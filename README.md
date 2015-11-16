@@ -57,7 +57,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Lz5 v1.7.2](https://github.com/inikep/lz5) BSD license
  - [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) MIT license
  - [Lzma v9.35](http://7-zip.org) Public Domain
- - [LzTurbo v1.3](https://sites.google.com/site/powturbo)         
+ - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
  - [Pithy v2011](https://github.com/johnezang/pithy) BSD license
  - [Shrinker v0.1/r9](https://code.google.com/p/data-shrinker) BSD license
  - [Snappy v1.1.3](https://github.com/google/snappy) Apache license
@@ -77,9 +77,9 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Tornado v0.6a](http://freearc.org) GPL license
 
 #### Entropy coder:
- - [TurboANX-ANS v1.3](https://sites.google.com/site/powturbo)         
- - [TurboHF-Huffmann v1.3](https://sites.google.com/site/powturbo)         
- - [TurboRC-Range Coder v1.3](https://sites.google.com/site/powturbo)         
+ - [TurboANX-ANS v1.3](https://sites.google.com/site/powturbo)
+ - [TurboHF-Huffmann v1.3](https://sites.google.com/site/powturbo)
+ - [TurboRC-Range Coder v1.3](https://sites.google.com/site/powturbo)
  - [Finite State Coder v15-05](https://github.com/skal65535/fsc) Apache license
  - [Finite State Entropy v15-11](https://github.com/Cyan4973/FiniteStateEntropy) BSD license
  - [Fast HF v2006](http://www.cipr.rpi.edu/research/SPIHT/) BSD like
@@ -92,8 +92,8 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html) GPL license
  - [Tornado Huf v0.6a](http://freearc.org/Research.aspx) GPL license
 
- - [inline memcpy v.](https://github.com/powturbo/TurboBench) 
- - [library memcpy v.](https://github.com/powturbo/TurboBench) 
+ - [inline memcpy](https://github.com/powturbo/TurboBench)
+ - [library memcpy](https://github.com/powturbo/TurboBench)
 
 ### Compile:
   *make*
