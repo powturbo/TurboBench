@@ -50,9 +50,6 @@
 [submodule "pithy"]
 	path = pithy
 	url = https://github.com/johnezang/pithy
-[submodule "bzip2"]
-	path = bzip2
-	url = https://github.com/nemequ/bzip2
 [submodule "quicklz"]
 	path = quicklz
 	url = https://github.com/robottwo/quicklz
@@ -101,3 +98,6 @@
 [submodule "heatshrink"]
 	path = heatshrink
 	url = https://github.com/atomicobject/heatshrink
+[submodule "bzip2"]
+	path = bzip2
+	url = https://github.com/asimonov-im/bzip2

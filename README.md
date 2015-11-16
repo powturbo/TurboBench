@@ -95,7 +95,11 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [library memcpy](https://github.com/powturbo/TurboBench)
 
 ### Compile:
-  *make*
+
+  		git clone --recursive git://github.com/powturbo/TurboBench.git 
+        copy "snappy_/snappy-stubs-public.h" to "snappy"
+
+  		*make*
 
 ### Testing:
 ##### - Groups:
