@@ -1,0 +1,103 @@
+[submodule "brotli"]
+	path = brotli
+	url = https://github.com/google/brotli
+[submodule "brieflz"]
+	path = brieflz
+	url = https://github.com/jibsen/brieflz
+[submodule "c-blosc2"]
+	path = c-blosc2
+	url = https://github.com/Blosc/c-blosc2
+[submodule "CSC"]
+	path = CSC
+	url = https://github.com/fusiyuan2010/CSC
+[submodule "density"]
+	path = density
+	url = https://github.com/centaurean/density
+	branch = dev
+[submodule "FastLZ"]
+	path = FastLZ
+	url = https://github.com/ariya/FastLZ
+[submodule "fsc"]
+	path = fsc
+	url = https://github.com/skal65535/fsc
+[submodule "libbsc"]
+	path = libbsc
+	url = https://github.com/IlyaGrebnov/libbsc
+[submodule "liblzg"]
+	path = liblzg
+	url = https://github.com/mbitsnbites/liblzg
+[submodule "libzling"]
+	path = libzling
+	url = https://github.com/richox/libzling
+[submodule "lz4"]
+	path = lz4
+	url = https://github.com/Cyan4973/lz4
+[submodule "lz5"]
+	path = lz5
+	url = https://github.com/inikep/lz5
+[submodule "liblzf"]
+	path = liblzf
+	url = https://github.com/nemequ/liblzf
+[submodule "lzlib"]
+	path = lzlib
+	url = https://github.com/daniel-baumann/lzlib
+[submodule "lzmat"]
+	path = lzmat
+	url = https://github.com/nemequ/lzmat
+[submodule "lzo"]
+	path = lzo
+	url = https://github.com/nemequ/lzo
+[submodule "pithy"]
+	path = pithy
+	url = https://github.com/johnezang/pithy
+[submodule "bzip2"]
+	path = bzip2
+	url = https://github.com/nemequ/bzip2
+[submodule "quicklz"]
+	path = quicklz
+	url = https://github.com/robottwo/quicklz
+[submodule "snappy"]
+	path = snappy
+	url = https://github.com/google/snappy
+[submodule "snappy-c"]
+	path = snappy-c
+	url = https://github.com/andikleen/snappy-c
+[submodule "tornado"]
+	path = tornado
+	url = https://github.com/nemequ/tornado
+[submodule "wflz"]
+	path = wflz
+	url = https://github.com/ShaneWF/wflz
+[submodule "zlib"]
+	path = zlib
+	url = https://github.com/madler/zlib
+[submodule "zopfli"]
+	path = zopfli
+	url = https://github.com/google/zopfli
+[submodule "zstd"]
+	path = zstd
+	url = https://github.com/Cyan4973/zstd
+[submodule "doboz"]
+	path = doboz
+	url = https://github.com/nemequ/doboz
+[submodule "FastARI"]
+	path = FastARI
+	url = https://github.com/davidcatt/FastARI
+[submodule "lzham_codec_devel"]
+	path = lzham_codec_devel
+	url = https://github.com/richgel999/lzham_codec_devel
+[submodule "yalz77"]
+	path = yalz77
+	url = https://github.com/ivan-tkatchev/yalz77
+[submodule "LZMA-SDK"]
+	path = LZMA-SDK
+	url = https://github.com/jljusten/LZMA-SDK
+[submodule "gipfeli"]
+	path = gipfeli
+	url = https://github.com/google/gipfeli
+[submodule "ms-compress"]
+	path = ms-compress
+	url = https://github.com/coderforlife/ms-compress
+[submodule "heatshrink"]
+	path = heatshrink
+	url = https://github.com/atomicobject/heatshrink
