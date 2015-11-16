@@ -1,5 +1,5 @@
-TurboBench: Compressor Benchmark incl. LzTurbo 
-==============================================
+TurboBench: Compressor Benchmark
+================================
 + **TurboBench**
  - 100% in memory benchmark, no I/O overhead
  - Include (>50) allmost all popular, latest or fastest compressors in one compiled package 
@@ -22,8 +22,8 @@ TurboBench: Compressor Benchmark incl. LzTurbo
  - Transfer speed sheet for different connections: GPRS,3G,4G,DSL,Network,HDD,SSD,RAM
 
 ### Download benchmark program:
- - [TurboBench Linux](https://sites.google.com/site/powturbo/downloads)
- - [TurboBench Windows](https://sites.google.com/site/powturbo/downloads)
+ - [TurboBench Linux incl LzTurbo](https://sites.google.com/site/powturbo/downloads)
+ - [TurboBench Windows incl. LzTurbo](https://sites.google.com/site/powturbo/downloads)
 
 ### Benchmark:
 CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
