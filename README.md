@@ -62,10 +62,10 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Shrinker v0.1/r9](https://code.google.com/p/data-shrinker)
  - [Snappy v1.1.3](https://github.com/google/snappy)
  - [Snappy-c v1.1.2/14.04](https://github.com/andikleen/snappy-c)
- - [wfLZ v15-04](https://github.com/ShaneWF/wflz) CC0 license
+ - [wfLZ v15-04](https://github.com/ShaneWF/wflz)
  - [Yalz77 v15-09](https://github.com/ivan-tkatchev/yalz77)
  - [Yappy v.]() 
- - [zlib v1.2.8](http://zlib.net) zlib license
+ - [zlib v1.2.8](http://zlib.net)
  - [Libzling v15-09](https://github.com/richox/libzling)
  - [Zopfli v15-05](https://code.google.com/p/zopfli)
  - [ZSTD v0.3.6](https://github.com/Cyan4973/zstd)
