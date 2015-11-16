@@ -92,8 +92,8 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html) GPL license
  - [Tornado Huf v0.6a](http://freearc.org/Research.aspx) GPL license
 
- - [inline memcpy v.]() 
- - [library memcpy v.]() 
+ - [inline memcpy v.](https://github.com/powturbo/TurboBench) 
+ - [library memcpy v.](https://github.com/powturbo/TurboBench) 
 
 ### Compile:
   *make*
