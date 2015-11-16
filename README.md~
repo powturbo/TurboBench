@@ -31,7 +31,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 - No PURE cache benchmark
 
 ##### - Data files:
- - Comming soon...
+ - sample [Sample](#Sample)
 
 ### Compile:
   *make*
@@ -60,5 +60,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 
 ### References:
 
-Last update: 16 NOV 2015
+Last update: 14 NOV 2015
 
