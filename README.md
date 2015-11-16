@@ -35,6 +35,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 
 
 ### Plugins:
+#### Compressor Lz77,Rolz,Bwt:
  - [balz v1.20](http://sourceforge.net/projects/balz) Public Domain
  - [bcm v1.0](http://sourceforge.net/projects/bcm) Public Domain
  - [Blosc v1.7.1](https://github.com/Blosc/c-blosc2) BSD license
@@ -68,8 +69,14 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Libzling v15-09](https://github.com/richox/libzling) BSD license
  - [Zopfli v15-05](https://code.google.com/p/zopfli) Apache license
  - [ZSTD v0.3.6](https://github.com/Cyan4973/zstd) BSD license
- - [inline memcpy v.]() --------------------------------------------------
- - [library memcpy v.]() 
+ - [Lzlib v1.7](http://www.nongnu.org/lzip) GPL license
+ - [Lzmat v1.0](https://github.com/nemequ/lzmat) GPL license
+ - [Lzo v2.09](http://www.oberhumer.com/opensource/lzo) GPL license
+ - [ms-compress v15.09](https://github.com/coderforlife/ms-compress) GPL license
+ - [Quicklz v1.5.1](http://www.quicklz.com) GPL license
+ - [Tornado v0.6a](http://freearc.org) GPL license
+
+#### Entropy coder:
  - [TurboANX-ANS v1.3](https://sites.google.com/site/powturbo)         
  - [TurboHF-Huffmann v1.3](https://sites.google.com/site/powturbo)         
  - [TurboRC-Range Coder v1.3](https://sites.google.com/site/powturbo)         
@@ -82,17 +89,11 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [ANS/J.Bonfield v15-08](ftp://ftp.sanger.ac.uk/pub/users/jkb) Public Domain
  - [subotin v2000](http://ezcodesample.com/ralpha/Subbotin.txt) Public Domain
  - [zlib Huffmann v1.2.8](https://github.com/Cyan4973/FiniteStateEntropy) BSD license
-
- - [Lzlib v1.7](http://www.nongnu.org/lzip) GPL license
- - [Lzmat v1.0](https://github.com/nemequ/lzmat) GPL license
- - [Lzo v2.09](http://www.oberhumer.com/opensource/lzo) GPL license
- - [ms-compress v15.09](https://github.com/coderforlife/ms-compress) GPL license
- - [Quicklz v1.5.1](http://www.quicklz.com) GPL license
- - [Tornado v0.6a](http://freearc.org) GPL license
- - [inline memcpy v.]() --------------------------------------------------
- - [library memcpy v.]() 
  - [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html) GPL license
  - [Tornado Huf v0.6a](http://freearc.org/Research.aspx) GPL license
+
+ - [inline memcpy v.]() 
+ - [library memcpy v.]() 
 
 ### Compile:
   *make*
