@@ -26,7 +26,7 @@
 #define _COMPRESS1
 #define _COMPRESS2
 #define _ECODEC 
-#define _GPL
+//#define _GPL
 //#define _PLUGIN2 // Additional plugins not released
 
 #define _CPP

@@ -55,6 +55,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg)
  - [Lz4 v1.7.1](https://github.com/Cyan4973/lz4)
  - [Lz5 v1.7.2](https://github.com/inikep/lz5)
+ - [Lzfse](https://developer.apple.com/library/prerelease/mac/documentation/Performance/Reference/Compression/) *
  - [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel)
  - [Lzma v9.35](http://7-zip.org)
  - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
@@ -75,6 +76,8 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [ms-compress v15.09](https://github.com/coderforlife/ms-compress)
  - [Quicklz v1.5.1](http://www.quicklz.com)
  - [Tornado v0.6a](http://freearc.org)
+
+* included but not tested
 
 #### Entropy coder:
  - [TurboANX-ANS v1.3](https://sites.google.com/site/powturbo)
@@ -99,11 +102,14 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
   		git clone --recursive git://github.com/powturbo/TurboBench.git 
         copy "snappy_/snappy-stubs-public.h" to "snappy"
 
-  		*make*
+  		make
 
 ### Testing:
-##### - Groups:
-  + test all fast compressor in the lz4, zlib class<br />
+  + List all compiled codecs: "./turbobench -g1"<br />
+  + List all plugins: "./turbobench -g2"<br />
+
+##### - Groups FASTEST,FAST,EFFICIENT,OPTIMAL,BWT:
+  + test all fast compressor in the lz4, lzturbo, zlib class<br />
 
 
         ./turbobench -eFAST inputfile
@@ -120,7 +126,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### Environment:
 ###### OS/Compiler (64 bits):
 - Linux: GNU GCC (>=4.6)
-- clang (>=3.2)
+- clang (>=3.2) 
 - Windows: MinGW-w64
 
 ### References:
