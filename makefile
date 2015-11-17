@@ -15,11 +15,12 @@ CPP=1
 
 UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
-LDFLAGS=-lpthread -lm -static
+LDFLAGS=-lpthread -lm
+# -static
 HAVE_ZLIB=1
 else
-LDFLAGS=-static 
-#-libgcc
+LDFLAGS=
+#-static 
 endif
 
 LBITS := $(shell getconf LONG_BIT)
