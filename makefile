@@ -32,7 +32,7 @@ ARCH=64
 endif
 
 DDEBUG=-DNDEBUG -s
-CFLAGS+=-w -fpermissive -Wall $(DDEBUG) -Ilz4/lib -Ilz5/lib -D_7ZIP_ST -Ilzo/include -DZSTD_LEGACY_SUPPORT=0 
+CFLAGS+=-w -fpermissive -Wall $(DDEBUG) -Ilz4/lib -Ilz5/lib -D_7ZIP_ST -Ilzo/include -DZSTD_LEGACY_SUPPORT=0 -D"__int64=long long"
 CXXFLAGS=-w -fpermissive -Wall $(DDEBUG) -std=c++11 -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -Ilzo/include -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT -DSHUFFLE_SSE2_ENABLED -DHAVE_CPU_FEAT_INTRIN
 
 all:  turbobench
