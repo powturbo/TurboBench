@@ -77,7 +77,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Quicklz v1.5.1](http://www.quicklz.com)
  - [Tornado v0.6a](http://freearc.org)
 
-* included but not tested
+* LzFSE: included but not tested
 
 #### Entropy coder:
  - [TurboANX-ANS v1.3](https://sites.google.com/site/powturbo)
