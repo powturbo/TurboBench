@@ -3,7 +3,9 @@ TurboBench: Compressor Benchmark
 + **TurboBench**
  - The only benchmark program including **LzTurbo**
  - 100% in-memory benchmark, no I/O overhead
- - Include (>50) allmost all popular, latest or fastest compressors in one compiled package 
+ - Include (>50) allmost all popular, latest or fastest compressors in one compiled package
+ - No other compressor benchmark includes more codecs or offer more precision and features
+ - Benchmarking **Entropy Coders**, **Lz77** and **BWT** compressors
  - **Minimum** plugins call **overhead**
  - Set one, a group or several compressors to benchmark at the command line
  - **Multiple** input files with **recursive** directories
@@ -12,21 +14,19 @@ TurboBench: Compressor Benchmark
  - Avoid **cache szenario** found in other benchmarks with small files
  - Set block size, file size limit,...
  - Set number of **iterations**, number of **runs**, **benchamrks**, set max. **time** per run
-   and for all benchmarks. 
- - Automatic **sort** by compressed length
- - 64 bits **Linux** and **Windows** versions (gcc 5.2/mingw64 gcc5.2)
- - Benchmarking **Entropy Coders**, **Lz77** and **BWT** compressors
- - :new: **Text**, **html**, **csv**, **markdown** and other output formats without restart
- - 100% C/C++, w/o inline assembly
- - Enable disable groups or individual codecs
- - No other compressor benchmark includes more codecs or offer more precision and features
+   and for all benchmarks.
+ - Automatic **sort**
+ - :new: automatic update & merge of result files
+ - :new: **Text**, **html**, **csv**, **markdown** and other output formats without retesting
  - :new: html output with sortable tables
  - :new: **Transfer speed sheet** for different connections or devices: GPRS,2G,3G,4G,DSL,Network,HDD,SSD,RAM
- - :+1: **Speedup html Plot**
- - :new: automatic benchmark file update
- - **Without** installing any external package
+ - :+1: **Speedup html plot**
+ - for **Linux** and **Windows**
+ - 100% C/C++, w/o inline assembly
+ - Enable/disable groups or individual codecs at compile time
+ - All in one executable, **without** installing any external package
 
-### Download benchmark program incl. LzTurbo:
+### Download benchmark executable incl. LzTurbo:
  - [TurboBench Linux](https://sites.google.com/site/powturbo/downloads)
  - [TurboBench Windows](https://sites.google.com/site/powturbo/downloads)
 
@@ -36,7 +36,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 - No PURE cache benchmark
 
 ##### - Data files:
-#### TurboBench compressor benchmark: 
+#### TurboBench compressor benchmark:
 - File [app3.tar binary Portable Apps Suite](http://compressionratings.com/download.html)
 
 - [html output+Speedup](http://htmlpreview.github.io/?https://cdn.rawgit.com/powturbo/TurboBench/master/app3.tar.html)
@@ -141,32 +141,43 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [inline memcpy](https://github.com/powturbo/TurboBench)
  - [library memcpy](https://github.com/powturbo/TurboBench)
 
-### Compile:
-
-  		git clone --recursive git://github.com/powturbo/TurboBench.git 
-        copy "snappy_/snappy-stubs-public.h" to "snappy"
-
-  		make
-
 ### Testing:
-  + List all compiled codecs: "./turbobench -l1"<br />
   + List all plugins: "./turbobench -l2"<br />
+  + List all compiled codecs: "./turbobench -l1"<br />
   + type "./turbobench -h" for help
 
 ##### - Groups FASTEST,FAST,EFFICIENT,OPTIMAL,BWT:
   + test all fast compressors in the lz4, lzturbo, zlib class<br />
 
 
-        ./turbobench -eFAST inputfile
+        ./turbobench -eFAST file
 
 ##### - Codecs:
 
-  + individual codec test<br />
+  + individual codec test (output to screen & file.tbb)<br />
 
 
-        ./turbobench -elzturbo,30,31,32,39/zlib,1,5,9 inputfile
+        ./turbobench -elzturbo,19,29,39/brotli,6/zlib,6 file
 
-        ./turbobench -eFAST/bzip2 inputfile
+  + retest or test other compressors and merge the results to gfile.tbb<br />
+
+
+        ./turbobench -eFAST/bzip2 file
+
+##### - Print + Plot
+
+   + Print a sheet+plot to file.html
+
+
+        ./turbobench -p2 -S2 file.tbb
+
+
+### Compile:
+
+  		git clone --recursive git://github.com/powturbo/TurboBench.git 
+        copy "snappy_/snappy-stubs-public.h" to "snappy"
+
+  		make
 
 ### Environment:
 ###### OS/Compiler (64 bits):
