@@ -22,10 +22,10 @@
     - email    : powturbo [_AT_] gmail [_DOT_] com
 **/
 //	    TurboBench: plugins.h - settings 
-
 #define _COMPRESS1
 #define _COMPRESS2
 #define _ECODEC 
+//#define _APPLE
 //#define _GPL
 
 //#define _PLUGIN2 // Additional plugins not released
@@ -55,13 +55,13 @@
 #define _DENSITY    	"0.12.0\tDensity\tBSD license\thttps://github.com/centaurean/density"
 #define _DOBOZ			"14-01-14\tDoboz\tBSD Like\thttps://bitbucket.org/attila_afra\thttps://github.com/nemequ/doboz" //crash
 #define _FASTLZ 		"0.1.0\tFastLz\tBSD like\thttp://fastlz.org\thttps://github.com/ariya/FastLZ"
-#define _GIPFELI    	"11.10\tGipfeli\tApache license\thttps://github.com/google/gipfeli"
+#define _GIPFELI    	"15.10\tGipfeli\tApache license\thttps://github.com/google/gipfeli"
+#define _GIPFELI0
 #define _HEATSHRINK     "0.4.1\theatshrink\tBSD license\thttps://github.com/atomicobject/heatshrink"
 #define _LIBBSC         "3.1.0\tbsc\tApache license\thttps://github.com/IlyaGrebnov/libbsc"
 #define _LIBLZF        	"1.06\tLibLZF\tBSD license\thttp://oldhome.schmorp.de/marc/liblzf.html\thttps://github.com/nemequ/liblzf"
 #define _LIBLZG			"1.0.8\tLibLzg\tzlib-license\thttps://github.com/mbitsnbites/liblzg\thttp://liblzg.bitsnbites.eu/e" //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB 
 #define _LZ5 			"15-10\tLz5\tBSD license\thttps://github.com/inikep/lz5"
-//#define _LZFSE          "2015\tlzfse\thttps://developer.apple.com/library/prerelease/mac/documentation/Performance/Reference/Compression/\tiOS and OS X"
 #define _LZHAM			"1.1\tLzham\tMIT license\thttps://github.com/richgel999/lzham_codec_devel"
 //#define _LZSS      	" \tLZSS\t "//crashing
 #define _PITHY   	    "2011\tPithy\tBSD license\thttps://github.com/johnezang/pithy"
@@ -70,10 +70,15 @@
 #define _SHRINKER   	"0.1/r9\tShrinker\tBSD license\thttps://code.google.com/p/data-shrinker"
 #define _WFLZ 		    "15-04\twfLZ\tCC0 license\thttps://github.com/ShaneWF/wflz"
 //#define _WIMLIB	    	"15-11\tWimLib\tBSD license\thttp://wimlib.net"  //git clone git://wimlib.net/wimlib
+//#define _WKDM 		    "2003\tWKdm\tApple PS License\thttp://www.opensource.apple.com/source/xnu/xnu-1456.1.26/iokit/Kernel/\thttps://github.com/berkus/wkdm" // crash
 #define _YALZ77         "15-09\tYalz77\tPublic domain\thttps://github.com/ivan-tkatchev/yalz77" 
 #define _YAPPY          ".\tYappy\t\t" //crash on windows
 #define _ZOPFLI			"15-05\tZopfli\tApache license\thttps://code.google.com/p/zopfli"
 #define _ZLING	    	"15-09\tLibzling\tBSD license\thttps://github.com/richox/libzling"
+  #endif
+
+  #ifdef _APPLE
+#define _LZFSE          "2015\tlzfse\thttps://developer.apple.com/library/prerelease/mac/documentation/Performance/Reference/Compression/\tiOS and OS X"
   #endif
 
 //------------------ Entropy Coders ---------------
@@ -81,6 +86,7 @@
 #define _MEMCPY		    ".\tlibrary memcpy\t\t"
 
   #ifdef _ECODEC
+#define _BCMEC 			"1.0\tbcm range coder\tPublic Domain\thttp://sourceforge.net/projects/bcm" 
 #define _LZTANS		    "1.3\tTurboANX-ANS\t        \thttps://sites.google.com/site/powturbo\t"  
 #define _LZTHF 		    "1.3\tTurboHF-Huffmann\t        \thttps://sites.google.com/site/powturbo\t"  
 #define _LZTRC 		    "1.3\tTurboRC-Range Coder\t        \thttps://sites.google.com/site/powturbo\t" 
@@ -109,6 +115,7 @@
 #undef _TORNADO
 #undef _YAPPY 
 
+#undef _BCMEC
 #undef _FASTAC
 #undef _FASTHF		    
 #undef _TORNADOHF	 
@@ -120,6 +127,7 @@
 #define _LZO			"2.09\tLzo\tGPL license\thttp://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo"
 #define _MSCOMPRESS	    "15.09\tms-compress\tGPL license\thttps://github.com/coderforlife/ms-compress"
 #define _QUICKLZ		"1.5.1\tQuicklz\tGPL license\thttp://www.quicklz.com\thttps://github.com/robottwo/quicklz"
+#define _SAP		    "15-11\tsap\tGPL license\thttps://github.com/CoreSecurity/pysap"
 #define _TORNADO		"0.6a\tTornado\tGPL license\thttp://freearc.org\thttps://github.com/nemequ/tornado" 
 
 //#define _MMABS 		    "2007\tAsymmetric Binary Systems/ Matt Mahonney\tGPL 2.0"
@@ -180,6 +188,7 @@ enum {
  P_PITHY, 
  P_QUICKLZ, 
  P_SHRINKER, 
+ P_SAP, 
  P_SNAPPY, 
  P_SNAPPYC, 
  P_TORNADO,  
@@ -193,6 +202,7 @@ enum {
  P_ZSTD,
   // --------- Entropy coders -------------
  P_ABSMM, 
+ P_BCMEC,
  P_JAC, 
  P_FASTAC,
  P_FASTARI,
@@ -222,6 +232,7 @@ int  codstart( unsigned char *in, int inlen, int codec);
 int  codcomp(  unsigned char *in, int inlen, unsigned char *out, int outsize, int codec, int lev, char *prm);
 int  coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen,  int codec, int lev);
 char *codver(int codec, char *v, char *s);
+char *imemcpy(char *out, char *in, size_t n);
   #ifdef __cplusplus
 }
   #endif

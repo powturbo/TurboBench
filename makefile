@@ -1,6 +1,11 @@
 # powturbo  (c) Copyright 2013-2015
+#
+# git clone --recursive git://github.com/powturbo/TurboBench.git 
+# copy snappy_ to snappy (or configure snappy)
+# make
+#
 # Linux: "export CC=clang" windows mingw: "set CC=gcc" or uncomment one of following lines
-#CC=clang
+#CC=clang-
 #CXX=clang++
 CC=gcc
 CXX=g++
@@ -9,18 +14,17 @@ COMPRESS1=1
 COMPRESS2=1
 ECODEC=1
 GPL=0
+APPLE=0
 
 PLUGIN2=0
 CPP=1
 
 UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
-LDFLAGS=-lpthread -lm
-# -static
+LDFLAGS=-lpthread -static
 HAVE_ZLIB=1
 else
-LDFLAGS=
-#-static 
+#LDFLAGS=-static 
 endif
 
 LBITS := $(shell getconf LONG_BIT)
@@ -29,11 +33,12 @@ ARCH=64
 else
 ARCH=64
 #CFLAGS=-fomit-frame-pointer
+#ARCH=32
 endif
 
 DDEBUG=-DNDEBUG -s
-CFLAGS+=-w -fpermissive -Wall $(DDEBUG) -Ilz4/lib -Ilz5/lib -D_7ZIP_ST -Ilzo/include -DZSTD_LEGACY_SUPPORT=0 -D"__int64=long long"
-CXXFLAGS=-w -fpermissive -Wall $(DDEBUG) -std=c++11 -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -Ilzo/include -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT -DSHUFFLE_SSE2_ENABLED -DHAVE_CPU_FEAT_INTRIN
+CFLAGS+=$(DDEBUG) -w -fpermissive -Wall -Ilz4/lib -Ilz5/lib -D_7ZIP_ST -Ilzo/include -DZSTD_LEGACY_SUPPORT=0 -D"__int64=long long" -D__unused=  -DWK_DEBUG 
+CXXFLAGS=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -Ilzo/include -D"UINT64_MAX=-1ull" -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT -DSHUFFLE_SSE2_ENABLED -DHAVE_CPU_FEAT_INTRIN
 
 all:  turbobench
 
@@ -70,7 +75,8 @@ LIBBSC=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/c
 LIBCSC=CSC/src/libcsc/csc_analyzer.o CSC/src/libcsc/csc_coder.o CSC/src/libcsc/csc_dec.o CSC/src/libcsc/csc_enc.o CSC/src/libcsc/csc_encoder_main.o CSC/src/libcsc/csc_filters.o \
 CSC/src/libcsc/csc_lz.o CSC/src/libcsc/csc_memio.o CSC/src/libcsc/csc_mf.o CSC/src/libcsc/csc_model.o CSC/src/libcsc/csc_profiler.o 
 
-GIPFELI=gipfeli/lz77.o gipfeli/entropy.o gipfeli/entropy_code_builder.o gipfeli/decompress.o gipfeli/gipfeli-internal.o
+GIPFELI=gipfeli0/gipfeli.o gipfeli0/lz77.o gipfeli0/entropy.o gipfeli0/entropy_code_builder.o gipfeli0/decompress.o
+#GIPFELI=$(GIPEFLI0) gipfeli/lz77.o gipfeli/entropy.o gipfeli/entropy_code_builder.o gipfeli/decompress.o gipfeli/gipfeli-internal.o
 	
 LIBLZG=liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o 
 
@@ -96,6 +102,10 @@ endif
 LZMA=LZMA-SDK/C/LzFind.o LZMA-SDK/C/LzmaDec.o LZMA-SDK/C/LzmaEnc.o LZMA-SDK/C/LzmaLib.o LZMA-SDK/C/Alloc.o 
 
 LZMAT=lzmat/lzmat_enc.o lzmat/lzmat_dec.o
+lzmat/lzmat_dec.o: lzmat/lzmat_dec.c
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
+lzmat/lzmat_enc.o: lzmat/lzmat_enc.c
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 
 LZO = lzo/src/lzo1.o lzo/src/lzo1a.o lzo/src/lzo1a_99.o lzo/src/lzo1b_1.o lzo/src/lzo1b_2.o lzo/src/lzo1b_3.o lzo/src/lzo1b_4.o lzo/src/lzo1b_5.o \
 lzo/src/lzo1b_6.o lzo/src/lzo1b_7.o lzo/src/lzo1b_8.o lzo/src/lzo1b_9.o lzo/src/lzo1b_99.o lzo/src/lzo1b_9x.o lzo/src/lzo1b_cc.o \
@@ -112,12 +122,18 @@ lzo/src/lzo_ptr.o lzo/src/lzo_str.o lzo/src/lzo_util.o
 MSCOMPRESS=ms-compress/src/mscomp.o ms-compress/src/lznt1_compress.o ms-compress/src/lznt1_decompress.o ms-compress/src/xpress_compress.o ms-compress/src/xpress_decompress.o ms-compress/src/xpress_huff_compress.o ms-compress/src/xpress_huff_decompress.o
 
 PITHY=pithy/pithy.o
+pithy/pithy.o: pithy/pithy.c
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@  
 
 LZLIB=lzlib/lzlib.o lzlib_/bbexample.o 
 
 QUICKLZ=quicklz_/quicklz1.o quicklz_/quicklz2.o quicklz_/quicklz3.o 
 
+SAP=pysap/pysapcompress/vpa105CsObjInt.o pysap/pysapcompress/vpa106cslzc.o pysap/pysapcompress/vpa107cslzh.o pysap/pysapcompress/vpa108csulzh.o
+#pysap/pysapcompress/sapdecompress.o 
 SHRINKER=shrinker/Shrinker.o
+shrinker/shrinker.o: shrinker/shrinker.c
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@  
 
 SNAPPY=snappy/snappy-sinksource.o snappy/snappy-stubs-internal.o snappy/snappy.o
 
@@ -131,7 +147,10 @@ TORDEF=-DFREEARC_WIN -DFREEARC_INTEL_BYTE_ORDER -D_UNICODE -DUNICODE
 endif
 
 WFLZ=wflz/wfLZ.o
+wflz/wfLZ.o: wflz/wfLZ.c
+	$(CXX) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
 
+#WKDM=wkdm/WKdmCompress.o wkdm/WKdmDecompress.o
 YAPPY=yappy/yappy.o 
 
 ifeq ($(HAVE_ZLIB), 1)
@@ -139,7 +158,7 @@ ifeq ($(HAVE_ZLIB), 1)
 ZLIB=/usr/lib/x86_64-linux-gnu/libz.a
 else
 ZLIBDIR=zlib/
-#ZLIBDIR=zlib-ng/
+#ZLIBDIR=zlib-ng/git commit -m "Compressor Benchmark"
 #ZLIBDIR=zlib_intel/
 ZLIB=$(ZLIBDIR)compress.o $(ZLIBDIR)deflate.o $(ZLIBDIR)infback.o $(ZLIBDIR)inffast.o $(ZLIBDIR)inflate.o $(ZLIBDIR)inftrees.o $(ZLIBDIR)trees.o $(ZLIBDIR)adler32.o $(ZLIBDIR)crc32.o $(ZLIBDIR)uncompr.o $(ZLIBDIR)zutil.o
 #ZLIB+=$(ZLIBDIR)match.o
@@ -149,6 +168,8 @@ ZSTD=zstd/lib/zstd.o zstd/lib/fse.o zstd/lib/huff0.o zstd/lib/zstdhc.o
 
 Z=zopfli/src/zopfli/
 ZOPFLI=$(Z)blocksplitter.o $(Z)cache.o $(Z)deflate.o $(Z)gzip_container.o $(Z)hash.o $(Z)util.o $(Z)lz77.o $(Z)tree.o $(Z)squeeze.o $(Z)katajainen.o $(Z)zlib_container.o $(Z)zopfli_lib.o
+
+
 #-------------------------------------------------------------
 OBJB+=plugins.o 
 
@@ -160,7 +181,7 @@ endif
 endif
 
 ifeq ($(COMPRESS2), 1)
-OBJB+= $(BRIEFLZ) $(BZIP2) $(DENSITY) $(FASTLZ) $(HEATSHRINK) $(LIBBSC) $(LIBLZF) $(LZ5) $(LIBLZG) $(SHRINKER) $(PITHY) $(LZSS) $(SNAPPY_C) $(MINIZ) $(YAPPY) $(WFLZ) $(WIMLIB) $(ZOPFLI)
+OBJB+= $(BRIEFLZ) $(BZIP2) $(DENSITY) $(FASTLZ) $(HEATSHRINK) $(LIBBSC) $(LIBLZF) $(LZ5) $(LIBLZG) $(SHRINKER) $(PITHY) $(LZSS) $(SNAPPY_C) $(MINIZ) $(YAPPY) $(WFLZ) $(WIMLIB) $(WKDM) $(ZOPFLI)
 OBJB+=chameleon/chameleon.o
 OBJB+=crush/crush.o
 ifeq ($(CPP), 1)
@@ -173,8 +194,12 @@ endif
 endif	   
 endif
 
+ifeq ($(APPLE), 1)
+LZFSE=
+endif
+
 ifeq ($(GPL), 1)
-OBJB+=$(LZMAT) $(LZO) $(QUICKLZ) $(ECGPL) $(LZLIB) $(MSCOMPRESS) 
+OBJB+=$(LZMAT) $(LZO) $(QUICKLZ) $(ECGPL) $(LZLIB) $(MSCOMPRESS) $(SAP)
 ifeq ($(CPP), 1)
 OBJB+=$(TORNADO)
 endif
@@ -215,10 +240,10 @@ turbobench: $(OBJB) turbobench.o
 	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@  
 
 .cc.o:
-	$(CXX) -O3 $(MARCH) $(CXXFLAGS) -DNDEBUG -std=c++11 $< -c -o $@ 
+	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@ 
 
 .cpp.o:
-	$(CXX) -O3 $(MARCH) $(CXXFLAGS) -DNDEBUG -std=c++11 $< -c -o $@ 
+	$(CXX) -O3 $(MARCH) $(CXXFLAGS) $< -c -o $@ 
 
 clean:
 	find . -name "turbobench" -type f -delete
@@ -231,4 +256,3 @@ cleanw:
 	del /S *~
 	del /S *.exe
 
-# cop< snappy_ to snappy 

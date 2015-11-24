@@ -118,7 +118,11 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
   #endif
 
   #ifdef _GIPFELI
+    #ifdef _GIPFELI0
+#include "gipfeli0/gipfeli.h"
+    #else
 #include "gipfeli/gipfeli.h"
+    #endif 
   #endif
 
   #ifdef _HEATSHRINK
@@ -212,6 +216,20 @@ int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char
 #include "quicklz_/quicklz-c.h"
   #endif
 
+  #ifdef _SAP
+//#include "pysap/src/hpa101saptype.h"        /* Common SAP Header Files ...............*/
+//#include "pysap/src/hpa106cslzc.h"          /* Internal Definitions for LZC algorithm */
+//#include "pysap/src/hpa107cslzh.h"
+
+//#include "../sap/src/hpa104CsObject.h"
+//#include "../sap/src/hpa105CsObjInt.h"
+
+#include "pysap/pysapcompress/hpa101saptype.h"
+#include "pysap/pysapcompress/hpa104CsObject.h"
+#include "pysap/pysapcompress/hpa106cslzc.h"
+#include "pysap/pysapcompress/hpa107cslzh.h"
+#include "pysap/pysapcompress/hpa105CsObjInt.h"
+  #endif
   #ifdef _SHRINKER
 #include "shrinker/Shrinker.h"
   #endif
@@ -224,14 +242,10 @@ int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char
 #include "tornado_/tormem.h"
   #endif
 
-  #ifdef _YALZ77
-#include "yalz77/lz77.h"
+  #ifdef _WKDM
+#include "wkdm/WKdm.h"
   #endif
-
-  #ifdef _YAPPY
-#include "yappy/yappy.hpp"
-  #endif
-
+  
   #ifdef _WFLZ
 #include "wflz/wfLZ.h"
   #endif
@@ -240,6 +254,14 @@ int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char
 #include "../wimlib/include/wimlib.h"
   #endif
   
+  #ifdef _YALZ77
+#include "yalz77/lz77.h"
+  #endif
+
+  #ifdef _YAPPY
+#include "yappy/yappy.hpp"
+  #endif
+
   #ifdef _ZLIB
      #ifdef _ZLIBLIB
 #include <zlib.h>
@@ -389,7 +411,7 @@ static char *workmem;
 static int state_size,dstate_size,lzosize,blzsize;
 
 int codini(unsigned insize) {
-  size_t worksize = 0;
+  size_t workmemsize = 0;
     #ifdef _C_BLOSC2
   blosc_init();
   blosc_set_nthreads(1);  //blosc_set_compressor("lz4");
@@ -397,9 +419,9 @@ int codini(unsigned insize) {
 
     #ifdef _LZFSE
   size_t lzfse_size = compression_encode_scratch_buffer_size(COMPRESSION_LZFSE);
-  worksize = max(lzfse_size, worksize);
+  workmemsize = max(lzfse_size, workmemsize);
          lzfse_size = compression_decode_scratch_buffer_size(COMPRESSION_LZFSE);
-  worksize = max(lzfse_size, worksize);
+  workmemsize = max(lzfse_size, workmemsize);
     #endif
 
     #ifdef LZO_VERSION
@@ -408,21 +430,21 @@ int codini(unsigned insize) {
 	   #else
   lzo_init(); lzosize = LZO1B_999_MEM_COMPRESS; 
        #endif
-  worksize = max(lzosize, worksize);
+  workmemsize = max(lzosize, workmemsize);
     #endif
 	
     #ifdef _CHAMELEON
-  worksize = max(sizeof(struct Chameleon), worksize);	
+  workmemsize = max(sizeof(struct Chameleon), workmemsize);	
 	#endif
 	
     #ifdef _QUICKLZ
-  state_size  = max(qlz_get_setting1(1), max(qlz_get_setting2(1), qlz_get_setting3(1))); worksize = max(state_size, worksize);
-  dstate_size = max(qlz_get_setting1(2), max(qlz_get_setting2(2), qlz_get_setting3(2))); worksize = max(dstate_size, worksize);
+  state_size  = max(qlz_get_setting1(1), max(qlz_get_setting2(1), qlz_get_setting3(1))); workmemsize = max(state_size, workmemsize);
+  dstate_size = max(qlz_get_setting1(2), max(qlz_get_setting2(2), qlz_get_setting3(2))); workmemsize = max(dstate_size, workmemsize);
     #endif
  
     #ifdef _BRIEFLZ
   blzsize     = blz_workmem_size(insize); 												 
-  worksize = max(blzsize, worksize); 
+  workmemsize = max(blzsize, workmemsize); 
     #endif  
     #ifdef _LINUX_SNAPPY_H
   snappy_init_env(&env);
@@ -430,10 +452,11 @@ int codini(unsigned insize) {
     
     #ifdef _WFLZ	
   unsigned wflzsize = wfLZ_GetWorkMemSize();
-  worksize = max(wflzsize, worksize);
+  workmemsize = max(wflzsize, workmemsize);
     #endif
-  if(worksize && (workmem = (char *)malloc(worksize)) == NULL) { printf("Malloc error: %d\n", worksize); if(worksize) exit(0); }
- 
+
+  if(workmemsize && !(workmem = (char *)malloc(workmemsize))) { printf("Malloc error: %d\n", workmemsize); exit(0); }
+
     #ifdef _YAPPY
   YappyFillTables(); 	
     #endif
@@ -528,12 +551,17 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif
 	  
  	  #ifdef _GIPFELI 
+    case P_GIPFELI:
+ 	    #ifdef _GIPFELI0
+	                { gipfeli::Compressor c; c.Init(); outlen = c.Compress((char *)in, inlen, (char *)out); return outlen; }
+        #else
     case P_GIPFELI: { 
         util::compression::Compressor *c = util::compression::NewGipfeliCompressor();
         util::compression::UncheckedByteArraySink sink((char*) out);
         util::compression::ByteArraySource        src((const char*)in, inlen);
         outlen = c->CompressStream(&src, &sink); delete c; return outlen;
 	  }	
+        #endif
 	  #endif
  
       #ifdef _HEATSHRINK
@@ -558,14 +586,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #ifdef _LZHAM
     case P_LZHAM:    
-
-      // Advanced settings - set to 0 if you don't care.
-		// m_table_max_update_interval/m_table_update_interval_slow_rate override m_table_update_rate and allow finer control over the table update settings.
-		// If either are non-zero they will override whatever m_table_update_rate is set to. Just leave them 0 unless you are specifically customizing them for your data.
-						
-		// def=0, typical range 12-128 (LZHAM_DEFAULT_TABLE_UPDATE_RATE=64), controls the max interval between table updates, higher=longer max interval (faster decode/lower ratio). Was 16 in prev. releases.
 		lzham_uint32 m_table_max_update_interval;
-		// def=0, 32 or higher (LZHAM_DEFAULT_TABLE_UPDATE_RATE=64), scaled by 32, controls the slowing of the update update freq, higher=more rapid slowing (faster decode/lower ratio). Was 40 in prev. releases.
 		lzham_uint32 m_table_update_interval_slow_rate;
 
 
@@ -667,6 +688,12 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_QUICKLZ: { memset(workmem,0,state_size); return lev<=1?qlz_compress1((char *)in, (char *)out, inlen, workmem):(lev<=2?qlz_compress2((char *)in, (char *)out, inlen, workmem):qlz_compress3((char *)in, (char *)out, inlen, workmem)); }
       #endif  	
 
+	  #ifdef _SAP
+    case P_SAP: { CsObjectInt c; SAP_INT bytes_read, bytes_written; int rc = c.CsInitCompr((SAP_BYTE *)out, inlen, lev); out += CS_HEAD_SIZE; outsize -= CS_HEAD_SIZE;
+        c.CsCompr(inlen, in, inlen, out, outsize, lev, &bytes_read, &bytes_written); return bytes_written+CS_HEAD_SIZE; 
+      }
+      #endif  	
+
 	  #ifdef _SHRINKER
     case P_SHRINKER:     return shrinker_compress((char *)in, (char *)out, inlen);
       #endif  	
@@ -696,6 +723,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_WIMLIB: { struct wimlib_compressor *compressor; if(wimlib_create_compressor(lev, 32*1024/*inlen*/, 0, &compressor)) return 0;
         outlen = wimlib_compress(in, inlen, out, outsize /*inlen- 1*/, compressor);  wimlib_free_compressor(compressor); return outlen; 
       }
+	  #endif
+
+      #ifdef _WKDM
+    case P_WKDM:    return WKdm_compress ((WK_word*)in, (WK_word*)out, inlen);
 	  #endif
 
       #ifdef _YALZ77
@@ -729,11 +760,12 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif   
 
     //------------------------- Entropy Coders -------------------------
+      #ifdef _IMEMCPY 
+    case P_MCPY:   imemcpy(out, in, inlen);    return inlen;
+	  #endif	
+
       #ifdef _MEMCPY 
     case P_LMCPY:   libmemcpy(out, in, inlen); return inlen;
-	  #endif	
-      #ifdef _IMEMCPY 
-    case P_MCPY:   memcpy(out, in, inlen);    return inlen;
 	  #endif	
 
       #ifdef _BCMEC
@@ -889,18 +921,24 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	  #endif
 	   
  	  #ifdef _GIPFELI
-    case P_GIPFELI: { 
+    case P_GIPFELI:
+ 	    #ifdef _GIPFELI0
+                    { gipfeli::Uncompressor uncompressor; uncompressor.Init(); int s = uncompressor.Uncompress((const char *)in, inlen, (char *)out, outlen); } break;
+	    #else
+      { 
 	    util::compression::Compressor *c = util::compression::NewGipfeliCompressor();
         util::compression::UncheckedByteArraySink sink((char*) out);
         util::compression::ByteArraySource         src((const char*)in, inlen);
         outlen = c->UncompressStream(&src, &sink); delete c; return outlen;
-	  }  break;
+	  }  
+        #endif
+      break;
 	  #endif
 
       #ifdef _HEATSHRINK
     case P_HEATSHRINK: return hsdecompress(in, inlen, out, outlen); 
       #endif
- 
+
 	  #ifdef _LIBLZF 
     case P_LIBLZF: lzf_decompress(in, inlen, out, outlen); break;
 	  #endif
@@ -972,6 +1010,13 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_QUICKLZ: { lev= (in[0]>>2)&3; outlen = lev<=1?qlz_decompress1((char*)in, out, workmem):(lev<=2?qlz_decompress2((char*)in, out, workmem):qlz_decompress3((char*)in, out, workmem)); } break;
       #endif
 	  
+	  #ifdef _SAP
+    case P_SAP: { CsObjectInt d; SAP_INT bytes_read, bytes_written; 
+	    d.CsInitDecompr((SAP_BYTE *)in); in += CS_HEAD_SIZE; d.CsDecompr( (SAP_BYTE *)in, inlen-CS_HEAD_SIZE, (SAP_BYTE *)out, outlen, lev, &bytes_read, &bytes_written );			 
+	    return inlen-CS_HEAD_SIZE; 
+	  }
+      #endif  	
+
 	  #ifdef _SHRINKER
     case P_SHRINKER:    shrinker_decompress(in, out, outlen); break;
 	  #endif
@@ -1013,6 +1058,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       }
 	  #endif
  
+      #ifdef _WKDM
+    case P_WKDM:    WKdm_decompress ((WK_word*)in, (WK_word*)out, outlen);
+	  #endif 
+
       #ifdef _YALZ77
     case P_YALZ77: { lz77::decompress_t d; std::string extra; if(!d.feed(in,in+inlen,extra) || extra.size() > 0) return 0;
         const std::string& os = d.result(); memcpy(out, os.c_str(), os.size()); return os.size(); 
@@ -1032,7 +1081,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
       //------------ Entropy Coders ------------------------------------------------------------------
       #ifdef _IMEMCPY 
-    case P_MCPY:    memcpy(out, in, outlen); 	break;
+    case P_MCPY:    imemcpy(out, in, outlen); 	break;
       #endif
       #ifdef _MEMCPY 
     case P_LMCPY:   libmemcpy(out, in, outlen); break;

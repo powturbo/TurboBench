@@ -93,7 +93,7 @@ struct plugs plugs[] = {
     #endif
 	
     #ifdef _LIBBSC
-  { P_LIBBSC_ST,"bsc-st", 			_LIBBSC, "3,4,5,6,7,8" }, 
+  { P_LIBBSC_ST,"bsc_st", 			_LIBBSC, "3,4,5,6,7,8" }, 
   { P_LIBBSC, 	"bsc", 				_LIBBSC, "1,2"}, 
     #endif
 
@@ -171,6 +171,10 @@ struct plugs plugs[] = {
   { P_QUICKLZ, 	"quicklz",			_QUICKLZ, "1,2,3" },
     #endif
 
+    #ifdef _SAP
+  { P_SAP, 	    "sap",				_SAP, "0,1,2"	},
+    #endif
+  
     #ifdef _SHRINKER
   { P_SHRINKER, "shrinker",			_SHRINKER, "", 0, (1<<26) },
     #endif
@@ -180,7 +184,7 @@ struct plugs plugs[] = {
     #endif
   
     #ifdef _SNAPPY_C
-  { P_SNAPPYC, 	"snappy-c",			_SNAPPY_C,"" },
+  { P_SNAPPYC, 	"snappy_c",			_SNAPPY_C,"" },
     #endif
    
     #ifdef _TORNADO
@@ -195,6 +199,10 @@ struct plugs plugs[] = {
   { P_WIMLIB,	"wimlib", 			_WIMLIB, "1,2,3" },//LZX,XPRESS,LZMS
     #endif
 	
+    #ifdef _WKDM
+  { P_WKDM, 	"WKdm",				_WKDM, "" }, // crash
+    #endif	
+
     #ifdef _YALZ77
   { P_YALZ77, 	"yalz77", 			_YALZ77, "1,6,12" },
     #endif
@@ -234,13 +242,13 @@ struct plugs plugs[] = {
   { P_LZT3, 	"TurboHF",		    _LZTHF, "",C_EC},  
     #endif
     #ifdef _LZTRC
-  { P_LZT5, 	"TurboAC-byte", 	_LZTRC, "",C_EC}, 
+  { P_LZT5, 	"TurboAC_byte", 	_LZTRC, "",C_EC}, 
   { P_LZT6, 	"TurboRC", 			_LZTRC, "",C_EC}, 
-  { P_LZT7, 	"TurboRC-o1",   	_LZTRC, "",C_EC1}, 
+  { P_LZT7, 	"TurboRC_o1",   	_LZTRC, "",C_EC1}, 
     #endif
 
     #ifdef _BCMEC
-  { P_BCMEC, 	"bcmec", 			_BCMEC, ""},
+  { P_BCMEC, 	"bcmec", 			_BCMEC, "", C_EC},
     #endif
 
     #ifdef _FSC
@@ -274,9 +282,9 @@ struct plugs plugs[] = {
   
 	#ifdef _JRANS
   { P_JRANS, 	"rans_static4c",	_JRANS, "",C_EC |E_ANS},
-  { P_JRANS1, 	"rans_static4c-o1", _JRANS, "",C_EC1|E_ANS},
+  { P_JRANS1, 	"rans_static4c_o1", _JRANS, "",C_EC1|E_ANS},
   { P_JRANS64, 	"rans_static64c",	_JRANS, "",C_EC |E_ANS},
-  { P_JRANS641,	"rans_static64c-o1",_JRANS, "",C_EC1|E_ANS},
+  { P_JRANS641,	"rans_static64c_o1",_JRANS, "",C_EC1|E_ANS},
     #endif
  
     #ifdef _MMRC
@@ -298,7 +306,7 @@ struct plugs plugs[] = {
     #endif
 
     #ifdef _TORNADOHF
-  { P_TORNADOHF,"tornado-huff", 	_TORNADOHF, "", C_EC},
+  { P_TORNADOHF,"tornado_huff", 	_TORNADOHF, "", C_EC},
     #endif
 
     #ifdef _ZLIBH
