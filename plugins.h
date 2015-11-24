@@ -22,11 +22,11 @@
     - email    : powturbo [_AT_] gmail [_DOT_] com
 **/
 //	    TurboBench: plugins.h - settings 
-#define _COMPRESS1
-#define _COMPRESS2
-#define _ECODEC 
+//#define _COMPRESS1
+//#define _COMPRESS2
+//#define _ECODEC 
 //#define _APPLE
-//#define _GPL
+#define _GPL
 
 //#define _PLUGIN2 // Additional plugins not released
 #define _CPP

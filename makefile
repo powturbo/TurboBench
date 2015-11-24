@@ -10,10 +10,10 @@
 CC=gcc
 CXX=g++
 
-COMPRESS1=1
-COMPRESS2=1
-ECODEC=1
-GPL=0
+COMPRESS1=0
+COMPRESS2=0
+ECODEC=0
+GPL=1
 APPLE=0
 
 PLUGIN2=0
@@ -21,7 +21,8 @@ CPP=1
 
 UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
-LDFLAGS=-lpthread -static
+LDFLAGS=-lpthread 
+#-static
 HAVE_ZLIB=1
 else
 #LDFLAGS=-static 
