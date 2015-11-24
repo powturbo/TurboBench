@@ -1,8 +1,9 @@
-<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><title>TurboBench: TurboBench:  - Tue Nov 24 13:13:47 2015
+<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><title>TurboBench: TurboBench:  - Tue Nov 24 18:59:23 2015
  - </title><script src=https://cdn.plot.ly/plotly-latest.min.js></script><script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>	<link rel="stylesheet" href="http://tablesorter.com/themes/blue/style.css" type="text/css" media="print, projection, screen" /><script type="text/javascript" src="http://tablesorter.com/__jquery.tablesorter.min.js"></script><script type="text/javascript">$(function() {		$("#myTable").tablesorter({sortList:[[0,0],[2,1]], widgets: ['zebra']});		$("#options").tablesorter({sortList: [[0,0]], headers: { 3:{sorter: false}, 4:{sorter: false}}});	});	</script><script type="text/javascript" src="http://tablesorter.com/__jquery.tablesorter.min.js"></script><script type="text/javascript">$(function() {		$("#myTable2").tablesorter({sortList:[[0,0],[2,1]], widgets: ['zebra']});		$("#options").tablesorter({sortList: [[0,0]], headers: { 3:{sorter: false}, 4:{sorter: false}}});	});	</script></head><body>
 <h3>TurboBench: Compressor Benchmark</h3><table id='myTable' class='tablesorter' style="width:30%"><thead><tr><th>C Size</th><th>ratio%</th><th>C MB/s</th><th>D MB/s</th><th>Name</th><th>File</th></tr></thead><tbody>
 <tr><td align="right">   32798929</td><td align="right"> 32.8</td><td align="right"><b>    2.79</b></td><td align="right"><b>   65.49</b></td><td><b>lzma 9          </b></td><td>app3.tar</td></tr>
 <tr><td align="right">   32922377</td><td align="right"> 32.9</td><td align="right">    1.61</td><td align="right"><b>   69.65</b></td><td><b>lzturbo 49      </b></td><td>app3.tar</td></tr>
+<tr><td align="right">   33761620</td><td align="right"> 33.7</td><td align="right">    2.64</td><td align="right"><b>  277.04</b></td><td><b>lzham 4         </b></td><td>app3.tar</td></tr>
 <tr><td align="right">   34109576</td><td align="right"> 34.1</td><td align="right">    2.17</td><td align="right"><b> 1318.56</b></td><td><b>lzturbo 39      </b></td><td>app3.tar</td></tr>
 <tr><td align="right">   35638896</td><td align="right"> 35.6</td><td align="right">    1.19</td><td align="right">  950.41</td><td>zstd 20         </td><td>app3.tar</td></tr>
 <tr><td align="right">   37025201</td><td align="right"> 37.0</td><td align="right"><b>   66.88</b></td><td align="right"><b> 1389.48</b></td><td><b>lzturbo 32      </b></td><td>app3.tar</td></tr>
@@ -35,6 +36,7 @@
 <p><h3>TurboBench: Speedup decompression sheet</h3><table id='myTable2' class='tablesorter' style="width:80%"><thead><tr><th>Name</th><th>GPRS 56</th><th>2G 456</th><th>3G 1M</th><th>DSL 2M</th><th>4G 4M</th><th>WIFI 30M</th><th>CAB 100M</th><th>USB2 40MB</th><th>ETH 1000</th><th>HDD 200MB</th><th>SSD 550MB</th><th>SSD 1GB</th><th>SSD 2GB</th><th>4GB/s</th><th>8GB/s</th><td>File</td></tr></thead><tbody>
 <tr><td>lzma 9</td><td align="right">      305 </td><td align="right">      304 </td><td align="right">      303 </td><td align="right">      302 </td><td align="right">      298 </td><td align="right">      260 </td><td align="right">      193 </td><td align="right">      107 </td><td align="right">       45 </td><td align="right">       30 </td><td align="right">       11 </td><td align="right">        6 </td><td align="right">        3 </td><td align="right">        2 </td><td align="right">        1 </td><td>app3.tar</td></tr>
 <tr><td>lzturbo 49</td><td align="right">      304 </td><td align="right">      303 </td><td align="right">      302 </td><td align="right">      301 </td><td align="right">      298 </td><td align="right">      261 </td><td align="right">      197 </td><td align="right">      111 </td><td align="right">       47 </td><td align="right">       31 </td><td align="right">       12 </td><td align="right">        7 </td><td align="right">        3 </td><td align="right">        2 </td><td align="right">        1 </td><td>app3.tar</td></tr>
+<tr><td>lzham 4</td><td align="right">      296 </td><td align="right">      296 </td><td align="right">      296 </td><td align="right">      296 </td><td align="right">      295 </td><td align="right">      285 </td><td align="right">      262 </td><td align="right">      208 </td><td align="right">      127 </td><td align="right">       94 </td><td align="right">       43 </td><td align="right">       25 </td><td align="right">       13 </td><td align="right">        7 </td><td align="right">        3 </td><td>app3.tar</td></tr>
 <tr><td>lzturbo 39</td><td align="right">      293 </td><td align="right">      293 </td><td align="right">      293 </td><td align="right">      293 </td><td align="right">      293 </td><td align="right">      291 </td><td align="right">      286 </td><td align="right">      269 </td><td align="right">      230 </td><td align="right">      203 </td><td align="right">      132 </td><td align="right">       91 </td><td align="right">       54 </td><td align="right">       30 </td><td align="right">       16 </td><td>app3.tar</td></tr>
 <tr><td>zstd 20</td><td align="right">      281 </td><td align="right">      281 </td><td align="right">      281 </td><td align="right">      281 </td><td align="right">      280 </td><td align="right">      278 </td><td align="right">      271 </td><td align="right">      251 </td><td align="right">      205 </td><td align="right">      177 </td><td align="right">      107 </td><td align="right">       71 </td><td align="right">       41 </td><td align="right">       22 </td><td align="right">       11 </td><td>app3.tar</td></tr>
 <tr><td>lzturbo 32</td><td align="right">      270 </td><td align="right">      270 </td><td align="right">      270 </td><td align="right">      270 </td><td align="right">      270 </td><td align="right">      268 </td><td align="right">      264 </td><td align="right">      251 </td><td align="right">      217 </td><td align="right">      195 </td><td align="right">      131 </td><td align="right">       92 </td><td align="right">       55 </td><td align="right">       31 </td><td align="right">       16 </td><td>app3.tar</td></tr>
@@ -78,6 +80,13 @@ type: 'scatter',
 mode: 'lines+markers',
 line: {shape: 'spline'},
 name: 'lzturbo_49'
+};
+var lzham_4 = { x: [7000,57000,125000,250000,500000,3750000,12500000,40000000,125000000,200000000,550000000,1000000000,2000000000,4000000000,8000000000],
+y: [      296,      296,      296,      296,      295,      285,      262,      208,      127,       94,       43,       25,       13,        7,        3],
+type: 'scatter',
+mode: 'lines+markers',
+line: {shape: 'spline'},
+name: 'lzham_4'
 };
 var lzturbo_39 = { x: [7000,57000,125000,250000,500000,3750000,12500000,40000000,125000000,200000000,550000000,1000000000,2000000000,4000000000,8000000000],
 y: [      293,      293,      293,      293,      293,      291,      286,      269,      230,      203,      132,       91,       54,       30,       16],
@@ -275,7 +284,7 @@ mode: 'lines+markers',
 line: {shape: 'spline'},
 name: 'memcpy'
 };
-var data = [lzma_9,lzturbo_49,lzturbo_39,zstd_20,lzturbo_32,lzturbo_29,brotli_11,brotli_6,brotli_5,lzturbo_31,zstd_9,zstd_5,brotli_1,lzturbo_30a,zlib_6,lzturbo_22,lzturbo_30,lzturbo_21,zlib_1,zstd_1,lzturbo_19,lz4_9,lzturbo_20a,lzturbo_12,lzturbo_11,lzturbo_20,lzturbo_10a,lzturbo_10,lz4_1,memcpy,];
+var data = [lzma_9,lzturbo_49,lzham_4,lzturbo_39,zstd_20,lzturbo_32,lzturbo_29,brotli_11,brotli_6,brotli_5,lzturbo_31,zstd_9,zstd_5,brotli_1,lzturbo_30a,zlib_6,lzturbo_22,lzturbo_30,lzturbo_21,zlib_1,zstd_1,lzturbo_19,lz4_9,lzturbo_20a,lzturbo_12,lzturbo_11,lzturbo_20,lzturbo_10a,lzturbo_10,lz4_1,memcpy,];
 var layout = {
 title:'TurboBench Speedup: Transfer+Decompress Speed',
 xaxis: {
