@@ -39,7 +39,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 #### TurboBench compressor benchmark:
 - File [app3.tar binary Portable Apps Suite](http://compressionratings.com/download.html)
 
-- [html output+Speedup](http://htmlpreview.github.io/?https://cdn.rawgit.com/powturbo/TurboBench/master/app3.tar.html)
+- [html output+Speedup](http://htmlpreview.github.io/?https://github.com/powturbo/TurboBench/master/app3.tar.html)
 
  (bold = pareto)  MB=1.000.0000
 
