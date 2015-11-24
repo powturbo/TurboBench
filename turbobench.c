@@ -989,7 +989,7 @@ int main(int argc, char* argv[]) {
       { "help", 	0, 0, 'h'},
       { 0, 		    0, 0, 0}
     };
-    if((c = getopt_long(argc, argv, "12A:b:B:C:e:E:F:i:I:j:J:K:l:L:mM:oPp:Q:rRS:t:T:Uv:V:W:X:Y:Z:", long_options, &option_index)) == -1) break;
+    if((c = getopt_long(argc, argv, "12A:b:B:C:e:E:F:i:I:j:J:k:K:l:L:mM:oPp:Q:rRS:t:T:Uv:V:W:X:Y:Z:", long_options, &option_index)) == -1) break;
     switch(c) { 
       case 0:
         printf("Option %s", long_options[option_index].name);
