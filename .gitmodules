@@ -101,3 +101,6 @@
 [submodule "bzip2"]
 	path = bzip2
 	url = https://github.com/asimonov-im/bzip2
+[submodule "pysap"]
+	path = pysap
+	url = https://github.com/CoreSecurity/pysap
