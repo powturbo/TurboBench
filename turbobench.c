@@ -393,8 +393,17 @@ static struct bandw bw[] = {
 
 void plugprth(FILE *f, int fmt, char *t) {
   char *plot  = "<script src=https://cdn.plot.ly/plotly-latest.min.js></script>";
-  char *table = "<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js\"></script>	<link rel=\"stylesheet\" href=\"http://tablesorter.com/themes/blue/style.css\" type=\"text/css\" media=\"print, projection, screen\" /><script type=\"text/javascript\" src=\"http://tablesorter.com/__jquery.tablesorter.min.js\"></script><script type=\"text/javascript\">$(function() {		$(\"#myTable\").tablesorter({sortList:[[0,0],[2,1]], widgets: ['zebra']});		$(\"#options\").tablesorter({sortList: [[0,0]], headers: { 3:{sorter: false}, 4:{sorter: false}}});	});	</script><script type=\"text/javascript\" src=\"http://tablesorter.com/__jquery.tablesorter.min.js\"></script><script type=\"text/javascript\">$(function() {		$(\"#myTable2\").tablesorter({sortList:[[0,0],[2,1]], widgets: ['zebra']});		$(\"#options\").tablesorter({sortList: [[0,0]], headers: { 3:{sorter: false}, 4:{sorter: false}}});	});	</script>";
-
+    #if 0
+  char *jquery = "<script src=\"https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js\"></script>";
+  char *tstyle = "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css\">";
+  char *table  = "<script src=\"https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js\"></script>";
+  char *code   = "<script type=\"text/javascript\" class=\"init\">$(document).ready(function() {\n $('#myTable').DataTable();\n} );\n</script>";
+    #else
+  char *jquery = "<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js\"></script>";
+  char *tstyle = "<link rel=\"stylesheet\" href=\"http://tablesorter.com/themes/blue/style.css\" type=\"text/css\" media=\"print, projection, screen\" />";
+  char *table  = "<script type=\"text/javascript\" src=\"http://tablesorter.com/__jquery.tablesorter.min.js\"></script>";
+  char *code   = "<script type=\"text/javascript\">$(function() {		$(\"#myTable\").tablesorter({sortList:[[0,0],[2,1]], widgets: ['zebra']});		$(\"#options\").tablesorter({sortList: [[0,0]], headers: { 3:{sorter: false}, 4:{sorter: false}}});	});	</script><script type=\"text/javascript\" src=\"http://tablesorter.com/__jquery.tablesorter.min.js\"></script><script type=\"text/javascript\">$(function() {		$(\"#myTable2\").tablesorter({sortList:[[0,0],[2,1]], widgets: ['zebra']});		$(\"#options\").tablesorter({sortList: [[0,0]], headers: { 3:{sorter: false}, 4:{sorter: false}}});	});	</script>";
+    #endif
   char s[128];
   time_t tm; 
   time(&tm);
@@ -411,7 +420,7 @@ void plugprth(FILE *f, int fmt, char *t) {
       fprintf(f,"<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"><title>TurboBench: %s - </title></head><body>\n", s); 
       break;
     case FMT_HTML:     
-      fprintf(f,"<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"><title>TurboBench: %s - </title>%s%s</head><body>\n", s, plot, table); 
+      fprintf(f,"<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"><title>TurboBench: %s - </title>%s%s%s%s%s</head><body>\n", s, plot, jquery, tstyle, table, code); 
        break;
     case FMT_MARKDOWN: 
       fprintf(f,"#### %s (bold = pareto)  MB=1.000.0000\n", s); 
@@ -441,10 +450,11 @@ void plugprtth(FILE *f, int fmt) {
       fprintf(f,"<pre><b>%s</b> MB=1.000.0000\n", head); 
       break;
     case FMT_HTML:     
-      fprintf(f,"<h3>TurboBench: Compressor Benchmark</h3><table id='myTable' class='tablesorter' style=\"width:30%%\"><thead><tr><th>C Size</th><th>ratio%%</th><th>C MB/s</th><th>D MB/s</th><th>Name</th><th>File</th></tr></thead><tbody>\n"); 
+      fprintf(f,"<h3>TurboBench: Compressor Benchmark</h3><table id='myTable' class='tablesorter' style=\"width:35%%\"><thead><tr><th>C Size</th><th>ratio%%</th><th>C MB/s</th><th>D MB/s</th><th>Name</th><th>File</th></tr></thead><tbody>\n"); 
+//      fprintf(f,"<h3>TurboBench: Compressor Benchmark</h3><table id='myTable' class='display' style=\"width:30%%\"><thead><tr><th>C Size</th><th>ratio%%</th><th>C MB/s</th><th>D MB/s</th><th>Name</th><th>File</th></tr></thead><tbody>\n"); 
       break;
     case FMT_MARKDOWN: 
-      fprintf(f,"|C Size|ratio%|C MB/s|D MB/s|Name|File|\n|--------:|-----:|--------:|--------:|---------|---------|\n"); 
+      fprintf(f,"|C Size|ratio%|C MB/s|D MB/s|Name|File|\n|--------:|-----:|--------:|--------:|----------------|----------------|\n"); 
       break;
     case FMT_CSV:      
       fprintf(f,"size,csize,ratio,ctime,dtime,name,file\n"); 

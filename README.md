@@ -21,10 +21,10 @@ TurboBench: Compressor Benchmark
  - :new: html output with sortable tables
  - :new: **Transfer speed sheet** for different connections or devices: GPRS,2G,3G,4G,DSL,Network,HDD,SSD,RAM
  - :+1: **Speedup html plot**
- - for **Linux** and **Windows**
+ - **Linux** and **Windows** binaries
  - 100% C/C++, w/o inline assembly
  - Enable/disable groups or individual codecs at compile time
- - All in one executable, **without** installing any external package
+ - All in one executable, no hassless installing of additional package
 
 ### Download benchmark executable incl. LzTurbo:
  - [TurboBench Linux](https://sites.google.com/site/powturbo/downloads)
@@ -40,11 +40,12 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 - File [app3.tar binary Portable Apps Suite](http://compressionratings.com/download.html)
 
 - [html output+Speedup](http://htmlpreview.github.io/?https://github.com/powturbo/TurboBench/master/app3.tar.html)
+  (download app3.tar.html to local file for better browsing)
 
  (bold = pareto)  MB=1.000.0000
 
 |C Size|ratio%|C MB/s|D MB/s|Name|File|
-|--------:|-----:|--------:|--------:|---------|---------|
+|--------:|-----:|--------:|--------:|----------------|----------------|
 |32798929| 32.8|**2.79**|**65.49**|**lzma 9**|app3.tar|
 |32922377| 32.9|1.61|**69.65**|**lzturbo 49**|app3.tar|
 |33761620| 33.7|2.64|**277.04**|**lzham 4**|app3.tar|
@@ -59,16 +60,19 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 |46875269| 46.8|48.58|695.99|zstd 9|app3.tar|
 |48836109| 48.8|113.95|676.74|zstd 5|app3.tar|
 |49324183| 49.3|141.06|337.46|brotli 1|app3.tar|
+|49860700| 49.8|16.94|295.99|zlib 9|app3.tar|
 |49915412| 49.9|**288.52**|1082.09|**lzturbo 30a**|app3.tar|
 |49962678| 49.9|35.70|294.24|zlib 6|app3.tar|
 |50027825| 50.0|52.85|1899.72|lzturbo 22|app3.tar|
 |50311200| 50.3|**312.35**|1090.91|**lzturbo 30**|app3.tar|
+|50337788| 50.3|6.73|1428.58|lz5 9|app3.tar|
 |52597358| 52.5|262.30|2068.57|lzturbo 21|app3.tar|
 |52928477| 52.9|69.17|276.75|zlib 1|app3.tar|
 |53112430| 53.1|298.70|442.42|zstd 1|app3.tar|
 |54265487| 54.2|2.01|**3883.96**|**lzturbo 19**|app3.tar|
 |54423519| 54.4|46.33|1918.40|lz4 9|app3.tar|
 |55400947| 55.3|**465.29**|1900.38|**lzturbo 20a**|app3.tar|
+|55764172| 55.7|405.79|1517.45|lz5 1|app3.tar|
 |55923645| 55.9|141.96|3713.00|lzturbo 12|app3.tar|
 |57606731| 57.6|263.89|3500.06|lzturbo 11|app3.tar|
 |59090242| 59.0|**631.43**|2099.72|**lzturbo 20**|app3.tar|
@@ -160,14 +164,14 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 
         ./turbobench -elzturbo,19,29,39/brotli,6/zlib,6 file
 
-  + retest or test other compressors and merge the results to gfile.tbb<br />
+  + retest or test other compressors and merge the results to file.tbb<br />
 
 
         ./turbobench -eFAST/bzip2 file
 
 ##### - Print + Plot
 
-   + Print a sheet+plot to file.html
+   + Print result file + "transfer+decompression speedup" plot to file.html
 
 
         ./turbobench -p2 -S2 file.tbb
@@ -188,5 +192,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 
 ### References:
 
-Last update: 24 NOV 2015
+Last update: 25 NOV 2015
 
