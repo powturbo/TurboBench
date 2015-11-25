@@ -16,7 +16,7 @@ ECODEC=1
 GPL=0
 APPLE=0
 
-PLUGIN2=1
+PLUGIN2=0
 CPP=1
 
 UNAME := $(shell uname)

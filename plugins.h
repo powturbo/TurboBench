@@ -28,7 +28,7 @@
 //#define _APPLE
 //#define _GPL
 
-#define _PLUGIN2 // Additional plugins not released
+//#define _PLUGIN2 // Additional plugins not released
 #define _CPP
 //-------------------------------------------------------------------------------------
   #ifdef _COMPRESS1   
