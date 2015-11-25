@@ -81,6 +81,8 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 |61938605| 61.9|671.21|2069.81|lz4 1|app3.tar|
 |100098564|100.0|**8647.84**|**8408.10**|**memcpy**|app3.tar|
 
+![Seedup](app3.tar.png "Speedup: Transfer+decompression")
+
 ### Plugins:
 #### Compressor Lz77,Rolz,Bwt:
  - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
