@@ -1,7 +1,7 @@
 TurboBench: Compressor Benchmark
 ================================
 + **TurboBench**
- - The only benchmark program including **LzTurbo**
+ - The only benchmark program including **[LzTurbo](https://sites.google.com/site/powturbo/)**
  - 100% in-memory benchmark, no I/O overhead
  - Include (>50) allmost all popular, latest or fastest compressors in one compiled package
  - No other compressor benchmark includes more codecs or offer more precision and features
