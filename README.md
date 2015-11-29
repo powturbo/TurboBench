@@ -115,6 +115,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
  - [sap v15-11](https://github.com/CoreSecurity/pysap) 
+ - [shoco v2015](https://github.com/Ed-von-Schleck/shoco) 
  - [Shrinker v0.1/r9](https://code.google.com/p/data-shrinker) 
  - [Snappy v1.1.3](https://github.com/google/snappy) 
  - [Snappy-c v1.1.2/14.04](https://github.com/andikleen/snappy-c) 
@@ -126,6 +127,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Libzling v15-09](https://github.com/richox/libzling) 
  - [Zopfli v15-05](https://code.google.com/p/zopfli) 
  - [ZSTD v0.3.6](https://github.com/Cyan4973/zstd) 
+ - [zpaq v7.05](https://github.com/zpaq/zpaq) 
 
 * LzFSE: included but not tested
 
