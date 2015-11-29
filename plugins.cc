@@ -96,7 +96,7 @@ static int cscread(MemISeqInStream *si, void *in, size_t *inlen) {
   memcpy(in, si->in, *inlen);
   si->in    += *inlen;
   si->inlen -= *inlen;
-  return 0;//*inlen;
+  return 0;
 }
 
 static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
@@ -131,6 +131,29 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 
     #ifdef _LIBLZG
 #include "liblzg/src/include/lzg.h"
+  #endif
+
+  #ifdef _LIBZPAQ
+#include "zpaq/libzpaq.h"
+void libzpaq::error(const char* msg) { 
+  fprintf(stderr, "zpaq error: %s\n", msg);
+  exit(1);
+}
+
+static unsigned char *zin,*zin_;
+static unsigned char *zout;
+#define _putc(__ch, __out) *__out++ = (__ch)
+#define _getc(in, in_) (in<in_?*in++:-1)
+
+class In: public libzpaq::Reader {
+  public:
+    int get() { return _getc(zin, zin_); }  
+} zmemin;
+
+class Out: public libzpaq::Writer {
+  public:
+    void put(int c) { _putc(c, zout); }  
+} zmemout;
   #endif
 
   #ifdef _LZ4
@@ -217,23 +240,21 @@ int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char
   #endif
 
   #ifdef _SAP
-//#include "pysap/src/hpa101saptype.h"        /* Common SAP Header Files ...............*/
-//#include "pysap/src/hpa106cslzc.h"          /* Internal Definitions for LZC algorithm */
-//#include "pysap/src/hpa107cslzh.h"
-
-//#include "../sap/src/hpa104CsObject.h"
-//#include "../sap/src/hpa105CsObjInt.h"
-
 #include "pysap/pysapcompress/hpa101saptype.h"
 #include "pysap/pysapcompress/hpa104CsObject.h"
 #include "pysap/pysapcompress/hpa106cslzc.h"
 #include "pysap/pysapcompress/hpa107cslzh.h"
 #include "pysap/pysapcompress/hpa105CsObjInt.h"
   #endif
+
   #ifdef _SHRINKER
 #include "shrinker/Shrinker.h"
   #endif
    
+  #ifdef _SHOCO
+#include "shoco/shoco.h"
+  #endif
+
   #ifdef _SNAPPY
 #include "snappy/snappy.h"
   #endif
@@ -279,7 +300,6 @@ int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char
 
   #ifdef _ZSTD
 #include "zstd/lib/zstd.h"
-#include "zstd/lib/zstdhc.h"
   #endif
 
   #ifdef _PLUGIN2
@@ -531,6 +551,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         return so.outlen;
       }
       #endif
+
       #ifdef _CRUSH
     case P_CRUSH: return crush::compress(lev, in, inlen, out);
       #endif
@@ -572,6 +593,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_LIBLZF:    return lzf_compress(in, inlen, out, outsize);
 	  #endif
 	
+      #ifdef _LIBZPAQ
+    case P_LIBZPAQ: { zin = in; zin_ = in+inlen; zout = out; char s[3]; s[0]=lev+'0'; s[1]=0; libzpaq::compress(&zmemin, &zmemout, s); return zout - out; }
+      #endif
+
 	  #ifdef _LZ4
     case P_LZ4: return !lev?LZ4_compress_fast((char *)in, (char *)out, inlen, outsize, 4):(lev<9?LZ4_compress_default((char *)in, (char *)out, inlen, outsize):LZ4_compress_HC((char *)in, (char *)out, inlen, outsize, lev));
 	  #endif
@@ -694,6 +719,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       }
       #endif  	
 
+	  #ifdef _SHOCO
+    case P_SHOCO:     return shoco_compress((const char *)in, inlen, (char *)out, outsize);
+      #endif  	
+
 	  #ifdef _SHRINKER
     case P_SHRINKER:     return shrinker_compress((char *)in, (char *)out, inlen);
       #endif  	
@@ -756,12 +785,12 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif	    
 
 	  #ifdef _ZSTD
-    case P_ZSTD: ZSTD_HC_compress( out, outsize, in, inlen, lev); break;
+    case P_ZSTD: ZSTD_compress( out, outsize, in, inlen, lev); break;
       #endif   
 
     //------------------------- Entropy Coders -------------------------
       #ifdef _IMEMCPY 
-    case P_MCPY:   imemcpy(out, in, inlen);    return inlen;
+    case P_MCPY:   memcpy(out, in, inlen);    return inlen;
 	  #endif	
 
       #ifdef _MEMCPY 
@@ -959,6 +988,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	case P_LIBLZG: LZG_Decode(in, inlen, out, outlen); break;
 	  #endif
 	  
+      #ifdef _LIBZPAQ
+    case P_LIBZPAQ: { zin = in; zin_ = in+inlen; zout = out; libzpaq::decompress(&zmemin, &zmemout); return zin - in; }
+      #endif
+
       #ifdef _LZHAM
     case P_LZHAM: { static int dicbits[]={ 24, 24, 24, 26, 29, 29 };
 	    lzham_decompress_params prm; memset(&prm, 0, sizeof(prm));
@@ -1017,10 +1050,6 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	  }
       #endif  	
 
-	  #ifdef _SHRINKER
-    case P_SHRINKER:    shrinker_decompress(in, out, outlen); break;
-	  #endif
-	   
       #ifdef _ZLING
     case P_ZLING: zling_decompress(in, inlen, out, outlen); break;
       #endif
@@ -1032,6 +1061,15 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #ifdef _MSCOMPRESS
      case P_MSCOMPRESS: { size_t _outlen=outlen; return ms_decompress(lev, in, inlen, out, &_outlen)==MSCOMP_OK?inlen:0; }
       #endif	 
+
+	  #ifdef _SHOCO
+    case P_SHOCO:     shoco_decompress((const char *)in, inlen, (char *)out, outlen); return inlen;
+      #endif  	
+
+	  #ifdef _SHRINKER
+    case P_SHRINKER:    shrinker_decompress(in, out, outlen); break;
+	  #endif
+	   
 	  #ifdef _SNAPPY
         #ifdef __cplusplus
     case P_SNAPPY: snappy::RawUncompress((char*)in, inlen, (char*)out);  break;

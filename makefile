@@ -1,15 +1,18 @@
 # powturbo  (c) Copyright 2013-2015
-#
+# ----------- Compiling ----------------------
 # git clone --recursive git://github.com/powturbo/TurboBench.git 
 # copy snappy_ to snappy (or configure snappy)
 # make
-#
-# Linux: "export CC=clang" windows mingw: "set CC=gcc" or uncomment one of following lines
+# ------------- Linux: "export CC=clang" windows mingw: "set CC=gcc" or set CC CXX in make file
 #CC=clang-
 #CXX=clang++
 CC=gcc
 CXX=g++
-
+#----- Compile for 'American Fuzzy Lop (http://lcamtuf.coredump.cx/afl/) 
+# add '-static' to LDFLAG
+# Run turbobench w/ no output : afl-fuzz -i testcase_dir -o finding_dir -- ./turbobench -elzturbo,12 -v0 -gg -i0 -j0 
+#CC=~/b/afl/afl-gcc 
+#CXX=~/b/afl/afl-g++ 
 COMPRESS1=1
 COMPRESS2=1
 ECODEC=1
@@ -21,8 +24,8 @@ CPP=1
 
 UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
-LDFLAGS=-lpthread 
-#-static
+LDFLAGS=-lpthread
+# -static
 HAVE_ZLIB=1
 else
 #LDFLAGS=-static 
@@ -37,7 +40,7 @@ ARCH=64
 #ARCH=32
 endif
 
-DDEBUG=-DNDEBUG -s
+DDEBUG=-DNNDEBUG -g
 CFLAGS+=$(DDEBUG) -w -fpermissive -Wall -Ilz4/lib -Ilz5/lib -D_7ZIP_ST -Ilzo/include -DZSTD_LEGACY_SUPPORT=0 -D"__int64=long long" -D__unused=  -DWK_DEBUG 
 CXXFLAGS=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -Ilzo/include -D"UINT64_MAX=-1ull" -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT -DSHUFFLE_SSE2_ENABLED -DHAVE_CPU_FEAT_INTRIN
 
@@ -128,10 +131,14 @@ pithy/pithy.o: pithy/pithy.c
 
 LZLIB=lzlib/lzlib.o lzlib_/bbexample.o 
 
+LIBZPAQ=zpaq/libzpaq.o
+
 QUICKLZ=quicklz_/quicklz1.o quicklz_/quicklz2.o quicklz_/quicklz3.o 
 
 SAP=pysap/pysapcompress/vpa105CsObjInt.o pysap/pysapcompress/vpa106cslzc.o pysap/pysapcompress/vpa107cslzh.o pysap/pysapcompress/vpa108csulzh.o
-#pysap/pysapcompress/sapdecompress.o 
+
+SHOCO=shoco/shoco.o 
+
 SHRINKER=shrinker/Shrinker.o
 shrinker/shrinker.o: shrinker/shrinker.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@  
@@ -165,28 +172,28 @@ ZLIB=$(ZLIBDIR)compress.o $(ZLIBDIR)deflate.o $(ZLIBDIR)infback.o $(ZLIBDIR)inff
 #ZLIB+=$(ZLIBDIR)match.o
 endif
 
-ZSTD=zstd/lib/zstd.o zstd/lib/fse.o zstd/lib/huff0.o zstd/lib/zstdhc.o
+ZSTD=zstd/lib/zstd_compress.o zstd/lib/zstd_decompress.o zstd/lib/fse.o zstd/lib/huff0.o 
 
 Z=zopfli/src/zopfli/
 ZOPFLI=$(Z)blocksplitter.o $(Z)cache.o $(Z)deflate.o $(Z)gzip_container.o $(Z)hash.o $(Z)util.o $(Z)lz77.o $(Z)tree.o $(Z)squeeze.o $(Z)katajainen.o $(Z)zlib_container.o $(Z)zopfli_lib.o
-
 
 #-------------------------------------------------------------
 OBJB+=plugins.o 
 
 ifeq ($(COMPRESS1), 1)
-OBJB+=$(LZ4) $(LZMA) $(ZLIB) $(ZSTD)
+OBJB+=$(LZ4) $(LZMA) $(ZLIB) $(ZSTD) 
 ifeq ($(CPP), 1)
 OBJB+=$(BROTLI) 
 endif
 endif
 
 ifeq ($(COMPRESS2), 1)
-OBJB+= $(BRIEFLZ) $(BZIP2) $(DENSITY) $(FASTLZ) $(HEATSHRINK) $(LIBBSC) $(LIBLZF) $(LZ5) $(LIBLZG) $(SHRINKER) $(PITHY) $(LZSS) $(SNAPPY_C) $(MINIZ) $(YAPPY) $(WFLZ) $(WIMLIB) $(WKDM) $(ZOPFLI)
+OBJB+= $(BRIEFLZ) $(BZIP2) $(DENSITY) $(FASTLZ) $(HEATSHRINK) $(LIBBSC) $(LIBLZF) $(LZ5) $(LIBLZG) $(SHRINKER) $(PITHY) $(LZSS) $(MINIZ) $(SHOCO) $(SNAPPY_C) $(YAPPY) $(WFLZ) $(WIMLIB) $(WKDM) $(ZOPFLI)
 OBJB+=chameleon/chameleon.o
 OBJB+=crush/crush.o
 ifeq ($(CPP), 1)
-OBJB+=$(LIBZLING) $(DOBOZ) $(LIBCSC) $(LZHAM) $(SNAPPY) 
+OBJB+=$(LIBZLING) $(DOBOZ) $(LIBCSC) $(LZHAM) $(LIBZPAQ)
+OBJB+=$(SNAPPY)
 OBJB+=balz/balz.o
 OBJB+=bcm/bcm.o
 ifeq ($(UNAME), Linux)

@@ -104,3 +104,9 @@
 [submodule "pysap"]
 	path = pysap
 	url = https://github.com/CoreSecurity/pysap
+[submodule "zpaq"]
+	path = zpaq
+	url = https://github.com/zpaq/zpaq
+[submodule "shoco"]
+	path = shoco
+	url = https://github.com/Ed-von-Schleck/shoco

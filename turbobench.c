@@ -38,6 +38,15 @@
   #ifndef _WIN32
 #include <sys/resource.h>
   #endif 
+
+  #if !defined(_WIN32)
+#include <sys/mman.h>
+#include <sys/resource.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/param.h>
+  #endif
+
 #include <time.h>
 //--------------------------------------- Time ------------------------------------------------------------------------
 typedef unsigned long long tm_t;
@@ -138,11 +147,37 @@ int memcheck(unsigned char *in, unsigned n, unsigned char *cpy, int cmp) {
   for(i = 0; i < n; i++)
     if(in[i] != cpy[i]) {
       printf("ERROR at %d:%x, %x\n", i, in[i], cpy[i]); 
-      if(cmp > 2) exit(0);
+      if(cmp > 2) exit(EXIT_FAILURE);
 	  return i+1; 
 	}
   return 0;
 }
+
+#define USE_MMAP
+
+void *_valloc(size_t size, int a) {
+  if(!size) return NULL;
+    #if defined(_WIN32)
+  return VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    #elif defined(USE_MMAP)
+  void *ptr = mmap((size_t)a<<31, size, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+  if(ptr == MAP_FAILED) return NULL;														
+  return ptr;
+    #else
+  return malloc(size); 
+    #endif
+}
+
+void _vfree(void *p, size_t size) {
+  if(!p) return;
+    #if defined(_WIN32)
+  VirtualFree(p, 0, MEM_RELEASE);
+    #elif defined(USE_MMAP)
+  munmap(p, size);
+    #else
+  free(p);
+    #endif
+} 
 //--------------------------------------- TurboBench ------------------------------------------------------------------
 #include "conf.h"   
 #include "plugins.h"
@@ -393,17 +428,10 @@ static struct bandw bw[] = {
 
 void plugprth(FILE *f, int fmt, char *t) {
   char *plot  = "<script src=https://cdn.plot.ly/plotly-latest.min.js></script>";
-    #if 0
-  char *jquery = "<script src=\"https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js\"></script>";
-  char *tstyle = "<link rel=\"stylesheet\" type=\"text/css\" href=\"https://cdn.datatables.net/1.10.10/css/jquery.dataTables.min.css\">";
-  char *table  = "<script src=\"https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js\"></script>";
-  char *code   = "<script type=\"text/javascript\" class=\"init\">$(document).ready(function() {\n $('#myTable').DataTable();\n} );\n</script>";
-    #else
   char *jquery = "<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js\"></script>";
   char *tstyle = "<link rel=\"stylesheet\" href=\"http://tablesorter.com/themes/blue/style.css\" type=\"text/css\" media=\"print, projection, screen\" />";
   char *table  = "<script type=\"text/javascript\" src=\"http://tablesorter.com/__jquery.tablesorter.min.js\"></script>";
   char *code   = "<script type=\"text/javascript\">$(function() {		$(\"#myTable\").tablesorter({sortList:[[0,0],[2,1]], widgets: ['zebra']});		$(\"#options\").tablesorter({sortList: [[0,0]], headers: { 3:{sorter: false}, 4:{sorter: false}}});	});	</script><script type=\"text/javascript\" src=\"http://tablesorter.com/__jquery.tablesorter.min.js\"></script><script type=\"text/javascript\">$(function() {		$(\"#myTable2\").tablesorter({sortList:[[0,0],[2,1]], widgets: ['zebra']});		$(\"#options\").tablesorter({sortList: [[0,0]], headers: { 3:{sorter: false}, 4:{sorter: false}}});	});	</script>";
-    #endif
   char s[128];
   time_t tm; 
   time(&tm);
@@ -451,7 +479,6 @@ void plugprtth(FILE *f, int fmt) {
       break;
     case FMT_HTML:     
       fprintf(f,"<h3>TurboBench: Compressor Benchmark</h3><table id='myTable' class='tablesorter' style=\"width:35%%\"><thead><tr><th>C Size</th><th>ratio%%</th><th>C MB/s</th><th>D MB/s</th><th>Name</th><th>File</th></tr></thead><tbody>\n"); 
-//      fprintf(f,"<h3>TurboBench: Compressor Benchmark</h3><table id='myTable' class='display' style=\"width:30%%\"><thead><tr><th>C Size</th><th>ratio%%</th><th>C MB/s</th><th>D MB/s</th><th>Name</th><th>File</th></tr></thead><tbody>\n"); 
       break;
     case FMT_MARKDOWN: 
       fprintf(f,"|C Size|ratio%|C MB/s|D MB/s|Name|File|\n|--------:|-----:|--------:|--------:|----------------|----------------|\n"); 
@@ -665,7 +692,7 @@ void plugplotb(FILE *f, int fmt) {
 void plugplot(struct plug *plug, long long totinlen, int fmt, int speedup, char *s, FILE *f) {
   int  i;
   char name[65];
-  if(plug->lev>=0) 
+  if(plug->lev>=0)
     sprintf(name, "%s%s_%d%s", plug->err?"?":"", plug->s, plug->lev, plug->prm);
   else
     sprintf(name, "%s%s%s",    plug->err?"?":"", plug->s,            plug->prm);
@@ -722,7 +749,7 @@ int plugprts(struct plug *plug, int k, char *finame, int xstdout, unsigned long 
   FILE *fo = xstdout>=0?stdout:fopen(s, "w");
   if(!fo) { 
     fprintf(stderr, "file create error for '%s'\n", finame); 
-    exit(0); 
+    exit(EXIT_FAILURE); 
   }
 
   plugprth( fo, fmt, t);
@@ -803,7 +830,7 @@ int plugread(struct plug *plug, char *finame, long long *totinlen) {
 }
 
 //----------------------------------- Benchmark -----------------------------------------------------------------------------
-static int mcpy, mode, tincx;
+static int mcpy, mode, tincx, fuzz;
 
 int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned outsize, unsigned bsize, int id, int lev, char *prm) { 
   unsigned char *op,*oe = _out + outsize;
@@ -880,55 +907,89 @@ unsigned trid[32],tid;
 #define BENCHSIZE (1u<<28)
   #endif
 
+#define INOVD 4*1024
+
+  #ifdef _WIN32
+int getpagesize_() {
+  static int pagesize = 0;
+  if (pagesize == 0) {
+    SYSTEM_INFO system_info;
+    GetSystemInfo(&system_info);
+    pagesize = max(system_info.dwPageSize, system_info.dwAllocationGranularity);
+  }
+  return pagesize;
+} 
+  #endif
+
 unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long filenmax, unsigned bsize, unsigned *trid, int tid, int krep) {
   size_t outsize;   
-  FILE *fi = fopen(finame, "rb"); if(!fi) { perror(finame); die("open error '%s'\n", finame); }
+  FILE *fi = strcmp(finame,"stdin")?fopen(finame, "rb"):stdin; if(!fi) { perror(finame); die("open error '%s'\n", finame); }
   char *p; 
   if((p = strrchr(finame, '\\')) || (p = strrchr(finame, '/'))) finame = p+1; 	if(verbose>1) printf("'%s'\n", finame);
   p = finame; 
-
-  fseeko(fi, 0, SEEK_END); unsigned long long filen = ftello(fi); fseeko(fi , 0 , SEEK_SET); if(filen > filenmax) filen = filenmax;  				
-
-  size_t insize = min(filen,BENCHSIZE);
-  outsize = insize*fac+10*Mb; 
-  unsigned char *in  = (unsigned char*)malloc(insize+4096),*cpy = in;
-  unsigned char *out = (unsigned char*)malloc(outsize);
  
-  if(cmp || tid) 
-    cpy = (unsigned char*)malloc(insize+4096);
-  if(!in || !out || !cpy) 
-    die("malloc err=%u\n", insize+outsize+cpy?insize:0);
+  unsigned long long filen;
+  if(finame) {
+    fseeko(fi, 0, SEEK_END); filen = ftello(fi); fseeko(fi , 0 , SEEK_SET); if(filen > filenmax) filen = filenmax;
+  } else 
+    filen = filenmax;
+  
+  size_t insize   = min(filen,BENCHSIZE); 
+  int    pagesize = getpagesize();
+  size_t insizem  = (fuzz&3)?SIZE_ROUNDUP(insize, pagesize):(insize+INOVD);
 
+  outsize = insize*fac + 10*Mb; 
+  unsigned char *_in = NULL;
+  if(insizem && !(_in = _valloc(insizem,1)))
+    die("malloc error in size=%u\n", insizem);
+  
+  unsigned char *_cpy = _in, *out = (unsigned char*)_valloc(outsize,2);
+  if(!out)
+    die("malloc error out size=%u\n", outsize);
+
+  if((cmp || tid) && insizem && !(_cpy = _valloc(insizem,3)))
+    die("malloc error cpy size=%u\n", insizem);
+ 
   codini(insize);																
   int       inlen;																	
   long long totinlen = 0;
-  double ptc = DBL_MAX, ptd = DBL_MAX;
-  bsize = plug->blksize;
-  plug->len = plug->tc = plug->td = 0; 											blknum=0;	
+  double    ptc = DBL_MAX, ptd = DBL_MAX;
+  bsize     = plug->blksize;
+  plug->len = plug->tc = plug->td = 0; 											blknum = 0;	
 
-  while((inlen = fread(in, 1, insize, fi)) > 0) {
+  while((inlen = fread(_in, 1, insize, fi)) > 0) {    
+    unsigned char *in = _in; 
+    if(fuzz & 1) { in = (_in+insizem)-inlen; memmove(in, _in, inlen); } 		//printf("ci=%d ", (int)((_in+insizem) - (in+inlen)) );
     double   tc = 0.0, td = 0.0;         
     unsigned l = inlen,outlen;
 	totinlen += inlen;															//if(!verbose) printf("%12d ", inlen); fflush(stdout);	
-    BEPRE;																		memrcpy(out, in, inlen);
+    BEPRE;		
+																				memrcpy(out, in, inlen);
 	outlen = becomp(in, l, out, outsize, bsize, plug->id, plug->lev, plug->prm);
-																				plug->len += outlen; plug->tc += tc += (double)tm_tm/(double)tm_rm;
+																				plug->len += outlen; plug->tc += (tc += (double)tm_tm/(double)tm_rm);
     if(tm_Repc > 1) 
       TMSLEEP;
 																				//if(!verbose) { double ratio = (double)outlen*100.0/inlen; printf("%11d\t%5.1f\t%7.2f\t", outlen, ratio, tc>=0.000001?((double)inlen/MBS)/(tc/TM_T):0.0); fflush(stdout); printf("\t");fflush(stdout);}
     if(cmp) {
-	  if(cpy != in) memrcpy(cpy, in, inlen);
+      unsigned char *cpy = _cpy; 
+      if(fuzz & 2) cpy = (_cpy+insizem) - l;
+	  if(_cpy != _in) memrcpy(cpy, in, l);
 	  unsigned cpylen = bedecomp(out, outlen, cpy, l, bsize, plug->id,plug->lev); 		td = (double)tm_tm/(double)tm_rm;
-      plug->err = memcheck(in, l, cpy, cmp);  
-      BEPOST;																	plug->td += td;
+      int e = memcheck(in, l, cpy, cmp);  
+      plug->err = plug->err?plug->err:e;
+      BEPOST;																	
+ 																				plug->td += td;
 	}																			if(verbose && inlen == filen) plugprt(plug, totinlen, finame, FMT_TEXT, &ptc, &ptd, stdout);
 	if(totinlen >= filen) 
       break;
   }	  
-  if(verbose && filen > insize) plugprt(plug, totinlen, finame, FMT_TEXT, &ptc, &ptd,stdout);
+  _vfree(out, outsize); 
+  _vfree(_in, insizem);
+  if(_cpy && _cpy != _in) 
+    _vfree(_cpy, insizem); 
   codexit();
   fclose(fi); 
-  free(in); free(out); if(cpy && cpy != in) free(cpy);
+  if(verbose && filen > insize) plugprt(plug, totinlen, finame, FMT_TEXT, &ptc, &ptd,stdout);
   return totinlen;
 }
 
@@ -959,6 +1020,7 @@ void usage(char *pgm) {
   fprintf(stderr, " -Q#      # Plot window 0:1920x1080, 1:1680x1050, 2:1280x800, 3:800x600 (default=1)\n");
   fprintf(stderr, " -rstr    str=Remark/Comment string\n");
   fprintf(stderr, " -o       print on standard output\n");
+  fprintf(stderr, " -g       -g:don't merge with old 'file.tbb', -gg:process w/o output (use for AFL fuzzing)\n");
   BEUSAGE;
   fprintf(stderr, "ex. ./turbobench enwik9 -eFAST/bzip2/lzma,5,9\n");
   fprintf(stderr, "ex. ./turbobench enwik9 -eFAST/OPTIMAL/bsc,2 -i0\n");
@@ -972,11 +1034,11 @@ void printfile(char *finame, int xstdout, int fmt, char *rem) {
   char      *p, s[256];
   if(!k)  { 
     fprintf(stderr, "file open error for '%s'\n", finame); 
-    exit(0); 
+    exit(EXIT_FAILURE); 
   }
   strncpy(s, finame, 255); 
   s[255]=0;
-  if((p=strrchr(s,'.')) && !strcmp(p, ".tbb")) 
+  if((p = strrchr(s,'.')) && !strcmp(p, ".tbb"))
     *p=0;
   plugprts(plugt, k, s, xstdout, totinlen, fmt, rem);	
 }
@@ -986,10 +1048,11 @@ extern int _CRT_glob = 1;
   #endif
 int main(int argc, char* argv[]) { 
   int xstdout=-1,xstdin=-1;
-  int                recurse  = 0, xplug = 0,tm_Repk=3,plot=-1,fmt=0,fno;
+  int                recurse  = 0, xplug = 0,tm_Repk=3,plot=-1,fmt=0,fno,merge=0;
   unsigned           bsize    = 1u<<30, bsizex=0;
   unsigned long long filenmax = 0;
   char               *scmd = NULL,*trans=NULL,*beb=NULL,*rem="",s[2049];
+  char               *_argvx[1], **argvx=_argvx;
 
   int c, digit_optind = 0;
   for(;;) {
@@ -999,7 +1062,7 @@ int main(int argc, char* argv[]) {
       { "help", 	0, 0, 'h'},
       { 0, 		    0, 0, 0}
     };
-    if((c = getopt_long(argc, argv, "12A:b:B:C:e:E:F:i:I:j:J:k:K:l:L:mM:oPp:Q:rRS:t:T:Uv:V:W:X:Y:Z:", long_options, &option_index)) == -1) break;
+    if((c = getopt_long(argc, argv, "12A:b:B:C:e:E:F:f:gi:I:j:J:k:K:l:L:mM:oPp:Q:rRS:t:T:Uv:V:W:X:Y:Z:", long_options, &option_index)) == -1) break;
     switch(c) { 
       case 0:
         printf("Option %s", long_options[option_index].name);
@@ -1010,6 +1073,8 @@ int main(int argc, char* argv[]) {
       case 'C': cmp      = atoi(optarg);      		 break;
       case 'e': scmd     = optarg;            		 break;
       case 'F': fac      = strtod(optarg, NULL); 	 break;
+      case 'f': fuzz     = atoi(optarg);       		 break;
+      case 'g': merge++;		 			 		 break;
 
       case 'i': if((tm_repc  = atoi(optarg))<=0) 
 		          tm_repc=tm_Repc=tm_Repk=1;         break;
@@ -1047,12 +1112,20 @@ int main(int argc, char* argv[]) {
     exit(0); 
   }
 
-  if(argc <= optind)   
-    die("file not specified. type turbobench -h for help\n");
-  
+  if(argc <= optind) {
+      #ifdef _WIN32
+    setmode( fileno(stdin), O_BINARY ); 
+      #endif
+    argvx[0] = "stdin";
+    optind   = 0;
+    argc     = 1;   
+    recurse  = 0;
+  } else
+    argvx = argv;
+
   if(fmt) {
     for(fno = optind; fno < argc; fno++)
-      printfile(argv[fno], xstdout, fmt, rem);
+      printfile(argvx[fno], xstdout, fmt, rem);
     exit(0);
   }
   if((tm_repc|tm_Repc|tm_repd|tm_Repd) ==1) 
@@ -1083,6 +1156,9 @@ int main(int argc, char* argv[]) {
   }
 
   unsigned k = plugreg(plug, s, 0, bsize, bsizex);
+  if(k > 1 && argc == 1 && !strcmp(argvx[0],"stdin")) 
+    die("multiple codecs not allowed when reading from stdin");
+
   BEINI;
   if(!filenmax) filenmax = Gb; 
   long long totinlen = 0;  
@@ -1100,27 +1176,27 @@ int main(int argc, char* argv[]) {
       g->len = g->tck = g->tdk = 0;
       BEFILE;
       for(fno = optind; fno < argc; fno++) {
-	    finame = argv[fno];																			if(verbose>1) printf("%s\n", finame);	
+	    finame = argvx[fno];																			if(verbose > 1) printf("%s\n", finame);	
         totinlen += plugfile(p, finame, filenmax, bsize, trid, tid,krep);
 	    g->len += p->len; 
 	    g->tck += p->tc;  
 	    g->tdk += p->td;
+        g->err  = g->err?g->err:p->err;
 	  }
       g->v   = p->v;
       g->s   = p->s;
       g->lev = p->lev;
       strcpy(g->prm, p->prm);
 	  g->id  = p->id;
-	  g->err = g->err?g->err:p->err;
       if(g->tck < g->tc) g->tc = g->tck;
       if(g->tdk < g->td) g->td = g->tdk;
       if(tmtime() - tmk0 > tm_RepkT) break;
     } 
   }
-
+  
   if(argc - optind > 1) {
-    unsigned clen = strpref(&argv[optind], argc-optind, '\\', '/');
-    strncpy(s, argv[optind], clen);
+    unsigned clen = strpref(&argvx[optind], argc-optind, '\\', '/');
+    strncpy(s, argvx[optind], clen);
     if(clen && (s[clen-1] == '/' || s[clen-1] == '\\')) 
       clen--;
     s[clen] = 0; 
@@ -1135,15 +1211,19 @@ int main(int argc, char* argv[]) {
     if((p = strrchr(finame, '\\')) || (p = strrchr(finame, '/'))) 
       finame = p+1;
   }
+  if(merge == 2) exit(0);
 
   sprintf(s, "%s.tbb", finame);
-  FILE *fo = fopen(s, "r"); 
+  FILE *fo = NULL;
   int gk = 0;
-  if(fo) {
-    long long _totinlen;
-    gk = plugread(plug, s, &_totinlen);
-    if(_totinlen != totinlen) 
-      gk = 0;    
+  if(!merge && tm_repc > 1 && tm_repd > 1) {
+    fo = fopen(s, "r"); 
+    if(fo) {
+      long long _totinlen;
+      gk = plugread(plug, s, &_totinlen);
+      if(_totinlen != totinlen) 
+        gk = 0;    
+    }
   }
   fo = fopen(s, "w"); 
   if(fo) {

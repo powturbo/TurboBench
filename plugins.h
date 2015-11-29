@@ -55,16 +55,18 @@
 #define _DENSITY    	"0.12.0\tDensity\tBSD license\thttps://github.com/centaurean/density"
 #define _DOBOZ			"14-01-14\tDoboz\tBSD Like\thttps://bitbucket.org/attila_afra\thttps://github.com/nemequ/doboz" //crash
 #define _FASTLZ 		"0.1.0\tFastLz\tBSD like\thttp://fastlz.org\thttps://github.com/ariya/FastLZ"
-#define _GIPFELI    	"15.10\tGipfeli\tApache license\thttps://github.com/google/gipfeli"
-#define _GIPFELI0
+#define _GIPFELI    	"15.10\tGipfeli\tApache license\thttps://github.com/google/gipfeli" // 
+#define _GIPFELI0       // gipfeli v2011 used per default, v2015 is actually crashing
 #define _HEATSHRINK     "0.4.1\theatshrink\tBSD license\thttps://github.com/atomicobject/heatshrink"
 #define _LIBBSC         "3.1.0\tbsc\tApache license\thttps://github.com/IlyaGrebnov/libbsc"
 #define _LIBLZF        	"1.06\tLibLZF\tBSD license\thttp://oldhome.schmorp.de/marc/liblzf.html\thttps://github.com/nemequ/liblzf"
 #define _LIBLZG			"1.0.8\tLibLzg\tzlib-license\thttps://github.com/mbitsnbites/liblzg\thttp://liblzg.bitsnbites.eu/e" //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB 
+#define _LIBZPAQ		"7.05\tLibzpaq\tPublic Domain\thttps://github.com/zpaq/zpaq" 
 #define _LZ5 			"15-10\tLz5\tBSD license\thttps://github.com/inikep/lz5"
 #define _LZHAM			"1.1\tLzham\tMIT license\thttps://github.com/richgel999/lzham_codec_devel"
 //#define _LZSS      	" \tLZSS\t "//crashing
 #define _PITHY   	    "2011\tPithy\tBSD license\thttps://github.com/johnezang/pithy"
+#define _SHOCO          "2015\tShoco\tMIT license\thttps://github.com/Ed-von-Schleck/shoco"
 #define _SNAPPY			"1.1.2/14-02\tSnappy\tApache license\thttps://github.com/google/snappy" 
 #define _SNAPPY_C		"1.1.2/14.04\tSnappy-c\tBSD Like\thttps://github.com/andikleen/snappy-c"
 #define _SHRINKER   	"0.1/r9\tShrinker\tBSD license\thttps://code.google.com/p/data-shrinker"
@@ -176,6 +178,7 @@ enum {
  P_LZ5,    
  P_LIBLZF,  
  P_LIBLZG,
+ P_LIBZPAQ, 
  P_LZHAM,
  P_LZLIB, 
  P_LZMA, 
@@ -189,6 +192,7 @@ enum {
  P_QUICKLZ, 
  P_SHRINKER, 
  P_SAP, 
+ P_SHOCO,
  P_SNAPPY, 
  P_SNAPPYC, 
  P_TORNADO,  

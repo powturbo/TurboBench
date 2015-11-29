@@ -105,6 +105,10 @@ struct plugs plugs[] = {
   { P_LIBLZG,  	"lzg", 				_LIBLZG, "1,2,3,4,5,6,7,8,9" }, 
     #endif
 	 
+    #ifdef _LIBZPAQ
+  { P_LIBZPAQ,  "zpaq", 			_LIBZPAQ, "0,1,2,3,4,5" }, 
+    #endif
+
     #ifdef _LZ4
   { P_LZ4,  	"lz4",				_LZ4, "0,1,9" }, 
     #endif
@@ -177,6 +181,10 @@ struct plugs plugs[] = {
   
     #ifdef _SHRINKER
   { P_SHRINKER, "shrinker",			_SHRINKER, "", 0, (1<<26) },
+    #endif
+
+    #ifdef _SHOCO
+  { P_SHOCO,    "shoco",			_SHOCO, "" },
     #endif
 
     #ifdef _SNAPPY
