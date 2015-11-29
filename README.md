@@ -42,7 +42,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 - [html output+Speedup](http://htmlpreview.github.io/?https://github.com/powturbo/TurboBench/master/app3.tar.html)
   (download app3.tar.html to local file for better browsing)
 
- (bold = pareto)  MB=1.000.0000
+ (bold = pareto)  MB=1.000.000
 
 |C Size|ratio%|C MB/s|D MB/s|Name|File|
 |--------:|-----:|--------:|--------:|----------------|----------------|
