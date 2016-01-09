@@ -1,0 +1,197 @@
+#!/usr/bin/env python
+""" Script to create a wheel builder for a project
+"""
+from __future__ import print_function
+
+import os
+from os.path import isdir
+
+import argparse # Python 2.6, really?
+
+from subprocess import check_call
+
+TERRYFY_URL = 'git://github.com/MacPython/terryfy.git'
+LATEST_PY27 = "2.7.9"
+LATEST_PY33 = "3.3.5"
+LATEST_PY34 = "3.4.3"
+
+VERSION_BIT_NO_NUMPY = \
+"""  - VERSION={}
+  - VERSION={}
+  - VERSION={}""".format(
+      LATEST_PY27, LATEST_PY33, LATEST_PY34)
+
+VERSION_BIT_NUMPY = \
+"""  - VERSION={} NUMPY_VERSION=1.6.2 # tune to taste
+  - VERSION={} NUMPY_VERSION=1.7.1
+  - VERSION={} NUMPY_VERSION=1.7.1""".format(
+      LATEST_PY27, LATEST_PY33, LATEST_PY34)
+
+TRAVIS_TEMPLATE = \
+"""language:
+- objective-c
+env:
+  global:
+  - BUILD_COMMIT='latest-tag'  # comment out to build version in submodule
+  matrix:
+{version_bit}
+install:
+  - source terryfy/travis_tools.sh
+  - get_python_environment macpython $VERSION venv
+  - pip install {pip_depends}
+  - if [ -n "$BUILD_COMMIT" ]; then
+        checkout_commit {project_dir} $BUILD_COMMIT;
+    fi
+  - cd {project_dir}
+  - python setup.py bdist_wheel
+  - delocate-listdeps dist/*.whl # lists library dependencies
+  - delocate-wheel dist/*.whl # copies library dependencies into wheel
+  - delocate-addplat --rm-orig -x 10_9 -x 10_10 dist/*.whl
+  - pip install dist/*.whl
+  - cd ..
+script:
+  # install dependencies for tests e.g - pip install nose
+  - mkdir tmp_for_test
+  - cd tmp_for_test
+  # Run the tests
+  - cd ..
+before_deploy: cd {project_dir}/dist
+deploy:
+  provider: cloudfiles
+  username: travis-worker
+  api_key:
+    secure: ALZrkCwjz3nY/9GfTNPgVQHUmUpCc5SnZTaqIUlJrhVyOBu6aktXaRmQi+sTXzFn7a/PQsYDnoZ8nibCZ472oUVDGUOSbtjIEkPodU+aisLN2dSLNueQsUU7Dmt0SaeyJVGovzfyUiavIYLuAfOtCfUKrwAsi7XTVNQpdyWCQDs=
+  region: ORD
+  container: wheels
+  skip_cleanup: true
+"""
+
+GITIGNORE_TEMPLATE = \
+"""*.pyc
+tmp_for_test/
+working/
+build/
+"""
+
+README_TEMPLATE = \
+"""##################
+{project_dir} wheel builder
+##################
+
+Repository to build {project_dir} wheels.
+
+By default the repo builds the latest tag (the tag on the branch most recently
+branched from master - see http://stackoverflow.com/a/24557377/1939576). If you
+want to build a specific commit:
+
+* Comment out the line ``- BUILD_COMMIT='latest-tag'`` in .travis.yml
+* Update {project_dir} submodule with version you want to build:
+
+    * cd {project_dir} && git pull && git checkout DESIRED_COMMIT
+    * cd .. && git add {project_dir}
+    * git commit
+
+{numpy_bit}
+The wheels get uploaded to a `rackspace container
+<http://a365fff413fe338398b6-1c8a9b3114517dc5fe17b7c3f8c63a43.r19.cf2.rackcdn.com>`_
+to which I have the API key.  The API key is encrypted to this specific repo
+in the ``.travis.yml`` file, so the upload won't work for you from another
+account.  Either contact me to get set up, or use another upload service such as
+github - see for example Jonathan Helmus' `sckit-image wheels builder
+<https://github.com/jjhelmus/scikit-image-ci-wheel-builder>`_
+
+I got the rackspace API key from Olivier Grisel - we might be able to share
+this account across projects - again - please contact me or Olivier if you'd
+like this to happen.
+"""
+
+NUMPY_BIT_TEMPLATE = \
+"""* Check minimum numpy versions to build against in ``.travis.yml`` file.  You
+  need to build against the earliest numpy that {project_dir} is compatible with; see
+  `forward, backward numpy compatibility
+  <http://stackoverflow.com/questions/17709641/valueerror-numpy-dtype-has-the-wrong-size-try-recompiling/18369312#18369312>`_
+
+"""
+
+
+def repo2project_dir(url):
+    """ Get project name from git repo
+    """
+    if url.endswith('.git'):
+        url = url[:-4]
+    return url.split('/')[-1]
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Create project to build wheels on travis')
+    parser.add_argument('github_url',
+                        help = 'Github repo URL')
+    parser.add_argument('--needs-numpy', action='store_true')
+    args = parser.parse_args()
+    project_dir = repo2project_dir(args.github_url)
+    wheels_project = project_dir + '-wheels'
+    os.mkdir(wheels_project)
+    os.chdir(wheels_project)
+    check_call(['git', 'init'])
+    check_call(['git', 'submodule', 'add', args.github_url])
+    project_dir = repo2project_dir(args.github_url)
+    if not isdir(project_dir):
+        raise RuntimeError('Expecting {} directory'.format(project_dir))
+    check_call(['git', 'submodule', 'add', TERRYFY_URL])
+    version_bit = (VERSION_BIT_NUMPY if args.needs_numpy
+                   else VERSION_BIT_NO_NUMPY)
+    pip_depends = 'delocate'
+    if args.needs_numpy:
+        pip_depends += ' numpy==$NUMPY_VERSION'
+    with open('.travis.yml', 'wt') as fobj:
+        fobj.write(TRAVIS_TEMPLATE.format(project_dir=project_dir,
+                                          version_bit=version_bit,
+                                          pip_depends=pip_depends))
+    with open('.gitignore', 'wt') as fobj:
+        fobj.write(GITIGNORE_TEMPLATE)
+    if args.needs_numpy:
+        numpy_bit = NUMPY_BIT_TEMPLATE.format(project_dir=project_dir)
+    else:
+        numpy_bit = ''
+    with open('README.rst', 'wt') as fobj:
+        fobj.write(README_TEMPLATE.format(project_dir=project_dir,
+                                          numpy_bit=numpy_bit))
+    check_call(['git', 'add', '*', '.gitignore', '.travis.yml'])
+    check_call(['git', 'commit', '-m', 'Initial commit'])
+    print('Created ' + wheels_project)
+    print(
+"""Now push to github, setup travis building and encrypt the rackspace key.
+
+I use "hub" [1] and the travis command line client [2], but you can do most of
+this with the web GUIs.
+
+    cd {wheels_project}
+    hub create <your-username>/{wheels_project} # create project on github
+    travis sync # sync list of github repos known to travis
+    travis enable # enable travis testing of this repo
+    travis encrypt <the rackspace API key> # see README about this key
+
+The last line generates something like:
+
+  secure: "fC8a017zdgsbkxZRcJrIrEa35LyzJJEyxTHkbMG/gVJKLhzMLKdw7F6FnsUyxu/RHA5FHE5D2S7X471dNU/xfCYJjWkzvHlrZrwQ5vwJ0KGIRE46KiO0URBGoGFQWI1WPhOeirIJ0ZLaahTYLbXYnQRhM2mOjCmIY74jPSTrrvg="
+
+Replace the current .travis.yml 'secure:' line with the result and commit.
+
+You might also want to fill in the test command for the project in the
+.travis.yml file (see comment placeholder)
+
+Finally, push to github to initiate the first travis build.
+
+If your package has external library dependencies, there are some utilities to
+help you build them; see
+https://github.com/matthew-brett/h5py-wheels/blob/master/.travis.yml for an
+example of their use.
+
+[1] https://github.com/github/hub
+[2] https://github.com/travis-ci/travis.rb
+""".format(wheels_project=wheels_project))
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,73 @@
+Date        Version  New features compared to previous version
+
+2007-04-16  0.1      Bytecoder, bitcoder and 2^n semi-dynamic RangeCoder
+                     Greedy parsing
+                     Only 4+ byte matches
+                     Hashtable matchfinders: simple and caching
+                     Blockwise compression
+
+2007-05-11  0.2      Huffman coder
+                     Lazy parsing
+                     3-byte matches
+                     Dropping too far matches
+                     Sliding window
+                     Gzip-like cmdline interface
+
+2007-07-25  0.25     Repdist, repboth and repchar codes
+                     2-byte matches
+                     Improved lz parsing
+                     Delta filter
+
+2008-03-13  0.3      Huffman decoder with variable block size
+                     Tested on 100 gb of data and fixed all bugs found
+
+2008-04-08  0.4      Cycling matchfinder
+                     Large, updated at each step hashes for 2/3-byte strings
+                     More interactive user interface
+
+2008-06-02  0.4a     Fixed bug in Huffman coder: unstable sorting
+                     Win32 & Linux versions
+
+2008-10-28  0.4b     Added -11:c1 .. -11:c3 modes
+
+2014-01-15  0.5      Removed modes -6 -8 -10 -12, renumerated -7/9/11 to -6/7/8
+                     -7/-8: 1% better compression and 5-20% better speed due to use of ht5
+                     New -9..-11 modes: 2gb hash and ht5..ht7 match finders
+                     In small tornado.exe -c1..-c3 available for -7..-11 modes
+                     Support for -l not power of 2   (in all matchfinders?)
+                     Options -ah, -al, -t#, -cpu, -q, -delete, stats->stderr
+                     Checks at decoding in order to prevent segfaults
+                     MSVC/ICL compatibility, use of wall-clock times
+                     Linux: 64-bit file offsets!
+                     PowerPC (big-endian cpus) compatibility, thanks to Joachim Henke
+                     64-bit compilers support!
+                     -3 mode compression improved by 2-3%
+                     2mb hash in -4/-5 modes improved speed by 20-30%
+                     Fixed long-standing decompression bug (table split across 2 write chunks)
+                     Removed CHECK_FOR_DATA_TABLE(2) in -3/-4 modes
+
+
+2014-03-08  0.6      http://freearc.org/download/research/tornado06.zip
+
+Compression:
+* new -11..-16 modes employing the new optimal parser (-p4)
+* -fb (FAST BYTES), new parameter used only by the optimal parser
+* old -10 mode was removed, old -11 mode was better tuned and renamed to -10
+* -s1 option meaning changed to "64kb hash3 + 4kb hash2", slightly improving compression in -5/-6 modes
+* new chash5..7 (-x15..17) and bt4..7 (-x24..27) match finders
+* all chash/cchash/bt matchfinders support -l values that is not power of 2
+* new manual.txt explaining all compression parameters
+
+Command line and progress indicator:
+* -slp/-rem options, large pages are allocated by default
+* Win7 taskbar progress indication (green bar) plus info in the console window title
+* returns Errcode 2 on any error, clears the window title on ^Break
+* prints ranges and default values for each option, checks option correctness
+* on Windows, prohibits simultaneous writing by several compression processes to the same output file
+* prints byte-exact filesizes; speeds are measured in MiB/s
+* progress indicator is more accurate and updated only once per 0.2 seconds
+
+Compilation:
+* on Windows, compile.cmd supports many GCC/MSVC/ICL versions
+* on Linux, compile.sh now produces executables that can process files larger than 2 GB
+

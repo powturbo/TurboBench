@@ -1,0 +1,71 @@
+v0.4.5
+new : -m/--multiple : compress/decompress multiple files
+
+v0.4.4
+Fixed : high compression modes for Windows 32 bits
+new : external dictionary API extended to buffered mode and accessible through command line
+new : windows DLL project, thanks to Christophe Chevalier
+
+v0.4.3 :
+new : external dictionary API
+new : zstd-frugal
+
+v0.4.2 :
+Generic minor improvements for small blocks
+Fixed : big-endian compatibility, by Peter Harris (#85)
+
+v0.4.1
+Fixed : ZSTD_LEGACY_SUPPORT=0 build mode (reported by Luben)
+removed `zstd.c`
+
+v0.4.0
+Command line utility compatible with high compression levels 
+Removed zstdhc => merged into zstd
+Added : ZBUFF API (see zstd_buffered.h)
+Rolling buffer support
+
+v0.3.6
+small blocks params
+
+v0.3.5
+minor generic compression improvements
+
+v0.3.4
+Faster fast cLevels
+
+v0.3.3
+Small compression ratio improvement
+
+v0.3.2
+Fixed Visual Studio
+
+v0.3.1 :
+Small compression ratio improvement
+
+v0.3
+HC mode : compression levels 2-26
+
+v0.2.2
+Fix : Visual Studio 2013 & 2015 release compilation, by Christophe Chevalier
+
+v0.2.1
+Fix : Read errors, advanced fuzzer tests, by Hanno Böck 
+
+v0.2.0
+**Breaking format change**
+Faster decompression speed
+Can still decode v0.1 format
+
+v0.1.3
+fix uninitialization warning, reported by Evan Nemerson
+
+v0.1.2
+frame concatenation support
+
+v0.1.1
+fix compression bug
+detects write-flush errors
+
+v0.1.0
+first release
+

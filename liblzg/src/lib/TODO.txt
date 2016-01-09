@@ -1,0 +1,91 @@
+TODO
+====
+
+The encoder needs to be faster!! It's possible that an alternative search data
+structure (e.g. a Patricia trie) could improve the speed alot (probably with the
+added cost of more memory). But before doing so, improving the current method
+at the low level is still quite feasible (e.g. zlib uses a very similar approach
+and still outperforms liblzg big time).
+
+
+Without loosing compression ratio
+---------------------------------
+
+- Data padding or special/slow case for the end of the input stream to reduce
+  the number of necessary checks for match termination, for instance.
+
+- Loop unrolling in the maximum length search.
+
+- Special early-out:s when crossing the non-linear-length bundaries (e.g. when
+  going from 29 to 30, try 35 first, etc).
+
+- Simplified _LZG_UpdateLastPos. Aggressive inlining in LZG_Encode
+  (/* Skip ahead... */). Keep track of last string start index (just do single
+  byte read and << 8).
+
+- Precalculate "+ preMatch" in the string start LUT and the string start.
+
+- Use 32-bit indices instead of 32/64-bit pointers for the window (improved
+  cache usage).
+
+- Try to check the longest match first (LUT with long matches for a certain
+  string start?). Will mean early-out for the string match routine for shorter
+  matches. Statistically feasible?
+
+- Go back to using only 16-bit string starts instead of 24-bit string starts
+  (skip "fast mode" in order to simplify things, ease up on the cache, and save
+  memory)? Might be feasible if the match search loop can be made very tight
+  (i.e. quick early out and quick LUT read).
+
+- Multi threading (speculative search). Feasible?
+
+x Precalculated mask for _LZG_WindowModulo (instead of length-1).
+
+x Go back to using uint32 instead of size_t (the routine shall only cope with
+  4GB buffers anyway - if >4GB buffers are necessary in the future, which would
+  require a data format change anyway, it should be possible to do some sort of
+  block compression - e.g. 1GB blocks at a time).
+
+
+Compression ratio degrading measures
+------------------------------------
+
+If introducing some sort of "quick mode", the following can be implemented:
+
+x Only try a maximum number of back matches (regardless of distance).
+
+- Reduce maximum number of back match attempts if a good enough length was
+  found (i.e. try harder when we don't have a very good match).
+
+x Be satisfied with a certain match length (currently 128, perhaps e.g.
+  29/35/48/72?).
+
+
+Other issues
+------------
+
+- The Canterbury corpus kennedy.xls file is giving strange compression results:
+  compression level 1 (window = 2048) gives significantly better compression
+  ratio than any other compression level! This indicates that we are not doing
+  optimal compression (and if the compression for the kennedy.xls file is fixed,
+  other files will probably gain from it too).
+  
+  NOTE: zlib also has problems with this file (levels 5 & 6 compress better than
+  levels 7, 8 & 9).
+
+  Possible problem: an optimal match is "hidden/prevented" by a previously
+  chosen match, for example:
+
+    str1:   ...BAAAA...       (far, offset > 2048)
+    str2:   ...AAAAAAAAA...   (close, offset < 2048)
+    str3:   ...BAAAAAAAAA...
+
+  Now, str3 will be encoded as: ...[ref str1][ref str2]..., taking 7 bytes.
+  An alternative would be to encode it as ...B[ref str2]..., which would require
+  only 4 bytes, i.e. 3 bytes better than with the current strategy of the
+  encoder!
+
+  A solution would be to try a few extra matches when a match is found, before
+  deciding whether to chose it or not (how advanced strategy? how much speed
+  loss? only for short matches?).
+

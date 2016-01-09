@@ -1,0 +1,31 @@
+BriefLZ 1.1.0 (2015.09.05)
+
+  * Remove legacy code and update build system
+  * Use `BLZ_HASH_BITS` to set workmem size
+  * Adjust default block size to 1024k in blzpack
+  * Default to not performing slow CRC computations
+
+BriefLZ 1.05 (unreleased)
+
+  * Add safe decompression functions
+  * Fix a potential portability issue
+
+BriefLZ 1.04 (2004.06.30)
+
+  * Gather all functions in one header file
+  * Add pre-compiled libraries
+  * Add .NET wrapper
+  * Rewrite documentation
+
+BriefLZ 1.02 (2003.08.14)
+
+  * Make it more obvious that `blz_depack` requires the length of the
+    depacked data, not the packed data
+  * Update documentation
+  * Update C source
+
+BriefLZ 1.00 (2003.03.17)
+
+  * First release
+
+Project started November 12th 2002.
