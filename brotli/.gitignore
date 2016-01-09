@@ -1,8 +1,0 @@
-*.o
-*.pyc
-*.txt.uncompressed
-*.bro
-*.unbro
-tools/bro
-build/
-dist/
