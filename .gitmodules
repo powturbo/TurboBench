@@ -4,3 +4,6 @@
 [submodule "brieflz"]
 	path = brieflz
 	url = https://github.com/jibsen/brieflz.git
+[submodule "CSC"]
+	path = CSC
+	url = https://github.com/fusiyuan2010/CSC.git
