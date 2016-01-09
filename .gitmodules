@@ -10,3 +10,6 @@
 [submodule "FastARI"]
 	path = FastARI
 	url = https://github.com/davidcatt/FastARI.git
+[submodule "FastLZ"]
+	path = FastLZ
+	url = https://github.com/ariya/FastLZ.git
