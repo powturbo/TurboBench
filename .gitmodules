@@ -13,3 +13,6 @@
 [submodule "FastLZ"]
 	path = FastLZ
 	url = https://github.com/ariya/FastLZ.git
+[submodule "LZMA-SDK"]
+	path = LZMA-SDK
+	url = https://github.com/jljusten/LZMA-SDK.git
