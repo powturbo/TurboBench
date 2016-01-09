@@ -160,6 +160,9 @@ shrinker/shrinker.o: shrinker/shrinker.c
 wflz/wfLZ.o: wflz/wfLZ.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
 
+nakamichi/Nakamichi_Nin.o: nakamichi/Nakamichi_Nin.c
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+
 #WKDM=wkdm/WKdmCompress.o wkdm/WKdmDecompress.o
 ifeq ($(NCOMP2), 0)
 DIVSUFSORT=libbsc/libbsc/bwt/divsufsort/divsufsort.o
@@ -181,7 +184,7 @@ OB+=lz5/lib/lz5.o lz5/lib/lz5hc.o
 OB+=liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o 
 OB+=liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o 
 OB+=miniz/miniz.o
-OB+=nakamichi/Nakamichi_Kintaro.o
+OB+=nakamichi/Nakamichi_Nin.o
 OB+=pithy/pithy.o
 OB+=shoco/shoco.o
 OB+=shrinker/Shrinker.o
