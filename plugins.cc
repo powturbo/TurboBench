@@ -1,5 +1,5 @@
 /**
-    Copyright (C) powturbo 2013-2015
+    Copyright (C) powturbo 2013-2016
     GPL v2 License
   
     This program is free software; you can redistribute it and/or modify
@@ -121,6 +121,8 @@ enum {
  P_MINIZ,
 #define _MSCOMPRESS	_GPL  
  P_MSCOMPRESS, 
+#define _NAKA	    _COMP2
+ P_NAKA,
 #define _PITHY   	_COMP2    
  P_PITHY, 
 #define _QUICKLZ	_GPL
@@ -425,6 +427,10 @@ static const Lzma_options option_mapping[] =  {
 #include "lzss/lzss.h"
   #endif  
 
+  #ifdef _NAKA
+#include "nakamichi/nakamichi.h"
+  #endif
+
   #if _PITHY
 #include "pithy/pithy.h"
   #endif
@@ -634,13 +640,13 @@ extern "C" {
 struct plugs plugs[] = {
   { P_BALZ, 	"balz", 			_BALZ, 		"1.20",		"balz",					"Public Domain",	"http://sourceforge.net/projects/balz", 												"0,1" }, 
   { P_BCM, 		"bcm", 				_BCM, 		"1.0",		"bcm",					"Public Domain",	"http://sourceforge.net/projects/bcm", 													"" }, 
-  { P_C_BLOSC2, "blosc",			_C_BLOSC2, 	"1.7.1",	"Blosc",				"BSD license",		"https://github.com/Blosc/c-blosc2", 													"0,1,2,3,4,5,6,7,8,9", 64*1024},
+  { P_C_BLOSC2, "blosc",			_C_BLOSC2, 	"2.0",		"Blosc",				"BSD license",		"https://github.com/Blosc/c-blosc2", 													"0,1,2,3,4,5,6,7,8,9", 64*1024},
   { P_BRIEFLZ,	"brieflz", 		    _BRIEFLZ, 	"1.1.0",	"BriefLz",				"BSD like",			"https://github.com/jibsen/brieflz", 													"" }, 
-  { P_BROTLI,	"brotli", 			_BROTLI, 	"15-11",	"Brotli",				"Apache license",	"https://github.com/google/brotli", 													"0,1,2,3,4,5,6,7,8,9,11/DOWX"},
+  { P_BROTLI,	"brotli", 			_BROTLI, 	"16-01",	"Brotli",				"Apache license",	"https://github.com/google/brotli", 													"0,1,2,3,4,5,6,7,8,9,11/DOWX"},
   { P_BZIP2,	"bzip2", 			_BZIP2, 	"1.06",		"Bzip2",				"BSD like",			"http://www.bzip.org/downloads.html\thttps://github.com/asimonov-im/bzip2", 			"" }, 
   { P_CHAMELEON,"chameleon",		_CHAMELEON, "15-03",	"Chameleon",			"Public Domain",	"http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html", 					"1,2" },
   { P_CRUSH,	"crush", 			_CRUSH, 	"1.0.0",	"Crush",				"Public Domain",	"http://sourceforge.net/projects/crush", 												"0,1,2" },
-  { P_CSC,	    "csc", 				_CSC, 		"15-06",	"CSC",					"Public domain",	"https://github.com/fusiyuan2010/CSC", 													"1,2,3,4,5" },
+  { P_CSC,	    "csc", 				_CSC, 		"16-01",	"CSC",					"Public domain",	"https://github.com/fusiyuan2010/CSC", 													"1,2,3,4,5" },
   { P_DENSITY, 	"density",        	_DENSITY,	"0.12.0",	"Density",				"BSD license",		"https://github.com/centaurean/density",												"1,2,3" },
   { P_DOBOZ,	"doboz",			_DOBOZ, 	"14-01-14",	"Doboz",				"BSD Like",			"https://bitbucket.org/attila_afra\thttps://github.com/nemequ/doboz", 					"" },  //crash on windows
   { P_FASTLZ,	"fastlz", 			_FASTLZ,	"0.1.0",	"FastLz",				"BSD like",			"http://fastlz.org\thttps://github.com/ariya/FastLZ",									"1,2" },
@@ -652,7 +658,7 @@ struct plugs plugs[] = {
   { P_LIBLZG,  	"lzg", 				_LIBLZG,    "1.0.8",	"LibLzg",				"zlib-license",		"https://github.com/mbitsnbites/liblzg\thttp://liblzg.bitsnbites.eu/e",					"1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
   { P_LIBZPAQ,  "zpaq", 			_LIBZPAQ, 	"7.05",		"Libzpaq",				"Public Domain",	"https://github.com/zpaq/zpaq",															"0,1,2,3,4,5" }, 
   { P_LZ4,  	"lz4",				_LZ4, 		"15-10",	"Lz4",					"BSD license",		"https://github.com/Cyan4973/lz4", 														"0,1,9,12,16" }, 
-  { P_LZ5,  	"lz5",				_LZ5, 		"1.3.2",	"Lz5",					"BSD license",		"https://github.com/inikep/lz5",														"0,1,2,3,4,5,6,7,8,9,12,15" }, 
+  { P_LZ5,  	"lz5",				_LZ5, 		"1.3.3",	"Lz5",					"BSD license",		"https://github.com/inikep/lz5",														"0,1,2,3,4,5,6,7,8,9,12,15" }, 
   { P_LZFSE, 	"lzfse", 			_LZFSE, 	"2015",		"lzfse",				"iOS and OS X",		"https://developer.apple.com/library/prerelease/mac/documentation/Performance/Reference/Compression/","" },
   { P_LZHAM, 	"lzham", 			_LZHAM,		"1.1",		"Lzham",				"MIT license",		"https://github.com/richgel999/lzham_codec_devel",										"1,2,3,4/x" }, 
   { P_LZLIB, 	"lzlib", 			_LZLIB, 	"1.7",		"Lzlib",				"GPL license",		"http://www.nongnu.org/lzip\thttps://github.com/daniel-baumann/lzlib",					"1,2,3,4,5,6,7,8,9" },
@@ -666,7 +672,7 @@ struct plugs plugs[] = {
   { P_LZO1y,  	"lzo1y",			_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"1,999" }, 
   { P_LZO1z, 	"lzo1z", 			_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"999" }, 
   { P_LZO2a, 	"lzo2a", 			_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"999" }, 
-
+  { P_NAKA, 	"Naka", 			_NAKA,		"15-10",	"Nakamichi",			"",					"http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188",	"" },
   { P_LZOMA, 	"lzoma", 			_LZOMA,		"15-06",	"lzoma",				"GPL license",		"https://github.com/alef78/lzoma", 														"1,2,3",0,(1<<16) },
   { P_MINIZ, 	"miniz", 			_MINIZ,		"15-06",	"miniz zlib-replacement","Public domain",	"https://github.com/richgel999/miniz", 													"1,2,3,4,5,6,7,8,9" },
   { P_MSCOMPRESS,"mscompress", 		_MSCOMPRESS,"15.09",	"ms-compress",			"GPL license",		"https://github.com/coderforlife/ms-compress", 											"2,3,4" }, 
@@ -683,9 +689,9 @@ struct plugs plugs[] = {
   { P_YALZ77, 	"yalz77", 			_YALZ77, 	"15-09",	"Yalz77",				"Public domain",	"https://github.com/ivan-tkatchev/yalz77",												"1,6,12" },
   { P_YAPPY, 	"yappy",			_YAPPY, 	"2011",		"Yappy",				"",					"" ,																					"" },//crash windows
   { P_ZLIB, 	"zlib", 			_ZLIB, 		"1.2.8",	"zlib",					"zlib license",		"http://zlib.net\thttps://github.com/madler/zlib", 										"1,2,3,4,5,6,7,8,9" },
-  { P_ZLING, 	"zling", 	   		_ZLING, 	"15-09",	"Libzling",				"BSD license",		"https://github.com/richox/libzling",													"0,1,2,3,4" }, 
+  { P_ZLING, 	"zling", 	   		_ZLING, 	"16-01",	"Libzling",				"BSD license",		"https://github.com/richox/libzling",													"0,1,2,3,4" }, 
   { P_ZOPFLI, 	"zopfli",			_ZOPFLI, 	"15-05",	"Zopfli",				"Apache license",	"https://code.google.com/p/zopfli",														""}, 
-  { P_ZSTD, 	"zstd", 			_ZSTD,		"15-10",	"ZSTD",					"BSD license",		"https://github.com/Cyan4973/zstd", 													"1,2,3,4,5,6,7,8,9,12,16,20" },
+  { P_ZSTD, 	"zstd", 			_ZSTD,		"15-12",	"ZSTD",					"BSD license",		"https://github.com/Cyan4973/zstd", 													"1,2,3,4,5,6,7,8,9,12,16,20" },
 //-----------------------------------------------------------------------------------	  
   { P_MCPY, 	"imemcpy", 			_MEMCPY, 	".",		"inline memcpy",		"------------",		"--------------------------------------",												"" },
   { P_LMCPY, 	"memcpy",			_MEMCPY,  	".",		"library memcpy",		"",					"",																						"" },
@@ -1022,6 +1028,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
  	  #if _MINIZ
     case P_MINIZ:   { uLongf outlen = outsize; int rc = mz_compress2(out, &outlen, in, inlen, lev); if (rc != Z_OK) printf("miniz compress2 rc=%d\n", rc); return outlen; }
       #endif
+
+      #if _NAKA
+    case P_NAKA:    return NakaCompress( out, in, inlen); 
+       #endif 
 
 	  #if _PITHY
     case P_PITHY: return pithy_Compress((const char *)in, inlen, (char *)out, outsize, lev);
@@ -1390,6 +1400,9 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_MINIZ: { uLongf outsize = outlen; int rc = mz_uncompress(out, &outsize, in, inlen); } break;
       #endif
 
+      #if _NAKA
+    case P_NAKA:    return NakaDecompress(out, in, inlen); 
+      #endif
 	  #if _PITHY
     case P_PITHY: return pithy_Decompress((const char *)in, inlen, (char *)out, outlen);
       #endif  	
