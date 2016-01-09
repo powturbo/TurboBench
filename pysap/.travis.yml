@@ -1,0 +1,33 @@
+language: python
+
+python:
+  - "2.7"
+
+env:
+  matrix:
+    - CXX=clang++ CC=clang
+    - CXX=g++ CC=gcc
+
+#os:
+#  - linux
+#  - osx
+
+#matrix:
+#  allow_failures:
+#    - os: osx
+
+sudo: false
+
+before_script:
+  # Install system requirements for OSX (pcapy and libdnet)
+  #- if [ ${TRAVIS_OS_NAME} == "osx" ]; then brew install pcapy; fi
+  #- if [ ${TRAVIS_OS_NAME} == "osx" ]; then wget http://libdnet.googlecode.com/files/libdnet-1.12.tgz && tar xvf libdnet-1.12.tgz; fi
+  #- if [ ${TRAVIS_OS_NAME} == "osx" ]; then cd libdnet-1.12 && ./configure && make && sudo make install && cd python && python setup.py install && cd ../..; fi
+
+install:
+  - python setup.py install
+  - pip install Sphinx
+
+script:
+  - python setup.py test
+  - python setup.py doc

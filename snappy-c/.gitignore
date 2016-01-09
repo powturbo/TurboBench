@@ -1,0 +1,7 @@
+*.o
+scmd
+sgverify
+verify
+bench
+fuzzer
+ftracer

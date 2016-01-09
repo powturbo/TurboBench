@@ -1,0 +1,9 @@
+language: c
+
+script:
+  - cd build
+  - wget https://github.com/premake/premake-core/releases/download/v5.0.0.alpha4/premake-5.0.0.alpha4-linux.tar.gz
+  - tar zxvf premake-5.0.0.alpha4-linux.tar.gz
+  - ./premake5 gmake
+  - make clean
+  - make

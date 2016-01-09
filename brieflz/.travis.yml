@@ -1,0 +1,21 @@
+language: c
+
+compiler: gcc
+
+sudo: false
+
+before_install:
+  - pip install --user codecov
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_COVERAGE=ON ..
+
+script: cmake --build . && ctest -V .
+
+after_success:
+  - gcov CMakeFiles/brieflz.dir/brieflz.c.gcno -o CMakeFiles/brieflz.dir
+  - gcov CMakeFiles/brieflz.dir/depack.c.gcno -o CMakeFiles/brieflz.dir
+  - gcov CMakeFiles/brieflz.dir/depacks.c.gcno -o CMakeFiles/brieflz.dir
+  - codecov -X gcov

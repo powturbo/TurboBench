@@ -1,0 +1,3 @@
+#! /bin/bash
+mkdir build >/dev/null 2>&1
+(cd build >/dev/null 2>&1 && cmake .. "$@")

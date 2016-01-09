@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{97af95c2-a912-46a0-831e-3b9663e10572}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\qlz">
+      <UniqueIdentifier>{8f7b5e44-c2fb-4ef5-a9d8-8504e03922f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\zlib">
+      <UniqueIdentifier>{742bef3f-c26c-48c7-a113-11ccdec751da}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\Source\Benchmark\Benchmark.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\qlz\quicklz.c">
+      <Filter>Source\qlz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\adler32.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\compress.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\crc32.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\deflate.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\gzclose.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\gzlib.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\gzread.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\gzwrite.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\infback.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\inffast.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\inflate.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\inftrees.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\trees.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\uncompr.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Benchmark\zlib\zutil.c">
+      <Filter>Source\zlib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\Source\Benchmark\qlz\quicklz.h">
+      <Filter>Source\qlz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Benchmark\zlib\crc32.h">
+      <Filter>Source\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Benchmark\zlib\deflate.h">
+      <Filter>Source\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Benchmark\zlib\gzguts.h">
+      <Filter>Source\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Benchmark\zlib\inffast.h">
+      <Filter>Source\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Benchmark\zlib\inffixed.h">
+      <Filter>Source\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Benchmark\zlib\inflate.h">
+      <Filter>Source\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Benchmark\zlib\inftrees.h">
+      <Filter>Source\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Benchmark\zlib\trees.h">
+      <Filter>Source\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Benchmark\zlib\zconf.h">
+      <Filter>Source\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Benchmark\zlib\zlib.h">
+      <Filter>Source\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Benchmark\zlib\zutil.h">
+      <Filter>Source\zlib</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

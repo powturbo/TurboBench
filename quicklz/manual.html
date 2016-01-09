@@ -1,0 +1,743 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+
+<head>
+<meta http-equiv="Content-Language" content="da" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>size_t qlz_compress</title>
+<style type="text/css">
+.plain {
+	font-family: verdana;
+	font-size: 9pt;
+}
+.code {
+	font-family: "Courier New";
+	font-size: 10pt;
+}
+.style1 {
+	font-family: verdana;
+	font-size: large;
+}
+.style2 {
+	font-family: Verdana;
+}
+.style3 {
+	font-size: 9pt;
+}
+.style5 {
+	font-weight: normal;
+}
+.style6 {
+	font-family: verdana;
+	font-size: xx-large;
+	text-align: center;
+}
+.style7 {
+	text-align: center;
+}
+.style8 {
+	font-family: verdana;
+	font-size: large;
+	text-align: left;
+}
+.style9 {
+	font-family: verdana;
+	font-size: 9pt;
+	font-weight: normal;
+}
+.style14 {
+	font-family: "Courier New", Courier, monospace;
+}
+.style15 {
+	font-family: "Courier New", Courier, monospace;
+	font-size: 9pt;
+}
+.style17 {
+	border-collapse: collapse;
+	background-color: #E2E6E9;
+}
+.style18 {
+	text-align: center;
+	font-family: Verdana;
+	font-size: 9pt;
+}
+.style19 {
+	font-family: "Courier New";
+	font-size: 9pt;
+}
+.style39 {
+	font-size: 9pt;
+}
+.style13 {
+	border: 1px solid #E2E6E9;
+	background-color: #E2E1DC;
+		border-collapse: collapse;
+}
+.style40 {
+	font-family: verdana;
+	font-size: 9pt;
+	text-align: left;
+	font-weight: normal;
+}
+.style43 {
+	text-decoration: underline;
+}
+.style44 {
+	border-collapse: collapse;
+	border-width: 0;
+	background-color: #E2E6E9;
+}
+.style45 {
+	border-color: #E2E1DC;
+	border-width: 0;
+	background-color: #E2E6E9;
+	border-collapse: collapse;
+}
+.style46 {
+	border-width: 0;
+	font-family: "Courier New", Courier, monospace;
+	font-size: 9pt;
+	background-color: #E2E6E9;
+}
+.style47 {
+	font-family: Verdana;
+	font-size: 10pt;
+}
+.style50 {
+	border-collapse: collapse;
+	border: 1px solid #000000;
+}
+.style51 {
+	text-align: center;
+	font-family: Verdana;
+	font-size: 9pt;
+	border: 1px solid #000000;
+}
+.style53 {
+	font-family: "Times New Roman", Times, serif;
+	font-size: large;
+}
+.style55 {
+	border-collapse: collapse;
+	border: 1px solid #FFFFFF;
+}
+.style56 {
+	text-align: left;
+	font-family: "Times New Roman";
+	font-size: 9pt;
+	border: 0 solid #000000;
+}
+.style57 {
+	font-size: large;
+}
+.style58 {
+	text-align: right;
+	font-family: "Times New Roman";
+	font-size: 9pt;
+	border: 0 solid #000000;
+}
+.style59 {
+	font-family: serif;
+	font-size: medium;
+}
+.style60 {
+	font-family: "Courier New";
+}
+.auto-style1 {
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-size: 9pt;
+}
+.auto-style2 {
+	border: 1px solid #808080;
+	text-align: center;
+	color: #FF0000;
+	font-size: 9pt;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+.auto-style3 {
+	color: #00FF00;
+	text-align: center;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-size: 9pt;
+	border: 1px solid #808080;
+}
+.auto-style4 {
+	border-collapse: collapse;
+	border: 1px solid #808080;
+}
+.auto-style5 {
+	border: 1px solid #808080;
+}
+.auto-style6 {
+	text-align: center;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-size: 9pt;
+}
+</style>
+</head>
+
+<body>
+
+<p class="style6">QuickLZ C 1.5.x manual</p>
+<p class="plain">Last edited: 08-Jan-2011.</p>
+<p class="plain"><a href="#functions">Functions</a><span class="style43"><br />
+</span>
+<a href="#flags">Flags</a><span class="style43"><br />
+</span><a href="#overlap">Overlapping decompression</a><span class="style43"><br />
+</span><a href="#thread">Thread Safety</a><span class="style43"><br />
+</span>
+<a href="#memory">Memory Requirements</a><span class="style43"><br />
+</span>
+<a href="#architecture">Architecture Compatibility</a><span class="style43"><br />
+</span>
+<a href="#backwards">Backwards Compatibility</a><br />
+<a href="#sample">Sample code</a></p>
+<p class="plain">This manual covers the C version of the QuickLZ 1.5.<em>x</em> library. 
+It consists of the two files quicklz.c and quicklz.h whose only dependency is 
+string.h.</p>
+<p class="plain">QuickLZ 1.5.<em>x</em> supports three compression levels and optional streaming 
+mode. Because of performance reasons, these settings cannot be given in 
+runtime but must instead be 
+defined through #define flags 
+whereafter the library must be compiled.</p>
+<p class="plain">The API of version 1.5.<em>x</em> is the same as in version 
+1.4.<em>x</em> except that <span class="code">qlz_compress()</span> and
+<span class="code">qlz_decompress()</span> now take <span class="code">
+qlz_state_compress </span>and <span class="code">qlz_state_decompress </span>
+structs as argument instead of <span class="code">char *scratch</span> buffers.</p>
+<p class="plain">Version 1.5.<em>x</em> is data compatible with version 1.4.<em>x</em> 
+and version 1.4.<em>x</em> data 
+compatible with version 1.5.<em>x</em>. Data compressed with one version can be 
+decompressed with the other version, for all compression levels.</p>
+<p class="style1"><strong>Functions<br />
+</strong><span class="style3">Following public functions exist</span><span class="plain">:</span></p>
+<table style="width: 100%" cellpadding="6" class="style17">
+	<tr>
+		<td><span class="code">size_t qlz_compress(const void 
+*source, char *destination, size_t size, qlz_state_compress *state_compress)</span></td>
+	</tr>
+</table>
+<p class="style1"><span class="plain">Compress </span><span class="code">size</span><span class="plain"> amount of 
+bytes of </span><span class="code">source</span><span class="plain"> and write 
+the result to </span><span class="code">destination</span><span class="plain">.</span></p>
+<p class="code"><span class="plain">The </span>size<span class="plain"> argument must be between 1 
+and 2</span><sup><span class="plain">32</span></sup><span class="plain"> - 1 on 64-bit architectures even though the </span>size_t<span class="plain"> type is used.</span></p>
+<p class="plain">The <span class="code">destination</span> buffer must be at 
+least <span class="code">size</span> + 400 bytes large because incompressible 
+data may increase in size.</p>
+<p class="plain">The <span class="code">qlz_state_compress</span> type is a 
+struct defined in the beginning of the quicklz.h file and is used for temporary 
+storage by the compression algorithm.</p>
+<p class="plain">If streaming mode is enabled, further issues apply; see the 
+description of the <span class="style14">QLZ_STREAMING_BUFFER</span> flag.</p>
+<p class="plain">Return value: Size of compressed result.</p>
+<p class="plain"><strong>Note: </strong>The <span class="code">
+qlz_state_compress </span>struct is large and should not be allocated in local 
+function scope becuse it can lead to stack overflow:</p>
+<table cellpadding="3" class="auto-style4" style="width: 1090px">
+	<tr>
+		<td class="auto-style2"><strong>wrong</strong></td>
+		<td class="auto-style3"><strong>OK</strong></td>
+		<td class="auto-style3"><strong>OK</strong></td>
+	</tr>
+	<tr>
+		<td class="auto-style5">
+		<p class="plain">main()<br />
+		{<br />
+&nbsp;&nbsp;&nbsp; qlz_state_compress state_compress;<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+		}</p>
+		</td>
+		<td class="auto-style5">
+		<p class="plain">qlz_state_compress state_compress;<br />
+		main()<br />
+		{<br />
+&nbsp;&nbsp;&nbsp; ...<br />
+		}</p>
+		<p class="plain">&nbsp;</p>
+		</td>
+		<td class="auto-style5">
+		<p class="plain"><span class="auto-style1">main()</span><br class="auto-style1" />
+		{<br />
+		<span class="auto-style1">&nbsp;&nbsp;&nbsp; qlz_state_compress 
+		*state_compress = malloc(sizeof(qlz_state_compress));</span><br class="auto-style1" />
+		<span class="auto-style1">&nbsp;&nbsp;&nbsp; ...</span><br class="auto-style1" />
+		}</p>
+		</td>
+	</tr>
+</table>
+<p class="plain">&nbsp;</p>
+<table style="width: 100%" cellpadding="6" class="style44">
+	<tr>
+		<td class="style15">size_t qlz_decompress(const char *source, void 
+		*destination, qlz_state_decompress *state_decompress)</td>
+	</tr>
+</table>
+<p class="plain">Decompress <span class="code">source</span> and write the result to
+<span class="code">destination</span>.</p>
+<p class="plain">The <span class="code">qlz_state_decompress</span> type is a 
+struct defined in the beginning of the quicklz.h file and is used for temporary 
+storage by the decompression algorithm.</p>
+<p class="plain">If streaming mode is enabled, further issues apply; see the 
+description of the <span class="style14">QLZ_STREAMING_BUFFER</span> flag.</p>
+<p class="plain">Return value: Size of decompressed result.</p>
+<p class="plain"><strong>Note: </strong>For <span class="code">
+qlz_state_decompress </span><span class="plain">the same allocation issues apply 
+as for </span><span class="code">qlz_state_compress </span><span class="plain">
+mentioned above.</span></p>
+<table style="width: 100%" cellpadding="6" class="style44">
+	<tr>
+		<td class="style15">size_t qlz_size_decompressed(const char *source)</td>
+	</tr>
+</table>
+<p><font style="FONT-SIZE: 9pt" face="Verdana">Takes the first 9 bytes of compressed data as argument (header) and returns 
+its decompressed size.</font></p>
+<p><font face="Verdana" class="plain">The function can be used to 
+allocate the correct amount of memory for decompression.</font></p>
+<table style="width: 100%" cellpadding="6" class="style44">
+	<tr>
+		<td class="style15">size_t qlz_size_compressed(const char *source)</td>
+	</tr>
+</table>
+<p><font face="Verdana"><span class="plain">Takes the first 9 bytes of compressed data as argument 
+(header) and returns its entire 
+compressed size.</span></font></p>
+<p><font style="FONT-SIZE: 9pt" face="Verdana">The function can be used to read 
+a block of compressed data from a file or storage device in cases where the 
+size of the block is unknown.</font></p>
+<table style="width: 100%" cellpadding="6" class="style44">
+	<tr>
+		<td class="style15">int qlz_get_setting(int settings)</td>
+	</tr>
+</table>
+<p><font style="FONT-SIZE: 9pt" face="Verdana" class="code"><span class="plain">This function gives access to source code constants that 
+are not accessible when using QuickLZ in compiled form like a .dll library.</span></font></p>
+<table style="width: 38%">
+	<tr class="plain">
+		<td style="width: 80px; height: 1px;">Argument</td>
+		<td style="height: 1px; width: 385px">Return value</td>
+	</tr>
+	<tr class="plain">
+		<td style="width: 80px">0</td>
+		<td style="width: 385px"><span class="code">QLZ_COMPRESSION_LEVEL</span></td>
+	</tr>
+	<tr class="plain">
+		<td style="width: 80px">1</td>
+		<td style="width: 385px"><span class="code">sizeof(qlz_state_compress)</span></td>
+	</tr>
+	<tr class="plain">
+		<td style="width: 80px">2</td>
+		<td style="width: 385px" class="code">sizeof(qlz_state_decompress)</td>
+	</tr>
+	<tr class="plain">
+		<td style="width: 80px">3</td>
+		<td style="width: 385px"><span class="code">QLZ_STREAMING_BUFFER</span></td>
+	</tr>
+	<tr class="plain">
+		<td style="width: 80px">6</td>
+		<td style="width: 385px">1 if <span class="code">QLZ_MEMOMRY_SAFE</span> 
+		is defined, otherwise 0</td>
+	</tr>
+	<tr>
+		<td style="width: 80px" class="plain">7</td>
+		<td style="width: 385px"><span class="code">QLZ_VERSION_MAJOR</span></td>
+	</tr>
+	<tr>
+		<td style="width: 80px" class="plain">8</td>
+		<td style="width: 385px"><span class="code">QLZ_VERSION_MINOR</span></td>
+	</tr>
+	<tr class="plain">
+		<td style="width: 80px" class="plain">9</td>
+		<td style="width: 385px"><span class="code">QLZ_VERSION_REVISION</span></td>
+	</tr>
+</table>
+<p class="style1"><strong>Flags</strong><br />
+<span class="style3">The flags </span><span class="plain">exist in the beginning of the
+quicklz.h file. They are surrounded by an </span><span class="style19">#ifndef 
+QLZ_COMPRESSION_LEVEL</span><span class="plain"> which enables possibility to 
+define them from the outside like on the compiler command line (most commonly 
+through the /D or -D option).</span></p>
+<p class="style1"><span class="plain">Possible settings and the default settings are 
+shown:</span></p>
+<table style="width: 100%" cellpadding="6" class="style44">
+	<tr>
+		<td class="style15">#define QLZ_COMPRESSION_LEVEL 1<br />
+		//#define QLZ_COMPRESSION_LEVEL 2<br />
+		//#define QLZ_COMPRESSION_LEVEL 3</td>
+	</tr>
+</table>
+<p class="code"><span class="plain">This flag selects the compression level 
+which can be 1, 2 
+or 3. </span></p>
+<p class="code"><span class="style2">Note that data must be decompressed with 
+the same setting of </span><span class="style14"><span class="style3">
+QLZ_COMPRESSION_LEVEL</span></span><font style="FONT-SIZE: 9pt"><span class="style2">
+</span></font><span class="plain">as it was compressed.</span></p>
+<table style="width: 100%" cellpadding="6" class="style44">
+	<tr>
+		<td class="style15">#define QLZ_STREAMING_BUFFER 0<br />
+		//#define QLZ_STREAMING_BUFFER 100000<br />
+		//#define QLZ_STREAMING_BUFFER 1000000</td>
+	</tr>
+</table>
+<p class="code"><font style="FONT-SIZE: 9pt" face="Verdana">Because LZ compression is 
+based on finding repeated strings, compression ratio can degrade if a data 
+entity is being split into smaller packets (less than 10 - 50 Kbytes) that are 
+compressed individually. Setting </font><span class="style14">
+<span class="style3">QLZ_STREAMING_</span><font style="FONT-SIZE: 9pt">BUFFER </font>
+</span><font style="FONT-SIZE: 9pt" face="Verdana"> to any non-zero value 
+enables streaming mode which makes QuickLZ store a history buffer of </font><span class="style14">
+<font style="FONT-SIZE: 9pt"> QLZ_</font><span class="style3">STREAMING_MODE</span></span><font style="FONT-SIZE: 9pt" face="Verdana"> 
+bytes in size. The history buffer is stored in the state structs on both the 
+compressing and decompressing site which increases their sizes. When enabled, </font><span class="style2">following issues apply:</span></p>
+<ul>
+	<li>
+	<p class="plain">Packets must be decompressed in the same order as they were 
+	compressed.</p>
+	</li>
+	<li>
+	<p class="plain">The functions <span class="code">qlz_compress()</span> 
+	and <span class="code">qlz_decompress()</span> must be given each their 
+	state struct and their contents must be preserved across calls by the 
+	caller.</p>
+	</li>
+	<li>
+	<p class="plain">The state structs must be initially zeroed out 
+	by the caller.</p>
+	</li>
+</ul>
+<p class="plain">There is no queue with flush or fetch functions; <span class="code">qlz_compress()</span> 
+generates a compressed packet which can be stored or sent to a decompressing 
+site for immediate decompression.</p>
+<p class="plain">Note that data must be decompressed with the same setting of
+<span class="style14"><span class="style3">QLZ_STREAMING_</span><font style="FONT-SIZE: 9pt">BUFFER</font></span><font style="FONT-SIZE: 9pt"><span class="style2">
+</span> </font>as it was compressed, which is why two easy-to-remember non-zero 
+values are suggested in quicklz.h. Setting it much lower than 100000 may degrade 
+compression ratio and setting it higher than 1000000 may not improve compression 
+ratio further.</p>
+<table style="width: 100%" cellpadding="6" class="style44">
+	<tr>
+		<td class="style15">//#define QLZ_MEMORY_SAFE</td>
+	</tr>
+</table>
+<p class="code"><font style="FONT-SIZE: 9pt" face="Verdana">When this flag is defined, decompression 
+with
+<span class="code">qlz_decompress()</span> cannot crash if fed with corrupted 
+data. It ensures that neither memory access, read nor write can happen outside the 
+following three byte intervals:</font></p>
+<p><font style="FONT-SIZE: 9pt" face="Verdana" class="code"><span class="plain">
+[</span>source<span class="plain"> ; </span>source + qlz_size_compressed(source) 
+- 1<span class="plain">]</span><br />
+<span class="plain">[</span>destination<span class="plain"> ; d</span>estination 
++ qlz_size_decompressed(source) - 1<span class="plain">]<br />
+[<span class="code"><span class="style3">state_decompress</span></span>; 
+<span class="code"><span class="style3">state_decompress</span></span></span><span class="code">+
+<span class="style3">sizeof(qlz_state_decompress) </span>- 1</span><span class="plain">]<br />
+</span></font><font style="FONT-SIZE: 9pt" face="Verdana"><br />
+Before decompression the caller must test if the return values of
+<span class="code">qlz_size_compressed()</span> and <span class="code">
+qlz_size_decompressed()</span> are within range of allocated memory. These 
+functions are reading the compressed and decompressed size from a header located 
+within the first 9 bytes of compressed data and is what <span class="code">
+qlz_decompress()</span>is bounds testing against.</font></p>
+<p><font style="FONT-SIZE: 9pt" face="Verdana">If <span class="code">
+qlz_decompress()</span> receives corrupted data with <span class="code">
+QLZ_MEMORY_SAFE</span> defined, it will either return 0 or return </font>
+<font style="FONT-SIZE: 9pt" face="Verdana" class="code">
+qlz_size_decompressed(source)</font><font style="FONT-SIZE: 9pt" face="Verdana"> 
+but with arbitrary decompressed data. </font></p>
+<p><span class="plain">Defining</span><font style="FONT-SIZE: 9pt" face="Verdana"> the flag decreases 
+decompression speed in the order of 10-20%. The speed of compression is not 
+affected.</font></p>
+<p><font style="FONT-SIZE: 9pt" face="Verdana">Note that the <span class="code">
+QLZ_MEMORY_SAFE</span> flag is 
+new in QuickLZ and should not be assumed exploit safe against maliciously 
+manipulated data. </font></p>
+
+<h2 class="style8"><strong><a name="overlap"></a>Overlappin<span class="style2">g 
+decompression</span></strong><br />
+</h2>
+<h2 class="style40">QuickLZ 1.5.x supports overlapping decompression to save 
+memory. Assume that d = (decompressed size) and c = (compressed size). Place compressed data at the 
+rightmost end of a destination buffer of total size 
+d + (d &gt;&gt; 3) + 400:</h2>
+<table class="style55">
+	<tr>
+		<td class="style56" style="height: 34px; width: 400px">
+		<span class="style57">←</span> <span class="style2">lower addresses</span></td>
+		<td class="style58" style="height: 34px; width: 400px">
+		<span class="style2">higher addresses</span> <span class="style57">→</span></td>
+	</tr>
+</table>
+<table class="style50">
+	<tr>
+		<td class="style51" style="height: 32px; width: 500px">d + (d &gt;&gt; 3) + 400 
+		- c bytes of space</td>
+		<td class="style51" style="width: 300px; height: 32px">c bytes of compressed data</td>
+	</tr>
+</table>
+<span class="style53">↑</span><span class="plain"> destination</span>
+<p><span class="plain">The data can now be decompressed to the destination 
+pointer and may overwrite a part of the compressed data. Note that the space d + (d &gt;&gt; 3) + 400 - c may evaluate to 0 for some 
+kinds of data.</span></p>
+<table style="width: 100%" cellpadding="6" class="style44">
+	<tr>
+		<td class="style15">
+<p class="style59"><span class="style15">#include &quot;quicklz.h&quot;<br />
+<br />
+int main()<br />
+{<br />
+&nbsp;&nbsp;&nbsp; char *destination;<br />
+&nbsp;&nbsp;&nbsp; char original[] = &quot;Test of overlapping 
+decompression.
+</span><font color="#000000" size="2"><span class="style39">
+		<span class="style15">Five, six, seven, eight, nine, fifteen, sixteen, 
+seventeen, fifteen, sixteen, seventeen.</span></span></font><span class="style15">&quot;;<br />
+&nbsp;&nbsp;&nbsp; int d = strlen(original);<br />
+<font color="#000000" size="2"><span class="style39">
+		<font color="#000000">&nbsp;&nbsp;&nbsp; qlz_state_compress 
+*state_compress</font> = (<font color="#000000">qlz_state_compress *</font>)malloc(sizeof(<font color="#000000">qlz_state_compress)</font>);<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; qlz_state_decompress 
+*state_decompress</font> = (<font color="#000000">qlz_state_decompress *</font>)malloc(sizeof(<font color="#000000">qlz_state_decompress)</font>);<br />
+</span></font>&nbsp;&nbsp;&nbsp; char *compressed = (char *)malloc(d + 400);<br />
+<br />
+&nbsp;&nbsp;&nbsp; int c = qlz_compress(original, compressed, d, 
+<font color="#000000" size="2"><span class="style39">
+		<font color="#000000">state_compress</font></span></font>);<br />
+<br />
+&nbsp;&nbsp;&nbsp; destination = (char *)malloc(d + (d &gt;&gt; 3) + 400);<br />
+&nbsp;&nbsp;&nbsp; memmove(destination + d + (d &gt;&gt; 3) + 400 - c, compressed, 
+c);<br />
+<br />
+&nbsp;&nbsp;&nbsp; qlz_decompress(destination + d + (d &gt;&gt; 3) + 400 - c, 
+destination, <font color="#000000" size="2"><span class="style39">
+		<font color="#000000">state_decompress</font></span></font>);<br />
+<br />
+&nbsp;&nbsp;&nbsp; destination[d] = 0;<br />
+&nbsp;&nbsp;&nbsp; printf(&quot;%s&quot;, destination);<br />
+<br />
+&nbsp;&nbsp;&nbsp; return 0;<br />
+</span>}</p>
+		</td>
+	</tr>
+</table>
+<h2 class="style40">In most applications the compressing and decompressing site 
+are separated. In this case the functions <span class="style14">
+c =
+qlz_size_compressed(compressed)</span> and <span class="style60">
+d =
+qlz_size_decompressed(compressed)</span> may be useful on the decompressing 
+site when arranging the decompression.</h2>
+<h2 class="style8">Thread Safety<br />
+<span class="style9">All functions are thread safe, but each thread must use its 
+own state structs.</span></h2>
+<p class="style1"><strong>Memory Requirements<br />
+</strong><span class="plain">The exact value of </span><span class="code">
+sizeof(qlz_state_compress)</span><span class="plain"> and </span>
+<span class="code">sizeof(qlz_state_decompress)</span><span class="plain"> 
+depends on how the C compiler is packing </span><span class="style3"> 
+various </span><span class="plain"> 
+struct array in quicklz.h. Most commonly the 
+sizes are the values given in the table below, plus the value of </span>
+<span class="code">QLZ_STREAMING_BUFFER</span><span class="plain">.</span></p>
+<table id="AutoNumber5" style="BORDER-COLLAPSE: collapse; height: 95px; width: 641px;" borderColor="#111111" height="89" cellSpacing="0" borderColorDark="#000000" cellPadding="4" borderColorLight="#000000" border="1">
+	<tr>
+		<td borderColor="#000000" borderColorLight="#000000" align="right" borderColorDark="#000000" class="style5" style="width: 426px; height: 24px;">
+		<font style="FONT-SIZE: 9pt" face="Verdana" class="code">sizeof(char *)</font></td>
+		<td borderColor="#000000" borderColorLight="#000000" align="middle" borderColorDark="#000000" colSpan="3" style="height: 24px">
+		<font style="FONT-SIZE: 9pt" face="Verdana">32 bits</font></td>
+		<td borderColor="#000000" borderColorLight="#000000" align="middle" borderColorDark="#000000" colSpan="3" style="height: 24px">
+		<font style="FONT-SIZE: 9pt" face="Verdana">64 bits</font></td>
+	</tr>
+	<tr>
+		<td borderColor="#000000" borderColorLight="#000000" align="right" borderColorDark="#000000" style="height: 24px; width: 426px" class="style5">
+		<p align="right">
+		<font style="FONT-SIZE: 9pt" face="Verdana" class="code">QLZ_COMPRESSION_LEVEL</font></p>
+		</td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" style="height: 24px; width: 91px;" class="style7">
+		<font style="FONT-SIZE: 9pt" face="Verdana">1</font></td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" style="height: 24px; width: 91px;" class="style7">
+		<font style="FONT-SIZE: 9pt" face="Verdana">2</font></td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" style="height: 24px; width: 91px;" class="style18">
+		3</td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" style="height: 24px; width: 91px;" class="style18">
+		1</td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" style="height: 24px; width: 92px;" class="style18">
+		2</td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" style="height: 24px; width: 92px;" class="style18">
+		3</td>
+	</tr>
+	<tr>
+		<td borderColor="#000000" borderColorLight="#000000" align="left" borderColorDark="#000000" class="style5" style="width: 426px; height: 24px;">
+		<font style="FONT-SIZE: 9pt" face="Verdana" class="code">
+		sizeof(qlz_state_compress)</font></td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" class="style18" style="height: 24px; width: 91px">
+		<span class="plain">36868</span><font face="Verdana" class="style3"><strong>
+		</strong> </font></td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" class="style18" style="height: 24px; width: 91px">
+		34820</td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" class="style18" style="width: 91px; height: 24px">
+		266244</td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" class="style18" style="height: 24px; width: 91px">
+		36872</td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" class="style18" style="height: 24px; width: 92px">
+		67592</td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" class="style18" style="width: 92px; height: 24px">
+		528392</td>
+	</tr>
+	<tr>
+		<td borderColor="#000000" borderColorLight="#000000" align="left" borderColorDark="#000000" class="style5" style="width: 426px; height: 25px;">
+		<font style="FONT-SIZE: 9pt" face="Verdana" class="code">
+		sizeof(qlz_state_decompress)</font></td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" class="style18" style="height: 25px; width: 91px">
+		<font face="Verdana" class="style3">20484</font></td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" class="style18" style="height: 25px; width: 91px">
+		34820</td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" class="auto-style6" style="width: 91px; height: 25px">
+		8</td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" class="style18" style="height: 25px; width: 91px">
+		36872</td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" class="style18" style="height: 25px; width: 92px">
+		67592</td>
+		<td borderColor="#000000" borderColorLight="#000000" borderColorDark="#000000" class="style7" style="width: 92px; height: 25px">
+		<font face="Verdana" class="style3">8</font></td>
+	</tr>
+</table>
+<p><strong class="style1"><a name="architecture"></a>Architecture Compatibility<br />
+</strong><span class="plain">QuickLZ 1.5.<em>x</em> has been extensively tested and bounds 
+checked on a variety of 32- and 64-bit architectures such as x86, x64, UltraSPARC, MIPS, 
+Itanium, POWER, ARM, PA-RISC, Alpha, Cell and 68k. Data compressed on one architecture can be 
+decompressed on any other architecture.</span></p>
+<p class="plain">It is required <span class="plain">that sizeof(int) == 4 which 
+</span>is the case for the 
+ILP32, LP64 and LLP64 data models.</p>
+
+<h2 class="style8">Sample code<font style="FONT-SIZE: 9pt" face="Verdana"><br />
+<span class="style5">Simple compression and decompression when not in streaming 
+mode:</span></font></h2>
+<table style="width: 100%" cellpadding="9" class="style45" cellspacing="0">
+	<tr>
+		<td class="style46">
+		<p class="style8"><font color="#000000" size="2"><span class="style39">
+		<span class="style15">#include &quot;quicklz.h&quot;<br />
+		<br />
+		#if QLZ_STREAMING_BUFFER &gt; 0<br />
+&nbsp;&nbsp;&nbsp; #error Define QLZ_STREAMING_BUFFER to 0 for this demo<br />
+		#endif<br />
+		<br />
+		int main ()<br />
+		</span>{<span class="style15"><br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; qlz_state_compress 
+		*state_compress</font> = (<font color="#000000">qlz_state_compress *</font>)malloc(sizeof(<font color="#000000">qlz_state_compress)</font>);<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; qlz_state_decompress 
+		*state_decompress</font> = (<font color="#000000">qlz_state_decompress *</font>)malloc(sizeof(<font color="#000000">qlz_state_decompress)</font>);<br />
+		&nbsp;&nbsp;&nbsp; char original[] = &quot;LZ compression is based on finding repeated 
+		strings: Five, six, seven, eight, nine, fifteen, sixteen, seventeen, 
+		fifteen, sixteen, seventeen.&quot;;<br />
+		<br />
+&nbsp;&nbsp;&nbsp; // Always allocate size + 400 bytes for the destination 
+		buffer when compressing.<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>char *compressed = (char 
+		*)malloc(strlen(original) + 400);<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>char *decompressed = (char 
+		*)malloc(strlen(original));<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>int r;<br />
+		<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>r = qlz_compress(original, compressed, 
+		strlen(original), <font color="#000000">state_compress</font>);<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>printf(&quot;Compressed %d bytes into %d 
+		bytes.\n&quot;, strlen(original), r);<br />
+		<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>r = qlz_decompress(compressed, 
+		decompressed, <font color="#000000">state_decompress</font>);<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>printf(&quot;Decompressed back to %d 
+		bytes.\n&quot;, r);<br />
+		<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>return 0;<br />
+		</span></span>}</font></p>
+		</td>
+	</tr>
+</table>
+<h2 class="style40">Example of compression and decompression when in streaming 
+mode:</h2>
+<table style="width: 100%" cellpadding="9" class="style13" cellspacing="0">
+	<tr>
+		<td class="style46">
+		<p class="style8"><font color="#000000" size="2"><span class="style15">
+		#include &quot;quicklz.h&quot;<br />
+		<br />
+		</span><span class="style39">
+		<span class="style15">#if QLZ_STREAMING_BUFFER == 0<br />
+&nbsp;&nbsp;&nbsp; #error Define QLZ_STREAMING_BUFFER to a non-zero value for 
+		this demo<br />
+		#endif<br />
+		</span></span><span class="style15">
+		<br />
+		int main ()<br />
+		{<br />
+		<span class="style39">
+		<font color="#000000">&nbsp;&nbsp;&nbsp; qlz_state_compress 
+		*state_compress</font> = (<font color="#000000">qlz_state_compress *</font>)malloc(sizeof(<font color="#000000">qlz_state_compress)</font>);<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; qlz_state_decompress 
+		*state_decompress</font> = (<font color="#000000">qlz_state_decompress *</font>)malloc(sizeof(<font color="#000000">qlz_state_decompress)</font>);<br />
+		</span>
+		<br />
+&nbsp;&nbsp;&nbsp; // Allocate data buffers. 200 and 200 + 400 bytes should be 
+		sufficient for our test data packets.<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>char *compressed = (char 
+		*)malloc(200 + 400);<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>char *decompressed = 
+		(char *)malloc(200);<br />
+		<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>int o = 0;</span></font></p>
+		<p class="style8"><font color="#000000" size="2"><span class="style15">
+		<font color="#000000">&nbsp;&nbsp;&nbsp; // Zero out both states.<br />
+&nbsp;&nbsp;&nbsp; </font>memset(<span class="style39"><font color="#000000">state_compress</font></span>, 0, 
+		<span class="style39">
+		<font color="#000000">sizeof(state_compress)</font></span>);
+		<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>
+		memset(<span class="style39"><font color="#000000">state_decompress</font></span>, 0, 
+		sizeof(state_decompress)); <br />
+		<br />
+&nbsp;&nbsp;&nbsp; // Always decompress data in the same order as it was 
+		compressed. There is no requirement on destination address when 
+		decompressing<br />
+&nbsp;&nbsp;&nbsp; // even though we do it consecutively in this example using 
+		the o pointer.<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>qlz_compress(&quot;This is 
+		data packet number one, &quot;, compressed, 32, <span class="style39">
+		<font color="#000000">state_compress</font></span>);<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>o += 
+		qlz_decompress(compressed, decompressed, <span class="style39">
+		<font color="#000000">state_decompress</font></span>);<br />
+		<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>qlz_compress(&quot;this is 
+		data packet number two, &quot;, compressed, 32, <span class="style39">
+		<font color="#000000">state_compress</font></span>);<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>o += 
+		qlz_decompress(compressed, decompressed + o, <span class="style39">
+		<font color="#000000">state_decompress</font></span>);<br />
+		<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>qlz_compress(&quot;and 
+		finally data packet number three.&quot;, compressed, 37, 
+		<span class="style39">
+		<font color="#000000">state_compress</font></span>);<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>o += 
+		qlz_decompress(compressed, decompressed + o, <span class="style39">
+		<font color="#000000">state_decompress</font></span>);<br />
+		<br />
+&nbsp;&nbsp;&nbsp; // printf() needs 0-termination.<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>decompressed[o] = 0;<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>printf(&quot;Concatenated 
+		decompressed results: %s&quot;, decompressed);<br />
+		<br />
+		<font color="#000000">&nbsp;&nbsp;&nbsp; </font>return 0;<br />
+		</span>}</font></p>
+		</td>
+	</tr>
+</table>
+
+</body>
+
+</html>

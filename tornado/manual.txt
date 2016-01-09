@@ -1,0 +1,75 @@
+Tornado is an LZHUF/LZARI compression engine. Compression method can be tuned
+by a lot of parameters. Options -1 to -16 selects one of the predefined
+compression profiles that may be further tuned by other options. Default
+compression profile is -5. Memory size parameters may be specified using
+b/k/m/g suffixes such as -b1g.
+
+Tuning parameters (most options doesn't affect decompression speed and memory):
+
+-cNUM: entropy coder. Larger values improves the compression ratio but hurts both
+       compression and decompression speed. -c1 (bytecoder) and -c2 (bitcoder) are
+       not competitive compared to other modern LZ compressors. -c3 (huffman coder)
+       makes decompression about 30% faster but on binary files it loses about 0.5%
+       of compressed file size, compared to the default -c4 (arithmetic coder).
+
+-pNUM: match parser. Larger values improves the compression ratio but hurts
+       the compression speed. -p1 (greedy parser) immediately skips over found match,
+       -p2 (lazy parser) tries multiple positions searching for larger match,
+       -p3 (flexible parser) is reserved and not implemented yet,
+       -p4 (optimal parser) checks every match in every position and chooses
+       the sequence of matches and literals encoded with minimum number of bits.
+
+-fbNUM: "fast bytes" for the optimal parser (-p4). Matches longer than NUM bytes
+        are parsed greedily, i.e. no alternative matches are checked. Larger values
+        improves the compression ratio but hurts the compression speed.
+
+-bMEM: buffer (dictionary) size, 4 KB .. 1 GB. Larger dictionary improves compression
+       ratio but increases memory required both for compression and decompression.
+       Example: -b64k
+
+-xNUM: match finder selection:
+       -x0: hash table hashed by 4 data bytes and storing only data pointers;
+            new pointers are inserted at the front of hash row with shifting
+            older pointers to the back (MatchFinder1/MatchFinder2/MatchFinderN)
+       -x4..7: hash table hashed by 4..7 data bytes and storing 4 additional
+               (cached) data bytes, new pointer+data are inserted at the index
+               cycling through the hash row (CycledCachingMatchFinder)
+       -x14..17: same as -x4..7, but new pointer+data are inserted at the front
+                 of hash row with shifting older pointers+data to the back
+                 (CachingMatchFinder class)
+       -x24..27: binary tree hashed by 4..7 data bytes (BinaryTreeMatchFinder)
+
+-hMEM: hash size, 4 KB .. 4 GB - 1. Larger hash improves compression,
+       but increases the compression memory. The binary tree matchfinder
+       allocates additional 8*bufsize bytes for the hash.
+
+-lNUM: hash row length, i.e. number of potential matches that will be checked
+       for every input byte. Longer row improves compression ratio but makes
+       compression slower. Some matchfinders support only powers of 2 for this
+       parameter. cchash matchfinders can't use length >256. Example: -l128
+
+-ah/-al: size and row length for auxiliary hash. Auxhash required for matchfinders
+         having MINLEN>4, i.e. ht5..7 and bt5..7. In this case auxhash finds
+         matches of length 4..MINLEN-1 and usually don't need to be large and deep.
+         It doesn't allocated and used with ht4/bt4 matchfinders.
+         Example: -ah1m -al4
+
+-sNUM: matches of length 2 and 3 are searched with two more auxiliary hashes.
+       The option selects one of the 3 predefined hash sizes:
+       -s0 - don't search 2/3-byte matches,
+       -s1 - 64 kb hash3 and 4 kb hash2,
+       -s2 - 256 kb hash3 and 16 kb hash2.
+       The optimal parser (-p4) isn't compatible with the -s0 option.
+
+-uNUM: when long match is skipped by non-optimal parser, intermediate positions
+       are inserted into all hashes every NUM bytes. Therefore, smaller NUM values
+       improves the compression ratio but decreases speed. -u1 inserts all
+       intermediate positions, while -u999 effectively disables hash updating on
+       intermediate positions. Example: -u4
+
+-tNUM: -t1 enables preprocessing of binary tables with 2/4-byte elements.
+       It's the stripped down but faster version of the FreeArc TABLE preprocessor,
+       making it useful for fast compression modes such as -5. Enabling the option
+       slightly decreases the compression speed, but the compression ratio improved
+       only on binary data. This option is ignored by the optimal parser (-p4) due
+       to their incompatibility.

@@ -1,0 +1,65 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Doboz", "Doboz\Doboz.vcxproj", "{D9C83466-3B89-4F02-9BD9-2E9CFA6B470F}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Benchmark", "Benchmark\Benchmark.vcxproj", "{DB9A88FA-9BF5-40E3-BCDC-453C63E3B403}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D9C83466-3B89-4F02-9BD9-2E9CFA6B470F} = {D9C83466-3B89-4F02-9BD9-2E9CFA6B470F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj", "{A02FBE31-D59D-4222-AF81-AEBC62125DC4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D9C83466-3B89-4F02-9BD9-2E9CFA6B470F} = {D9C83466-3B89-4F02-9BD9-2E9CFA6B470F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DobozCLI", "DobozCLI\DobozCLI.vcxproj", "{2A47F444-DE39-404A-AAE8-B799D97A8999}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D9C83466-3B89-4F02-9BD9-2E9CFA6B470F} = {D9C83466-3B89-4F02-9BD9-2E9CFA6B470F}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D9C83466-3B89-4F02-9BD9-2E9CFA6B470F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D9C83466-3B89-4F02-9BD9-2E9CFA6B470F}.Debug|Win32.Build.0 = Debug|Win32
+		{D9C83466-3B89-4F02-9BD9-2E9CFA6B470F}.Debug|x64.ActiveCfg = Debug|x64
+		{D9C83466-3B89-4F02-9BD9-2E9CFA6B470F}.Debug|x64.Build.0 = Debug|x64
+		{D9C83466-3B89-4F02-9BD9-2E9CFA6B470F}.Release|Win32.ActiveCfg = Release|Win32
+		{D9C83466-3B89-4F02-9BD9-2E9CFA6B470F}.Release|Win32.Build.0 = Release|Win32
+		{D9C83466-3B89-4F02-9BD9-2E9CFA6B470F}.Release|x64.ActiveCfg = Release|x64
+		{D9C83466-3B89-4F02-9BD9-2E9CFA6B470F}.Release|x64.Build.0 = Release|x64
+		{DB9A88FA-9BF5-40E3-BCDC-453C63E3B403}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DB9A88FA-9BF5-40E3-BCDC-453C63E3B403}.Debug|Win32.Build.0 = Debug|Win32
+		{DB9A88FA-9BF5-40E3-BCDC-453C63E3B403}.Debug|x64.ActiveCfg = Debug|x64
+		{DB9A88FA-9BF5-40E3-BCDC-453C63E3B403}.Debug|x64.Build.0 = Debug|x64
+		{DB9A88FA-9BF5-40E3-BCDC-453C63E3B403}.Release|Win32.ActiveCfg = Release|Win32
+		{DB9A88FA-9BF5-40E3-BCDC-453C63E3B403}.Release|Win32.Build.0 = Release|Win32
+		{DB9A88FA-9BF5-40E3-BCDC-453C63E3B403}.Release|x64.ActiveCfg = Release|x64
+		{DB9A88FA-9BF5-40E3-BCDC-453C63E3B403}.Release|x64.Build.0 = Release|x64
+		{A02FBE31-D59D-4222-AF81-AEBC62125DC4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A02FBE31-D59D-4222-AF81-AEBC62125DC4}.Debug|Win32.Build.0 = Debug|Win32
+		{A02FBE31-D59D-4222-AF81-AEBC62125DC4}.Debug|x64.ActiveCfg = Debug|x64
+		{A02FBE31-D59D-4222-AF81-AEBC62125DC4}.Debug|x64.Build.0 = Debug|x64
+		{A02FBE31-D59D-4222-AF81-AEBC62125DC4}.Release|Win32.ActiveCfg = Release|Win32
+		{A02FBE31-D59D-4222-AF81-AEBC62125DC4}.Release|Win32.Build.0 = Release|Win32
+		{A02FBE31-D59D-4222-AF81-AEBC62125DC4}.Release|x64.ActiveCfg = Release|x64
+		{A02FBE31-D59D-4222-AF81-AEBC62125DC4}.Release|x64.Build.0 = Release|x64
+		{2A47F444-DE39-404A-AAE8-B799D97A8999}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2A47F444-DE39-404A-AAE8-B799D97A8999}.Debug|Win32.Build.0 = Debug|Win32
+		{2A47F444-DE39-404A-AAE8-B799D97A8999}.Debug|x64.ActiveCfg = Debug|x64
+		{2A47F444-DE39-404A-AAE8-B799D97A8999}.Debug|x64.Build.0 = Debug|x64
+		{2A47F444-DE39-404A-AAE8-B799D97A8999}.Release|Win32.ActiveCfg = Release|Win32
+		{2A47F444-DE39-404A-AAE8-B799D97A8999}.Release|Win32.Build.0 = Release|Win32
+		{2A47F444-DE39-404A-AAE8-B799D97A8999}.Release|x64.ActiveCfg = Release|x64
+		{2A47F444-DE39-404A-AAE8-B799D97A8999}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
