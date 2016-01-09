@@ -7,3 +7,6 @@
 [submodule "CSC"]
 	path = CSC
 	url = https://github.com/fusiyuan2010/CSC.git
+[submodule "FastARI"]
+	path = FastARI
+	url = https://github.com/davidcatt/FastARI.git
