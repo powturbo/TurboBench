@@ -1254,7 +1254,6 @@ D:\_KAZE\Nakamichi_r1-RSSBO>
 #ifdef __SSE4_1__
 #include <smmintrin.h> // SSE4.1 intrinsics
 #endif
-#endif
 
 #ifdef _N_YMM
 #include <emmintrin.h> // SSE2 intrinsics
