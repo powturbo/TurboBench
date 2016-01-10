@@ -194,7 +194,7 @@ void _vfree(void *p, size_t size) {
     #endif
 } 
 
-  #if !defined(NO_MEMSIZE) && !defined(_WIN32)
+  #if !defined(NMEMSIZE) && !defined(_WIN32)
 #include <dlfcn.h>
 static ALIGNED(char, mem_heap[1<<20],32);
 static char *mem_heapp = mem_heap;
