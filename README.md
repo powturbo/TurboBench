@@ -119,7 +119,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Lzo v2.09](http://www.oberhumer.com/opensource/lzo) 
  - [Miniz v13-10](https://github.com/richgel999/miniz) :new:
  - [ms-compress v15.09](https://github.com/coderforlife/ms-compress) 
- - [Nakamichi v15-08](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) :new:
+ - [Nakamichi v15-10](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) :new:
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
  - [sap v15-11](https://github.com/CoreSecurity/pysap) 
@@ -229,5 +229,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 - [Lzbench](https://github.com/inikep/lzbench) - lzbench is an in-memory benchmark of open-source compressors
 
-Last update: 09 JAN 2016
+Last update: 10 JAN 2016
 
