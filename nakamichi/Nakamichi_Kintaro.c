@@ -1234,7 +1234,6 @@ D:\_KAZE\Nakamichi_r1-RSSBO>
 #define _N_Branchfull
 // During compilation use one of these, the granularity of the padded 'memcpy', 4x2x8/2x2x16/1x2x32/1x1x64 respectively as GP/XMM/YMM/ZMM, the maximum literal length reduced from 127 to 63:
 //#define _N_GP
-#define _N_XMM
 //#define _N_YMM
 //#define _N_ZMM
 
@@ -1248,10 +1247,15 @@ D:\_KAZE\Nakamichi_r1-RSSBO>
 #include <time.h>
 #include <string.h>
 
-#ifdef _N_XMM
+#define _N_XMM
+#ifdef __SSE__
 #include <emmintrin.h> // SSE2 intrinsics
+#endif
+#ifdef __SSE4_1__
 #include <smmintrin.h> // SSE4.1 intrinsics
 #endif
+#endif
+
 #ifdef _N_YMM
 #include <emmintrin.h> // SSE2 intrinsics
 #include <smmintrin.h> // SSE4.1 intrinsics
