@@ -46,25 +46,29 @@ ARCH=64
 endif
 endif
 
-#--------------------------------- make args --------------------------
+#---------------------- make args --------------------------
+# best or popular compressors
 ifeq ($(NCOMP1),1)
 DEFS+=-DNCOMP1
 else
 NCOMP1=0
 endif
 
+# other compressors
 ifeq ($(NCOMP2),1)
 DEFS+=-DNCOMP2
 else
 NCOMP2=0
 endif
 
+# Entropy coders
 ifeq ($(NECODER),1)
 DEFS+=-DNECODER
 else
 NECODER=0
 endif
 
+# Encoding: RLE
 ifeq ($(NENCOD),1)
 DEFS+=-DNENCOD
 else
@@ -184,7 +188,7 @@ OB+=lz5/lib/lz5.o lz5/lib/lz5hc.o
 OB+=liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o 
 OB+=liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o 
 OB+=miniz/miniz.o
-OB+=nakamichi/Nakamichi_Nin.o
+OB+=nakamichi/Nakamichi_Kintaro.o
 OB+=pithy/pithy.o
 OB+=shoco/shoco.o
 OB+=shrinker/Shrinker.o
@@ -204,7 +208,7 @@ OB+=zopfli/src/zopfli/blocksplitter.o zopfli/src/zopfli/cache.o zopfli/src/zopfl
 
 ifeq ($(UNAME), Linux)
 OB+=gipfeli/lz77.o gipfeli/entropy.o gipfeli/entropy_code_builder.o gipfeli/decompress.o gipfeli/gipfeli-internal.o
-OB+=c-blosc2/blosc/blosc.o c-blosc2/blosc/blosclz.o c-blosc2/blosc/schunk.o c-blosc2/blosc/delta.o c-blosc2/blosc/shuffle.o c-blosc2/blosc/shuffle-generic.o c-blosc2/blosc/shuffle-sse2.o c-blosc2/blosc/bitshuffle-generic.o
+OB+=c-blosc2/blosc/blosc.o c-blosc2/blosc/blosclz.o c-blosc2/blosc/schunk.o c-blosc2/blosc/delta.o c-blosc2/blosc/shuffle.o c-blosc2/blosc/shuffle-generic.o c-blosc2/blosc/shuffle-sse2.o 
 endif
 endif
 	   
@@ -238,7 +242,7 @@ lzo/src/lzo_ptr.o lzo/src/lzo_str.o lzo/src/lzo_util.o
 
 #http://encode.ru/threads/2280-LZOMA
 #lzoma_/lzoma.o: lzoma_/lzoma.c 
-#	$(CC) -O2 $< -c -o $@ 
+#	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
 
 tornado_/tormem.o: tornado_/tormem.cpp
 	$(CXX) -O3 $(TORDEF) -D__x86_$(ARCH)__ -DFREEARC_$(ARCH)BIT -pipe -fforce-addr -fno-exceptions -fno-rtti -c tornado_/tormem.cpp -o tornado_/tormem.o
