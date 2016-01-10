@@ -672,10 +672,10 @@ struct plugs plugs[] = {
   { P_LZO1y,  	"lzo1y",			_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"1,999" }, 
   { P_LZO1z, 	"lzo1z", 			_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"999" }, 
   { P_LZO2a, 	"lzo2a", 			_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"999" }, 
-  { P_NAKA, 	"Naka", 			_NAKA,		"15-10",	"Nakamichi",			"",					"http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188",	"" },
   { P_LZOMA, 	"lzoma", 			_LZOMA,		"15-06",	"lzoma",				"GPL license",		"https://github.com/alef78/lzoma", 														"1,2,3",0,(1<<16) },
   { P_MINIZ, 	"miniz", 			_MINIZ,		"15-06",	"miniz zlib-replacement","Public domain",	"https://github.com/richgel999/miniz", 													"1,2,3,4,5,6,7,8,9" },
   { P_MSCOMPRESS,"mscompress", 		_MSCOMPRESS,"15.09",	"ms-compress",			"GPL license",		"https://github.com/coderforlife/ms-compress", 											"2,3,4" }, 
+  { P_NAKA, 	"Naka", 			_NAKA,		"15-10",	"Nakamichi Kintaro",	"           ",	    "http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188",	"" },
   { P_PITHY, 	"pithy",			_PITHY, 	"2011",		"Pithy",	  			"BSD license",		"https://github.com/johnezang/pithy",													"0,1,2,3,4,5,6,7,8,9" },
   { P_QUICKLZ, 	"quicklz",			_QUICKLZ, 	"1.5.1",	"Quicklz",	  			"GPL license",		"http://www.quicklz.com\thttps://github.com/robottwo/quicklz",							"1,2,3" },
   { P_SAP, 	    "sap",				_SAP, 		"15-11",	"sap",		  			"GPL license",		"https://github.com/CoreSecurity/pysap",												"0,1,2"	},
@@ -718,8 +718,8 @@ struct plugs plugs[] = {
   { P_TORNADOHF,"tornado_huff", 	_TORNADOHF, "0.6a",		"Tornado Huf",			"GPL license",		"http://freearc.org/Research.aspx\thttps://github.com/nemequ/tornado" ,					"" },
   { P_ZLIBH, 	"zlibh",			_ZLIBH, 	"1.2.8",	"zlib Huffmann",		"BSD license",		"https://github.com/Cyan4973/FiniteStateEntropy",										"", E_HUF },
   //---- Encoding ------
-  { P_RLES, 	"srle",	    		_RLE, 	    "v2016-01", "TurboRLE ESC",			"GPL license",		"https://sites.google.com/site/powturbo",  												"0,8,16,32,64" },
-  { P_RLET, 	"trle",	    		_RLE, 	    "v2016-01", "TurboRLE",			    "GPL license",		"https://sites.google.com/site/powturbo",  												"" },
+  { P_RLES, 	"srle",	    		_RLE, 	    "16-01", 	"TurboRLE ESC",			"            ",		"https://sites.google.com/site/powturbo",  												"0,8,16,32,64" },
+  { P_RLET, 	"trle",	    		_RLE, 	    "16-01", 	"TurboRLE",			    "            ",		"https://sites.google.com/site/powturbo",  												"" },
   //----- Transform -----
   { P_DIVBWT, 	"divbwt",    		_DIVBWT,    "",			"bwt libdivsufsort/libbsc",	"        ",		"https://github.com/y-256/libdivsufsort",  												"" },
 
