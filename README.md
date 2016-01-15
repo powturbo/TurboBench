@@ -96,11 +96,11 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [bcm v1.0](http://sourceforge.net/projects/bcm) 
  - [Blosc v2.0](https://github.com/Blosc/c-blosc2)
  - [BriefLz v1.1.0](https://github.com/jibsen/brieflz) 
- - [Brotli v15-11](https://github.com/google/brotli) 
+ - [Brotli v16-01](https://github.com/google/brotli) 
  - [Bzip2 v1.06](http://www.bzip.org/downloads.html) 
  - [Chameleon v15-03](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
  - [Crush v1.0.0](http://sourceforge.net/projects/crush) 
- - [CSC v15-06](https://github.com/fusiyuan2010/CSC) 
+ - [CSC v16-01](https://github.com/fusiyuan2010/CSC) 
  - [Density v0.13.0](https://github.com/centaurean/density) 
  - [Doboz v14-01-14](https://bitbucket.org/attila_afra) 
  - [FastLz v0.1.0](http://fastlz.org) 
@@ -134,7 +134,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [zlib v1.2.8](http://zlib.net)
  - [Libzling v16-01](https://github.com/richox/libzling) 
  - [Zopfli v15-05](https://code.google.com/p/zopfli) 
- - [ZSTD v0.4.5](https://github.com/Cyan4973/zstd) 
+ - [ZSTD v0.4.6](https://github.com/Cyan4973/zstd) 
  - [zpaq v7.05](https://github.com/zpaq/zpaq) 
 
 * LzFSE: included but not tested
@@ -229,5 +229,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 - [Lzbench](https://github.com/inikep/lzbench) - lzbench is an in-memory benchmark of open-source compressors
 
-Last update: 10 JAN 2016
+Last update: 15 JAN 2016
 
