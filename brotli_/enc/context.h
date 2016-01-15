@@ -10,7 +10,7 @@
 #define BROTLI_ENC_CONTEXT_H_
 
 #include "./types.h"
-
+extern int brotlictx; //TurboBench
 namespace brotli {
 
 // Second-order context lookup table for UTF8 byte streams.
