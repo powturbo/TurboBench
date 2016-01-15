@@ -4,7 +4,7 @@
    See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
 */
 
-#include "../../brotli/enc/static_dict.h"
+#include "./static_dict.h"
 
 #include <algorithm>
 
