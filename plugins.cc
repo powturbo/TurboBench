@@ -101,7 +101,7 @@ enum {
  P_LIBZPAQ, 
 #define C_LZ4		COMP1 			
  P_LZ4,
-#define C_LZ5 		COMP2	
+#define C_LZ5 		COMP1
  P_LZ5,    
 #define C_LZHAM		COMP1
  P_LZHAM,
@@ -166,16 +166,16 @@ enum {
  P_DIVBWT,
   // --------- Entropy coders -------------
  #if C_BCM  
-#define C_BCMEC      ECODER 
+#define C_BCMEC     ECODER 
  #else
-#define C_BCMEC      0
+#define C_BCMEC     0
  #endif
  P_BCMEC,
-#define C_FASTAC		ECODER    
+#define C_FASTAC	ECODER    
  P_FASTAC,
 #define C_FASTARI	ECODER    
  P_FASTARI,
-#define C_FASTHF		ECODER    
+#define C_FASTHF	ECODER    
  P_FASTHF,
 #define C_FSC 		ECODER    
  P_FSC,
@@ -191,24 +191,24 @@ enum {
  P_JRANS1,
  P_JRANS64,
  P_JRANS641,
-#define C_FPAQC 		GPL
+#define C_FPAQC 	GPL
  P_FPAQC,
-#define C_NANS       ECODER 
+#define C_NANS		ECODER 
  P_NANS,      
-#define C_PPMDEC	 	ECODER       
+#define C_PPMDEC	ECODER       
  P_PPMDEC,
-#define C_SHRC       ECODER 
+#define C_SHRC		ECODER 
  P_SHRC,
  P_SHRCV,
-#define C_SUBOTIN    ECODER    
+#define C_SUBOTIN   ECODER    
  P_SUB,
-#define C_POLHF      GPL
+#define C_POLHF     GPL
  P_POLHF, 
 #define C_TORNADOHF	GPL	 
  P_TORNADOHF,
 #define C_ZLIBH		ECODER    
  P_ZLIBH,
-#define C_MYCODEC    COMP2	// Include your codec into TurboBench :search and modify "_MYCODEC" in the following files: plugins.h, plugreg.c. Insert your function calls like mycomp/mydecomp in plugins.cc 
+#define C_MYCODEC   COMP2	// Include your codec into TurboBench :search and modify "_MYCODEC" in the following files: plugins.h, plugreg.c. Insert your function calls like mycomp/mydecomp in plugins.cc 
  P_MYCODEC, // User plugin
   #ifdef LZTURBO
 #include "../beplug.h"
