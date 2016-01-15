@@ -6,7 +6,7 @@
 
 // Function to find backward reference copies.
 extern int brotlirep; // TurboBench
-#include "../../brotli/enc/backward_references.h"
+#include "../../brotli/backward_references.h"
 
 #include <algorithm>
 #include <limits>
