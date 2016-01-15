@@ -124,6 +124,7 @@ OB+=plugins.o
 ifeq ($(NCOMP1), 0)
 OB+=$(ZLIB) 
 OB+=lz4/lib/lz4hc.o lz4/lib/lz4.o  
+OB+=lz5/lib/lz5.o lz5/lib/lz5hc.o 
 OB+=LZMA-SDK/C/LzFind.o LZMA-SDK/C/LzmaDec.o LZMA-SDK/C/LzmaEnc.o LZMA-SDK/C/LzmaLib.o LZMA-SDK/C/Alloc.o 
 OB+=zstd/lib/zstd_compress.o zstd/lib/zstd_decompress.o zstd/lib/fse.o zstd/lib/huff0.o 
 ifeq ($(NCPP), 0)
@@ -184,7 +185,6 @@ OB+=FastLZ/fastlz.o
 OB+=heatshrink_/heatshrink.o heatshrink/heatshrink_encoder.o heatshrink/heatshrink_decoder.o
 OB+=chameleon/chameleon.o
 OB+=crush/crush.o
-OB+=lz5/lib/lz5.o lz5/lib/lz5hc.o 
 OB+=liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o 
 OB+=liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o 
 OB+=miniz/miniz.o

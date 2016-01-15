@@ -19,9 +19,6 @@
 [submodule "bzip2"]
 	path = bzip2
 	url = https://github.com/asimonov-im/bzip2.git
-[submodule "xrle"]
-	path = xrle
-	url = https://github.com/algorithm314/xrle.git
 [submodule "lzoma"]
 	path = lzoma
 	url = https://github.com/alef78/lzoma.git
