@@ -128,7 +128,7 @@ OB+=lz5/lib/lz5.o lz5/lib/lz5hc.o
 OB+=LZMA-SDK/C/LzFind.o LZMA-SDK/C/LzmaDec.o LZMA-SDK/C/LzmaEnc.o LZMA-SDK/C/LzmaLib.o LZMA-SDK/C/Alloc.o 
 OB+=zstd/lib/zstd_compress.o zstd/lib/zstd_decompress.o zstd/lib/fse.o zstd/lib/huff0.o 
 ifeq ($(NCPP), 0)
-OB+=brotli_/enc/backward_references.o brotli/enc/block_splitter.o brotli/enc/encode.o brotli/enc/entropy_encode.o brotli/enc/histogram.o brotli/enc/literal_cost.o brotli/enc/brotli_bit_stream.o brotli/enc/metablock.o \
+OB+=brotli_/enc/backward_references.o brotli/enc/block_splitter.o brotli/enc/encode.o brotli/enc/entropy_encode.o brotli/enc/compress_fragment.o brotli/enc/histogram.o brotli/enc/literal_cost.o brotli/enc/brotli_bit_stream.o brotli/enc/metablock.o \
 	brotli_/enc/static_dict.o brotli/enc/streams.o brotli/dec/bit_reader.o brotli/dec/decode.o brotli/dec/dictionary.o brotli/dec/huffman.o brotli/dec/state.o brotli/dec/streams.o brotli/enc/utf8_util.o
 OB+=lzham_codec_devel/lzhamcomp/lzham_lzbase.o lzham_codec_devel/lzhamcomp/lzham_lzcomp.o lzham_codec_devel/lzhamcomp/lzham_lzcomp_internal.o \
 	lzham_codec_devel/lzhamcomp/lzham_lzcomp_state.o lzham_codec_devel/lzhamcomp/lzham_match_accel.o lzham_codec_devel/lzhamcomp/lzham_pthreads_threading.o \
