@@ -1063,7 +1063,7 @@ int bedecomp(unsigned char *_in, int _inlen, unsigned char *_out, unsigned _outl
   #ifdef LZTURBO
 #include "../bebench.h"
   #else
-unsigned trid[32],tid;
+struct plug plugr[32]; int tid;
 #define BEPRE
 #define BEINI
 #define BEPOST
@@ -1088,7 +1088,7 @@ int getpagesize() {
 
 unsigned mininlen;
 
-unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long filenmax, unsigned bsize, unsigned *trid, int tid, int krep) {
+unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long filenmax, unsigned bsize, struct plug *plugr, int tid, int krep) {
   size_t outsize;   
   FILE *fi = strcmp(finame,"stdin")?fopen(finame, "rb"):stdin; if(!fi) { perror(finame); die("open error '%s'\n", finame); }
   char *p; 
@@ -1383,7 +1383,7 @@ int main(int argc, char* argv[]) { //lzdbgon();
       BEFILE;
       for(fno = optind; fno < argc; fno++) {
 	    finame = argvx[fno];																			if(verbose > 1) printf("%s\n", finame);	
-        totinlen += plugfile(p, finame, filenmax, bsize, trid, tid,krep);
+        totinlen += plugfile(p, finame, filenmax, bsize, plugr, tid, krep);
 	    g->len += p->len;
 	    g->tck += p->tc;
 	    g->tdk += p->td;
