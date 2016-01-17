@@ -225,9 +225,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 - Windows: Visual Studio 2015
 
 ### References:
-- [Speedup](http://cbloomrants.blogspot.de/2015/03/03-02-15-oodle-lz-pareto-frontier.html) - "speedup" is the ratio of the effective speed vs. the speed of the disk
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
-- [Lzbench](https://github.com/inikep/lzbench) - lzbench is an in-memory benchmark of open-source compressors
 
-Last update: 15 JAN 2016
+Last update: 17 JAN 2016
 
