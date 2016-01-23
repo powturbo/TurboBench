@@ -124,23 +124,12 @@ OB+=plugins.o
 ifeq ($(NCOMP1), 0)
 OB+=$(ZLIB) 
 OB+=lz4/lib/lz4hc.o lz4/lib/lz4.o  
-OB+=lz5/lib/lz5.o lz5/lib/lz5hc.o 
 OB+=LZMA-SDK/C/LzFind.o LZMA-SDK/C/LzmaDec.o LZMA-SDK/C/LzmaEnc.o LZMA-SDK/C/LzmaLib.o LZMA-SDK/C/Alloc.o 
 OB+=zstd/lib/zstd_compress.o zstd/lib/zstd_decompress.o zstd/lib/fse.o zstd/lib/huff0.o 
 ifeq ($(NCPP), 0)
 OB+=brotli_/enc/backward_references.o brotli/enc/block_splitter.o brotli/enc/encode.o brotli/enc/entropy_encode.o brotli/enc/compress_fragment.o brotli/enc/compress_fragment_two_pass.o brotli/enc/histogram.o \
 	brotli/enc/literal_cost.o brotli/enc/brotli_bit_stream.o brotli/enc/metablock.o brotli_/enc/static_dict.o brotli/enc/streams.o brotli/dec/bit_reader.o brotli/dec/decode.o brotli/dec/dictionary.o \
 	brotli/dec/huffman.o brotli/dec/state.o brotli/dec/streams.o brotli/enc/utf8_util.o
-OB+=lzham_codec_devel/lzhamcomp/lzham_lzbase.o lzham_codec_devel/lzhamcomp/lzham_lzcomp.o lzham_codec_devel/lzhamcomp/lzham_lzcomp_internal.o \
-	lzham_codec_devel/lzhamcomp/lzham_lzcomp_state.o lzham_codec_devel/lzhamcomp/lzham_match_accel.o lzham_codec_devel/lzhamcomp/lzham_pthreads_threading.o \
-	lzham_codec_devel/lzhamdecomp/lzham_assert.o lzham_codec_devel/lzhamdecomp/lzham_checksum.o lzham_codec_devel/lzhamdecomp/lzham_huffman_codes.o \
-	lzham_codec_devel/lzhamdecomp/lzham_lzdecomp.o lzham_codec_devel/lzhamdecomp/lzham_lzdecompbase.o lzham_codec_devel/lzhamdecomp/lzham_mem.o \
-	lzham_codec_devel/lzhamdecomp/lzham_platform.o lzham_codec_devel/lzhamdecomp/lzham_prefix_coding.o \
-	lzham_codec_devel/lzhamdecomp/lzham_symbol_codec.o lzham_codec_devel/lzhamdecomp/lzham_timer.o lzham_codec_devel/lzhamdecomp/lzham_vector.o \
-	lzham_codec_devel/lzhamlib/lzham_lib.o 
-ifeq ($(UNAME), Windows)
-OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
-endif
 endif
 
 ifeq ($(HAVE_ZLIB), 1)
@@ -188,6 +177,17 @@ OB+=chameleon/chameleon.o
 OB+=crush/crush.o
 OB+=liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o 
 OB+=liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o 
+OB+=lz5/lib/lz5.o lz5/lib/lz5hc.o 
+OB+=lzham_codec_devel/lzhamcomp/lzham_lzbase.o lzham_codec_devel/lzhamcomp/lzham_lzcomp.o lzham_codec_devel/lzhamcomp/lzham_lzcomp_internal.o \
+	lzham_codec_devel/lzhamcomp/lzham_lzcomp_state.o lzham_codec_devel/lzhamcomp/lzham_match_accel.o lzham_codec_devel/lzhamcomp/lzham_pthreads_threading.o \
+	lzham_codec_devel/lzhamdecomp/lzham_assert.o lzham_codec_devel/lzhamdecomp/lzham_checksum.o lzham_codec_devel/lzhamdecomp/lzham_huffman_codes.o \
+	lzham_codec_devel/lzhamdecomp/lzham_lzdecomp.o lzham_codec_devel/lzhamdecomp/lzham_lzdecompbase.o lzham_codec_devel/lzhamdecomp/lzham_mem.o \
+	lzham_codec_devel/lzhamdecomp/lzham_platform.o lzham_codec_devel/lzhamdecomp/lzham_prefix_coding.o \
+	lzham_codec_devel/lzhamdecomp/lzham_symbol_codec.o lzham_codec_devel/lzhamdecomp/lzham_timer.o lzham_codec_devel/lzhamdecomp/lzham_vector.o \
+	lzham_codec_devel/lzhamlib/lzham_lib.o 
+ifeq ($(UNAME), Windows)
+OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
+endif
 OB+=miniz/miniz.o
 OB+=nakamichi/Nakamichi_Kintaro.o
 OB+=pithy/pithy.o
@@ -258,7 +258,7 @@ ifeq ($(GPL), 1)
 OB+=$(LZMAT) $(LZO) $(ECGPL) $(MSCOMPRESS)
 OB+=lzlib/lzlib.o lzlib_/bbexample.o 
 OB+=lzmat/lzmat_enc.o lzmat/lzmat_dec.o
-#OB+=lzoma_/pack.o lzoma_/unpack.o
+OB+=lzoma_/pack.o lzoma_/unpack.o 
 #OB+=lzoma_/lzoma.o lzoma_/divsufsort.o
 OB+=ms-compress/src/mscomp.o ms-compress/src/lznt1_compress.o ms-compress/src/lznt1_decompress.o ms-compress/src/xpress_compress.o ms-compress/src/xpress_decompress.o ms-compress/src/xpress_huff_compress.o ms-compress/src/xpress_huff_decompress.o
 OB+=quicklz_/quicklz1.o quicklz_/quicklz2.o quicklz_/quicklz3.o 
