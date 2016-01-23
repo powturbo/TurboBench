@@ -6,9 +6,17 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdint.h>
-#include <x86intrin.h>
+#include <string.h>
+//#include <x86intrin.h>
 
-#define O_BINARY 0
+#ifndef O_BINARY
+  #ifdef _O_BINARY
+    #define O_BINARY _O_BINARY
+  #else
+    #define O_BINARY 0
+  #endif
+#endif
+
 #define byte unsigned char
 #include "../lzoma/lzoma.h"									//TurboBench
 #include "lzoma.h"
@@ -78,19 +86,23 @@ getcode_doneit: \
 getlen_0bit: ;\
 }
 
-static void unpack_c(byte *src, byte *dst, int left) {
+static void unpack_c(int history_size, byte *src, byte *dst, byte *start, int left) {
   int ofs=-1;
   int len;
   uint32_t bits=0x80000000;
   uint32_t resbits;
   left--;
 
+  if (history_size) {
+    history_size-=dst-start;
+    goto nextblock;
+  }
+
 copyletter:
-//fprintf(stderr,"i");
   *dst++=*src++;
-  //was_letter=1;
-  len=-1;
   left--;
+nextblock:
+  len=-1;
 
 get_bit:
   if (left<0) return;
@@ -99,7 +111,6 @@ get_bit:
 
   /* unpack lz */
   if (len<0) {
-//fprintf(stderr,"\nw");
     len=1;
     loadbit;
     if (!getbit) {
@@ -107,54 +118,77 @@ get_bit:
     }
   }
   len=2;
-//fprintf(stderr,"\nn");
-  getcode(bits,src,dst-out_buf);
+  getcode(bits,src,dst-start+history_size);
   ofs++;
   if (ofs>=longlen) len++;
   if (ofs>=hugelen) len++;
   ofs=-ofs;
 uselastofs:
   getlen(bits,src);
-//  printf("lz: %d:%d,left=%d\n",ofs,len,left);
   left-=len;
-//    *dst=dst[ofs];
-//    dst++;
-//    --len;//len is at least 2 bytes - byte1 can be copied without checking
-  //memcpy(dst,dst+ofs,len);dst+=len;
+
+  // Note: on some platforms memcpy may be faster here
+  int ptr = dst-start+ofs;
   do {
-    *dst=dst[ofs];
+    *dst=start[ptr&(MAX_SIZE-1)];
+    ptr++;
     dst++;
-    /*if (--len==0) goto get_bit;
-    *dst=dst[ofs];
-    dst++;
-    if (--len==0) goto get_bit;
-    *dst=dst[ofs];
-    dst++;
-    if (--len==0) goto get_bit;
-    *dst=dst[ofs];
-    dst++;*/
   } while(--len);
-  /*if (ofs < -3)
-  while(len>=4) {
-    *(long*)dst=*(long*)(dst+ofs);
-    dst+=4;
-    len-=4;
-  }
-  while(len>0) {
-    *dst=dst[ofs];
-    dst++;
-    len--;
-  };*/
   goto get_bit;
 }
 
+#ifdef ASM_X86
+extern unsigned int unpack_x86(byte *src, byte *dst, int left);
+#endif
+
+//#include "../lzoma/e8.h"
+
 int lzomaunpack( unsigned char *in, int inlen, unsigned char *out, int outlen) {
-  unpack_c(in, out, outlen);
+    #if 0
+  int history_size = 0;
+  int ofs = 0;
+  int use_e8=0;
+  unsigned char *ip = in;
+  while(ip < in+inlen /*read(ifd,&n,4)==4*/) {
+    n = *(unsigned *)ip; ip += 4;
+    if (use_e8) e8(out_buf, n_unp);
+    n_unp = *(unsigned *)ip; ip += 4; //  read(ifd,&n_unp,4);
+    if (n != n_unp && !history_size) {
+      use_e8 = *ip++; //read(ifd,&use_e8,1);
+    } else
+      use_e8 = 0;
+    //long unsigned tsc = (long unsigned)__rdtsc();
+    if (n == n_unp) {
+      memcpy(op, ip, n_unp);   	//	read(ifd,out_buf,n_unp);
+      op += n_unp;				//	write(ofd,out_buf+ofs,n_unp);
+    } else {
+      in_buf = ip;	ip += n;			//read(ifd,in_buf,n);
+#ifdef ASM_X86
+#error Asm version not yet updated for recent format changes. Please use C version right now.
+      unpack_x86(in_buf, out_buf, n_unp);
+#else
+      unpack_c(history_size, in_buf, out_buf+ofs, out_buf, n_unp);
+#endif
+      //tsc=(long unsigned)__rdtsc()-tsc;
+      //printf("tsc=%lu\n",tsc);
+      if (use_e8) e8back(out_buf,n_unp);
+      write(ofd,out_buf+ofs,n_unp);
+    }
+    ofs+=n_unp;
+    ofs &= (MAX_SIZE-1);
+    history_size = MAX_SIZE-NEXT_SIZE;
+  }
+  //if(*in++) e8(out_buf,n_unp);
+  if(inlen == outlen) {
+    memcpy(out, inlen, in);
+    return outlen;
+  }
+  unpack_c(0, in, out, outlen);
+    #endif
   return 0;
 }
+
 #if 0
-extern unsigned int unpack(byte *src, byte *dst, int left);
-#include "e8.h"
 int main(int argc,char * argv[]) {
   int ifd,ofd;
   int n,n_unp;
@@ -162,21 +196,36 @@ int main(int argc,char * argv[]) {
 
   ifd=open(argv[1],O_RDONLY|O_BINARY);
   ofd=open(argv[2],O_WRONLY|O_TRUNC|O_CREAT|O_BINARY,511);
+  int history_size = 0;
+  int ofs = 0;
+  int use_e8=0;
   while(read(ifd,&n,4)==4) {
+    if (use_e8) e8(out_buf,n_unp);
     read(ifd,&n_unp,4);
-    int use_e8=0;
-    read(ifd,&use_e8,1);
-    //breaklz=1<<shift;
-    //breaklz = 1<<9;
-    read(ifd,in_buf,n);
-    //for(int t=0;t<10;t++) {
-      long unsigned tsc = (long unsigned)__rdtsc();
-      unpack(in_buf, out_buf, n_unp);
-      tsc=(long unsigned)__rdtsc()-tsc;
-      printf("tsc=%lu\n",tsc);
-    //}
-    if (use_e8) e8back(out_buf,n_unp);
-    write(ofd,out_buf,n_unp);
+    if (n != n_unp && !history_size) 
+      read(ifd,&use_e8,1);
+    else
+      use_e8 = 0;
+    //long unsigned tsc = (long unsigned)__rdtsc();
+    if (n == n_unp) {
+      read(ifd,out_buf,n_unp);
+      write(ofd,out_buf+ofs,n_unp);
+    } else {
+      read(ifd,in_buf,n);
+#ifdef ASM_X86
+#error Asm version not yet updated for recent format changes. Please use C version right now.
+      unpack_x86(in_buf, out_buf, n_unp);
+#else
+      unpack_c(history_size, in_buf, out_buf+ofs, out_buf, n_unp);
+#endif
+      //tsc=(long unsigned)__rdtsc()-tsc;
+      //printf("tsc=%lu\n",tsc);
+      if (use_e8) e8back(out_buf,n_unp);
+      write(ofd,out_buf+ofs,n_unp);
+    }
+    ofs+=n_unp;
+    ofs &= (MAX_SIZE-1);
+    history_size = MAX_SIZE-NEXT_SIZE;
   }
 
   close(ifd);

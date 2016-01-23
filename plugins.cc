@@ -69,19 +69,19 @@ enum {
  P_BCM,
 #define C_BRIEFLZ 	COMP2	
  P_BRIEFLZ, 
-#define C_BROTLI		COMP1
+#define C_BROTLI	COMP1
  P_BROTLI,    
-#define C_BZIP2 		COMP2
+#define C_BZIP2 	COMP2
  P_BZIP2, 
-#define C_CHAMELEON  COMP2    
+#define C_CHAMELEON COMP2    
  P_CHAMELEON,
 #define C_C_BLOSC2	COMP2
  P_C_BLOSC2,
 #define C_CRUSH	 	COMP2	
  P_CRUSH, 
-#define C_CSC        COMP2    
+#define C_CSC       COMP2    
  P_CSC, 
-#define C_DENSITY    COMP2	
+#define C_DENSITY   COMP2	
  P_DENSITY, 
 #define C_DOBOZ		COMP2	 //crash
  P_DOBOZ, 
@@ -95,15 +95,15 @@ enum {
  P_LIBBSC, P_LIBBSC_ST,  
 #define C_LIBLZF     COMP2   	
  P_LIBLZF,  
-#define C_LIBLZG		COMP2	  
+#define C_LIBLZG	COMP2	  
  P_LIBLZG,
 #define C_LIBZPAQ	COMP2	
  P_LIBZPAQ, 
 #define C_LZ4		COMP1 			
  P_LZ4,
-#define C_LZ5 		COMP1
+#define C_LZ5 		COMP2
  P_LZ5,    
-#define C_LZHAM		COMP1
+#define C_LZHAM		COMP2
  P_LZHAM,
 #define C_LZFSE      0 // disabled
  P_LZFSE,
