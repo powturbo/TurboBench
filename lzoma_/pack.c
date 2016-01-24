@@ -29,11 +29,10 @@
 #include <stdlib.h>
 #include"divsufsort.h"
 
-#include "../lzoma/lzoma.h"			
+#include "../lzoma/lzoma.h"
 #include "../lzoma/bpe.h"
-#include "../lzoma/e8.h"
-
-#include "lzoma.h"	//TurboBench
+#include "e8.h"
+#include "lzoma.h"
 
 #define MINOLEN 1
 #define MINLZ 2
@@ -842,39 +841,76 @@ dolz:
   printf("out bytes=%d\n",outpos);
   return outpos;
 }
-
-int lzomapack( unsigned char *in, int n, unsigned char *out, int lev) {							// TurboBench
+int lzomapack( unsigned char *in, int inlen, unsigned char *out, int lev) {							// TurboBench
   if(--lev < 0) lev = 0;
   level				= levels[lev][0];
   short_match_level = levels[lev][1];
   match_level		= levels[lev][2];
 
-  in_buf = in; //(void *)malloc(MAX_SIZE * sizeof(uint8_t));
+  in_buf = (void *)malloc(MAX_SIZE * sizeof(uint8_t));
   rle    = (void *)malloc(MAX_SIZE * sizeof(uint32_t));
   state  = (void *)malloc(MAX_SIZE * sizeof(FutureState));
-
-      /*int b1     = cnt_bpes(in_buf,n);
-      int use_e8 = 1; e8(in_buf, n);
-      int b2     = cnt_bpes(in_buf, n);
+  
+  int n=0;
+  unsigned char *ip=in,*op=out;
+  for(;ip < in+inlen;) {
+    if (n==0) { 
+      n = (in+inlen) - ip; if(n > MAX_SIZE) n = MAX_SIZE;
+      memcpy(in_buf, ip, n); ip += n; //n=fread(in_buf,1,MAX_SIZE,ifd);      
+      if (n<=0) break;
+      printf("got %d bytes, packing %d\n",n,inlen);fflush(stdout);
+      int b1=cnt_bpes(in_buf,n);
+      int use_e8=1;
+      e8(in_buf, n);
+      int b2=cnt_bpes(in_buf,n);
       printf("stats noe8 %d e8 %d\n",b1,b2);
       if (b2<=b1) {
         use_e8=0;
         printf("reverted e8\n");
 
         e8back(in_buf,n);
-      }*/
+      }
+printf("pack %d\n", n);fflush(stdout);
+      int bres=pack(1,n);
+printf("pack %d\n", bres);fflush(stdout);
+      if (bres==n) {
+        *(unsigned *)op = n; op+=4; //fwrite(&n,4,1,ofd);
+        *(unsigned *)op = n; op+=4; //fwrite(&n,4,1,ofd);
+        memcpy(op, in_buf, n); op+=n; //fwrite(in_buf,1,n,ofd);
+      } else {
+        *(unsigned *)op = bres; op+=4; 	//fwrite(&bres,4,1,ofd);
+        *(unsigned *)op = n;    op+=4; 	//fwrite(&n,4,1,ofd);
+        *op++ = use_e8;					//fwrite(&use_e8,1,1,ofd);
+        memcpy(op, out_buf, bres); op += bres;		//fwrite(out_buf,1,bres,ofd);
+        //  for (i=0;i<n-1;i++) {printf("%d%s\n",cache[i],(cache[i]>=cache[i+1])?"":" !!!");};
+      }
+    } else { // next blocks
+      memmove(in_buf, in_buf+NEXT_SIZE, MAX_SIZE-NEXT_SIZE);
+      n = (in+inlen) - ip; if(n > NEXT_SIZE) n = NEXT_SIZE;       
+      memcpy(in_buf+MAX_SIZE-NEXT_SIZE, ip, n); ip += n; //n=fread(in_buf+MAX_SIZE-NEXT_SIZE,1,NEXT_SIZE,ifd);
 
-  int bres = pack(1, n);
-  if (bres >= n) {
-    memcpy(out, n, in_buf); 			//fwrite(in_buf,1,n,ofd);
-    return n;
-  } else {
-    //*out++ = use_e8; 					//fwrite(&use_e8,1,1,ofd);
-    memcpy(out, bres, out_buf); 		//fwrite(out_buf,1,bres,ofd);
+      if (n<=0) break;
+      printf("got %d bytes, packing...\n",n);fflush(stdout);
+      int bres=pack(MAX_SIZE-NEXT_SIZE,MAX_SIZE-NEXT_SIZE+n);
+      if (bres==n) {
+        *(unsigned *)op = n; op+=4; //fwrite(&n,4,1,ofd);
+        *(unsigned *)op = n; op+=4; //fwrite(&n,4,1,ofd);
+        memcpy(op, in_buf, n); op+=n; //fwrite(in_buf,1,n,ofd);
+      } else {
+        *(unsigned *)op = bres; op+=4; 	//fwrite(&bres,4,1,ofd);
+        *(unsigned *)op = n; op+=4; 	//fwrite(&n,4,1,ofd);
+        memcpy(op, out_buf, bres); op += bres; //fwrite(out_buf,1,bres,ofd);
+        //  for (i=0;i<n-1;i++) {printf("%d%s\n",cache[i],(cache[i]>=cache[i+1])?"":" !!!");};
+      }
+    }
   }
-  return bres;
+  free(in_buf);
+  free(rle);
+  free(state);
+  return op - out;
 }
 #if 0
+
 int main(int argc,char *argv[]) {
   FILE *ifd,*ofd;
   int n,i,bres,blz;

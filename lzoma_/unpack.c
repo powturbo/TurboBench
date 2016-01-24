@@ -18,9 +18,8 @@
 #endif
 
 #define byte unsigned char
-#include "../lzoma/lzoma.h"									//TurboBench
+#include "../lzoma/lzoma.h"
 #include "lzoma.h"
-
 byte in_buf[MAX_SIZE]; /* text to be encoded */
 byte out_buf[MAX_SIZE];
 
@@ -141,28 +140,32 @@ uselastofs:
 extern unsigned int unpack_x86(byte *src, byte *dst, int left);
 #endif
 
-//#include "../lzoma/e8.h"
+#include "e8.h"
 
 int lzomaunpack( unsigned char *in, int inlen, unsigned char *out, int outlen) {
-    #if 0
+  int n,n_unp;
+  char shift;
+
+  unsigned char *ip=in,*op=out;	// ifd=open(argv[1],O_RDONLY|O_BINARY);
+  							// ofd=open(argv[2],O_WRONLY|O_TRUNC|O_CREAT|O_BINARY,511);
   int history_size = 0;
   int ofs = 0;
   int use_e8=0;
-  unsigned char *ip = in;
-  while(ip < in+inlen /*read(ifd,&n,4)==4*/) {
+  //while(read(ifd,&n,4)==4) 
+  for(;ip < in+inlen;) {
     n = *(unsigned *)ip; ip += 4;
-    if (use_e8) e8(out_buf, n_unp);
-    n_unp = *(unsigned *)ip; ip += 4; //  read(ifd,&n_unp,4);
-    if (n != n_unp && !history_size) {
+    if (use_e8) e8(out_buf,n_unp);
+     n_unp = *(unsigned *)ip; ip += 4; //read(ifd,&n_unp,4);
+    if (n != n_unp && !history_size) 
       use_e8 = *ip++; //read(ifd,&use_e8,1);
-    } else
+    else
       use_e8 = 0;
     //long unsigned tsc = (long unsigned)__rdtsc();
     if (n == n_unp) {
-      memcpy(op, ip, n_unp);   	//	read(ifd,out_buf,n_unp);
-      op += n_unp;				//	write(ofd,out_buf+ofs,n_unp);
+      memcpy(out_buf, ip, n_unp); ip+=n_unp; //read(ifd,out_buf,n_unp);
+      memcpy(op, out_buf+ofs,n_unp); op += n_unp; //write(ofd,out_buf+ofs,n_unp);
     } else {
-      in_buf = ip;	ip += n;			//read(ifd,in_buf,n);
+      memcpy(in_buf, ip, n); ip+=n; //read(ifd,in_buf,n);
 #ifdef ASM_X86
 #error Asm version not yet updated for recent format changes. Please use C version right now.
       unpack_x86(in_buf, out_buf, n_unp);
@@ -172,23 +175,17 @@ int lzomaunpack( unsigned char *in, int inlen, unsigned char *out, int outlen) {
       //tsc=(long unsigned)__rdtsc()-tsc;
       //printf("tsc=%lu\n",tsc);
       if (use_e8) e8back(out_buf,n_unp);
-      write(ofd,out_buf+ofs,n_unp);
+      memcpy(op, out_buf+ofs,n_unp); //write(ofd,out_buf+ofs,n_unp);
     }
     ofs+=n_unp;
     ofs &= (MAX_SIZE-1);
     history_size = MAX_SIZE-NEXT_SIZE;
   }
-  //if(*in++) e8(out_buf,n_unp);
-  if(inlen == outlen) {
-    memcpy(out, inlen, in);
-    return outlen;
-  }
-  unpack_c(0, in, out, outlen);
-    #endif
-  return 0;
+  return op-out;
 }
 
 #if 0
+
 int main(int argc,char * argv[]) {
   int ifd,ofd;
   int n,n_unp;
