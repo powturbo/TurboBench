@@ -115,7 +115,7 @@ enum {
  P_LZMAT,
 #define C_LZO		GPL		
  P_LZO1b, P_LZO1c, P_LZO1f, P_LZO1x, P_LZO1y, P_LZO1z, P_LZO2a,
-#define C_LZOMA		0 //GPL
+#define C_LZOMA		GPL
  P_LZOMA, 
 #define C_MINIZ   	COMP2
  P_MINIZ,
@@ -672,7 +672,7 @@ struct plugs plugs[] = {
   { P_LZO1y,  	"lzo1y",			C_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"1,999" }, 
   { P_LZO1z, 	"lzo1z", 			C_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"999" }, 
   { P_LZO2a, 	"lzo2a", 			C_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"999" }, 
-  { P_LZOMA, 	"lzoma", 			C_LZOMA,	"15-06",	"lzoma",				"GPL license",		"https://github.com/alef78/lzoma", 														"1,2,3",0,(1<<16) },
+  { P_LZOMA, 	"lzoma", 			C_LZOMA,	"15-06",	"lzoma",				"GPL license",		"https://github.com/alef78/lzoma", 														"1,2,3,4,5,6,7" },
   { P_MINIZ, 	"miniz", 			C_MINIZ,	"15-06",	"miniz zlib-replacement","Public domain",	"https://github.com/richgel999/miniz", 													"1,2,3,4,5,6,7,8,9" },
   { P_MSCOMPRESS,"mscompress", 		C_MSCOMPRESS,"15.09",	"ms-compress",			"GPL license",		"https://github.com/coderforlife/ms-compress", 											"2,3,4" }, 
   { P_NAKA, 	"naka", 			C_NAKA,		"15-10",	"Nakamichi Kintaro",	"Public Domain",    "http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188",	"" },
