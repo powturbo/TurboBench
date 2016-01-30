@@ -295,6 +295,8 @@ int lzomaunpack( unsigned char *in, int inlen, unsigned char *out, int outlen) {
   /*close(ifd);
   close(ofd);
   return 0;*/
+  free(in_buf);
+  free(out_buf);
   return ifd - in;
 }
 #endif
