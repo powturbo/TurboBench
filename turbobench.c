@@ -394,8 +394,8 @@ struct plug {
 };
 
 struct plug plug[255],plugt[255];
-int         seg_ans = 32*1024, seg_huf = 32*1024, seg_anx = 12*1024, seg_hufx=11*1024, verbose=1;
-static int  cmp = 2,trans;
+int         seg_ans = 32*1024, seg_huf = 32*1024, seg_anx = 12*1024, seg_hufx=11*1024;
+static int  cmp = 2,trans, verbose=1;
 double      fac = 1.3;
 
 int plugins(struct plug *plug, struct plugs *gs, int *pk, unsigned bsize, int bsizex, int lev, char *prm) { 

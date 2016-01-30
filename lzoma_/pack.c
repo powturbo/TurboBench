@@ -8,8 +8,8 @@
 // Notes:
 //
 // Pros:
-// Compression ratio is very good (much higher than lzo, ucl, gzip, bzip2).
-// Decompression speed is very high (faster than gzip, much faster than bzip,lzham, lzma,xz)
+// Compression ratio is very good (much higher than lzo, ucl, gzip).
+// Decompression speed is very high (faster than gzip, much faster than bzip2,lzham, lzma,xz)
 // tiny decompressor code (asm version of decompress function less than 400 bytes)
 //
 // compressed data format is somewhere between lzo and lzma
@@ -31,8 +31,7 @@
 
 #include "../lzoma/lzoma.h"
 #include "../lzoma/bpe.h"
-#include "e8.h"
-#include "lzoma.h"
+//#include "e8.h"
 
 #define MINOLEN 1
 #define MINLZ 2
@@ -49,12 +48,19 @@ int level, short_match_level, match_level;
     {3,40,500},
     {3,100,1000}
   };
+int verbose = 0;
 
 FILE *flzlit=NULL;
 FILE *flit=NULL;
 FILE *folz=NULL;
 FILE *flen=NULL;
 FILE *fdist=NULL;
+#ifdef EXPERIMENTS
+// this is for some experimention only.
+FILE *test=NULL;
+FILE *test2=NULL;
+FILE *test3=NULL;
+#endif
 
 uint32_t *rle;
 uint8_t *in_buf; /* text to be encoded */
@@ -84,22 +90,25 @@ typedef struct {
 // PastState and FutureState share the same memory buffer
 // sizeof(PastState) should be < sizeof(FutureState)
 void *state;
+void *past_state;
 
-#define sorted ((int32_t *)((uint8_t *)state+sizeof(PastState)*MAX_SIZE)) // used very early in initialization
+#define sorted ((int32_t *)((uint8_t *)state)) // used very early in initialization
 
-#define cache(i) ((FutureState *)state)[i].cache
-#define best_ofs(i) ((FutureState *)state)[i].best_ofs
-#define best_len(i) ((FutureState *)state)[i].best_len
-#define use_olz(i) ((FutureState *)state)[i].use_olz
-#define olz_len(i) ((FutureState *)state)[i].olz_len
-#define use_olz2(i) ((FutureState *)state)[i].use_olz2
-#define olz_len2(i) ((FutureState *)state)[i].olz_len2
+#define cache(i) ((FutureState *)state)[i-in_offset].cache
+#define best_ofs(i) ((FutureState *)state)[i-in_offset].best_ofs
+#define best_len(i) ((FutureState *)state)[i-in_offset].best_len
+#define use_olz(i) ((FutureState *)state)[i-in_offset].use_olz
+#define olz_len(i) ((FutureState *)state)[i-in_offset].olz_len
+#define use_olz2(i) ((FutureState *)state)[i-in_offset].use_olz2
+#define olz_len2(i) ((FutureState *)state)[i-in_offset].olz_len2
 
-#define same(i) (((PastState *)state)[i].same)
-#define samelen(i) (((PastState *)state)[i].samelen)
-#define sorted_len(i) (((PastState *)state)[i].sorted_len)
-#define sorted_prev(i) (((PastState *)state)[i].sorted_prev)
-#define sorted_next(i) (((PastState *)state)[i].sorted_next)
+#define same(i) (((PastState *)past_state)[i].same)
+#define samelen(i) (((PastState *)past_state)[i].samelen)
+#define sorted_len(i) (((PastState *)past_state)[i].sorted_len)
+#define sorted_prev(i) (((PastState *)past_state)[i].sorted_prev)
+#define sorted_next(i) (((PastState *)past_state)[i].sorted_next)
+
+int in_offset = 0;
 
 static inline int price_offset(int num,int total) {
   if (total<=256) return 8;//top=0;
@@ -112,16 +121,15 @@ static inline int price_offset(int num,int total) {
     if (x>=total+top) break; /* only 1 bit to be outputted left */
       if (x & lzmagic)
         top=lzshift(top);
-    if (x>=breaklz) {
-      if (num<top) { goto doneit;}
+    //if (x>=breaklz) {
+      if (num<top) { return res;}
       num+=top;
       total+=top;
       top+=top;
-    }
+    //}
     res++;
   }
   if (num>=x-total) { res++;}
-doneit: 
   return res;
 }
 
@@ -188,7 +196,6 @@ static inline void putenc(int num,int total, int break_at, int debug) {
       if (x & lzmagic) 
         top=lzshift(top);
     if (x>=break_at) {
-      //if (top==0) top=lzlow(top);
       if (num<top) {  goto doneit;}
       num+=top;
       total+=top;
@@ -214,7 +221,7 @@ doneit:
   }
   if (obyte) {
     //printf("res=%d\n", res);
-    byte b=0;
+    uint8_t b=0;
     for(x=0;x<8;x++) {
       if (debug) printf("%d",bits[x]);
       if (bits[x]) b|=128>>x;
@@ -285,6 +292,10 @@ static inline int min(int a,int b) {
 }
 
 static inline void put_lz(int offset,int length,int used) {
+#ifdef EXPERIMENTS
+  uint16_t code512 = 0x100;
+#endif
+
   if (flzlit) fprintf(flzlit,"%c",1);
   putbit(1); bitslzlen++;
   offset=-offset; /* 1.. */
@@ -292,8 +303,24 @@ static inline void put_lz(int offset,int length,int used) {
   if (was_letter) { bitsolzlen++;
     was_letter=0;
     if (old_ofs==offset) {
-    stolz++;
-    if (folz) fprintf(folz,"%c",0);
+      stolz++;
+      if (folz) fprintf(folz,"%c",0);
+
+#ifdef EXPERIMENTS
+// test combining everything into one model for simple entropy coding
+      code512 |= 0x80;
+      if (length-MINOLEN < 0x7F) {
+        code512 |= length-MINOLEN;
+      } else {
+        code512 |= 0x3F;
+        length-=MINOLEN+0x7F;
+        fwrite(&length, 4, 1, test2);
+        length+=MINOLEN+0x7F;
+      }
+      code512 = (code512 & 0xFF) << 8 | (code512>>8);
+      fwrite(&code512, 2, 1, test);
+#endif
+
       putbit(0);
       putenc_l(length-MINOLEN,breaklen);
       return;
@@ -319,6 +346,23 @@ static inline void put_lz(int offset,int length,int used) {
 #else
   if (offset+1>=longlen) { length--; }
   if (offset+1>=hugelen) { length--; }
+
+#ifdef EXPERIMENTS
+  if (length < 15) {
+    code512 |= length;
+  } else {
+    code512 |= 15;
+    length-=15;
+    fwrite(&length, 4, 1, test2);
+    length+=15;
+  }
+  code512 |= (offset & 0x7) << 4;
+  code512 = (code512 & 0xFF) << 8 | (code512>>8);
+  fwrite(&code512, 2, 1, test);
+  uint tmpofs = offset >> 4;
+  fwrite(&tmpofs, 4, 1, test3);
+#endif
+  
   putenc(offset,used,breaklz, 0);
   putenc_l(length-MINLZ+2,breaklen);
 #endif
@@ -326,7 +370,13 @@ static inline void put_lz(int offset,int length,int used) {
   old_ofs=offset;
 }
 
-static inline void put_letter(byte b) {
+static inline void put_letter(uint8_t b) {
+#ifdef EXPERIMENTS
+  uint16_t code512 = b;
+  code512 = (code512 & 0xFF) << 8 | (code512>>8);
+  fwrite(&code512, 2, 1, test);
+#endif
+
   if (flzlit) fprintf(flzlit,"%c",0);
   if (flit) fprintf(flit,"%c",b);
   putbit(0); bitslzlen++;
@@ -406,8 +456,52 @@ void init_same(int start, int n) {
   int run_len;
   int gen_same[256*256+256];
 
+  /*
+    Notes: the slowest parts here are PLCP array construction and divsufsort.
+    On slower levels -7 .. -9 it does not matter.
+    But on fast levels -1..-3 (that still provide good compression),
+    initialization takes about 20-30% processing time.
+    
+    Also, it reprocesses whole history each time a new block is read, 
+    which is clearly not optimal.
+    
+    possible optimizations:
+    1. store SA for later reuse, do divsufsort for new block only, then
+    merge them. not sure if it will be faster. still need to recalculate rlcp
+    2. get rid of SA completely, construct suffix tree directly.
+  */
+  for(i=0;i<256+256*256;i++) gen_same[i] =0;	// for bucketA & bucketB
+  _divsufsort(in_buf,sorted,gen_same,n); // TurboBench
+  // reuse sorted_prev for temp buffer
+#define rank(i) rle[i]
+  /* 
+   calculate plcp in O(n) time
+   see http://www.cs.ucr.edu/~stelo/cpm/cpm09/04_karkk.pdf
+   http://www.mi.fu-berlin.de/wiki/pub/ABI/Sequence_analysi_2013/2004_ManziniTwo_Space_Saving_Tricks_for_Linear_Time_LCP_Array_Computation.pdf
+  */
+  for(i=1;i<=n-1;i++) rank(sorted[i]) = sorted[i-1];
+  rank(sorted[0]) = sorted[n-1];
+  
+  sorted_prev(sorted[0])=-1;
+  for(i=1;i<n;i++) sorted_prev(sorted[i])=sorted[i-1];
+
+  for(i=0;i<n-1;i++) sorted_next(sorted[i])=sorted[i+1];
+  sorted_next(sorted[n-1])=-1;
+  
+  int h=0;
+  for(i=0;i<=n-1;i++) {
+    int j = rank(i);
+    while(i+h<=n && j+h<=n && in_buf[i+h]==in_buf[j+h]) h++;
+    sorted_len(i) = h;
+    if (h<=MINLZ) {
+      sorted_prev(i)=-1;
+      sorted_next(j)=-1;
+    }
+    if(h>0) h--;
+  }
+
   rle[n] = run_len = 0;
-  byte b = in_buf[n-1];
+  uint8_t b = in_buf[n-1];
   for(i=n-1;i>=0;i--) {
     if (in_buf[i]==b) 
       run_len++;
@@ -416,15 +510,6 @@ void init_same(int start, int n) {
       run_len = 1;
     }
     rle[i]=run_len;
-  }
-
-  if (n > 1000) {
-    for(i=0;i<256+256*256;i++) gen_same[i] =0;	// for bucketA & bucketB
-    divsufsort(in_buf,sorted,gen_same,n);
-  } else {
-    for(i=0;i<n;i++) sorted[i]=i;
-    qsort( sorted, n, sizeof( int ),
-                 ( int (*)(const void *, const void *) ) cmpstrsort );
   }
 
   bb=0;
@@ -438,17 +523,9 @@ void init_same(int start, int n) {
   }
   same(i)=-1;
 
-  for(i=0;i<n-1;i++) sorted_len(sorted[i])=cmpstr(sorted[i],sorted[i+1]);
-  sorted_len(sorted[n-1])=0;
-
-  sorted_prev(sorted[0])=-1;
-  for(i=1;i<n;i++) sorted_prev(sorted[i])=sorted_len(sorted[i-1]) > MINLZ? sorted[i-1]:-1;
-
-  for(i=0;i<n-1;i++) sorted_next(sorted[i])=sorted_len(sorted[i]) > MINLZ? sorted[i+1]:-1;
-  sorted_next(sorted[n-1])=-1;
   in_buf[n]=0;
-  
-  printf("init done.\n");
+
+  if (verbose) printf("init done.\n");
 }
 
 static inline int max(int a,int b) {
@@ -553,11 +630,13 @@ int pack(int start, int n) {
   use_olz(n-1)=0;
 
   if (sorted_prev(n-1)>=0) {
-    sorted_len(sorted_prev(n-1)) = min(sorted_len(sorted_prev(n-1)),
-                                            sorted_len(n-1));
     sorted_next(sorted_prev(n-1))=sorted_next(n-1);
   }
-  if (sorted_next(n-1)>=0) sorted_prev(sorted_next(n-1))=sorted_prev(n-1);
+  if (sorted_next(n-1)>=0) {
+    sorted_len(sorted_next(n-1)) = min(sorted_len(sorted_next(n-1)),
+                                            sorted_len(n-1));
+    sorted_prev(sorted_next(n-1))=sorted_prev(n-1);
+  }
 
   for(i=n-2;i>=start;i--) {
     int used=i;
@@ -696,18 +775,20 @@ int pack(int start, int n) {
       for(;;) {
         int slen=samelen(pos);
         pos=same(pos);
-        if (used-pos>=longlen) break;
+        int ll=(used-pos>=longlen)?1:0;
+        if (used-pos>=hugelen) ll=2;
+        //if (used-pos>=longlen) break;
         if (pos<0) break;
         if (len>slen) {
           len=slen;
         } else if (len==slen) {
           len+=cmpstr(used+len,pos+len);
         } 
-        if (len<left && len>=2) {
+        if (len<left && len>=2+ll) {
           CHECK_REPLZ
         }
         if (len>max_match) {
-          for(j=max_match+1;j<=len;j++) {
+          for(j=max_match+1+ll;j<=len;j++) {
             int tmp=price_lz(used-pos,j-MINLZ+2,used);
             tmp+=cache(used+j);
             if (tmp<res) {
@@ -728,8 +809,8 @@ int pack(int start, int n) {
     if (max_match<MINLZ) max_match=MINLZ;
     int top=sorted_prev(used);
     int bottom=sorted_next(used);
-    int len_top=top >= 0 ? sorted_len(top) : 0;
-    int len_bottom=bottom >= 0 ? sorted_len(used) : 0;
+    int len_top=top >= 0 ? sorted_len(used) : 0;
+    int len_bottom=bottom >= 0 ? sorted_len(bottom) : 0;
 
     match_check_max = match_level;
     int my_min_ofs=used+1;
@@ -739,13 +820,13 @@ int pack(int start, int n) {
       if (len_top>len_bottom) {
         pos=top;
 	len=len_top;
-	top=sorted_prev(pos);
         len_top = min(len_top,top >= 0 ? sorted_len(top):0);
+	top=sorted_prev(pos);
       } else {
         pos=bottom;
 	len=len_bottom;
-        len_bottom = min(len_bottom,bottom >= 0 ? sorted_len(bottom):0);
 	bottom=sorted_next(pos);
+        len_bottom = min(len_bottom,bottom >= 0 ? sorted_len(bottom):0);
       }
 //      if (used-pos<longlen) continue; // we already checked it
       if (len<=MINLZ) goto done;
@@ -773,11 +854,11 @@ int pack(int start, int n) {
 
 done:
     if (sorted_prev(used)>=0) {
-      sorted_len(sorted_prev(used)) = min(sorted_len(sorted_prev(used)),
-                                            sorted_len(used));
       sorted_next(sorted_prev(used))=sorted_next(used);
     }
     if (sorted_next(used)>=0) {
+      sorted_len(sorted_next(used)) = min(sorted_len(sorted_next(used)),
+                                            sorted_len(used));
       sorted_prev(sorted_next(used))=sorted_prev(used);
     }
 
@@ -789,17 +870,17 @@ done:
     olz_len2(used)=my_olz_len2;
     cache(used)=res;
 
-    if ((i&0xFFF)==0) {
+    if (verbose && (i&0xFFF)==0) {
       printf("\x0D%d left ",i-start);
       fflush(stdout);
     }
   }
 
   res=8+cache(start);
-  printf("\nres=%d\n",res);
+  if (verbose) printf("\nres=%d\n",res);
   res+=7;
   res>>=3;
-  printf("res bytes=%d\n",res);
+  if (verbose) printf("res bytes=%d\n",res);
   if (res>=n-start) {
     return n;
   };
@@ -838,86 +919,22 @@ dolz:
       }
     }
   }
-  printf("out bytes=%d\n",outpos);
+  if (verbose) printf("out bytes=%d\n",outpos);
   return outpos;
 }
-int lzomapack( unsigned char *in, int inlen, unsigned char *out, int lev) {							// TurboBench
-  if(--lev < 0) lev = 0;
-  level				= levels[lev][0];
-  short_match_level = levels[lev][1];
-  match_level		= levels[lev][2];
 
-  in_buf = (void *)malloc(MAX_SIZE * sizeof(uint8_t));
-  rle    = (void *)malloc(MAX_SIZE * sizeof(uint32_t));
-  state  = (void *)malloc(MAX_SIZE * sizeof(FutureState));
-  
-  int n=0;
-  unsigned char *ip=in,*op=out;
-  for(;ip < in+inlen;) {
-    if (n==0) { 
-      n = (in+inlen) - ip; if(n > MAX_SIZE) n = MAX_SIZE;
-      memcpy(in_buf, ip, n); ip += n; //n=fread(in_buf,1,MAX_SIZE,ifd);      
-      if (n<=0) break;
-      printf("got %d bytes, packing %d\n",n,inlen);fflush(stdout);
-      int b1=cnt_bpes(in_buf,n);
-      int use_e8=1;
-      e8(in_buf, n);
-      int b2=cnt_bpes(in_buf,n);
-      printf("stats noe8 %d e8 %d\n",b1,b2);
-      if (b2<=b1) {
-        use_e8=0;
-        printf("reverted e8\n");
 
-        e8back(in_buf,n);
-      }
-printf("pack %d\n", n);fflush(stdout);
-      int bres=pack(1,n);
-printf("pack %d\n", bres);fflush(stdout);
-      if (bres==n) {
-        *(unsigned *)op = n; op+=4; //fwrite(&n,4,1,ofd);
-        *(unsigned *)op = n; op+=4; //fwrite(&n,4,1,ofd);
-        memcpy(op, in_buf, n); op+=n; //fwrite(in_buf,1,n,ofd);
-      } else {
-        *(unsigned *)op = bres; op+=4; 	//fwrite(&bres,4,1,ofd);
-        *(unsigned *)op = n;    op+=4; 	//fwrite(&n,4,1,ofd);
-        *op++ = use_e8;					//fwrite(&use_e8,1,1,ofd);
-        memcpy(op, out_buf, bres); op += bres;		//fwrite(out_buf,1,bres,ofd);
-        //  for (i=0;i<n-1;i++) {printf("%d%s\n",cache[i],(cache[i]>=cache[i+1])?"":" !!!");};
-      }
-    } else { // next blocks
-      memmove(in_buf, in_buf+NEXT_SIZE, MAX_SIZE-NEXT_SIZE);
-      n = (in+inlen) - ip; if(n > NEXT_SIZE) n = NEXT_SIZE;       
-      memcpy(in_buf+MAX_SIZE-NEXT_SIZE, ip, n); ip += n; //n=fread(in_buf+MAX_SIZE-NEXT_SIZE,1,NEXT_SIZE,ifd);
-
-      if (n<=0) break;
-      printf("got %d bytes, packing...\n",n);fflush(stdout);
-      int bres=pack(MAX_SIZE-NEXT_SIZE,MAX_SIZE-NEXT_SIZE+n);
-      if (bres==n) {
-        *(unsigned *)op = n; op+=4; //fwrite(&n,4,1,ofd);
-        *(unsigned *)op = n; op+=4; //fwrite(&n,4,1,ofd);
-        memcpy(op, in_buf, n); op+=n; //fwrite(in_buf,1,n,ofd);
-      } else {
-        *(unsigned *)op = bres; op+=4; 	//fwrite(&bres,4,1,ofd);
-        *(unsigned *)op = n; op+=4; 	//fwrite(&n,4,1,ofd);
-        memcpy(op, out_buf, bres); op += bres; //fwrite(out_buf,1,bres,ofd);
-        //  for (i=0;i<n-1;i++) {printf("%d%s\n",cache[i],(cache[i]>=cache[i+1])?"":" !!!");};
-      }
-    }
-  }
-  free(in_buf);
-  free(rle);
-  free(state);
-  return op - out;
-}
 #if 0
-
 int main(int argc,char *argv[]) {
   FILE *ifd,*ofd;
   int n,i,bres,blz;
-  byte b;
+  uint8_t b;
 
   if (argc<3) {
-    printf("usage: lzoma [OPTION] input output [lzlit lit olz len dist]\n\t-1 .. -9 Compression level\n");
+    printf("usage: lzoma [OPTION] input output [lzlit lit olz len dist]\n"
+           "\t-1 .. -9 Compression level\n"
+           "\t-v Be verbose\n"
+           );
     printf("Notice: this program is at experimental stage of development. Compression format is not stable yet.\n");
     if (argc>1 && argv[1][0]=='%') { // undocumented debug feature to check correctness of offset encoding, when tuning parameters in lzoma.h
       int i;
@@ -931,14 +948,18 @@ int main(int argc,char *argv[]) {
     }
     exit(0);
   }
-  in_buf = (void *)malloc(MAX_SIZE * sizeof(uint8_t));
-  rle = (void *)malloc(MAX_SIZE * sizeof(uint32_t));
-  state = (void *)malloc(MAX_SIZE * sizeof(FutureState));
+  in_buf = (void *)malloc(HISTORY_SIZE * sizeof(uint8_t)+1);
+  rle = (void *)malloc(HISTORY_SIZE * sizeof(uint32_t));
+  //sorted = (void *)malloc(HISTORY_SIZE * sizeof(uint32_t));
+  state = (void *)malloc(max(BLOCK_SIZE * sizeof(FutureState), HISTORY_SIZE * sizeof(uint32_t)));
+  past_state = (void *)malloc(HISTORY_SIZE * sizeof(PastState));
   int arg=1;
   int metalevel = 7;
-  if (argv[arg][0]=='-') {
+  while (argv[arg][0]=='-') {
     if (argv[arg][1]>='1' && argv[arg][1]<='9')
       metalevel = argv[arg][1]-'0';
+    if (argv[arg][1]=='v')
+      verbose = 1;
     arg++;
   }
   metalevel--;
@@ -954,12 +975,29 @@ int main(int argc,char *argv[]) {
   if (arg<argc) folz=fopen(argv[arg++],"wb");
   if (arg<argc) flen=fopen(argv[arg++],"wb");
   if (arg<argc) fdist=fopen(argv[arg++],"wb");
-  n=0;
-  for(;;) {
-    if (n==0) {
-      n=fread(in_buf,1,MAX_SIZE,ifd);
-      if (n<=0) break;
-      printf("got %d bytes, packing %s into %s...\n",n,inf,ouf);
+
+#ifdef EXPERIMENTS
+  test=fopen("test","wb");
+  test2=fopen("test2","wb");
+  test3=fopen("test3","wb");
+#endif
+  
+  int blocknum;
+  uint32_t blk;
+  for(blocknum=0;;blocknum++) {
+    if (in_offset>HISTORY_SIZE-BLOCK_SIZE) {
+      memmove(in_buf, in_buf+BLOCK_SIZE, HISTORY_SIZE-BLOCK_SIZE);
+      in_offset -= BLOCK_SIZE;
+    }
+    n=fread(in_buf+in_offset,1,BLOCK_SIZE,ifd);
+    if (n<=0) {
+      blk = BLOCK_STORED | BLOCK_LAST;
+      fwrite(&blk,4,1,ofd);
+      break;
+    }
+    if (verbose) printf("got %d bytes, packing...\n",n);
+    if (blocknum==0) {
+      /*
       int b1=cnt_bpes(in_buf,n);
       int use_e8=1;
       e8(in_buf, n);
@@ -971,41 +1009,223 @@ int main(int argc,char *argv[]) {
 
         e8back(in_buf,n);
       }
+      */
+      /* 
+         write compressed file header 
+         we do it here only after we read some data
+         TODO:
+           at this stage we should decide if we will use any file-level compression filters
+      */
+      uint8_t header[8];
+      header[0] = AuthorID >> 8;
+      header[1] = AuthorID & 0xFF;
+      header[2] = AlgoID[0];
+      header[3] = AlgoID[1];
+      header[4] = AlgoID[2];
+      header[5] = AlgoID[3];
+      header[6] = Version;
+      int flags=0;
+      int blocksize_id = 5;
+      header[7] = flags << 4 | blocksize_id; 
+      fwrite(header,8,1,ofd);
 
       bres=pack(1,n);
-      if (bres==n) {
-        fwrite(&n,4,1,ofd);
-        fwrite(&n,4,1,ofd);
-        fwrite(in_buf,1,n,ofd);
-      } else {
-        fwrite(&bres,4,1,ofd);
-        fwrite(&n,4,1,ofd);
-        fwrite(&use_e8,1,1,ofd);
-        fwrite(out_buf,1,bres,ofd);
-        //  for (i=0;i<n-1;i++) {printf("%d%s\n",cache[i],(cache[i]>=cache[i+1])?"":" !!!");};
-      }
     } else { // next blocks
-      memmove(in_buf, in_buf+NEXT_SIZE, MAX_SIZE-NEXT_SIZE);
-      n=fread(in_buf+MAX_SIZE-NEXT_SIZE,1,NEXT_SIZE,ifd);
-      if (n<=0) break;
-      printf("got %d bytes, packing...\n",n);
-      bres=pack(MAX_SIZE-NEXT_SIZE,MAX_SIZE-NEXT_SIZE+n);
-      if (bres==n) {
+      bres=pack(in_offset,in_offset+n);
+    }
+    uint32_t blk = (n < BLOCK_SIZE) ? BLOCK_LAST : 0;
+    if (bres==n) {
+      blk |= BLOCK_STORED;
+      blk |= n;
+      fwrite(&blk,4,1,ofd);
+      fwrite(in_buf+in_offset,1,n,ofd);
+    } else {
+      blk |= bres;
+      fwrite(&blk,4,1,ofd);
+      if (blk & BLOCK_LAST)
         fwrite(&n,4,1,ofd);
-        fwrite(&n,4,1,ofd);
-        fwrite(in_buf,1,n,ofd);
-      } else {
-        fwrite(&bres,4,1,ofd);
-        fwrite(&n,4,1,ofd);
-        fwrite(out_buf,1,bres,ofd);
-        //  for (i=0;i<n-1;i++) {printf("%d%s\n",cache[i],(cache[i]>=cache[i+1])?"":" !!!");};
+      fwrite(out_buf,1,bres,ofd);
+      if (blk & BLOCK_LAST)
+        break;
+    }
+    
+    in_offset += n;
+  }
+  if (verbose) printf("closing files let=%d lz=%d olz=%d\n",stlet,stlz,stolz);
+  if (verbose) printf("bits lzlit=%d let=%d olz=%d match=%d len=%d\n",bitslzlen,bitslit,bitsolzlen,bitsdist,bitslen);
+  fclose(ifd);
+  fclose(ofd);
+
+#ifdef EXPERIMENTS
+  fclose(test);
+  fclose(test2);
+  fclose(test3);
+#endif
+
+  return 0;
+}
+#else
+#include "lzoma.h"
+
+#define _fwrite(_buf_, _esize_, _size_, _fd_) { size_t _size = (_esize_)*(_size_); memcpy(_fd_, _buf_, _size); _fd_ += _size; }
+#define _fread(_buf_, _esize_, _size_, _fd_, _fd__) ({ size_t _s = _fd__ - _fd_, _size = (_esize_)*(_size_); if(_s > _size) _s = _size; memcpy(_buf_, _fd_, _s); _fd_ += _s; _s; })
+
+int lzomapack( unsigned char *in, int inlen, unsigned char *out, int metalevel) {							// TurboBench
+  state = NULL;
+  past_state = NULL;
+  in_offset = 0;
+
+  lastpos=0;
+  bit_cnt=0;
+  outpos=0;
+
+  stlet=0;
+  stlz=0;
+  stolz=0;
+  bitslzlen=0;
+  bitsolzlen=0;
+  bitslen=0;
+  bitsdist=0;
+  bitslit=0;
+
+  unsigned char *ifd=in,*ifd_=in+inlen,*ofd=out;
+  //FILE *ifd,*ofd;
+  int n,i,bres,blz;
+  uint8_t b;
+
+  /*if (argc<3) {
+    printf("usage: lzoma [OPTION] input output [lzlit lit olz len dist]\n"
+           "\t-1 .. -9 Compression level\n"
+           "\t-v Be verbose\n"
+           );
+    printf("Notice: this program is at experimental stage of development. Compression format is not stable yet.\n");
+    if (argc>1 && argv[1][0]=='%') { // undocumented debug feature to check correctness of offset encoding, when tuning parameters in lzoma.h
+      int i;
+      int total=atoi(argv[1]+1);//16*1024*1024;
+      printf("%d\n",total);
+      for(i=total-10;i<total;i++) {
+        printf("%04d:",i);
+        putenc(i, total,breaklz, 1);
+        printf("\n");
       }
     }
+    exit(0);
+  }*/
+  in_buf = (void *)malloc(HISTORY_SIZE * sizeof(uint8_t)+1);
+  rle = (void *)malloc(HISTORY_SIZE * sizeof(uint32_t));
+  //sorted = (void *)malloc(HISTORY_SIZE * sizeof(uint32_t));
+  state = (void *)malloc(max(BLOCK_SIZE * sizeof(FutureState), HISTORY_SIZE * sizeof(uint32_t)));
+  past_state = (void *)malloc(HISTORY_SIZE * sizeof(PastState));
+  /*int arg=1;
+  int metalevel = 7;
+  while (argv[arg][0]=='-') {
+    if (argv[arg][1]>='1' && argv[arg][1]<='9')
+      metalevel = argv[arg][1]-'0';
+    if (argv[arg][1]=='v')
+      verbose = 1;
+    arg++;
+  }*/
+  metalevel--;
+  level=levels[metalevel][0];
+  short_match_level=levels[metalevel][1];
+  match_level=levels[metalevel][2];
+  /*char *inf=argv[arg++];
+  char *ouf=argv[arg++];
+  ifd=fopen(inf,"rb");
+  ofd=fopen(ouf,"wb");
+  if (arg<argc) flzlit=fopen(argv[arg++],"wb");
+  if (arg<argc) flit=fopen(argv[arg++],"wb");
+  if (arg<argc) folz=fopen(argv[arg++],"wb");
+  if (arg<argc) flen=fopen(argv[arg++],"wb");
+  if (arg<argc) fdist=fopen(argv[arg++],"wb");*/
+
+#ifdef EXPERIMENTS
+  test=fopen("test","wb");
+  test2=fopen("test2","wb");
+  test3=fopen("test3","wb");
+#endif
+  
+  int blocknum;
+  uint32_t blk;
+  for(blocknum=0;;blocknum++) {
+    if (in_offset>HISTORY_SIZE-BLOCK_SIZE) {
+      memmove(in_buf, in_buf+BLOCK_SIZE, HISTORY_SIZE-BLOCK_SIZE);
+      in_offset -= BLOCK_SIZE;
+    }
+    n=_fread(in_buf+in_offset,1,BLOCK_SIZE,ifd,ifd_);
+    if (n<=0) {
+      blk = BLOCK_STORED | BLOCK_LAST;
+      _fwrite(&blk,4,1,ofd);
+      break;
+    }
+    if (verbose) printf("got %d bytes, packing...\n",n);
+    if (blocknum==0) {
+      /*
+      int b1=cnt_bpes(in_buf,n);
+      int use_e8=1;
+      e8(in_buf, n);
+      int b2=cnt_bpes(in_buf,n);
+      printf("stats noe8 %d e8 %d\n",b1,b2);
+      if (b2<=b1) {
+        use_e8=0;
+        printf("reverted e8\n");
+
+        e8back(in_buf,n);
+      }
+      */
+      /* 
+         write compressed file header 
+         we do it here only after we read some data
+         TODO:
+           at this stage we should decide if we will use any file-level compression filters
+      */
+      uint8_t header[8];
+      header[0] = AuthorID >> 8;
+      header[1] = AuthorID & 0xFF;
+      header[2] = AlgoID[0];
+      header[3] = AlgoID[1];
+      header[4] = AlgoID[2];
+      header[5] = AlgoID[3];
+      header[6] = Version;
+      int flags=0;
+      int blocksize_id = 5;
+      header[7] = flags << 4 | blocksize_id; 
+      _fwrite(header,8,1,ofd);
+
+      bres=pack(1,n);
+    } else { // next blocks
+      bres=pack(in_offset,in_offset+n);
+    }
+    uint32_t blk = (n < BLOCK_SIZE) ? BLOCK_LAST : 0;
+    if (bres==n) {
+      blk |= BLOCK_STORED;
+      blk |= n;
+      _fwrite(&blk,4,1,ofd);
+      _fwrite(in_buf+in_offset,1,n,ofd);
+    } else {
+      blk |= bres;
+      _fwrite(&blk,4,1,ofd);
+      if (blk & BLOCK_LAST)
+        _fwrite(&n,4,1,ofd);
+      _fwrite(out_buf,1,bres,ofd);
+      if (blk & BLOCK_LAST)
+        break;
+    }
+    
+    in_offset += n;
   }
-  printf("closing files let=%d lz=%d olz=%d\n",stlet,stlz,stolz);
-  printf("bits lzlit=%d let=%d olz=%d match=%d len=%d\n",bitslzlen,bitslit,bitsolzlen,bitsdist,bitslen);
-  close(ifd);
-  close(ofd);
-  return 0;
+  if (verbose) printf("closing files let=%d lz=%d olz=%d\n",stlet,stlz,stolz);
+  if (verbose) printf("bits lzlit=%d let=%d olz=%d match=%d len=%d\n",bitslzlen,bitslit,bitsolzlen,bitsdist,bitslen);
+  //fclose(ifd);
+  //fclose(ofd);
+
+#ifdef EXPERIMENTS
+  fclose(test);
+  fclose(test2);
+  fclose(test3);
+#endif
+
+  //return 0;
+  return ofd - out;
 }
 #endif

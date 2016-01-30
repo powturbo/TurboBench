@@ -235,16 +235,6 @@ lzo/src/lzo1y_d1.o lzo/src/lzo1y_d2.o lzo/src/lzo1y_d3.o lzo/src/lzo1y_o.o lzo/s
 lzo/src/lzo1z_d3.o lzo/src/lzo1_99.o lzo/src/lzo2a_9x.o lzo/src/lzo2a_d1.o lzo/src/lzo2a_d2.o lzo/src/lzo_crc.o lzo/src/lzo_init.o \
 lzo/src/lzo_ptr.o lzo/src/lzo_str.o lzo/src/lzo_util.o 
 
-#https://github.com/alef78/lzoma
-lzoma_/pack.o: lzoma_/pack.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
-lzoma_/unpack.o: lzoma_/unpack.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
-
-#http://encode.ru/threads/2280-LZOMA
-#lzoma_/lzoma.o: lzoma_/lzoma.c 
-#	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
-
 tornado_/tormem.o: tornado_/tormem.cpp
 	$(CXX) -O3 $(TORDEF) -D__x86_$(ARCH)__ -DFREEARC_$(ARCH)BIT -pipe -fforce-addr -fno-exceptions -fno-rtti -c tornado_/tormem.cpp -o tornado_/tormem.o
 
@@ -258,8 +248,7 @@ ifeq ($(GPL), 1)
 OB+=$(LZMAT) $(LZO) $(ECGPL) $(MSCOMPRESS)
 OB+=lzlib/lzlib.o lzlib_/bbexample.o 
 OB+=lzmat/lzmat_enc.o lzmat/lzmat_dec.o
-OB+=lzoma_/pack.o lzoma_/unpack.o 
-#OB+=lzoma_/lzoma.o lzoma_/divsufsort.o
+OB+=lzoma_/pack.o lzoma_/unpack.o lzoma_/divsufsort.o
 OB+=ms-compress/src/mscomp.o ms-compress/src/lznt1_compress.o ms-compress/src/lznt1_decompress.o ms-compress/src/xpress_compress.o ms-compress/src/xpress_decompress.o ms-compress/src/xpress_huff_compress.o ms-compress/src/xpress_huff_decompress.o
 OB+=quicklz_/quicklz1.o quicklz_/quicklz2.o quicklz_/quicklz3.o 
 OB+=pysap/pysapcompress/vpa105CsObjInt.o pysap/pysapcompress/vpa106cslzc.o pysap/pysapcompress/vpa107cslzh.o pysap/pysapcompress/vpa108csulzh.o
