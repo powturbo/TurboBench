@@ -122,7 +122,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Nakamichi v15-10](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) :new:
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
- - [sap v15-11](https://github.com/CoreSecurity/pysap) 
+ - [sap v16-01](https://github.com/CoreSecurity/pysap) 
  - [shoco v2015](https://github.com/Ed-von-Schleck/shoco) 
  - [Shrinker v0.1/r9](https://code.google.com/p/data-shrinker) 
  - [Snappy v1.1.3](https://github.com/google/snappy) 
@@ -133,8 +133,8 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Yappy v2011]() 
  - [zlib v1.2.8](http://zlib.net)
  - [Libzling v16-01](https://github.com/richox/libzling) 
- - [Zopfli v15-05](https://code.google.com/p/zopfli) 
- - [ZSTD v0.4.6](https://github.com/Cyan4973/zstd) 
+ - [Zopfli v16-01](https://code.google.com/p/zopfli) 
+ - [ZSTD v0.4.7](https://github.com/Cyan4973/zstd) 
  - [zpaq v7.05](https://github.com/zpaq/zpaq) 
 
 * LzFSE: included but not tested
@@ -227,5 +227,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 17 JAN 2016
+Last update: 30 JAN 2016
 
