@@ -1224,7 +1224,10 @@ int lzomapack( unsigned char *in, int inlen, unsigned char *out, int metalevel) 
   fclose(test2);
   fclose(test3);
 #endif
-
+  free(in_buf);
+  free(rle);
+  free(state);
+  free(past_state);
   //return 0;
   return ofd - out;
 }
