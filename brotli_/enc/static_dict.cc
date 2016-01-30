@@ -3,7 +3,7 @@
    Distributed under MIT license.
    See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
 */
-
+extern int brotlidic; //TurboBench
 #include "../../brotli/enc/static_dict.h"
 
 #include <algorithm>
@@ -12,7 +12,6 @@
 #include "../../brotli/enc/find_match_length.h"
 #include "../../brotli/enc/static_dict_lut.h"
 #include "../../brotli/enc/transform.h"
-extern int brotlidic; //TurboBench
 
 namespace brotli {
 
