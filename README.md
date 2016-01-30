@@ -117,7 +117,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Lzmat v1.0](https://github.com/nemequ/lzmat) 
  - [Lzma v9.35](http://7-zip.org) 
  - [Lzo v2.09](http://www.oberhumer.com/opensource/lzo) 
- - [Lzoma v16.01](https://github.com/alef78/lzoma) 
+ - [Lzoma v16-01](https://github.com/alef78/lzoma) 
  - [Miniz v13-10](https://github.com/richgel999/miniz) :new:
  - [ms-compress v16.01](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi v15-10](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) :new:
