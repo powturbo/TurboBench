@@ -310,7 +310,7 @@ struct plugg {
 struct plugg plugg[] = 
 {
   { "FASTEST",   "lzturbo,10,11,12,19,20,21,22,29/lz4,0,1/lz5,0,1/chameleon,1,2/density,1,3/memcpy", 						"Fastest de-/compression. HDD/SSD/RAM speed" },
-  { "FAST",      "lzturbo,10,10a,11,12,20,20a,21,22,30,30a,31,32/zlib,1,6,9/brotli,1,5/lz4,1/zstd,1,5,9/lz5,1,6/memcpy",	"lz4,lzturbo,zlib class" },
+  { "FAST",      "lzturbo,10,10a,11,12,20,20a,21,22,30,30a,31,32/zlib,1,6,9/brotli,0,1,5/lz4,1/zstd,1,5,9/lz5,1,6/memcpy",	"lz4,lzturbo,zlib class" },
   { "EFFICIENT", "lzturbo,21,22,30,30a,31,32/brotli,5/zlib,5,6/zstd,5,9/lz5,5,6/zling,4/memcpy",							"Compression speed > 'zlib 6' class" },
   { "MAX",       "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lz5,15/lzlib,9/zstd,20/memcpy",						"Best compression (slow)" },
   { "OPTIMAL",   "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lz5,15/lzlib,9/zstd,20/zopfli/memcpy", 				"Optimal compression (slow)" },
@@ -1435,8 +1435,9 @@ int main(int argc, char* argv[]) { //lzdbgon();
     char tms[20];
     time_t tm; 
     time(&tm);    
-    strftime(tms, 20, "%F.%T", localtime(&tm));
-
+	struct tm *ltm = localtime(&tm); 
+	sprintf(tms, "%.4d-%.2d-%.2d/%.2d:%.2d:%.2d", 1900 + ltm->tm_year, ltm->tm_mon+1, ltm->tm_mday, ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
+	
     struct plug *g;
     fprintf(fo, "dataset\tsize\tcsize\tdtime\tctime\tcodec\tlevel\tparam\tcmem\tdmem\ttime\n");
     for(p = plugt; p < plugt+k; p++) {
