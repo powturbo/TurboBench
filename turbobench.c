@@ -1183,7 +1183,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
 }
 
 void usage(char *pgm) {
-  fprintf(stderr, "\nTurboBench Copyright (c) 2013-2015 Powturbo v15.12 %s\n", __DATE__);
+  fprintf(stderr, "\nTurboBench Copyright (c) 2013-2016 Powturbo %s\n", __DATE__);
   fprintf(stderr, "Usage: %s [options] [file]\n", pgm);
   fprintf(stderr, " -eS      S = compressors/groups separated by '/' Parameter can be specified after ','\n");
   fprintf(stderr, " -b#s     # = blocksize (default filesize,). max=1GB\n");
