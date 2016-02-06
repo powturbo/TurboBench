@@ -1436,7 +1436,7 @@ int main(int argc, char* argv[]) { //lzdbgon();
     time_t tm; 
     time(&tm);    
 	struct tm *ltm = localtime(&tm); 
-	sprintf(tms, "%.4d-%.2d-%.2d/%.2d:%.2d:%.2d", 1900 + ltm->tm_year, ltm->tm_mon+1, ltm->tm_mday, ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
+	sprintf(tms, "%.4d-%.2d-%.2d.%.2d:%.2d:%.2d", 1900 + ltm->tm_year, ltm->tm_mon+1, ltm->tm_mday, ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
 	
     struct plug *g;
     fprintf(fo, "dataset\tsize\tcsize\tdtime\tctime\tcodec\tlevel\tparam\tcmem\tdmem\ttime\n");
