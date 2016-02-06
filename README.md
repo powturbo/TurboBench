@@ -135,7 +135,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [zlib v1.2.8](http://zlib.net)
  - [Libzling v16-01](https://github.com/richox/libzling) 
  - [Zopfli v16-01](https://code.google.com/p/zopfli) 
- - [ZSTD v0.4.7](https://github.com/Cyan4973/zstd) 
+ - [ZSTD v0.5.0](https://github.com/Cyan4973/zstd) 
  - [zpaq v7.05](https://github.com/zpaq/zpaq) 
 
 * LzFSE: included but not tested
