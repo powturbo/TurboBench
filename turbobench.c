@@ -57,7 +57,7 @@
 #include <time.h>
 #include "conf.h"   
 #include "plugins.h"
-
+ 
 //--------------------------------------- Time ------------------------------------------------------------------------
 typedef unsigned long long tm_t;
 #define TM_T 1000000.0
@@ -92,7 +92,7 @@ static tm_t     tm_tm, tm_tx = 2*TM_T, tm_TX = 120*TM_T, tm_0, tm_T, tm_RepkT=24
 #define KB 1000
 #define MB 1000000
 #define GB 1000000000
-
+ 
 unsigned argtoi(char *s) {
   char *p; 
   unsigned n = strtol(s, &p, 10),f=1; 
@@ -310,8 +310,8 @@ struct plugg {
 struct plugg plugg[] = 
 {
   { "FASTEST",   "lzturbo,10,11,12,19,20,21,22,29/lz4,0,1/lz5,0,1/chameleon,1,2/density,1,3/memcpy", 						"Fastest de-/compression. HDD/SSD/RAM speed" },
-  { "FAST",      "lzturbo,10,10a,11,12,20,20a,21,22,30,30a,31,32/zlib,1,6,9/brotli,0,1,5/lz4,1/zstd,1,5,9/lz5,1,6/memcpy",	"lz4,lzturbo,zlib class" },
-  { "EFFICIENT", "lzturbo,21,22,30,30a,31,32/brotli,5/zlib,5,6/zstd,5,9/lz5,5,6/zling,4/memcpy",							"Compression speed > 'zlib 6' class" },
+  { "FAST",      "lzturbo,10,10a,11,12,20,20a,21,22,30,30a,31,32/zlib,1,6,9/brotli,0,1,4,5/lz4,1/zstd,1,5,9/lz5,1,6/memcpy","lz4,lzturbo,zlib class" },
+  { "EFFICIENT", "lzturbo,21,22,30,30a,31,32/brotli,4,5/zlib,5,6/zstd,5,9/lz5,5,6/zling,4/memcpy",							"Compression speed > 'zlib 6' class" },
   { "MAX",       "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lz5,15/lzlib,9/zstd,20/memcpy",						"Best compression (slow)" },
   { "OPTIMAL",   "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lz5,15/lzlib,9/zstd,20/zopfli/memcpy", 				"Optimal compression (slow)" },
   { "BWT",       "bsc_st,4,5/bsc,2/bcm/bzip2/memcpy/", 																		"ST & BWT" },
@@ -1235,7 +1235,7 @@ void printfile(char *finame, int xstdout, int fmt, char *rem) {
   if((p = strrchr(s,'.')) && !strcmp(p, ".tbb"))
     *p=0;
   plugprts(plugt, k, s, xstdout, totinlen, fmt, rem);	
-}
+} 
 
   #ifdef __MINGW32__
 extern int _CRT_glob = 1;
