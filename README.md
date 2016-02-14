@@ -110,7 +110,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [LibLZF v1.06](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [Lz4 v1.7.1](https://github.com/Cyan4973/lz4) 
- - [Lz5 v1.3.3](https://github.com/inikep/lz5) 
+ - [Lz5 v1.4.0](https://github.com/inikep/lz5) 
  - [Lzfse](https://developer.apple.com/library/mac/samplecode/CompressionSample/Introduction/Intro.html) *
  - [Lzham v1.1/15-12](https://github.com/richgel999/lzham_codec_devel) 
  - [Lzlib v1.7](http://www.nongnu.org/lzip) 
@@ -118,9 +118,9 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Lzma v9.35](http://7-zip.org) 
  - [Lzo v2.09](http://www.oberhumer.com/opensource/lzo) 
  - [Lzoma v16-01](https://github.com/alef78/lzoma) 
- - [Miniz v13-10](https://github.com/richgel999/miniz) :new:
+ - [Miniz v13-10](https://github.com/richgel999/miniz) 
  - [ms-compress v16.01](https://github.com/coderforlife/ms-compress) 
- - [Nakamichi v15-10](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) :new:
+ - [Nakamichi v15-10](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) 
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
  - [sap v16-02](https://github.com/CoreSecurity/pysap) 
