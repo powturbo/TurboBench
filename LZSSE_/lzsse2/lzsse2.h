@@ -28,15 +28,53 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+/* LZSSE2 - x64/SSE targeted codec for better performance with high compression ratio data/more optimal compressors.
+ * Supports minimum 3 byte matches, maximum 16 bytes of match per control word and 2 byte literal runs per control word. 
+ */
+
+ /* Re-usable parse state object for compression. */
 typedef struct LZSSE2_OptimalParseState LZSSE2_OptimalParseState;
 
-    // Make a compressor state for the re-entrant version of 
+/* Allocate the parse state for compression - returns null on failure */
 LZSSE2_OptimalParseState* LZSSE2_MakeOptimalParseState( size_t bufferSize );
 
+/* De-allocate the parse state for compression */
 void LZSSE2_FreeOptimalParseState( LZSSE2_OptimalParseState* toFree );
 
-size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const char* input, size_t inputLength, char* output, size_t outputLength, unsigned int level );
+/* "Optimal" compression routine.
+* Will compress data into LZSSE2 format, uses hash BST matching to find matches and run an optimal parse (high relative memory usage). Requires SSE 4.1.
+* state : Contains the hash table for matching, passed as a parameter so that allocations can be re-used. 
+* input : Buffer containing uncompressed data to be compressed. May not be null.
+* inputLength : Length of the compressed data in the input buffer - note should be under 2GB.
+* output : Buffer that will receive the compressed output. 
+* outputLength : The length reserved in the buffer for compressed data. This should be at least inputLength. Note,
+*                The compressed data should never be longer than inputLength, as in this case the data is stored raw.
+* level : The compression level to use for this file 1->16, 16 is most, 1 is least
+* Thread Safety - state can not be used on multiple threads with calls running concurrently. Can run multiple threads with separate state
+* concurrently.
+*
+* Returns the size of the compressed data, or 0 in the case of error (e.g. outputLength is less than inputLength).
+*/
+size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const void* input, size_t inputLength, void* output, size_t outputLength, unsigned int level );
 
-size_t LZSSE2_Decompress( const char* input, size_t inputLength, char* output, size_t outputLength );
+/* Decompression routine.
+* This routine will decompress data in the LZSSE2 format and currently requires SSE 4.1 and is targeted at x64.
+* It will perform poorly on x86 due to hunger for registers.
+*  input : Buffer containing compressed input block. May not be null.
+*  inputLength : Length of the compressed data in the input buffer - note, this should be under 2GB
+*  output : Buffer that will received the de-compressed output. Note, that this needs to be at least outputLength long.
+*           May not be null.
+*  outputLength : The length of the compressed output - note, this should be under 2GB
+*
+* Provided that input and output are valid pointers to buffers of at least their specified size, this routine
+* should be memory safe - both match pointer checks and input/output buffer checks exist.
+*
+* Returns the size of the decompressed data, which will be less than outputLength in the event of an error (number of bytes
+* will indicate where in the output stream the error occured).
+*
+* Note that this data is not hash verified, errors that occur are either from a misformed stream or bad buffer sizes.
+* Remember, corrupt data can still be valid to decompress.
+*/ 
+size_t LZSSE2_Decompress( const void* input, size_t inputLength, void* output, size_t outputLength );
 
-#endif // -- LZSSE2_H__
+#endif /* -- LZSSE2_H__ */

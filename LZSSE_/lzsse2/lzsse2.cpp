@@ -37,12 +37,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _BitScanForward(x, m) *(x)=__builtin_ctz(m)
   #endif
 
+#include <assert.h>
+
 #pragma warning ( disable : 4127 )
 
 namespace
 {
     // Constants - most of these should not be changed without corresponding code changes because it will break many things in unpredictable ways.
-    const uint32_t WINDOW_BITS = 16;
+    const uint32_t WINDOW_BITS             = 16;
     const uint32_t MIN_MATCH_LENGTH        = 3; 
     const uint32_t LZ_WINDOW_SIZE          = 1 << WINDOW_BITS;
     const uint32_t LZ_WINDOW_MASK          = LZ_WINDOW_SIZE - 1;
@@ -62,7 +64,7 @@ namespace
     const uint32_t BASE_MATCH_BITS         = OFFSET_BITS + CONTROL_BITS;
     const uint32_t SINGLE_LITERAL_COST     = CONTROL_BITS + LITERAL_BITS;
     const uint32_t DOUBLE_LITERAL_COST     = SINGLE_LITERAL_COST + LITERAL_BITS;
-    const uint32_t EXTENDED_MATCH_BOUND       = ( 1 << CONTROL_BITS ) - 1;
+    const uint32_t EXTENDED_MATCH_BOUND    = ( 1 << CONTROL_BITS ) - 1;
     const uint32_t CONTROL_BLOCK_SIZE      = sizeof( __m128i );
     const uint32_t CONTROLS_PER_BLOCK      = 32;
     const uint32_t LITERALS_PER_CONTROL    = 2;
@@ -70,6 +72,8 @@ namespace
     const size_t   OUTPUT_BUFFER_SAFE      = EXTENDED_MATCH_BOUND * CONTROLS_PER_BLOCK;
     const size_t   INPUT_BUFFER_SAFE       = MAX_INPUT_PER_CONTROL * CONTROLS_PER_BLOCK;
     const uint16_t INITIAL_OFFSET          = MIN_MATCH_LENGTH;
+    const size_t   SKIP_MATCH_LENGTH       = 128;
+    const uint32_t MAXIMUM_COMPRESSION     = 16;
 }
 
 struct Arrival
@@ -82,21 +86,16 @@ struct Arrival
 
 struct TreeNode
 {
-    int32_t parent;
     int32_t children[ 2 ];
 };
 
 struct LZSSE2_OptimalParseState
 {
     // Note, we should really replace this with a BST, hash chaining works but is *slooooooooooooooow* for optimal parse.
-    int32_t root; // stores the first matching position, we can then look at the rest of the matches by tracing through the window.
-//    int32_t  window[ LZ_WINDOW_SIZE ]; // each entry stores the next hash match position in the list. The list is indexed by position.
+    int32_t roots[ OPTIMAL_BUCKETS_COUNT ];
 
     TreeNode window[ LZ_WINDOW_SIZE ];
 
-    // consider more extensive testing to see if these provide benefit.
-//    int32_t  previousPosition[ LZ_WINDOW_SIZE ]; // each entry stores the next hash match position in the list. The list is indexed by position.
-//    uint32_t previousSize[ LZ_WINDOW_SIZE ]; // each entry stores the next hash match position in the list. The list is indexed by position.
     Arrival* arrivals;
 };
 
@@ -131,24 +130,11 @@ void LZSSE2_FreeOptimalParseState( LZSSE2_OptimalParseState* toFree )
 }
 
 
-//inline void SetHash( LZSSE2_OptimalParseState& state, uint32_t hash, const uint8_t* input, const uint8_t* inputCursor )
-//{
-//    int32_t position = static_cast< int32_t >( inputCursor - input );
-//    int32_t next     = state.buckets[ hash & OPTIMAL_HASH_MASK ];
-//
-//    state.buckets[ hash & OPTIMAL_HASH_MASK ] = position;
-//    state.window[ position & LZ_WINDOW_MASK ] = next;
-//}
-//
-//
-//inline uint32_t UpdateHash( uint32_t hash, const uint8_t* inputCursor )
-//{
-//    hash -= uint32_t( *( inputCursor - 1 ) ) * HASH_REMOVAL_MULTIPLIER;
-//    hash *= HASH_MULTIPLIER;
-//    hash += inputCursor[ 2 ]; 
-//
-//    return hash;
-//}
+inline uint32_t CalculateHash( const uint8_t* inputCursor )
+{
+    return ( uint32_t( inputCursor[ 0 ] ) * HASH_MULTIPLIER * HASH_MULTIPLIER + uint32_t( inputCursor[ 1 ] ) * HASH_MULTIPLIER + uint32_t( inputCursor[ 2 ] ) ) & OPTIMAL_HASH_MASK;
+}
+
 
 struct Match
 {
@@ -158,168 +144,145 @@ struct Match
 };
 
 
-namespace
+inline Match SearchAndUpdateFinder( LZSSE2_OptimalParseState& state, const uint8_t* input, const uint8_t* inputCursor, const uint8_t* inputEnd, uint32_t cutOff )
 {
-    void TreeRemove( LZSSE2_OptimalParseState& state, int32_t position )
+    Match result;
+
+    int32_t position = static_cast<int32_t>( inputCursor - input );
+
+    result.position = NO_MATCH;
+    result.length   = MIN_MATCH_LENGTH;
+    result.offset   = 0;
+
+    size_t   lengthToEnd  = inputEnd - inputCursor;
+    int32_t  lastPosition = position - ( LZ_WINDOW_SIZE - 1 );
+    uint32_t hash         = CalculateHash( inputCursor );
+
+    lastPosition = lastPosition > 0 ? lastPosition : 0;
+
+    int32_t treeCursor = state.roots[ hash ];
+
+    state.roots[ hash ] = position;
+    
+    int32_t* left        = &state.window[ position & LZ_WINDOW_MASK ].children[ 1 ];
+    int32_t* right       = &state.window[ position & LZ_WINDOW_MASK ].children[ 0 ];
+    size_t   leftLength  = 0;
+    size_t   rightLength = 0;
+
+    for ( ;; )
     {
-        if ( position > EMPTY_NODE )
+        if ( cutOff-- == 0 || treeCursor < lastPosition )
         {
-            const TreeNode& toRemoveNode = state.window[ position & LZ_WINDOW_MASK ];
-            int32_t         replacement  = EMPTY_NODE;
+            *left = *right = EMPTY_NODE;
+            break;
+        }
 
-            if ( toRemoveNode.children[ 0 ] > EMPTY_NODE && toRemoveNode.children[ 1 ] > EMPTY_NODE )
+        TreeNode&      currentNode = state.window[ treeCursor & LZ_WINDOW_MASK ];
+        const uint8_t* key         = input + treeCursor;
+        size_t         matchLength = leftLength < rightLength ? leftLength : rightLength;
+
+        uint16_t       matchOffset = static_cast<uint16_t>( position - treeCursor );
+        size_t         maxLength   = matchOffset <= ( EXTENDED_MATCH_BOUND + 1 ) && matchOffset < lengthToEnd ? matchOffset : lengthToEnd;
+
+        while ( matchLength < lengthToEnd )
+        {
+            __m128i input16 = _mm_loadu_si128( reinterpret_cast<const __m128i*>( inputCursor + matchLength ) );
+            __m128i match16 = _mm_loadu_si128( reinterpret_cast<const __m128i*>( key + matchLength ) );
+
+            unsigned long matchBytes;
+
+            _BitScanForward( &matchBytes, ( static_cast<unsigned long>( ~_mm_movemask_epi8( _mm_cmpeq_epi8( input16, match16 ) ) ) | 0x10000 ) );
+
+            matchLength += matchBytes;
+
+            if ( matchBytes != 16 )
             {
-                int32_t innerMostRight = toRemoveNode.children[ 1 ];
-                int32_t next           = state.window[ innerMostRight & LZ_WINDOW_MASK ].children[ 0 ];
-
-                while ( next > EMPTY_NODE )
-                {
-                    innerMostRight = next;
-                    next           = state.window[ innerMostRight & LZ_WINDOW_MASK ].children[ 0 ];
-                }
-
-                TreeRemove( state, innerMostRight );
-
-                replacement = innerMostRight;
-
-                TreeNode& replacementNode = state.window[ replacement & LZ_WINDOW_MASK ];
-
-                replacementNode = toRemoveNode;
-
-                if ( replacementNode.children[ 0 ] > EMPTY_NODE )
-                {
-                    state.window[ replacementNode.children[ 0 ] & LZ_WINDOW_MASK ].parent = replacement;
-                }
-
-                if ( replacementNode.children[ 1 ] > EMPTY_NODE )
-                {
-                    state.window[ replacementNode.children[ 1 ] & LZ_WINDOW_MASK ].parent = replacement;
-                }
-            }
-            else if ( toRemoveNode.children[ 0 ] > EMPTY_NODE )
-            {
-                replacement = toRemoveNode.children[ 0 ];
-
-                TreeNode& replacementNode = state.window[ replacement & LZ_WINDOW_MASK ];
-
-                replacementNode.parent = toRemoveNode.parent;
-            }
-            else
-            {
-                replacement = toRemoveNode.children[ 1 ];
-
-                if ( replacement > EMPTY_NODE )
-                {
-                    TreeNode& replacementNode = state.window[ replacement & LZ_WINDOW_MASK ];
-
-                    replacementNode.parent = toRemoveNode.parent;
-                }
-            }
-
-            if ( state.root == position )
-            {
-                state.root = replacement;
-
-                TreeNode& replacementNode = state.window[ replacement & LZ_WINDOW_MASK ];
-
-                replacementNode.parent = EMPTY_NODE;
-            }
-            else
-            {
-                TreeNode& parentNode = state.window[ toRemoveNode.parent & LZ_WINDOW_MASK ];
-
-                parentNode.children[ parentNode.children[ 1 ] == position ] = replacement;
+                break;
             }
         }
-    }
-    
-    inline Match SearchAndUpdateTree( LZSSE2_OptimalParseState& state, const uint8_t* input, const uint8_t* inputCursor, const uint8_t* inputEnd )
-    {
-        Match result;
 
-        int32_t position = static_cast<int32_t>( inputCursor - input );
+        matchLength = matchLength < lengthToEnd ? matchLength : lengthToEnd;
 
-        result.position = NO_MATCH;
-        result.length   = MIN_MATCH_LENGTH - 1;
-        result.offset   = 0;
+        size_t truncatedMatchLength = matchLength < maxLength ? matchLength : maxLength;
 
-        size_t  lengthToEnd  = inputEnd - inputCursor;
-        int32_t lastPosition = position - LZ_WINDOW_SIZE;
-
-        TreeRemove( state, lastPosition );
-
-        TreeNode& treeNode = state.window[ position & LZ_WINDOW_MASK ];
-
-        treeNode.parent        = EMPTY_NODE;
-        treeNode.children[ 0 ] = EMPTY_NODE;
-        treeNode.children[ 1 ] = EMPTY_NODE;
-
-        int32_t treeCursor = state.root;
-
-        if ( state.root == EMPTY_NODE )
+        if ( truncatedMatchLength >= result.length )
         {
-            state.root = position;
+            result.length   = truncatedMatchLength;
+            result.offset   = matchOffset;
+            result.position = treeCursor;
+        }
+        
+        if ( matchLength == lengthToEnd )
+        {
+            *left  = currentNode.children[ 1 ];
+            *right = currentNode.children[ 0 ];
+            break;
+        }
+
+        if ( inputCursor[ matchLength ] < key[ matchLength ] || ( matchLength == lengthToEnd ) )
+        {
+            *left       = treeCursor;
+            left        = currentNode.children;
+            treeCursor  = *left;
+            leftLength  = matchLength;
         }
         else
         {
-            for ( ;; )
+            *right      = treeCursor;
+            right       = currentNode.children + 1;
+            treeCursor  = *right;
+            rightLength = matchLength;
+        }
+    }
+    
+    // Special RLE overlapping match case, the LzFind style match above doesn't work very well with our
+    // restriction of overlapping matches having offsets of at least 16.
+    // Suffix array seems like a better option to handling this.
+    {
+        // Note, we're detecting long RLE here, but if we have an offset too close, we'll sacrifice a fair 
+        // amount of decompression performance to load-hit-stores.
+        int32_t matchPosition = position - ( sizeof( __m128i ) * 2 );
+
+        if ( matchPosition >= 0 )
+        {
+            uint16_t       matchOffset = static_cast<uint16_t>( position - matchPosition );
+            const uint8_t* key = input + matchPosition;
+            size_t         matchLength = 0;
+
+            while ( matchLength < lengthToEnd )
             {
-                TreeNode&      currentNode = state.window[ treeCursor & LZ_WINDOW_MASK ];
-                const uint8_t* key         = input + treeCursor;
-                size_t         matchLength = 0;
+                __m128i input16 = _mm_loadu_si128( reinterpret_cast<const __m128i*>( inputCursor + matchLength ) );
+                __m128i match16 = _mm_loadu_si128( reinterpret_cast<const __m128i*>( key + matchLength ) );
 
-                uint16_t matchOffset = static_cast<uint16_t>( position - treeCursor );
-                size_t   maxLength   = matchOffset <= ( EXTENDED_MATCH_BOUND + 1 ) && matchOffset < lengthToEnd ? matchOffset : lengthToEnd;
+                unsigned long matchBytes;
 
-                while ( matchLength < lengthToEnd )
+                _BitScanForward( &matchBytes, ( static_cast<unsigned long>( ~_mm_movemask_epi8( _mm_cmpeq_epi8( input16, match16 ) ) ) | 0x10000 ) );
+
+                matchLength += matchBytes;
+
+                if ( matchBytes != 16 )
                 {
-                    __m128i input16 = _mm_loadu_si128( reinterpret_cast<const __m128i*>( inputCursor + matchLength ) );
-                    __m128i match16 = _mm_loadu_si128( reinterpret_cast<const __m128i*>( key + matchLength ) );
-
-                    unsigned long matchBytes;
-
-                    _BitScanForward( &matchBytes, ( static_cast<unsigned long>( ~_mm_movemask_epi8( _mm_cmpeq_epi8( input16, match16 ) ) ) | 0x10000 ) );
-
-                    matchLength += matchBytes;
-
-                    if ( matchBytes != 16 )
-                    {
-                        break;
-                    }
-                }
-
-                matchLength = matchLength < lengthToEnd ? matchLength : lengthToEnd;
-
-                size_t truncatedMatchLength = matchLength < maxLength ? matchLength : maxLength;
-
-                if ( truncatedMatchLength > result.length )
-                {
-                    result.length   = truncatedMatchLength;
-                    result.position = treeCursor;
-                    result.offset   = matchOffset;
-                }
-
-                size_t  comparison = key[ matchLength ] > inputCursor[ matchLength ];
-                int32_t child      = currentNode.children[ comparison ];
-
-                if ( child == EMPTY_NODE )
-                {
-                    treeNode.parent                    = treeCursor;
-                    currentNode.children[ comparison ] = position;
                     break;
                 }
-                else
-                {
-                    treeCursor = child;
-                }
+
+            }
+
+            matchLength = matchLength < lengthToEnd ? matchLength : lengthToEnd;
+
+            if ( matchLength >= result.length )
+            {
+                result.length = matchLength;
+                result.offset = matchOffset;
+                result.position = matchPosition;
             }
         }
-
-        return result;
     }
+
+    return result;
 }
 
-size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const char* inputChar, size_t inputLength, char* outputChar, size_t outputLength, unsigned int )
+
+size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const void* inputChar, size_t inputLength, void* outputChar, size_t outputLength, unsigned int level )
 {
     if ( outputLength < inputLength )
     {
@@ -339,15 +302,21 @@ size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const char*
 
     const uint8_t* inputCursor      = input;
     const uint8_t* inputEnd         = input + inputLength;
-    uint32_t       hash             = 0;
     Arrival*       arrivalWatermark = state->arrivals;
     Arrival*       arrival          = state->arrivals;
+    uint32_t       cutOff           = 1 << level;
 
-    state->root = -1;
+    for ( int32_t* rootCursor = state->roots, *end = rootCursor + OPTIMAL_BUCKETS_COUNT; rootCursor < end; rootCursor += 4 )
+    {
+        rootCursor[ 0 ] = EMPTY_NODE;
+        rootCursor[ 1 ] = EMPTY_NODE;
+        rootCursor[ 2 ] = EMPTY_NODE;
+        rootCursor[ 3 ] = EMPTY_NODE;
+    }
 
     for ( uint32_t where = 0; where < MIN_MATCH_LENGTH; ++where )
     {
-        SearchAndUpdateTree( *state, input, inputCursor, inputEnd - END_PADDING_LITERALS );
+        /*Match dummy = */ SearchAndUpdateFinder( *state, input, inputCursor, inputEnd - END_PADDING_LITERALS, cutOff );
 
         ++inputCursor;
     }
@@ -355,7 +324,7 @@ size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const char*
     arrival->cost   = LITERAL_BITS * MIN_MATCH_LENGTH;
     arrival->from   = -1;
     arrival->offset = 0;
-
+    
     // loop through each character and project forward the matches at that character to calculate the cheapest
     // path of arrival for each individual character.
     for ( const uint8_t* earlyEnd = inputEnd - END_PADDING_LITERALS; inputCursor < earlyEnd; ++inputCursor, ++arrival )
@@ -397,7 +366,7 @@ size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const char*
             continue;
         }
 
-        Match match = SearchAndUpdateTree( *state, input, inputCursor, earlyEnd );
+        Match match = SearchAndUpdateFinder( *state, input, inputCursor, earlyEnd, cutOff );
         
         if ( match.position != NO_MATCH )
         {
@@ -420,6 +389,12 @@ size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const char*
                     arrivalWatermark = matchArrival > arrivalWatermark ? matchArrival : arrivalWatermark;
                 }
             }
+
+            if ( match.length > SKIP_MATCH_LENGTH )
+            {
+                arrival     += match.length - 2;
+                inputCursor += match.length - 2;
+            }
         }
     }
 
@@ -437,7 +412,7 @@ size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const char*
     // now trace the actual optimal parse path back, connecting the nodes in the other direction.
     for ( const Arrival* pathNode = arrivalWatermark; pathNode->from > 0; pathNode = previousPathNode )
     {
-        previousPathNode = state->arrivals + ( pathNode->from - MIN_MATCH_LENGTH );
+        previousPathNode     = state->arrivals + ( pathNode->from - MIN_MATCH_LENGTH );
 
         previousPathNode->to = static_cast<int32_t>( ( pathNode - state->arrivals ) + MIN_MATCH_LENGTH );
     }
@@ -448,7 +423,7 @@ size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const char*
 
     outputCursor += MIN_MATCH_LENGTH;
 
-    uint8_t* currentControlBlock = outputCursor;    
+    uint8_t* currentControlBlock = outputCursor;
     uint32_t currentControlCount = 0;
     uint32_t totalControlCount   = 0;
 
@@ -583,7 +558,7 @@ size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const char*
 }
 
 
-size_t LZSSE2_Decompress( const char* inputChar, size_t inputLength, char* outputChar, size_t outputLength )
+size_t LZSSE2_Decompress( const void* inputChar, size_t inputLength, void* outputChar, size_t outputLength )
 {
     const uint8_t* input  = reinterpret_cast< const uint8_t* >( inputChar );
     uint8_t*       output = reinterpret_cast< uint8_t* >( outputChar );
