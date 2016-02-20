@@ -103,6 +103,10 @@ SNAPPY=1
 DEFS+=-DSNAPPY
 endif
 
+ifeq ($(LZSSE),1)
+DEFS+=-DLZSSE
+endif
+
 ifeq ($(LZTURBO),1)
 DEFS+=-DLZTURBO
 endif
@@ -129,7 +133,7 @@ OB+=zstd/lib/zstd_compress.o zstd/lib/zstd_decompress.o zstd/lib/fse.o zstd/lib/
 ifeq ($(NCPP), 0)
 OB+=brotli_/enc/backward_references.o brotli/enc/block_splitter.o brotli/enc/encode.o brotli/enc/entropy_encode.o brotli/enc/compress_fragment.o brotli/enc/compress_fragment_two_pass.o brotli/enc/histogram.o \
 	brotli/enc/literal_cost.o brotli/enc/brotli_bit_stream.o brotli/enc/metablock.o brotli_/enc/static_dict.o brotli/enc/streams.o brotli/dec/bit_reader.o brotli/dec/decode.o brotli/dec/dictionary.o \
-	brotli/dec/huffman.o brotli/dec/state.o brotli/dec/streams.o brotli/enc/utf8_util.o
+	brotli/dec/huffman.o brotli/dec/state.o brotli/enc/utf8_util.o
 endif
 
 ifeq ($(HAVE_ZLIB), 1)
@@ -158,6 +162,15 @@ wflz/wfLZ.o: wflz/wfLZ.c
 
 nakamichi/Nakamichi_Nin.o: nakamichi/Nakamichi_Nin.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+
+LZSSE_/lzsse2/lzsse2.o: LZSSE_/lzsse2/lzsse2.cpp
+	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $(CFLAGS) $< -c -o $@ 
+
+LZSSE_/lzsse4/lzsse4.o: LZSSE_/lzsse4/lzsse4.cpp
+	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $(CFLAGS) $< -c -o $@ 
+
+LZSSE_/lzsse8/lzsse8.o: LZSSE_/lzsse8/lzsse8.cpp
+	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $(CFLAGS) $< -c -o $@ 
 
 #WKDM=wkdm/WKdmCompress.o wkdm/WKdmDecompress.o
 ifeq ($(NCOMP2), 0)
@@ -188,6 +201,10 @@ OB+=lzham_codec_devel/lzhamcomp/lzham_lzbase.o lzham_codec_devel/lzhamcomp/lzham
 	lzham_codec_devel/lzhamlib/lzham_lib.o 
 ifeq ($(UNAME), Windows)
 OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
+endif
+
+ifeq ($(LZSSE),1)
+OB+=LZSSE_/lzsse2/lzsse2.o LZSSE_/lzsse4/lzsse4.o LZSSE_/lzsse8/lzsse8.o 
 endif
 OB+=miniz/miniz.o
 OB+=nakamichi/Nakamichi_Kintaro.o

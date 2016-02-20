@@ -117,6 +117,12 @@ enum {
  P_LZO1b, P_LZO1c, P_LZO1f, P_LZO1x, P_LZO1y, P_LZO1z, P_LZO2a,
 #define C_LZOMA		GPL
  P_LZOMA, 
+   #ifdef LZSSE
+#define C_LZSSE     COMP2
+   #else
+#define C_LZSSE     0
+   #endif
+ P_LZSSE,
 #define C_MINIZ   	COMP2
  P_MINIZ,
 #define C_MSCOMPRESS	GPL  
@@ -419,6 +425,12 @@ static const Lzma_options option_mapping[] =  {
 #include "lzoma_/lzoma.h"
   #endif
 
+  #if C_LZSSE
+#include "LZSSE/lzsse2/lzsse2.h"
+#include "LZSSE/lzsse4/lzsse4.h"
+#include "LZSSE/lzsse8/lzsse8.h"
+  #endif
+ 
   #if C_MSCOMPRESS
 #include "ms-compress/include/mscomp.h"
   #endif  
@@ -673,6 +685,7 @@ struct plugs plugs[] = {
   { P_LZO1z, 	"lzo1z", 			C_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"999" }, 
   { P_LZO2a, 	"lzo2a", 			C_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"999" }, 
   { P_LZOMA, 	"lzoma", 			C_LZOMA,	"15-06",	"lzoma",				"GPL license",		"https://github.com/alef78/lzoma", 														"1,2,3,4,5,6,7" },
+  { P_LZSSE,	"lzsse",   	        C_LZSSE,	"16-02",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													"2,4,8"}, 
   { P_MINIZ, 	"miniz", 			C_MINIZ,	"15-06",	"miniz zlib-replacement","Public domain",	"https://github.com/richgel999/miniz", 													"1,2,3,4,5,6,7,8,9" },
   { P_MSCOMPRESS,"mscompress", 		C_MSCOMPRESS,"16.01",	"ms-compress",			"GPL license",		"https://github.com/coderforlife/ms-compress", 											"2,3,4" }, 
   { P_NAKA, 	"naka", 			C_NAKA,		"15-10",	"Nakamichi Kintaro",	"Public Domain",    "http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188",	"" },
@@ -691,7 +704,7 @@ struct plugs plugs[] = {
   { P_ZLIB, 	"zlib", 			C_ZLIB, 	"1.2.8",	"zlib",					"zlib license",		"http://zlib.net\thttps://github.com/madler/zlib", 										"1,2,3,4,5,6,7,8,9" },
   { P_ZLING, 	"zling", 	   		C_ZLING, 	"16-01",	"Libzling",				"BSD license",		"https://github.com/richox/libzling",													"0,1,2,3,4" }, 
   { P_ZOPFLI, 	"zopfli",			C_ZOPFLI, 	"15-05",	"Zopfli",				"Apache license",	"https://code.google.com/p/zopfli",														""}, 
-  { P_ZSTD, 	"zstd", 			C_ZSTD,		"0.5.0",	"ZSTD",					"BSD license",		"https://github.com/Cyan4973/zstd", 													"1,2,3,4,5,6,7,8,9,12,16,20" },
+  { P_ZSTD, 	"zstd", 			C_ZSTD,		"0.5.0",	"ZSTD",					"BSD license",		"https://github.com/Cyan4973/zstd", 													"1,2,3,4,5,6,7,8,9,12,16,20,21" },
 //-----------------------------------------------------------------------------------	  
   { P_MCPY, 	"imemcpy", 			C_MEMCPY, 	".",		"inline memcpy",		"------------",		"--------------------------------------",												"" },
   { P_LMCPY, 	"memcpy",			C_MEMCPY,  	".",		"library memcpy",		"",					"",																						"" },
@@ -1019,6 +1032,15 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #if C_LZSS
 	case P_LZSS1:   { return lzss_encode(in, inlen, out, 0); }
     case P_LZSS2:   { return lzss_encode(in, inlen, out, 1); }
+	  #endif
+
+	  #if C_LZSSE
+	case P_LZSSE:
+      switch(lev) {
+		case 2: { LZSSE2_OptimalParseState *s = LZSSE2_MakeOptimalParseState(1<<26); outlen = LZSSE2_CompressOptimalParse( s, in, inlen, out, outsize, 0 ); LZSSE2_FreeOptimalParseState(s); } break;
+		case 4: { LZSSE4_FastParseState    *s = LZSSE4_MakeFastParseState();           outlen = LZSSE4_CompressFast(         s, in, inlen, out, outsize    ); LZSSE4_FreeFastParseState(s); } break;
+		case 8: { LZSSE8_FastParseState    *s = LZSSE8_MakeFastParseState();           outlen = LZSSE8_CompressFast(         s, in, inlen, out, outsize    ); LZSSE8_FreeFastParseState(s); } break;
+	  } return outlen;
 	  #endif
 
       #if C_MSCOMPRESS
@@ -1424,6 +1446,15 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
 	  #if C_LZSS
     case P_LZSS: lzss_decode(in, out, outlen); break;
+	  #endif
+
+	  #if C_LZSSE
+	case P_LZSSE: 
+      switch(lev) {
+		case 2: return LZSSE2_Decompress(in,inlen,out,outlen);
+		case 4: return LZSSE4_Decompress(in,inlen,out,outlen);
+		case 8: return LZSSE8_Decompress(in,inlen,out,outlen);
+	  } break;
 	  #endif
 
       #if C_MSCOMPRESS

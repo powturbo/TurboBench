@@ -1070,7 +1070,8 @@ struct plug plugr[32]; int tid;
 #define BEOPT
 #define BEUSAGE
 #define BEFILE
-  #endif
+#define BENCHSTA
+#endif
 
 #define INOVD 4*1024
 
@@ -1400,7 +1401,8 @@ int main(int argc, char* argv[]) { //lzdbgon();
       if(tmtime() - tmk0 > tm_RepkT) break;
     } 
   }
-  
+    BENCHSTA;
+
   if(argc - optind > 1) {
     unsigned clen = strpref(&argvx[optind], argc-optind, '\\', '/');
     strncpy(s, argvx[optind], clen);
