@@ -28,8 +28,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-/* LZSSE-F - x64/SSE targeted codec for better performance with lower compression ratio data/less optimal compressors.
-* Supports minimum 4 byte matches, maximum 15 bytes of match per control word and 4 byte literal runs per control word. 
+/* LZSSE8 - x64/SSE targeted codec for better performance with lower compression ratio data/less optimal compressors.
+* Supports minimum 4 byte matches, maximum 15 bytes of match per control word and 8 byte literal runs per control word. 
 */
 
 /* Re-usable parse state object for compression. */
@@ -41,8 +41,8 @@ LZSSE8_FastParseState* LZSSE8_MakeFastParseState();
 /* De-allocate the parse state for compression */
 void LZSSE8_FreeFastParseState( LZSSE8_FastParseState* toFree );
 
-/* LZZSE-F "Fast" compression routine.
-* Will compress data into LZSSE-F format, uses a simple single entry hash/greedy matching to find matches. Requires SSE 4.1.
+/* "Fast" compression routine.
+* Will compress data into LZSSE8 format, uses a simple single entry hash/greedy matching to find matches. Requires SSE 4.1.
 * state : Contains the hash table for matching, passed as a parameter so that allocations can be re-used. 
 * input : Buffer containing uncompressed data to be compressed. May not be null.
 * inputLength : Length of the compressed data in the input buffer - note should be under 2GB.
@@ -55,10 +55,10 @@ void LZSSE8_FreeFastParseState( LZSSE8_FastParseState* toFree );
 *
 * Returns the size of the compressed data, or 0 in the case of error (e.g. outputLength is less than inputLength).
 */
-size_t LZSSE8_CompressFast( LZSSE8_FastParseState* state, const char* input, size_t inputLength, char* output, size_t outputLength );
+size_t LZSSE8_CompressFast( LZSSE8_FastParseState* state, const void* input, size_t inputLength, void* output, size_t outputLength );
 
-/* LZZSE-F Decompression routine.
-* This routine will decompress data in the LZSSE-F format and currently requires SSE 4.1 and is targeted at x64.
+/* Decompression routine.
+* This routine will decompress data in the LZSSE8 format and currently requires SSE 4.1 and is targeted at x64.
 * It will perform poorly on x86 due to hunger for registers.
 *  input : Buffer containing compressed input block. May not be null.
 *  inputLength : Length of the compressed data in the input buffer - note, this should be under 2GB
@@ -75,7 +75,7 @@ size_t LZSSE8_CompressFast( LZSSE8_FastParseState* state, const char* input, siz
 * Note that this data is not hash verified, errors that occur are either from a misformed stream or bad buffer sizes.
 * Remember, corrupt data can still be valid to decompress.
 */ 
-size_t LZSSE8_Decompress( const char* input, size_t inputLength, char* output, size_t outputLength );
+size_t LZSSE8_Decompress( const void* input, size_t inputLength, void* output, size_t outputLength );
 
 
 #endif /* -- LZSSE8_H__ */

@@ -98,7 +98,7 @@ inline uint32_t HashFast( const uint8_t* inputCursor )
     return *reinterpret_cast<const uint32_t*>( inputCursor ) * 0x1e35a7bd >> ( 32 - FAST_HASH_BITS );
 }
 
-size_t LZSSE8_CompressFast( LZSSE8_FastParseState* state, const char* inputChar, size_t inputLength, char* outputChar, size_t outputLength )
+size_t LZSSE8_CompressFast( LZSSE8_FastParseState* state, const void* inputChar, size_t inputLength, void* outputChar, size_t outputLength )
 {
     if ( outputLength < inputLength )
     {
@@ -387,7 +387,7 @@ size_t LZSSE8_CompressFast( LZSSE8_FastParseState* state, const char* inputChar,
     }
 
     // If we would create a compression output bigger than or equal to the input, just copy the input to the output and return equal size.
-    if ( ( outputCursor + literalsToFlush + ( currentControlCount == CONTROLS_PER_BLOCK ? CONTROL_BLOCK_SIZE : 0 ) ) >= outputEarlyEnd )
+    if ( ( ( outputCursor + literalsToFlush + ( currentControlCount == CONTROLS_PER_BLOCK ? CONTROL_BLOCK_SIZE : 0 ) ) ) >= output + inputLength - END_PADDING_LITERALS )
     {
         memcpy( output, input, inputLength );
 
@@ -441,7 +441,7 @@ size_t LZSSE8_CompressFast( LZSSE8_FastParseState* state, const char* inputChar,
 }
 
 
-size_t LZSSE8_Decompress( const char* inputChar, size_t inputLength, char* outputChar, size_t outputLength )
+size_t LZSSE8_Decompress( const void* inputChar, size_t inputLength, void* outputChar, size_t outputLength )
 {
     const uint8_t* input  = reinterpret_cast< const uint8_t* >( inputChar );
     uint8_t*       output = reinterpret_cast< uint8_t* >( outputChar );
@@ -594,10 +594,9 @@ size_t LZSSE8_Decompress( const char* inputChar, size_t inputLength, char* outpu
 #define DECODE_STEP_END_HI(CHECKMATCH, CHECKBUFFERS )      DECODE_STEP_END( Hi, CHECKMATCH, CHECKBUFFERS )
 
     __m128i nibbleMask         = _mm_set1_epi8( 0xF );
-    __m128i literalsPerControl = _mm_set1_epi8( LITERALS_PER_CONTROL );
-    __m128i bytesInOutLUT      = _mm_set_epi8( 0x2B, 0x2A, 0x29, 0x28, 0x27, 0x26, 0x25, 0x24, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11 );
-
-
+    __m128i literalsPerControl = _mm_set1_epi8( static_cast< char >( LITERALS_PER_CONTROL ) );
+    __m128i bytesInOutLUT      = _mm_set_epi8( '\x2B', '\x2A', '\x29', '\x28', '\x27', '\x26', '\x25', '\x24', '\x88', '\x77', '\x66', '\x55', '\x44', '\x33', '\x22', '\x11' );
+    
     // Note, we use this block here because it allows the "fake" inputEarlyEnd/outputEarlyEnd not to cause register spills 
     // in the decompression loops. And yes, that did actually happen.
     {
@@ -899,19 +898,16 @@ size_t LZSSE8_Decompress( const char* inputChar, size_t inputLength, char* outpu
 
             previousCarryHi = carryHi;
 
-            // We make the implicit assumption that the maximum number of literals to controls here is twice the offset size (4 vs 2),
-            // we are doing this here to save keeping the value around (spilling or fetching it each time)
-
+            // Note, unlike the other compressors, we are essentially doing an in register lookup table to implement the logic here. 
             __m128i streamBytesLo      = _mm_shuffle_epi8( bytesInOutLUT, controlLo );
             __m128i streamBytesHi      = _mm_shuffle_epi8( bytesInOutLUT, controlHi );
 
-            // Here we're calculating the number of bytes that will be output, we are actually subtracting negative one from the control 
-            // (handy trick where comparison result masks are negative one) if carry is not set and it is a literal.
+            // Either use the value from the lookup, or in the case the carry is set, use the control value.
             __m128i bytesOutLo         = _mm_blendv_epi8( _mm_and_si128( streamBytesLo, nibbleMask ), controlLo, shiftedCarryHi );
             __m128i bytesOutHi         = _mm_blendv_epi8( _mm_and_si128( streamBytesHi, nibbleMask ), controlHi, carryLo ); 
 
             // Calculate the number of bytes to read per control.
-            // In the case the carry is set, no bytes. Otherwise, the offset size (2 bytes) for matches or the number of output bytes for literals.
+            // We use the value from the lookup table to .
             __m128i streamBytesReadLo  = _mm_andnot_si128( shiftedCarryHi, _mm_and_si128( _mm_srli_epi32( streamBytesLo, 4 ), nibbleMask ) );
             __m128i streamBytesReadHi  = _mm_andnot_si128( carryLo, _mm_and_si128( _mm_srli_epi32( streamBytesHi, 4 ), nibbleMask ) );
 

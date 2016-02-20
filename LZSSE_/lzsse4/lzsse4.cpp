@@ -100,7 +100,7 @@ inline uint32_t HashFast( const uint8_t* inputCursor )
     return *reinterpret_cast<const uint32_t*>( inputCursor ) * 0x1e35a7bd >> ( 32 - FAST_HASH_BITS );
 }
 
-size_t LZSSE4_CompressFast( LZSSE4_FastParseState* state, const char* inputChar, size_t inputLength, char* outputChar, size_t outputLength )
+size_t LZSSE4_CompressFast( LZSSE4_FastParseState* state, const void* inputChar, size_t inputLength, void* outputChar, size_t outputLength )
 {
     if ( outputLength < inputLength )
     {
@@ -373,7 +373,7 @@ size_t LZSSE4_CompressFast( LZSSE4_FastParseState* state, const char* inputChar,
     }
 
     // If we would create a compression output bigger than or equal to the input, just copy the input to the output and return equal size.
-    if ( ( outputCursor + literalsToFlush + ( currentControlCount == CONTROLS_PER_BLOCK ? CONTROL_BLOCK_SIZE : 0 ) ) >= outputEarlyEnd )
+    if ( ( ( outputCursor + literalsToFlush + ( currentControlCount == CONTROLS_PER_BLOCK ? CONTROL_BLOCK_SIZE : 0 ) ) ) >= output + inputLength - END_PADDING_LITERALS )
     {
         memcpy( output, input, inputLength );
 
@@ -426,7 +426,7 @@ size_t LZSSE4_CompressFast( LZSSE4_FastParseState* state, const char* inputChar,
 }
 
 
-size_t LZSSE4_Decompress( const char* inputChar, size_t inputLength, char* outputChar, size_t outputLength )
+size_t LZSSE4_Decompress( const void* inputChar, size_t inputLength, void* outputChar, size_t outputLength )
 {
     const uint8_t* input  = reinterpret_cast< const uint8_t* >( inputChar );
     uint8_t*       output = reinterpret_cast< uint8_t* >( outputChar );
