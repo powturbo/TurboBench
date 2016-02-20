@@ -119,3 +119,6 @@
 [submodule "miniz"]
 	path = miniz
 	url = https://github.com/richgel999/miniz.git
+[submodule "LZSSE"]
+	path = LZSSE
+	url = https://github.com/ConorStokes/LZSSE.git
