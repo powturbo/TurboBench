@@ -4,15 +4,14 @@
    See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
 */
 
-extern int brotlidic; //TurboBench
-#include "../../brotli/enc/static_dict.h"
+#include "./static_dict.h"
 
 #include <algorithm>
 
-#include "../../brotli/enc/dictionary.h"
-#include "../../brotli/enc/find_match_length.h"
-#include "../../brotli/enc/static_dict_lut.h"
-#include "../../brotli/enc/transform.h"
+#include "./dictionary.h"
+#include "./find_match_length.h"
+#include "./static_dict_lut.h"
+#include "./transform.h"
 
 namespace brotli {
 
@@ -70,7 +69,6 @@ bool FindAllStaticDictionaryMatches(const uint8_t* data,
                                     size_t min_length,
                                     size_t max_length,
                                     uint32_t* matches) {
-  if(brotlidic) return false;//TurboBench
   bool found_match = false;
   size_t key = Hash(data);
   size_t bucket = kStaticDictionaryBuckets[key];
