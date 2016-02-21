@@ -34,6 +34,7 @@ endif
 
 ifeq ($(STATIC),1)
 LDFLAGS+=-static
+NMEMSIZE=1
 endif
 
 LBITS := $(shell getconf LONG_BIT)

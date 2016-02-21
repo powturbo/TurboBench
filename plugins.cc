@@ -1039,11 +1039,9 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif
 
 	  #if C_LZSSE
-	case P_LZSSE2: { size_t l = (inlen<(1u<<28)?inlen:(1u<<28))*18ull; if(*prm=='B') { prm++; l=1ull<<atoi(prm);} LZSSE2_OptimalParseState *s = LZSSE2_MakeOptimalParseState(l); if(!s) return 0; 
-                                                                                                        outlen = LZSSE2_CompressOptimalParse( s, in, inlen, out, outsize, lev ); LZSSE2_FreeOptimalParseState(s); return outlen; 
-      }
-	case P_LZSSE4: {                         LZSSE4_FastParseState    *s = LZSSE4_MakeFastParseState(); outlen = LZSSE4_CompressFast(         s, in, inlen, out, outsize      ); LZSSE4_FreeFastParseState(s);    return outlen; }
-	case P_LZSSE8: {                         LZSSE8_FastParseState    *s = LZSSE8_MakeFastParseState(); outlen = LZSSE8_CompressFast(         s, in, inlen, out, outsize      ); LZSSE8_FreeFastParseState(s);    return outlen; }
+	case P_LZSSE2: { LZSSE2_OptimalParseState *s = LZSSE2_MakeOptimalParseState(inlen); if(!s) return 0; outlen = LZSSE2_CompressOptimalParse( s, in, inlen, out, outsize, lev ); LZSSE2_FreeOptimalParseState(s); return outlen; }
+	case P_LZSSE4: { LZSSE4_FastParseState    *s = LZSSE4_MakeFastParseState();                          outlen = LZSSE4_CompressFast(         s, in, inlen, out, outsize      ); LZSSE4_FreeFastParseState(s);    return outlen; }
+	case P_LZSSE8: { LZSSE8_FastParseState    *s = LZSSE8_MakeFastParseState();                          outlen = LZSSE8_CompressFast(         s, in, inlen, out, outsize      ); LZSSE8_FreeFastParseState(s);    return outlen; }
 	  #endif
 
       #if C_MSCOMPRESS
