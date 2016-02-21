@@ -23,19 +23,19 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-//#include <intrin.h>
 #include <memory.h>
 #include <stdint.h>
 #include <stdio.h>
 #include "lzsse2.h"
 
 #include <assert.h>
+#include <stddef.h>
   #ifdef __SSE4_1__
 #include <smmintrin.h>
   #else
 #error "missing compiler option -msse4.1"
   #endif
-  #ifndef _WIN32
+  #ifndef _MSC_VER
 #define _BitScanForward(x, m) *(x)=__builtin_ctz(m)
   #endif
 
