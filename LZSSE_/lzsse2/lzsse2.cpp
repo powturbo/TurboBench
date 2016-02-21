@@ -27,17 +27,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stddef.h>
 #include "lzsse2.h"
 
+#include <assert.h>
   #ifdef __SSE4_1__
-#include <smmintrin.h> 
+#include <smmintrin.h>
+  #else
+#error "missing compiler option -msse4.1"
   #endif
   #ifndef _WIN32
 #define _BitScanForward(x, m) *(x)=__builtin_ctz(m)
   #endif
-
-#include <assert.h>
 
 #pragma warning ( disable : 4127 )
 
@@ -941,8 +941,10 @@ size_t LZSSE2_Decompress( const void* inputChar, size_t inputLength, void* outpu
     
     // Decoding loop with all buffer checks.
     {
-        const  uint8_t* inputEarlyEnd  = ( input + inputLength ) - END_PADDING_LITERALS;
-        uint8_t*        outputEarlyEnd = ( output + outputLength ) - END_PADDING_LITERALS;
+        const uint8_t* inputEarlyEnd;
+        uint8_t*        outputEarlyEnd;
+        inputEarlyEnd  = (( input + inputLength ) - END_PADDING_LITERALS);
+        outputEarlyEnd = ( output + outputLength ) - END_PADDING_LITERALS;
 
         while ( outputCursor < outputEarlyEnd && inputCursor < inputEarlyEnd )
         {
