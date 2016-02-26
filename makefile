@@ -207,9 +207,9 @@ ifeq ($(UNAME), Windows)
 OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
 
-#ifeq ($(LZSSE),1)
+ifeq ($(LZSSE),1)
 OB+=$(LZSSEDIR)/lzsse2/lzsse2.o $(LZSSEDIR)/lzsse4/lzsse4.o $(LZSSEDIR)/lzsse8/lzsse8.o 
-#endif
+endif
 OB+=miniz/miniz.o
 OB+=nakamichi/Nakamichi_Kintaro.o
 OB+=pithy/pithy.o
