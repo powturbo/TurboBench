@@ -23,22 +23,13 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-//#include <intrin.h>
 #include <memory.h>
+#include <stdlib.h>
 #include <stdint.h>
-#include <stdio.h>
-#include "lzsse8.h"
 
-#include <assert.h>
+#include "lzsse8_platform.h"
+#include "lzsse8.h"
 #include <stddef.h>
-  #ifdef __SSE4_1__
-#include <smmintrin.h>
-  #else
-#error "missing compiler option -msse4.1"
-  #endif
-  #ifndef _MSC_VER
-#define _BitScanForward(x, m) *(x)=__builtin_ctz(m)
-  #endif
 
 #pragma warning ( disable : 4127 )
 
@@ -55,6 +46,7 @@ namespace
     const uint32_t MIN_COMPRESSION_SIZE    = 32;
     const uint32_t END_PADDING_LITERALS    = 16;
     const int32_t  NO_MATCH                = -1;
+    const int32_t  EMPTY_NODE              = -1;
     const uint32_t CONTROL_BITS            = 4;
     const uint32_t OFFSET_SIZE             = 2;
     const uint32_t EXTENDED_MATCH_BOUND    = ( 1 << CONTROL_BITS ) - 1;
@@ -66,6 +58,15 @@ namespace
     const size_t   OUTPUT_BUFFER_SAFE      = EXTENDED_MATCH_BOUND * CONTROLS_PER_BLOCK;
     const size_t   INPUT_BUFFER_SAFE       = MAX_INPUT_PER_CONTROL * CONTROLS_PER_BLOCK;
     const uint16_t INITIAL_OFFSET          = LITERALS_PER_CONTROL;
+    const uint32_t OFFSET_BITS             = 16;
+    const uint32_t BASE_MATCH_BITS         = OFFSET_BITS + CONTROL_BITS;
+    const uint32_t OPTIMAL_HASH_BITS       = 20;
+    const uint32_t OPTIMAL_BUCKETS_COUNT   = 1 << OPTIMAL_HASH_BITS;
+    const uint32_t OPTIMAL_HASH_MASK       = OPTIMAL_BUCKETS_COUNT - 1;
+    const uint32_t LITERAL_BITS            = 8;
+    const size_t   SKIP_MATCH_LENGTH       = 128;
+    const uint32_t NO_SKIP_LEVEL           = 17;
+
 }
 
 
@@ -100,6 +101,517 @@ inline uint32_t HashFast( const uint8_t* inputCursor )
 {
     return *reinterpret_cast<const uint32_t*>( inputCursor ) * 0x1e35a7bd >> ( 32 - FAST_HASH_BITS );
 }
+
+struct Arrival
+{
+    size_t    cost;
+    int32_t   from;
+    int32_t   to;
+    uint16_t  offset;
+};
+
+struct TreeNode
+{
+    int32_t children[ 2 ];
+};
+
+struct LZSSE8_OptimalParseState
+{
+    // Note, we should really replace this with a BST, hash chaining works but is *slooooooooooooooow* for optimal parse.
+    int32_t roots[ OPTIMAL_BUCKETS_COUNT ];
+
+    TreeNode window[ LZ_WINDOW_SIZE ];
+
+    Arrival* arrivals;
+    
+    size_t bufferSize;
+};
+
+
+LZSSE8_OptimalParseState* LZSSE8_MakeOptimalParseState( size_t bufferSize )
+{
+    LZSSE8_OptimalParseState* result = reinterpret_cast< LZSSE8_OptimalParseState* >( ::malloc( sizeof( LZSSE8_OptimalParseState ) ) );
+
+    result->bufferSize = bufferSize;
+
+    if ( result != nullptr )
+    {
+        result->arrivals = reinterpret_cast< Arrival* >( ::malloc( sizeof( Arrival ) * bufferSize ) );
+
+        if ( result->arrivals == nullptr )
+        {
+            LZSSE8_FreeOptimalParseState( result );
+
+            result = nullptr;
+        }
+    }
+
+    return result;
+}
+
+
+void LZSSE8_FreeOptimalParseState( LZSSE8_OptimalParseState* toFree )
+{
+    ::free( toFree->arrivals );
+
+    toFree->arrivals = nullptr;
+
+    ::free( toFree );
+}
+
+
+inline uint32_t HashOptimal( const uint8_t* inputCursor )
+{
+    return *reinterpret_cast<const uint32_t*>( inputCursor ) * 0x1e35a7bd >> ( 32 - OPTIMAL_HASH_BITS );
+}
+
+
+struct Match
+{
+    size_t length;
+    int32_t position;
+    uint16_t offset;
+};
+
+
+inline Match SearchAndUpdateFinder( LZSSE8_OptimalParseState& state, const uint8_t* input, const uint8_t* inputCursor, const uint8_t* inputEnd, uint32_t cutOff )
+{
+    Match result;
+
+    int32_t position = static_cast<int32_t>( inputCursor - input );
+
+    result.position = NO_MATCH;
+    result.length   = MIN_MATCH_LENGTH;
+    result.offset   = 0;
+
+    size_t   lengthToEnd  = inputEnd - inputCursor;
+    int32_t  lastPosition = position - ( LZ_WINDOW_SIZE - 1 );
+    uint32_t hash         = HashOptimal( inputCursor );
+
+    lastPosition = lastPosition > 0 ? lastPosition : 0;
+
+    int32_t treeCursor = state.roots[ hash ];
+
+    state.roots[ hash ] = position;
+
+    int32_t* left        = &state.window[ position & LZ_WINDOW_MASK ].children[ 1 ];
+    int32_t* right       = &state.window[ position & LZ_WINDOW_MASK ].children[ 0 ];
+    size_t   leftLength  = 0;
+    size_t   rightLength = 0;
+
+    for ( ;; )
+    {
+        if ( cutOff-- == 0 || treeCursor < lastPosition )
+        {
+            *left = *right = EMPTY_NODE;
+            break;
+        }
+
+        TreeNode&      currentNode = state.window[ treeCursor & LZ_WINDOW_MASK ];
+        const uint8_t* key         = input + treeCursor;
+        size_t         matchLength = leftLength < rightLength ? leftLength : rightLength;
+
+        uint16_t       matchOffset = static_cast<uint16_t>( position - treeCursor );
+        size_t         maxLength   = matchOffset <= ( EXTENDED_MATCH_BOUND + 1 ) && matchOffset < lengthToEnd ? matchOffset : lengthToEnd;
+
+        while ( matchLength < lengthToEnd )
+        {
+            __m128i input16 = _mm_loadu_si128( reinterpret_cast<const __m128i*>( inputCursor + matchLength ) );
+            __m128i match16 = _mm_loadu_si128( reinterpret_cast<const __m128i*>( key + matchLength ) );
+
+            unsigned long matchBytes;
+
+            _BitScanForward( &matchBytes, ( static_cast<unsigned long>( ~_mm_movemask_epi8( _mm_cmpeq_epi8( input16, match16 ) ) ) | 0x10000 ) );
+
+            matchLength += matchBytes;
+
+            if ( matchBytes != 16 )
+            {
+                break;
+            }
+        }
+
+        matchLength = matchLength < lengthToEnd ? matchLength : lengthToEnd;
+
+        size_t truncatedMatchLength = matchLength < maxLength ? matchLength : maxLength;
+
+        if ( truncatedMatchLength >= result.length && matchOffset >= LITERALS_PER_CONTROL )
+        {
+            result.length   = truncatedMatchLength;
+            result.offset   = matchOffset;
+            result.position = treeCursor;
+        }
+
+        if ( matchLength == lengthToEnd )
+        {
+            *left  = currentNode.children[ 1 ];
+            *right = currentNode.children[ 0 ];
+            break;
+        }
+
+        if ( inputCursor[ matchLength ] < key[ matchLength ] || ( matchLength == lengthToEnd ) )
+        {
+            *left       = treeCursor;
+            left        = currentNode.children;
+            treeCursor  = *left;
+            leftLength  = matchLength;
+        }
+        else
+        {
+            *right      = treeCursor;
+            right       = currentNode.children + 1;
+            treeCursor  = *right;
+            rightLength = matchLength;
+        }
+    }
+
+    // Special RLE overlapping match case, the LzFind style match above doesn't work very well with our
+    // restriction of overlapping matches having offsets of at least 16.
+    // Suffix array seems like a better option to handling this.
+    {
+        // Note, we're detecting long RLE here, but if we have an offset too close, we'll sacrifice a fair 
+        // amount of decompression performance to load-hit-stores.
+        int32_t matchPosition = position - ( sizeof( __m128i ) * 2 );
+
+        if ( matchPosition >= 0 )
+        {
+            uint16_t       matchOffset = static_cast<uint16_t>( position - matchPosition );
+            const uint8_t* key = input + matchPosition;
+            size_t         matchLength = 0;
+
+            while ( matchLength < lengthToEnd )
+            {
+                __m128i input16 = _mm_loadu_si128( reinterpret_cast<const __m128i*>( inputCursor + matchLength ) );
+                __m128i match16 = _mm_loadu_si128( reinterpret_cast<const __m128i*>( key + matchLength ) );
+
+                unsigned long matchBytes;
+
+                _BitScanForward( &matchBytes, ( static_cast<unsigned long>( ~_mm_movemask_epi8( _mm_cmpeq_epi8( input16, match16 ) ) ) | 0x10000 ) );
+
+                matchLength += matchBytes;
+
+                if ( matchBytes != 16 )
+                {
+                    break;
+                }
+
+            }
+
+            matchLength = matchLength < lengthToEnd ? matchLength : lengthToEnd;
+
+            if ( matchLength >= result.length )
+            {
+                result.length = matchLength;
+                result.offset = matchOffset;
+                result.position = matchPosition;
+            }
+        }
+    }
+
+    return result;
+}
+
+
+size_t LZSSE8_CompressOptimalParse( LZSSE8_OptimalParseState* state, const void* inputChar, size_t inputLength, void* outputChar, size_t outputLength, unsigned int level )
+{
+    if ( outputLength < inputLength || state->bufferSize < inputLength )
+    {
+        // error case, output buffer not large enough.
+        return 0;
+    }
+
+    const uint8_t* input  = reinterpret_cast< const uint8_t* >( inputChar );
+    uint8_t*       output = reinterpret_cast< uint8_t* >( outputChar );
+
+    if ( inputLength < MIN_COMPRESSION_SIZE )
+    {
+        memcpy( output, input, inputLength );
+
+        return inputLength;
+    }
+
+    const uint8_t* inputCursor      = input;
+    const uint8_t* inputEnd         = input + inputLength;
+    Arrival*       arrivalWatermark = state->arrivals;
+    Arrival*       arrival          = state->arrivals;
+    uint32_t       cutOff           = 1 << level;
+
+    for ( int32_t* rootCursor = state->roots, *end = rootCursor + OPTIMAL_BUCKETS_COUNT; rootCursor < end; rootCursor += 4 )
+    {
+        rootCursor[ 0 ] = EMPTY_NODE;
+        rootCursor[ 1 ] = EMPTY_NODE;
+        rootCursor[ 2 ] = EMPTY_NODE;
+        rootCursor[ 3 ] = EMPTY_NODE;
+    }
+
+    for ( uint32_t where = 0; where < LITERALS_PER_CONTROL; ++where )
+    {
+        SearchAndUpdateFinder( *state, input, inputCursor, inputEnd - END_PADDING_LITERALS, cutOff );
+
+        ++inputCursor;
+    }
+
+    arrival->cost   = LITERAL_BITS * LITERALS_PER_CONTROL;
+    arrival->from   = -1;
+    arrival->offset = 0;
+
+    // loop through each character and project forward the matches at that character to calculate the cheapest
+    // path of arrival for each individual character.
+    for ( const uint8_t* earlyEnd = inputEnd - END_PADDING_LITERALS; inputCursor < earlyEnd; ++inputCursor, ++arrival )
+    {
+        uint32_t  lengthToEnd     = static_cast< uint32_t >( earlyEnd - inputCursor );       
+        int32_t   currentPosition = static_cast< int32_t >( inputCursor - input );
+        size_t    literalsForward = LITERALS_PER_CONTROL < lengthToEnd ? LITERALS_PER_CONTROL : lengthToEnd;
+        size_t    arrivalCost     = arrival->cost;
+
+        // NOTE - we currently assume only 2 literals filled in here, because the minimum match length is 3.
+        // If we wanted to go with a higher minimum match length, we would need to fill in more literals before hand.
+        // Also, because there is a maximum of 2 literals per control block assumed.
+
+        // project forward the cost of a single literal
+
+        for ( size_t where = 1; where <= literalsForward; ++where )
+        {
+            Arrival* literalArrival = arrival + where;
+            size_t   literalCost    = arrivalCost + CONTROL_BITS + ( where * LITERAL_BITS );
+
+            if ( literalArrival > arrivalWatermark || literalArrival->cost > literalCost )
+            {
+                literalArrival->cost   = literalCost;
+                literalArrival->from   = currentPosition;
+                literalArrival->offset = 0;
+
+                arrivalWatermark = literalArrival > arrivalWatermark ? literalArrival : arrivalWatermark;
+            }
+        }
+
+        Match match = SearchAndUpdateFinder( *state, input, inputCursor, earlyEnd, cutOff );
+
+        if ( match.position != NO_MATCH )
+        {
+            for ( size_t matchedLength = MIN_MATCH_LENGTH, end = match.length + 1; matchedLength < end; ++matchedLength )
+            {
+                Arrival* matchArrival = arrival + matchedLength;
+                size_t   matchCost    = arrivalCost + BASE_MATCH_BITS;
+
+                if ( matchedLength >= INITIAL_MATCH_BOUND )
+                {
+                    matchCost += ( ( ( matchedLength - INITIAL_MATCH_BOUND ) / EXTENDED_MATCH_BOUND ) + 1 ) * CONTROL_BITS;
+                }
+
+                if ( matchArrival > arrivalWatermark || matchArrival->cost > matchCost )
+                {
+                    matchArrival->cost   = matchCost;
+                    matchArrival->from   = currentPosition;
+                    matchArrival->offset = match.offset;
+
+                    arrivalWatermark = matchArrival > arrivalWatermark ? matchArrival : arrivalWatermark;
+                }
+            }
+
+            if ( match.length > SKIP_MATCH_LENGTH && level < NO_SKIP_LEVEL )
+            {
+                arrival     += match.length - LITERALS_PER_CONTROL;
+                inputCursor += match.length - LITERALS_PER_CONTROL;
+            }
+        }
+    }
+
+    // If this would cost more to encode than it would if it were just literals, encode it with no control blocks,
+    // just literals
+    if ( ( arrivalWatermark->cost + END_PADDING_LITERALS * LITERAL_BITS ) > ( inputLength * LITERAL_BITS ) )
+    {
+        memcpy( output, input, inputLength );
+
+        return inputLength;
+    }
+
+    Arrival* previousPathNode;
+
+    // now trace the actual optimal parse path back, connecting the nodes in the other direction.
+    for ( const Arrival* pathNode = arrivalWatermark; pathNode->from > 0; pathNode = previousPathNode )
+    {
+        previousPathNode     = state->arrivals + ( pathNode->from - LITERALS_PER_CONTROL );
+
+        previousPathNode->to = static_cast<int32_t>( ( pathNode - state->arrivals ) + LITERALS_PER_CONTROL );
+    }
+
+    uint8_t* outputCursor = output;
+
+    memcpy( outputCursor, input, LITERALS_PER_CONTROL );
+
+    outputCursor += LITERALS_PER_CONTROL;
+
+    uint8_t* currentControlBlock = outputCursor;
+    uint32_t currentControlCount = 0;
+    uint32_t totalControlCount   = 0;
+
+    outputCursor += CONTROL_BLOCK_SIZE;
+
+    Arrival* nextPathNode;
+
+    size_t   totalPathLength = LITERALS_PER_CONTROL;
+    uint16_t previousOffset  = INITIAL_OFFSET;
+
+    // Now walk forwards again and actually write out the data.
+    for ( const Arrival* pathNode = state->arrivals; pathNode < arrivalWatermark; pathNode = nextPathNode )
+    {
+        int32_t currentPosition = static_cast< int32_t >( ( pathNode - state->arrivals ) + LITERALS_PER_CONTROL );
+
+        nextPathNode = state->arrivals + ( pathNode->to - LITERALS_PER_CONTROL );
+
+        size_t pathDistance = nextPathNode - pathNode;
+
+        totalPathLength += pathDistance;
+
+        if ( nextPathNode->offset == 0 )
+        {
+            if ( currentControlCount == CONTROLS_PER_BLOCK )
+            {
+                currentControlBlock  = outputCursor;
+                outputCursor        += CONTROL_BLOCK_SIZE;
+                currentControlCount  = 0;
+            }
+
+            if ( ( currentControlCount & 1 ) == 0 )
+            {
+                currentControlBlock[ currentControlCount >> 1 ] =
+                    ( static_cast<uint8_t>( pathDistance ) - 1 );
+            }
+            else
+            {
+                currentControlBlock[ currentControlCount >> 1 ] |= 
+                    ( static_cast< uint8_t >( pathDistance ) - 1 ) << CONTROL_BITS;
+            }
+
+            // output the literals.
+            for ( int32_t where = 0; where < pathDistance; ++where )
+            {
+                const uint8_t* currentInput = input + currentPosition + where;
+
+                outputCursor[ where ] = *currentInput ^ *( currentInput - previousOffset );
+            }
+
+            outputCursor += pathDistance;
+
+            ++totalControlCount;
+            ++currentControlCount;
+        }
+        else
+        {
+            // Check if we need to start a new control block
+            if ( currentControlCount == CONTROLS_PER_BLOCK )
+            {
+                currentControlBlock = outputCursor;
+                outputCursor       += CONTROL_BLOCK_SIZE;
+
+                _mm_storeu_si128( reinterpret_cast<__m128i*>( outputCursor ), _mm_setzero_si128() );
+
+                currentControlCount = 0;
+            }
+
+            // Write the offset out - note the xor with the previous offset.
+            *reinterpret_cast< uint16_t* >( outputCursor ) = nextPathNode->offset ^ previousOffset;
+
+            previousOffset = nextPathNode->offset;
+            outputCursor  += sizeof( uint16_t );
+
+            if ( pathDistance < INITIAL_MATCH_BOUND )
+            {
+                if ( ( currentControlCount & 1 ) == 0 )
+                {
+                    currentControlBlock[ currentControlCount >> 1 ] =
+                        static_cast<uint8_t>( pathDistance + MIN_MATCH_LENGTH );
+                }
+                else
+                {
+                    currentControlBlock[ currentControlCount >> 1 ] |= 
+                        static_cast< uint8_t >( pathDistance + MIN_MATCH_LENGTH ) << CONTROL_BITS;
+                }
+
+                ++currentControlCount;
+            }
+            else
+            {
+                if ( ( currentControlCount & 1 ) == 0 )
+                {
+                    currentControlBlock[ currentControlCount >> 1 ] =
+                        static_cast<uint8_t>( EXTENDED_MATCH_BOUND );
+                }
+                else
+                {
+                    currentControlBlock[ currentControlCount >> 1 ] |= 
+                        static_cast< uint8_t >( EXTENDED_MATCH_BOUND ) << CONTROL_BITS;
+                }
+
+                ++currentControlCount;
+
+                size_t toEncode = pathDistance - INITIAL_MATCH_BOUND;
+
+                for ( ;; )
+                {
+                    // Check if we need to start a new control block
+                    if ( currentControlCount == CONTROLS_PER_BLOCK )
+                    {
+                        currentControlBlock = outputCursor;
+                        outputCursor       += CONTROL_BLOCK_SIZE;
+
+                        _mm_storeu_si128( reinterpret_cast<__m128i*>( outputCursor ), _mm_setzero_si128() );
+
+                        currentControlCount = 0;
+                    }
+
+                    // If the encode size is greater than we can hold in a control, write out a full match length
+                    // control, subtract full control value from the amount to encode and loop around again.
+                    if ( toEncode >= EXTENDED_MATCH_BOUND )
+                    {
+                        if ( ( currentControlCount & 1 ) == 0 )
+                        {
+                            currentControlBlock[ currentControlCount >> 1 ] =
+                                static_cast<uint8_t>( EXTENDED_MATCH_BOUND );
+                        }
+                        else
+                        {
+                            currentControlBlock[ currentControlCount >> 1 ] |= 
+                                static_cast< uint8_t >( EXTENDED_MATCH_BOUND ) << CONTROL_BITS;
+                        }
+
+                        toEncode -= EXTENDED_MATCH_BOUND;
+
+                        ++currentControlCount;
+                    }
+                    else // Write out the remaining match length control. Could potentially be zero.
+                    {
+                        if ( ( currentControlCount & 1 ) == 0 )
+                        {
+                            currentControlBlock[ currentControlCount >> 1 ] =
+                                static_cast<uint8_t>( toEncode );
+                        }
+                        else
+                        {
+                            currentControlBlock[ currentControlCount >> 1 ] |= 
+                                static_cast< uint8_t >( toEncode ) << CONTROL_BITS;
+                        }
+                        
+                        ++currentControlCount;
+
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    size_t remainingLiterals = ( input + inputLength ) - inputCursor;
+
+    // copy remaining literals
+    memcpy( outputCursor, inputCursor, remainingLiterals );
+
+    outputCursor += remainingLiterals;
+
+    return outputCursor - output;
+}
+
 
 size_t LZSSE8_CompressFast( LZSSE8_FastParseState* state, const void* inputChar, size_t inputLength, void* outputChar, size_t outputLength )
 {

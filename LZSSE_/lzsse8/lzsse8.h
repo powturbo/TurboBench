@@ -41,6 +41,33 @@ LZSSE8_FastParseState* LZSSE8_MakeFastParseState();
 /* De-allocate the parse state for compression */
 void LZSSE8_FreeFastParseState( LZSSE8_FastParseState* toFree );
 
+/* Re-usable parse state object for compression. */
+typedef struct LZSSE8_OptimalParseState LZSSE8_OptimalParseState;
+
+/* Allocate the parse state for compression - returns null on failure. Note
+Buffersize has to be greater or equal to any inputLength used with LZSSE2_CompressOptimalParse */
+LZSSE8_OptimalParseState* LZSSE8_MakeOptimalParseState( size_t bufferSize );
+
+/* De-allocate the parse state for compression */
+void LZSSE8_FreeOptimalParseState( LZSSE8_OptimalParseState* toFree );
+
+/* "Optimal" compression routine.
+* Will compress data into LZSSE8 format, uses hash BST matching to find matches and run an optimal parse (high relative memory usage). Requires SSE 4.1.
+* state : Contains the hash table for matching, passed as a parameter so that allocations can be re-used. 
+* input : Buffer containing uncompressed data to be compressed. May not be null.
+* inputLength : Length of the compressed data in the input buffer - note should be under 2GB.
+* output : Buffer that will receive the compressed output. 
+* outputLength : The length reserved in the buffer for compressed data. This should be at least inputLength. Note,
+*                The compressed data should never be longer than inputLength, as in this case the data is stored raw.
+* level : The compression level to use for this file 1->17, 17 delivers the highest compression, 1 delivers the least.
+* Thread Safety - state can not be used on multiple threads with calls running concurrently. Can run multiple threads with separate state
+* concurrently.
+*
+* Returns the size of the compressed data, or 0 in the case of error (e.g. outputLength is less than inputLength).
+*/
+size_t LZSSE8_CompressOptimalParse( LZSSE8_OptimalParseState* state, const void* input, size_t inputLength, void* output, size_t outputLength, unsigned int level );
+
+
 /* "Fast" compression routine.
 * Will compress data into LZSSE8 format, uses a simple single entry hash/greedy matching to find matches. Requires SSE 4.1.
 * state : Contains the hash table for matching, passed as a parameter so that allocations can be re-used. 

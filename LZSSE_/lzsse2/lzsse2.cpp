@@ -24,20 +24,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <memory.h>
+#include <stdlib.h>
 #include <stdint.h>
-#include <stdio.h>
+#include "lzsse2_platform.h"
 #include "lzsse2.h"
-
-#include <assert.h>
 #include <stddef.h>
-  #ifdef __SSE4_1__
-#include <smmintrin.h>
-  #else
-#error "missing compiler option -msse4.1"
-  #endif
-  #ifndef _MSC_VER
-#define _BitScanForward(x, m) *(x)=__builtin_ctz(m)
-  #endif
 
 #pragma warning ( disable : 4127 )
 
@@ -73,7 +64,7 @@ namespace
     const size_t   INPUT_BUFFER_SAFE       = MAX_INPUT_PER_CONTROL * CONTROLS_PER_BLOCK;
     const uint16_t INITIAL_OFFSET          = MIN_MATCH_LENGTH;
     const size_t   SKIP_MATCH_LENGTH       = 128;
-    const uint32_t MAXIMUM_COMPRESSION     = 16;
+    const uint32_t NO_SKIP_LEVEL           = 17;
 }
 
 struct Arrival
@@ -97,12 +88,16 @@ struct LZSSE2_OptimalParseState
     TreeNode window[ LZ_WINDOW_SIZE ];
 
     Arrival* arrivals;
+
+    size_t bufferSize;
 };
 
 
 LZSSE2_OptimalParseState* LZSSE2_MakeOptimalParseState( size_t bufferSize )
 {
     LZSSE2_OptimalParseState* result = reinterpret_cast< LZSSE2_OptimalParseState* >( ::malloc( sizeof( LZSSE2_OptimalParseState ) ) );
+
+    result->bufferSize = bufferSize;
 
     if ( result != nullptr )
     {
@@ -271,8 +266,8 @@ inline Match SearchAndUpdateFinder( LZSSE2_OptimalParseState& state, const uint8
 
             if ( matchLength >= result.length )
             {
-                result.length = matchLength;
-                result.offset = matchOffset;
+                result.length   = matchLength;
+                result.offset   = matchOffset;
                 result.position = matchPosition;
             }
         }
@@ -284,7 +279,7 @@ inline Match SearchAndUpdateFinder( LZSSE2_OptimalParseState& state, const uint8
 
 size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const void* inputChar, size_t inputLength, void* outputChar, size_t outputLength, unsigned int level )
 {
-    if ( outputLength < inputLength )
+    if ( outputLength < inputLength || state->bufferSize < inputLength )
     {
         // error case, output buffer not large enough.
         return 0;
@@ -377,7 +372,7 @@ size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const void*
 
                 if ( matchedLength > EXTENDED_MATCH_BOUND )
                 {
-                    matchCost += ( matchedLength - 1 ) / EXTENDED_MATCH_BOUND;
+                    matchCost += ( ( matchedLength - 1 ) / EXTENDED_MATCH_BOUND ) * CONTROL_BITS;
                 }
 
                 if ( matchArrival > arrivalWatermark || matchArrival->cost > matchCost )
@@ -390,10 +385,10 @@ size_t LZSSE2_CompressOptimalParse( LZSSE2_OptimalParseState* state, const void*
                 }
             }
 
-            if ( match.length > SKIP_MATCH_LENGTH )
+            if ( match.length > SKIP_MATCH_LENGTH && level < NO_SKIP_LEVEL )
             {
-                arrival     += match.length - 2;
-                inputCursor += match.length - 2;
+                arrival     += match.length - LITERALS_PER_CONTROL;
+                inputCursor += match.length - LITERALS_PER_CONTROL;
             }
         }
     }
