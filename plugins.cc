@@ -687,7 +687,7 @@ struct plugs plugs[] = {
   { P_LZO1z, 	"lzo1z", 			C_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"999" }, 
   { P_LZO2a, 	"lzo2a", 			C_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"999" }, 
   { P_LZOMA, 	"lzoma", 			C_LZOMA,	"15-06",	"lzoma",				"GPL license",		"https://github.com/alef78/lzoma", 														"1,2,3,4,5,6,7" },
-  { P_LZSSE2,	"lzsse2",   	    C_LZSSE,	"16-02",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													"1,2,3,4,5,6,7,8,9,12,16/B"}, 
+  { P_LZSSE2,	"lzsse2",   	    C_LZSSE,	"16-02",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													"1,2,3,4,5,6,7,8,9,12,16,17"}, 
   { P_LZSSE4,	"lzsse4",   	    C_LZSSE,	"16-02",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													""}, 
   { P_LZSSE8,	"lzsse8",   	    C_LZSSE,	"16-02",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													""}, 
   { P_MINIZ, 	"miniz", 			C_MINIZ,	"15-06",	"miniz zlib-replacement","Public domain",	"https://github.com/richgel999/miniz", 													"1,2,3,4,5,6,7,8,9" },

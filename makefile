@@ -24,12 +24,14 @@ ifeq ($(OS),Windows_NT)
   UNAME := Windows
 CC=gcc
 CXX=g++
+LZSSEDIR=LZSSE
 else
   UNAME := $(shell uname -s)
 ifeq ($(UNAME),$(filter $(UNAME),Linux Darwin FreeBSD GNU/kFreeBSD))
 LDFLAGS+=-lpthread -lrt
 HAVE_ZLIB=1
 endif
+LZSSEDIR=LZSSE_
 endif
 
 ifeq ($(STATIC),1)
@@ -165,13 +167,13 @@ wflz/wfLZ.o: wflz/wfLZ.c
 nakamichi/Nakamichi_Nin.o: nakamichi/Nakamichi_Nin.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
 
-LZSSE_/lzsse2/lzsse2.o: LZSSE_/lzsse2/lzsse2.cpp
+$(LZSSEDIR)/lzsse2/lzsse2.o: $(LZSSEDIR)/lzsse2/lzsse2.cpp
 	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $(CFLAGS) $< -c -o $@ 
 
-LZSSE_/lzsse4/lzsse4.o: LZSSE_/lzsse4/lzsse4.cpp
+$(LZSSEDIR)/lzsse4/lzsse4.o: $(LZSSEDIR)/lzsse4/lzsse4.cpp
 	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $(CFLAGS) $< -c -o $@ 
 
-LZSSE_/lzsse8/lzsse8.o: LZSSE_/lzsse8/lzsse8.cpp
+$(LZSSEDIR)/lzsse8/lzsse8.o: $(LZSSEDIR)/lzsse8/lzsse8.cpp
 	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $(CFLAGS) $< -c -o $@ 
 
 #WKDM=wkdm/WKdmCompress.o wkdm/WKdmDecompress.o
@@ -205,9 +207,9 @@ ifeq ($(UNAME), Windows)
 OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
 
-ifeq ($(LZSSE),1)
-OB+=LZSSE_/lzsse2/lzsse2.o LZSSE_/lzsse4/lzsse4.o LZSSE_/lzsse8/lzsse8.o 
-endif
+#ifeq ($(LZSSE),1)
+OB+=$(LZSSEDIR)/lzsse2/lzsse2.o $(LZSSEDIR)/lzsse4/lzsse4.o $(LZSSEDIR)/lzsse8/lzsse8.o 
+#endif
 OB+=miniz/miniz.o
 OB+=nakamichi/Nakamichi_Kintaro.o
 OB+=pithy/pithy.o

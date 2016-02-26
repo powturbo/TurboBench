@@ -35,7 +35,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  /* Re-usable parse state object for compression. */
 typedef struct LZSSE2_OptimalParseState LZSSE2_OptimalParseState;
 
-/* Allocate the parse state for compression - returns null on failure */
+/* Allocate the parse state for compression - returns null on failure. Note
+   Buffersize has to be greater or equal to any inputLength used with LZSSE2_CompressOptimalParse */
 LZSSE2_OptimalParseState* LZSSE2_MakeOptimalParseState( size_t bufferSize );
 
 /* De-allocate the parse state for compression */
@@ -49,7 +50,7 @@ void LZSSE2_FreeOptimalParseState( LZSSE2_OptimalParseState* toFree );
 * output : Buffer that will receive the compressed output. 
 * outputLength : The length reserved in the buffer for compressed data. This should be at least inputLength. Note,
 *                The compressed data should never be longer than inputLength, as in this case the data is stored raw.
-* level : The compression level to use for this file 1->16, 16 is most, 1 is least
+* level : The compression level to use for this file 1->17, 17 is highest compression, 0 is least
 * Thread Safety - state can not be used on multiple threads with calls running concurrently. Can run multiple threads with separate state
 * concurrently.
 *
