@@ -75,7 +75,11 @@ enum {
  P_BZIP2, 
 #define C_CHAMELEON COMP2    
  P_CHAMELEON,
+   #ifdef BLOSC
 #define C_C_BLOSC2	COMP2
+   #else
+#define C_C_BLOSC2	0
+   #endif
  P_C_BLOSC2,
 #define C_CRUSH	 	COMP2	
  P_CRUSH, 
