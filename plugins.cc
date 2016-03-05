@@ -117,7 +117,7 @@ enum {
  P_LZO1b, P_LZO1c, P_LZO1f, P_LZO1x, P_LZO1y, P_LZO1z, P_LZO2a,
 #define C_LZOMA		GPL
  P_LZOMA, 
-   #ifdef LZSSE
+   #ifndef NSIMD
 #define C_LZSSE     COMP2
    #else
 #define C_LZSSE     0

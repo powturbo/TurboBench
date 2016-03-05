@@ -94,9 +94,9 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
  - [balz v1.20](http://sourceforge.net/projects/balz) 
  - [bcm v1.0](http://sourceforge.net/projects/bcm) 
- - [Blosc v2.0/16-02](https://github.com/Blosc/c-blosc2)
+ - [Blosc v2.0/16-03](https://github.com/Blosc/c-blosc2)
  - [BriefLz v1.1.0](https://github.com/jibsen/brieflz) 
- - [Brotli v16-02](https://github.com/google/brotli) 
+ - [Brotli v16-03](https://github.com/google/brotli) 
  - [Bzip2 v1.06](http://www.bzip.org/downloads.html) 
  - [Chameleon v15-03](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
  - [Crush v1.0.0](http://sourceforge.net/projects/crush) 
@@ -120,7 +120,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Lzoma v16-01](https://github.com/alef78/lzoma) 
  - [LZSSE v16-02](https://github.com/ConorStokes/LZSSE) :new:
  - [Miniz v13-10](https://github.com/richgel999/miniz) 
- - [ms-compress v16.01](https://github.com/coderforlife/ms-compress) 
+ - [ms-compress v16.03](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi v15-10](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) 
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
@@ -135,7 +135,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Yappy v2011]() 
  - [zlib v1.2.8](http://zlib.net)
  - [Libzling v16-01](https://github.com/richox/libzling) 
- - [Zopfli v16-01](https://code.google.com/p/zopfli) 
+ - [Zopfli v16-03](https://code.google.com/p/zopfli) 
  - [ZSTD v0.5.0](https://github.com/Cyan4973/zstd) 
  - [zpaq v7.05](https://github.com/zpaq/zpaq) 
 
@@ -229,5 +229,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 21 FEB 2016
+Last update: 05 MAR 2016
 

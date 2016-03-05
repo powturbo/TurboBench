@@ -1422,7 +1422,7 @@ int main(int argc, char* argv[]) { //lzdbgon();
   }
 
   sprintf(s, "%s.tbb", finame);
-  if(merge || tm_repc <= 1 || tm_repd <= 1) {
+  if(merge /*|| tm_repc <= 1 || tm_repd <= 1*/) {
     if(merge == 1) 
       plugprts(plugt, k, s, 1, totinlen, FMT_TEXT, rem);	
     exit(0);
