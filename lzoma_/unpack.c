@@ -1,5 +1,5 @@
 // test file decompression using LZOMA algoritm
-// (c) Alexandr Efimov, 2015
+// (c) Alexandr Efimov, 2015-2016
 // License: GPL v2 or later
 
 #include <stdio.h>
@@ -25,43 +25,34 @@ uint8_t *out_buf;/* decoded text + history */
 
 //#define getbit (((bits=bits&0x7f? bits+bits :  (((unsigned)(*src++))<<1)+1)>>8)&1)
 #define getbit ((bits=bits&0x7fffffff? (resbits=bits,bits+bits) :  (src+=4,resbits=*((uint32_t *)(src-4)),(resbits<<1)+1)),resbits>>31)
-#define loadbit
 
 #define getcode(bits, src, ptotal) {\
   int total = (ptotal);\
   ofs=0;\
   long int res=0;\
-  int x=1;\
+  int x=256;\
   int top=0;\
-\
-  /*if (total > 256) {*/\
-     top=lzlow(total);\
-     x=256;\
-     res=*src++;\
-  /*}*/\
+  top=lzlow(total);\
+  res=*src++;\
 \
   while (1) {\
     x+=x;\
     if (x>=total+top) break;\
     if (x & lzmagic)\
       top=lzshift(top);\
-    /*if (x>=512) {*/\
-      if (res<top) {  goto getcode_doneit;}\
-      ofs-=top;\
-      total+=top;\
-      top+=top;\
-    /*}*/\
-    loadbit;\
+    if (res<top) {  goto getcode_doneit;}\
+    ofs-=top;\
+    total+=top;\
+    top+=top;\
     res+=res+getbit;\
   }\
   x-=total;\
   if (res>=x) { \
-    loadbit; res+=res+getbit;\
+    res+=res+getbit;\
     res-=x;\
   }\
 getcode_doneit: \
   ofs+=res;\
-  /*fprintf(stderr,"ofs=%d total=%d\n",ofs,ptotal);*/\
 }
 
 #define getlen(bits, src) {\
@@ -73,9 +64,7 @@ getcode_doneit: \
   }\
   len+=2;\
   while (1) {  \
-    loadbit;\
     res+=res+getbit;\
-    loadbit;\
     if (getbit==0) break;\
     res++;\
   }\
@@ -103,13 +92,11 @@ nextblock:
 
 get_bit:
   if (left<0) return;
-  loadbit;
   if (getbit==0) goto copyletter;
 
   /* unpack lz */
   if (len<0) {
     len=1;
-    loadbit;
     if (!getbit) {
       goto uselastofs;
     }
@@ -124,7 +111,6 @@ uselastofs:
   getlen(bits,src);
   left-=len;
 
-  // Note: on some platforms memcpy may be faster here
   int ptr = dst-start+ofs;
   do {
     *dst=start[ptr&(history_size)];
@@ -137,7 +123,6 @@ uselastofs:
 #ifdef ASM_X86
 extern unsigned int unpack_x86(uint8_t *src, uint8_t *dst, int left);
 #endif
-
 #if 0
 #include "e8.h"
 int main(int argc,char * argv[]) {
@@ -263,7 +248,7 @@ int lzomaunpack( unsigned char *in, int inlen, unsigned char *out, int outlen) {
     }
     /*
     if (n != n_unp && !current_history) 
-      _read(ifd,&use_e8,1,ifd_);
+      read(ifd,&use_e8,1);
     else
       use_e8 = 0;
     */
@@ -299,6 +284,5 @@ int lzomaunpack( unsigned char *in, int inlen, unsigned char *out, int outlen) {
   free(in_buf);
   free(out_buf);
   return ifd - in;
-
 }
 #endif
