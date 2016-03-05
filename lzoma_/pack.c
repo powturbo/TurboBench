@@ -243,7 +243,7 @@ doneit:
   bitsdist+=res;
 }
 
-static inline void putenc_l(int num, int break_at) {
+static inline void putenc_l(int num) {
   char bits[100];
   int res=0;
   int x=1;
@@ -253,14 +253,14 @@ static inline void putenc_l(int num, int break_at) {
   if (num==0) {bitslen+=2; putbit(0);putbit(0);return;}
   if (num==1) {bitslen+=2; putbit(0);putbit(1);return;}
   putbit(1);num-=2;bitslen++;
+  x+=x;
+  bits[res++]=2;
 
   while (1) {
     x+=x;
-    if (x>=break_at) {
-      if (num<(x>>1)) {bits[res++]=0; break;}
-      bits[res++]=1;
-      num-=x>>1;
-    }
+    if (num<(x>>1)) {bits[res++]=0; break;}
+    bits[res++]=1;
+    num-=x>>1;
     bits[res++]=2;
   }
 
@@ -324,7 +324,7 @@ static inline void put_lz(int offset,int length,int used) {
 #endif
 
       putbit(0);
-      putenc_l(length-MINOLEN,breaklen);
+      putenc_l(length-MINOLEN);
       return;
     }
     if (folz) fprintf(folz,"%c",1);
@@ -332,20 +332,6 @@ static inline void put_lz(int offset,int length,int used) {
   }
   length-=MINLZ;
   stlz++;
-#if LZX
-  int total=used;
-  int h=min(used,hugelen);
-  int l=min(used,longlen);
-  total+=h+l;
-  if (length==0) {
-    putenc(offset,total,breaklz, 0);
-  } else if (length==1) {
-    putenc(offset+l,total,breaklz, 0);
-  } else {
-    putenc(offset+l+h,total,breaklz, 0);
-    putenc_l(length-2,breaklen);
-  }
-#else
   if (offset+1>=longlen) { length--; }
   if (offset+1>=hugelen) { length--; }
 
@@ -366,8 +352,7 @@ static inline void put_lz(int offset,int length,int used) {
 #endif
   
   putenc(offset,used,breaklz, 0);
-  putenc_l(length-MINLZ+2,breaklen);
-#endif
+  putenc_l(length-MINLZ+2);
 
   old_ofs=offset;
 }
@@ -390,18 +375,6 @@ static inline void put_letter(uint8_t b) {
 static inline int price_lz(int offset, int length, int used) { // offset>=1, length>=2, 
                                                     // if offset=>0xD00  length>=3
   int res=1; /* 1 bit = not a letter */
-#if LZX
-  int l=min(used,longlen);
-  int h=min(used,hugelen);
-  used+=l+h;
-  offset--;
-  if (length==2)
-    return res+price_offset(offset,used);
-  if (length==3)
-    return res+price_offset(offset+l,used);
-  res+=price_offset(offset+l+h,used);
-  res+=price_len(length-MINLZ+2-2);
-#else
   if (offset>=longlen) { length--; }
   if (offset>=hugelen) { length--; }
 
@@ -409,7 +382,16 @@ static inline int price_lz(int offset, int length, int used) { // offset>=1, len
 
   res+=price_offset(offset,used);
   res+=price_len(length-MINLZ+2);
-#endif
+  return res;
+}
+
+static inline int price_lzlen(int offset, int length, int used) { // offset>=1, length>=2, 
+                                                    // if offset=>0xD00  length>=3
+  int res=1; /* 1 bit = not a letter */
+  if (offset>=longlen) { length--; }
+  if (offset>=hugelen) { length--; }
+
+  res+=price_len(length-MINLZ+2);
   return res;
 }
 
@@ -473,7 +455,7 @@ void init_same(int start, int n) {
     2. get rid of SA completely, construct suffix tree directly.
   */
   for(i=0;i<256+256*256;i++) gen_same[i] =0;	// for bucketA & bucketB
-  divsufsort(in_buf,sorted,gen_same,n);
+  _divsufsort(in_buf,sorted,gen_same,n);
   // reuse sorted_prev for temp buffer
 #define rank(i) rle[i]
   /* 
@@ -538,14 +520,14 @@ static inline int max(int a,int b) {
         int k;\
 	int jjj;\
         int d=level;\
-        int tmp=price_lz(used-pos,len,used);\
+        int tmp=pofs+price_lzlen(used-pos,len,used);\
         int olen=0;\
         for(k=len+1;k<left-2;k++) {\
           tmp+=9;\
           if (best_ofs(used+k)==pos-used) {\
             int tmp2=tmp+price_replz_minus_lz(used-pos,best_len(used+k),used+k);\
             tmp2+=cache(used+k);\
-            if (tmp2<res || (tmp2==res && my_best_ofs<pos-used)) {\
+            if (tmp2<res || (tmp2==res && my_use_olz && my_best_ofs<pos-used)) {\
               res=tmp2;\
               my_best_ofs=pos-used;\
               my_best_len=len;\
@@ -749,16 +731,18 @@ int pack(int start, int n) {
       }
     pos=same(used);
     if (pos<0) goto done;
+    if (!notskip) goto done;
 
-    if (notskip) {
+    {
       len=samelen(used);
       int ll=(used-pos>=longlen)?1:0;
       if (used-pos>=hugelen) ll=2;
+      int pofs = price_offset(used-pos-1,used);
       if (len<left && len>=2+ll) {
         CHECK_REPLZ
       }
       for(j=MINLZ+ll;j<=len;j++) {
-        int tmp=price_lz(used-pos,2-MINLZ+j,used);
+        int tmp=pofs+price_lzlen(used-pos,2-MINLZ+j,used);
         tmp+=cache(used+j);
         if (tmp<res) {
           res=tmp;
@@ -773,7 +757,6 @@ int pack(int start, int n) {
     }
     if (max_match<MINLZ) max_match=MINLZ;
     match_check_max = short_match_level;
-    if (notskip) 
       for(;;) {
         int slen=samelen(pos);
         pos=same(pos);
@@ -786,12 +769,13 @@ int pack(int start, int n) {
         } else if (len==slen) {
           len+=cmpstr(used+len,pos+len);
         } 
+        int pofs = price_offset(used-pos-1,used);
         if (len<left && len>=2+ll) {
           CHECK_REPLZ
         }
         if (len>max_match) {
-          for(j=max_match+1+ll;j<=len;j++) {
-            int tmp=price_lz(used-pos,j-MINLZ+2,used);
+          for(j=max(max_match+1,MINLZ+ll);j<=len;j++) {
+            int tmp=pofs+price_lzlen(used-pos,j-MINLZ+2,used);
             tmp+=cache(used+j);
             if (tmp<res) {
               res=tmp;
@@ -805,10 +789,7 @@ int pack(int start, int n) {
         } else { match_check_max--; if (match_check_max <= 0) break; }
         
       }
-    if (!notskip) goto done;
     
-    max_match=my_best_len+1;//2;
-    if (max_match<MINLZ) max_match=MINLZ;
     int top=sorted_prev(used);
     int bottom=sorted_next(used);
     int len_top=top >= 0 ? sorted_len(used) : 0;
@@ -830,9 +811,9 @@ int pack(int start, int n) {
 	bottom=sorted_next(pos);
         len_bottom = min(len_bottom,bottom >= 0 ? sorted_len(bottom):0);
       }
-//      if (used-pos<longlen) continue; // we already checked it
       if (len<=MINLZ) goto done;
       if (len<=MINLZ+1 && used-pos>=hugelen) continue; // 
+      int pofs = price_offset(used-pos-1,used);
       if (len<left) {
           CHECK_REPLZ
       }
@@ -840,7 +821,7 @@ int pack(int start, int n) {
         my_min_ofs=used-pos;//we are checking matches in decreasing order. we need to check next matches only if those are shorter
         int ll=(used-pos>=hugelen)?1:0;
         for(j=MINLZ+1+ll;j<=len;j++) {
-          int tmp=price_lz(used-pos,j-MINLZ+2,used);
+          int tmp=pofs+price_lzlen(used-pos,j-MINLZ+2,used);
           tmp+=cache(used+j);
           if (tmp<res || (tmp==res && my_best_ofs<pos-used)) {
             res=tmp;
@@ -1080,25 +1061,26 @@ int main(int argc,char *argv[]) {
 #define _fread(_buf_, _esize_, _size_, _fd_, _fd__) ({ size_t _s = _fd__ - _fd_, _size = (_esize_)*(_size_); if(_s > _size) _s = _size; memcpy(_buf_, _fd_, _s); _fd_ += _s; _s; })
 
 int lzomapack( unsigned char *in, int inlen, unsigned char *out, int metalevel) {							// TurboBench
-  state = NULL;
-  past_state = NULL;
+  old_ofs=0;
+  was_letter=1;
+
   in_offset = 0;
 
-  history_size=0;
   lastpos=0;
   bit_cnt=0;
   outpos=0;
 
- stlet=0;
- stlz=0;
- stolz=0;
- bitslzlen=0;
- bitsolzlen=0;
- bitslen=0;
- bitsdist=0;
- bitslit=0;
+  stlet=0;
+  stlz=0;
+  stolz=0;
+  bitslzlen=0;
+  bitsolzlen=0;
+  bitslen=0;
+  bitsdist=0;
+  bitslit=0;
 
   unsigned char *ifd=in,*ifd_=in+inlen,*ofd=out;
+
   //FILE *ifd,*ofd;
   int n,i,bres,blz;
   uint8_t b;
@@ -1125,7 +1107,7 @@ int lzomapack( unsigned char *in, int inlen, unsigned char *out, int metalevel) 
   }*/
   int arg=1;
   //int metalevel = 7;
-  int dict_size=9;
+  int dict_size=15;
   /*while (arg<argc && argv[arg][0]=='-') {
     if (argv[arg][1]>='1' && argv[arg][1]<='9')
       metalevel = argv[arg][1]-'0';
@@ -1234,8 +1216,8 @@ int lzomapack( unsigned char *in, int inlen, unsigned char *out, int metalevel) 
   }
   if (verbose) printf("closing files let=%d lz=%d olz=%d\n",stlet,stlz,stolz);
   if (verbose) printf("bits lzlit=%d let=%d olz=%d match=%d len=%d\n",bitslzlen,bitslit,bitsolzlen,bitsdist,bitslen);
-  fclose(ifd);
-  fclose(ofd);
+  //fclose(ifd);
+  //fclose(ofd);
 
 #ifdef EXPERIMENTS
   fclose(test);
