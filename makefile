@@ -4,7 +4,6 @@
 # make
 #
 # snappy:    "cp snappy_/* snappy" (or configure snappy) & type make
-# LZSSE: make LZSSE=1 
 # GPL: "make GPL=1" to include GPL libraries
 # Minimum make: "make NCOMP2=1 NECODER=1" to compile only lz4,brotli,lzma,zlib and zstd
 
@@ -24,14 +23,12 @@ ifeq ($(OS),Windows_NT)
   UNAME := Windows
 CC=gcc
 CXX=g++
-LZSSEDIR=LZSSE
 else
   UNAME := $(shell uname -s)
 ifeq ($(UNAME),$(filter $(UNAME),Linux Darwin FreeBSD GNU/kFreeBSD))
 LDFLAGS+=-lpthread -lrt
 HAVE_ZLIB=1
 endif
-LZSSEDIR=LZSSE_
 endif
 
 ifeq ($(STATIC),1)
@@ -93,6 +90,13 @@ LDFLAGS += -ldl
 endif
 endif
 
+# disable SIMD compressors (LZSSE)
+ifeq ($(NSIMD),1)
+DEFS+=-DNSIMD
+else
+NSIMD=0
+endif
+
 ifeq ($(APPLE),1)
 # Lzfse
 DEFS+=-DAPPLE
@@ -105,10 +109,6 @@ NCPP=0
 ifneq (,$(wildcard snappy/snappy-stubs-public.h))
 SNAPPY=1
 DEFS+=-DSNAPPY
-endif
-
-ifeq ($(LZSSE),1)
-DEFS+=-DLZSSE
 endif
 
 ifeq ($(LZTURBO),1)
@@ -167,13 +167,13 @@ wflz/wfLZ.o: wflz/wfLZ.c
 nakamichi/Nakamichi_Nin.o: nakamichi/Nakamichi_Nin.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
 
-$(LZSSEDIR)/lzsse2/lzsse2.o: $(LZSSEDIR)/lzsse2/lzsse2.cpp
+LZSSE/lzsse2/lzsse2.o: LZSSE/lzsse2/lzsse2.cpp
 	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $(CFLAGS) $< -c -o $@ 
 
-$(LZSSEDIR)/lzsse4/lzsse4.o: $(LZSSEDIR)/lzsse4/lzsse4.cpp
+LZSSE/lzsse4/lzsse4.o: LZSSE/lzsse4/lzsse4.cpp
 	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $(CFLAGS) $< -c -o $@ 
 
-$(LZSSEDIR)/lzsse8/lzsse8.o: $(LZSSEDIR)/lzsse8/lzsse8.cpp
+LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
 	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $(CFLAGS) $< -c -o $@ 
 
 #WKDM=wkdm/WKdmCompress.o wkdm/WKdmDecompress.o
@@ -207,8 +207,8 @@ ifeq ($(UNAME), Windows)
 OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
 
-ifeq ($(LZSSE),1)
-OB+=$(LZSSEDIR)/lzsse2/lzsse2.o $(LZSSEDIR)/lzsse4/lzsse4.o $(LZSSEDIR)/lzsse8/lzsse8.o 
+ifeq ($(NSIMD),0)
+OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o 
 endif
 OB+=miniz/miniz.o
 OB+=nakamichi/Nakamichi_Kintaro.o
