@@ -1,6 +1,12 @@
 // crush.cpp
 // Written and placed in the public domain by Ilya Muravyov
-//
+// Pure C version by powturbo
+#define _GNU_SOURCE              
+#define _LARGEFILE64_SOURCE 1 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
@@ -9,13 +15,9 @@
 #define _FILE_OFFSET_BITS 64
 #define _ftelli64 ftello64
 #endif
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <time.h>
 
-namespace crush
-{
+//namespace crush
+//{
 
 // Bit I/O
 //
@@ -68,39 +70,39 @@ inline int get_bits(int n)
 // LZ77
 //
 
-const int W_BITS=21; // Window size (17..23)
-const int W_SIZE=1<<W_BITS;
-const int W_MASK=W_SIZE-1;
-const int SLOT_BITS=4;
-const int NUM_SLOTS=1<<SLOT_BITS;
+#define W_BITS 21 // Window size (17..23)
+#define W_SIZE (1<<W_BITS)
+#define W_MASK (W_SIZE-1)
+#define SLOT_BITS 4
+#define NUM_SLOTS (1<<SLOT_BITS)
 
-const int A_BITS=2; // 1 xx
-const int B_BITS=2; // 01 xx
-const int C_BITS=2; // 001 xx
-const int D_BITS=3; // 0001 xxx
-const int E_BITS=5; // 00001 xxxxx
-const int F_BITS=9; // 00000 xxxxxxxxx
-const int A=1<<A_BITS;
-const int B=(1<<B_BITS)+A;
-const int C=(1<<C_BITS)+B;
-const int D=(1<<D_BITS)+C;
-const int E=(1<<E_BITS)+D;
-const int F=(1<<F_BITS)+E;
-const int MIN_MATCH=3;
-const int MAX_MATCH=(F-1)+MIN_MATCH;
+#define A_BITS 2 // 1 xx
+#define B_BITS 2 // 01 xx
+#define C_BITS 2 // 001 xx
+#define D_BITS 3 // 0001 xxx
+#define E_BITS 5 // 00001 xxxxx
+#define F_BITS 9 // 00000 xxxxxxxxx
+#define A (1<<A_BITS)
+#define B ((1<<B_BITS)+A)
+#define C ((1<<C_BITS)+B)
+#define D ((1<<D_BITS)+C)
+#define E ((1<<E_BITS)+D)
+#define F ((1<<F_BITS)+E)
+#define MIN_MATCH 3
+#define MAX_MATCH ((F-1)+MIN_MATCH)
 
-const int TOO_FAR=1<<16;
+#define TOO_FAR (1<<16)
 
-const int HASH1_LEN=MIN_MATCH;
-const int HASH2_LEN=MIN_MATCH+1;
-const int HASH1_BITS=21;
-const int HASH2_BITS=24;
-const int HASH1_SIZE=1<<HASH1_BITS;
-const int HASH2_SIZE=1<<HASH2_BITS;
-const int HASH1_MASK=HASH1_SIZE-1;
-const int HASH2_MASK=HASH2_SIZE-1;
-const int HASH1_SHIFT=(HASH1_BITS+(HASH1_LEN-1))/HASH1_LEN;
-const int HASH2_SHIFT=(HASH2_BITS+(HASH2_LEN-1))/HASH2_LEN;
+#define HASH1_LEN MIN_MATCH
+#define HASH2_LEN (MIN_MATCH+1)
+#define HASH1_BITS 21
+#define HASH2_BITS 24
+#define HASH1_SIZE (1<<HASH1_BITS)
+#define HASH2_SIZE (1<<HASH2_BITS)
+#define HASH1_MASK (HASH1_SIZE-1)
+#define HASH2_MASK (HASH2_SIZE-1)
+#define HASH1_SHIFT ((HASH1_BITS+(HASH1_LEN-1))/HASH1_LEN)
+#define HASH2_SHIFT ((HASH2_BITS+(HASH2_LEN-1))/HASH2_LEN)
 
 inline int update_hash1(int h, int c)
 {
@@ -133,7 +135,7 @@ inline int get_penalty(int a, int b)
 	return p;
 }
 
-uint32_t compress(int level, uint8_t* buf, int size, uint8_t* outbuf)
+uint32_t crush_compress(int level, uint8_t* buf, int size, uint8_t* outbuf)
 {
 	static int head[HASH1_SIZE+HASH2_SIZE];
 	static int prev[W_SIZE];
@@ -304,7 +306,7 @@ uint32_t compress(int level, uint8_t* buf, int size, uint8_t* outbuf)
 	return g_outbuf_pos;
 }
 
-uint32_t decompress(uint8_t* inbuf, uint8_t* outbuf, int outsize)
+uint32_t crush_decompress(uint8_t* inbuf, uint8_t* outbuf, int outsize)
 {
 		if ((outsize<1))
 		{
@@ -356,12 +358,12 @@ uint32_t decompress(uint8_t* inbuf, uint8_t* outbuf, int outsize)
 		return p;
 }
 
-} // namespace crush
+//} // namespace crush
 
-/*
+ #if 0
 int main(int argc, char* argv[])
 {
-	using namespace crush;
+	//using namespace crush;
 
 	const clock_t start=clock();
 
@@ -422,13 +424,13 @@ int main(int argc, char* argv[])
 		int level = argv[1][1]=='f'?0:(argv[1][1]=='x'?2:1);
 
 		fwrite(&insize, 1, sizeof(insize), out); // Little-endian
-		outsize = compress(level, inbuf, insize, outbuf);
+		outsize = crush_compress(level, inbuf, insize, outbuf);
 		fwrite(outbuf, 1, outsize, out);
 	}
 	else if (*argv[1]=='d')
 	{
 		printf("Decompressing %s... %d bytes\n", argv[2], insize);
-		decompress(inbuf+sizeof(uint32_t), outbuf, outsize);
+		crush_decompress(inbuf+sizeof(uint32_t), outbuf, outsize);
 		fwrite(outbuf, 1, outsize, out);
 	}
 	else
@@ -438,12 +440,12 @@ int main(int argc, char* argv[])
 	}
 
 	printf("%lld -> %lld in %gs\n", _ftelli64(in), _ftelli64(out),
-		double(clock()-start)/CLOCKS_PER_SEC);
+		(double)(clock()-start)/CLOCKS_PER_SEC);
 
 	fclose(in);
 	fclose(out);
 
 	return 0;
 }
+  #endif
 
-*/
