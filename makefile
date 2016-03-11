@@ -98,9 +98,9 @@ NSIMD=0
 endif
 
 # blosc
-ifeq ($(BLOSC),1)
+#ifeq ($(BLOSC),1)
 DEFS+=-DBLOSC
-endif
+#endif
 
 # Lzfse
 ifeq ($(APPLE),1)
