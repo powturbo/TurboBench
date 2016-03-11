@@ -327,7 +327,7 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 
   #if C_CRUSH
 #include <stdint.h>
-#include "crush/crush.hpp"
+#include "crush/crush.h"
   #endif
 
   #if C_DOBOZ
@@ -712,7 +712,7 @@ struct plugs plugs[] = {
   { P_ZLIB, 	"zlib", 			C_ZLIB, 	"1.2.8",	"zlib",					"zlib license",		"http://zlib.net\thttps://github.com/madler/zlib", 										"1,2,3,4,5,6,7,8,9" },
   { P_ZLING, 	"zling", 	   		C_ZLING, 	"16-01",	"Libzling",				"BSD license",		"https://github.com/richox/libzling",													"0,1,2,3,4" }, 
   { P_ZOPFLI, 	"zopfli",			C_ZOPFLI, 	"15-05",	"Zopfli",				"Apache license",	"https://code.google.com/p/zopfli",														""}, 
-  { P_ZSTD, 	"zstd", 			C_ZSTD,		"0.5.0",	"ZSTD",					"BSD license",		"https://github.com/Cyan4973/zstd", 													"1,2,3,4,5,6,7,8,9,12,16,20,21" },
+  { P_ZSTD, 	"zstd", 			C_ZSTD,		"0.5.0",	"ZSTD",					"BSD license",		"https://github.com/Cyan4973/zstd", 													"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25" },
 //-----------------------------------------------------------------------------------	  
   { P_MCPY, 	"imemcpy", 			C_MEMCPY, 	".",		"inline memcpy",		"------------",		"--------------------------------------",												"" },
   { P_LMCPY, 	"memcpy",			C_MEMCPY,  	".",		"library memcpy",		"",					"",																						"" },
@@ -903,7 +903,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if C_CRUSH
-    case P_CRUSH: return crush::compress(lev, in, inlen, out);
+    case P_CRUSH: return crush_compress(lev, in, inlen, out);
       #endif
 	  
       #if C_DENSITY
@@ -1325,7 +1325,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
      #if C_CRUSH
-    case P_CRUSH: crush::decompress(in, out, outlen); break;
+    case P_CRUSH: crush_decompress(in, out, outlen); break;
 	  #endif
 	  
       #if C_DENSITY
