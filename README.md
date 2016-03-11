@@ -124,10 +124,10 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Nakamichi v15-10](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) 
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
- - [sap v16-02](https://github.com/CoreSecurity/pysap) 
+ - [sap v16-03](https://github.com/CoreSecurity/pysap) 
  - [shoco v2015](https://github.com/Ed-von-Schleck/shoco) 
  - [Shrinker v0.1/r9](https://code.google.com/p/data-shrinker) 
- - [Snappy v1.1.3](https://github.com/google/snappy) 
+ - [Snappy v1.1.3/16-03](https://github.com/google/snappy) 
  - [Snappy-c v1.1.2/14.04](https://github.com/andikleen/snappy-c) 
  - [Tornado v0.6a](http://freearc.org) 
  - [wfLZ v15-04](https://github.com/ShaneWF/wflz) 
@@ -229,5 +229,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 05 MAR 2016
+Last update: 11 MAR 2016
 
