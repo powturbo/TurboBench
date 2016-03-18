@@ -879,9 +879,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif    
 
       #if C_LIBBSC
-	    #define LZPHASHSIZE 18 //LIBBSC_DEFAULT_LZPHASHSIZE
-	case P_LIBBSC_ST: return bsc_compress(in, out, inlen, 0/*LZPHASHSIZE*/, 0/*LIBBSC_DEFAULT_LZPMINLEN*/, lev/*codec-_BSC_ST3+LIBBSC_BLOCKSORTER_ST3*/, lev>4?LIBBSC_CODER_QLFC_ADAPTIVE:LIBBSC_CODER_QLFC_STATIC, 0/*LIBBSC_FEATURE_FASTMODE /*| LIBBSC_FEATURE_MULTITHREADING*/);
-	case P_LIBBSC:    return bsc_compress(in, out, inlen, LZPHASHSIZE,     32, LIBBSC_BLOCKSORTER_BWT,     lev,                                          LIBBSC_DEFAULT_FEATURES/*LIBBSC_FEATURE_FASTMODE | LIBBSC_FEATURE_MULTITHREADING*/);
+	case P_LIBBSC_ST: return bsc_compress(in, out, inlen,                  0/*LZPHASHSIZE*/,  0/*LIBBSC_DEFAULT_LZPMINLEN*/,                  lev, lev>4?LIBBSC_CODER_QLFC_ADAPTIVE:LIBBSC_CODER_QLFC_STATIC, 0);
+	case P_LIBBSC:    return bsc_compress(in, out, inlen,/*18*/LIBBSC_DEFAULT_LZPHASHSIZE,/*32*/ LIBBSC_DEFAULT_LZPMINLEN, LIBBSC_BLOCKSORTER_BWT, lev,                                                       LIBBSC_DEFAULT_FEATURES);
 	  #endif
 
       #if C_BZIP2
