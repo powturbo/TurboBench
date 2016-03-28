@@ -94,7 +94,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
  - [balz v1.20](http://sourceforge.net/projects/balz) 
  - [bcm v1.0](http://sourceforge.net/projects/bcm) 
- - [Blosc v2.0/16-03](https://github.com/Blosc/c-blosc2)
+ - [Blosc v2.0/16-03-28](https://github.com/Blosc/c-blosc2)
  - [BriefLz v1.1.0](https://github.com/jibsen/brieflz) 
  - [Brotli v16-03](https://github.com/google/brotli) 
  - [Bzip2 v1.06](http://www.bzip.org/downloads.html) 
@@ -118,13 +118,13 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Lzma v9.35](http://7-zip.org) 
  - [Lzo v2.09](http://www.oberhumer.com/opensource/lzo) 
  - [Lzoma v16-01](https://github.com/alef78/lzoma) 
- - [LZSSE v16-03](https://github.com/ConorStokes/LZSSE) :new:
+ - [LZSSE v16-03-28](https://github.com/ConorStokes/LZSSE) :new:
  - [Miniz v13-10](https://github.com/richgel999/miniz) 
  - [ms-compress v16.03](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi v15-10](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) 
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
- - [sap v16-03](https://github.com/CoreSecurity/pysap) 
+ - [sap v16-03-28](https://github.com/CoreSecurity/pysap) 
  - [shoco v2015](https://github.com/Ed-von-Schleck/shoco) 
  - [Shrinker v0.1/r9](https://code.google.com/p/data-shrinker) 
  - [Snappy v1.1.3/16-03](https://github.com/google/snappy) 
@@ -229,5 +229,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 26 MAR 2016
+Last update: 28 MAR 2016
 
