@@ -692,8 +692,8 @@ struct plugs plugs[] = {
   { P_LZO2a, 	"lzo2a", 			C_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"999" }, 
   { P_LZOMA, 	"lzoma", 			C_LZOMA,	"16-03",	"lzoma",				"GPL license",		"https://github.com/alef78/lzoma", 														"1,2,3,4,5,6,7,8,9" },
   { P_LZSSE2,	"lzsse2",   	    C_LZSSE,	"16-03",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													"1,2,3,4,5,6,7,8,9,12,16,17"}, 
-  { P_LZSSE4,	"lzsse4",   	    C_LZSSE,	"16-03",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													""}, 
-  { P_LZSSE8,	"lzsse8",   	    C_LZSSE,	"16-03",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													""}, 
+  { P_LZSSE4,	"lzsse4",   	    C_LZSSE,	"16-03",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													"0,1,2,3,4,5,6,7,8,9,12,16,17"}, 
+  { P_LZSSE8,	"lzsse8",   	    C_LZSSE,	"16-03",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													"0,1,2,3,4,5,6,7,8,9,12,16,17"}, 
   { P_MINIZ, 	"miniz", 			C_MINIZ,	"15-06",	"miniz zlib-replacement","Public domain",	"https://github.com/richgel999/miniz", 													"1,2,3,4,5,6,7,8,9" },
   { P_MSCOMPRESS,"mscompress", 		C_MSCOMPRESS,"16.03",	"ms-compress",			"GPL license",		"https://github.com/coderforlife/ms-compress", 											"2,3,4" }, 
   { P_NAKA, 	"naka", 			C_NAKA,		"15-10",	"Nakamichi Kintaro",	"Public Domain",    "http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188",	"" },
@@ -1042,9 +1042,12 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif
 
 	  #if C_LZSSE
-	case P_LZSSE2: { LZSSE2_OptimalParseState *s = LZSSE2_MakeOptimalParseState(inlen); if(!s) return 0; outlen = LZSSE2_CompressOptimalParse( s, in, inlen, out, outsize, lev ); LZSSE2_FreeOptimalParseState(s); return outlen; }
-	case P_LZSSE4: { LZSSE4_FastParseState    *s = LZSSE4_MakeFastParseState();                          outlen = LZSSE4_CompressFast(         s, in, inlen, out, outsize      ); LZSSE4_FreeFastParseState(s);    return outlen; }
-	case P_LZSSE8: { LZSSE8_FastParseState    *s = LZSSE8_MakeFastParseState();                          outlen = LZSSE8_CompressFast(         s, in, inlen, out, outsize      ); LZSSE8_FreeFastParseState(s);    return outlen; }
+	case P_LZSSE2: {            LZSSE2_OptimalParseState *s = LZSSE2_MakeOptimalParseState(inlen); if(!s) return 0; outlen = LZSSE2_CompressOptimalParse( s, in, inlen, out, outsize, lev ); LZSSE2_FreeOptimalParseState(s); return outlen; }
+	case P_LZSSE4: if(lev==1) { LZSSE4_FastParseState    *s = LZSSE4_MakeFastParseState();                          outlen = LZSSE4_CompressFast(         s, in, inlen, out, outsize      ); LZSSE4_FreeFastParseState(s);    return outlen; }
+                   else {       LZSSE4_OptimalParseState *s = LZSSE4_MakeOptimalParseState(inlen); if(!s) return 0; outlen = LZSSE4_CompressOptimalParse( s, in, inlen, out, outsize, lev ); LZSSE4_FreeOptimalParseState(s); return outlen; }
+	case P_LZSSE8: if(lev==1) { LZSSE8_FastParseState    *s = LZSSE8_MakeFastParseState();                          outlen = LZSSE8_CompressFast(         s, in, inlen, out, outsize      ); LZSSE8_FreeFastParseState(s);    return outlen; }
+                   else {       LZSSE8_OptimalParseState *s = LZSSE8_MakeOptimalParseState(inlen); if(!s) return 0; outlen = LZSSE8_CompressOptimalParse( s, in, inlen, out, outsize, lev ); LZSSE8_FreeOptimalParseState(s); return outlen; }
+
 	  #endif
 
       #if C_MSCOMPRESS
