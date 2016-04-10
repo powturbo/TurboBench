@@ -185,7 +185,7 @@ LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
 ifeq ($(NCOMP2), 0)
 DIVSUFSORT=libbsc/libbsc/bwt/divsufsort/divsufsort.o
 OB+=balz/balz.o
-OB+=bcm/bcm.o
+OB+=bcm_/bcm.o
 OB+=brieflz/brieflz.o brieflz/depack.o
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/platform/platform.o libbsc/libbsc/filters/detectors.o \
 	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o $(DIVSUFSORT) libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o
