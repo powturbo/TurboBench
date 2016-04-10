@@ -264,7 +264,7 @@ enum {
   #endif
 
   #if C_BCM
-#include "bcm/bcm.h"
+#include "bcm_/bcm.h"
   #endif
 
   #if C_C_BLOSC2
@@ -657,7 +657,7 @@ extern "C" {
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
   { P_BALZ, 	"balz", 			C_BALZ, 	"1.20",		"balz",					"Public Domain",	"http://sourceforge.net/projects/balz", 												"0,1" }, 
-  { P_BCM, 		"bcm", 				C_BCM, 		"1.0",		"bcm",					"Public Domain",	"http://sourceforge.net/projects/bcm", 													"" }, 
+  { P_BCM, 		"bcm", 				C_BCM, 		"1.01",		"bcm",					"Public Domain",	"https://github.com/encode84/bcm", 													"" }, 
   { P_C_BLOSC2, "blosc",			C_C_BLOSC2, "2.0",		"Blosc",				"BSD license",		"https://github.com/Blosc/c-blosc2", 													"0,1,2,3,4,5,6,7,8,9", 64*1024},
   { P_BRIEFLZ,	"brieflz", 		    C_BRIEFLZ, 	"1.1.0",	"BriefLz",				"BSD like",			"https://github.com/jibsen/brieflz", 													"" }, 
   { P_BROTLI,	"brotli", 			C_BROTLI, 	"16-03",	"Brotli",				"Apache license",	"https://github.com/google/brotli", 													"0,1,2,3,4,5,6,7,8,9,11/DOWX"},

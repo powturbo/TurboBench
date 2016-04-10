@@ -122,3 +122,6 @@
 [submodule "LZSSE"]
 	path = LZSSE
 	url = https://github.com/ConorStokes/LZSSE.git
+[submodule "bcm"]
+	path = bcm
+	url = https://github.com/encode84/bcm.git

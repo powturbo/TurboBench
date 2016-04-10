@@ -1,7 +1,11 @@
-// bcm.cpp is written and placed in the public domain by Ilya Muravyov
-//
+/*
 
-#ifdef __GNUC__ 
+BCM - A BWT-based file compressor
+Written and placed in the public domain by Ilya Muravyov
+
+*/
+
+#ifdef __GNUC__
 #define _FILE_OFFSET_BITS 64
 #define _fseeki64 fseeko64
 #define _ftelli64 ftello64
@@ -16,37 +20,48 @@
 #include "divsufsort.h" // libdivsufsort-lite
 #include "bcm.h"
 #include "../libbsc/libbsc/bwt/bwt.h"
+
 typedef unsigned char byte;
 typedef unsigned int uint;
 typedef unsigned long long ulonglong;
 
 const char magic[]="BCM1";
 
+//FILE* in;
+//FILE* out;
 static unsigned char *in,*in_;
 static unsigned char* out;
 #define _putc(__ch, __out) *__out++ = (__ch)
 #define _getc(in, in_) (in<in_?*in++:-1)
-//#define _rewind(in,_in) in = _in
 
-class Encoder
+struct Encoder
 {
-public:
 	uint code;
 	uint low;
 	uint high;
 
 	Encoder()
-		: code(0), low(0), high(-1)
-	{}
-
-	void Encode(int bit, uint p)
 	{
-		const uint mid=low+((ulonglong(high-low)*(p<<14))>>32);
+		code=0;
+		low=0;
+		high=uint(-1);
+	}
 
-		if (bit)
-			high=mid;
-		else
-			low=mid+1;
+	void EncodeBit0(uint p)
+	{
+		low+=((ulonglong(high-low)*(p<<14))>>32)+1;
+
+		while ((low^high)<(1<<24))
+		{
+			_putc(low>>24, out);
+			low<<=8;
+			high=(high<<8)|255;
+		}
+	}
+
+	void EncodeBit1(uint p)
+	{
+		high=low+((ulonglong(high-low)*(p<<14))>>32);
 
 		while ((low^high)<(1<<24))
 		{
@@ -93,48 +108,28 @@ public:
 };
 
 template<int RATE>
-class Counter
+struct Counter
 {
-public:
 	int p;
 
 	Counter()
-		: p(1<<15)
-	{}
-
-	void _Counter() { p = 1<<15;}
-	
- 	int P() const {	
- 	  return p;	
- 	}	
-	void Update(int bit)
 	{
-		if (bit)
-			p+=(p^65535)>>RATE;
-		else
-			p-=p>>RATE;
+		p=1<<15;
+	}
+
+	void UpdateBit0()
+	{
+		p-=p>>RATE;
+	}
+
+	void UpdateBit1()
+	{
+		p+=(p^65535)>>RATE;
 	}
 };
 
-
-template<unsigned a, unsigned b>
-class Counter0 {
-  public:	
- 	unsigned short p1, p2;	
- 	Counter0(): p1(1<<15), p2(1<<15) {}	
-	void _Counter() { p1 = 1<<15; p2 = 1<<15;}
- 	int P() const {	
- 	return (p1+p2);	
- 	}	
- 	void Update(int y) {	
- 	p1-=((p1>>a)-(((1<<(16-a))-1)&(-y)));	
- 	p2-=((p2>>b)-(((1<<(16-b))-1)&(-y)));	
- 	}	
- 	};
-
-class CM: public Encoder
+struct CM: Encoder
 {
-public:
 	Counter<2> counter0[256];
 	Counter<4> counter1[256][256];
 	Counter<6> counter2[2][256][17];
@@ -143,11 +138,11 @@ public:
 	int run;
 
 	CM()
-		: c1(0), c2(0), run(0)
 	{
-	  for(int i=0; i < 256; i++) { counter0[i]._Counter();
-	    for (int j=0; j<256; ++j) counter1[i][j]._Counter();
-	  }
+		c1=0;
+		c2=0;
+		run=0;
+		
 		for (int i=0; i<2; ++i)
 		{
 			for (int j=0; j<256; ++j)
@@ -158,7 +153,7 @@ public:
 		}
 	}
 
-	void Put(int c)
+	void Encode(int c)
 	{
 		if (c1==c2)
 			++run;
@@ -169,33 +164,44 @@ public:
 		int ctx=1;
 		while (ctx<256)
 		{
-			const int p0=counter0[ctx].P();
-			const int p1=counter1[c1][ctx].P();
-			const int p2=counter1[c2][ctx].P();
-			const int p=((p0<<2)+p1+p1+p1+p2)>>3;
+			const int p0=counter0[ctx].p;
+			const int p1=counter1[c1][ctx].p;
+			const int p2=counter1[c2][ctx].p;
+			const int p=(p0+p0+p0+p0+p1+p1+p1+p2)>>3;
 
 			const int idx=p>>12;
-			const int x1=counter2[f][ctx][idx].P();
-			const int x2=counter2[f][ctx][idx+1].P();
+			const int x1=counter2[f][ctx][idx].p;
+			const int x2=counter2[f][ctx][idx+1].p;
 			const int ssep=x1+(((x2-x1)*(p&4095))>>12);
 
-			const int bit=((c&128)!=0);
-			c += c;
-			Encoder::Encode(bit, p+ssep+ssep+ssep);
+			const int bit=c&128;
+			c+=c;
 
-			counter0[ctx].Update(bit);
-			counter1[c1][ctx].Update(bit);
-			counter2[f][ctx][idx].Update(bit);
-			counter2[f][ctx][idx+1].Update(bit);
-
-			ctx += ctx+bit;
+			if (bit)
+			{
+				Encoder::EncodeBit1(p+ssep+ssep+ssep);
+				counter0[ctx].UpdateBit1();
+				counter1[c1][ctx].UpdateBit1();
+				counter2[f][ctx][idx].UpdateBit1();
+				counter2[f][ctx][idx+1].UpdateBit1();
+				ctx+=ctx+1;
+			}
+			else
+			{
+				Encoder::EncodeBit0(p+ssep+ssep+ssep);
+				counter0[ctx].UpdateBit0();
+				counter1[c1][ctx].UpdateBit0();
+				counter2[f][ctx][idx].UpdateBit0();
+				counter2[f][ctx][idx+1].UpdateBit0();
+				ctx+=ctx;
+			}
 		}
 
-		c2 = c1;
-		c1 = byte(ctx);
+		c2=c1;
+		c1=ctx&255;
 	}
 
-	int Get()
+	int Decode()
 	{
 		if (c1==c2)
 			++run;
@@ -206,53 +212,65 @@ public:
 		int ctx=1;
 		while (ctx<256)
 		{
-			const int p0=counter0[ctx].P();
-			const int p1=counter1[c1][ctx].P();
-			const int p2=counter1[c2][ctx].P();
-			const int p=((p0<<2)+p1+p1+p1+p2)>>3;
+			const int p0=counter0[ctx].p;
+			const int p1=counter1[c1][ctx].p;
+			const int p2=counter1[c2][ctx].p;
+			const int p=(p0+p0+p0+p0+p1+p1+p1+p2)>>3;
 
 			const int idx=p>>12;
-			const int x1=counter2[f][ctx][idx].P();
-			const int x2=counter2[f][ctx][idx+1].P();
+			const int x1=counter2[f][ctx][idx].p;
+			const int x2=counter2[f][ctx][idx+1].p;
 			const int ssep=x1+(((x2-x1)*(p&4095))>>12);
 
 			const int bit=Encoder::Decode(p+ssep+ssep+ssep);
 
-			counter0[ctx].Update(bit);
-			counter1[c1][ctx].Update(bit);
-			counter2[f][ctx][idx].Update(bit);
-			counter2[f][ctx][idx+1].Update(bit);
-
-			ctx+=ctx+bit;
+			if (bit)
+			{
+				counter0[ctx].UpdateBit1();
+				counter1[c1][ctx].UpdateBit1();
+				counter2[f][ctx][idx].UpdateBit1();
+				counter2[f][ctx][idx+1].UpdateBit1();
+				ctx+=ctx+1;
+			}
+			else
+			{
+				counter0[ctx].UpdateBit0();
+				counter1[c1][ctx].UpdateBit0();
+				counter2[f][ctx][idx].UpdateBit0();
+				counter2[f][ctx][idx+1].UpdateBit0();
+				ctx+=ctx;
+			}
 		}
 
 		c2=c1;
-		return c1=byte(ctx);
-	} 
-};
+		return c1=ctx&255;
+	}
+};// cm;
 
 //byte* buf;
 
+//void compress(int b)
 unsigned bcmcompress(unsigned char *in, int n, unsigned char *_out)
 {
   CM cm;
   out = _out;
 
-  
-	/*if (_fseeki64(in, 0, SEEK_END)!=0)
+	/*if (_fseeki64(in, 0, SEEK_END))
 	{
-		perror("Fseek failed");
+		perror("Fseek() failed");
 		exit(1);
 	}
 	const long long flen=_ftelli64(in);
 	if (flen<0)
 	{
-		perror("Ftell failed");
+		perror("Ftell() failed");
 		exit(1);
 	}
 	if (b>flen)
 		b=int(flen);
-	rewind(in);*/
+	rewind(in);
+
+	buf=(byte*)calloc(b, 5);*/
 	unsigned char *buf = (byte*)malloc(n+16);
 	if (!buf)
 	{
@@ -263,65 +281,53 @@ unsigned bcmcompress(unsigned char *in, int n, unsigned char *_out)
 	/*_putc(magic[0], out);
 	_putc(magic[1], out);
 	_putc(magic[2], out);
-	_putc(magic[3], out);*/
+	_putc(magic[3], out);
 
-	//int n;
-	//while ((n=fread(buf, 1, b, in))>0)
+	int n;
+	while ((n=fread(buf, 1, b, in))>0)*/
 	{
-		const unsigned p = divbwt(in, buf, NULL, n, NULL, NULL, 0);
+		//const int p=divbwt(buf, buf, (int*)&buf[b], n);
+		const int p = divbwt(in, buf, NULL, n, NULL, NULL, 0);
 		if (p<1)
 		{
-			perror("Divbwt failed");
+			perror("Divbwt() failed");
 			exit(1);
 		}
-		/*cm.Put(n>>24);
-		cm.Put(n>>16);
-		cm.Put(n>>8);
-		cm.Put(n);*/				//printf("p=%d ", p);
-		cm.Put(p>>24);
-		cm.Put(p>>16);
-		cm.Put(p>>8);
-		cm.Put(p);
+
+		/*cm.Encode(n>>24);
+		cm.Encode(n>>16);
+		cm.Encode(n>>8);
+		cm.Encode(n);*/
+		cm.Encode(p>>24);
+		cm.Encode(p>>16);
+		cm.Encode(p>>8);
+		cm.Encode(p);
 
 		for (int i=0; i<n; ++i)
-			cm.Put(buf[i]);
+			cm.Encode(buf[i]);
 	}
 
-	cm.Put(0); // EOF
-	cm.Put(0);
-	cm.Put(0);
-	cm.Put(0);
- 
+	cm.Encode(0); // EOF
+	cm.Encode(0);
+	cm.Encode(0);
+	cm.Encode(0);
+
 	cm.Flush();
 	free(buf);
- return out - _out;	
-}
- 
-unsigned bcmbwti(unsigned char *buf, unsigned n, unsigned p, unsigned char *out) {
-  int t[257]={0};
-  for (int i=0; i<n; ++i)
-	++t[(buf[i]/*=cm.Get()*/)+1];			
-  for (int i=1; i<256; ++i)
-	t[i]+=t[i-1];
-  int* next=(int*)&buf[n];
-  for (int i=0; i<n; ++i)
-	next[t[buf[i]]++]=i+(i>=p);
-  for (int i=p; i!=0;)
-  {
-	i=next[i-1];
-	int c = buf[i-(i>=p)]; _putc(c, out);
-  }
+  return out - _out;	
 }
 
+//void decompress()
 unsigned bcmdecompress(unsigned char *_in, int inlen, unsigned char *_out, int n)
 {
   CM cm;
   in = _in; in_ = _in+inlen; out = _out; //printf("n=%d ", _n);
   unsigned char *buf;
-	/*if (  (_getc(in,in_)!=magic[0])
-		||(_getc(in,in_)!=magic[1])
-		||(_getc(in,in_)!=magic[2])
-		||(_getc(in,in_)!=magic[3]))
+
+	/*if (_getc(in,in_)!=magic[0]
+		|| _getc(in,in_)!=magic[1]
+		|| _getc(in,in_)!=magic[2]
+		|| _getc(in,in_)!=magic[3])
 	{
 		fprintf(stderr, "Not in BCM format\n");
 		exit(1);
@@ -331,15 +337,15 @@ unsigned bcmdecompress(unsigned char *_in, int inlen, unsigned char *_out, int n
 
 	int b=0;
 
-	///*for (;;)
-	//{
-		/*const int _n = (cm.Get()<<24)
-			         |(cm.Get()<<16)
-			         |(cm.Get()<<8)
-			         |cm.Get();*/			//printf("_n=%d ", _n);
-		/*if (n==0)
+	/*for (;;)
+	{
+		const int n=(cm.Decode()<<24)
+			|(cm.Decode()<<16)
+			|(cm.Decode()<<8)
+			|cm.Decode();
+		if (!n) // EOF
 			break;
-		if (b==0)*/
+		if (!b)*/
 		{
 			buf=(byte*)calloc(b=n, 5);
 			if (!buf)
@@ -348,39 +354,29 @@ unsigned bcmdecompress(unsigned char *_in, int inlen, unsigned char *_out, int n
 				exit(1);
 			}
 		}
-		const unsigned p = (cm.Get()<<24)
-			              |(cm.Get()<<16)
-			              |(cm.Get()<<8)
-			              |cm.Get();									//printf("p=%d ", p);
-		if ((n<1)||(n>b)||(p<1)||(p>n))
+		const int p=(cm.Decode()<<24)
+			|(cm.Decode()<<16)
+			|(cm.Decode()<<8)
+			|cm.Decode();
+		if (n<1 || n>b || p<1 || p>n)
 		{
-			fprintf(stderr, "File corrupted %d,%d\n", n, p);
+			fprintf(stderr, "File corrupted\n");
 			exit(1);
 		}
-		  #if 0
-		for (int i=0; i<n; ++i)
-		  _out[i] = cm.Get();			
-		bsc_bwt_decode(_out, n, p, 0, NULL, 0);
-		  #elif 1 
-		for (int i=0; i<n; ++i)
-		  buf[i] = cm.Get();			
-        bcmbwti(buf,n,p,out);		  
-		  #else
 		// Inverse BWT
 		int t[257]={0};
 		for (int i=0; i<n; ++i)
-			++t[(buf[i]=cm.Get())+1];			
+			++t[(buf[i]=cm.Decode())+1];
 		for (int i=1; i<256; ++i)
 			t[i]+=t[i-1];
 		int* next=(int*)&buf[b];
 		for (int i=0; i<n; ++i)
 			next[t[buf[i]]++]=i+(i>=p);
-		for (int i=p; i!=0;)
+		for (int i=p; i;)
 		{
 			i=next[i-1];
-			int c = buf[i-(i>=p)]; _putc(c, out);
+			_putc(buf[i-(i>=p)], out);
 		}
-		  #endif
 	//}
   free(buf);
   return in - _in;		
@@ -389,7 +385,7 @@ unsigned bcmdecompress(unsigned char *_in, int inlen, unsigned char *_out, int n
 unsigned bcmenc(unsigned char *in, int n, unsigned char *_out) {
   CM cm;
   out = _out; 
-  unsigned char *ip = in; while(ip < in+n) cm.Put(*ip++);
+  unsigned char *ip = in; while(ip < in+n) cm.Encode(*ip++);
   cm.Flush();
   return out - _out;
 }
@@ -398,12 +394,11 @@ unsigned bcmdec(unsigned char *_in, unsigned inlen, unsigned char *out, unsigned
   CM cm;
   in = _in; in_ = _in+inlen; 
   cm.Init();
-  unsigned char *op = out; while(op < out+n) *op++= cm.Get();
+  unsigned char *op = out; while(op < out+n) *op++= cm.Decode();
   return in - _in;
 }
-
 #if 0
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
 	const clock_t start=clock();
 
@@ -411,7 +406,7 @@ int main(int argc, char* argv[])
 	bool do_decomp=false;
 	bool overwrite=false;
 
-	while ((argc>1)&&(argv[1][0]=='-'))
+	while (argc>1 && *argv[1]=='-')
 	{
 		switch (argv[1][1])
 		{
@@ -441,14 +436,14 @@ int main(int argc, char* argv[])
 	if (argc<2)
 	{
 		fprintf(stderr,
-			"BCM - A BWT-based file compressor, v1.00\n"
+			"BCM - A BWT-based file compressor, v1.01\n"
 			"\n"
 			"Usage: BCM [options] infile [outfile]\n"
 			"\n"
 			"Options:\n"
-			"  -b<N>[k] Set block size to N MB or KB (default is 20 MB)\n"
-			"  -d       Decompress\n"
-			"  -f       Force overwrite of output file\n");
+			"  -b#[k] Set block size to # MB or KB (default is 20 MB)\n"
+			"  -d     Decompress\n"
+			"  -f     Force overwrite of output file\n");
 		exit(1);
 	}
 
@@ -466,7 +461,7 @@ int main(int argc, char* argv[])
 		if (do_decomp)
 		{
 			const int p=strlen(ofname)-4;
-			if ((p>0)&&(strcmp(&ofname[p], ".bcm")==0))
+			if (p>0 && !strcmp(&ofname[p], ".bcm"))
 				ofname[p]='\0';
 			else
 				strcat(ofname, ".out");
@@ -495,16 +490,15 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 
-	fprintf(stdout, "%s: ", argv[1]);
-	fflush(stdout);
+	fprintf(stderr, "%s: ", argv[1]);
+	fflush(stderr);
 
 	if (do_decomp)
 		decompress();
 	else
 		compress(block_size);
 
-	fprintf(stdout, "%lld -> %lld in %.3fs\n",
-		_ftelli64(in), _ftelli64(out),
+	fprintf(stderr, "%lld->%lld in %.3fs\n", _ftelli64(in), _ftelli64(out),
 		double(clock()-start)/CLOCKS_PER_SEC);
 
 	fclose(in);

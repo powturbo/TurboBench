@@ -93,7 +93,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 #### Compressor Lz77,Rolz,Bwt,zpaq:
  - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
  - [balz v1.20](http://sourceforge.net/projects/balz) 
- - [bcm v1.0](http://sourceforge.net/projects/bcm) 
+ - [bcm v1.01](https://github.com/encode84/bcm) 
  - [Blosc v2.0/16-04](https://github.com/Blosc/c-blosc2)
  - [BriefLz v1.1.0](https://github.com/jibsen/brieflz) 
  - [Brotli v16-03](https://github.com/google/brotli) 
