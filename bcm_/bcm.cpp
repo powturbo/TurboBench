@@ -17,7 +17,7 @@ Written and placed in the public domain by Ilya Muravyov
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "divsufsort.h" // libdivsufsort-lite
+#include "../bcm/src/divsufsort.h" // libdivsufsort-lite
 #include "bcm.h"
 #include "../libbsc/libbsc/bwt/bwt.h"
 
