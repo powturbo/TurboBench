@@ -56,7 +56,7 @@ struct Encoder
 #endif
 		while ((low^high)<(1<<24))
 		{
-			putc(low>>24, out);
+			_putc(low>>24, out);
 			low<<=8;
 			high=(high<<8)|255;
 		}
@@ -71,7 +71,7 @@ struct Encoder
 #endif
 		while ((low^high)<(1<<24))
 		{
-			putc(low>>24, out);
+			_putc(low>>24, out);
 			low<<=8;
 			high=(high<<8)|255;
 		}
@@ -81,7 +81,7 @@ struct Encoder
 	{
 		for (int i=0; i<4; ++i)
 		{
-			putc(low>>24, out);
+			_putc(low>>24, out);
 			low<<=8;
 		}
 	}
@@ -89,7 +89,7 @@ struct Encoder
 	void Init()
 	{
 		for (int i=0; i<4; ++i)
-			code=(code<<8)|getc(in);
+			code=(code<<8)|_getc(in,in_);
 	}
 
 	int DecodeBit(uint p)
@@ -107,7 +107,7 @@ struct Encoder
 
 		while ((low^high)<(1<<24))
 		{
-			code=(code<<8)|getc(in);
+			code=(code<<8)|_getc(in,in_);
 			low<<=8;
 			high=(high<<8)|255;
 		}
@@ -383,7 +383,7 @@ unsigned bcmdecompress(unsigned char *_in, int inlen, unsigned char *_out, int n
 		for (int i=p; i;)
 		{
 			i=next[i-1];
-			putc(buf[i-(i>=p)], out);
+			_putc(buf[i-(i>=p)], out);
 		}
 	//}
   free(buf);
