@@ -254,7 +254,7 @@ struct CM: Encoder
 		c2=c1;
 		return c1=ctx&255;
 	}
-}/* cm;
+};/* cm;
 
 byte* buf;
 
