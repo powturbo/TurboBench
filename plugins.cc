@@ -657,7 +657,7 @@ extern "C" {
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
   { P_BALZ, 	"balz", 			C_BALZ, 	"1.20",		"balz",					"Public Domain",	"http://sourceforge.net/projects/balz", 												"0,1" }, 
-  { P_BCM, 		"bcm", 				C_BCM, 		"1.01",		"bcm",					"Public Domain",	"https://github.com/encode84/bcm", 													"" }, 
+  { P_BCM, 		"bcm", 				C_BCM, 		"1.02",		"bcm",					"Public Domain",	"https://github.com/encode84/bcm", 													"" }, 
   { P_C_BLOSC2, "blosc",			C_C_BLOSC2, "2.0",		"Blosc",				"BSD license",		"https://github.com/Blosc/c-blosc2", 													"0,1,2,3,4,5,6,7,8,9", 64*1024},
   { P_BRIEFLZ,	"brieflz", 		    C_BRIEFLZ, 	"1.1.0",	"BriefLz",				"BSD like",			"https://github.com/jibsen/brieflz", 													"" }, 
   { P_BROTLI,	"brotli", 			C_BROTLI, 	"16-03",	"Brotli",				"Apache license",	"https://github.com/google/brotli", 													"0,1,2,3,4,5,6,7,8,9,11/DOWX"},
@@ -674,7 +674,7 @@ struct plugs plugs[] = {
   { P_LIBBSC, 	"bsc", 				C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"1,2"}, 
   { P_LIBLZF, 	"lzf", 				C_LIBLZF, 	"1.06",		"LibLZF",				"BSD license",		"http://oldhome.schmorp.de/marc/liblzf.html\thttps://github.com/nemequ/liblzf",			"" },
   { P_LIBLZG,  	"lzg", 				C_LIBLZG,   "1.0.8",	"LibLzg",				"zlib-license",		"https://github.com/mbitsnbites/liblzg\thttp://liblzg.bitsnbites.eu/e",					"1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
-  { P_LIBZPAQ,  "zpaq", 			C_LIBZPAQ, 	"7.05",		"Libzpaq",				"Public Domain",	"https://github.com/zpaq/zpaq",															"0,1,2,3,4,5" }, 
+  { P_LIBZPAQ,  "zpaq", 			C_LIBZPAQ, 	"7.10",		"Libzpaq",				"Public Domain",	"https://github.com/zpaq/zpaq",															"0,1,2,3,4,5" }, 
   { P_LZ4,  	"lz4",				C_LZ4, 		"15-10",	"Lz4",					"BSD license",		"https://github.com/Cyan4973/lz4", 														"0,1,9,12,16" }, 
   { P_LZ5,  	"lz5",				C_LZ5, 		"1.3.3",	"Lz5",					"BSD license",		"https://github.com/inikep/lz5",														"0,1,2,3,4,5,6,7,8,9,12,15" }, 
   { P_LZFSE, 	"lzfse", 			C_LZFSE, 	"2015",		"lzfse",				"iOS and OS X",		"https://developer.apple.com/library/prerelease/mac/documentation/Performance/Reference/Compression/","" },
@@ -711,8 +711,8 @@ struct plugs plugs[] = {
   { P_YAPPY, 	"yappy",			C_YAPPY, 	"2011",		"Yappy",				"",					"" ,																					"" },//crash windows
   { P_ZLIB, 	"zlib", 			C_ZLIB, 	"1.2.8",	"zlib",					"zlib license",		"http://zlib.net\thttps://github.com/madler/zlib", 										"1,2,3,4,5,6,7,8,9" },
   { P_ZLING, 	"zling", 	   		C_ZLING, 	"16-01",	"Libzling",				"BSD license",		"https://github.com/richox/libzling",													"0,1,2,3,4" }, 
-  { P_ZOPFLI, 	"zopfli",			C_ZOPFLI, 	"15-05",	"Zopfli",				"Apache license",	"https://code.google.com/p/zopfli",														""}, 
-  { P_ZSTD, 	"zstd", 			C_ZSTD,		"0.5.0",	"ZSTD",					"BSD license",		"https://github.com/Cyan4973/zstd", 													"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25" },
+  { P_ZOPFLI, 	"zopfli",			C_ZOPFLI, 	"16-04",	"Zopfli",				"Apache license",	"https://code.google.com/p/zopfli",														""}, 
+  { P_ZSTD, 	"zstd", 			C_ZSTD,		"0.6.0",	"ZSTD",					"BSD license",		"https://github.com/Cyan4973/zstd", 													"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25" },
 //-----------------------------------------------------------------------------------	  
   { P_MCPY, 	"imemcpy", 			C_MEMCPY, 	".",		"inline memcpy",		"------------",		"--------------------------------------",												"" },
   { P_LMCPY, 	"memcpy",			C_MEMCPY,  	".",		"library memcpy",		"",					"",																						"" },

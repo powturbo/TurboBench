@@ -49,11 +49,14 @@ struct Encoder
 
 	void EncodeBit0(uint p)
 	{
+#ifdef _WIN64
+		low+=((ulonglong(high-low)*p)>>18)+1;
+#else
 		low+=((ulonglong(high-low)*(p<<14))>>32)+1;
-
+#endif
 		while ((low^high)<(1<<24))
 		{
-			_putc(low>>24, out);
+			putc(low>>24, out);
 			low<<=8;
 			high=(high<<8)|255;
 		}
@@ -61,11 +64,14 @@ struct Encoder
 
 	void EncodeBit1(uint p)
 	{
+#ifdef _WIN64
+		high=low+((ulonglong(high-low)*p)>>18);
+#else
 		high=low+((ulonglong(high-low)*(p<<14))>>32);
-
+#endif
 		while ((low^high)<(1<<24))
 		{
-			_putc(low>>24, out);
+			putc(low>>24, out);
 			low<<=8;
 			high=(high<<8)|255;
 		}
@@ -75,7 +81,7 @@ struct Encoder
 	{
 		for (int i=0; i<4; ++i)
 		{
-			_putc(low>>24, out);
+			putc(low>>24, out);
 			low<<=8;
 		}
 	}
@@ -83,13 +89,16 @@ struct Encoder
 	void Init()
 	{
 		for (int i=0; i<4; ++i)
-			code=(code<<8)|_getc(in,in_);
+			code=(code<<8)|getc(in);
 	}
 
-	int Decode(uint p)
+	int DecodeBit(uint p)
 	{
+#ifdef _WIN64
+		const uint mid=low+((ulonglong(high-low)*p)>>18);
+#else
 		const uint mid=low+((ulonglong(high-low)*(p<<14))>>32);
-
+#endif
 		const int bit=(code<=mid);
 		if (bit)
 			high=mid;
@@ -98,7 +107,7 @@ struct Encoder
 
 		while ((low^high)<(1<<24))
 		{
-			code=(code<<8)|_getc(in,in_);
+			code=(code<<8)|getc(in);
 			low<<=8;
 			high=(high<<8)|255;
 		}
@@ -222,7 +231,7 @@ struct CM: Encoder
 			const int x2=counter2[f][ctx][idx+1].p;
 			const int ssep=x1+(((x2-x1)*(p&4095))>>12);
 
-			const int bit=Encoder::Decode(p+ssep+ssep+ssep);
+			const int bit=Encoder::DecodeBit(p+ssep+ssep+ssep);
 
 			if (bit)
 			{
@@ -245,16 +254,15 @@ struct CM: Encoder
 		c2=c1;
 		return c1=ctx&255;
 	}
-};// cm;
+}/* cm;
 
-//byte* buf;
+byte* buf;
 
-//void compress(int b)
+void compress(int b)*/
 unsigned bcmcompress(unsigned char *in, int n, unsigned char *_out)
 {
   CM cm;
   out = _out;
-
 	/*if (_fseeki64(in, 0, SEEK_END))
 	{
 		perror("Fseek() failed");
@@ -278,23 +286,23 @@ unsigned bcmcompress(unsigned char *in, int n, unsigned char *_out)
 		exit(1);
 	}
 
-	/*_putc(magic[0], out);
-	_putc(magic[1], out);
-	_putc(magic[2], out);
-	_putc(magic[3], out);
+	/*putc(magic[0], out);									
+	putc(magic[1], out);
+	putc(magic[2], out);
+	putc(magic[3], out);
 
 	int n;
-	while ((n=fread(buf, 1, b, in))>0)*/
+	while ((n=fread(buf, 1, b, in))>0)*/						
 	{
-		//const int p=divbwt(buf, buf, (int*)&buf[b], n);
-		const int p = divbwt(in, buf, NULL, n, NULL, NULL, 0);
+//		const int p=divbwt(buf, buf, (int*)&buf[b], n);
+		const int p = divbwt(in, buf, NULL, n, NULL, NULL, 0); // TurboBench
 		if (p<1)
 		{
 			perror("Divbwt() failed");
 			exit(1);
 		}
 
-		/*cm.Encode(n>>24);
+		/*cm.Encode(n>>24); // TurboBench
 		cm.Encode(n>>16);
 		cm.Encode(n>>8);
 		cm.Encode(n);*/
@@ -313,8 +321,8 @@ unsigned bcmcompress(unsigned char *in, int n, unsigned char *_out)
 	cm.Encode(0);
 
 	cm.Flush();
-	free(buf);
-  return out - _out;	
+	free(buf); // TurboBench
+  return out - _out; // TurboBench
 }
 
 //void decompress()
@@ -324,10 +332,10 @@ unsigned bcmdecompress(unsigned char *_in, int inlen, unsigned char *_out, int n
   in = _in; in_ = _in+inlen; out = _out; //printf("n=%d ", _n);
   unsigned char *buf;
 
-	/*if (_getc(in,in_)!=magic[0]
-		|| _getc(in,in_)!=magic[1]
-		|| _getc(in,in_)!=magic[2]
-		|| _getc(in,in_)!=magic[3])
+	/*if (getc(in)!=magic[0]
+		|| getc(in)!=magic[1]
+		|| getc(in)!=magic[2]
+		|| getc(in)!=magic[3])
 	{
 		fprintf(stderr, "Not in BCM format\n");
 		exit(1);
@@ -375,7 +383,7 @@ unsigned bcmdecompress(unsigned char *_in, int inlen, unsigned char *_out, int n
 		for (int i=p; i;)
 		{
 			i=next[i-1];
-			_putc(buf[i-(i>=p)], out);
+			putc(buf[i-(i>=p)], out);
 		}
 	//}
   free(buf);
@@ -415,7 +423,7 @@ int main(int argc, char** argv)
 				<<(argv[1][strlen(argv[1])-1]=='k'?10:20);
 			if (block_size<1)
 			{
-				fprintf(stderr, "Invalid block size\n");
+				fprintf(stderr, "Block size is out of range\n");
 				exit(1);
 			}
 			break;
@@ -436,7 +444,7 @@ int main(int argc, char** argv)
 	if (argc<2)
 	{
 		fprintf(stderr,
-			"BCM - A BWT-based file compressor, v1.01\n"
+			"BCM - A BWT-based file compressor, v1.02\n"
 			"\n"
 			"Usage: BCM [options] infile [outfile]\n"
 			"\n"
@@ -471,6 +479,13 @@ int main(int argc, char** argv)
 	}
 	else
 		strcpy(ofname, argv[2]);
+
+	if (!strcmp(ofname, argv[1]))
+	{
+		fprintf(stderr, "%s: Cannot %scompress onto itself\n", argv[1],
+			do_decomp?"de":"");
+		exit(1);
+	}
 
 	if (!overwrite)
 	{
