@@ -27,7 +27,9 @@ else
   UNAME := $(shell uname -s)
 ifeq ($(UNAME),$(filter $(UNAME),Linux Darwin FreeBSD GNU/kFreeBSD))
 LDFLAGS+=-lpthread -lrt
-HAVE_ZLIB=1
+ifeq ($(NO_ZLIB), 1)
+HAVE_ZLIB=0
+endif
 endif
 endif
 
@@ -135,28 +137,33 @@ endif
 OB+=plugins.o 
 #----------------------- COMP1 -----------------------------------------
 ifeq ($(NCOMP1), 0)
-OB+=$(ZLIB) 
 OB+=lz4/lib/lz4hc.o lz4/lib/lz4.o  
 OB+=LZMA-SDK/C/LzFind.o LZMA-SDK/C/LzmaDec.o LZMA-SDK/C/LzmaEnc.o LZMA-SDK/C/LzmaLib.o LZMA-SDK/C/Alloc.o 
 OB+=zstd/lib/zstd_compress.o zstd/lib/zstd_decompress.o zstd/lib/fse.o zstd/lib/huff0.o 
+
 ifeq ($(NCPP), 0)
 OB+=brotli_/enc/backward_references.o brotli/enc/block_splitter.o brotli/enc/encode.o brotli/enc/entropy_encode.o brotli/enc/compress_fragment.o brotli/enc/compress_fragment_two_pass.o brotli/enc/histogram.o \
 	brotli/enc/literal_cost.o brotli/enc/brotli_bit_stream.o brotli/enc/metablock.o brotli_/enc/static_dict.o brotli/enc/streams.o brotli/dec/bit_reader.o brotli/dec/decode.o brotli/dec/dictionary.o \
 	brotli/dec/huffman.o brotli/dec/state.o brotli/enc/utf8_util.o
 endif
 
-ifeq ($(HAVE_ZLIB), 1)
-#OB+=-lz
-OB+=/usr/lib/x86_64-linux-gnu/libz.a
-else
+ifeq ($(HAVE_ZLIB), 0)
 ZD=zlib/
+
 #ZD=zlib-ng/
 #OB+=$(ZD)deflate_fast.o $(ZD)deflate_slow.o $(ZD)match.o
+
 #ZD=zlib_intel/
 #OB+=$(ZD)match.o
-OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
-endif
 
+OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
+else
+ifeq ($(STATIC),1)
+OB+=/usr/lib/x86_64-linux-gnu/libz.a
+else
+OB+=-lz
+endif
+endif
 endif
 
 #----------------------- COMP2 -----------------------
