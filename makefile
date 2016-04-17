@@ -144,7 +144,13 @@ OB+=brotli_/enc/backward_references.o brotli/enc/block_splitter.o brotli/enc/enc
 	brotli/dec/huffman.o brotli/dec/state.o brotli/enc/utf8_util.o
 endif
 
-ifeq ($(HAVE_ZLIB), 0)
+ifeq ($(HAVE_ZLIB), 1)
+ifeq ($(STATIC),1)
+OB+=/usr/lib/x86_64-linux-gnu/libz.a
+else
+OB+=-lz
+endif
+else
 ZD=zlib/
 
 #ZD=zlib-ng/
@@ -154,15 +160,8 @@ ZD=zlib/
 #OB+=$(ZD)match.o
 
 OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
-else
-ifeq ($(STATIC),1)
-OB+=/usr/lib/x86_64-linux-gnu/libz.a
-else
-OB+=-lz
 endif
 endif
-endif
-
 #----------------------- COMP2 -----------------------
 pithy/pithy.o: pithy/pithy.c
 	$(CC) -O2 $(MARCH) $(CFLAGS)  $< -c -o $@  
