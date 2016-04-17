@@ -27,9 +27,6 @@ else
   UNAME := $(shell uname -s)
 ifeq ($(UNAME),$(filter $(UNAME),Linux Darwin FreeBSD GNU/kFreeBSD))
 LDFLAGS+=-lpthread -lrt
-ifeq ($(NO_ZLIB), 1)
-HAVE_ZLIB=0
-endif
 endif
 endif
 
