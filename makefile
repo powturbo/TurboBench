@@ -122,7 +122,7 @@ endif
 #------------- 
 DDEBUG=-DNDEBUG -s
 
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Ilz4/lib -Ilz5/lib -D_7ZIP_ST -DZSTD_LEGACY_SUPPORT=0 $(DEFS)
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Ilz4/lib -Ilz5/lib -D_7ZIP_ST -DZSTD_LEGACY_SUPPORT=0 $(DEFS) -Ilibdeflate
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 
 all:  turbobench
@@ -192,6 +192,7 @@ OB+=bcm_/bcm.o
 OB+=brieflz/brieflz.o brieflz/depack.o
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/platform/platform.o libbsc/libbsc/filters/detectors.o \
 	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o $(DIVSUFSORT) libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o
+OB+=libdeflate/src/aligned_malloc.o libdeflate/src/deflate_compress.o libdeflate/src/deflate_decompress.o libdeflate/src/x86_cpu_features.o
 OB+=bzip2/blocksort.o bzip2/huffman.o bzip2/crctable.o bzip2/randtable.o bzip2/compress.o bzip2/decompress.o bzip2/bzlib.o
 OB+=density/src/buffers/buffer.o density/src/core/algorithms.o density/src/structure/header.o density/src/globals.o density/src/streams/stream.o \
 	density/src/core/chameleon/chameleon_decode.o density/src/core/chameleon/chameleon_dictionary.o density/src/core/chameleon/chameleon_encode.o \
