@@ -293,7 +293,7 @@ unsigned bcmcompress(unsigned char *in, int n, unsigned char *_out)
 	rewind(in);
 
 	buf=(byte*)calloc(b, 5);*/
-	unsigned char *buf = (byte*)malloc(n+16);
+	unsigned char *buf = (BYTE*)malloc(n+16);
 	if (!buf)
 	{
 		fprintf(stderr, "Out of memory\n");
@@ -309,7 +309,7 @@ unsigned bcmcompress(unsigned char *in, int n, unsigned char *_out)
 	while ((n=fread(buf, 1, bsize, in))>0)
 	{
 		const int idx=divbwt(buf, buf, (int*)&buf[bsize], n);*/
-		const int p = divbwt(in, buf, NULL, n, NULL, NULL, 0); // TurboBench
+		const int idx = divbwt(in, buf, NULL, n, NULL, NULL, 0); // TurboBench
 		if (idx<1)
 		{
 			perror("Divbwt() failed");
