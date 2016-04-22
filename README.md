@@ -93,10 +93,10 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 #### Compressor Lz77,Rolz,Bwt,zpaq:
  - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
  - [balz v1.20](http://sourceforge.net/projects/balz) 
- - [bcm v1.02](https://github.com/encode84/bcm) 
+ - [bcm v1.03](https://github.com/encode84/bcm) 
  - [Blosc v2.0/16-04](https://github.com/Blosc/c-blosc2)
  - [BriefLz v1.1.0](https://github.com/jibsen/brieflz) 
- - [Brotli v16-03](https://github.com/google/brotli) 
+ - [Brotli v16-04](https://github.com/google/brotli) 
  - [Bzip2 v1.06](http://www.bzip.org/downloads.html) 
  - [Chameleon v15-03](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
  - [Crush v1.0.0](http://sourceforge.net/projects/crush) 
@@ -107,6 +107,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Gipfeli v15.12](https://github.com/google/gipfeli) 
  - [heatshrink v0.4.1](https://github.com/atomicobject/heatshrink) 
  - [bsc v3.1.0](https://github.com/IlyaGrebnov/libbsc) 
+ - [Libdeflate v16-04](https://github.com/ebiggers/libdeflate) 
  - [LibLZF v1.06](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [Lz4 v1.7.1](https://github.com/Cyan4973/lz4) 
@@ -229,5 +230,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 15 APR 2016
+Last update: 22 APR 2016
 
