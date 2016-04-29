@@ -94,6 +94,8 @@ enum {
 #define C_GIPFELI    COMP2	 
  P_GIPFELI,
 #define C_HEATSHRINK COMP2    
+ P_KRAKEN,
+#define C_KRAKEN     COMP2    
  P_HEATSHRINK,
 #define C_LIBBSC     COMP2    
  P_LIBBSC, P_LIBBSC_ST,  
@@ -347,6 +349,10 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 
   #if C_HEATSHRINK
 #include "heatshrink_/heatshrink.h"
+  #endif
+
+  #if C_KRAKEN
+//#include "kraken/kraken.h"
   #endif
 
   #if C_LIBLZG
@@ -676,6 +682,7 @@ struct plugs plugs[] = {
   { P_FASTLZ,	"fastlz", 			C_FASTLZ,	"0.1.0",	"FastLz",				"BSD like",			"http://fastlz.org\thttps://github.com/ariya/FastLZ",									"1,2" },
   { P_GIPFELI, 	"gipfeli", 			C_GIPFELI, 	"15.12",	"Gipfeli",				"Apache license",	"https://github.com/google/gipfeli",													"" }, 
   { P_HEATSHRINK,"heatshrink",		C_HEATSHRINK,"0.4.1",	"heatshrink",			"BSD license",		"https://github.com/atomicobject/heatshrink",											"" },
+  { P_KRAKEN, 	"kraken", 			C_KRAKEN, 	"2016",		"Kraken/memcpy demo",	"Closed",			"http://www.radgametools.com/oodlewhatsnew.htm",										"1,2,3,4,5,6,7,8,9" },
   { P_LIBBSC_ST,"bsc_st", 			C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"3,4,5,6,7,8" }, 
   { P_LIBBSC, 	"bsc", 				C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"1,2"}, 
   { P_LIBDEFLATE,"deflate",   	    C_LIBDEFLATE,"16-04",	"libdeflate",			"CC0 license",		"https://github.com/ebiggers/libdeflate",												"1,2,3,4,5,6,7,8,9,12"}, 
@@ -945,6 +952,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
  
       #if C_HEATSHRINK
     case P_HEATSHRINK:   return hscompress(in, inlen, out);
+      #endif
+
+      #if C_KRAKEN
+    case P_KRAKEN:   memcpy(out, in, inlen); return inlen;
       #endif
 
 	  #if C_LIBLZF  
@@ -1379,6 +1390,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if C_HEATSHRINK
     case P_HEATSHRINK: return hsdecompress(in, inlen, out, outlen); 
+      #endif
+
+      #if C_KRAKEN
+    case P_KRAKEN: return memcpy(out, in, outlen); break; // REPLACE 
       #endif
 
 	  #if C_LIBLZF 

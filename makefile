@@ -200,6 +200,7 @@ OB+=density/src/buffers/buffer.o density/src/core/algorithms.o density/src/struc
 	density/src/core/cheetah/cheetah_decode.o density/src/core/cheetah/cheetah_dictionary.o density/src/core/cheetah/cheetah_encode.o 
 OB+=FastLZ/fastlz.o 
 OB+=heatshrink_/heatshrink.o heatshrink/heatshrink_encoder.o heatshrink/heatshrink_decoder.o
+#OB+=kraken/kraken.o 
 OB+=chameleon/chameleon.o
 OB+=crush/crush.o
 OB+=liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o 
