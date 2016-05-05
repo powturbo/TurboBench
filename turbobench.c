@@ -609,11 +609,14 @@ void plugprttf(FILE *f, int fmt) {
   }
 }
 
-#define TMBS(__l,__t) ((__t)>=0.000001?((double)(__l)/MBS)/((__t)/TM_T):0.0)
+#define TMBS(__l,__t)         ((__t)>=0.000001?((double)(__l)/MBS)/((__t)/TM_T):0.0)
+#define RATIO(__clen, __len)  ((double)__clen*100.0/__len)
+#define FACTOR(__clen, __len) ((double)__len/(double)__clen)
 
 void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, double *ptc, double *ptd, FILE *f) {
-  double ratio = (double)plug->len*100.0/totinlen,
-         tc    = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td);
+  double ratio  = RATIO(plug->len,totinlen),    
+         //ratio  = FACTOR(plug->len,totinlen),
+         tc     = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td);
   char   name[65]; 
   if(plug->lev >= 0) 
     sprintf(name, "%s%s %d%s", plug->err?"?":"", plug->s, plug->lev, plug->prm);
@@ -625,7 +628,9 @@ void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, doubl
   if(td > *ptd) { d++; n++; *ptd = td; } 
   switch(fmt) {
     case FMT_TEXT:     
-      fprintf(f,"%12"PRId64"   %5.1f   %8.2f   %8.2f   %-16s%s\n", 
+//      fprintf(f,"%12"PRId64"   %5.1f   %8.2f   %8.2f   %-16s%s\n", 
+//        plug->len, ratio, tc, td, name, finame); 
+      fprintf(f,"%12"PRId64"   %5.2f   %8.2f   %8.2f   %-16s%s\n", 
         plug->len, ratio, tc, td, name, finame); 
       break;
     case FMT_VBULLETIN:
@@ -848,8 +853,6 @@ int libcmpn(const struct plug *e1, const struct plug *e2) {
   return 0;
 }
 
-#define RATIO(__clen, __len) ((double)__clen*100.0/__len)
-#define FACTOR(__clen, __len) ((double)__len/(double)__clen)
 #define P_MCPY 1  // memcpy id
 void plugplotc(struct plug *plug, int k, long long totinlen, int fmt, int speedup, char *s, FILE *f) {
   int  i, n = 0;
