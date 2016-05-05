@@ -96,7 +96,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [bcm v1.03](https://github.com/encode84/bcm) 
  - [Blosc v2.0/16-04](https://github.com/Blosc/c-blosc2)
  - [BriefLz v1.1.0](https://github.com/jibsen/brieflz) 
- - [Brotli v16-04](https://github.com/google/brotli) 
+ - [Brotli v16-05](https://github.com/google/brotli) 
  - [Bzip2 v1.06](http://www.bzip.org/downloads.html) 
  - [Chameleon v15-03](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
  - [Crush v1.0.0](http://sourceforge.net/projects/crush) 
@@ -136,7 +136,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Yappy v2011]() 
  - [zlib v1.2.8](http://zlib.net)
  - [Libzling v16-01](https://github.com/richox/libzling) 
- - [Zopfli v16-04](https://code.google.com/p/zopfli) 
+ - [Zopfli v16-05](https://code.google.com/p/zopfli) 
  - [ZSTD v0.6.0](https://github.com/Cyan4973/zstd) 
  - [zpaq v7.10](https://github.com/zpaq/zpaq) 
 
@@ -230,5 +230,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 29 APR 2016
+Last update: 05 MAY 2016
 
