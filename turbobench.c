@@ -86,6 +86,8 @@ static   tm_t tminit()        { tm_t t0=tmtime(),ts; while((ts = tmtime())==t0);
 static unsigned tm_repc = 1<<30, tm_Repc = 3, tm_repd = 1<<30, tm_Repd = 4, tm_rm, tm_slp = 60;
 static tm_t     tm_tm, tm_tx = 2*TM_T, tm_TX = 120*TM_T, tm_0, tm_T, tm_RepkT=24*3600*TM_T;
 
+//: b 512, kB 1000, K  1024,  MB 1000*1000,  M  1024*1024,  GB  1000*1000*1000,  G 1024*1024*1024
+
 #define Kb (1u<<10)
 #define Mb (1u<<20)
 #define Gb (1u<<30)
@@ -628,9 +630,7 @@ void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, doubl
   if(td > *ptd) { d++; n++; *ptd = td; } 
   switch(fmt) {
     case FMT_TEXT:     
-//      fprintf(f,"%12"PRId64"   %5.1f   %8.2f   %8.2f   %-16s%s\n", 
-//        plug->len, ratio, tc, td, name, finame); 
-      fprintf(f,"%12"PRId64"   %5.2f   %8.2f   %8.2f   %-16s%s\n", 
+      fprintf(f,"%12"PRId64"   %5.1f   %8.2f   %8.2f   %-16s%s\n", 
         plug->len, ratio, tc, td, name, finame); 
       break;
     case FMT_VBULLETIN:
