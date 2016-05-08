@@ -138,7 +138,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Libzling v16-01](https://github.com/richox/libzling) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
  - [ZSTD v0.6.0](https://github.com/Cyan4973/zstd) 
- - [zpaq v7.10](https://github.com/zpaq/zpaq) 
+ - [zpaq v7.13](https://github.com/zpaq/zpaq) 
 
 * LzFSE: included but not tested
 
@@ -230,5 +230,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 05 MAY 2016
+Last update: 08 MAY 2016
 
