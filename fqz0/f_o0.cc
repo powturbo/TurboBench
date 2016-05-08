@@ -27,7 +27,7 @@
 //#define BLK_SIZE 0x100000
 //static unsigned char in[BLK_SIZE], out[BLK_SIZE*2];
 
-static void compress_block(unsigned char *in,  unsigned int in_size,
+void compress_block(unsigned char *in,  unsigned int in_size,
 			   unsigned char *out, unsigned int *out_size) {
     SIMPLE_MODEL<257> order0;
     RangeCoder rc;
@@ -43,7 +43,7 @@ static void compress_block(unsigned char *in,  unsigned int in_size,
     *out_size = rc.size_out();
 }
 
-static void uncompress_block(unsigned char *in,
+void uncompress_block(unsigned char *in,
 			     unsigned char *out, int out_size) {
     SIMPLE_MODEL<257> order0;
     RangeCoder rc;

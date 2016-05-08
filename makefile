@@ -176,13 +176,13 @@ nakamichi/Nakamichi_Nin.o: nakamichi/Nakamichi_Nin.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
 
 LZSSE/lzsse2/lzsse2.o: LZSSE/lzsse2/lzsse2.cpp
-	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
 LZSSE/lzsse4/lzsse4.o: LZSSE/lzsse4/lzsse4.cpp
-	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
 LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
-	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
 #WKDM=wkdm/WKdmCompress.o wkdm/WKdmDecompress.o
 ifeq ($(NCOMP2), 0)
