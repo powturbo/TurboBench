@@ -682,7 +682,7 @@ struct plugs plugs[] = {
   { P_FASTLZ,	"fastlz", 			C_FASTLZ,	"0.1.0",	"FastLz",				"BSD like",			"http://fastlz.org\thttps://github.com/ariya/FastLZ",									"1,2" },
   { P_GIPFELI, 	"gipfeli", 			C_GIPFELI, 	"15.12",	"Gipfeli",				"Apache license",	"https://github.com/google/gipfeli",													"" }, 
   { P_HEATSHRINK,"heatshrink",		C_HEATSHRINK,"0.4.1",	"heatshrink",			"BSD license",		"https://github.com/atomicobject/heatshrink",											"" },
-  { P_KRAKEN, 	"kraken", 			C_KRAKEN, 	"2016",		"Kraken/memcpy demo",	"Closed",			"http://www.radgametools.com/oodlewhatsnew.htm",										"1,2,3,4,5,6,7,8,9" },
+// { P_KRAKEN, 	"kraken", 			C_KRAKEN, 	"2016",		"Kraken/memcpy demo",	"Closed",			"http://www.radgametools.com/oodlewhatsnew.htm",										"1,2,3,4,5,6,7,8,9" },
   { P_LIBBSC_ST,"bsc_st", 			C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"3,4,5,6,7,8" }, 
   { P_LIBBSC, 	"bsc", 				C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"1,2"}, 
   { P_LIBDEFLATE,"deflate",   	    C_LIBDEFLATE,"16-04",	"libdeflate",			"CC0 license",		"https://github.com/ebiggers/libdeflate",												"1,2,3,4,5,6,7,8,9,12"}, 
@@ -955,7 +955,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if C_KRAKEN
-    case P_KRAKEN:   memcpy(out, in, inlen); return inlen;
+//    case P_KRAKEN:   memcpy(out, in, inlen); return inlen;
       #endif
 
 	  #if C_LIBLZF  
@@ -1084,7 +1084,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if C_NAKA
-    case P_NAKA:    return NakaCompress( out, in, inlen); 
+    case P_NAKA:    return NakaCompress( (char *)out, (char *)in, inlen); 
        #endif 
 
 	  #if C_PITHY
@@ -1393,7 +1393,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if C_KRAKEN
-    case P_KRAKEN: return memcpy(out, in, outlen); break; // REPLACE 
+//    case P_KRAKEN: memcpy(out, in, outlen); break; // REPLACE 
       #endif
 
 	  #if C_LIBLZF 
@@ -1466,7 +1466,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if C_NAKA
-    case P_NAKA:    return NakaDecompress(out, in, inlen); 
+    case P_NAKA:    return NakaDecompress((char *)out, (char *)in, inlen); 
       #endif
 	  #if C_PITHY
     case P_PITHY: return pithy_Decompress((const char *)in, inlen, (char *)out, outlen);
