@@ -121,8 +121,8 @@ endif
 
 #------------- 
 DDEBUG=-DNDEBUG -s
-
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Ilz4/lib -Ilz5/lib -D_7ZIP_ST -DZSTD_LEGACY_SUPPORT=0 $(DEFS) -Ilibdeflate
+#-DZSTD_LEGACY_SUPPORT=0 
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Ilz4/lib -D_7ZIP_ST $(DEFS) -Ilibdeflate -Izstd/lib/common  -Ilz5/lib 
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 
 all:  turbobench
@@ -136,7 +136,7 @@ OB+=plugins.o
 ifeq ($(NCOMP1), 0)
 OB+=lz4/lib/lz4hc.o lz4/lib/lz4.o  
 OB+=LZMA-SDK/C/LzFind.o LZMA-SDK/C/LzmaDec.o LZMA-SDK/C/LzmaEnc.o LZMA-SDK/C/LzmaLib.o LZMA-SDK/C/Alloc.o 
-OB+=zstd/lib/zstd_compress.o zstd/lib/zstd_decompress.o zstd/lib/fse.o zstd/lib/huff0.o 
+OB+=zstd/lib/compress/zstd_compress.o zstd/lib/decompress/zstd_decompress.o zstd/lib/compress/fse_compress.o zstd/lib/common/fse_decompress.o zstd/lib/compress/huf_compress.o zstd/lib/decompress/huf_decompress.o zstd/lib/common/zstd_common.o zstd/lib/common/entropy_common.o
 
 ifeq ($(NCPP), 0)
 OB+=brotli_/enc/backward_references.o brotli/enc/block_splitter.o brotli/enc/encode.o brotli/enc/entropy_encode.o brotli/enc/compress_fragment.o brotli/enc/compress_fragment_two_pass.o brotli/enc/histogram.o \

@@ -529,7 +529,7 @@ static const Lzma_options option_mapping[] =  {
   #endif  
 
   #if C_ZSTD
-#include "zstd/lib/zstd.h"
+#include "zstd/lib/common/zstd.h"
   #endif
 
   #ifdef LZTURBO
@@ -593,8 +593,8 @@ struct snappy_env env;
   #endif
   
   #if C_FSE
-#include "zstd/lib/fse.h"
-#include "zstd/lib/huff0.h"
+#include "zstd/lib/common/fse.h"
+#include "zstd/lib/common/huf.h"
   #endif
 
   #if C_FQZ
