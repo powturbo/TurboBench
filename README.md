@@ -88,7 +88,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 |61460109| 61.4|**705.32**|3500.41|**lzturbo 10**|
 |61938605| 61.9|671.21|2069.81|lz4 1|
 |100098564|100.0|**8647.84**|**8408.10**|**memcpy**|
-
+y
 ### Plugins:
 #### Compressor Lz77,Rolz,Bwt,zpaq:
  - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
@@ -107,7 +107,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Gipfeli v15.12](https://github.com/google/gipfeli) 
  - [heatshrink v0.4.1](https://github.com/atomicobject/heatshrink) 
  - [bsc v3.1.0](https://github.com/IlyaGrebnov/libbsc) 
- - [Libdeflate v16-04](https://github.com/ebiggers/libdeflate) 
+ - [Libdeflate v16-05](https://github.com/ebiggers/libdeflate) 
  - [LibLZF v1.06](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [Lz4 v1.7.1](https://github.com/Cyan4973/lz4) 
@@ -137,7 +137,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [zlib v1.2.8](http://zlib.net)
  - [Libzling v16-01](https://github.com/richox/libzling) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
- - [ZSTD v0.6.0](https://github.com/Cyan4973/zstd) 
+ - [ZSTD v0.6.1](https://github.com/Cyan4973/zstd) 
  - [zpaq v7.13](https://github.com/zpaq/zpaq) 
 
 * LzFSE: included but not tested

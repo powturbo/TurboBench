@@ -668,7 +668,9 @@ int pack(int start, int n) {
 
     int k;
     for(k=1;k<4;k++)
-      if (n-i>2+k && best_ofs(used+2+k) && -best_ofs(used+2+k) < longlen && best_ofs(used+2+k)!=best_ofs(used+1+k)) {
+      if (n-i>2+k && best_ofs(used+2+k) 
+        && used+best_ofs(used+2+k) >= 0
+        && -best_ofs(used+2+k) < longlen && best_ofs(used+2+k)!=best_ofs(used+1+k)) {
         if (in_buf[used]==in_buf[used+best_ofs(used+2+k)]) {
           if (in_buf[used+1]==in_buf[used+1+best_ofs(used+2+k)]) {
               int tmp=cache(used+2+k)+price_replz_minus_lz(-best_ofs(used+2+k),best_len(used+2+k),used+2+k)
@@ -687,7 +689,9 @@ int pack(int start, int n) {
       }
 
     for(k=1;k<4;k++)
-      if (n-i>3+k && best_ofs(used+3+k) && -best_ofs(used+3+k) < hugelen && best_ofs(used+3+k)!=best_ofs(used+2+k)) {
+      if (n-i>3+k && best_ofs(used+3+k) 
+        && used+best_ofs(used+3+k) >= 0
+        && -best_ofs(used+3+k) < hugelen && best_ofs(used+3+k)!=best_ofs(used+2+k)) {
         if (in_buf[used]==in_buf[used+best_ofs(used+3+k)]) {
           if (in_buf[used+1]==in_buf[used+1+best_ofs(used+3+k)]) {
             if (in_buf[used+2]==in_buf[used+2+best_ofs(used+3+k)]) {
@@ -708,7 +712,9 @@ int pack(int start, int n) {
       }
 
     for(k=1;k<4;k++)
-      if (n-i>4+k && best_ofs(used+4+k) && best_ofs(used+4+k)!=best_ofs(used+3+k)) {
+      if (n-i>4+k && best_ofs(used+4+k) 
+        && used+best_ofs(used+4+k) >= 0
+        && best_ofs(used+4+k)!=best_ofs(used+3+k)) {
         if (in_buf[used]==in_buf[used+best_ofs(used+4+k)]) {
           if (in_buf[used+1]==in_buf[used+1+best_ofs(used+4+k)]) {
             if (in_buf[used+2]==in_buf[used+2+best_ofs(used+4+k)]) {
