@@ -128,3 +128,6 @@
 [submodule "libdeflate"]
 	path = libdeflate
 	url = https://github.com/ebiggers/libdeflate.git
+[submodule "xpack"]
+	path = xpack
+	url = https://github.com/ebiggers/xpack.git

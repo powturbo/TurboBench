@@ -122,7 +122,7 @@ endif
 #------------- 
 DDEBUG=-DNDEBUG -s
 #-DZSTD_LEGACY_SUPPORT=0 
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Ilz4/lib -D_7ZIP_ST $(DEFS) -Ilibdeflate -Izstd/lib/common  -Ilz5/lib 
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Ilz4/lib -D_7ZIP_ST $(DEFS) -Ilibdeflate -Ixpack/common -Ixpack -Izstd/lib/common -Ilz5/lib 
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 
 all:  turbobench
@@ -226,6 +226,8 @@ OB+=pithy/pithy.o
 OB+=shoco/shoco.o
 OB+=shrinker/Shrinker.o
 OB+=wflz/wfLZ.o 
+OB+=xpack/lib/xpack_common.o xpack/lib/xpack_compress.o xpack/lib/xpack_decompress.o
+# xpack/lib/x86_cpu_features.o
 OB+=yappy/yappy.o 
 ifeq ($(NCPP), 0)
 OB+=CSC/src/libcsc/csc_analyzer.o CSC/src/libcsc/csc_coder.o CSC/src/libcsc/csc_dec.o CSC/src/libcsc/csc_default_alloc.o CSC/src/libcsc/csc_enc.o CSC/src/libcsc/csc_encoder_main.o CSC/src/libcsc/csc_filters.o CSC/src/libcsc/csc_lz.o CSC/src/libcsc/csc_memio.o \
@@ -246,7 +248,7 @@ OB+=c-blosc2/blosc/blosc.o c-blosc2/blosc/blosclz.o c-blosc2/blosc/schunk.o c-bl
 endif
 endif
 endif
-	   
+
 endif
 #----------------------- Apple -----------------------
 ifeq ($(APPLE), 1)

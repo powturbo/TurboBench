@@ -222,6 +222,8 @@ enum {
  P_POLHF, 
 #define C_TORNADOHF	GPL	 
  P_TORNADOHF,
+#define C_XPACK		COMP2    
+ P_XPACK,
 #define C_ZLIBH		ECODER    
  P_ZLIBH,
 #define C_MYCODEC   COMP2	// Include your codec into TurboBench :search and modify "_MYCODEC" in the following files: plugins.h, plugreg.c. Insert your function calls like mycomp/mydecomp in plugins.cc 
@@ -505,6 +507,10 @@ static const Lzma_options option_mapping[] =  {
 #include "../wimlib/include/wimlib.h"
   #endif
   
+  #if C_XPACK
+#include "xpack_/libxpack.h"
+  #endif
+
   #if C_YALZ77
 #include "yalz77/lz77.h"
   #endif
@@ -721,6 +727,7 @@ struct plugs plugs[] = {
   { P_TORNADO, 	"tornado", 			C_TORNADO, 	"0.6a",		"Tornado",				"GPL license",		"http://freearc.org\thttps://github.com/nemequ/tornado",								"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" }, 
   { P_WFLZ,	    "wflz", 			C_WFLZ, 	"15-04",	"wfLZ",					"CC0 license",		"https://github.com/ShaneWF/wflz",														"1,2" },
 //{ P_WKDM, 	"WKdm",				C_WKDM, 		"2003",		"WKdm",					"Apple PS License",	"http://www.opensource.apple.com/source/xnu/xnu-1456.1.26/iokit/Kernel/\thttps://github.com/berkus/wkdm", "" }, // crash
+  { P_XPACK, 	"xpack", 			C_XPACK,	"16-05",	"xpack",				"BSD license",		"https://github.com/ebiggers/xpack", 													"1,2,3,4,5,6,7,8,9" },
   { P_YALZ77, 	"yalz77", 			C_YALZ77, 	"15-09",	"Yalz77",				"Public domain",	"https://github.com/ivan-tkatchev/yalz77",												"1,6,12" },
   { P_YAPPY, 	"yappy",			C_YAPPY, 	"2011",		"Yappy",				"",					"" ,																					"" },//crash windows
   { P_ZLIB, 	"zlib", 			C_ZLIB, 	"1.2.8",	"zlib",					"zlib license",		"http://zlib.net\thttps://github.com/madler/zlib", 										"1,2,3,4,5,6,7,8,9" },
@@ -1140,6 +1147,13 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_WKDM:    return WKdm_compress ((WK_word*)in, (WK_word*)out, inlen);
 	  #endif
 
+	  #if C_XPACK
+	case P_XPACK:  { struct xpack_compressor *dc = xpack_alloc_compressor(inlen,lev); 
+	   outlen = xpack_compress(dc,in, inlen,out, outsize); 
+	   xpack_free_compressor(dc); return outlen;
+	  } 
+	  #endif
+
       #if C_YALZ77
     case P_YALZ77: { lz77::compress_t c(lev, lz77::DEFAULT_BLOCKSIZE); std::string os = c.feed(in,in+inlen); memcpy(out, os.c_str(), os.size()); return os.size(); }
 	  #endif
@@ -1540,6 +1554,13 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #if C_WKDM
     case P_WKDM:    WKdm_decompress ((WK_word*)in, (WK_word*)out, outlen);
 	  #endif 
+
+	  #if C_XPACK
+	case P_XPACK:  { size_t rc; struct xpack_decompressor *dd = xpack_alloc_decompressor(); 
+	    outlen = xpack_decompress(dd, in, inlen,out, outlen, &rc); 
+	    xpack_free_decompressor(dd); return outlen;
+	  } 
+	  #endif
 
       #if C_YALZ77
     case P_YALZ77: { lz77::decompress_t d; std::string extra; if(!d.feed(in,in+inlen,extra) || extra.size() > 0) return 0;
