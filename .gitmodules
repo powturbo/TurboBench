@@ -131,3 +131,6 @@
 [submodule "xpack"]
 	path = xpack
 	url = https://github.com/ebiggers/xpack.git
+[submodule "rans_static"]
+	path = rans_static
+	url = https://github.com/jkbonfield/rans_static.git
