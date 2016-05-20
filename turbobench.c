@@ -317,7 +317,7 @@ struct plugg plugg[] =
   { "MAX",       "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lz5,15/lzlib,9/zstd,20/memcpy",						"Best compression (slow)" },
   { "OPTIMAL",   "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lz5,15/lzlib,9/zstd,20/zopfli/memcpy", 				"Optimal compression (slow)" },
   { "BWT",       "bsc_st,4,5/bsc,2/bcm/bzip2/memcpy/", 																		"ST & BWT" },
-  { "ECODER",    "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static4c/subotin/fasthf/fastac/zlibh/fse/fsehuf/memcpy/", "Entropy coder" },
+  { "ECODER",    "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static4k/rans_static4_16i/rans_static4_16io1/subotin/fasthf/fastac/zlibh/fse/fsehuf/memcpy/", "Entropy coder" },
 };
 #define PLUGGSIZE (sizeof(plugg)/sizeof(plugg[0]))
 
