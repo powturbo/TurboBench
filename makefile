@@ -192,7 +192,7 @@ OB+=bcm_/bcm.o
 OB+=brieflz/brieflz.o brieflz/depack.o
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/platform/platform.o libbsc/libbsc/filters/detectors.o \
 	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o $(DIVSUFSORT) libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o
-OB+=libdeflate/src/aligned_malloc.o libdeflate/src/deflate_compress.o libdeflate/src/deflate_decompress.o libdeflate/src/x86_cpu_features.o
+OB+=libdeflate/src/deflate_compress.o libdeflate/src/deflate_decompress.o libdeflate/src/x86_cpu_features.o
 OB+=bzip2/blocksort.o bzip2/huffman.o bzip2/crctable.o bzip2/randtable.o bzip2/compress.o bzip2/decompress.o bzip2/bzlib.o
 OB+=density/src/buffers/buffer.o density/src/core/algorithms.o density/src/structure/header.o density/src/globals.o density/src/streams/stream.o \
 	density/src/core/chameleon/chameleon_decode.o density/src/core/chameleon/chameleon_dictionary.o density/src/core/chameleon/chameleon_encode.o \
