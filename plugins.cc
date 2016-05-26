@@ -912,7 +912,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  
       #if C_BROTLI
     case P_BROTLI: { brotli::BrotliParams params;params.quality=lev; 
-         if(params.quality==11) params.lgwin = 24; if(*prm=='w') { prm++; params.lgwin=22;} else if(strchr(prm,'W')) { prm++; params.lgwin=24;} if(strchr(prm,'D')) brotlidic++; if(strchr(prm,'R')) brotlirep++; if(strchr(prm,'X')) brotlictx++;
+	if(params.quality==11) params.lgwin = 24; if(strchr(prm,'w')) params.lgwin=22; else if(strchr(prm,'W')) params.lgwin=24; if(strchr(prm,'D')) brotlidic++; if(strchr(prm,'R')) {brotlirep++;printf("brotlirep");} if(strchr(prm,'X')) brotlictx++;
          size_t esize=outsize; int rc = brotli::BrotliCompressBuffer(params, inlen,in,&esize,out); brotlidic = brotlictx = brotlirep = 0; return rc?esize:0; 
       }
 	  #endif    
@@ -1035,7 +1035,11 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
            #define DICSIZE (1<<27)
         #endif
       #if C_LZMA
-	case P_LZMA: { CLzmaEncProps p;	LzmaEncProps_Init(&p); p.level = lev; p.numThreads = 1; if(lev==9) p.fb = 273,p.dictSize=inlen<DICSIZE?inlen:DICSIZE; LzmaEncProps_Normalize(&p);
+	case P_LZMA: { CLzmaEncProps p;	LzmaEncProps_Init(&p); p.level = lev; p.numThreads = 1; 
+	    unsigned char *q;  
+	    if(q=strchr(prm,'c')) { p.lc = *++q - '0'; if(p.lc <= 0) p.lc = 0; if(p.lc > 8) p.lc = 8;printf("lc=%d ", p.lc ); }
+	    if(q=strchr(prm,'p')) { p.lp = *++q - '0'; if(p.lp <= 0) p.lp = 0; if(p.lp > 4) p.lp = 4;printf("lp2=%d ", p.lp ); }
+	    if(lev==9) p.fb = 273,p.dictSize=inlen<DICSIZE?inlen:DICSIZE; LzmaEncProps_Normalize(&p);
         SizeT psize = LZMA_PROPS_SIZE, outlen = outsize - LZMA_PROPS_SIZE;
   	    return LzmaEncode(out+LZMA_PROPS_SIZE, &outlen, in, inlen, &p, out, &psize, 0, NULL, &g_Alloc, &g_Alloc) == SZ_OK?outlen+LZMA_PROPS_SIZE:0;
 	  }

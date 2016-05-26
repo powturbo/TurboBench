@@ -4,11 +4,16 @@
    See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
 */
 
-extern int brotlidic; //TurboBench
+//#include "./static_dict.h"
 #include "../../brotli/enc/static_dict.h"
 
 #include <algorithm>
 
+//#include "./dictionary.h"
+//#include "./find_match_length.h"
+//#include "./static_dict_lut.h"
+//#include "./transform.h"
+extern int brotlidic; //TurboBench
 #include "../../brotli/enc/dictionary.h"
 #include "../../brotli/enc/find_match_length.h"
 #include "../../brotli/enc/static_dict_lut.h"
