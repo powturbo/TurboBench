@@ -643,7 +643,10 @@ void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, doubl
       break;
     case FMT_HTML:     
       fprintf(f, "<tr><td align=\"right\">%11"PRId64"</td><td align=\"right\">%5.1f</td><td align=\"right\">%s%8.2f%s</td><td align=\"right\">%s%8.2f%s</td><td>%s%-16s%s</td><td align=\"right\">%"PRId64"</td><td align=\"right\">%"PRId64"</td><td>%s</td></tr>\n",
-        plug->len, ratio, c?"<b>":"", tc, c?"</b>":"",  d?"<b>":"", td, d?"</b>":"", n?"<b>":"", name, n?"</b>":"", SIZE_ROUNDUP(plug->memc, Mb)/Mb, SIZE_ROUNDUP(plug->memd,Mb)/Mb, finame); 
+        plug->len, ratio, c?"<b>":"", tc, c?"</b>":"",  d?"<b>":"", td, d?"</b>":"", n?"<b>":"", name, n?"</b>":"", 
+//        SIZE_ROUNDUP(plug->memc, Kb)/Kb, SIZE_ROUNDUP(plug->memd,Kb)/Kb, 
+        plug->memc, plug->memd, 
+        finame); 
       break;
     case FMT_MARKDOWN: 
       fprintf(f, "|%"PRId64"|%5.1f|%s%.2f%s|%s%.2f%s|%s%s%s|%s|\n", 
