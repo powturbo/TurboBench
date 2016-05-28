@@ -93,7 +93,7 @@ y
 #### Compressor Lz77,Rolz,Bwt,zpaq:
  - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
  - [balz v1.20](http://sourceforge.net/projects/balz) 
- - [bcm v1.04](https://github.com/encode84/bcm) 
+ - [bcm v1.1b](https://github.com/encode84/bcm) 
  - [Blosc v2.0/16-04](https://github.com/Blosc/c-blosc2)
  - [BriefLz v1.1.0](https://github.com/jibsen/brieflz) 
  - [Brotli v16-05](https://github.com/google/brotli) 
@@ -128,7 +128,7 @@ y
  - [sap v16-04](https://github.com/CoreSecurity/pysap) 
  - [shoco v2015](https://github.com/Ed-von-Schleck/shoco) 
  - [Shrinker v0.1/r9](https://code.google.com/p/data-shrinker) 
- - [Snappy v1.1.3/16-04](https://github.com/google/snappy) 
+ - [Snappy v1.1.3/16-05](https://github.com/google/snappy) 
  - [Snappy-c v1.1.2/14.04](https://github.com/andikleen/snappy-c) 
  - [Tornado v0.6a](http://freearc.org) 
  - [wfLZ v15-04](https://github.com/ShaneWF/wflz) 
@@ -231,5 +231,5 @@ y
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 22 MAY 2016
+Last update: 28 MAY 2016
 
