@@ -1036,7 +1036,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         #endif
       #if C_LZMA
 	case P_LZMA: { CLzmaEncProps p;	LzmaEncProps_Init(&p); p.level = lev; p.numThreads = 1; 
-	    unsigned char *q;  
+	    char *q;  
 	    if(q=strchr(prm,'c')) { p.lc = *++q - '0'; if(p.lc <= 0) p.lc = 0; if(p.lc > 8) p.lc = 8;printf("lc=%d ", p.lc ); }
 	    if(q=strchr(prm,'p')) { p.lp = *++q - '0'; if(p.lp <= 0) p.lp = 0; if(p.lp > 4) p.lp = 4;printf("lp2=%d ", p.lp ); }
 	    if(lev==9) p.fb = 273,p.dictSize=inlen<DICSIZE?inlen:DICSIZE; LzmaEncProps_Normalize(&p);
@@ -1298,10 +1298,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	
     case P_JRANSo0:     return rans_compress_O0(in, inlen, out, oend);
     case P_JRANSo1:     return rans_compress_O1(in, inlen, out, oend); 
-    case P_JRANS4ko0:   { unsigned outlen = outsize; return rans4k_compress_O0(in, inlen, out, &outlen) ? outlen : 0;}
-    case P_JRANS4ko1:   { unsigned outlen = outsize; return rans4k_compress_O1(in, inlen, out, &outlen) ? outlen : 0;} 
-    case P_JRANS4_16o0: { unsigned outlen = outsize; return rans4_16_compress_O0(in, inlen, out, &outlen) ? outlen : 0;}
-    case P_JRANS4_16o1: { unsigned outlen = outsize; return rans4_16_compress_O1(in, inlen, out, &outlen) ? outlen : 0;} 
+    case P_JRANS4ko0:   { unsigned int outlen = outsize; return rans4k_compress_O0(in, inlen, out, &outlen) ? outlen : 0;}
+    case P_JRANS4ko1:   { unsigned int outlen = outsize; return rans4k_compress_O1(in, inlen, out, &outlen) ? outlen : 0;} 
+    case P_JRANS4_16o0: { unsigned int outlen = outsize; return rans4_16_compress_O0(in, inlen, out, &outlen) ? outlen : 0;}
+    case P_JRANS4_16o1: { unsigned int outlen = outsize; return rans4_16_compress_O1(in, inlen, out, &outlen) ? outlen : 0;} 
          #ifdef __x86_64__
     //case P_JRANS64: return rans64_compress_O0(in, inlen, out, oend);
     //case P_JRANS641:return rans64_compress_O1(in, inlen, out, oend);
@@ -1682,10 +1682,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	  #if C_JRANS
     case P_JRANSo0:     rans_uncompress_O0(in, inlen, out, outlen); break;
     case P_JRANSo1:     rans_uncompress_O1(in, inlen, out, outlen); break;
-    case P_JRANS4ko0:   rans4k_uncompress_O0(in, inlen, out, &outlen); break;
-    case P_JRANS4ko1:   rans4k_uncompress_O1(in, inlen, out, &outlen); break;
-    case P_JRANS4_16o0: rans4_16_uncompress_O0(in, inlen, out, &outlen); break;
-    case P_JRANS4_16o1: rans4_16_uncompress_O1(in, inlen, out, &outlen); break;
+    case P_JRANS4ko0:   rans4k_uncompress_O0(in, inlen, out, outlen); break;
+    case P_JRANS4ko1:   rans4k_uncompress_O1(in, inlen, out, outlen); break;
+    case P_JRANS4_16o0: rans4_16_uncompress_O0(in, inlen, out, outlen); break;
+    case P_JRANS4_16o1: rans4_16_uncompress_O1(in, inlen, out, outlen); break;
     //case P_JRANS:   rans_uncompress_O0(  in, inlen, out, outlen); break;
     //case P_JRANS1:  rans_uncompress_O1(  in, inlen, out, outlen); break;
         #ifdef __x86_64__

@@ -8,10 +8,10 @@
 # Minimum make: "make NCOMP2=1 NECODER=1" to compile only lz4,brotli,lzma,zlib and zstd
 
 # Linux: "export CC=clang" "export CXX=clang". windows mingw: "set CC=gcc" "set CXX=g++" or uncomment the CC,CXX lines
-CC ?= gcc
-CXX ?= g++
-#CC=clang
-#CXX=clang++
+#CC ?= gcc
+#CXX ?= g++
+CC=clang
+CXX=clang++
 
 #----- Compile for 'American Fuzzy Lop (http://lcamtuf.coredump.cx/afl/) 
 # add '-static' to LDFLAG
