@@ -122,7 +122,7 @@ endif
 #------------- 
 DDEBUG=-DNDEBUG -s
 #-DZSTD_LEGACY_SUPPORT=0 
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Ilz4/lib -D_7ZIP_ST $(DEFS) -Ilibdeflate -Ilibdeflate/common -Ixpack/common -Ixpack -Izstd/lib/common -Ilz5/lib 
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Ilz4/lib -D_7ZIP_ST $(DEFS) -Ixpack/common -Ixpack -Ilibdeflate -Ilibdeflate/common -Izstd/lib/common -Ilz5/lib 
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 
 all:  turbobench
