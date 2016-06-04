@@ -88,7 +88,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 |61460109| 61.4|**705.32**|3500.41|**lzturbo 10**|
 |61938605| 61.9|671.21|2069.81|lz4 1|
 |100098564|100.0|**8647.84**|**8408.10**|**memcpy**|
-y
+
 ### Plugins:
 #### Compressor Lz77,Rolz,Bwt,zpaq:
  - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
@@ -96,7 +96,7 @@ y
  - [bcm v1.1b](https://github.com/encode84/bcm) 
  - [Blosc v2.0/16-04](https://github.com/Blosc/c-blosc2)
  - [BriefLz v1.1.0](https://github.com/jibsen/brieflz) 
- - [Brotli v16-05](https://github.com/google/brotli) 
+ - [Brotli v16-06](https://github.com/google/brotli) 
  - [Bzip2 v1.06](http://www.bzip.org/downloads.html) 
  - [Chameleon v15-03](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
  - [Crush v1.0.0](http://sourceforge.net/projects/crush) 
@@ -114,7 +114,7 @@ y
  - [Lz5 v1.4.0](https://github.com/inikep/lz5) 
  - [Lzfse](https://developer.apple.com/library/mac/samplecode/CompressionSample/Introduction/Intro.html) *
  - [Lzham v1.1/15-12](https://github.com/richgel999/lzham_codec_devel) 
- - [Lzlib v1.7](http://www.nongnu.org/lzip) 
+ - [Lzlib v1.8](http://www.nongnu.org/lzip) 
  - [Lzmat v1.0](https://github.com/nemequ/lzmat) 
  - [Lzma v9.35](http://7-zip.org) 
  - [Lzo v2.09](http://www.oberhumer.com/opensource/lzo) 
@@ -136,7 +136,7 @@ y
  - [Yappy v2011]() 
  - [zlib v1.2.8](http://zlib.net)
  - [Libzling v16-01](https://github.com/richox/libzling) 
- - [xpack v16-05](https://github.com/ebiggers/xpack) 
+ - [xpack v16-06](https://github.com/ebiggers/xpack) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
  - [ZSTD v0.6.1](https://github.com/Cyan4973/zstd) 
  - [zpaq v7.13](https://github.com/zpaq/zpaq) 
@@ -231,5 +231,5 @@ y
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 29 MAY 2016
+Last update: 04 JUN 2016
 
