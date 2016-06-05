@@ -13,6 +13,7 @@
 #include <stdint.h>
 
 #include <assert.h>
+#include "rANS_static.h"
 
 #ifdef assert
 #define RansAssert assert
@@ -463,13 +464,13 @@ static void hist8(unsigned char *in, unsigned int in_size, int F0[256]) {
 	F0[i] += F1[i] + F2[i] + F3[i] + F4[i] + F5[i] + F6[i] + F7[i];
 }
 
-static unsigned int rans_compress_bound(unsigned int size, int order) {
+unsigned int rans_compress_bound(unsigned int size, int order) {
     return order == 0
 	? 1.05*size + 257*3 + 4
 	: 1.05*size + 257*257*3 + 4;
 }
 
-unsigned char *rans4_16_compress_O0(unsigned char *in, unsigned int in_size,
+unsigned char *rans_compress_O0(unsigned char *in, unsigned int in_size,
 				unsigned char *out, unsigned int *out_size) {
     unsigned char *cp, *out_end;
     RansEncSymbol syms[256];
@@ -621,7 +622,7 @@ typedef struct {
     unsigned char R[TOTFREQ];
 } ari_decoder;
 
-unsigned char *rans4_16_uncompress_O0(unsigned char *in, unsigned int in_size,
+unsigned char *rans_uncompress_O0(unsigned char *in, unsigned int in_size,
 				  unsigned char *out, unsigned int *out_size) {
     /* Load in the static tables */
     unsigned char *cp = in + 4;
@@ -777,7 +778,7 @@ static void hist1_4(unsigned char *in, unsigned int in_size,
     }
 }
 
-unsigned char *rans4_16_compress_O1(unsigned char *in, unsigned int in_size,
+unsigned char *rans_compress_O1(unsigned char *in, unsigned int in_size,
 				unsigned char *out, unsigned int *out_size) {
     unsigned char *cp, *out_end;
     unsigned int tab_size, rle_i, rle_j;
@@ -960,12 +961,195 @@ unsigned char *rans4_16_compress_O1(unsigned char *in, unsigned int in_size,
     return out;
 }
 
+unsigned char *rans_uncompress_O1c(unsigned char *in, unsigned int in_size,
+				   unsigned char *out, unsigned int *out_size) {
+    /* Load in the static tables */
+    unsigned char *cp = in + 4;
+    int i, j = -999, x, out_sz, rle_i, rle_j;
+    ari_decoder D[256];
+    RansDecSymbol syms[256][256];
+    
+    //memset(D, 0, 256*sizeof(*D));
+
+    out_sz = ((in[0])<<0) | ((in[1])<<8) | ((in[2])<<16) | ((in[3])<<24);
+    if (!out) {
+	out = malloc(out_sz);
+	*out_size = out_sz;
+    }
+    if (!out || out_sz > *out_size)
+	return NULL;
+
+    //fprintf(stderr, "out_sz=%d\n", out_sz);
+
+    //i = *cp++;
+    rle_i = 0;
+    i = *cp++;
+    do {
+	rle_j = x = 0;
+	j = *cp++;
+	do {
+	    int F, C;
+	    if ((F = *cp++) >= 128) {
+		F &= ~128;
+		F = ((F & 127) << 8) | *cp++;
+	    }
+	    C = x;
+
+	    //fprintf(stderr, "i=%d j=%d F=%d C=%d\n", i, j, F, C);
+
+	    if (!F)
+		F = TOTFREQ_O1;
+
+	    RansDecSymbolInit(&syms[i][j], C, F);
+
+	    /* Build reverse lookup table */
+	    //if (!D[i].R) D[i].R = (unsigned char *)malloc(TOTFREQ_O1);
+	    memset(&D[i].R[x], j, F);
+	    x += F;
+
+	    assert(x <= TOTFREQ_O1);
+
+	    if (!rle_j && j+1 == *cp) {
+		j = *cp++;
+		rle_j = *cp++;
+	    } else if (rle_j) {
+		rle_j--;
+		j++;
+	    } else {
+		j = *cp++;
+	    }
+	} while(j);
+
+	if (!rle_i && i+1 == *cp) {
+	    i = *cp++;
+	    rle_i = *cp++;
+	} else if (rle_i) {
+	    rle_i--;
+	    i++;
+	} else {
+	    i = *cp++;
+	}
+    } while (i);
+
+    // Precompute reverse lookup of frequency.
+
+    RansState rans0, rans1, rans2, rans3;
+    uint8_t *ptr = cp;
+    RansDecInit(&rans0, &ptr);
+    RansDecInit(&rans1, &ptr);
+    RansDecInit(&rans2, &ptr);
+    RansDecInit(&rans3, &ptr);
+
+    int isz4 = out_sz>>2;
+    int l0 = 0;
+    int l1 = 0;
+    int l2 = 0;
+    int l3 = 0;
+    int i4[] = {0*isz4, 1*isz4, 2*isz4, 3*isz4};
+
+    RansState R[4];
+    R[0] = rans0;
+    R[1] = rans1;
+    R[2] = rans2;
+    R[3] = rans3;
+
+    uint16_t *ptr16 = (uint16_t *)ptr;
+
+    for (; i4[0] < isz4; i4[0]++, i4[1]++, i4[2]++, i4[3]++) {
+	uint8_t c0, c1, c2, c3;
+	{
+	    uint32_t m0 = R[0] & ((1u << TF_SHIFT_O1)-1);
+	    uint32_t m1 = R[1] & ((1u << TF_SHIFT_O1)-1);
+
+	    c0 = D[l0].R[m0]; out[i4[0]] = c0;
+	    c1 = D[l1].R[m1]; out[i4[1]] = c1;
+
+	    RansDecAdvanceSymbolStep(&R[0], &syms[l0][c0], TF_SHIFT_O1);
+	    RansDecAdvanceSymbolStep(&R[1], &syms[l1][c1], TF_SHIFT_O1);
+	}
+
+	{
+	    uint32_t m2 = R[2] & ((1u << TF_SHIFT_O1)-1);
+	    uint32_t m3 = R[3] & ((1u << TF_SHIFT_O1)-1);
+
+	    c2 = D[l2].R[m2]; out[i4[2]] = c2;
+	    c3 = D[l3].R[m3]; out[i4[3]] = c3;
+
+	    RansDecAdvanceSymbolStep(&R[2], &syms[l2][c2], TF_SHIFT_O1);
+	    RansDecAdvanceSymbolStep(&R[3], &syms[l3][c3], TF_SHIFT_O1);
+	}
+
+//#define BRANCHLESS
+#ifdef BRANCHLESS
+	// Faster on deskpro for q40
+	// Slower on deskpro for q8
+	// Slower on seq3 for both.
+	// Slower on farm (AMD) for both
+	uint32_t j4[] = {
+	    !(R[0] & ~(RANS_BYTE_L-1)),
+	    !(R[1] & ~(RANS_BYTE_L-1)),
+	    !(R[2] & ~(RANS_BYTE_L-1)),
+	    !(R[3] & ~(RANS_BYTE_L-1))
+	};
+
+	R[0] <<= j4[0]<<4;
+	R[1] <<= j4[1]<<4;
+	R[2] <<= j4[2]<<4;
+	R[3] <<= j4[3]<<4;
+
+	uint32_t xx[] = {0,(1<<16)-1};
+	R[0] |= (*ptr16) & xx[j4[0]];
+	ptr16 += j4[0];
+	
+	R[1] |= (*ptr16) & xx[j4[1]];
+	ptr16 += j4[1];
+	
+	R[2] |= (*ptr16) & xx[j4[2]];
+	ptr16 += j4[2];
+	
+	R[3] |= (*ptr16) & xx[j4[3]];
+	ptr16 += j4[3];
+#else
+	RansDecRenorm(&R[0], (uint8_t **)&ptr16);
+	RansDecRenorm(&R[1], (uint8_t **)&ptr16);
+	RansDecRenorm(&R[2], (uint8_t **)&ptr16);
+	RansDecRenorm(&R[3], (uint8_t **)&ptr16);
+#endif
+
+	l0 = c0;
+	l1 = c1;
+	l2 = c2;
+	l3 = c3;
+    }
+    ptr = (uint8_t *)ptr16;
+
+    rans0 = R[0];
+    rans1 = R[1];
+    rans2 = R[2];
+    rans3 = R[3];
+
+    // Remainder
+    for (; i4[3] < out_sz; i4[3]++) {
+	unsigned char c3 = D[l3].R[RansDecGet(&rans3, TF_SHIFT_O1)];
+	out[i4[3]] = c3;
+	RansDecAdvanceSymbol(&rans3, &ptr, &syms[l3][c3], TF_SHIFT_O1);
+	l3 = c3;
+    }
+    
+    *out_size = out_sz;
+
+//    for (i = 0; i < 256; i++)
+//	if (D[i].R) free(D[i].R);
+
+    return out;
+}
+
 typedef struct {
     uint16_t f;
     uint16_t b;
 } sb_t;
 
-unsigned char *rans4_16_uncompress_O1(unsigned char *in, unsigned int in_size,
+unsigned char *rans_uncompress_O1sfb(unsigned char *in, unsigned int in_size,
 				     unsigned char *out, unsigned int *out_size) {
     /* Load in the static tables */
     unsigned char *cp = in + 4;
@@ -1111,7 +1295,6 @@ unsigned char *rans4_16_uncompress_O1(unsigned char *in, unsigned int in_size,
     return out;
 }
 
-#if 0
 /*-----------------------------------------------------------------------------
  * Simple interface to the order-0 vs order-1 encoders and decoders.
  */
@@ -1132,7 +1315,8 @@ unsigned char *rans_uncompress_to(unsigned char *in,  unsigned int in_size,
 				  unsigned char *out, unsigned int *out_size,
 				  int order) {
     return order
-	? rans_uncompress_O1(in, in_size, out, out_size)
+	? rans_uncompress_O1sfb(in, in_size, out, out_size)
+	//? rans_uncompress_O1c(in, in_size, out, out_size)
 	: rans_uncompress_O0(in, in_size, out, out_size);
 }
 
@@ -1141,7 +1325,7 @@ unsigned char *rans_uncompress(unsigned char *in, unsigned int in_size,
     return rans_uncompress_to(in, in_size, NULL, out_size, order);
 }
 
-
+#ifdef RANSTEST
 /*-----------------------------------------------------------------------------
  * Main
  */

@@ -38,11 +38,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-unsigned rans4k_compress_O0(  unsigned char *in, unsigned in_size, unsigned char *out_buf, unsigned int *out_size);				   
-unsigned rans4k_uncompress_O0(unsigned char *in, unsigned inlen,       unsigned char *out_buf, unsigned int out_sz);
 
-unsigned rans4k_compress_O1(  unsigned char *in, unsigned int in_size, unsigned char *out_buf, unsigned int *out_size);				   
-unsigned rans4k_uncompress_O1(unsigned char *in, unsigned inlen,       unsigned char *out_buf, unsigned int out_sz);
+unsigned char *rans4k_compress_O0(  unsigned char *in, unsigned int in_size, unsigned char *out, unsigned int *out_size);
+unsigned char *rans4k_uncompress_O0(unsigned char *in, unsigned int in_size, unsigned char *out, unsigned int *out_size);
+
+unsigned char *rans4k_compress_O1(  unsigned char *in, unsigned int in_size, unsigned char *out, unsigned int *out_size);
+unsigned char *rans4k_uncompress_O1(unsigned char *in, unsigned int in_size, unsigned char *out, unsigned int *out_size);
 #ifdef __cplusplus
 }
 #endif
