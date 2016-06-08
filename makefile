@@ -282,7 +282,7 @@ endif
 
 ifeq ($(GPL), 1)
 OB+=$(LZMAT) $(LZO) $(ECGPL) $(MSCOMPRESS)
-OB+=lzlib/lzlib.o lzlib_/bbexample.o 
+OB+=lzlib-1.8/lzlib.o lzlib_/bbexample.o 
 OB+=lzmat/lzmat_enc.o lzmat/lzmat_dec.o
 OB+=lzoma_/pack.o lzoma_/unpack.o lzoma_/divsufsort.o
 OB+=ms-compress/src/mscomp.o ms-compress/src/lznt1_compress.o ms-compress/src/lznt1_decompress.o ms-compress/src/xpress_compress.o ms-compress/src/xpress_decompress.o ms-compress/src/xpress_huff_compress.o ms-compress/src/xpress_huff_decompress.o
