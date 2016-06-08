@@ -62,9 +62,6 @@
 [submodule "lzham_codec_devel"]
 	path = lzham_codec_devel
 	url = https://github.com/richgel999/lzham_codec_devel.git
-[submodule "lzlib"]
-	path = lzlib
-	url = https://github.com/daniel-baumann/lzlib.git
 [submodule "lzmat"]
 	path = lzmat
 	url = https://github.com/nemequ/lzmat.git

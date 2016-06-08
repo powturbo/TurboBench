@@ -1,0 +1,16 @@
+Changes in version 1.8:
+
+The test of the value remaining in the range decoder has been removed.
+(After extensive testing it has been found useless to detect corruption
+in the decompressed data. Eliminating it reduces the number of false
+positives for corruption and makes error detection more accurate).
+
+The option "-a, --trailing-error", which makes minilzip exit with error
+status 2 if any remaining input is detected after decompressing the last
+member, has been added.
+
+When decompressing with minilzip, the file specified with the '--output'
+option is now deleted if the input is a terminal.
+
+A harmless check failure on Windows, caused by the failed comparison of
+a message in text mode, has been fixed.
