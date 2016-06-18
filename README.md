@@ -107,12 +107,12 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Gipfeli v15.12](https://github.com/google/gipfeli) 
  - [heatshrink v0.4.1](https://github.com/atomicobject/heatshrink) 
  - [bsc v3.1.0](https://github.com/IlyaGrebnov/libbsc) 
- - [Libdeflate v16-05](https://github.com/ebiggers/libdeflate) 
+ - [Libdeflate v16-06](https://github.com/ebiggers/libdeflate) 
  - [LibLZF v1.06](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [Lz4 v1.7.1](https://github.com/Cyan4973/lz4) 
  - [Lz5 v1.4.0](https://github.com/inikep/lz5) 
- - [Lzfse](https://developer.apple.com/library/mac/samplecode/CompressionSample/Introduction/Intro.html) *
+ - [Lzfse v12-06](https://github.com/lzfse/lzfse)
  - [Lzham v1.1/15-12](https://github.com/richgel999/lzham_codec_devel) 
  - [Lzlib v1.8](http://www.nongnu.org/lzip) 
  - [Lzmat v1.0](https://github.com/nemequ/lzmat) 
@@ -121,7 +121,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Lzoma v16-01](https://github.com/alef78/lzoma) 
  - [LZSSE v16-03-28](https://github.com/ConorStokes/LZSSE)
  - [Miniz v13-10](https://github.com/richgel999/miniz) 
- - [ms-compress v16.03](https://github.com/coderforlife/ms-compress) 
+ - [ms-compress v16.06](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi v15-10](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) 
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
@@ -138,10 +138,8 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Libzling v16-01](https://github.com/richox/libzling) 
  - [xpack v16-06](https://github.com/ebiggers/xpack) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
- - [ZSTD v0.6.1](https://github.com/Cyan4973/zstd) 
+ - [ZSTD v0.7.0](https://github.com/Cyan4973/zstd) 
  - [zpaq v7.13](https://github.com/zpaq/zpaq) 
-
-* LzFSE: included but not tested
 
 #### Entropy coder:
 ###### bitwise range coder
@@ -165,8 +163,8 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ###### ANS: Asymmetric Numeral Systems
  - [TurboANX-ANS v1.3](https://sites.google.com/site/powturbo)
  - [Finite State Coder v15-05](https://github.com/skal65535/fsc)
- - [Finite State Entropy v15-11](https://github.com/Cyan4973/FiniteStateEntropy)
- - [ANS/J.Bonfield v15-08](ftp://ftp.sanger.ac.uk/pub/users/jkb)
+ - [Finite State Entropy v16-06](https://github.com/Cyan4973/FiniteStateEntropy)
+ - [ANS/J.Bonfield v16-06](ftp://ftp.sanger.ac.uk/pub/users/jkb)
  - [Nania Adaptive rANS v2015](http://encode.ru/threads/2079-nARANS-(Nania-Adaptive-Range-Variant-of-ANS))
 
 ###### Huffman Coding
@@ -174,6 +172,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Tornado Huf v0.6a](http://freearc.org/Research.aspx) 
  - [zlib Huffmann v1.2.8](https://github.com/Cyan4973/FiniteStateEntropy) 
  - [Fast HF v2006](http://www.cipr.rpi.edu/research/SPIHT/) 
+ - [FSE Huff v16-06](https://github.com/Cyan4973/FiniteStateEntropy)
  - [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html)
  - [inline memcpy](https://github.com/powturbo/TurboBench)
  - [library memcpy](https://github.com/powturbo/TurboBench)
@@ -231,5 +230,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 08 JUN 2016
+Last update: 18 JUN 2016
 
