@@ -113,13 +113,15 @@ enum {
  P_LZ5,    
 #define C_LZHAM		COMP2
  P_LZHAM,
-#define C_LZFSE      0 // disabled
+#define C_LZFSE     COMP2 
  P_LZFSE,
-#define C_LZLIB 		GPL
+#define C_LZFSEA    0 // apple api on Osx. disabled 
+ P_LZFSEA,
+#define C_LZLIB 	GPL
  P_LZLIB, 
 #define C_LZMA		COMP1 			
  P_LZMA, 
-#define C_LZMAT 		GPL
+#define C_LZMAT 	GPL
  P_LZMAT,
 #define C_LZO		GPL		
  P_LZO1b, P_LZO1c, P_LZO1f, P_LZO1x, P_LZO1y, P_LZO1z, P_LZO2a,
@@ -395,7 +397,7 @@ class Out: public libzpaq::Writer {
 #include "lz5/lib/lz5hc.h"
   #endif
     
-  #if C_LZFSE
+  #if C_LZFSEA
 #include <compression.h>
   #endif  
 
@@ -563,6 +565,10 @@ extern "C" {
 #include "liblzf/lzf.h"
   #endif
 
+  #if C_LZFSE
+#include "lzfse/src/lzfse.h"
+  #endif  
+
   #if C_MINIZ
 typedef unsigned long mz_ulong;
 int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len, int level);
@@ -676,10 +682,10 @@ extern "C" {
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
   { P_BALZ, 	"balz", 			C_BALZ, 	"1.20",		"balz",					"Public Domain",	"http://sourceforge.net/projects/balz", 												"0,1" }, 
-  { P_BCM, 		"bcm", 				C_BCM, 		"1.02",		"bcm",					"Public Domain",	"https://github.com/encode84/bcm", 													"" }, 
+  { P_BCM, 		"bcm", 				C_BCM, 		"1.1b",		"bcm",					"Public Domain",	"https://github.com/encode84/bcm", 													"" }, 
   { P_C_BLOSC2, "blosc",			C_C_BLOSC2, "2.0",		"Blosc",				"BSD license",		"https://github.com/Blosc/c-blosc2", 													"0,1,2,3,4,5,6,7,8,9", 64*1024},
   { P_BRIEFLZ,	"brieflz", 		    C_BRIEFLZ, 	"1.1.0",	"BriefLz",				"BSD like",			"https://github.com/jibsen/brieflz", 													"" }, 
-  { P_BROTLI,	"brotli", 			C_BROTLI, 	"16-05",	"Brotli",				"Apache license",	"https://github.com/google/brotli", 													"0,1,2,3,4,5,6,7,8,9,11/DOWX"},
+  { P_BROTLI,	"brotli", 			C_BROTLI, 	"16-06",	"Brotli",				"Apache license",	"https://github.com/google/brotli", 													"0,1,2,3,4,5,6,7,8,9,11/DOWX"},
   { P_BZIP2,	"bzip2", 			C_BZIP2, 	"1.06",		"Bzip2",				"BSD like",			"http://www.bzip.org/downloads.html\thttps://github.com/asimonov-im/bzip2", 			"" }, 
   { P_CHAMELEON,"chameleon",		C_CHAMELEON, "15-03",	"Chameleon",			"Public Domain",	"http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html", 					"1,2" },
   { P_CRUSH,	"crush", 			C_CRUSH, 	"1.0.0",	"Crush",				"Public Domain",	"http://sourceforge.net/projects/crush", 												"0,1,2" },
@@ -692,13 +698,14 @@ struct plugs plugs[] = {
 // { P_KRAKEN, 	"kraken", 			C_KRAKEN, 	"2016",		"Kraken/memcpy demo",	"Closed",			"http://www.radgametools.com/oodlewhatsnew.htm",										"1,2,3,4,5,6,7,8,9" },
   { P_LIBBSC_ST,"bsc_st", 			C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"3,4,5,6,7,8" }, 
   { P_LIBBSC, 	"bsc", 				C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"1,2"}, 
-  { P_LIBDEFLATE,"deflate",   	    C_LIBDEFLATE,"16-04",	"libdeflate",			"CC0 license",		"https://github.com/ebiggers/libdeflate",												"1,2,3,4,5,6,7,8,9,12"}, 
+  { P_LIBDEFLATE,"libdeflate", 	    C_LIBDEFLATE,"16-06",	"libdeflate",			"CC0 license",		"https://github.com/ebiggers/libdeflate",												"1,2,3,4,5,6,7,8,9,12"}, 
   { P_LIBLZF, 	"lzf", 				C_LIBLZF, 	"1.06",		"LibLZF",				"BSD license",		"http://oldhome.schmorp.de/marc/liblzf.html\thttps://github.com/nemequ/liblzf",			"" },
   { P_LIBLZG,  	"lzg", 				C_LIBLZG,   "1.0.8",	"LibLzg",				"zlib-license",		"https://github.com/mbitsnbites/liblzg\thttp://liblzg.bitsnbites.eu/e",					"1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
   { P_LIBZPAQ,  "zpaq", 			C_LIBZPAQ, 	"7.10",		"Libzpaq",				"Public Domain",	"https://github.com/zpaq/zpaq",															"0,1,2,3,4,5" }, 
   { P_LZ4,  	"lz4",				C_LZ4, 		"15-10",	"Lz4",					"BSD license",		"https://github.com/Cyan4973/lz4", 														"0,1,9,12,16" }, 
   { P_LZ5,  	"lz5",				C_LZ5, 		"1.3.3",	"Lz5",					"BSD license",		"https://github.com/inikep/lz5",														"0,1,2,3,4,5,6,7,8,9,12,15" }, 
-  { P_LZFSE, 	"lzfse", 			C_LZFSE, 	"2015",		"lzfse",				"iOS and OS X",		"https://developer.apple.com/library/prerelease/mac/documentation/Performance/Reference/Compression/","" },
+  { P_LZFSE, 	"lzfse", 			C_LZFSE, 	"16-06",	"lzfse",				"",					"https://github.com/lzfse/lzfse","" },
+  { P_LZFSEA, 	"lzfsea", 			C_LZFSEA, 	"2015",		"lzfsea",				"iOS and OS X",		"https://developer.apple.com/library/ios/documentation/Performance/Reference/Compression/index.html","" },
   { P_LZHAM, 	"lzham", 			C_LZHAM,	"1.1",		"Lzham",				"MIT license",		"https://github.com/richgel999/lzham_codec_devel",										"1,2,3,4/x" }, 
   { P_LZLIB, 	"lzlib", 			C_LZLIB, 	"1.7",		"Lzlib",				"GPL license",		"http://www.nongnu.org/lzip\thttps://github.com/daniel-baumann/lzlib",					"1,2,3,4,5,6,7,8,9" },
   { P_LZMAT, 	"lzmat", 			C_LZMAT, 	"1.0",		"Lzmat",				"GPL license",		"https://github.com/nemequ/lzmat\thttp://www.matcode.com/lzmat.htm",					"" },
@@ -716,7 +723,7 @@ struct plugs plugs[] = {
   { P_LZSSE4,	"lzsse4",   	    C_LZSSE,	"16-04",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													"0,1,2,3,4,5,6,7,8,9,12,16,17"}, 
   { P_LZSSE8,	"lzsse8",   	    C_LZSSE,	"16-04",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													"0,1,2,3,4,5,6,7,8,9,12,16,17"}, 
   { P_MINIZ, 	"miniz", 			C_MINIZ,	"15-06",	"miniz zlib-replacement","Public domain",	"https://github.com/richgel999/miniz", 													"1,2,3,4,5,6,7,8,9" },
-  { P_MSCOMPRESS,"mscompress", 		C_MSCOMPRESS,"16.03",	"ms-compress",			"GPL license",		"https://github.com/coderforlife/ms-compress", 											"2,3,4" }, 
+  { P_MSCOMPRESS,"mscompress", 		C_MSCOMPRESS,"16.06",	"ms-compress",			"GPL license",		"https://github.com/coderforlife/ms-compress", 											"2,3,4" }, 
   { P_NAKA, 	"naka", 			C_NAKA,		"15-10",	"Nakamichi Kintaro",	"Public Domain",    "http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188",	"" },
   { P_PITHY, 	"pithy",			C_PITHY, 	"2011",		"Pithy",	  			"BSD license",		"https://github.com/johnezang/pithy",													"0,1,2,3,4,5,6,7,8,9" },
   { P_QUICKLZ, 	"quicklz",			C_QUICKLZ, 	"1.5.1",	"Quicklz",	  			"GPL license",		"http://www.quicklz.com\thttps://github.com/robottwo/quicklz",							"1,2,3" },
@@ -734,7 +741,7 @@ struct plugs plugs[] = {
   { P_ZLIB, 	"zlib", 			C_ZLIB, 	"1.2.8",	"zlib",					"zlib license",		"http://zlib.net\thttps://github.com/madler/zlib", 										"1,2,3,4,5,6,7,8,9" },
   { P_ZLING, 	"zling", 	   		C_ZLING, 	"16-01",	"Libzling",				"BSD license",		"https://github.com/richox/libzling",													"0,1,2,3,4" }, 
   { P_ZOPFLI, 	"zopfli",			C_ZOPFLI, 	"16-04",	"Zopfli",				"Apache license",	"https://code.google.com/p/zopfli",														""}, 
-  { P_ZSTD, 	"zstd", 			C_ZSTD,		"0.6.0",	"ZSTD",					"BSD license",		"https://github.com/Cyan4973/zstd", 													"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,22" },
+  { P_ZSTD, 	"zstd", 			C_ZSTD,		"0.7.0",	"ZSTD",					"BSD license",		"https://github.com/Cyan4973/zstd", 													"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,22" },
 //-----------------------------------------------------------------------------------	  
   { P_MCPY, 	"imemcpy", 			C_MEMCPY, 	".",		"inline memcpy",		"------------",		"--------------------------------------",												"" },
   { P_LMCPY, 	"memcpy",			C_MEMCPY,  	".",		"library memcpy",		"",					"",																						"" },
@@ -805,10 +812,21 @@ int codini(size_t insize, int codec) {
 
       #if C_LZFSE
     case P_LZFSE:
-      size_t lzfse_size = compression_encode_scratch_buffer_size(COMPRESSION_LZFSE);
-      workmemsize = max(lzfse_size, workmemsize);
-      lzfse_size = compression_decode_scratch_buffer_size(COMPRESSION_LZFSE);
-      workmemsize = max(lzfse_size, workmemsize);
+      { size_t lzfse_size = lzfse_encode_scratch_size();
+        workmemsize = max(lzfse_size, workmemsize);
+        lzfse_size = lzfse_decode_scratch_size();
+        workmemsize = max(lzfse_size, workmemsize);
+      }
+      break;
+      #endif
+
+      #if C_LZFSEA
+    case P_LZFSEA:
+      { size_t lzfsea_size = compression_encode_scratch_buffer_size(COMPRESSION_LZFSE);
+        workmemsize = max(lzfsea_size, workmemsize);
+        lzfsea_size = compression_decode_scratch_buffer_size(COMPRESSION_LZFSE);
+        workmemsize = max(lzfsea_size, workmemsize);
+      }
       break;
       #endif
 
@@ -896,9 +914,11 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif
 	  
       #if C_BROTLI
-    case P_BROTLI: { brotli::BrotliParams params;params.quality=lev; 
-	if(params.quality==11) params.lgwin = 24; if(strchr(prm,'w')) params.lgwin=22; else if(strchr(prm,'W')) params.lgwin=24; if(strchr(prm,'D')) brotlidic++; if(strchr(prm,'R')) {brotlirep++;printf("brotlirep");} if(strchr(prm,'X')) brotlictx++;
-         size_t esize=outsize; int rc = brotli::BrotliCompressBuffer(params, inlen,in,&esize,out); brotlidic = brotlictx = brotlirep = 0; return rc?esize:0; 
+    case P_BROTLI: { int lgwin,mode=0; char *q; if(q = strchr(prm,'m')) mode = *++q - '0';
+	    if(lev==11) lgwin = 24; if(strchr(prm,'w')) lgwin=22; else if(strchr(prm,'W')) lgwin=24; 			   if(strchr(prm,'D')) brotlidic++; if(strchr(prm,'R')) brotlirep++; if(strchr(prm,'X')) brotlictx++;
+        size_t esize = outsize; 
+        int rc = BrotliEncoderCompress(lev, lgwin, mode, inlen, (uint8_t*)in, &esize, (uint8_t*)out);          brotlidic = brotlictx = brotlirep = 0; 
+        return rc?esize:0; 
       }
 	  #endif    
 
@@ -985,7 +1005,11 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif
 
       #if C_LZFSE
-    case P_LZFSE_ : return compression_encode_buffer(out, outsize, in, inlen, workmem, COMPRESSION_LZFSE); break;
+    case P_LZFSE : return lzfse_encode_buffer(out, outsize, in, inlen, workmem);
+      #endif
+
+      #if C_LZFSEA
+    case P_LZFSEA : return compression_encode_buffer(out, outsize, in, inlen, workmem, COMPRESSION_LZFSE);
       #endif
 
       #if C_LZHAM
@@ -1022,8 +1046,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #if C_LZMA
 	case P_LZMA: { CLzmaEncProps p;	LzmaEncProps_Init(&p); p.level = lev; p.numThreads = 1; 
 	    char *q;  
-	    if(q=strchr(prm,'c')) { p.lc = *++q - '0'; if(p.lc <= 0) p.lc = 0; if(p.lc > 8) p.lc = 8;printf("lc=%d ", p.lc ); }
-	    if(q=strchr(prm,'p')) { p.lp = *++q - '0'; if(p.lp <= 0) p.lp = 0; if(p.lp > 4) p.lp = 4;printf("lp2=%d ", p.lp ); }
+	    if(q=strchr(prm,'c')) { p.lc = *++q - '0'; if(p.lc <= 0) p.lc = 0; if(p.lc > 8) p.lc = 8; }
+	    if(q=strchr(prm,'p')) { p.lp = *++q - '0'; if(p.lp <= 0) p.lp = 0; if(p.lp > 4) p.lp = 4; }
 	    if(lev==9) p.fb = 273,p.dictSize=inlen<DICSIZE?inlen:DICSIZE; LzmaEncProps_Normalize(&p);
         SizeT psize = LZMA_PROPS_SIZE, outlen = outsize - LZMA_PROPS_SIZE;
   	    return LzmaEncode(out+LZMA_PROPS_SIZE, &outlen, in, inlen, &p, out, &psize, 0, NULL, &g_Alloc, &g_Alloc) == SZ_OK?outlen+LZMA_PROPS_SIZE:0;
@@ -1430,7 +1454,11 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 	  
       #if C_LZFSE
-    case P_LZFSE_ : return compression_decode_buffer(out, outlen, in, inlen, workmem, COMPRESSION_LZFSE); break;
+    case P_LZFSE : return lzfse_decode_buffer(out, outlen, in, inlen, workmem); 
+      #endif
+
+      #if C_LZFSEA
+    case P_LZFSEA : return compression_decode_buffer(out, outlen, in, inlen, workmem, COMPRESSION_LZFSE);
       #endif
 
 	  #if C_LIBLZG

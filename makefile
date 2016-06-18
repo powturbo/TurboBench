@@ -136,11 +136,11 @@ OB+=plugins.o
 ifeq ($(NCOMP1), 0)
 OB+=lz4/lib/lz4hc.o lz4/lib/lz4.o  
 OB+=LZMA-SDK/C/LzFind.o LZMA-SDK/C/LzmaDec.o LZMA-SDK/C/LzmaEnc.o LZMA-SDK/C/LzmaLib.o LZMA-SDK/C/Alloc.o 
-OB+=zstd/lib/compress/zstd_compress.o zstd/lib/decompress/zstd_decompress.o zstd/lib/compress/fse_compress.o zstd/lib/common/fse_decompress.o zstd/lib/compress/huf_compress.o zstd/lib/decompress/huf_decompress.o zstd/lib/common/zstd_common.o zstd/lib/common/entropy_common.o
+OB+=zstd/lib/common/xxhash.o zstd/lib/compress/zstd_compress.o zstd/lib/decompress/zstd_decompress.o zstd/lib/compress/fse_compress.o zstd/lib/common/fse_decompress.o zstd/lib/compress/huf_compress.o zstd/lib/decompress/huf_decompress.o zstd/lib/common/zstd_common.o zstd/lib/common/entropy_common.o
 
 ifeq ($(NCPP), 0)
-OB+=brotli_/enc/backward_references.o brotli/enc/block_splitter.o brotli/enc/encode.o brotli/enc/entropy_encode.o brotli/enc/compress_fragment.o brotli/enc/compress_fragment_two_pass.o brotli/enc/histogram.o \
-	brotli/enc/literal_cost.o brotli/enc/brotli_bit_stream.o brotli/enc/metablock.o brotli_/enc/static_dict.o brotli/enc/streams.o brotli/dec/bit_reader.o brotli/dec/decode.o brotli/dec/dictionary.o \
+OB+=brotli_/enc/backward_references.o brotli/enc/bit_cost.o brotli/enc/cluster.o brotli/enc/block_splitter.o brotli/enc/encode.o brotli/enc/entropy_encode.o brotli/enc/compress_fragment.o brotli/enc/compress_fragment_two_pass.o brotli/enc/histogram.o \
+	brotli/enc/literal_cost.o brotli/enc/brotli_bit_stream.o brotli/enc/memory.o brotli/enc/metablock.o brotli_/enc/static_dict.o brotli/enc/streams.o brotli/dec/bit_reader.o brotli/dec/decode.o brotli/common/dictionary.o \
 	brotli/dec/huffman.o brotli/dec/state.o brotli/enc/utf8_util.o
 endif
 
@@ -205,7 +205,8 @@ OB+=chameleon/chameleon.o
 OB+=crush/crush.o
 OB+=liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o 
 OB+=liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o 
-OB+=lz5/lib/lz5.o lz5/lib/lz5hc.o 
+OB+=lz5/lib/lz5.o lz5/lib/lz5hc.o
+OB+=lzfse/src/lzfse_decode_base.o lzfse/src/lzfse_decode.o lzfse/src/lzfse_encode_base.o lzfse/src/lzfse_encode.o lzfse/src/lzfse_fse.o lzfse/src/lzvn_decode_base.o lzfse/src/lzvn_encode_base.o
 OB+=lzham_codec_devel/lzhamcomp/lzham_lzbase.o lzham_codec_devel/lzhamcomp/lzham_lzcomp.o lzham_codec_devel/lzhamcomp/lzham_lzcomp_internal.o \
 	lzham_codec_devel/lzhamcomp/lzham_lzcomp_state.o lzham_codec_devel/lzhamcomp/lzham_match_accel.o lzham_codec_devel/lzhamcomp/lzham_pthreads_threading.o \
 	lzham_codec_devel/lzhamdecomp/lzham_assert.o lzham_codec_devel/lzhamdecomp/lzham_checksum.o lzham_codec_devel/lzhamdecomp/lzham_huffman_codes.o \

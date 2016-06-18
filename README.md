@@ -112,7 +112,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [Lz4 v1.7.1](https://github.com/Cyan4973/lz4) 
  - [Lz5 v1.4.0](https://github.com/inikep/lz5) 
- - [Lzfse v12-06](https://github.com/lzfse/lzfse)
+ - [Lzfse v16-06](https://github.com/lzfse/lzfse)
  - [Lzham v1.1/15-12](https://github.com/richgel999/lzham_codec_devel) 
  - [Lzlib v1.8](http://www.nongnu.org/lzip) 
  - [Lzmat v1.0](https://github.com/nemequ/lzmat) 
