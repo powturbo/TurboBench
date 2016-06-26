@@ -94,7 +94,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
  - [balz v1.20](http://sourceforge.net/projects/balz) 
  - [bcm v1.1b](https://github.com/encode84/bcm) 
- - [Blosc v2.0/16-04](https://github.com/Blosc/c-blosc2)
+ - [Blosc v2.0/16-06](https://github.com/Blosc/c-blosc2)
  - [BriefLz v1.1.0](https://github.com/jibsen/brieflz) 
  - [Brotli v16-06](https://github.com/google/brotli) 
  - [Bzip2 v1.06](http://www.bzip.org/downloads.html) 
@@ -118,7 +118,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Lzmat v1.0](https://github.com/nemequ/lzmat) 
  - [Lzma v9.35](http://7-zip.org) 
  - [Lzo v2.09](http://www.oberhumer.com/opensource/lzo) 
- - [Lzoma v16-01](https://github.com/alef78/lzoma) 
+ - [Lzoma v16-06](https://github.com/alef78/lzoma) 
  - [LZSSE v16-03-28](https://github.com/ConorStokes/LZSSE)
  - [Miniz v13-10](https://github.com/richgel999/miniz) 
  - [ms-compress v16.06](https://github.com/coderforlife/ms-compress) 
@@ -138,7 +138,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Libzling v16-01](https://github.com/richox/libzling) 
  - [xpack v16-06](https://github.com/ebiggers/xpack) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
- - [ZSTD v0.7.0](https://github.com/Cyan4973/zstd) 
+ - [ZSTD v0.7.1](https://github.com/Cyan4973/zstd) 
  - [zpaq v7.13](https://github.com/zpaq/zpaq) 
 
 #### Entropy coder:
@@ -230,5 +230,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 19 JUN 2016
+Last update: 26 JUN 2016
 
