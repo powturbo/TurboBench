@@ -104,15 +104,15 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Density v0.13.0](https://github.com/centaurean/density) 
  - [Doboz v14-01-14](https://bitbucket.org/attila_afra) 
  - [FastLz v0.1.0](http://fastlz.org) 
- - [Gipfeli v15.12](https://github.com/google/gipfeli) 
+ - [Gipfeli v16.07](https://github.com/google/gipfeli) 
  - [heatshrink v0.4.1](https://github.com/atomicobject/heatshrink) 
  - [bsc v3.1.0](https://github.com/IlyaGrebnov/libbsc) 
- - [Libdeflate v16-06](https://github.com/ebiggers/libdeflate) 
+ - [Libdeflate v16-07](https://github.com/ebiggers/libdeflate) 
  - [LibLZF v1.06](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [Lz4 v1.7.1](https://github.com/Cyan4973/lz4) 
  - [Lz5 v1.4.0](https://github.com/inikep/lz5) 
- - [Lzfse v16-06](https://github.com/lzfse/lzfse)
+ - [Lzfse v16-07](https://github.com/lzfse/lzfse)
  - [Lzham v1.1/15-12](https://github.com/richgel999/lzham_codec_devel) 
  - [Lzlib v1.8](http://www.nongnu.org/lzip) 
  - [Lzmat v1.0](https://github.com/nemequ/lzmat) 
@@ -230,5 +230,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 10 JUL 2016
+Last update: 15 JUL 2016
 
