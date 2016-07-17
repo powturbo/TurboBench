@@ -125,7 +125,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Nakamichi v15-10](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) 
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
- - [sap v16-04](https://github.com/CoreSecurity/pysap) 
+ - [sap v16-07](https://github.com/CoreSecurity/pysap) 
  - [shoco v2015](https://github.com/Ed-von-Schleck/shoco) 
  - [Shrinker v0.1/r9](https://code.google.com/p/data-shrinker) 
  - [Snappy v1.1.3/16-05](https://github.com/google/snappy) 
@@ -138,7 +138,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Libzling v16-01](https://github.com/richox/libzling) 
  - [xpack v16-06](https://github.com/ebiggers/xpack) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
- - [ZSTD v0.7.3](https://github.com/Cyan4973/zstd) 
+ - [ZSTD v0.7.4](https://github.com/Cyan4973/zstd) 
  - [zpaq v7.13](https://github.com/zpaq/zpaq) 
 
 #### Entropy coder:
@@ -230,5 +230,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 15 JUL 2016
+Last update: 17 JUL 2016
 
