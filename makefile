@@ -227,7 +227,8 @@ OB+=pithy/pithy.o
 OB+=shoco/shoco.o
 OB+=shrinker/Shrinker.o
 OB+=wflz/wfLZ.o 
-OB+=xpack/lib/xpack_common.o xpack/lib/xpack_compress.o xpack/lib/xpack_decompress.o xpack/lib/x86_cpu_features.o
+OB+=xpack/lib/xpack_common.o xpack/lib/xpack_compress.o xpack/lib/xpack_decompress.o
+# xpack/lib/x86_cpu_features.o
 OB+=yappy/yappy.o 
 ifeq ($(NCPP), 0)
 OB+=CSC/src/libcsc/csc_analyzer.o CSC/src/libcsc/csc_coder.o CSC/src/libcsc/csc_dec.o CSC/src/libcsc/csc_default_alloc.o CSC/src/libcsc/csc_enc.o CSC/src/libcsc/csc_encoder_main.o CSC/src/libcsc/csc_filters.o CSC/src/libcsc/csc_lz.o CSC/src/libcsc/csc_memio.o \
@@ -299,7 +300,7 @@ endif
 #-------------------- Entropy Coder -------------------
 ifeq ($(NECODER), 0)
 OB+=FastARI/FastAri.o 
-OB+=rans_static/rANS_static4x8.o rans_static/rANS_static4x16.o rans_static/rANS_static.o rans_static_/arith_static.o
+OB+=rans_static_/rANS_static4_16i.o rans_static_/arith_static.o
 #OB+=ans_jb/rANS_static4c.o ans_jb/arith_static.o rans_static_/rANS_static4c.o rans_static_/rANS_static4k.o 
 OB+=zlibh/zlibh.o
 OB+=subotin_/subotin.o 
