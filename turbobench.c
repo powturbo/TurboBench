@@ -1302,7 +1302,7 @@ int main(int argc, char* argv[]) { //lzdbgon();
       case 'P': mcpy++;       		 			     break;	  
       case 'Q': divxy    = atoi(optarg); 
                 if(divxy>3) divxy=3;                 break;
-      case 'R': rprio=0;		 			 		 break;
+      case 'D': rprio=0;		 			 		 break;
       case 's': mininlen = argtoi(optarg);    		 break;
       case 'v': verbose  = atoi(optarg);       		 break;
       case 'Y': seg_ans  = argtoi(optarg);           break;
