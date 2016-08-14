@@ -679,47 +679,47 @@ size_t BrotliZopfliComputeShortestPath(MemoryManager* m,
 
 #define HASHER() H4
 /* NOLINTNEXTLINE(build/include) */
-#include "./backward_references_inc.h"
+#include "../../brotli/enc/backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H5
 /* NOLINTNEXTLINE(build/include) */
-#include "./backward_references_inc.h"
+#include "../../brotli/enc/backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H6
 /* NOLINTNEXTLINE(build/include) */
-#include "./backward_references_inc.h"
+#include "../../brotli/enc/backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H7
 /* NOLINTNEXTLINE(build/include) */
-#include "./backward_references_inc.h"
+#include "../../brotli/enc/backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H8
 /* NOLINTNEXTLINE(build/include) */
-#include "./backward_references_inc.h"
+#include "../../brotli/enc/backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H9
 /* NOLINTNEXTLINE(build/include) */
-#include "./backward_references_inc.h"
+#include "../../brotli/enc/backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H40
 /* NOLINTNEXTLINE(build/include) */
-#include "./backward_references_inc.h"
+#include "../../brotli/enc/backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H41
 /* NOLINTNEXTLINE(build/include) */
-#include "./backward_references_inc.h"
+#include "../../brotli/enc/backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H42
 /* NOLINTNEXTLINE(build/include) */
-#include "./backward_references_inc.h"
+#include "../../brotli/enc/backward_references_inc.h"
 #undef HASHER
 
 #undef FN
