@@ -1206,7 +1206,7 @@ void usage(char *pgm) {
   fprintf(stderr, " -k#      Repeat all benchmarks # times (default=3). -k0 = test mode\n");
   fprintf(stderr, " -K#t     Max. time limit for all benchmarks (default 24h)\n");
   fprintf(stderr, "          t = M:millisecond s:second m:minute h:hour. ex. 3h\n");
-  fprintf(stderr, " -R       No process real-time priority setting\n");
+  fprintf(stderr, " -D       No process real-time priority setting\n");
   fprintf(stderr, "Check:\n");
   fprintf(stderr, " -C#      #=0 compress only, #=1 ignore errors, #=2 exit on error, #=3 crash on error\n");
   fprintf(stderr, " -f#      check reading/writing outside bounds: #=1 compress, #=2 decompress, #3:both\n");
