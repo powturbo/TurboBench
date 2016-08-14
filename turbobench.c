@@ -76,9 +76,9 @@ static   tm_t tminit()        { tm_t t0=tmtime(),ts; while((ts = tmtime())==t0);
 #define TMPRINT(__x) { printf("%7.2f MB/s\t%s", (double)(tm_tm>=0.000001?(((double)n*tm_rm/MBS)/(((double)tm_tm/1)/TM_T)):0.0), __x); fflush(stdout); }
 #define TMDEF unsigned tm_r,tm_R; tm_t _t0,_tc,_ts;
 #define TMSLEEP do { tm_T = tmtime(); if(!tm_0) tm_0 = tm_T; else if(tm_T - tm_0 > tm_TX) { printf("S \b\b");fflush(stdout); sleep(tm_slp); tm_0=tmtime();} } while(0)
-#define TMBEG(__c,__tm_reps,__tm_Reps) \
-  for(tm_tm = TM_MAX,tm_R=0,_ts=tmtime(); tm_R < __tm_Reps; tm_R++) { if(__tm_reps>1) TMSLEEP; printf("%c%d\b\b",__c,tm_R+1);fflush(stdout);\
-    for(_t0 = tminit(), tm_r=0; tm_r < __tm_reps;) {
+#define TMBEG(_c_, _tm_reps_, _tm_Reps_) \
+  for(tm_tm = TM_MAX,tm_R=0,_ts=tmtime(); tm_R < _tm_Reps_; tm_R++) { if(_tm_reps_>1) TMSLEEP; printf("%c%d\b\b",_c_,tm_R+1);fflush(stdout);\
+    for(_t0 = tminit(), tm_r=0; tm_r < _tm_reps_;) {
 
 #define TMEND tm_r++; tm_T = tmtime(); if((_tc = (tm_T - _t0)) > tm_tx) break; } if(_tc < tm_tm) tm_tm = _tc,tm_rm=tm_r; if(tm_T-_ts > tm_TX) break; }
 #define MBS   1000000.0
@@ -612,8 +612,8 @@ void plugprttf(FILE *f, int fmt) {
 }
 
 #define TMBS(__l,__t)         ((__t)>=0.000001?((double)(__l)/MBS)/((__t)/TM_T):0.0)
-#define RATIO(__clen, __len)  ((double)__clen*100.0/__len)
-#define FACTOR(__clen, __len) ((double)__len/(double)__clen)
+#define RATIO(_clen_, _len_)  ((double)_clen_*100.0/_len_)
+#define FACTOR(_clen_, _len_) ((double)_len_/(double)_clen_)
 
 void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, double *ptc, double *ptd, FILE *f) {
   double ratio  = RATIO(plug->len,totinlen),    
@@ -1157,7 +1157,8 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
     }
     size_t peak = mempeakinit();
 	outlen = becomp(in, l*nb, out, outsize, bsize, plug->id, plug->lev, plug->prm)/nb;
-	plug->len += outlen; plug->tc += (tc += (double)tm_tm/((double)tm_rm*nb)); 
+	plug->len += outlen; 
+    plug->tc  += (tc += (double)tm_tm/((double)tm_rm*nb)); 
 	plug->memc = mempeak() - peak;
     if(tm_Repc > 1) 
       TMSLEEP;
