@@ -171,6 +171,21 @@ endif
 glza/GLZAmodel.o: glza/GLZAmodel.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
 
+glza/GLZAcomp.o: glza/GLZAcomp.c
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+
+glza/GLZAencode.o: glza/GLZAencode.c
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+
+glza/GLZAcompress.o: glza/GLZAcompress.c
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+
+glza/GLZAformat.o: glza/GLZAformat.c
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+
+glza/GLZAdecode.o: glza/GLZAdecode.c
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+
 pithy/pithy.o: pithy/pithy.c
 	$(CC) -O2 $(MARCH) $(CFLAGS)  $< -c -o $@  
 
