@@ -101,6 +101,11 @@ ifeq ($(BLOSC),1)
 DEFS+=-DBLOSC
 endif
 
+# GLZA
+ifeq ($(GLZA),1)
+DEFS+=-DGLZA
+endif
+
 # Lzfse
 ifeq ($(APPLE),1)
 DEFS+=-DAPPLE
@@ -163,6 +168,9 @@ OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(
 endif
 endif
 #----------------------- COMP2 -----------------------
+glza/GLZAmodel.o: glza/GLZAmodel.c
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+
 pithy/pithy.o: pithy/pithy.c
 	$(CC) -O2 $(MARCH) $(CFLAGS)  $< -c -o $@  
 
@@ -199,6 +207,9 @@ OB+=density/src/buffers/buffer.o density/src/core/algorithms.o density/src/struc
 	density/src/core/lion/lion_decode.o density/src/core/lion/lion_dictionary.o density/src/core/lion/lion_encode.o density/src/core/lion/lion_form_model.o \
 	density/src/core/cheetah/cheetah_decode.o density/src/core/cheetah/cheetah_dictionary.o density/src/core/cheetah/cheetah_encode.o 
 OB+=FastLZ/fastlz.o 
+ifeq ($(GLZA),1)
+OB+=glza/GLZAcomp.o glza/GLZAformat.o glza/GLZAcompress.o glza/GLZAencode.o glza/GLZAdecode.o glza/GLZAmodel.o 
+endif
 OB+=heatshrink_/heatshrink.o heatshrink/heatshrink_encoder.o heatshrink/heatshrink_decoder.o
 #OB+=kraken/kraken.o 
 OB+=chameleon/chameleon.o
@@ -321,9 +332,6 @@ OB+=fastac/arithmetic_codec.o
 OB+=fasthf/binary_codec.o
 endif
 
-ifeq ($(ARCH),64)
-OB+=rans_static_/rANS_static64c.o
-endif
 endif
 
 ifeq ($(GPL), 1)

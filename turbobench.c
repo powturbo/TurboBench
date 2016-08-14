@@ -1206,6 +1206,7 @@ void usage(char *pgm) {
   fprintf(stderr, " -k#      Repeat all benchmarks # times (default=3). -k0 = test mode\n");
   fprintf(stderr, " -K#t     Max. time limit for all benchmarks (default 24h)\n");
   fprintf(stderr, "          t = M:millisecond s:second m:minute h:hour. ex. 3h\n");
+  fprintf(stderr, " -R       No process real-time priority setting\n");
   fprintf(stderr, "Check:\n");
   fprintf(stderr, " -C#      #=0 compress only, #=1 ignore errors, #=2 exit on error, #=3 crash on error\n");
   fprintf(stderr, " -f#      check reading/writing outside bounds: #=1 compress, #=2 decompress, #3:both\n");
@@ -1251,7 +1252,7 @@ extern int _CRT_glob = 1;
 int main(int argc, char* argv[]) { //lzdbgon();
 
   int xstdout=-1,xstdin=-1;
-  int                recurse  = 0, xplug = 0,tm_Repk=3,plot=-1,fmt=0,fno,merge=0;
+  int                recurse  = 0, xplug = 0,tm_Repk=3,plot=-1,fmt=0,fno,merge=0,rprio=1;
   unsigned           bsize    = 1u<<30, bsizex=0;
   unsigned long long filenmax = 0;
   char               *scmd = NULL,*trans=NULL,*beb=NULL,*rem="",s[2049];
@@ -1301,6 +1302,7 @@ int main(int argc, char* argv[]) { //lzdbgon();
       case 'P': mcpy++;       		 			     break;	  
       case 'Q': divxy    = atoi(optarg); 
                 if(divxy>3) divxy=3;                 break;
+      case 'R': rprio=0;		 			 		 break;
       case 's': mininlen = argtoi(optarg);    		 break;
       case 'v': verbose  = atoi(optarg);       		 break;
       case 'Y': seg_ans  = argtoi(optarg);           break;
@@ -1345,12 +1347,13 @@ int main(int argc, char* argv[]) { //lzdbgon();
   }
   if((tm_repc|tm_Repc|tm_repd|tm_Repd) ==1) 
     tm_Repk = 1;
-    #ifdef _WIN32
-  SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
-    #else
-  setpriority(PRIO_PROCESS, 0, -19);
-	#endif
-
+  if(rprio) { 
+      #ifdef _WIN32
+    SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+      #else
+    setpriority(PRIO_PROCESS, 0, -19);
+	  #endif
+  }
   if(!scmd) scmd = "FAST";
   for(s[0] = 0;;) {
     char *q; int i;

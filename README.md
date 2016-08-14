@@ -105,6 +105,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Doboz v14-01-14](https://bitbucket.org/attila_afra) 
  - [FastLz v0.1.0](http://fastlz.org) 
  - [Gipfeli v16.07](https://github.com/google/gipfeli) 
+ - [glza v16-08](https://github.com/jrmuizel/GLZA) 
  - [heatshrink v0.4.1](https://github.com/atomicobject/heatshrink) 
  - [bsc v3.1.0](https://github.com/IlyaGrebnov/libbsc) 
  - [Libdeflate v16-07](https://github.com/ebiggers/libdeflate) 
