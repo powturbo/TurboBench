@@ -164,7 +164,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [TurboANX-ANS v1.3](https://sites.google.com/site/powturbo)
  - [Finite State Coder v15-05](https://github.com/skal65535/fsc)
  - [Finite State Entropy v16-06](https://github.com/Cyan4973/FiniteStateEntropy)
- - [ANS/J.Bonfield v16-08](ftp://ftp.sanger.ac.uk/pub/users/jkb)
+ - [ANS/J.Bonfield v16-08](https://github.com/jkbonfield/rans_static)
  - [Nania Adaptive rANS v2015](http://encode.ru/threads/2079-nARANS-(Nania-Adaptive-Range-Variant-of-ANS))
 
 ###### Huffman Coding
