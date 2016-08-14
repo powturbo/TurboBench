@@ -669,12 +669,12 @@ size_t BrotliZopfliComputeShortestPath(MemoryManager* m,
 
 #define HASHER() H2
 /* NOLINTNEXTLINE(build/include) */
-#include "./backward_references_inc.h"
+#include "../../brotli/enc/backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H3
 /* NOLINTNEXTLINE(build/include) */
-#include "./backward_references_inc.h"
+#include "../../brotli/enc/backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H4
