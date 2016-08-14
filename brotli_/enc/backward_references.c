@@ -7,6 +7,7 @@
 /* Function to find backward reference copies. */
 
 #include "../../brotli/enc/backward_references.h"
+
 #include <math.h>  /* INFINITY */
 #include <string.h>  /* memcpy, memset */
 
