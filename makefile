@@ -5,7 +5,7 @@
 #
 # snappy:    "cp snappy_/* snappy" (or configure snappy) & type make
 # GPL: "make GPL=1" to include GPL libraries
-# Minimum make: "make NCOMP2=1 NECODER=1" to compile only lz4,brotli,lzma,zlib and zstd
+# Minimum make: "make NCOMP2=1 NECODER=1 NSIMD=1" to compile only lz4,brotli,lzma,zlib and zstd
 
 # Linux: "export CC=clang" "export CXX=clang". windows mingw: "set CC=gcc" "set CXX=g++" or uncomment the CC,CXX lines
 CC ?= gcc

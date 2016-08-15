@@ -47,6 +47,7 @@ static inline unsigned rol32(unsigned x, int s) { asm ("roll %%cl,%0" :"=r" (x) 
 static inline unsigned ror32(unsigned x, int s) { asm ("rorl %%cl,%0" :"=r" (x) :"0" (x),"c" (s)); return x; }
 
     #else
+static inline int    __bsr32(unsigned x          ) { return   31 - __builtin_clz(  x); }
 static inline int      bsr32(int x               ) { return x?32 - __builtin_clz(  x):0; }
 static inline int      bsr64(unsigned long long x) { return x?64 - __builtin_clzll(x):0; }
 
@@ -115,7 +116,9 @@ static inline int ctz32(unsigned           x) { unsigned      z = 0; _BitScanRev
 
     #if defined(__i386__) || defined(__x86_64__) || defined(__powerpc__)
 #define ctou64(_cp_)       (*(unsigned long long *)(_cp_))
-#define ctou(_cp_t, _cp_) (*(_cp_t *)(_cp_))
+    #elif defined(__ARM_FEATURE_UNALIGNED)
+struct _PACKED longu     { unsigned long long l; };
+#define ctou64(_cp_) ((struct longu     *)(_cp_))->l
     #endif
 
   #elif defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7S__)
@@ -131,24 +134,24 @@ struct _PACKED longu     { unsigned long long l; };
   #endif
 
   #ifdef ctou16
-#define utoc16(_x_,_cp_) ctou16(_cp_) = _x_
+//#define utoc16(_x_,_cp_) ctou16(_cp_) = _x_
   #else
 static inline unsigned short     ctou16(const void *cp) { unsigned short     x; memcpy(&x, cp, sizeof(x)); return x; }
-static inline               void utoc16(unsigned short     x, void *cp ) { memcpy(cp, &x, sizeof(x)); }
+//static inline               void utoc16(unsigned short     x, void *cp ) { memcpy(cp, &x, sizeof(x)); }
   #endif
 
   #ifdef ctou32
-#define utoc32(_x_,_cp_) ctou32(_cp_) = _x_
+//#define utoc32(_x_,_cp_) ctou32(_cp_) = _x_
   #else
 static inline unsigned           ctou32(const void *cp) { unsigned           x; memcpy(&x, cp, sizeof(x)); return x; }
-static inline               void utoc32(unsigned           x, void *cp ) { memcpy(cp, &x, sizeof(x)); }
+//static inline               void utoc32(unsigned           x, void *cp ) { memcpy(cp, &x, sizeof(x)); }
   #endif
 
   #ifdef ctou64
-#define utoc64(_x_,_cp_) ctou64(_cp_) = _x_
+//#define utoc64(_x_,_cp_) ctou64(_cp_) = _x_
   #else
 static inline unsigned long long ctou64(const void *cp) { unsigned long long x; memcpy(&x, cp, sizeof(x)); return x; }
-static inline               void utoc64(unsigned long long x, void *cp ) { memcpy(cp, &x, sizeof(x)); }
+//static inline               void utoc64(unsigned long long x, void *cp ) { memcpy(cp, &x, sizeof(x)); }
   #endif
 
 #define ctou24(_cp_) (ctou32(_cp_) & 0xffffff)
