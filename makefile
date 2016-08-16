@@ -23,6 +23,7 @@ ifeq ($(OS),Windows_NT)
   UNAME := Windows
 CC=gcc
 CXX=g++
+LDFLAGS+=-L./ oodle230x64.lib
 else
   UNAME := $(shell uname -s)
 ifeq ($(UNAME),$(filter $(UNAME),Linux Darwin FreeBSD GNU/kFreeBSD))
