@@ -68,7 +68,7 @@
  */
  #ifdef _MSC_VER
 static inline uint32_t i_log2(const uint32_t x) { return x?32 - __builtin_clz(  x):0; }
- #else
+  #elif defined(__i386__) || defined(__x86_64__)
 static inline uint32_t i_log2(const uint32_t x) {
     uint32_t y;
     asm ( "\tbsr %1, %0\n"
@@ -80,6 +80,8 @@ static inline uint32_t i_log2(const uint32_t x) {
 
     return y;
 }
+ #else
+static inline uint32_t i_log2(const uint32_t x) { return x?32 - __builtin_clz(  x):0; }
   #endif
 #define  TOP	   (1<<24)
 
