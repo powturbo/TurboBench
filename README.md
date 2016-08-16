@@ -124,6 +124,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Miniz v13-10](https://github.com/richgel999/miniz) 
  - [ms-compress v16.07](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi v15-10](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) 
+ - [Oodle v2.3.0](http://www.radgametools.com/oodle.htm) (only win64) :new: 
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
  - [sap v16-07](https://github.com/CoreSecurity/pysap) 
