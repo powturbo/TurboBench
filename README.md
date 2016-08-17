@@ -93,7 +93,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 #### Compressor Lz77,Rolz,Bwt,zpaq:
  - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
  - [balz v1.20](http://sourceforge.net/projects/balz) 
- - [bcm v1.21b](https://github.com/encode84/bcm) 
+ - [bcm v1.25](https://github.com/encode84/bcm) 
  - [Blosc v2.0/16-07](https://github.com/Blosc/c-blosc2)
  - [BriefLz v1.1.0](https://github.com/jibsen/brieflz) 
  - [Brotli v16-08](https://github.com/google/brotli) 
@@ -104,7 +104,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Density v0.13.0](https://github.com/centaurean/density) 
  - [Doboz v14-01-14](https://bitbucket.org/attila_afra) 
  - [FastLz v0.1.0](http://fastlz.org) 
- - [Gipfeli v16.07](https://github.com/google/gipfeli) 
+ - [Gipfeli v16.08](https://github.com/google/gipfeli) 
  - [glza v16-08](https://github.com/jrmuizel/GLZA) :new:
  - [heatshrink v0.4.1](https://github.com/atomicobject/heatshrink) 
  - [bsc v3.1.0](https://github.com/IlyaGrebnov/libbsc) 
@@ -112,7 +112,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [LibLZF v1.06](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [Lz4 v1.7.1](https://github.com/Cyan4973/lz4) 
- - [Lz5 v1.4.2](https://github.com/inikep/lz5) 
+ - [Lz5 v1.5](https://github.com/inikep/lz5) 
  - [Lzfse v16-08](https://github.com/lzfse/lzfse)
  - [Lzham v1.1/15-12](https://github.com/richgel999/lzham_codec_devel) 
  - [Lzlib v1.8](http://www.nongnu.org/lzip) 
@@ -165,8 +165,8 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ###### ANS: Asymmetric Numeral Systems
  - [TurboANX-ANS v1.3](https://sites.google.com/site/powturbo)
  - [Finite State Coder v15-05](https://github.com/skal65535/fsc)
- - [Finite State Entropy v16-06](https://github.com/Cyan4973/FiniteStateEntropy)
- - [ANS/J.Bonfield v16-08](https://github.com/jkbonfield/rans_static)
+ - [Finite State Entropy v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
+ - [rans_static v16-08](https://github.com/jkbonfield/rans_static)
  - [Nania Adaptive rANS v2015](http://encode.ru/threads/2079-nARANS-(Nania-Adaptive-Range-Variant-of-ANS))
 
 ###### Huffman Coding
@@ -174,7 +174,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Tornado Huf v0.6a](http://freearc.org/Research.aspx) 
  - [zlib Huffmann v1.2.8](https://github.com/Cyan4973/FiniteStateEntropy) 
  - [Fast HF v2006](http://www.cipr.rpi.edu/research/SPIHT/) 
- - [FSE Huff v16-06](https://github.com/Cyan4973/FiniteStateEntropy)
+ - [FSE Huff v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
  - [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html)
  - [inline memcpy](https://github.com/powturbo/TurboBench)
  - [library memcpy](https://github.com/powturbo/TurboBench)
@@ -233,5 +233,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 16 AUG 2016
+Last update: 17 AUG 2016
 
