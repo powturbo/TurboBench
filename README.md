@@ -89,6 +89,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 |61938605| 61.9|671.21|2069.81|lz4 1|
 |100098564|100.0|**8647.84**|**8408.10**|**memcpy**|
 
+------------------------------------------------------------------------
 
 Hardware: ODROID C2 - ARM 64 bits - 2Ghz CPU, OS: Ubuntu 16.04, gcc 5.3<br>
 All compressors with latest versions 16.08.2016b <br>
