@@ -111,6 +111,7 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
  - [Libdeflate v16-07](https://github.com/ebiggers/libdeflate) 
  - [LibLZF v1.06](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
+ - [LibSLZ v1.0.0](http://1wt.eu/projects/libslz/) :new:
  - [Lz4 v1.7.1](https://github.com/Cyan4973/lz4) 
  - [Lz5 v1.5](https://github.com/inikep/lz5) 
  - [Lzfse v16-08](https://github.com/lzfse/lzfse)
@@ -233,5 +234,5 @@ CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 17 AUG 2016
+Last update: 19 AUG 2016
 
