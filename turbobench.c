@@ -1030,11 +1030,11 @@ int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned ou
 	    if(mcpy) { memcpy(op+bs, ip, iplen); oplen = iplen; }
 	    else if(oplen <= 0) return 0;
 	  }
+      if(bs == 2 && oplen >= (1<<16)) { printf("Output larger than input! Use option '-P'\n"); exit(-1); }
       bs==2?(ctou16(op) = oplen):(ctou32(op) = oplen); op += oplen+bs; ip += iplen; 
-    }                                                             
-    if(op > _out+outsize) 
-	  die("Overflow error %llu, %u in lib=%d\n", outsize, (int)(ptrdiff_t)(op - _out), id);      
-  }
+      if(op > _out+outsize) 
+	    die("Overflow error %llu, %u in lib=%d\n", outsize, (int)(ptrdiff_t)(op - _out), id);                                                      
+    }
   TMEND;	
   return op - _out;
 }
