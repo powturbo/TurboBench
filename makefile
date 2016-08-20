@@ -156,13 +156,17 @@ else
 OB+=-lz
 endif
 else
+ifeq ($(ZLIB_NG), 1)
+ZD=zlib-ng/
+OB+=$(ZD)deflate_fast.o $(ZD)deflate_slow.o $(ZD)match.o
+else
+ifeq ($(ZLIB_INTEL), 1)
+ZD=zlib_intel/
+OB+=$(ZD)match.o
+else
 ZD=zlib/
-
-#ZD=zlib-ng/
-#OB+=$(ZD)deflate_fast.o $(ZD)deflate_slow.o $(ZD)match.o
-
-#ZD=zlib_intel/
-#OB+=$(ZD)match.o
+endif
+endif
 
 OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
 endif
