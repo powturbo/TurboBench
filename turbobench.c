@@ -1035,6 +1035,7 @@ int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned ou
       if(op > _out+outsize) 
 	    die("Overflow error %llu, %u in lib=%d\n", outsize, (int)(ptrdiff_t)(op - _out), id);                                                      
     }
+  }
   TMEND;	
   return op - _out;
 }
