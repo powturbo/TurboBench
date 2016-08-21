@@ -170,6 +170,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [Yalz77 v15-09](https://github.com/ivan-tkatchev/yalz77) 
  - [Yappy v2011]() 
  - [zlib v1.2.8](http://zlib.net)
+ - [zlib-ng v1.2.8](https://github.com/Dead2/zlib-ng) :new:
  - [Libzling v16-01](https://github.com/richox/libzling) 
  - [xpack v16-06](https://github.com/ebiggers/xpack) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
@@ -266,5 +267,5 @@ All compressors with latest versions 16.08.2016b <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 19 AUG 2016
+Last update: 21 AUG 2016
 
