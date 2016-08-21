@@ -127,7 +127,7 @@ endif
 #------------- 
 DDEBUG=-DNDEBUG -s
 
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ixpack/common -Ixpack -Ilibdeflate -Ilibdeflate/common -Ilz4/lib -Ilz5/lib 
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ilibdeflate -Ixpack/common -Ilibdeflate/common -Ixpack -Ilz4/lib -Ilz5/lib 
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 
 all:  turbobench
@@ -153,11 +153,16 @@ ifeq ($(HAVE_ZLIB), 1)
 ifeq ($(STATIC),1)
 OB+=/usr/lib/x86_64-linux-gnu/libz.a
 else
+ifeq ($(ZLIB_NG), 1)
+OB+=zlib-ng/libz.a
+else
 OB+=-lz
+endif
 endif
 else
 ifeq ($(ZLIB_NG), 1)
 ZD=zlib-ng/
+#type "./configure" in zlib_ng directory to create zconf.h
 OB+=$(ZD)deflate_fast.o $(ZD)deflate_slow.o $(ZD)match.o
 else
 ifeq ($(ZLIB_INTEL), 1)
@@ -171,7 +176,14 @@ endif
 OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
 endif
 endif
+
 #----------------------- COMP2 -----------------------
+libdeflate/lib/zlib_compress.o: libdeflate/lib/zlib_compress.c
+	$(CC) -O3 -Ilibdeflate/common $(MARCH) $(CFLAGS) $< -c -o $@ 
+
+libdeflate/lib/zlib_decompress.o: libdeflate/lib/zlib_decompress.c
+	$(CC) -O3 -Ilibdeflate/common $(MARCH) $(CFLAGS) $< -c -o $@ 
+
 glza/GLZAmodel.o: glza/GLZAmodel.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
 
@@ -219,7 +231,8 @@ OB+=bcm_/bcm.o
 OB+=brieflz/brieflz.o brieflz/depack.o
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/platform/platform.o libbsc/libbsc/filters/detectors.o \
 	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o $(DIVSUFSORT) libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o
-OB+=libdeflate/lib/aligned_malloc.o libdeflate/lib/deflate_compress.o libdeflate/lib/deflate_decompress.o libdeflate/lib/x86_cpu_features.o
+OB+=libdeflate/lib/adler32.o libdeflate/lib/aligned_malloc.o libdeflate/lib/crc32.o libdeflate/lib/x86_cpu_features.o \
+    libdeflate/lib/deflate_compress.o libdeflate/lib/deflate_decompress.o libdeflate/lib/gzip_compress.o libdeflate/lib/gzip_decompress.o libdeflate/lib/zlib_compress.o libdeflate/lib/zlib_decompress.o 
 OB+=bzip2/blocksort.o bzip2/huffman.o bzip2/crctable.o bzip2/randtable.o bzip2/compress.o bzip2/decompress.o bzip2/bzlib.o
 OB+=density/src/buffers/buffer.o density/src/core/algorithms.o density/src/structure/header.o density/src/globals.o density/src/streams/stream.o \
 	density/src/core/chameleon/chameleon_decode.o density/src/core/chameleon/chameleon_dictionary.o density/src/core/chameleon/chameleon_encode.o \

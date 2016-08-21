@@ -134,3 +134,6 @@
 [submodule "lzfse"]
 	path = lzfse
 	url = https://github.com/lzfse/lzfse.git
+[submodule "zlib-ng"]
+	path = zlib-ng
+	url = https://github.com/Dead2/zlib-ng.git

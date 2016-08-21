@@ -1040,7 +1040,7 @@ int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned ou
   return op - _out;
 }
 
-int bedecomp(unsigned char *_in, int _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev) { 
+int bedecomp(unsigned char *_in, int _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm) { 
   unsigned char *ip;
   TMDEF; 
   TMBEG('D',tm_repd,tm_Repd);     mempeakinit();
@@ -1059,7 +1059,7 @@ int bedecomp(unsigned char *_in, int _inlen, unsigned char *_out, unsigned _outl
       int l, iplen = bs==2?ctou16(ip):ctou32(ip); ip += bs;
       if(mcpy && iplen==oplen) 
         memcpy(op, ip, oplen); 
-	  else l = coddecomp(ip, iplen, op, oplen, id, lev);
+	  else l = coddecomp(ip, iplen, op, oplen, id, lev,prm);
       ip += iplen; op += oplen;
     }
   }
@@ -1169,7 +1169,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
       if(fuzz & 2) cpy = (_cpy+insizem) - l;
 	  if(_cpy != _in) memrcpy(cpy, in, l);
       peak = mempeakinit();
-	  unsigned cpylen = bedecomp(out, outlen, cpy, l*nb, bsize, plug->id,plug->lev)/nb; 
+	  unsigned cpylen = bedecomp(out, outlen, cpy, l*nb, bsize, plug->id,plug->lev, plug->prm)/nb; 
 	  td = (double)tm_tm/((double)tm_rm*nb);		
       plug->memd = mempeak() - peak;                                                             if(verbose && inlen == filen) { printf("%8.2f   %-16s%s\n", TMBS(inlen,td), name, finame); }
       int e = memcheck(in, l, cpy, fuzz?3:cmp);  

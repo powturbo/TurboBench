@@ -41,7 +41,7 @@ int  codini(size_t insize, int codec);
 void codexit(int codec);
 int  codstart( unsigned char *in, int inlen, int codec);
 int  codcomp(  unsigned char *in, int inlen, unsigned char *out, int outsize, int codec, int lev, char *prm);
-int  coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen,  int codec, int lev);
+int  coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen,  int codec, int lev, char *prm);
 char *codver(int codec, char *v, char *s);
 void *_valloc(size_t size, int a);
 void _vfree(void *p, size_t size);
