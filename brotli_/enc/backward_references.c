@@ -14,7 +14,7 @@
 extern int brotlirep; // TurboBench
 #include "../../brotli/common/constants.h"
 //#include <brotli/types.h>
-#include "../../brotli/common/types.h"
+#include "../../brotli/include/brotli/types.h"
 #include "../../brotli/enc/command.h"
 #include "../../brotli/enc/fast_log.h"
 #include "../../brotli/enc/find_match_length.h"
