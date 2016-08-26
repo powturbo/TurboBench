@@ -13,6 +13,7 @@
 
 extern int brotlirep; // TurboBench
 #include "../../brotli/common/constants.h"
+//#include <brotli/types.h>
 #include "../../brotli/common/types.h"
 #include "../../brotli/enc/command.h"
 #include "../../brotli/enc/fast_log.h"
@@ -214,7 +215,7 @@ static BROTLI_INLINE float ZopfliCostModelGetMinCostCmd(
 static BROTLI_INLINE size_t ComputeDistanceCode(size_t distance,
                                                 size_t max_distance,
                                                 const int* dist_cache) {
-  if (brotlirep && distance <= max_distance) { // TurboBench
+  if (brotlirep && distance <= max_distance) {
     size_t distance_plus_3 = distance + 3;
     size_t offset0 = distance_plus_3 - (size_t)dist_cache[0];
     size_t offset1 = distance_plus_3 - (size_t)dist_cache[1];
@@ -874,14 +875,14 @@ void BrotliCreateBackwardReferences(MemoryManager* m,
   }
 
   switch (ChooseHasher(params)) {
-#define _CASE(N)                                                            \
+#define CASE_(N)                                                            \
     case N:                                                                 \
       CreateBackwardReferencesH ## N(m, num_bytes, position, is_last,       \
           ringbuffer, ringbuffer_mask, params, hashers->h ## N, dist_cache, \
           last_insert_len, commands, num_commands, num_literals);           \
       break;
-    FOR_GENERIC_HASHERS(_CASE)
-#undef _CASE
+    FOR_GENERIC_HASHERS(CASE_)
+#undef CASE_
     default:
       break;
   }
