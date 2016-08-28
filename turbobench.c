@@ -1458,9 +1458,9 @@ int main(int argc, char* argv[]) { //lzdbgon();
         if(g->id >= 0 && !strcmp(g->s, p->s) && g->lev == p->lev && !strcmp(g->prm, p->prm)) {
           if(g->len == p->len) {
             int u=0;
-            if(g->td < p->td) 
+            if(g->td < p->td || p->td < 0.01) 
 			  p->td = g->td,u++;
-            if(g->tc < p->tc) 
+            if(g->tc < p->tc || p->tc < 0.01) 
 			  p->tc = g->tc,u++;
 
             if(g->memd != p->memd) u++;

@@ -218,6 +218,7 @@ All compressors with latest versions 16.08.2016b <br>
 
 #### Transform:
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
+ - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
 ### Testing:
   + List all plugins: "./turbobench -l2"<br />
@@ -267,5 +268,5 @@ All compressors with latest versions 16.08.2016b <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 26 AUG 2016
+Last update: 28 AUG 2016
 
