@@ -127,7 +127,7 @@ endif
 #------------- 
 DDEBUG=-DNDEBUG -s
 
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ilibdeflate -Ilibdeflate/common -Ilz4/lib -Ilz5/lib -Ibrotli/include  
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ilibdeflate -Ilibdeflate/common -Ilz4/lib -Ilz5/lib -Ibrotli/include -Ixpack/common -Ixpack
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -ICSC/src/libcsc -D_7Z_TYPES_ -Ibrotli/include -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 
 all:  turbobench
@@ -176,18 +176,6 @@ endif
 endif
 
 #----------------------- COMP2 -----------------------
-xpack/lib/xpack_common.o: xpack/lib/xpack_common.c
-	$(CC) -O3 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
-
-xpack/lib/xpack_compress.o: xpack/lib/xpack_compress.c
-	$(CC) -O3 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
-
-xpack/lib/xpack_decompress.o: xpack/lib/xpack_decompress.c
-	$(CC) -O3 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
-
-xpack/lib/x86_cpu_features.o: xpack/lib/x86_cpu_features.c
-	$(CC) -O3 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
-
 glza/GLZAmodel.o: glza/GLZAmodel.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
 
