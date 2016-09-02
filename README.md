@@ -128,7 +128,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [bcm v1.25](https://github.com/encode84/bcm) 
  - [Blosc v2.0/16-07](https://github.com/Blosc/c-blosc2)
  - [BriefLz v1.1.0](https://github.com/jibsen/brieflz) 
- - [Brotli v16-08](https://github.com/google/brotli) 
+ - [Brotli v16-09](https://github.com/google/brotli) 
  - [Bzip2 v1.06](http://www.bzip.org/downloads.html) 
  - [Chameleon v15-03](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
  - [Crush v1.0.0](http://sourceforge.net/projects/crush) 
@@ -140,7 +140,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [glza v16-08](https://github.com/jrmuizel/GLZA) :new:
  - [heatshrink v0.4.1](https://github.com/atomicobject/heatshrink) 
  - [bsc v3.1.0](https://github.com/IlyaGrebnov/libbsc) 
- - [Libdeflate v16-07](https://github.com/ebiggers/libdeflate) 
+ - [Libdeflate v16-09](https://github.com/ebiggers/libdeflate) 
  - [LibLZF v1.06](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [LibSLZ v1.0.0](http://1wt.eu/projects/libslz/) :new:
@@ -174,7 +174,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [Libzling v16-01](https://github.com/richox/libzling) 
  - [xpack v16-06](https://github.com/ebiggers/xpack) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
- - [ZSTD v0.8.0](https://github.com/Cyan4973/zstd) 
+ - [ZSTD v1.0](https://github.com/facebook/zstd) 
  - [zpaq v7.14](https://github.com/zpaq/zpaq) 
 
 #### Entropy coder:
@@ -268,5 +268,5 @@ All compressors with latest versions 16.08.2016b <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 28 AUG 2016
+Last update: 02 SEP 2016
 
