@@ -101,9 +101,6 @@
 [submodule "zopfli"]
 	path = zopfli
 	url = https://github.com/google/zopfli.git
-[submodule "zstd"]
-	path = zstd
-	url = https://github.com/Cyan4973/zstd.git
 [submodule "zpaq"]
 	path = zpaq
 	url = https://github.com/zpaq/zpaq.git
@@ -137,3 +134,6 @@
 [submodule "zlib-ng"]
 	path = zlib-ng
 	url = https://github.com/Dead2/zlib-ng.git
+[submodule "zstd"]
+	path = zstd
+	url = https://github.com/facebook/zstd.git
