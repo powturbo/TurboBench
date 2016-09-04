@@ -753,7 +753,7 @@ struct plugs plugs[] = {
   { P_ZLIB, 	"zlib", 			C_ZLIB, 	"1.2.8",	"zlib",					"zlib license",		"http://zlib.net\thttps://github.com/madler/zlib", 										"1,2,3,4,5,6,7,8,9" },
   { P_ZLING, 	"zling", 	   		C_ZLING, 	"16-01",	"Libzling",				"BSD license",		"https://github.com/richox/libzling",													"0,1,2,3,4" }, 
   { P_ZOPFLI, 	"zopfli",			C_ZOPFLI, 	"16-04",	"Zopfli",				"Apache license",	"https://code.google.com/p/zopfli",														""}, 
-  { P_ZSTD, 	"zstd", 			C_ZSTD,		"0.7.0",	"ZSTD",					"BSD license",		"https://github.com/Cyan4973/zstd", 													"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },
+  { P_ZSTD, 	"zstd", 			C_ZSTD,		"1.0.0",	"ZSTD",					"BSD license+Patents","https://github.com/facebook/zstd", 													"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },
 //-----------------------------------------------------------------------------------	  
   { P_MCPY, 	"imemcpy", 			C_MEMCPY, 	".",		"inline memcpy",		"------------",		"--------------------------------------",												"" },
   { P_LMCPY, 	"memcpy",			C_MEMCPY,  	".",		"library memcpy",		"",					"",																						"" },
