@@ -77,14 +77,14 @@ static   tm_t tminit()        { tm_t t0=tmtime(),ts; while((ts = tmtime())==t0);
 #define TMDEF unsigned tm_r,tm_R; tm_t _t0,_tc,_ts;
 #define TMSLEEP do { tm_T = tmtime(); if(!tm_0) tm_0 = tm_T; else if(tm_T - tm_0 > tm_TX) { printf("S \b\b");fflush(stdout); sleep(tm_slp); tm_0=tmtime();} } while(0)
 #define TMBEG(_c_, _tm_reps_, _tm_Reps_) \
-  for(tm_tm = TM_MAX,tm_R=0,_ts=tmtime(); tm_R < _tm_Reps_; tm_R++) { if(_tm_reps_>1) TMSLEEP; printf("%c%d\b\b",_c_,tm_R+1);fflush(stdout);\
+  for(tm_tm = TM_MAX,tm_R=0,_ts=tmtime(); tm_R < _tm_Reps_; tm_R++) { /*if(_tm_reps_>1) TMSLEEP;*/ printf("%c%d\b\b",_c_,tm_R+1);fflush(stdout);\
     for(_t0 = tminit(), tm_r=0; tm_r < _tm_reps_;) {
 
-#define TMEND tm_r++; tm_T = tmtime(); if((_tc = (tm_T - _t0)) > tm_tx) break; } if(_tc < tm_tm) tm_tm = _tc,tm_rm=tm_r; if(tm_T-_ts > tm_TX) break; }
+#define TMEND tm_r++; tm_T = tmtime(); if((_tc = (tm_T - _t0)) > tm_tx) break; } if(_tc < tm_tm) tm_tm = _tc,tm_rm=tm_r;else if(_tc/tm_tm>1.3) TMSLEEP; if(tm_T-_ts > tm_TX) break; }
 #define MBS   1000000.0
 
 static unsigned tm_repc = 1<<30, tm_Repc = 3, tm_repd = 1<<30, tm_Repd = 4, tm_rm, tm_slp = 60;
-static tm_t     tm_tm, tm_tx = 2*TM_T, tm_TX = 120*TM_T, tm_0, tm_T, tm_RepkT=24*3600*TM_T;
+static tm_t     tm_tm, tm_tx = 2*TM_T, tm_TX = 30*TM_T, tm_0, tm_T, tm_RepkT=24*3600*TM_T;
 
 //: b 512, kB 1000, K  1024,  MB 1000*1000,  M  1024*1024,  GB  1000*1000*1000,  G 1024*1024*1024
 
@@ -1267,7 +1267,7 @@ int main(int argc, char* argv[]) { //lzdbgon();
       { "help", 	0, 0, 'h'},
       { 0, 		    0, 0, 0}
     };
-    if((c = getopt_long(argc, argv, "1234A:b:B:C:e:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oPp:Q:rRs:S:t:T:Uv:V:W:X:Y:Z:", long_options, &option_index)) == -1) break;
+    if((c = getopt_long(argc, argv, "1234A:b:B:C:e:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oOPp:Q:rRs:S:t:T:Uv:V:W:X:Y:Z:", long_options, &option_index)) == -1) break;
     switch(c) { 
       case 0:
         printf("Option %s", long_options[option_index].name);
