@@ -1406,7 +1406,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	  #endif
 	  
       #if C_BROTLI
-    case P_BROTLI: { size_t dsize = outlen; int rc = BrotliDecompressBuffer(inlen,in,&dsize,out); return rc?dsize:0; }
+    case P_BROTLI: { size_t dsize = outlen; int rc = BrotliDecoderDecompress(inlen,in,&dsize,out); return rc?dsize:0; }
 	  #endif
 
       #if C_LIBBSC

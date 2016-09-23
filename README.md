@@ -175,7 +175,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [xpack v16-06](https://github.com/ebiggers/xpack) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
  - [ZSTD v1.0](https://github.com/facebook/zstd) 
- - [zpaq v7.14](https://github.com/zpaq/zpaq) 
+ - [zpaq v7.15](https://github.com/zpaq/zpaq) 
 
 #### Entropy coder:
 ###### bitwise range coder
@@ -268,5 +268,5 @@ All compressors with latest versions 16.08.2016b <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 16 SEP 2016
+Last update: 23 SEP 2016
 
