@@ -132,7 +132,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [Bzip2 v1.06](http://www.bzip.org/downloads.html) 
  - [Chameleon v15-03](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
  - [Crush v1.0.0](http://sourceforge.net/projects/crush) 
- - [CSC v16-01](https://github.com/fusiyuan2010/CSC) 
+ - [CSC v16-10](https://github.com/fusiyuan2010/CSC) 
  - [Density v0.13.0](https://github.com/centaurean/density) 
  - [Doboz v14-01-14](https://bitbucket.org/attila_afra) 
  - [FastLz v0.1.0](http://fastlz.org) 
@@ -170,7 +170,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [Yalz77 v15-09](https://github.com/ivan-tkatchev/yalz77) 
  - [Yappy v2011]() 
  - [zlib v1.2.8](http://zlib.net)
- - [zlib-ng v1.2.8](https://github.com/Dead2/zlib-ng) :new:
+ - [zlib-ng v1.2.8](https://github.com/Dead2/zlib-ng)
  - [Libzling v16-01](https://github.com/richox/libzling) 
  - [xpack v16-06](https://github.com/ebiggers/xpack) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
@@ -268,5 +268,5 @@ All compressors with latest versions 16.08.2016b <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 12 OCT 2016
+Last update: 13 OCT 2016
 
