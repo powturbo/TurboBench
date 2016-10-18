@@ -6,7 +6,7 @@
 
 /* Function to find backward reference copies. */
 
-#include "../../brotli/enc/backward_references.h"
+#include "./backward_references.h"
 
 #include <math.h>  /* INFINITY */
 #include <string.h>  /* memcpy, memset */
@@ -58,7 +58,9 @@ static BROTLI_INLINE uint32_t ZopfliNodeCopyDistance(const ZopfliNode* self) {
 
 static BROTLI_INLINE uint32_t ZopfliNodeDistanceCode(const ZopfliNode* self) {
   const uint32_t short_code = self->distance >> 25;
-  return short_code == 0 ? ZopfliNodeCopyDistance(self) + 15 : short_code - 1;
+  return short_code == 0 ?
+      ZopfliNodeCopyDistance(self) + BROTLI_NUM_DISTANCE_SHORT_CODES - 1 :
+      short_code - 1;
 }
 
 static BROTLI_INLINE uint32_t ZopfliNodeCommandLength(const ZopfliNode* self) {
@@ -232,7 +234,7 @@ static BROTLI_INLINE size_t ComputeDistanceCode(size_t distance,
       return 3;
     }
   }
-  return distance + 15;
+  return distance + BROTLI_NUM_DISTANCE_SHORT_CODES - 1;
 }
 
 /* REQUIRES: len >= 2, start_pos <= pos */
@@ -435,7 +437,7 @@ static void UpdateNodes(const size_t num_bytes,
       if (prev_ix >= cur_ix) {
         continue;
       }
-      if (PREDICT_FALSE(backward > max_distance)) {
+      if (BROTLI_PREDICT_FALSE(backward > max_distance)) {
         continue;
       }
       prev_ix &= ringbuffer_mask;
@@ -483,7 +485,7 @@ static void UpdateNodes(const size_t num_bytes,
         BROTLI_BOOL is_dictionary_match = TO_BROTLI_BOOL(dist > max_distance);
         /* We already tried all possible last distance matches, so we can use
            normal distance code here. */
-        size_t dist_code = dist + 15;
+        size_t dist_code = dist + BROTLI_NUM_DISTANCE_SHORT_CODES - 1;
         uint16_t dist_symbol;
         uint32_t distextra;
         uint32_t distnumextra;
@@ -669,57 +671,57 @@ size_t BrotliZopfliComputeShortestPath(MemoryManager* m,
 
 #define HASHER() H2
 /* NOLINTNEXTLINE(build/include) */
-#include "../../brotli/enc/backward_references_inc.h"
+#include "./backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H3
 /* NOLINTNEXTLINE(build/include) */
-#include "../../brotli/enc/backward_references_inc.h"
+#include "./backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H4
 /* NOLINTNEXTLINE(build/include) */
-#include "../../brotli/enc/backward_references_inc.h"
+#include "./backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H5
 /* NOLINTNEXTLINE(build/include) */
-#include "../../brotli/enc/backward_references_inc.h"
+#include "./backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H6
 /* NOLINTNEXTLINE(build/include) */
-#include "../../brotli/enc/backward_references_inc.h"
+#include "./backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H7
 /* NOLINTNEXTLINE(build/include) */
-#include "../../brotli/enc/backward_references_inc.h"
+#include "./backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H8
 /* NOLINTNEXTLINE(build/include) */
-#include "../../brotli/enc/backward_references_inc.h"
+#include "./backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H9
 /* NOLINTNEXTLINE(build/include) */
-#include "../../brotli/enc/backward_references_inc.h"
+#include "./backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H40
 /* NOLINTNEXTLINE(build/include) */
-#include "../../brotli/enc/backward_references_inc.h"
+#include "./backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H41
 /* NOLINTNEXTLINE(build/include) */
-#include "../../brotli/enc/backward_references_inc.h"
+#include "./backward_references_inc.h"
 #undef HASHER
 
 #define HASHER() H42
 /* NOLINTNEXTLINE(build/include) */
-#include "../../brotli/enc/backward_references_inc.h"
+#include "./backward_references_inc.h"
 #undef HASHER
 
 #undef FN
