@@ -227,6 +227,9 @@ LZSSE/lzsse4/lzsse4.o: LZSSE/lzsse4/lzsse4.cpp
 LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
 	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
+rans_static/r32x16b_avx2.o: rans_static/r32x16b_avx2.c
+	$(CC) -O3 -mavx2 $(MARCH) $< -c -o $@ 
+
 #WKDM=wkdm/WKdmCompress.o wkdm/WKdmDecompress.o
 ifeq ($(NCOMP2), 0)
 DIVSUFSORT=libbsc/libbsc/bwt/divsufsort/divsufsort.o
@@ -350,6 +353,9 @@ endif
 ifeq ($(NECODER), 0)
 OB+=FastARI/FastAri.o 
 OB+=rans_static/rANS_static4x8.o rans_static/rANS_static4x16.o rans_static/rANS_static.o rans_static_/arith_static.o
+ifeq ($(NSIMD),0)
+OB+=rans_static/r32x16b_avx2.o
+endif
 OB+=zlibh/zlibh.o
 OB+=subotin_/subotin.o 
 OB+=fqz0/f_o0.o

@@ -213,10 +213,12 @@ enum {
 #define C_JAC 	    ECODER    
  P_JAC, 
 #define C_JRANS		ECODER 
- P_JRANS4_16o0,
- P_JRANS4_16o1,
  P_JRANS4_8o0,
  P_JRANS4_8o1,
+ P_JRANS4_16o0,
+ P_JRANS4_16o1,
+ P_JRANS4_32o0,
+ P_JRANS4_32o1,
 
 #define C_FPAQC 	GPL
  P_FPAQC,
@@ -689,6 +691,15 @@ extern "C" {
 #include "fsc/fsc.h"
   #endif
 
+  #if C_JRANS
+unsigned char *rans_compress_to_32x16(unsigned char *in,  unsigned int in_size,
+				     unsigned char *out, unsigned int *out_size,
+				     int order);
+unsigned char *rans_uncompress_to_32x16(unsigned char *in,  unsigned int in_size,
+				       unsigned char *out, unsigned int *out_size,
+				       int order);
+  #endif
+
   #if __cplusplus
 }
   #endif
@@ -773,10 +784,12 @@ struct plugs plugs[] = {
   { P_FQZ0, 	"fqz0",				C_FQZ, 		"15-03",	"FQZ/PPMD Range Coder",	"Public Domain",	"http://encode.ru/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder",			""},
   { P_PPMDEC, 	"ppmdec", 			C_PPMDEC,	"15-03",	"PPMD Range Coder",		"Public Domain",	"http://encode.ru/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder",  		""},
 
-  { P_JRANS4_16o0,"rans_static16",  C_JRANS,	"16-08",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
-  { P_JRANS4_16o1,"rans_static16o1",C_JRANS,    "16-08",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
   { P_JRANS4_8o0, "rans_static8",	C_JRANS, 	"16-08",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
   { P_JRANS4_8o1, "rans_static8o1", C_JRANS, 	"16-08",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
+  { P_JRANS4_16o0,"rans_static16",  C_JRANS,	"16-08",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
+  { P_JRANS4_16o1,"rans_static16o1",C_JRANS,    "16-08",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
+  { P_JRANS4_32o0,"rans_static32",  C_JRANS,	"16-10",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
+  { P_JRANS4_32o1,"rans_static32o1",C_JRANS,    "16-10",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
   
   { P_NANS,	    "naniarans",		C_NANS, 	"2015",	    "Nania Adaptive rANS",	"           ",		"http://encode.ru/threads/2079-nARANS-(Nania-Adaptive-Range-Variant-of-ANS)",			"", E_ANS},
   { P_POLHF,    "polar", 			C_POLHF, 	"10-07",	"Polar Codes",			"GPL license",		"http://www.ezcodesample.com/prefixer/prefixer_article.html",							"" },
@@ -1347,6 +1360,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_JRANS4_16o1: { unsigned int outlen = outsize; return rans_compress_to(16,in, inlen, out, &outlen,1) ? outlen : 0;} 
     case P_JRANS4_8o0:  { unsigned int outlen = outsize; return rans_compress_to( 8,in, inlen, out, &outlen,0) ? outlen : 0;}
     case P_JRANS4_8o1:  { unsigned int outlen = outsize; return rans_compress_to( 8,in, inlen, out, &outlen,1) ? outlen : 0;}
+    case P_JRANS4_32o0: { unsigned int outlen = outsize; return rans_compress_to_32x16(in, inlen, out, &outlen,0) ? outlen : 0;}  //rans_compress_to_4x16(in, in_size, out, out_size, order)
+    case P_JRANS4_32o1: { unsigned int outlen = outsize; return rans_compress_to_32x16(in, inlen, out, &outlen,1) ? outlen : 0;} 
 	  #endif
 
       #if C_PPMDEC
@@ -1750,6 +1765,8 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_JRANS4_16o1: rans_uncompress_to(16,in, inlen, out, &outlen,1); break;
     case P_JRANS4_8o0:  rans_uncompress_to( 8,in, inlen, out, &outlen,0); break;
     case P_JRANS4_8o1:  rans_uncompress_to( 8,in, inlen, out, &outlen,1); break; 	
+    case P_JRANS4_32o0: rans_uncompress_to_32x16(in, inlen, out, &outlen,0); break;
+    case P_JRANS4_32o1: rans_uncompress_to_32x16(in, inlen, out, &outlen,1); break;
 	  #endif
 
       #if C_FPAQC
