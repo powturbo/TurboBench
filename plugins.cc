@@ -205,12 +205,12 @@ enum {
  P_FASTHF,
 #define C_FSC 		ECODER    
  P_FSC,
-#define C_FSE 		ECODER    
+#define C_FSE 		COMP1    
  P_FSE, 
  P_FSEH, 
 #define C_FQZ 	 	ECODER    
  P_FQZ0,
-#define C_JAC 	    ECODER    
+#define C_JAC 	    	ECODER    
  P_JAC, 
 #define C_JRANS		ECODER 
  P_JRANS4_8o0,
