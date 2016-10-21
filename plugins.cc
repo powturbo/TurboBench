@@ -1360,8 +1360,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_JRANS4_16o1: { unsigned int outlen = outsize; return rans_compress_to(16,in, inlen, out, &outlen,1) ? outlen : 0;} 
     case P_JRANS4_8o0:  { unsigned int outlen = outsize; return rans_compress_to( 8,in, inlen, out, &outlen,0) ? outlen : 0;}
     case P_JRANS4_8o1:  { unsigned int outlen = outsize; return rans_compress_to( 8,in, inlen, out, &outlen,1) ? outlen : 0;}
+	    #ifdef AVX2_ON
     case P_JRANS4_32o0: { unsigned int outlen = outsize; return rans_compress_to_32x16(in, inlen, out, &outlen,0) ? outlen : 0;}  //rans_compress_to_4x16(in, in_size, out, out_size, order)
     case P_JRANS4_32o1: { unsigned int outlen = outsize; return rans_compress_to_32x16(in, inlen, out, &outlen,1) ? outlen : 0;} 
+	    #endif
 	  #endif
 
       #if C_PPMDEC
@@ -1765,8 +1767,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_JRANS4_16o1: rans_uncompress_to(16,in, inlen, out, &outlen,1); break;
     case P_JRANS4_8o0:  rans_uncompress_to( 8,in, inlen, out, &outlen,0); break;
     case P_JRANS4_8o1:  rans_uncompress_to( 8,in, inlen, out, &outlen,1); break; 	
+	    #ifdef AVX2_ON	 
     case P_JRANS4_32o0: rans_uncompress_to_32x16(in, inlen, out, &outlen,0); break;
     case P_JRANS4_32o1: rans_uncompress_to_32x16(in, inlen, out, &outlen,1); break;
+	    #endif
 	  #endif
 
       #if C_FPAQC

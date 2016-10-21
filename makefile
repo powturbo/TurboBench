@@ -6,7 +6,7 @@
 # snappy:    "cp snappy_/* snappy" (or configure snappy) & type make
 # GPL: "make GPL=1" to include GPL libraries
 # Minimum make: "make NCOMP2=1 NECODER=1 NSIMD=1" to compile only lz4,brotli,lzma,zlib and zstd
-
+# AVX2 : make AVX2=1 
 # Linux: "export CC=clang" "export CXX=clang". windows mingw: "set CC=gcc" "set CXX=g++" or uncomment the CC,CXX lines
 CC ?= gcc
 CXX ?= g++
@@ -79,6 +79,11 @@ ifeq ($(GPL),1)
 DEFS+=-DGPL
 DEFS+=-Ilzo/include 
 endif
+
+ifeq ($(AVX2),1)
+DEFS+=-DAVX2_ON
+endif
+
 #-------------- compressor specific
 # disable SIMD compressors (LZSSE)
 ifeq ($(NSIMD),1)
@@ -353,7 +358,7 @@ endif
 ifeq ($(NECODER), 0)
 OB+=FastARI/FastAri.o 
 OB+=rans_static/rANS_static4x8.o rans_static/rANS_static4x16.o rans_static/rANS_static.o rans_static_/arith_static.o
-ifeq ($(NSIMD),0)
+ifeq ($(AVX2),1)
 OB+=rans_static/r32x16b_avx2.o
 endif
 OB+=zlibh/zlibh.o
