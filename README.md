@@ -140,7 +140,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [glza v16-08](https://github.com/jrmuizel/GLZA)
  - [heatshrink v0.4.1](https://github.com/atomicobject/heatshrink) 
  - [bsc v3.1.0](https://github.com/IlyaGrebnov/libbsc) 
- - [Libdeflate v16-09](https://github.com/ebiggers/libdeflate) :sparkles:
+ - [Libdeflate v16-09](https://github.com/ebiggers/libdeflate) 
  - [LibLZF v1.06](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [LibSLZ v1.0.0](http://1wt.eu/projects/libslz/)
@@ -174,7 +174,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [Libzling v16-01](https://github.com/richox/libzling) 
  - [xpack v16-06](https://github.com/ebiggers/xpack) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
- - [ZSTD v1.1](https://github.com/facebook/zstd) :sparkles:
+ - [ZSTD v1.1](https://github.com/facebook/zstd) 
  - [zpaq v7.15](https://github.com/zpaq/zpaq) 
 
 #### Entropy coder:
@@ -200,7 +200,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [TurboANX-ANS v1.3](https://sites.google.com/site/powturbo)
  - [Finite State Coder v15-05](https://github.com/skal65535/fsc)
  - [Finite State Entropy v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
- - [rans_static v16-10](https://github.com/jkbonfield/rans_static) :sparkles:
+ - [rans_static v16-10](https://github.com/jkbonfield/rans_static)
  - [Nania Adaptive rANS v2015](http://encode.ru/threads/2079-nARANS-(Nania-Adaptive-Range-Variant-of-ANS))
 
 ###### Huffman Coding
@@ -268,5 +268,5 @@ All compressors with latest versions 16.08.2016b <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 19 OCT 2016
+Last update: 26 OCT 2016
 
