@@ -989,11 +989,23 @@ int plugread(struct plug *plug, char *finame, long long *totinlen) {
   fgets(s, 255, fi);
   for(p = plug;;) { 
     p->tms[0] = 0;
-    int i = fscanf(fi, "%s\t%"PRId64"\t%"PRId64"\t%lf\t%lf\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%s\n", s, totinlen, &p->len, &p->td, &p->tc, name, &p->lev, p->prm, &p->memc, &p->memd, p->tms); 
-    if(i != 11)
-      break;
+	char ss[256],*t = ss,*q;
+	if(!fgets(ss, 255, fi)) break;
+	for(q = t;  *q && *q != '\t'; q++);  *q++ = 0; strcpy(s, t); t = q;
+	*totinlen = strtoull(t, &t, 10);   
+	p->len    = strtoull(++t, &t, 10);
+	p->td     = strtod(  ++t, &t);
+	p->tc     = strtod(  ++t, &t);
+	for(q = ++t; *q && *q != '\t'; q++); *q++ = 0; strcpy(name,t); t=q;
+	p->lev    = strtoul(t, &t, 10);
+	for(q = t; *q && *q != '\t'; q++);   *q++ = 0; strcpy(p->prm,t); t = q;
+	p->memc   = strtoull(t, &t, 10);
+    p->memd   = strtoull(++t, &t, 10);
+    for(q = ++t; *q && *q != '\t'; q++); *q++ = 0; strcpy(p->tms,t); t = q;
+    //int i = sscanf(ss, "%s\t%"PRId64"\t%"PRId64"\t%lf\t%lf\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%s", s, totinlen, &p->len, &p->td, &p->tc, name, &p->lev, p->prm, &p->memc, &p->memd, p->tms); if(i != 11) break;
     if(p->prm[0]=='?') 
       p->prm[0]=0;
+    int i;
     for(i = 0; plugs[i].id >=0; i++) 
       if(!strcmp(name, plugs[i].s)) { 
         p->s  = plugs[i].s; 
