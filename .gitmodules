@@ -56,9 +56,6 @@
 [submodule "lz4"]
 	path = lz4
 	url = https://github.com/Cyan4973/lz4.git
-[submodule "lz5"]
-	path = lz5
-	url = https://github.com/inikep/lz5.git
 [submodule "lzham_codec_devel"]
 	path = lzham_codec_devel
 	url = https://github.com/richgel999/lzham_codec_devel.git
