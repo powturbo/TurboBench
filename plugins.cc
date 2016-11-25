@@ -403,10 +403,10 @@ class Out: public libzpaq::Writer {
   #endif
     
   #if C_LZ5
-#include "lz5/lib/lz5.h"
-#include "lz5/lib/lz5hc.h"
-//#include "lz5/lib/lz5_compress.h"    //v2.0
-//#include "lz5/lib/lz5_decompress.h"
+//#include "lz5/lib/lz5.h"
+//#include "lz5/lib/lz5hc.h"
+#include "lz5/lib/lz5_compress.h"    //v2.0
+#include "lz5/lib/lz5_decompress.h"
   #endif
     
   #if C_LZFSEA
@@ -728,7 +728,7 @@ struct plugs plugs[] = {
   { P_LIBZPAQ,  "zpaq", 			C_LIBZPAQ, 	"7.10",		"Libzpaq",				"Public Domain",	"https://github.com/zpaq/zpaq",															"0,1,2,3,4,5" }, 
   { P_LIBSLZ, 	"slz",				C_LIBSLZ, 	"1.0.0",	"libslz",				"BSD license",	    "http://git.1wt.eu/web/libslz.git/",													"0,1,2,3,4,5,6,7,8,9" },
   { P_LZ4,  	"lz4",				C_LZ4, 		"15-10",	"Lz4",					"BSD license",		"https://github.com/Cyan4973/lz4", 														"0,1,9,12,16" }, 
-  { P_LZ5,  	"lz5",				C_LZ5, 		"1.5",	    "Lz5",					"BSD license",		"https://github.com/inikep/lz5",														"0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18" }, 
+  { P_LZ5,  	"lz5",				C_LZ5, 		"2.0",	    "Lz5",					"BSD license",		"https://github.com/inikep/lz5",														"10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" }, 
   { P_LZFSE, 	"lzfse", 			C_LZFSE, 	"16-08",	"lzfse",				"BSD licence",		"https://github.com/lzfse/lzfse","" },
   { P_LZFSEA, 	"lzfsea", 			C_LZFSEA, 	"2015",		"lzfsea",				"iOS and OS X",		"https://developer.apple.com/library/ios/documentation/Performance/Reference/Compression/index.html","" },
   { P_LZHAM, 	"lzham", 			C_LZHAM,	"1.1",		"Lzham",				"MIT license",		"https://github.com/richgel999/lzham_codec_devel",										"1,2,3,4/x" }, 
@@ -1036,8 +1036,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif
 
 	  #if C_LZ5
-    case P_LZ5: return !lev?LZ5_compress_fast((char *)in, (char *)out, inlen, outsize, 4):(lev<2?LZ5_compress_default((char *)in, (char *)out, inlen, outsize):LZ5_compress_HC((char *)in, (char *)out, inlen, outsize, lev));
-    //case P_LZ5: return LZ5_compress (in, out, inlen, outsize, lev); 
+    //case P_LZ5: return !lev?LZ5_compress_fast((char *)in, (char *)out, inlen, outsize, 4):(lev<2?LZ5_compress_default((char *)in, (char *)out, inlen, outsize):LZ5_compress_HC((char *)in, (char *)out, inlen, outsize, lev));
+    case P_LZ5: return LZ5_compress (in, out, inlen, outsize, lev); 
 	  #endif
 
       #if C_LZFSE

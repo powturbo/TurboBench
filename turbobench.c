@@ -1279,7 +1279,7 @@ int main(int argc, char* argv[]) { //lzdbgon();
       { "help", 	0, 0, 'h'},
       { 0, 		    0, 0, 0}
     };
-    if((c = getopt_long(argc, argv, "1234A:b:B:C:e:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oOPp:Q:rRs:S:t:T:Uv:V:W:X:Y:Z:", long_options, &option_index)) == -1) break;
+    if((c = getopt_long(argc, argv, "12345:6:7:8:9:A:b:B:C:e:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oOPp:Q:rRs:S:t:T:Uv:V:W:X:Y:Z:", long_options, &option_index)) == -1) break;
     switch(c) { 
       case 0:
         printf("Option %s", long_options[option_index].name);
