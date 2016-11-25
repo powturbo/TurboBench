@@ -145,7 +145,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [LibSLZ v1.0.0](http://1wt.eu/projects/libslz/)
  - [Lz4 v1.7.1](https://github.com/Cyan4973/lz4) 
- - [Lz5 v1.5](https://github.com/inikep/lz5) 
+ - [Lz5 v2.0](https://github.com/inikep/lz5) :new:
  - [Lzfse v16-11](https://github.com/lzfse/lzfse)
  - [Lzham v1.1/15-12](https://github.com/richgel999/lzham_codec_devel) 
  - [Lzlib v1.8](http://www.nongnu.org/lzip) 
@@ -174,7 +174,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [Libzling v16-01](https://github.com/richox/libzling) 
  - [xpack v16-06](https://github.com/ebiggers/xpack) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
- - [ZSTD v1.1.2](https://github.com/facebook/zstd) 
+ - [ZSTD v1.1.2](https://github.com/facebook/zstd)
  - [zpaq v7.15](https://github.com/zpaq/zpaq) 
 
 #### Entropy coder:
