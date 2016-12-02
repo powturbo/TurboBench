@@ -144,8 +144,8 @@ All compressors with latest versions 16.08.2016b <br>
  - [LibLZF v1.06](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [LibSLZ v1.0.0](http://1wt.eu/projects/libslz/)
- - [Lz4 v1.7.1](https://github.com/Cyan4973/lz4) 
- - [Lz5 v2.0](https://github.com/inikep/lz5) :new:
+ - [Lz4 v1.7.3](https://github.com/Cyan4973/lz4) 
+ - [Lz5 v2.0](https://github.com/inikep/lz5) 
  - [Lzfse v16-11](https://github.com/lzfse/lzfse)
  - [Lzham v1.1/15-12](https://github.com/richgel999/lzham_codec_devel) 
  - [Lzlib v1.8](http://www.nongnu.org/lzip) 
@@ -160,7 +160,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [Oodle v2.3.0](http://www.radgametools.com/oodle.htm) (only win64 binary)
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
- - [sap v16-11](https://github.com/CoreSecurity/pysap) 
+ - [sap v16-12](https://github.com/CoreSecurity/pysap) 
  - [shoco v2015](https://github.com/Ed-von-Schleck/shoco) 
  - [Shrinker v0.1/r9](https://code.google.com/p/data-shrinker) 
  - [Snappy v1.1.3/16-05](https://github.com/google/snappy) 
@@ -268,5 +268,5 @@ All compressors with latest versions 16.08.2016b <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 25 NOV 2016
+Last update: 02 DEC 2016
 
