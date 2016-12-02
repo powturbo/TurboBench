@@ -70,21 +70,21 @@ static tm_t tminit() { QueryPerformanceFrequency(&tps); tm_t t0=tmtime(),ts; whi
   #else
 static   tm_t tmtime(void)    { struct timespec tm; clock_gettime(CLOCK_MONOTONIC, &tm); return (tm_t)tm.tv_sec*1000000ull + tm.tv_nsec/1000; }
 static   tm_t tminit()        { tm_t t0=tmtime(),ts; while((ts = tmtime())==t0); return ts; }
-  #endif
+  #endif 
 //---------------------------------------- bench ----------------------------------------------------------------------
 #define TM_MAX (1ull<<63)
 #define TMPRINT(__x) { printf("%7.2f MB/s\t%s", (double)(tm_tm>=0.000001?(((double)n*tm_rm/MBS)/(((double)tm_tm/1)/TM_T)):0.0), __x); fflush(stdout); }
 #define TMDEF unsigned tm_r,tm_R; tm_t _t0,_tc,_ts;
-#define TMSLEEP do { tm_T = tmtime(); if(!tm_0) tm_0 = tm_T; else if(tm_T - tm_0 > tm_TX) { printf("S \b\b");fflush(stdout); sleep(tm_slp); tm_0=tmtime();} } while(0)
+#define TMSLEEP do { tm_T = tmtime(); if(!tm_0) tm_0 = tm_T; else if(tm_T - tm_0 > tm_TX) { printf("S \b\b\b");fflush(stdout); sleep(tm_slp); tm_0=tmtime();} } while(0)
 #define TMBEG(_c_, _tm_reps_, _tm_Reps_) \
-  for(tm_tm = TM_MAX,tm_R=0,_ts=tmtime(); tm_R < _tm_Reps_; tm_R++) { /*if(_tm_reps_>1) TMSLEEP;*/ printf("%c%d\b\b",_c_,tm_R+1);fflush(stdout);\
+  for(tm_tm = TM_MAX,tm_R=0,_ts=tmtime(); tm_R < _tm_Reps_; tm_R++) { printf("%c%.2d\b\b\b",_c_,tm_R+1);fflush(stdout);\
     for(_t0 = tminit(), tm_r=0; tm_r < _tm_reps_;) {
 
-#define TMEND tm_r++; tm_T = tmtime(); if((_tc = (tm_T - _t0)) > tm_tx) break; } if(_tc < tm_tm) tm_tm = _tc,tm_rm=tm_r;else if(_tc/tm_tm>1.3) TMSLEEP; if(tm_T-_ts > tm_TX) break; }
+#define TMEND tm_r++; tm_T = tmtime(); if((_tc = (tm_T - _t0)) > tm_tx) break; } if(_tc < tm_tm) {tm_tm = _tc,tm_rm=tm_r;/*printf("r%d ", tm_R);*/ }else if(_tc/tm_tm>1.2) TMSLEEP; if(tm_T-_ts > tm_TX) break; if((tm_R & 7)==7) { sleep(tm_slp); _ts=tmtime(); } }
 #define MBS   1000000.0
 
-static unsigned tm_repc = 1<<30, tm_Repc = 3, tm_repd = 1<<30, tm_Repd = 4, tm_rm, tm_slp = 60;
-static tm_t     tm_tm, tm_tx = 2*TM_T, tm_TX = 30*TM_T, tm_0, tm_T, tm_RepkT=24*3600*TM_T;
+static unsigned tm_repc = 1<<30, tm_Repc = 2, tm_repd = 1<<30, tm_Repd = 2, tm_rm, tm_slp = 20;
+static tm_t     tm_tm, tm_tx = TM_T, tm_TX = 30*TM_T, tm_0, tm_T, tm_RepkT=24*3600*TM_T;
 
 //: b 512, kB 1000, K  1024,  MB 1000*1000,  M  1024*1024,  GB  1000*1000*1000,  G 1024*1024*1024
 
