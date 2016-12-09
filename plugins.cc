@@ -947,7 +947,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  
       #if C_BROTLI
     case P_BROTLI: { int lgwin,mode=0; char *q; if(q = strchr(prm,'m')) mode = *++q - '0';
-	    if(lev==11) lgwin = 24; if(strchr(prm,'w')) lgwin=22; else if(strchr(prm,'W')) lgwin=24; 			   if(strchr(prm,'D')) brotlidic++; if(strchr(prm,'R')) brotlirep++; if(strchr(prm,'X')) brotlictx++;
+	    if(lev==11) lgwin = 30; if(strchr(prm,'w')) lgwin=22; else if(strchr(prm,'W')) lgwin=30; 			   if(strchr(prm,'D')) brotlidic++; if(strchr(prm,'R')) brotlirep++; if(strchr(prm,'X')) brotlictx++;
         size_t esize = outsize; 
         int rc = BrotliEncoderCompress(lev, lgwin, mode, inlen, (uint8_t*)in, &esize, (uint8_t*)out);          brotlidic = brotlictx = brotlirep = 0; 
         return rc?esize:0; 

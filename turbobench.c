@@ -73,17 +73,21 @@ static   tm_t tminit()        { tm_t t0=tmtime(),ts; while((ts = tmtime())==t0);
   #endif 
 //---------------------------------------- bench ----------------------------------------------------------------------
 #define TM_MAX (1ull<<63)
-#define TMPRINT(__x) { printf("%7.2f MB/s\t%s", (double)(tm_tm>=0.000001?(((double)n*tm_rm/MBS)/(((double)tm_tm/1)/TM_T)):0.0), __x); fflush(stdout); }
-#define TMDEF unsigned tm_r,tm_R; tm_t _t0,_tc,_ts;
+//#define TMPRINT(__x) { printf("%7.2f MB/s\t%s", (double)(tm_tm>=0.000001?(((double)n*tm_rm/MBS)/(((double)tm_tm/1)/TM_T)):0.0), __x); fflush(stdout); }
+
+#define TMBS(__l,__t)         ((__t)>=0.000001?((double)(__l)/MBS)/((__t)/TM_T):0.0)
+#define TMDEF unsigned tm_r,tm_R; tm_t _t0,_tc,_ts,tm_c; double _tmbs=0.0;
 #define TMSLEEP do { tm_T = tmtime(); if(!tm_0) tm_0 = tm_T; else if(tm_T - tm_0 > tm_TX) { printf("S \b\b\b");fflush(stdout); sleep(tm_slp); tm_0=tmtime();} } while(0)
 #define TMBEG(_c_, _tm_reps_, _tm_Reps_) \
-  for(tm_tm = TM_MAX,tm_R=0,_ts=tmtime(); tm_R < _tm_Reps_; tm_R++) { printf("%c%.2d\b\b\b",_c_,tm_R+1);fflush(stdout);\
+  for(tm_c=_c_,tm_tm = TM_MAX,tm_rm=1,tm_R=0,_ts=tmtime(); tm_R < _tm_Reps_; tm_R++) { printf("%.2d%c %8.2f\b\b\b\b\b\b\b\b\b\b\b\b",tm_R+1,tm_c,_tmbs);fflush(stdout);\
     for(_t0 = tminit(), tm_r=0; tm_r < _tm_reps_;) {
-
-#define TMEND tm_r++; tm_T = tmtime(); if((_tc = (tm_T - _t0)) > tm_tx) break; } if(_tc < tm_tm) {tm_tm = _tc,tm_rm=tm_r;/*printf("r%d ", tm_R);*/ }else if(_tc/tm_tm>1.2) TMSLEEP; if(tm_T-_ts > tm_TX) break; if((tm_R & 7)==7) { sleep(tm_slp); _ts=tmtime(); } }
+ 
+#define TMEND(_len_) tm_T = tmtime(); tm_r++; if((_tc = (tm_T - _t0)) > tm_tx) break; }\
+  if(_tc/(double)tm_r < (double)tm_tm/(double)tm_rm) { tm_tm = _tc,tm_rm=tm_r; tm_c++; double _d = (double)tm_tm/(double)tm_rm; _tmbs=TMBS(_len_, _d); } else if(_tc/tm_tm>1.2) TMSLEEP; if(tm_T-_ts > tm_TX) break;\
+  if((tm_R & 7)==7) { sleep(tm_slp); _ts=tmtime(); } }
 #define MBS   1000000.0
 
-static unsigned tm_repc = 1<<30, tm_Repc = 2, tm_repd = 1<<30, tm_Repd = 2, tm_rm, tm_slp = 20;
+static unsigned tm_repc = 1<<30, tm_Repc = 2, tm_repd = 1<<30, tm_Repd = 2, tm_rm, tm_slp = 25;
 static tm_t     tm_tm, tm_tx = TM_T, tm_TX = 30*TM_T, tm_0, tm_T, tm_RepkT=24*3600*TM_T;
 
 //: b 512, kB 1000, K  1024,  MB 1000*1000,  M  1024*1024,  GB  1000*1000*1000,  G 1024*1024*1024
@@ -611,7 +615,6 @@ void plugprttf(FILE *f, int fmt) {
   }
 }
 
-#define TMBS(__l,__t)         ((__t)>=0.000001?((double)(__l)/MBS)/((__t)/TM_T):0.0)
 #define RATIO(_clen_, _len_)  ((double)_clen_*100.0/_len_)
 #define FACTOR(_clen_, _len_) ((double)_len_/(double)_clen_)
 
@@ -1024,7 +1027,7 @@ static int mcpy, mode, tincx, fuzz;
 int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned outsize, unsigned bsize, int id, int lev, char *prm) { 
   unsigned char *op,*oe = _out + outsize;
   TMDEF;
-  TMBEG('C',tm_repc,tm_Repc);     mempeakinit();                                           
+  TMBEG('A',tm_repc,tm_Repc);     mempeakinit();                                           
   unsigned char *in,*ip;																							
   for(op = _out, in = _in; in < _in+_inlen; ) { 
     unsigned inlen,bs; 
@@ -1048,14 +1051,14 @@ int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned ou
 	    die("Overflow error %llu, %u in lib=%d\n", outsize, (int)(ptrdiff_t)(op - _out), id);                                                      
     }
   }
-  TMEND;	
-  return op - _out;
+  TMEND(_inlen);	
+  return op - _out;;
 }
 
 int bedecomp(unsigned char *_in, int _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm) { 
   unsigned char *ip;
   TMDEF; 
-  TMBEG('D',tm_repd,tm_Repd);     mempeakinit();
+  TMBEG('a',tm_repd,tm_Repd);     mempeakinit();
   unsigned char *out,*op;
   for(ip = _in, out = _out; out < _out+_outlen;) {
     unsigned outlen,bs; 
@@ -1075,7 +1078,7 @@ int bedecomp(unsigned char *_in, int _inlen, unsigned char *_out, unsigned _outl
       ip += iplen; op += oplen;
     }
   }
-  TMEND;
+  TMEND(_outlen);
   return ip - _in;
 }
 
@@ -1262,8 +1265,31 @@ void printfile(char *finame, int xstdout, int fmt, char *rem) {
   #ifdef __MINGW32__
 extern int _CRT_glob = 1;
   #endif
-int main(int argc, char* argv[]) { //lzdbgon();
 
+  #define BITS 32
+#define BIT_SET(  p, n) (p[(n)/BITS] |=  (0x8000u>>((n)%BITS)))
+#define BIT_CLEAR(p, n) (p[(n)/BITS] &= ~(0x8000u>>((n)%BITS)))
+#define BIT_ISSET(p, n) (p[(n)/BITS] &   (0x8000u>>((n)%BITS)))
+tst1() 
+	{
+unsigned i;
+#define A (((r ^ l) & (r & l)) )
+
+//#define A r==0 || l==0
+#define A (l | r) & ( l & r) == i&0xf
+#define A r i&16
+#define A (r ^ l)
+#define A r==0xf || l==0xf
+unsigned p[256]={0};
+for(i=0;i<256;i++) { unsigned l = i & 0xf, r = i >> 4; //if((i%16) == 0) printf("\n"); //printf("%d,", A); 
+  if(A) BIT_SET(p,i);//p[i]=1; //
+} 
+//for(i=0;i<256;i++) { if((i%16) == 0) printf("\n"); printf("0x%x,", p[i]);}
+for(i = 0; i < 8; i++) { printf("0x%x,", p[i]); }
+ exit(0);
+	}
+
+int main(int argc, char* argv[]) { //tst1();//lzdbgon();
   int xstdout=-1,xstdin=-1;
   int                recurse  = 0, xplug = 0,tm_Repk=3,plot=-1,fmt=0,fno,merge=0,rprio=1;
   unsigned           bsize    = 1u<<30, bsizex=0;
