@@ -87,6 +87,10 @@ else
 NSIMD=0
 endif
 
+ifeq ($(AVX2),1)
+DEFS+=-DAVX2_ON
+endif
+
 # No c++ codecs
 NCPP=0
 
@@ -365,7 +369,7 @@ ifeq ($(NENCOD),0)
 OB+=TurboBase64/turbob64c.o TurboBase64/turbob64d.o
 OB+=TurboRLE/trlec.o TurboRLE/trled.o
 OB+=fastbase64/src/chromiumbase64.o fastbase64/src/quicktimebase64.o fastbase64/src/scalarbase64.o
-ifeq ($(NSIMD),0)
+ifeq ($(AVX2),1)
 OB+=fastbase64/src/avxbase64.o fastbase64/src/experimentalavxbase64.o 
 endif
 endif
@@ -373,7 +377,7 @@ endif
 ifeq ($(NECODER), 0)
 OB+=FastARI/FastAri.o 
 OB+=rans_static/rANS_static4x8.o rans_static/rANS_static4x16.o rans_static/rANS_static.o rans_static_/arith_static.o
-ifeq ($(NSIMD),0)
+ifeq ($(AVX2),1)
 OB+=rans_static/r32x16b_avx2.o
 endif
 OB+=zlibh/zlibh.o
