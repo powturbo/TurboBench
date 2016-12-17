@@ -73,19 +73,21 @@ static   tm_t tminit()        { tm_t t0=tmtime(),ts; while((ts = tmtime())==t0);
   #endif 
 //---------------------------------------- bench ----------------------------------------------------------------------
 #define TM_MAX (1ull<<63)
-//#define TMPRINT(__x) { printf("%7.2f MB/s\t%s", (double)(tm_tm>=0.000001?(((double)n*tm_rm/MBS)/(((double)tm_tm/1)/TM_T)):0.0), __x); fflush(stdout); }
 
+#define MIS   4000000.0
+#define TMIS(__l,__t)         ((__t)>=0.000001?((double)(__l)/MIS)/((__t)/TM_T):0.0)
+
+#define MBS   1000000.0
 #define TMBS(__l,__t)         ((__t)>=0.000001?((double)(__l)/MBS)/((__t)/TM_T):0.0)
-#define TMDEF unsigned tm_r,tm_R; tm_t _t0,_tc,_ts,tm_c; double _tmbs=0.0;
+#define TMDEF unsigned tm_r,tm_R,tm_c; tm_t _t0,_tc,_ts; double _tmbs=0.0;
 #define TMSLEEP do { tm_T = tmtime(); if(!tm_0) tm_0 = tm_T; else if(tm_T - tm_0 > tm_TX) { printf("S \b\b\b");fflush(stdout); sleep(tm_slp); tm_0=tmtime();} } while(0)
 #define TMBEG(_c_, _tm_reps_, _tm_Reps_) \
-  for(tm_c=_c_,tm_tm = TM_MAX,tm_rm=1,tm_R=0,_ts=tmtime(); tm_R < _tm_Reps_; tm_R++) { printf("%.2d%c %8.2f\b\b\b\b\b\b\b\b\b\b\b\b",tm_R+1,tm_c,_tmbs);fflush(stdout);\
+  for(tm_c=_c_,tm_tm = TM_MAX,tm_rm=1,tm_R=0,_ts=tmtime(); tm_R < _tm_Reps_; tm_R++) { printf("%8.2f %.2d_%d\b\b\b\b\b\b\b\b\b\b\b\b\b",_tmbs,tm_R+1,tm_c);fflush(stdout);\
     for(_t0 = tminit(), tm_r=0; tm_r < _tm_reps_;) {
  
 #define TMEND(_len_) tm_T = tmtime(); tm_r++; if((_tc = (tm_T - _t0)) > tm_tx) break; }\
   if(_tc/(double)tm_r < (double)tm_tm/(double)tm_rm) { tm_tm = _tc,tm_rm=tm_r; tm_c++; double _d = (double)tm_tm/(double)tm_rm; _tmbs=TMBS(_len_, _d); } else if(_tc/tm_tm>1.2) TMSLEEP; if(tm_T-_ts > tm_TX) break;\
   if((tm_R & 7)==7) { sleep(tm_slp); _ts=tmtime(); } }
-#define MBS   1000000.0
 
 static unsigned tm_repc = 1<<30, tm_Repc = 2, tm_repd = 1<<30, tm_Repd = 2, tm_rm, tm_slp = 25;
 static tm_t     tm_tm, tm_tx = TM_T, tm_TX = 30*TM_T, tm_0, tm_T, tm_RepkT=24*3600*TM_T;
@@ -162,7 +164,7 @@ int memcheck(unsigned char *in, unsigned n, unsigned char *cpy, int cmp) {
   for(i = 0; i < n; i++)
     if(in[i] != cpy[i]) {
       if(cmp > 3) abort(); // crash (AFL) fuzzing
-      printf("ERROR at %d:%x, %x\n", i, in[i], cpy[i]); 
+      printf("ERROR at %d:%x, %x\n", i, in[i], cpy[i]);  //memdump(stderr, in+(i&~3), 16); memdump(stderr, cpy+(i&~3), 16); 
       if(cmp > 2) exit(EXIT_FAILURE);      
 	  return i+1; 
 	}
@@ -1022,12 +1024,12 @@ int plugread(struct plug *plug, char *finame, long long *totinlen) {
 }
 
 //----------------------------------- Benchmark -----------------------------------------------------------------------------
-static int mcpy, mode, tincx, fuzz;
+static int mcpy=0, mode, tincx, fuzz;
 
 int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned outsize, unsigned bsize, int id, int lev, char *prm) { 
   unsigned char *op,*oe = _out + outsize;
   TMDEF;
-  TMBEG('A',tm_repc,tm_Repc);     mempeakinit();                                           
+  TMBEG(0,tm_repc,tm_Repc);     mempeakinit();                                           
   unsigned char *in,*ip;																							
   for(op = _out, in = _in; in < _in+_inlen; ) { 
     unsigned inlen,bs; 
@@ -1058,7 +1060,7 @@ int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned ou
 int bedecomp(unsigned char *_in, int _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm) { 
   unsigned char *ip;
   TMDEF; 
-  TMBEG('a',tm_repd,tm_Repd);     mempeakinit();
+  TMBEG(0,tm_repd,tm_Repd);     mempeakinit();
   unsigned char *out,*op;
   for(ip = _in, out = _out; out < _out+_outlen;) {
     unsigned outlen,bs; 
@@ -1291,7 +1293,7 @@ for(i = 0; i < 8; i++) { printf("0x%x,", p[i]); }
 
 int main(int argc, char* argv[]) { //tst1();//lzdbgon();
   int xstdout=-1,xstdin=-1;
-  int                recurse  = 0, xplug = 0,tm_Repk=3,plot=-1,fmt=0,fno,merge=0,rprio=1;
+  int                recurse  = 0, xplug = 0,tm_Repk=1,plot=-1,fmt=0,fno,merge=0,rprio=1;
   unsigned           bsize    = 1u<<30, bsizex=0;
   unsigned long long filenmax = 0;
   char               *scmd = NULL,*trans=NULL,*beb=NULL,*rem="",s[2049];
