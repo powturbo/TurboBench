@@ -214,7 +214,8 @@ All compressors with latest versions 16.08.2016b <br>
  - [library memcpy](https://github.com/powturbo/TurboBench)
 
 #### Encoding:
- - [TurboRLE](https://github.com/powturbo/TurboRLE)
+ - [TurboRLE](https://github.com/powturbo/TurboRLE) Turbo Run Length Encoding
+ - [TurboBase64](https://github.com/powturbo/TurboBase64) Turbo Bas64 Encoding/Decoding :new:
 
 #### Transform:
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
@@ -268,5 +269,5 @@ All compressors with latest versions 16.08.2016b <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 09 DEC 2016
+Last update: 18 DEC 2016
 

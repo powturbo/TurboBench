@@ -138,3 +138,9 @@
 	path = lz5
 	url = https://github.com/inikep/lz5
 	branch = lz5_v2.0
+[submodule "fastbase64"]
+	path = fastbase64
+	url = https://github.com/lemire/fastbase64.git
+[submodule "TurboBase64"]
+	path = TurboBase64
+	url = https://github.com/powturbo/TurboBase64.git

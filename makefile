@@ -6,7 +6,6 @@
 # snappy:    "cp snappy_/* snappy" (or configure snappy) & type make
 # GPL: "make GPL=1" to include GPL libraries
 # Minimum make: "make NCOMP2=1 NECODER=1 NSIMD=1" to compile only lz4,brotli,lzma,zlib and zstd
-# AVX2 : make AVX2=1 
 # Linux: "export CC=clang" "export CXX=clang". windows mingw: "set CC=gcc" "set CXX=g++" or uncomment the CC,CXX lines
 CC ?= gcc
 CXX ?= g++
@@ -68,7 +67,7 @@ else
 NECODER=0
 endif
 
-# Encoding: RLE
+# Encoding: RLE,BASE64,...
 ifeq ($(NENCOD),1)
 DEFS+=-DNENCOD
 else
@@ -78,20 +77,30 @@ endif
 ifeq ($(GPL),1)
 DEFS+=-DGPL
 DEFS+=-Ilzo/include 
+
 endif
 
-ifeq ($(AVX2),1)
-DEFS+=-DAVX2_ON
-endif
-
-#-------------- compressor specific
-# disable SIMD compressors (LZSSE)
+# disable SIMD compiling
 ifeq ($(NSIMD),1)
 DEFS+=-DNSIMD
 else
 NSIMD=0
 endif
 
+# No c++ codecs
+NCPP=0
+
+# disable peak memory calculation
+ifeq ($(NMEMSIZE),1)
+DEFS+=-DNMEMSIZE
+else
+ifeq ($(UNAME),$(filter $(UNAME),Linux Darwin FreeBSD GNU/kFreeBSD))
+LDFLAGS += -ldl
+endif
+endif
+
+DDEBUG=-DNDEBUG -s
+#-------------- compressor specific
 # blosc
 ifeq ($(BLOSC),1)
 DEFS+=-DBLOSC
@@ -107,9 +116,6 @@ ifeq ($(APPLE),1)
 DEFS+=-DAPPLE
 endif
 
-# No c++ codec
-NCPP=0
-
 # configure or copy directory "snappy_/*" to "snappy"
 ifneq (,$(wildcard snappy/snappy-stubs-public.h))
 SNAPPY=1
@@ -121,18 +127,7 @@ DEFS+=-DLZTURBO
 endif
 
 #------------- 
-# disable peak memory calculation
-ifeq ($(NMEMSIZE),1)
-DEFS+=-DNMEMSIZE
-else
-ifeq ($(UNAME),$(filter $(UNAME),Linux Darwin FreeBSD GNU/kFreeBSD))
-LDFLAGS += -ldl
-endif
-endif
-
-DDEBUG=-DNDEBUG -s
-
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ilz4/lib -Ilz5/lib -Ibrotli/include -Ilibdeflate -Ilibdeflate/common     
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ilz4/lib -Ilz5/lib -Ibrotli/include -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include   
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -ICSC/src/libcsc -D_7Z_TYPES_ -Ibrotli/include -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 
 all:  turbobench
@@ -229,6 +224,7 @@ wflz/wfLZ.o: wflz/wfLZ.c
 nakamichi/Nakamichi_Nin.o: nakamichi/Nakamichi_Nin.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
 
+# SSE4.1
 LZSSE/lzsse2/lzsse2.o: LZSSE/lzsse2/lzsse2.cpp
 	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
@@ -238,8 +234,16 @@ LZSSE/lzsse4/lzsse4.o: LZSSE/lzsse4/lzsse4.cpp
 LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
 	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
+# AVX2
 rans_static/r32x16b_avx2.o: rans_static/r32x16b_avx2.c
 	$(CC) -O3 -mavx2 $(MARCH) $< -c -o $@ 
+
+fastbase64/src/avxbase64.o: fastbase64/src/avxbase64.c
+	$(CC) -O3 -mavx2 $(MARCH) -Ifastbase64/include $< -c -o $@ 
+
+fastbase64/src/experimentalavxbase64.o: fastbase64/src/experimentalavxbase64.c
+	$(CC) -O3 -mavx2 $(MARCH) -Ifastbase64/include $< -c -o $@ 
+
 
 #WKDM=wkdm/WKdmCompress.o wkdm/WKdmDecompress.o
 ifeq ($(NCOMP2), 0)
@@ -358,13 +362,18 @@ endif
 endif
 #-------------------- Encoding ------------------------
 ifeq ($(NENCOD),0)
+OB+=TurboBase64/turbob64c.o TurboBase64/turbob64d.o
 OB+=TurboRLE/trlec.o TurboRLE/trled.o
+OB+=fastbase64/src/chromiumbase64.o fastbase64/src/quicktimebase64.o fastbase64/src/scalarbase64.o
+ifeq ($(NSIMD),0)
+OB+=fastbase64/src/avxbase64.o fastbase64/src/experimentalavxbase64.o 
+endif
 endif
 #-------------------- Entropy Coder -------------------
 ifeq ($(NECODER), 0)
 OB+=FastARI/FastAri.o 
 OB+=rans_static/rANS_static4x8.o rans_static/rANS_static4x16.o rans_static/rANS_static.o rans_static_/arith_static.o
-ifeq ($(AVX2),1)
+ifeq ($(NSIMD),0)
 OB+=rans_static/r32x16b_avx2.o
 endif
 OB+=zlibh/zlibh.o
