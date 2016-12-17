@@ -639,7 +639,7 @@ struct snappy_env env;
 #include "TurboRLE/trle.h"
   #endif
   #if C_TB64
-#include "../../dev/lz/turbob64.h"
+#include "TurboBase64/turbob64.h"
   #endif
   //------------------------------------ Transform ----------------------------------
   #if C_DIVBWT 
