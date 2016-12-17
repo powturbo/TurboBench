@@ -164,7 +164,7 @@ int memcheck(unsigned char *in, unsigned n, unsigned char *cpy, int cmp) {
   for(i = 0; i < n; i++)
     if(in[i] != cpy[i]) {
       if(cmp > 3) abort(); // crash (AFL) fuzzing
-      printf("ERROR at %d:%x, %x\n", i, in[i], cpy[i]);  //memdump(stderr, in+(i&~3), 16); memdump(stderr, cpy+(i&~3), 16); 
+      printf("ERROR at %d:%x, %x\n", i, in[i], cpy[i]);
       if(cmp > 2) exit(EXIT_FAILURE);      
 	  return i+1; 
 	}
