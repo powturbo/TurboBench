@@ -586,14 +586,14 @@ extern "C" {
   #endif
 
   #if C_FB64
-   #ifndef NSIMD
+   #ifdef AVX2_ON
 #include "fastbase64/include/avxbase64.h"
+size_t expavx2_base64_decode(char *out, const char *src, size_t srclen);
+size_t expavx2_base64_encode(char* dest, const char* str, size_t len);
    #endif
 size_t chromium_base64_encode(char* dest, const char* str, size_t len);
 size_t chromium_base64_decode(char* dest, const char* src, size_t len);
 //#include "fastbase64/include/experimentalavxbase64.h"
-size_t expavx2_base64_decode(char *out, const char *src, size_t srclen);
-size_t expavx2_base64_encode(char* dest, const char* str, size_t len);
 
 #include "fastbase64/include/linuxbase64.h"
 #include "fastbase64/include/quicktimebase64.h"
@@ -1336,7 +1336,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_ST: { memcpy(out+4,in, inlen); *(unsigned *)(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
       #endif	
 	  #if C_FB64
-        #ifndef NSIMD
+        #ifdef AVX2_ON
 	case P_FB64AVX: 	 { size_t outlen = outsize; avx2_base64_encode(     in,inlen,out,&outlen);return outlen; }
 	case P_FB64EXPAVX:	 { 							return expavx2_base64_encode(  out,in,inlen); }
 	    #endif
@@ -1772,7 +1772,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_ST: { memcpy(out, in+4, inlen-4); bsc_st_decode(out, inlen-4, lev, *(unsigned *)(in), 0); break; }
       #endif
 	  #if C_FB64
-        #ifndef NSIMD
+        #ifdef AVX2_ON
 	case P_FB64AVX:      { size_t _outlen = outlen; avx2_base64_decode(     in,inlen,out,&_outlen);return inlen; }
 	case P_FB64EXPAVX:	 { size_t _outlen = outlen; expavx2_base64_decode(  out,in,inlen);return inlen; }
 	    #endif
