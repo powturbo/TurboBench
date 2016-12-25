@@ -1303,7 +1303,7 @@ void SlowCopy512bit (const char *SOURCE, char *TARGET) { _mm512_storeu_si512((__
 
 void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* retIndex, unsigned int* retMatch, char* refStart,char* refEnd,char* encStart,char* encEnd);
 unsigned int SlidingWindowVsLookAheadBuffer(char* refStart, char* refEnd, char* encStart, char* encEnd);
-unsigned int NakaCompress(char* ret, char* src, unsigned int srcSize);
+uint64_t NakaCompress(char* ret, char* src, unsigned int srcSize);
 uint64_t NakaDecompress(char* ret, char* src, uint64_t srcSize);
 char * Railgun_Swampshine_BailOut(char * pbTarget, char * pbPattern, uint32_t cbTarget, uint32_t cbPattern);
 char * Railgun_Doublet (char * pbTarget, char * pbPattern, uint32_t cbTarget, uint32_t cbPattern);
