@@ -2127,7 +2127,7 @@ unsigned int SlidingWindowVsLookAheadBuffer( char* refStart, char* refEnd, char*
 	return ret;
 }
 
-unsigned int NakaCompress(char* ret, char* src, unsigned int srcSize){
+uint64_t NakaCompress(char* ret, char* src, unsigned int srcSize){
 	unsigned int srcIndex=0;
 	unsigned int retIndex=0;
 	unsigned int index=0;
