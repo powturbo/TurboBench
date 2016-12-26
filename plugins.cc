@@ -1,5 +1,5 @@
 /**
-    Copyright (C) powturbo 2013-2016
+    Copyright (C) powturbo 2013-2017
     GPL v2 License
   
     This program is free software; you can redistribute it and/or modify
@@ -182,6 +182,22 @@ enum {
 #define C_ZSTD		COMP1	
  P_ZSTD,
   // --------- Encoding -------------------
+  #ifdef AVX2_ON 
+#define C_B64 		ENCOD
+  #else
+#define C_B64 		0
+  #endif
+ P_B64_AVX2,
+ P_B64_NEON32,
+ P_B64_NEON64,
+ P_B64_PLAIN,
+ P_B64_SSSE3,
+ P_B64_SSE41,
+ P_B64_SSE42,
+ P_B64_AVX,
+
+#define C_SB64 		0 //ENCOD
+ P_SB64SSE,
 #define C_FB64 		ENCOD
  P_FB64AVX,
  P_FB64CHROMIUM,
@@ -585,21 +601,6 @@ extern "C" {
 #include "density/src/density_api.h"
   #endif
 
-  #if C_FB64
-   #ifdef AVX2_ON
-#include "fastbase64/include/avxbase64.h"
-size_t expavx2_base64_decode(char *out, const char *src, size_t srclen);
-size_t expavx2_base64_encode(char* dest, const char* str, size_t len);
-   #endif
-size_t chromium_base64_encode(char* dest, const char* str, size_t len);
-size_t chromium_base64_decode(char* dest, const char* src, size_t len);
-//#include "fastbase64/include/experimentalavxbase64.h"
-
-#include "fastbase64/include/linuxbase64.h"
-#include "fastbase64/include/quicktimebase64.h"
-#include "fastbase64/include/scalarbase64.h"
-  #endif
-
   #if C_FASTLZ
 #include "FastLZ/fastlz.h"
   #endif
@@ -641,6 +642,36 @@ struct snappy_env env;
   #if C_TB64
 #include "TurboBase64/turbob64.h"
   #endif
+  #if C_SB64
+#include "base64simd/encode/lookup.sse.cpp"
+#include "base64simd/decode/decode.sse.cpp"
+  #endif
+
+  #if C_B64
+#include "base64/include/libbase64.h"
+  #endif
+
+  #if __cplusplus  
+extern "C" {
+  #endif
+  #if C_FB64
+   #ifdef AVX2_ON
+#include "fastbase64/include/avxbase64.h"
+size_t expavx2_base64_decode(char *out, const char *src, size_t srclen);
+size_t expavx2_base64_encode(char* dest, const char* str, size_t len);
+   #endif
+size_t chromium_base64_encode(char* dest, const char* str, size_t len);
+size_t chromium_base64_decode(char* dest, const char* src, size_t len);
+//#include "fastbase64/include/experimentalavxbase64.h"
+
+#include "fastbase64/include/linuxbase64.h"
+#include "fastbase64/include/quicktimebase64.h"
+#include "fastbase64/include/scalarbase64.h"
+  #endif
+  #if __cplusplus
+}
+  #endif
+
   //------------------------------------ Transform ----------------------------------
   #if C_DIVBWT 
 #include "libbsc/libbsc/bwt/divsufsort/divsufsort.h"
@@ -838,12 +869,16 @@ struct plugs plugs[] = {
   { P_FB64LINUX,	"fb64linux",    C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
   { P_FB64QUICKTIME,"fb64quicktime",C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
   { P_FB64SCALAR,	"fb64scalar",   C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
-  { P_TB64,		    "TurboB64",    	C_FB64,		 "    ",	"TurboBase64 Fast",			"",		"",  						"" },
-  { P_TB64S,	    "TurboB64s",    C_FB64,		 "    ",	"TurboBase64 Space",	"",		"",  						"" },
-
+  { P_TB64,		    "TurboB64",    	C_FB64,		 "    ",	"TurboBase64",			"BSD license",		"https://github.com/powturbo/TurboBase64",  						"" },
+  { P_TB64S,	    "TurboB64s",    C_FB64,		 "    ",	"TurboBase64",			"BSD license",		"https://github.com/powturbo/TurboBase64",  						"" },
+//  { P_SB64SSE,		"base64simd",   C_SB64,		 "    ",	"Base64simd",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
+  { P_B64_AVX2,		"b64_avx2",     C_B64,		 "    ",	"Base64",				"BSD license",		"https://github.com/aklomp/base64",  						"" },
+  { P_B64_PLAIN,	"b64_plain",    C_B64,		 "    ",	"Base64",				"BSD license",		"https://github.com/aklomp/base64",  						"" },
+  { P_B64_SSSE3,	"b64_ssse3",    C_B64,		 "    ",	"Base64",				"BSD license",		"https://github.com/aklomp/base64",  						"" },
+  { P_B64_SSE41,	"b64_sse41",    C_B64,		 "    ",	"Base64",				"BSD license",		"https://github.com/aklomp/base64",  						"" },
   //----- Transform -----
   { P_DIVBWT, 	"divbwt",    		C_DIVBWT,    "    ",	"bwt libdivsufsort/libbsc",	"        ",		"https://github.com/y-256/libdivsufsort",  												"" },
-  { P_ST, 	    "st",    			C_ST,   	 "    ",	"st  libbsc",			"Apache license",						"https://github.com/IlyaGrebnov/libbsc",  						"3,4,5,6,7,8" },
+  { P_ST, 	    "st",    			C_ST,   	 "    ",	"st  libbsc",			"Apache license",	"https://github.com/IlyaGrebnov/libbsc",  						"3,4,5,6,7,8" },
 
 //{ P_MYCODEC, 	"mycodec",			C_MYCODEC, 	"0",		"My codec",				"           ",		"",																						"" },
     #ifdef LZTURBO
@@ -1325,27 +1360,48 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       } break;
     case P_RLET: return trlec(in, inlen, out); 
       #endif 
-    //------------------------- Transform -----------------------------
-	  #if C_TB64 
-	case P_TB64:  return turbob64enc(in, inlen, out); 
-	case P_TB64S: return turbob64encs(in, inlen, out); 
-     #endif
-      #if C_DIVBWT
-    case P_DIVBWT: { int *sa = (int *)malloc((inlen + 1) * sizeof(int)); if(!sa) return -1; 
-	  unsigned bwtidx = divbwt(in, out+sizeof(bwtidx), sa, inlen, NULL, NULL, 0); free(sa); *(unsigned *)out = bwtidx; return inlen+4; }
-    case P_ST: { memcpy(out+4,in, inlen); *(unsigned *)(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
-      #endif	
+
+	  #if C_B64
+        #ifdef __AVX2__
+    case P_B64_AVX2:  { size_t outlen; base64_encode(in, inlen, out, &outlen, BASE64_FORCE_AVX2); return outlen; }
+	    #endif
+    case P_B64_PLAIN: { size_t outlen; base64_encode(in, inlen, out, &outlen, BASE64_FORCE_PLAIN); return outlen; }
+        #ifdef __SSSE3__
+    case P_B64_SSSE3: { size_t outlen; base64_encode(in, inlen, out, &outlen, BASE64_FORCE_SSSE3); return outlen; } 
+	    #endif
+
+        #ifdef __SSE4_1__
+    case P_B64_SSE41: { size_t outlen; base64_encode(in, inlen, out, &outlen, BASE64_FORCE_SSE41); return outlen; }
+	    #endif
+	  #endif
+
 	  #if C_FB64
         #ifdef AVX2_ON
 	case P_FB64AVX: 	 { size_t outlen = outsize; avx2_base64_encode(     in,inlen,out,&outlen);return outlen; }
 	case P_FB64EXPAVX:	 { 							return expavx2_base64_encode(  out,in,inlen); }
 	    #endif
 
-	case P_FB64CHROMIUM: {  						return chromium_base64_encode(out,in,inlen); }
-	case P_FB64LINUX:    { 							return linux_base64_encode(    out,in,in+inlen); }
-	case P_FB64QUICKTIME:{ size_t outlen = outsize; quicktime_base64_encode(out,in,inlen);return outlen; }
+	case P_FB64CHROMIUM:  return chromium_base64_encode( out,in,inlen);
+	case P_FB64LINUX:     return linux_base64_encode(    out,in,in+inlen);
+	case P_FB64QUICKTIME: return quicktime_base64_encode(out,in,inlen);
 	case P_FB64SCALAR:   { size_t outlen = outsize; scalar_base64_encode(   in,inlen,out,&outlen);return outlen; }
 	  #endif
+
+	  #if C_SB64
+	case P_SB64SSE:  base64::sse::encode(base64::sse::lookup_naive, in, inlen, out); return ((inlen+2)/3)*4;
+	  #endif
+
+	  #if C_TB64 
+	case P_TB64:  return turbob64enc(in, inlen, out); 
+	case P_TB64S: return turbob64encs(in, inlen, out); 
+     #endif
+
+    //------------------------- Transform -----------------------------
+      #if C_DIVBWT
+    case P_DIVBWT: { int *sa = (int *)malloc((inlen + 1) * sizeof(int)); if(!sa) return -1; 
+	  unsigned bwtidx = divbwt(in, out+sizeof(bwtidx), sa, inlen, NULL, NULL, 0); free(sa); *(unsigned *)out = bwtidx; return inlen+4; }
+    case P_ST: { memcpy(out+4,in, inlen); *(unsigned *)(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
+      #endif	
     //------------------------- Entropy Coders -------------------------
       #if C_MEMCPY 
     case P_MCPY:     memcpy(out, in, inlen); return inlen;
@@ -1761,6 +1817,19 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       } break;
     case P_RLET: return trled(in, inlen, out, outlen); 
       #endif
+	  #if C_B64
+        #ifdef __AVX2__
+    case P_B64_AVX2:  { size_t outlen; base64_decode(in, inlen, out, &outlen, BASE64_FORCE_AVX2);  return inlen; }
+	    #endif
+    case P_B64_PLAIN: { size_t outlen; base64_decode(in, inlen, out, &outlen, BASE64_FORCE_PLAIN); return inlen; }
+        #ifdef __SSSE3__
+    case P_B64_SSSE3: { size_t outlen; base64_decode(in, inlen, out, &outlen, BASE64_FORCE_SSSE3); return inlen; } 
+	    #endif
+        #ifdef __SSE4_1__
+    case P_B64_SSE41: { size_t outlen; base64_decode(in, inlen, out, &outlen, BASE64_FORCE_SSE41); return inlen; }
+	    #endif
+	  #endif
+
       //------------ Transform -----------------------------------------------------------------------
 	  #if C_TB64 
 	case P_TB64: return turbob64dec(in, inlen, out);
@@ -1777,10 +1846,14 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	case P_FB64EXPAVX:	 { size_t _outlen = outlen; expavx2_base64_decode(  out,in,inlen);return inlen; }
 	    #endif
 
-	case P_FB64CHROMIUM: {                          chromium_base64_decode( out,in,inlen);   return inlen; }
-	case P_FB64LINUX:    {                          linux_base64_decode(    out,in,in+inlen);return inlen; }
-	case P_FB64QUICKTIME:{ size_t _outlen = outlen; quicktime_base64_decode(out,in);return inlen; }
-	case P_FB64SCALAR:   { size_t _outlen = outlen;  scalar_base64_decode(	 in,inlen,out,&_outlen);return inlen; }
+	case P_FB64CHROMIUM:  chromium_base64_decode( out,in,inlen);   return inlen;
+	case P_FB64LINUX:     linux_base64_decode(    out,in,in+inlen);return inlen;
+	case P_FB64QUICKTIME: quicktime_base64_decode(out,in);         return inlen;
+	case P_FB64SCALAR:   { size_t _outlen = outlen; scalar_base64_decode(	 in,inlen,out,&_outlen);return inlen; }
+	  #endif
+
+	  #if C_SB64
+	case P_SB64SSE:  base64::sse::decode(base64::sse::lookup_base, in, inlen, out); return inlen;
 	  #endif
   
       //------------ Entropy Coders ------------------------------------------------------------------

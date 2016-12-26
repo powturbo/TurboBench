@@ -43,25 +43,24 @@
 #include <getopt.h>
 #include <unistd.h>   
   #endif
-  #if !defined(_WIN32)
+  #if !defined(_WIN32)  
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/param.h>
   #else
-#include <io.h>
+#include <io.h> 
 #include <fcntl.h>
   #endif
 
 #include <time.h>
 #include "conf.h"   
-#include "plugins.h"
- 
+#include "plugins.h" 
 //--------------------------------------- Time ------------------------------------------------------------------------
+#include <time.h>
 typedef unsigned long long tm_t;
 #define TM_T 1000000.0
-#define TM_MAX (1ull<<63)
   #ifdef _WIN32
 #include <windows.h>
 static LARGE_INTEGER tps;
@@ -71,29 +70,31 @@ static tm_t tminit() { QueryPerformanceFrequency(&tps); tm_t t0=tmtime(),ts; whi
 static   tm_t tmtime(void)    { struct timespec tm; clock_gettime(CLOCK_MONOTONIC, &tm); return (tm_t)tm.tv_sec*1000000ull + tm.tv_nsec/1000; }
 static   tm_t tminit()        { tm_t t0=tmtime(),ts; while((ts = tmtime())==t0); return ts; }
   #endif 
+static double tmsec( tm_t tm) { return (double)tm/1000000.0; }
+static double tmmsec(tm_t tm) { return (double)tm/1000.0; }
 //---------------------------------------- bench ----------------------------------------------------------------------
-#define TM_MAX (1ull<<63)
-
 #define MIS   4000000.0
 #define TMIS(__l,__t)         ((__t)>=0.000001?((double)(__l)/MIS)/((__t)/TM_T):0.0)
 
 #define MBS   1000000.0
 #define TMBS(__l,__t)         ((__t)>=0.000001?((double)(__l)/MBS)/((__t)/TM_T):0.0)
+#define TM_TX TM_T 
+
 #define TMDEF unsigned tm_r,tm_R,tm_c; tm_t _t0,_tc,_ts; double _tmbs=0.0;
 #define TMSLEEP do { tm_T = tmtime(); if(!tm_0) tm_0 = tm_T; else if(tm_T - tm_0 > tm_TX) { printf("S \b\b\b");fflush(stdout); sleep(tm_slp); tm_0=tmtime();} } while(0)
 #define TMBEG(_c_, _tm_reps_, _tm_Reps_) \
-  for(tm_c=_c_,tm_tm = TM_MAX,tm_rm=1,tm_R=0,_ts=tmtime(); tm_R < _tm_Reps_; tm_R++) { printf("%8.2f %.2d_%d\b\b\b\b\b\b\b\b\b\b\b\b\b",_tmbs,tm_R+1,tm_c);fflush(stdout);\
+  for(tm_c=_c_,tm_tm = (1ull<<63),tm_rm=1,tm_R=0,_ts=tmtime(); tm_R < _tm_Reps_; tm_R++) { printf("%8.2f %.2d_%d\b\b\b\b\b\b\b\b\b\b\b\b\b",_tmbs,tm_R+1,tm_c);fflush(stdout);\
     for(_t0 = tminit(), tm_r=0; tm_r < _tm_reps_;) {
  
 #define TMEND(_len_) tm_T = tmtime(); tm_r++; if((_tc = (tm_T - _t0)) > tm_tx) break; }\
-  if(_tc/(double)tm_r < (double)tm_tm/(double)tm_rm) { tm_tm = _tc,tm_rm=tm_r; tm_c++; double _d = (double)tm_tm/(double)tm_rm; _tmbs=TMBS(_len_, _d); } else if(_tc/tm_tm>1.2) TMSLEEP; if(tm_T-_ts > tm_TX) break;\
+  if(_tc/(double)tm_r < (double)tm_tm/(double)tm_rm) { tm_tm = _tc; tm_rm=tm_r; tm_c++; double _d = (double)tm_tm/(double)tm_rm; _tmbs=TMBS(_len_, _d); } else if(_tc/tm_tm>1.2) TMSLEEP; if(tm_T-_ts > tm_TX) break;\
   if((tm_R & 7)==7) { sleep(tm_slp); _ts=tmtime(); } }
 
-static unsigned tm_repc = 1<<30, tm_Repc = 2, tm_repd = 1<<30, tm_Repd = 2, tm_rm, tm_slp = 25;
-static tm_t     tm_tm, tm_tx = TM_T, tm_TX = 30*TM_T, tm_0, tm_T, tm_RepkT=24*3600*TM_T;
+#define TMVARS static unsigned tm_repc = 1<<30, tm_Repc = 2, tm_repd = 1<<30, tm_Repd = 2, tm_rm, tm_slp = 25;\
+               static tm_t     tm_tm, tm_tx = TM_TX, tm_TX = 30*TM_TX, tm_0, tm_T, tm_RepkT=24*3600*TM_TX;
+TMVARS;
 
 //: b 512, kB 1000, K  1024,  MB 1000*1000,  M  1024*1024,  GB  1000*1000*1000,  G 1024*1024*1024
-
 #define Kb (1u<<10)
 #define Mb (1u<<20)
 #define Gb (1u<<30)

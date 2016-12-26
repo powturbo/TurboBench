@@ -1,12 +1,12 @@
-# powturbo  (c) Copyright 2013-2016
+# powturbo  (c) Copyright 2013-2017
 # ----------- Downloading + Compiling ----------------------
 # git clone --recursive git://github.com/powturbo/TurboBench.git 
 # make
 #
+# Minimum make: "make NCOMP2=1 NECODER=1 NSIMD=1" to compile only lz4,brotli,lzma,zlib and zstd
+#
 # snappy:    "cp snappy_/* snappy" (or configure snappy) & type make
 # GPL: "make GPL=1" to include GPL libraries
-# Minimum make: "make NCOMP2=1 NECODER=1 NSIMD=1" to compile only lz4,brotli,lzma,zlib and zstd
-# Linux: "export CC=clang" "export CXX=clang". windows mingw: "set CC=gcc" "set CXX=g++" or uncomment the CC,CXX lines
 CC ?= gcc
 CXX ?= g++
 #CC=clang
@@ -77,7 +77,6 @@ endif
 ifeq ($(GPL),1)
 DEFS+=-DGPL
 DEFS+=-Ilzo/include 
-
 endif
 
 # disable SIMD compiling
@@ -87,12 +86,10 @@ else
 NSIMD=0
 endif
 
+# enable AVX2
 ifeq ($(AVX2),1)
 DEFS+=-DAVX2_ON
 endif
-
-# No c++ codecs
-NCPP=0
 
 # disable peak memory calculation
 ifeq ($(NMEMSIZE),1)
@@ -102,6 +99,9 @@ ifeq ($(UNAME),$(filter $(UNAME),Linux Darwin FreeBSD GNU/kFreeBSD))
 LDFLAGS += -ldl
 endif
 endif
+
+# No c++ codecs
+NCPP=0
 
 DDEBUG=-DNDEBUG -s
 #-------------- compressor specific
@@ -225,9 +225,6 @@ shrinker/shrinker.o: shrinker/shrinker.c
 wflz/wfLZ.o: wflz/wfLZ.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
 
-nakamichi/Nakamichi_Nin.o: nakamichi/Nakamichi_Nin.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
-
 # SSE4.1
 LZSSE/lzsse2/lzsse2.o: LZSSE/lzsse2/lzsse2.cpp
 	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
@@ -242,13 +239,9 @@ LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
 rans_static/r32x16b_avx2.o: rans_static/r32x16b_avx2.c
 	$(CC) -O3 -mavx2 $(MARCH) $< -c -o $@ 
 
-fastbase64/src/avxbase64.o: fastbase64/src/avxbase64.c
-	$(CC) -O3 -mavx2 $(MARCH) -Ifastbase64/include $< -c -o $@ 
-
-fastbase64/src/experimentalavxbase64.o: fastbase64/src/experimentalavxbase64.c
-	$(CC) -O3 -mavx2 $(MARCH) -Ifastbase64/include $< -c -o $@ 
-
-
+nakamichi/Nakamichi_Okamigan.o: nakamichi/Nakamichi_Okamigan.c
+	$(CC) -O3 -mssse3 $(MARCH) $< -c -o $@ 
+	
 #WKDM=wkdm/WKdmCompress.o wkdm/WKdmDecompress.o
 ifeq ($(NCOMP2), 0)
 DIVSUFSORT=libbsc/libbsc/bwt/divsufsort/divsufsort.o
@@ -292,9 +285,10 @@ endif
 
 ifeq ($(NSIMD),0)
 OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o 
+OB+=nakamichi/Nakamichi_Okamigan.o
 endif
 OB+=miniz/miniz.o
-OB+=nakamichi/Nakamichi_Kintaro.o
+
 OB+=pithy/pithy.o
 OB+=shoco/shoco.o
 OB+=shrinker/Shrinker.o
@@ -366,10 +360,26 @@ endif
 endif
 #-------------------- Encoding ------------------------
 ifeq ($(NENCOD),0)
+fastbase64/src/avxbase64.o: fastbase64/src/avxbase64.c
+	$(CC) -O3 -mavx2 $(MARCH) -Ifastbase64/include $< -c -o $@ 
+
+fastbase64/src/experimentalavxbase64.o: fastbase64/src/experimentalavxbase64.c
+	$(CC) -O3 -mavx2 $(MARCH) -Ifastbase64/include $< -c -o $@ 
+
+base64/lib/arch/avx2/codec.o: base64/lib/arch/avx2/codec.c
+	$(CC) -O3 -mavx2 $(MARCH) $< -c -o $@ 
+
+base64/lib/arch/sse41/codec.o: base64/lib/arch/sse41/codec.c
+	$(CC) -O3 -msse4.1 $(MARCH) $< -c -o $@ 
+
+base64/lib/arch/ssse3/codec.o: base64/lib/arch/ssse3/codec.c
+	$(CC) -O3 -mssse3 $(MARCH) $< -c -o $@ 
+
 OB+=TurboBase64/turbob64c.o TurboBase64/turbob64d.o
 OB+=TurboRLE/trlec.o TurboRLE/trled.o
 OB+=fastbase64/src/chromiumbase64.o fastbase64/src/quicktimebase64.o fastbase64/src/scalarbase64.o
 ifeq ($(AVX2),1)
+OB+=base64/lib/arch/avx/codec.o base64/lib/lib.o base64/lib/arch/generic/codec.o base64/lib/arch/ssse3/codec.o base64/lib/arch/sse41/codec.o base64/lib/arch/sse42/codec.o base64/lib/arch/avx2/codec.o base64/lib/codec_choose.o base64/lib/arch/neon32/codec.o base64/lib/arch/neon64/codec.o
 OB+=fastbase64/src/avxbase64.o fastbase64/src/experimentalavxbase64.o 
 endif
 endif

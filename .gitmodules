@@ -144,3 +144,6 @@
 [submodule "TurboBase64"]
 	path = TurboBase64
 	url = https://github.com/powturbo/TurboBase64.git
+[submodule "base64"]
+	path = base64
+	url = https://github.com/aklomp/base64

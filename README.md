@@ -156,7 +156,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [LZSSE v16-03-28](https://github.com/ConorStokes/LZSSE)
  - [Miniz v13-10](https://github.com/richgel999/miniz) 
  - [ms-compress v16.07](https://github.com/coderforlife/ms-compress) 
- - [Nakamichi v15-10](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) 
+ - [Nakamichi Okamigan v16-12](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) :new:
  - [Oodle v2.3.0](http://www.radgametools.com/oodle.htm) (only win64 binary)
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
@@ -216,6 +216,8 @@ All compressors with latest versions 16.08.2016b <br>
 #### Encoding:
  - [TurboRLE](https://github.com/powturbo/TurboRLE) Turbo Run Length Encoding
  - [TurboBase64](https://github.com/powturbo/TurboBase64) Turbo Base64 Encoding/Decoding :new:
+ - [fastbase64](https://github.com/lemire/fastbase64) Base64 Encoding :new:
+ - [base64](https://github.com/aklomp/base64) Fast Base64 stream encoder/decoder :new:
 
 #### Transform:
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
@@ -258,6 +260,11 @@ All compressors with latest versions 16.08.2016b <br>
         cd TurboBench
   		make
 
+###### Turbobench mini: compile (only popular codecs)
+
+		make NCOMP2=1 NECODER=1 NSIMD=1
+
+
 ### Environment:
 ###### OS/Compiler (32 + 64 bits):
 - Linux: GNU GCC (>=4.6) 
@@ -269,5 +276,5 @@ All compressors with latest versions 16.08.2016b <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 18 DEC 2016
+Last update: 26 DEC 2016
 
