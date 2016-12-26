@@ -182,7 +182,7 @@ enum {
 #define C_ZSTD		COMP1	
  P_ZSTD,
   // --------- Encoding -------------------
-  #ifdef AVX2_ON 
+  #ifdef BASE64 
 #define C_B64 		ENCOD
   #else
 #define C_B64 		0
