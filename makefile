@@ -240,7 +240,7 @@ rans_static/r32x16b_avx2.o: rans_static/r32x16b_avx2.c
 	$(CC) -O3 -mavx2 $(MARCH) $< -c -o $@ 
 
 nakamichi/Nakamichi_Okamigan.o: nakamichi/Nakamichi_Okamigan.c
-	$(CC) -O3 -mss4.1 $(MARCH) $< -c -o $@ 
+	$(CC) -O3 -msse4.1 $(MARCH) $< -c -o $@ 
 	
 #WKDM=wkdm/WKdmCompress.o wkdm/WKdmDecompress.o
 ifeq ($(NCOMP2), 0)
