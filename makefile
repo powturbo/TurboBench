@@ -377,13 +377,14 @@ base64/lib/arch/sse41/codec.o: base64/lib/arch/sse41/codec.c
 base64/lib/arch/ssse3/codec.o: base64/lib/arch/ssse3/codec.c
 	$(CC) -O3 -mssse3 $(MARCH) $< -c -o $@ 
 
+ifeq ($(BASE64),1)
+#B+=base64/lib/arch/avx/codec.o base64/lib/lib.o base64/lib/arch/generic/codec.o base64/lib/arch/ssse3/codec.o base64/lib/arch/sse41/codec.o base64/lib/arch/sse42/codec.o base64/lib/arch/avx2/codec.o base64/lib/codec_choose.o base64/lib/arch/neon32/codec.o base64/lib/arch/neon64/codec.o
+OB+=base64/lib/libbase64.o
+endif
 OB+=TurboBase64/turbob64c.o TurboBase64/turbob64d.o
 OB+=TurboRLE/trlec.o TurboRLE/trled.o
 OB+=fastbase64/src/chromiumbase64.o fastbase64/src/quicktimebase64.o fastbase64/src/scalarbase64.o
 ifeq ($(AVX2),1)
-ifeq ($(BASE64),1)
-OB+=base64/lib/arch/avx/codec.o base64/lib/lib.o base64/lib/arch/generic/codec.o base64/lib/arch/ssse3/codec.o base64/lib/arch/sse41/codec.o base64/lib/arch/sse42/codec.o base64/lib/arch/avx2/codec.o base64/lib/codec_choose.o base64/lib/arch/neon32/codec.o base64/lib/arch/neon64/codec.o
-endif
 OB+=fastbase64/src/avxbase64.o fastbase64/src/experimentalavxbase64.o 
 endif
 endif

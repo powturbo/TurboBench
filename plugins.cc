@@ -1362,17 +1362,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif 
 
 	  #if C_B64
-        #ifdef __AVX2__
-    case P_B64_AVX2:  { size_t outlen; base64_encode(in, inlen, out, &outlen, BASE64_FORCE_AVX2); return outlen; }
-	    #endif
-    case P_B64_PLAIN: { size_t outlen; base64_encode(in, inlen, out, &outlen, BASE64_FORCE_PLAIN); return outlen; }
-        #ifdef __SSSE3__
-    case P_B64_SSSE3: { size_t outlen; base64_encode(in, inlen, out, &outlen, BASE64_FORCE_SSSE3); return outlen; } 
-	    #endif
-
-        #ifdef __SSE4_1__
+    case P_B64_AVX2:  { size_t outlen=0; base64_encode(in, inlen, out, &outlen, BASE64_FORCE_AVX2); return outlen; }
+    case P_B64_PLAIN: { size_t outlen=0; base64_encode(in, inlen, out, &outlen, BASE64_FORCE_PLAIN); return outlen; }
+    case P_B64_SSSE3: { size_t outlen=0; base64_encode(in, inlen, out, &outlen, BASE64_FORCE_SSSE3); return outlen; } 
     case P_B64_SSE41: { size_t outlen; base64_encode(in, inlen, out, &outlen, BASE64_FORCE_SSE41); return outlen; }
-	    #endif
 	  #endif
 
 	  #if C_FB64
@@ -1818,16 +1811,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_RLET: return trled(in, inlen, out, outlen); 
       #endif
 	  #if C_B64
-        #ifdef __AVX2__
     case P_B64_AVX2:  { size_t outlen; base64_decode(in, inlen, out, &outlen, BASE64_FORCE_AVX2);  return inlen; }
-	    #endif
     case P_B64_PLAIN: { size_t outlen; base64_decode(in, inlen, out, &outlen, BASE64_FORCE_PLAIN); return inlen; }
-        #ifdef __SSSE3__
     case P_B64_SSSE3: { size_t outlen; base64_decode(in, inlen, out, &outlen, BASE64_FORCE_SSSE3); return inlen; } 
-	    #endif
-        #ifdef __SSE4_1__
     case P_B64_SSE41: { size_t outlen; base64_decode(in, inlen, out, &outlen, BASE64_FORCE_SSE41); return inlen; }
-	    #endif
 	  #endif
 
       //------------ Transform -----------------------------------------------------------------------
