@@ -144,7 +144,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [LibLZF v1.06](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [LibSLZ v1.0.0](http://1wt.eu/projects/libslz/)
- - [Lz4 v1.7.3](https://github.com/Cyan4973/lz4) 
+ - [Lz4 v1.7.5 v2017.01](https://github.com/Cyan4973/lz4) 
  - [Lz5 v2.0](https://github.com/inikep/lz5) 
  - [Lzfse v16-11](https://github.com/lzfse/lzfse)
  - [Lzham v1.1/15-12](https://github.com/richgel999/lzham_codec_devel) 
@@ -169,12 +169,12 @@ All compressors with latest versions 16.08.2016b <br>
  - [wfLZ v15-04](https://github.com/ShaneWF/wflz) 
  - [Yalz77 v15-09](https://github.com/ivan-tkatchev/yalz77) 
  - [Yappy v2011]() 
- - [zlib v1.2.8](http://zlib.net)
+ - [zlib v1.2.8 2017.01](http://zlib.net)
  - [zlib-ng v1.2.8](https://github.com/Dead2/zlib-ng)
- - [Libzling v16-01](https://github.com/richox/libzling) 
+ - [Libzling v2017-01](https://github.com/richox/libzling) 
  - [xpack v16-06](https://github.com/ebiggers/xpack) 
  - [Zopfli v16-05](https://code.google.com/p/zopfli) 
- - [ZSTD v1.1.2](https://github.com/facebook/zstd)
+ - [ZSTD v1.1.2 v2017.01](https://github.com/facebook/zstd)
  - [zpaq v7.15](https://github.com/zpaq/zpaq) 
 
 #### Entropy coder:
@@ -276,5 +276,5 @@ All compressors with latest versions 16.08.2016b <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 26 DEC 2016
+Last update: 04 JAN 2017
 
