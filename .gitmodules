@@ -145,4 +145,5 @@
 	url = https://github.com/aklomp/base64
 [submodule "lz5"]
 	path = lz5
-	url = https://github.com/inikep/lz5.git
+	url = https://github.com/inikep/lz5
+	branch = lz5_v2.0
