@@ -157,7 +157,7 @@ OB+=brotli_/enc/backward_references.o brotli_/enc/static_dict.o
 endif
 OB+=brotli/enc/bit_cost.o brotli/enc/cluster.o brotli/enc/block_splitter.o brotli/enc/encode.o brotli/enc/entropy_encode.o brotli/enc/compress_fragment.o brotli/enc/compress_fragment_two_pass.o brotli/enc/histogram.o \
 	brotli/enc/literal_cost.o brotli/enc/brotli_bit_stream.o brotli/enc/memory.o brotli/enc/metablock.o brotli/dec/bit_reader.o brotli/dec/decode.o brotli/common/dictionary.o \
-	brotli/dec/huffman.o brotli/dec/state.o brotli/enc/utf8_util.o
+	brotli/dec/huffman.o brotli/dec/state.o brotli/enc/utf8_util.o brotli/enc/backward_references_hq.o brotli/enc/dictionary_hash.o
 
 ifeq ($(HAVE_ZLIB), 1)
 ifeq ($(STATIC),1)
