@@ -134,10 +134,6 @@
 [submodule "zstd"]
 	path = zstd
 	url = https://github.com/facebook/zstd.git
-[submodule "lz5"]
-	path = lz5
-	url = https://github.com/inikep/lz5
-	branch = lz5_v2.0
 [submodule "fastbase64"]
 	path = fastbase64
 	url = https://github.com/lemire/fastbase64.git
