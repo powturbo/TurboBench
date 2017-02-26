@@ -4,6 +4,12 @@
    See file LICENSE for detail or copy at https://opensource.org/licenses/MIT
 */
 
+/*#include "./static_dict.h"
+
+#include "../common/dictionary.h"
+#include "./find_match_length.h"
+#include "./port.h"
+#include "./static_dict_lut.h"*/
 #include "../../brotli/enc/static_dict.h"
 
 extern int brotlidic; //TurboBench
@@ -88,7 +94,7 @@ BROTLI_BOOL BrotliFindAllStaticDictionaryMatches(
     BROTLI_BOOL end = !offset;
     while (!end) {
       DictWord w = kStaticDictionaryWords[offset++];
-      const size_t l = w.len & 0x7F;
+      const size_t l = w.len & 0x1F;
       const size_t n = (size_t)1 << kBrotliDictionarySizeBitsByLength[l];
       const size_t id = w.idx;
       end = !!(w.len & 0x80);
@@ -327,7 +333,7 @@ BROTLI_BOOL BrotliFindAllStaticDictionaryMatches(
     BROTLI_BOOL end = !offset;
     while (!end) {
       DictWord w = kStaticDictionaryWords[offset++];
-      const size_t l = w.len & 0x7F;
+      const size_t l = w.len & 0x1F;
       const size_t n = (size_t)1 << kBrotliDictionarySizeBitsByLength[l];
       const size_t id = w.idx;
       end = !!(w.len & 0x80);
@@ -419,7 +425,7 @@ BROTLI_BOOL BrotliFindAllStaticDictionaryMatches(
       BROTLI_BOOL end = !offset;
       while (!end) {
         DictWord w = kStaticDictionaryWords[offset++];
-        const size_t l = w.len & 0x7F;
+        const size_t l = w.len & 0x1F;
         const size_t n = (size_t)1 << kBrotliDictionarySizeBitsByLength[l];
         const size_t id = w.idx;
         end = !!(w.len & 0x80);
@@ -447,7 +453,7 @@ BROTLI_BOOL BrotliFindAllStaticDictionaryMatches(
       BROTLI_BOOL end = !offset;
       while (!end) {
         DictWord w = kStaticDictionaryWords[offset++];
-        const size_t l = w.len & 0x7F;
+        const size_t l = w.len & 0x1F;
         const size_t n = (size_t)1 << kBrotliDictionarySizeBitsByLength[l];
         const size_t id = w.idx;
         end = !!(w.len & 0x80);
