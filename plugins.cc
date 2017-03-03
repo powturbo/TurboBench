@@ -429,8 +429,8 @@ class Out: public libzpaq::Writer {
   #endif
     
   #if C_LIZARD
-#include "lizard/lib/lz5_compress.h"    //v2.0
-#include "lizard/lib/lz5_decompress.h"
+#include "lizard/lib/lizard_compress.h"    //v2.0
+#include "lizard/lib/lizard_decompress.h"
   #endif
     
   #if C_LZFSEA
@@ -1111,7 +1111,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif
 
 	  #if C_LIZARD
-    case P_LIZARD: return LZ5_compress(in, out, inlen, outsize, lev); 
+    case P_LIZARD: return Lizard_compress(in, out, inlen, outsize, lev); 
 	  #endif
 
       #if C_LZFSE
@@ -1612,7 +1612,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 	  
 	  #if C_LIZARD
-    case P_LIZARD: return LZ5_decompress_safe((const char *)in, (char *)out, inlen, outlen); 
+    case P_LIZARD: return Lizard_decompress_safe((const char *)in, (char *)out, inlen, outlen); 
       #endif
 	  
       #if C_LZFSE
@@ -1963,7 +1963,7 @@ char *codver(int codec, char *v, char *s) {
 	  #endif
 
 	  #if C_LIZARD
-    case P_LIZARD:     sprintf(s,"%d.%d.%d", LZ5_VERSION_MAJOR, LZ5_VERSION_MINOR, LZ5_VERSION_RELEASE); return s;
+    case P_LIZARD:     sprintf(s,"%d.%d.%d", LIZARD_VERSION_MAJOR, LIZARD_VERSION_MINOR, LIZARD_VERSION_RELEASE); return s;
 	  #endif
 
 	  #if C_ZSTD
