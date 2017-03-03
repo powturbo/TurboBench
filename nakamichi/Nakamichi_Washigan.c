@@ -635,7 +635,17 @@ char * _ui64toaKAZEzerocomma4 (
 #else
 #endif /* defined(_WIN32_ENVIRONMENT_)  */
 
-#ifdef _N_XMM
+  #ifdef __AVX2__
+#include <immintrin.h>
+  #elif defined(__SSE41__)
+#include <smmintrin.h>
+  #elif defined(__SSSE3__)
+#include <tmmintrin.h>
+  #elif defined(__SSE2__)
+#include <emmintrin.h>
+  #endif
+
+/*#ifdef _N_XMM
 #include <emmintrin.h> // SSE2 intrinsics
 #include <smmintrin.h> // SSE4.1 intrinsics
 #endif
@@ -644,12 +654,12 @@ char * _ui64toaKAZEzerocomma4 (
 #include <smmintrin.h> // SSE4.1 intrinsics
 #include <immintrin.h> // AVX intrinsics
 #endif
-#ifdef _N_ZMM
+#ifdef __AVX2__
 #include <emmintrin.h> // SSE2 intrinsics
 #include <smmintrin.h> // SSE4.1 intrinsics
 #include <immintrin.h> // AVX intrinsics
 #include <zmmintrin.h> // AVX2 intrinsics, definitions and declarations for use with 512-bit compiler intrinsics.
-#endif
+#endif*/
 
 #ifdef _N_XMM
 void SlowCopy128bit (const char *SOURCE, char *TARGET) { _mm_storeu_si128((__m128i *)(TARGET), _mm_loadu_si128((const __m128i *)(SOURCE))); }
