@@ -287,7 +287,7 @@ endif
 
 ifeq ($(NSIMD),0)
 OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o 
-OB+=nakamichi/Nakamichi_Okamigan.o
+OB+=nakamichi/Nakamichi_Washigan.o
 endif
 OB+=miniz/miniz.o
 
