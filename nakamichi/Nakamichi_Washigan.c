@@ -3,6 +3,8 @@
 // Also: http://www.sanmayce.com/Hayabusa/
 // Also: http://www.codeproject.com/Articles/878593/Slowest-LZSS-Compressor-in-C
 
+// Washigan+ has been tuned for 2/3 bytes windows...
+// Nakamichi_Washigan is strongest so far and by far - it is just as Okamigan but uses the reserved value 9.
 // Okamigan is strongest so far and by far.
 // Okami is stronger than Okamiko thanks to the additional 6:3 (64KB window), plus, 14:4 (16MB window) instead of 48:3/24:3/12:3/6:3 (64KB window).
 // Okamiko is stronger than Zato thanks to the additional 48:3/24:3/12:3/6:3 (64KB window).
@@ -58,67 +60,191 @@ Setting environment for using Microsoft Visual Studio 2010 x64 tools.
 
 C:\Program Files (x86)\Intel\Composer XE 2015\bin>d:
 
-D:\>cd D:\TEXTUAL_MADNESS_old\Nakamichi_(Zato)_256MB-Sliding-Window_vs_LZSSE2_bawbaw
+D:\>cd D:\TEXTUAL_MADNESS_old\Nakamichi_Okamigan\Nakamichi_Okamigan_(source-executable-booklet)
 
-D:\TEXTUAL_MADNESS_old\Nakamichi_(Zato)_256MB-Sliding-Window_vs_LZSSE2_bawbaw>dir
+D:\TEXTUAL_MADNESS_old\Nakamichi_Okamigan\Nakamichi_Okamigan_(source-executable-booklet)>dir
+ Volume in drive D is S640_Vol5
+ Volume Serial Number is 5861-9E6C
 
-09/07/2016  10:50 PM            55,397 lzsse2.cpp
-09/07/2016  10:50 PM             4,858 lzsse2.h
-09/07/2016  10:50 PM             2,481 lzsse2_platform.h
-09/07/2016  10:50 PM             1,285 MakeEXEs_Zato.bat
-09/07/2016  10:50 PM             1,632 MokujIN 224 prompt.lnk
-09/18/2016  02:25 PM           379,652 Nakamichi_Zato.c
-09/07/2016  10:50 PM               225 _DENAKAMICHIZE.BAT
-09/07/2016  10:50 PM               113 _NAKAMICHIZE.BAT
+ Directory of D:\TEXTUAL_MADNESS_old\Nakamichi_Okamigan\Nakamichi_Okamigan_(source-executable-booklet)
 
-D:\TEXTUAL_MADNESS_old\Nakamichi_(Zato)_256MB-Sliding-Window_vs_LZSSE2_bawbaw>MakeEXEs_Zato.bat
+12/02/2016  01:25 PM    <DIR>          .
+12/02/2016  01:25 PM    <DIR>          ..
+11/28/2016  01:34 PM         4,353,536 Booklet_Okamigan.doc
+11/28/2016  01:35 PM         2,766,041 Booklet_Okamigan.pdf
+10/25/2016  01:08 AM            55,397 lzsse2.cpp
+10/25/2016  01:08 AM             4,858 lzsse2.h
+10/25/2016  01:08 AM             2,481 lzsse2_platform.h
+11/14/2016  08:52 PM             1,357 MakeEXEs_Okamigan.bat
+10/25/2016  01:08 AM             1,632 MokujIN BLUE 224 prompt.lnk
+10/25/2016  01:08 AM             1,632 MokujIN CYAN 224 prompt.lnk
+10/25/2016  01:08 AM             1,632 MokujIN DARK 224 prompt.lnk
+10/25/2016  01:08 AM             1,632 MokujIN GREEN 224 prompt.lnk
+10/25/2016  01:08 AM             1,632 MokujIN ORANGE 224 prompt.lnk
+12/02/2016  01:23 PM           417,892 Nakamichi_Okamigan.c
+11/28/2016  06:55 PM        10,245,120 Okamigan_TurboBench.doc
+11/28/2016  06:56 PM         5,119,192 Okamigan_TurboBench.pdf
+              14 File(s)     22,974,034 bytes
+               2 Dir(s)  30,903,410,688 bytes free
 
-D:\TEXTUAL_MADNESS_old\Nakamichi_(Zato)_256MB-Sliding-Window_vs_LZSSE2_bawbaw>icl /TP /O3 /QxSSE4.1 Nakamichi_Zato.c lzsse2.cpp -D_N_XMM -D_N_prefetch_4096 -D_N_HIGH_PRIORITY /FAcs
+D:\TEXTUAL_MADNESS_old\Nakamichi_Okamigan\Nakamichi_Okamigan_(source-executable-booklet)>MakeEXEs_Okamigan.bat
+
+D:\TEXTUAL_MADNESS_old\Nakamichi_Okamigan\Nakamichi_Okamigan_(source-executable-booklet)>icl /TP /O3 /QxSSE4.1 Nakamichi_Okamigan.c lzsse2.cpp -D_N_XMM -D_N_prefetch_4096 -D_N_HIGH_PRIORITY /FAcs
 Intel(R) C++ Intel(R) 64 Compiler XE for applications running on Intel(R) 64, Version 15.0.0.108 Build 20140726
 Copyright (C) 1985-2014 Intel Corporation.  All rights reserved.
 
-Nakamichi_Zato.c
+Nakamichi_Okamigan.c
 lzsse2.cpp
 Microsoft (R) Incremental Linker Version 10.00.30319.01
 Copyright (C) Microsoft Corporation.  All rights reserved.
 
--out:Nakamichi_Zato.exe
-Nakamichi_Zato.obj
+-out:Nakamichi_Okamigan.exe
+Nakamichi_Okamigan.obj
 lzsse2.obj
 
-D:\TEXTUAL_MADNESS_old\Nakamichi_(Zato)_256MB-Sliding-Window_vs_LZSSE2_bawbaw>icl /TP /O3 /QxAVX Nakamichi_Zato.c lzsse2.cpp -D_N_XMM -D_N_prefetch_4096 -D_N_HIGH_PRIORITY /FAcs
+D:\TEXTUAL_MADNESS_old\Nakamichi_Okamigan\Nakamichi_Okamigan_(source-executable-booklet)>icl /TP /O3 /QxAVX Nakamichi_Okamigan.c lzsse2.cpp -D_N_XMM -D_N_prefetch_4096 -D_N_HIGH_PRIORITY /FAcs
 Intel(R) C++ Intel(R) 64 Compiler XE for applications running on Intel(R) 64, Version 15.0.0.108 Build 20140726
 Copyright (C) 1985-2014 Intel Corporation.  All rights reserved.
 
-Nakamichi_Zato.c
+Nakamichi_Okamigan.c
 lzsse2.cpp
 Microsoft (R) Incremental Linker Version 10.00.30319.01
 Copyright (C) Microsoft Corporation.  All rights reserved.
 
--out:Nakamichi_Zato.exe
-Nakamichi_Zato.obj
+-out:Nakamichi_Okamigan.exe
+Nakamichi_Okamigan.obj
 lzsse2.obj
 
-D:\TEXTUAL_MADNESS_old\Nakamichi_(Zato)_256MB-Sliding-Window_vs_LZSSE2_bawbaw>dir
 
-09/07/2016  10:50 PM            55,397 lzsse2.cpp
-09/07/2016  10:50 PM             4,858 lzsse2.h
-09/19/2016  02:12 PM            18,554 lzsse2.obj
-09/19/2016  02:12 PM           697,361 lzsse2_64bit_AVX.cod
-09/19/2016  02:12 PM           741,193 lzsse2_64bit_SSE41.cod
-09/07/2016  10:50 PM             2,481 lzsse2_platform.h
-09/07/2016  10:50 PM             1,285 MakeEXEs_Zato.bat
-09/07/2016  10:50 PM             1,632 MokujIN 224 prompt.lnk
-09/18/2016  02:25 PM           379,652 Nakamichi_Zato.c
-09/19/2016  02:12 PM            55,001 Nakamichi_Zato.obj
-09/19/2016  02:12 PM         1,412,792 Nakamichi_Zato_XMM_PREFETCH_4096_Intel_15.0_64bit_AVX.cod
-09/19/2016  02:12 PM           146,944 Nakamichi_Zato_XMM_PREFETCH_4096_Intel_15.0_64bit_AVX.exe
-09/19/2016  02:12 PM         1,408,383 Nakamichi_Zato_XMM_PREFETCH_4096_Intel_15.0_64bit_SSE41.cod
-09/19/2016  02:12 PM           154,624 Nakamichi_Zato_XMM_PREFETCH_4096_Intel_15.0_64bit_SSE41.exe
-09/07/2016  10:50 PM               225 _DENAKAMICHIZE.BAT
-09/07/2016  10:50 PM               113 _NAKAMICHIZE.BAT
+D:\TEXTUAL_MADNESS_old\Nakamichi_Okamigan\Nakamichi_Okamigan_(source-executable-booklet)>dir
+ Volume in drive D is S640_Vol5
+ Volume Serial Number is 5861-9E6C
 
-D:\TEXTUAL_MADNESS_old\Nakamichi_(Zato)_256MB-Sliding-Window_vs_LZSSE2_bawbaw>
+ Directory of D:\TEXTUAL_MADNESS_old\Nakamichi_Okamigan\Nakamichi_Okamigan_(source-executable-booklet)
+
+12/02/2016  01:26 PM    <DIR>          .
+12/02/2016  01:26 PM    <DIR>          ..
+11/28/2016  01:34 PM         4,353,536 Booklet_Okamigan.doc
+11/28/2016  01:35 PM         2,766,041 Booklet_Okamigan.pdf
+10/25/2016  01:08 AM            55,397 lzsse2.cpp
+10/25/2016  01:08 AM             4,858 lzsse2.h
+12/02/2016  01:26 PM            18,554 lzsse2.obj
+12/02/2016  01:26 PM           734,013 lzsse2_64bit_AVX.cod
+12/02/2016  01:26 PM           780,573 lzsse2_64bit_SSE41.cod
+10/25/2016  01:08 AM             2,481 lzsse2_platform.h
+11/14/2016  08:52 PM             1,357 MakeEXEs_Okamigan.bat
+10/25/2016  01:08 AM             1,632 MokujIN BLUE 224 prompt.lnk
+10/25/2016  01:08 AM             1,632 MokujIN CYAN 224 prompt.lnk
+10/25/2016  01:08 AM             1,632 MokujIN DARK 224 prompt.lnk
+10/25/2016  01:08 AM             1,632 MokujIN GREEN 224 prompt.lnk
+10/25/2016  01:08 AM             1,632 MokujIN ORANGE 224 prompt.lnk
+12/02/2016  01:23 PM           417,892 Nakamichi_Okamigan.c
+12/02/2016  01:26 PM            59,854 Nakamichi_Okamigan.obj
+12/02/2016  01:26 PM         1,626,256 Nakamichi_Okamigan_XMM_PREFETCH_4096_Intel_15.0_64bit_AVX.cod
+12/02/2016  01:26 PM           150,016 Nakamichi_Okamigan_XMM_PREFETCH_4096_Intel_15.0_64bit_AVX.exe
+12/02/2016  01:26 PM         1,622,331 Nakamichi_Okamigan_XMM_PREFETCH_4096_Intel_15.0_64bit_SSE41.cod
+12/02/2016  01:26 PM           157,184 Nakamichi_Okamigan_XMM_PREFETCH_4096_Intel_15.0_64bit_SSE41.exe
+11/28/2016  06:55 PM        10,245,120 Okamigan_TurboBench.doc
+11/28/2016  06:56 PM         5,119,192 Okamigan_TurboBench.pdf
+              22 File(s)     28,122,815 bytes
+               2 Dir(s)  30,898,241,536 bytes free
+
+D:\TEXTUAL_MADNESS_old\Nakamichi_Okamigan\Nakamichi_Okamigan_(source-executable-booklet)>
+*/
+
+/*
+D:\TEXTUAL_MADNESS_old\Nakamichi_Okamigan\Okamigan_testdatafiles>lzbench.exe -c4 -ebrotli,11/brotli24/tornado,16/blosclz,9/brieflz/crush,2/csc,5/density,3/fastlz,2/gipfeli/zstd,12,14,16,18,20,22/lzo1b,999/lzo1c,999/lzo1f,999/lzo1x,999/lzo1y,999/lzham,4/libdeflate,12/lz4/lz4fast,17/lz4hc,16/lz5,10,12,15,19,20,22,25,29,30,32,35,39,40,42,45,49/lzf,1/lzfse/lzg,8/lzham,1/lzjb/lzlib,9/lzma,9/lzrw,5/lzsse2,17/lzsse4,17/lzsse8,17/lzvn/pithy,9/quicklz,3/snappy/slz_zlib,3/ucl_nrv2b,9/ucl_nrv2d,9/ucl_nrv2e,9/xpack,9/xz,9/yalz77,12/yappy,100/zlib,9/zling,4/shrinker/wflz/lzmat "Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar"
+lzbench 1.5 (64-bit Windows)   Assembled by P.Skibinski
+...
+The results sorted by column number 4:
+Compressor name         Compress. Decompress. Compr. size  Ratio Filename
+csc 2016-10-13 -5        1.68 MB/s    52 MB/s    10612266  18.67 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzma 9.38 -9             0.90 MB/s    73 MB/s    10834633  19.06 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+xz 5.2.2 -9              0.96 MB/s    67 MB/s    10835237  19.06 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzham 1.0 -d26 -4        0.62 MB/s   151 MB/s    10890931  19.16 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzlib 1.7 -9             0.89 MB/s    49 MB/s    10933042  19.23 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+zstd 1.1.1 -22           1.00 MB/s   279 MB/s    10960492  19.28 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+tornado 0.6a -16         1.00 MB/s   144 MB/s    11112380  19.55 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+zstd 1.1.1 -20           1.10 MB/s   289 MB/s    11163724  19.64 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli24 0.5.2 -11       0.30 MB/s   224 MB/s    11231676  19.76 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli24 0.5.2 -10       0.66 MB/s   214 MB/s    11509238  20.24 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli 0.5.2 -11         0.33 MB/s   302 MB/s    11744547  20.66 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+zstd 1.1.1 -18           1.53 MB/s   411 MB/s    11766966  20.70 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+zstd 1.1.1 -16           2.61 MB/s   427 MB/s    12896491  22.68 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -49          1.08 MB/s   470 MB/s    12906666  22.70 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzham 1.0 -d26 -1        1.43 MB/s   139 MB/s    13496167  23.74 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli24 0.5.2 -9        2.68 MB/s   254 MB/s    13530637  23.80 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+zstd 1.1.1 -14           3.35 MB/s   430 MB/s    13713520  24.12 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+zling 2016-01-10 -4        25 MB/s   131 MB/s    13890373  24.43 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli24 0.5.2 -8        4.76 MB/s   260 MB/s    13950505  24.54 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+
+Nakamichi 'Okamigan'                 286 MB/s    14045104        ! Outside lzbench !
+
+zstd 1.1.1 -12           7.96 MB/s   424 MB/s    14078713  24.76 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+crush 1.0 -2             0.20 MB/s   233 MB/s    14219813  25.01 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli24 0.5.2 -7        7.07 MB/s   258 MB/s    14412837  25.35 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli24 0.5.2 -6          11 MB/s   252 MB/s    15100251  26.56 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -29          1.13 MB/s   625 MB/s    15369474  27.03 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+xpack 2016-06-02 -9      8.70 MB/s   380 MB/s    15557942  27.37 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli24 0.5.2 -5          13 MB/s   242 MB/s    15733732  27.67 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+libdeflate 16-08-29 -12  3.79 MB/s   435 MB/s    16121144  28.36 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -39          4.13 MB/s   702 MB/s    16461942  28.96 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -45          4.88 MB/s   563 MB/s    16807549  29.56 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzsse2 2016-05-14 -17    4.41 MB/s   977 MB/s    16877731  29.69 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli24 0.5.2 -4          22 MB/s   234 MB/s    16938702  29.79 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzsse4 2016-05-14 -17    5.16 MB/s   857 MB/s    16965317  29.84 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+zlib 1.2.8 -9            7.59 MB/s   212 MB/s    17096274  30.07 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzsse8 2016-05-14 -17    4.81 MB/s   780 MB/s    17346051  30.51 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzfse 2016-08-16           29 MB/s   343 MB/s    17420925  30.64 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli24 0.5.2 -3          44 MB/s   216 MB/s    17559147  30.89 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli24 0.5.2 -2          51 MB/s   207 MB/s    17870346  31.43 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+ucl_nrv2e 1.03 -9        0.91 MB/s   167 MB/s    17977999  31.62 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+ucl_nrv2d 1.03 -9        0.91 MB/s   174 MB/s    18202067  32.02 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli24 0.5.2 -1         110 MB/s   197 MB/s    18254688  32.11 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -35            29 MB/s   755 MB/s    18484210  32.51 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+ucl_nrv2b 1.03 -9        0.91 MB/s   167 MB/s    18650749  32.81 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -42            25 MB/s   569 MB/s    18653110  32.81 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzo1b 2.09 -999          8.42 MB/s   430 MB/s    18742166  32.97 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -19          4.19 MB/s   891 MB/s    19223294  33.81 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz4hc 1.7.3 -16            10 MB/s   975 MB/s    19485733  34.27 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzmat 1.01                 13 MB/s   200 MB/s    19486644  34.28 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzo1y 2.09 -999          4.13 MB/s   331 MB/s    19585061  34.45 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -25          5.12 MB/s   766 MB/s    19629113  34.53 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzo1x 2.09 -999          4.06 MB/s   340 MB/s    19719054  34.68 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -40            81 MB/s   522 MB/s    20076011  35.31 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brotli24 0.5.2 -0         131 MB/s   177 MB/s    20269152  35.65 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -15            31 MB/s   920 MB/s    20402490  35.89 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -32            53 MB/s   709 MB/s    20689235  36.39 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzo1c 2.09 -999            15 MB/s   384 MB/s    20987539  36.92 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+yalz77 2015-09-19 -12      17 MB/s   174 MB/s    21268964  37.41 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+brieflz 1.1.0              64 MB/s   108 MB/s    21477647  37.78 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzg 1.0.8 -8             5.62 MB/s   434 MB/s    21573002  37.95 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzo1f 2.09 -999            13 MB/s   342 MB/s    21901148  38.52 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+quicklz 1.5.0 -3           22 MB/s   445 MB/s    22456387  39.50 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzvn 2016-08-16            24 MB/s   460 MB/s    22614458  39.78 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -22            27 MB/s   787 MB/s    22637525  39.82 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzrw 15-Jul-1991 -5        69 MB/s   256 MB/s    22822174  40.14 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+gipfeli 2016-07-13        152 MB/s   275 MB/s    22991906  40.44 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -12            57 MB/s   864 MB/s    23011038  40.47 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+density 0.12.5 beta -3    208 MB/s   179 MB/s    23550542  41.42 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -30           130 MB/s   469 MB/s    23775355  41.82 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+pithy 2011-12-24 -9       195 MB/s   709 MB/s    24356552  42.84 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -20            92 MB/s   703 MB/s    24539107  43.16 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+yappy 2014-03-22 -100      42 MB/s   695 MB/s    25853815  45.48 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+shrinker 0.1              156 MB/s   419 MB/s    27715769  48.75 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzf 3.6 -1                162 MB/s   325 MB/s    28243297  49.68 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+fastlz 0.1 -2             156 MB/s   276 MB/s    28306575  49.79 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+slz_zlib 1.0.0 -3         117 MB/s   159 MB/s    28542551  50.20 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz4 1.7.3                 188 MB/s   973 MB/s    28594787  50.30 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz5 2.0 RC2 -10           166 MB/s   878 MB/s    28661562  50.41 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+blosclz 2015-11-10 -9     128 MB/s   303 MB/s    28868231  50.78 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+snappy 1.1.3              164 MB/s   539 MB/s    28957112  50.93 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+wflz 2015-09-16           141 MB/s   399 MB/s    35284003  62.06 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lzjb 2010                 126 MB/s   261 MB/s    37400941  65.79 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+lz4fast 1.7.3 -17         339 MB/s  1116 MB/s    42950710  75.55 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+memcpy                   2909 MB/s  2904 MB/s    56852480 100.00 Jiddu_Krishnamurti_-_Complete_Works_(84_books).tar
+
+D:\TEXTUAL_MADNESS_old\Nakamichi_Okamigan\Okamigan_testdatafiles>
 */
 
 // 2016-Apr-04: Grrr... Stupid bug (due to overlooking) was crushed in 'TT', namely:
@@ -479,6 +605,7 @@ char * _ui64toaKAZEzerocomma4 (
       char llTOaDigits2[27]; // 9,223,372,036,854,775,807: 1(sign or carry)+19(digits)+1('\0')+6(,)
       char llTOaDigits3[27]; // 9,223,372,036,854,775,807: 1(sign or carry)+19(digits)+1('\0')+6(,)
       char llTOaDigits4[27]; // 9,223,372,036,854,775,807: 1(sign or carry)+19(digits)+1('\0')+6(,)
+      char llTOaDigits5[27]; // 9,223,372,036,854,775,807: 1(sign or carry)+19(digits)+1('\0')+6(,)
 
 // During compilation use one of these, the granularity of the padded 'memcpy', 4x2x8/2x2x16/1x2x32/1x1x64 respectively as GP/XMM/YMM/ZMM, the maximum literal length reduced from 127 to 63:
 //#define _N_GP
@@ -500,9 +627,9 @@ char * _ui64toaKAZEzerocomma4 (
 #include <time.h>
 #include <string.h>
 
-      clock_t clocks1, clocks2;
+      clock_t clocks0, clocks1, clocks2;
 
-#if defined(_WIN32)
+#if defined(_WIN32_ENVIRONMENT_)
 #include <io.h> // needed for Windows' 'lseeki64' and 'telli64'
 //Above line must be commented in order to compile with Intel C compiler: an error "can't find io.h" occurs.
 #else
@@ -556,14 +683,18 @@ void SlowCopy512bit (const char *SOURCE, char *TARGET) { _mm512_storeu_si512((__
 #define NULL ((void*)0)
 #endif
 
+// LZSSE2 [
+//#include "lzsse2.h"
+// LZSSE2 ]
+
 // Comment it to see how slower 'BruteForce' is, for Wikipedia 100MB the ratio is 41KB/s versus 197KB/s.
 #define ReplaceBruteForceWithRailgunSwampshineBailOut
 
 void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* retIndex, unsigned int* retMatch, char* refStart,char* refEnd,char* encStart,char* encEnd);
 unsigned int SlidingWindowVsLookAheadBuffer(char* refStart, char* refEnd, char* encStart, char* encEnd);
-uint64_t NakaCompress(char* ret, char* src, uint64_t srcSize);
-//unsigned int NakaDecompress(char* ret, char* src, unsigned int srcSize);
-uint64_t NakaDecompress(char* ret, char* src, uint64_t srcSize);
+uint64_t Compress(char* ret, char* src, uint64_t srcSize);
+//unsigned int Decompress(char* ret, char* src, unsigned int srcSize);
+uint64_t Decompress(char* ret, char* src, uint64_t srcSize);
 char * Railgun_Trolldom(char * pbTarget, char * pbPattern, uint32_t cbTarget, uint32_t cbPattern);
 char * Railgun_Doublet (char * pbTarget, char * pbPattern, uint32_t cbTarget, uint32_t cbPattern);
 char * Railgun_BawBaw_reverse(char * pbTarget, char * pbPattern, uint32_t cbTarget, uint32_t cbPattern);
@@ -705,7 +836,7 @@ return 0;
 
 // Min_Match_Length=THRESHOLD=4 means 4 and bigger are to be encoded:
 #define Min_Match_BAILOUT_Length (8)
-#define Min_Match_Length (48)
+#define Min_Match_Length (128) //48 in old ones
 //#define Min_Match_Length (4)
 //#define Min_Match_Length (16) // Maximum MatchLength is 16, it decides the size of Look-ahead buffer - to avoid search beyound end. This needs more attention in the future - to clarify it fully. Overlapping is also yet to come.
 #define Min_Match_Length_SHORT (5)
@@ -912,6 +1043,30 @@ $LL9@FNV1A_Hash@2:
 }
 
 #if 0
+
+#if defined(_icl_mumbo_jumbo_)
+// GetRDTSC() taken from strchr.com
+#if defined(_M_IX86)
+unsigned long long __forceinline GetRDTSC(void) {
+   __asm {
+      ; Flush the pipeline
+      XOR eax, eax
+      CPUID
+      ; Get RDTSC counter in edx:eax
+      RDTSC
+   }
+}
+#elif defined(_M_X64)
+unsigned long long __forceinline GetRDTSC(void) {
+	return __rdtsc();
+}
+#else
+unsigned long long __forceinline GetRDTSC(void) {
+	return GetTickCount();
+}
+#endif
+#endif
+
 int main( int argc, char *argv[] ) {
 	FILE *fp;
 	FILE *fp_outLOG;
@@ -934,6 +1089,7 @@ int main( int argc, char *argv[] ) {
 //	clock_t clocks1, clocks2;
 	uint64_t OneMB=1024*1024;
 	uint64_t SevenGB = OneMB*5120;
+unsigned long long ticksTOTAL=0, ticksStart;
 
 char *pointerALIGN;
 int i, j;
@@ -945,7 +1101,12 @@ int BandwidthFlag=0;
 unsigned long long k;
 unsigned long long k1;
 unsigned long long k2;
+unsigned long long k3;
 int Trials;
+
+// LZSSE2 [
+LZSSE2_OptimalParseState *s;
+// LZSSE2 ]
 
 #if defined(_WIN32_ENVIRONMENT_)
       unsigned long long size_inLINESIXFOUR;
@@ -959,13 +1120,22 @@ int Trials;
    DWORD dwError, dwPriClass;
 #endif
 
-	printf("Nakamichi 'Okamigan/Lonewolfeye', written by Kaze, based on Nobuo Ito's LZSS source, babealicious suggestion by m^2 enforced, muffinesque suggestion by Jim Dempsey enforced.\n");
-	printf("Note1: It is dedicated to Shintaro Katsu's brother Tomisaburo Wakayama animating 'Okami/Lonewolf'.\n");
-	printf("Note2: 'Okamiko' predecessors are 'Zato', 'Tsubame', 'Tengu-Tsuyo' and 'Tengu'.\n");
-	printf("Note3: This compile can handle files up to 5120MB.\n");
-	printf("Note4: The matchfinder/memmem() is 'Railgun_BawBaw_reverse'.\n");
-	printf("Note5: Instead of '_mm_loadu_si128' '_mm_lddqu_si128' is used.\n");
-	printf("Note6: The lookahead 'Tsuyo' heuristic which looks one char ahead is applied thrice, still not strengthened, though.\n");
+	printf("Nakamichi 'Washigan+', written by Kaze, based on Nobuo Ito's LZSS source, babealicious suggestion by m^2 enforced, muffinesque suggestion by Jim Dempsey enforced.\n");
+	printf("Note0: Nakamichi 'Eye-of-the-Eagle' is 100%% FREE, licenseless that is.\n");
+	printf("Note1: Hamid Buzidi's LzTurbo ([a] FASTEST [Textual] Decompressor, Levels 19/39) retains kingship, his TurboBench (2016-Dec-26) proves the supremacy of LzTurbo, Turbo-Amazing!\n");
+	printf("Note2: Conor Stokes' LZSSE2 ([a] FASTEST Textual Decompressor, Level 17) is embedded, all credits along with many thanks go to him.\n");
+	printf("Note3: 'Washigan' predecessors are 'Okamigan', 'Zato', 'Tsubame', 'Tengu-Tsuyo' and 'Tengu'.\n");
+	printf("Note4: This compile can handle files up to 5120MB.\n");
+	printf("Note5: The matchfinder/memmem() is 'Railgun_BawBaw_reverse'.\n");
+	printf("Note6: Instead of '_mm_loadu_si128' '_mm_lddqu_si128' is used.\n");
+	printf("Note7: The lookahead 'Tsuyo' heuristic which looks one char ahead is applied thrice, still not strengthened, though.\n");
+	printf("Note8: The compile made 2017-Feb-07, the decompression time measuring is done in 16x8 passes choosing the top score from 64 back-to-back runs - the goal - to enter [maximal] Turbo Mode.\n");
+	printf("Note9: Just to reduce the codesize, the 3xQWORD become (in this compile) 1xQWORD+1xXMMWORD.\n");
+	printf("NoteA: Please send me (at sanmayce@sanmayce.com) decompression results obtained on machines with fast CPU-RAM subsystems.\n");
+
+	if (argc==1) {
+		printf("Usage: Nakamichi filename\n"); exit(13);
+	}
 
 #ifdef _N_HIGH_PRIORITY
    if(!SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS))
@@ -987,14 +1157,11 @@ int Trials;
    if (dwPriClass==0x00000080) printf("Current priority class is HIGH_PRIORITY_CLASS.\n");
    if (dwPriClass==0x00000100) printf("Current priority class is REALTIME_PRIORITY_CLASS.\n");
 #endif
-	
-	if (argc==1) {
-		printf("Usage: Nakamichi filename\n"); exit(13);
-	}
+
 	if (argc==3) BandwidthFlag=1;
 	BandwidthFlag=0; // Disable memcpy test
-	//if (BandwidthFlag) Trials=256; else Trials=1; 
-	if (argc==3) Trials=256; else Trials=1; 
+	//if (BandwidthFlag) Trials=64; else Trials=1; 
+	if (argc==3) Trials=64; else Trials=1; 
 	if ((fp = fopen(argv[1], "rb")) == NULL) {
 		printf("Nakamichi: Can't open '%s' file.\n", argv[1]); exit(13);
 	}
@@ -1032,21 +1199,50 @@ SourceSize = (uint64_t)size_inLINESIXFOUR;
 	fread(SourceBlock, 1, SourceSize, fp);
 	fclose(fp);
 		//printf("Decompressing %lu bytes ...\n", SourceSize );
-		printf("Decompressing %s bytes ...\n", _ui64toaKAZEcomma(SourceSize, llTOaDigits2, 10) );
-// Warm up... [
-	for (i = 1; i <= Trials; i++) {
-		TargetSize = NakaDecompress(TargetBlock, SourceBlock, SourceSize);
+		printf("Decompressing %s bytes (being the compressed stream) ...\n", _ui64toaKAZEcomma(SourceSize, llTOaDigits2, 10) );
+
+// Warm up...[
+	printf("Warming up ...\n");
+	for (i = 1; i <= Trials*4; i++) {
+		TargetSize = Decompress(TargetBlock, SourceBlock, SourceSize);
+		TargetSize1=SourceSize;
 	}
-// Warm up... ]
-		//clocks1 = clock();
-		//while (clocks1 == clock());
+// Warm up...]
+// Attempt to pick up the Turbomode score... [
+clocks0 = clock();
+ticksTOTAL = 0;
+#if defined(_icl_mumbo_jumbo_)
+ticksStart = GetRDTSC();
+#endif
+	k1=0;
+	printf("RAM-to-RAM performance:\n");
+if (TargetSize < (1UL<<20)) {Trials=8192; printf("The file is smaller than 1MB, increasing trials to %d.\n",Trials);}
+	for (j = 1; j <= 16*8; j++) {
+		clocks1 = clock();
+		while (clocks1 == clock());
 		clocks1 = clock();
 	for (i = 1; i <= Trials; i++) {
-		TargetSize = NakaDecompress(TargetBlock, SourceBlock, SourceSize);
+		TargetSize = Decompress(TargetBlock, SourceBlock, SourceSize);
 	}
 		clocks2 = clock();
 		k = (((double)CLOCKS_PER_SEC*TargetSize/(double)(clocks2 - clocks1 + 1))); k=k*Trials; k=k>>20; 
-		printf("RAM-to-RAM performance: %d MB/s.\n", k);
+			if (j%16==0) printf("%d MB/s\n", k); else printf("%d MB/s; ", k);
+			if (j%16==0) {
+				printf("Enforcing 17 seconds idling to avoid throttling ...\n", k);
+				clocks1 = clock();
+				while (clocks1 + (double)CLOCKS_PER_SEC*17 > clock() );
+			}
+	if (k1<k) k1=k;
+	}
+	k=k1;
+	k2=k;
+#if defined(_icl_mumbo_jumbo_)
+ticksTOTAL = ticksTOTAL + GetRDTSC() - ticksStart;
+printf("This CPU seems to be working at %s MHz, or more due to ensleeping.\n", _ui64toaKAZEcomma(ticksTOTAL/((double)(clock() - clocks0 + 1)/(double)CLOCKS_PER_SEC)/1000000, llTOaDigits, 10));	
+#endif
+
+// Attempt to pick up the Turbomode score... ]
+		printf("RAM-to-RAM (peak) performance: %d MB/s.\n", k);
 		strcpy(NewFileName, argv[1]);
 		*( NewFileName + strlen(argv[1])-strlen(Nakamichi) ) = '\0';
 		printf("Source-file-Hash(FNV1A_YoshimitsuTRIAD) = 0x%s\n", _ui64toaKAZEzerocomma4(FNV1A_Hash_YoshimitsuTRIAD(SourceBlock, SourceSize), llTOaDigits2, 16)+(26-8-1) );
@@ -1066,6 +1262,90 @@ SourceSize = (uint64_t)size_inLINESIXFOUR;
 	}
 	fclose(fp);
 
+// LZSSE2 [
+	free(TargetBlock);
+	free(SourceBlock);
+	memcpy(NewFileName2, argv[1], (strlen(argv[1])-strlen(Nakamichi)));
+	memcpy(NewFileName2+strlen(argv[1])-strlen(Nakamichi), LZSSE, strlen(LZSSE)+1); //+1 to add NULL
+	if ((fp = fopen(NewFileName2, "rb")) == NULL) {
+		printf("Nakamichi: Can't open '%s' file.\n", NewFileName2); exit(13);
+	}
+#if defined(_WIN32_ENVIRONMENT_)
+   // 64bit:
+_lseeki64( fileno(fp), 0L, SEEK_END );
+size_inLINESIXFOUR = _telli64( fileno(fp) );
+_lseeki64( fileno(fp), 0L, SEEK_SET );
+#else
+   // 64bit:
+fseeko( fp, 0L, SEEK_END );
+size_inLINESIXFOUR = ftello( fp );
+fseeko( fp, 0L, SEEK_SET );
+#endif /* defined(_WIN32_ENVIRONMENT_)  */
+SourceSize = (uint64_t)size_inLINESIXFOUR;
+
+	printf("Allocating Source-Buffer %s MB ... \n", _ui64toaKAZEcomma((SourceSize+512)>>20, llTOaDigits2, 10) );
+	SourceBlock = (char*)malloc(SourceSize+512);
+	if( SourceBlock == NULL )
+		{ printf("Nakamichi: Needed memory (%luMB) allocation denied!\n", (SourceSize+512)>>20); exit(13); }
+//	TargetBlock = (char*)malloc(1111*1024*1024+512); // This was enwik9 setting
+//	TargetBlock = (char*)malloc(OneMB*2330+512); // This is GTCC_General_Textual_Compression_Corpus.tar 2,443,181,056 setting
+	printf("Allocating Target-Buffer %s MB ... \n", _ui64toaKAZEcomma((SevenGB+512)>>20, llTOaDigits2, 10) );
+	TargetBlock = (char*)malloc(SevenGB+512); // 5GB
+		if( TargetBlock == NULL )
+		{ printf("Nakamichi: Needed memory (%luMB) allocation denied!\n", (SevenGB+512)>>20); free(SourceBlock); exit(13); }
+	fread(SourceBlock, 1, SourceSize, fp);
+	fclose(fp);
+		//printf("Decompressing %lu bytes ...\n", SourceSize );
+		printf("Decompressing '%s' (%s bytes, being the compressed stream) ...\n", NewFileName2, _ui64toaKAZEcomma(SourceSize, llTOaDigits2, 10) );
+// Warm up...[
+	printf("Warming up ...\n");
+	for (i = 1; i <= Trials*4; i++) {
+		TargetSize = LZSSE2_Decompress( SourceBlock, SourceSize, TargetBlock, TargetSize );
+		TargetSize2=SourceSize;
+	}
+// Warm up...]
+// Attempt to pick up the Turbomode score... [
+clocks0 = clock();
+ticksTOTAL = 0;
+#if defined(_icl_mumbo_jumbo_)
+ticksStart = GetRDTSC();
+#endif
+	k1=0;
+	printf("RAM-to-RAM performance:\n");
+if (TargetSize < (1UL<<20)) {Trials=8192; printf("The file is smaller than 1MB, increasing trials to %d.\n",Trials);}
+	for (j = 1; j <= 16*8; j++) {
+		clocks1 = clock();
+		while (clocks1 == clock());
+		clocks1 = clock();
+	for (i = 1; i <= Trials; i++) {
+		TargetSize = LZSSE2_Decompress( SourceBlock, SourceSize, TargetBlock, TargetSize );
+	}
+		clocks2 = clock();
+		k = (((double)CLOCKS_PER_SEC*TargetSize/(double)(clocks2 - clocks1 + 1))); k=k*Trials; k=k>>20; 
+			if (j%16==0) printf("%d MB/s\n", k); else printf("%d MB/s; ", k);
+			if (j%16==0) {
+				printf("Enforcing 17 seconds idling to avoid throttling ...\n", k);
+				clocks1 = clock();
+				while (clocks1 + (double)CLOCKS_PER_SEC*17 > clock() );
+			}
+	if (k1<k) k1=k;
+	}
+	k=k1;
+	k3=k;
+#if defined(_icl_mumbo_jumbo_)
+ticksTOTAL = ticksTOTAL + GetRDTSC() - ticksStart;
+printf("This CPU seems to be working at %s MHz, or more due to ensleeping.\n", _ui64toaKAZEcomma(ticksTOTAL/((double)(clock() - clocks0 + 1)/(double)CLOCKS_PER_SEC)/1000000, llTOaDigits, 10));	
+#endif
+
+// Attempt to pick up the Turbomode score... ]
+		printf("RAM-to-RAM (peak) performance: %d MB/s.\n", k);
+	printf("Nakamichi 'Washigan+' vs LZSSE2 17, c.size: %.2fx\n", (double)(TargetSize1) / (double)(TargetSize2)  );
+	printf("LZSSE2 17 vs Nakamichi 'Washigan+', d.rate: %.2fx\n", (double)(k3) / (double)(k2)  );
+	printf("Bottomline:\n", k);
+	printf("Nakamichi 'Washigan+' expanding %.2fx to %s at %d MB/s.\n", (double)(TargetSize) / (double)(TargetSize1), _ui64toaKAZEcomma(TargetSize, llTOaDigits2, 10), k2 );
+
+// LZSSE2 ]
+// DECOMPRESSING ]
 	} else {
 // COMPRESSING [
 	Trials=256;
@@ -1090,7 +1370,7 @@ SourceSize = (uint64_t)size_inLINESIXFOUR;
 		clocks1 = clock();
 		while (clocks1 == clock());
 		clocks1 = clock();
-		TargetSize = NakaCompress(TargetBlock, SourceBlock, SourceSize);
+		TargetSize = Compress(TargetBlock, SourceBlock, SourceSize);
 		TargetSize1=TargetSize;
 		clocks2 = clock();
 		k = (((double)CLOCKS_PER_SEC*SourceSize/(double)(clocks2 - clocks1 + 1))); //k=k>>10;
@@ -1121,13 +1401,62 @@ SourceSize = (uint64_t)size_inLINESIXFOUR;
 		while (clocks1 == clock());
 		clocks1 = clock();
 	for (i = 1; i <= Trials; i++) {
-		VerifySize = NakaDecompress(VerifyBlock, TargetBlock, TargetSize);
+		VerifySize = Decompress(VerifyBlock, TargetBlock, TargetSize);
 	}
 		clocks2 = clock();
 		k1 = (((double)CLOCKS_PER_SEC*VerifySize/(double)(clocks2 - clocks1 + 1))); k1=k1*Trials; k1=k1>>20; 
 		printf("RAM-to-RAM performance: %d MB/s.\n", k1);
 		if(VerifySize == SourceSize) printf("Verification (input and output sizes match) OK.\n"); else printf("Verification (input and output sizes mismatch) FAILED!\n");
 		if (memcmp(SourceBlock, VerifyBlock, SourceSize)==0) printf("Verification (input and output blocks match) OK.\n"); else printf("Verification (input and output blocks mismatch) FAILED!\n");
+
+// LZSSE2 [
+		printf("LZSSE2: Compressing with LZSSE2 (level 17) %s bytes ...\n", _ui64toaKAZEcomma(SourceSize, llTOaDigits2, 10) );
+		clocks1 = clock();
+		while (clocks1 == clock());
+		clocks1 = clock();
+		s = LZSSE2_MakeOptimalParseState(SourceSize);
+		if(s==NULL) { printf("Errorful compression, allocation stage!\n"); exit(13); }; 
+		TargetSize = LZSSE2_CompressOptimalParse( s, SourceBlock, SourceSize, TargetBlock, SourceSize+3*1024*1024, 17 );
+		TargetSize2=TargetSize;
+		if (TargetSize == 0) { printf("Errorful compression!\n"); exit(13); }; 
+		LZSSE2_FreeOptimalParseState(s);
+		//printf("LZSSE2: Compressed to %d bytes.\n", TargetSize );
+		printf("LZSSE2: Compressed to %s bytes.\n", _ui64toaKAZEcomma(TargetSize, llTOaDigits2, 10) );
+		clocks2 = clock();
+		k = (((double)CLOCKS_PER_SEC*SourceSize/(double)(clocks2 - clocks1 + 1))); k=k>>10;
+		printf("LZSSE2: RAM-to-RAM performance: %d KB/s.\n", k);
+		// Another operation (I/O) TO TRY TO AVOID JUST-MAPPING [
+		strcpy(NewFileName2, argv[1]);
+		strcat(NewFileName2, LZSSE);
+	if ((fp = fopen(NewFileName2, "wb")) == NULL) {
+		printf("Nakamichi: Can't write '%s' file.\n", NewFileName2); exit(13);
+	}
+	fwrite(TargetBlock, 1, TargetSize, fp); // Caramba: It doesn't work when file is 4+GB long!
+	fclose(fp);
+		// Another operation (I/O) TO TRY TO AVOID JUST-MAPPING ]
+//		printf("LZSSE2: Allocating Verification-Buffer %s MB ... \n", _ui64toaKAZEcomma((SourceSize+512)>>20, llTOaDigits2, 10) );
+//		VerifyBlock = (char*)malloc(SourceSize+512);
+//		if( VerifyBlock == NULL )
+//		{ printf("Nakamichi: Needed memory (%sMB) allocation denied!\n", _ui64toaKAZEcomma((SourceSize+512)>>20, llTOaDigits2, 10)); exit(13); }
+		printf("LZSSE2: Decompressing %s bytes (being the compressed stream) ...\n", _ui64toaKAZEcomma(TargetSize, llTOaDigits2, 10) );
+		clocks1 = clock();
+		while (clocks1 == clock());
+		clocks1 = clock();
+		for (i = 1; i <= Trials; i++) {
+			VerifySize = LZSSE2_Decompress( TargetBlock, TargetSize, VerifyBlock, SourceSize );
+		}
+		clocks2 = clock();
+		k2 = (((double)CLOCKS_PER_SEC*VerifySize/(double)(clocks2 - clocks1 + 1))); k2=k2*Trials; k2=k2>>20; 
+		printf("LZSSE2: RAM-to-RAM performance: %d MB/s.\n", k2);
+		if(VerifySize == SourceSize) printf("LZSSE2: Verification (input and output sizes match) OK.\n"); else printf("LZSSE2: Verification (input and output sizes mismatch) FAILED!\n");
+		if (memcmp(SourceBlock, VerifyBlock, SourceSize)==0) printf("LZSSE2: Verification (input and output blocks match) OK.\n"); else printf("LZSSE2: Verification (input and output blocks mismatch) FAILED!\n");
+// LZSSE2 ]
+
+	printf("LZSSE2 vs Nakamichi 'Washigan+', c.size: %.2fx\n", (double)(TargetSize2) / (double)(TargetSize1)  );
+	if (k1 != 0) 
+		printf("LZSSE2 vs Nakamichi 'Washigan+', d.rate: %.2fx\n", (double)(k2) / (double)(k1)  );
+//	else
+//		printf("LZSSE2 vs Nakamichi 'Okamigan', quicker: %.2f:1\n", 0  );
 	free(VerifyBlock);
 // COMPRESSING ]
 // LOG writing [
@@ -1145,7 +1474,7 @@ size_inLINESIXFOURlog = ftello( fp_outLOG );
 fseeko( fp_outLOG, 0L, SEEK_SET );
 #endif /* defined(_WIN32_ENVIRONMENT_)  */
 if ( (uint64_t)size_inLINESIXFOURlog == 0 )
-	fprintf( fp_outLOG, "| #1 Filesize     | #2 Filehash  | #3 Nakamichi 'ZO' c.size/decompressionrate | #4 LZSSE2 c.size/decompressionrate | #5 Filename \n" );
+	fprintf( fp_outLOG, "| #1 Filesize     | #2 Filehash  | #3 Nakamichi 'EE' c.size/decompressionrate | #4 LZSSE2 c.size/decompressionrate | #5 Filename \n" );
 	fprintf( fp_outLOG, "| %s ",  _ui64toaKAZEzerocomma(size_inLINESIXFOUR, llTOaDigits3, 10)+(26-15) );
 	fprintf( fp_outLOG, "| 0x%s  ",  _ui64toaKAZEzerocomma4(Filehash, llTOaDigits2, 16)+(26-8-1) );
 	fprintf( fp_outLOG, "| %s / %sMB/s                ",  _ui64toaKAZEzerocomma(TargetSize1, llTOaDigits2, 10)+(26-13), _ui64toaKAZEzerocomma(k1, llTOaDigits3, 10)+(26-7) );
@@ -1211,7 +1540,6 @@ printf("RAM-to-RAM performance vs memcpy() ratio (bigger-the-better): %d%%\n", (
 	exit(0);
 }
 #endif
-
 void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* retIndex, unsigned int* retMatch, char* refStart,char* refEnd,char* encStart,char* encEnd){
 	char* FoundAtPosition;
 	unsigned int match=0;
@@ -1221,11 +1549,16 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 	char* refStartSW2 = refEnd-(4*8*128-1);        // 10b
 	char* refStartSW3 = refEnd-(1024*8*128-1);     // 01b
 	char* refStartSW4 = refEnd-(256*1024*8*128-1); // 00b
+	char* refStartSW5 = refEnd-(512*1024*8*128-1); // 00b
 	char* refStartSW1a = refEnd-(16*1024*8*128-1);  // 11b
 	char* refStartSW1b = refEnd-(64*8*128-1);  // 11b
 	char* refStartSW1c = refEnd-(256-1);  // 11b
 	char* refStartSW1d = refEnd-(256*4-1);  // 11b
+	char* refStartSW1d2 = refEnd-(256*8-1);  // 11b
 	char* refStartSW1e = refEnd-(64*1024*8*128-1);  // 11b
+
+	char* refStartSW512 = refEnd-(512-1);  // 11b
+	char* refStartSW128kb = refEnd-(128*8*128-1);  // 11b
 
 	// In order to avoid the unheardof slowness the 256MB may be reduced to 2MB... // --|
 	char* refStartHOT = refEnd-(256*8*128-1);                                      //   |
@@ -1278,40 +1611,58 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 	if ( (4*8*128-1) >= refEnd-refStart ) refStartSW2 = refStart;     
 	if ( (1024*8*128-1) >= refEnd-refStart ) refStartSW3 = refStart;     
 	if ( (256*1024*8*128-1) >= refEnd-refStart ) refStartSW4 = refStart;     
+	if ( (512*1024*8*128-1) >= refEnd-refStart ) refStartSW5 = refStart;     
 	if ( (16*1024*8*128-1) >= refEnd-refStart ) refStartSW1a = refStart;     
 	if ( (64*8*128-1) >= refEnd-refStart ) refStartSW1b = refStart;     
 	if ( (256-1) >= refEnd-refStart ) refStartSW1c = refStart;     
 
 	if ( (256*4-1) >= refEnd-refStart ) refStartSW1d = refStart;     
+	if ( (256*8-1) >= refEnd-refStart ) refStartSW1d2 = refStart;     
 	if ( (64*1024*8*128-1) >= refEnd-refStart ) refStartSW1e = refStart;     
 
-// Sizewise priority:
-//  4:1= 4    (16B)   #01 32:2= 16   (256B)
-//  8:1= 8    (16B)   #02 48:4= 12   (64MB)
-// 12:1= 12   (16B)   #03 24:2= 12   (4KB)
-// 16:1= Flag (16B)   #04 12:1= 12   (16B)
-//  4:2= 2    (4KB)   #05 32:4= 8    (64MB)
-//  6:2= 3    (1KB)   #06 24:3= 8    (1MB)
-//  8:2= 4    (4KB)   #07 16:2= 8    (4KB)
-// 12:2= 6    (4KB)   #08  8:1= 8    (16B)
-// 16:2= 8    (4KB)   #09 24:4= 6    (256MB)
-// 24:2= 12   (4KB)   #10 12:2= 6    (4KB)
-// 32:2= 16   (256B)  #11 16:3= 5.3  (1MB)
-//  4:3= 1.3  (1MB)   #12 16:4= 4    (16MB)F
-//  8:3= 2.6  (1MB)   #13 16:4= 4    (64MB)S
-// 12:3= 4    (1MB)   #14 12:3= 4    (1MB)
-// 16:3= 5.3  (1MB)   #15  8:2= 4    (4KB)
-// 24:3= 8    (1MB)   #16  4:1= 4    (16B)
-//  6:4= 1.5  (16MB)  #17 14:4= 3.5  (16MB)
-//  8:4= 2    (16MB)  #18 12:4= 3    (16MB)
-// 10:4= 2.5  (16MB)  #19  6:2= 3    (1KB)
-// 12:4= 3    (16MB)  #20  8:3= 2.6  (1MB)
-// 14:4= 3.5  (16MB)  #21 10:4= 2.5  (16MB)
-// 16:4= 4    (16MB)F #22  8:4= 2    (16MB)
-// 16:4= 4    (64MB)S #23  4:2= 2    (4KB)
-// 24:4= 6    (256MB) #24  6:4= 1.5  (16MB)
-// 32:4= 8    (64MB)  #25  4:3= 1.3  (1MB)
-// 48:4= 12   (64MB) 
+	if ( (512-1) >= refEnd-refStart ) refStartSW512 = refStart;     
+	if ( (128*8*128-1) >= refEnd-refStart ) refStartSW128kb = refStart;     
+
+// Sizewise/MatchLenWise priority:
+//  4:1= 4    (16B)   #01 128:5= 25.6 (512MB)
+//  8:1= 8    (16B)   #02 112:5= 22.4 (512MB)
+// 12:1= 12   (16B)   #03  96:5= 19.2 (512MB)
+// 16:1= Flag (16B)   #04  80:5= 16   (512MB)
+//  3:2= 1.5  (256B)  #05  30:2= 15   (512B)
+//  4:2= 2    (4KB)   #06  64:5= 12.8 (512MB)
+//  6:2= 3    (512B)  #07  24:2= 12   (4KB)
+//  8:2= 4    (4KB)   #08  12:1= 12   (16B)
+// 12:2= 6    (4KB)   #09  22:2= 11   (512B)  
+// 14:2= 7    (512B)  #10  30:3= 10   (128KB)  
+// 16:2= 8    (4KB)   #11  48:5= 9.6  (512MB)  
+// 22:2= 11   (512B)  #12  24:3= 8    (1MB)    
+// 24:2= 12   (4KB)   #13  16:2= 8    (4KB)
+// 30:2= 15   (512B)  #14   8:1= 8    (16B)
+//  4:3= 1.3  (1MB)   #15  22:3= 7.3  (128KB)
+//  6:3= 2    (128KB) #16  14:2= 7    (512B)
+//  8:3= 2.6  (1MB)   #17  32:5= 6.4  (512MB)
+// 12:3= 4    (1MB)   #18  24:4= 6    (256MB)
+// 14:3= 4.6  (128KB) #19  12:2= 6    (4KB)
+// 16:3= 5.3  (1MB)   #20  16:3= 5.3  (1MB)
+// 22:3= 7.3  (128KB) #21  14:3= 4.6  (128KB)
+// 24:3= 8    (1MB)   #22  16:4= 4    (16MB)F
+// 30:3= 10   (128KB) #23  12:3= 4    (1MB)
+//  6:4= 1.5  (16MB)  #24   8:2= 4    (4KB)
+//  8:4= 2    (16MB)  #25   4:1= 4    (16B)
+// 10:4= 2.5  (16MB)  #26  14:4= 3.5  (16MB)
+// 12:4= 3    (16MB)  #27  16:5= 3.2  (512MB)
+// 14:4= 3.5  (16MB)  #28  12:4= 3    (16MB)
+// 16:4= 4    (16MB)F #29   6:2= 3    (512B)
+// 24:4= 6    (256MB) #30   8:3= 2.6  (1MB)
+// 16:5= 3.2  (512MB) #31  10:4= 2.5  (16MB)
+// 32:5= 6.4  (512MB) #32   8:4= 2    (16MB)
+// 48:5= 9.6  (512MB) #33   6:3= 2    (128KB)
+// 64:5= 12.8 (512MB) #34   4:2= 2    (4KB)
+// 80:5= 16   (512MB) #35   6:4= 1.5  (16MB)
+// 96:5= 19.2 (512MB) #36   3:2= 1.5  (256B)
+//112:5= 22.4 (512MB) #37   4:3= 1.3  (1MB)
+//128:5= 25.6 (512MB)
+
 // |1stLSB    |2ndLSB  |3rdLSB   |
 // -------------------------------
 // |OO|LL|xxxx|xxxxxxxx|xxxxxx|xx|
@@ -1327,36 +1678,79 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 // OO = 10b MatchOffset, 0xFFFFFFFF>>OO, 2 bytes long i.e. Sliding Window is 2*8-LL-OO=2*8-4=12 or   4KB    
 // OO = 11b MatchOffset, 0xFFFFFFFF>>OO, 1 byte long  i.e. Sliding Window is 1*8-LL-OO=1*8-4=4 or   16B     
 
-
-// 32:2= 16   (256B)
-
-	if (refStartSW1c >= refStart) {
-	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW1c, encStart, (uint32_t)(refEnd-refStartSW1c), 32);	
+// #01 128:5= 25.6 (512MB)
+	if (refStartSW5 >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW5, encStart, (uint32_t)(refEnd-refStartSW5), 128);	
 		if (FoundAtPosition!=NULL) {
-				*retMatch=32;
+				*retMatch=128;
+				// The first 8 bits should be 0x93, in order to retain 4bytes-longness of 'retIndex' we play dirty - not tagging the 5bytes chunk with 0x93 but as "usual" - the address subchunk:
+				*retIndex=(((refEnd-FoundAtPosition)<<3)&0xFFFFFFF8)|0x07; // xx ... x[LLL] (7+1)*16=128
+				*ShortMediumLongOFFSET=5;
+				return;
+		}
+	}
+
+// #02 112:5= 22.4 (512MB)
+	if (refStartSW5 >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW5, encStart, (uint32_t)(refEnd-refStartSW5), 112);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=112;
+				// The first 8 bits should be 0x93, in order to retain 4bytes-longness of 'retIndex' we play dirty - not tagging the 5bytes chunk with 0x93 but as "usual" - the address subchunk:
+				*retIndex=(((refEnd-FoundAtPosition)<<3)&0xFFFFFFF8)|0x06; // xx ... x[LLL] (7+1)*16=128
+				*ShortMediumLongOFFSET=5;
+				return;
+		}
+	}
+
+// #03  96:5= 19.2 (512MB)
+	if (refStartSW5 >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW5, encStart, (uint32_t)(refEnd-refStartSW5), 96);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=96;
+				// The first 8 bits should be 0x93, in order to retain 4bytes-longness of 'retIndex' we play dirty - not tagging the 5bytes chunk with 0x93 but as "usual" - the address subchunk:
+				*retIndex=(((refEnd-FoundAtPosition)<<3)&0xFFFFFFF8)|0x05; // xx ... x[LLL] (7+1)*16=128
+				*ShortMediumLongOFFSET=5;
+				return;
+		}
+	}
+
+// #04  80:5= 16   (512MB)
+	if (refStartSW5 >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW5, encStart, (uint32_t)(refEnd-refStartSW5), 80);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=80;
+				// The first 8 bits should be 0x93, in order to retain 4bytes-longness of 'retIndex' we play dirty - not tagging the 5bytes chunk with 0x93 but as "usual" - the address subchunk:
+				*retIndex=(((refEnd-FoundAtPosition)<<3)&0xFFFFFFF8)|0x04; // xx ... x[LLL] (7+1)*16=128
+				*ShortMediumLongOFFSET=5;
+				return;
+		}
+	}
+
+// #05  30:2= 15   (512B)
+	if (refStartSW512 >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW512, encStart, (uint32_t)(refEnd-refStartSW512), 30);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=30;
 				// The first four bits should be:
-				                                                                    // 0011b = 0x3;
-				*retIndex=(((refEnd-FoundAtPosition)<<8)&0xFF00)|0x03; // xx ... x[LLOO]
+				*retIndex=(((refEnd-FoundAtPosition)<<7)&0xFF80)|0x7C; // (4+3)C
 				*ShortMediumLongOFFSET=2;
 				return;
 		}
 	}
 
-// 48:4= 12   (64MB)
-
-	if (refStartSW1e >= refStart) {
-	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW1e, encStart, (uint32_t)(refEnd-refStartSW1e), 48);	
+// #06  64:5= 12.8 (512MB)
+	if (refStartSW5 >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW5, encStart, (uint32_t)(refEnd-refStartSW5), 64);	
 		if (FoundAtPosition!=NULL) {
-				*retMatch=48;
-				// The first four bits should be:
-				                                                                    // 1100b = 0xC; 6<<3
-				*retIndex=(((refEnd-FoundAtPosition)<<6)&0xFFFFFFC0)|0x3C; // xx ... x[LLOO]
-				*ShortMediumLongOFFSET=4;
+				*retMatch=64;
+				// The first 8 bits should be 0x93, in order to retain 4bytes-longness of 'retIndex' we play dirty - not tagging the 5bytes chunk with 0x93 but as "usual" - the address subchunk:
+				*retIndex=(((refEnd-FoundAtPosition)<<3)&0xFFFFFFF8)|0x03; // xx ... x[LLL] (7+1)*16=128
+				*ShortMediumLongOFFSET=5;
 				return;
 		}
 	}
 
-// 24:2= 12   (4KB)
+// #07  24:2= 12   (4KB)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOTTER >= refStart)
@@ -1385,7 +1779,7 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 12:1= 12   (16B)
+// #08  12:1= 12   (16B)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOTEST >= refStart)
@@ -1414,21 +1808,43 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 32:4= 8    (64MB)
-
-	if (refStartSW1e >= refStart) {
-	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW1e, encStart, (uint32_t)(refEnd-refStartSW1e), 32);	
+// #09  22:2= 11   (512B)  
+	if (refStartSW512 >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW512, encStart, (uint32_t)(refEnd-refStartSW512), 22);	
 		if (FoundAtPosition!=NULL) {
-				*retMatch=32;
+				*retMatch=22;
 				// The first four bits should be:
-				                                                                    // 1100b = 0xC; 6<<3
-				*retIndex=(((refEnd-FoundAtPosition)<<6)&0xFFFFFFC0)|0x2C; // xx ... x[LLOO]
-				*ShortMediumLongOFFSET=4;
+				*retIndex=(((refEnd-FoundAtPosition)<<7)&0xFF80)|0x6C;  // (4+2)C
+				*ShortMediumLongOFFSET=2;
 				return;
 		}
 	}
 
-// 24:3= 8    (1MB)
+// #10  30:3= 10   (128KB)  
+	if (refStartSW128kb >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW128kb, encStart, (uint32_t)(refEnd-refStartSW128kb), 30);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=30;
+				// The first four bits should be:
+				*retIndex=(((refEnd-FoundAtPosition)<<7)&0xFFFF80)|0x3C;
+				*ShortMediumLongOFFSET=3;
+				return;
+		}
+	}
+
+// #11  48:5= 9.6  (512MB)
+	if (refStartSW5 >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW5, encStart, (uint32_t)(refEnd-refStartSW5), 48);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=48;
+				// The first 8 bits should be 0x93, in order to retain 4bytes-longness of 'retIndex' we play dirty - not tagging the 5bytes chunk with 0x93 but as "usual" - the address subchunk:
+				*retIndex=(((refEnd-FoundAtPosition)<<3)&0xFFFFFFF8)|0x02; // xx ... x[LLL] (7+1)*16=128
+				*ShortMediumLongOFFSET=5;
+				return;
+		}
+	}
+
+// #12  24:3= 8    (1MB)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOT >= refStart)
@@ -1472,7 +1888,7 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 16:2= 8    (4KB)
+// #13  16:2= 8    (4KB)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOTTER >= refStart)
@@ -1501,7 +1917,7 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 8:1= 8    (16B)
+// #14   8:1= 8    (16B)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOTEST >= refStart)
@@ -1530,7 +1946,43 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 24:4= 6    (256MB)
+// #15  22:3= 7.3  (128KB)
+	if (refStartSW128kb >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW128kb, encStart, (uint32_t)(refEnd-refStartSW128kb), 22);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=22;
+				// The first four bits should be:
+				*retIndex=(((refEnd-FoundAtPosition)<<7)&0xFFFF80)|0x2C;
+				*ShortMediumLongOFFSET=3;
+				return;
+		}
+	}
+
+// #16  14:2= 7    (512B)
+	if (refStartSW512 >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW512, encStart, (uint32_t)(refEnd-refStartSW512), 14);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=14;
+				// The first four bits should be:
+				*retIndex=(((refEnd-FoundAtPosition)<<7)&0xFF80)|0x5C;  // (4+1)C
+				*ShortMediumLongOFFSET=2;
+				return;
+		}
+	}
+
+// #17  32:5= 6.4  (512MB)
+	if (refStartSW5 >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW5, encStart, (uint32_t)(refEnd-refStartSW5), 32);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=32;
+				// The first 8 bits should be 0x93, in order to retain 4bytes-longness of 'retIndex' we play dirty - not tagging the 5bytes chunk with 0x93 but as "usual" - the address subchunk:
+				*retIndex=(((refEnd-FoundAtPosition)<<3)&0xFFFFFFF8)|0x01; // xx ... x[LLL] (7+1)*16=128
+				*ShortMediumLongOFFSET=5;
+				return;
+		}
+	}
+
+// #18  24:4= 6    (256MB)
 	if (refStartSW4 >= refStart) {
 	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW4, encStart, (uint32_t)(refEnd-refStartSW4), 48-24);	
 		if (FoundAtPosition!=NULL) {
@@ -1543,7 +1995,7 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 12:2= 6    (4KB)
+// #19  12:2= 6    (4KB)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOTTER >= refStart)
@@ -1572,7 +2024,7 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 16:3= 5.3  (1MB)
+// #20  16:3= 5.3  (1MB)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOT >= refStart)
@@ -1616,8 +2068,19 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 16:4= 4    (16MB)F
+// #21  14:3= 4.6  (128KB)
+	if (refStartSW128kb >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW128kb, encStart, (uint32_t)(refEnd-refStartSW128kb), 14);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=14;
+				// The first four bits should be:
+				*retIndex=(((refEnd-FoundAtPosition)<<7)&0xFFFF80)|0x1C;
+				*ShortMediumLongOFFSET=3;
+				return;
+		}
+	}
 
+// #22  16:4= 4    (16MB)F
 	if (refStartSW1a >= refStart) {
 	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW1a, encStart, (uint32_t)(refEnd-refStartSW1a), 16);	
 		if (FoundAtPosition!=NULL) {
@@ -1630,21 +2093,7 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 16:4= 4    (64MB)S
-
-	if (refStartSW1e >= refStart) {
-	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW1e, encStart, (uint32_t)(refEnd-refStartSW1e), 16);	
-		if (FoundAtPosition!=NULL) {
-				*retMatch=16;
-				// The first four bits should be:
-				                                                                    // 1100b = 0xC; 6<<3
-				*retIndex=(((refEnd-FoundAtPosition)<<6)&0xFFFFFFC0)|0x1C; // xx ... x[LLOO]
-				*ShortMediumLongOFFSET=4;
-				return;
-		}
-	}
-
-// 12:3= 4    (1MB)
+// #23  12:3= 4    (1MB)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOT >= refStart)
@@ -1688,7 +2137,7 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 8:2= 4    (4KB)
+// #24   8:2= 4    (4KB)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOTTER >= refStart)
@@ -1717,7 +2166,7 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 4:1= 4    (16B)
+// #25   4:1= 4    (16B)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOTEST >= refStart)
@@ -1746,8 +2195,7 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 14:4= 3.5  (16MB)
-
+// #26  14:4= 3.5  (16MB)
 	if (refStartSW1a >= refStart) {
 	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW1a, encStart, (uint32_t)(refEnd-refStartSW1a), 14);	
 		if (FoundAtPosition!=NULL) {
@@ -1760,8 +2208,19 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 12:4= 3    (16MB)
+// #27  16:5= 3.2  (512MB)
+	if (refStartSW5 >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW5, encStart, (uint32_t)(refEnd-refStartSW5), 16);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=16;
+				// The first 8 bits should be 0x93, in order to retain 4bytes-longness of 'retIndex' we play dirty - not tagging the 5bytes chunk with 0x93 but as "usual" - the address subchunk:
+				*retIndex=(((refEnd-FoundAtPosition)<<3)&0xFFFFFFF8)|0x00; // xx ... x[LLL] (7+1)*16=128
+				*ShortMediumLongOFFSET=5;
+				return;
+		}
+	}
 
+// #28  12:4= 3    (16MB)
 	if (refStartSW1a >= refStart) {
 	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW1a, encStart, (uint32_t)(refEnd-refStartSW1a), 12);	
 		if (FoundAtPosition!=NULL) {
@@ -1774,21 +2233,19 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 6:2= 3    (1KB)
-
-	if (refStartSW1d >= refStart) {
-	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW1d, encStart, (uint32_t)(refEnd-refStartSW1d), 6);	
+// #29   6:2= 3    (512B)
+	if (refStartSW512 >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW512, encStart, (uint32_t)(refEnd-refStartSW512), 6);	
 		if (FoundAtPosition!=NULL) {
 				*retMatch=6;
 				// The first four bits should be:
-				                                                                    // 0011b = 0x3;
-				*retIndex=(((refEnd-FoundAtPosition)<<6)&0xFFC0)|0x0C; // xx ... x[LLOO]
+				*retIndex=(((refEnd-FoundAtPosition)<<7)&0xFF80)|0x4C;  // (4+0)C
 				*ShortMediumLongOFFSET=2;
 				return;
 		}
 	}
 
-// 8:3= 2.6  (1MB)
+// #30   8:3= 2.6  (1MB)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOT >= refStart)
@@ -1832,8 +2289,7 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 10:4= 2.5  (16MB)
-
+// #31  10:4= 2.5  (16MB)
 	if (refStartSW1a >= refStart) {
 	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW1a, encStart, (uint32_t)(refEnd-refStartSW1a), 10);	
 		if (FoundAtPosition!=NULL) {
@@ -1846,8 +2302,7 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 8:4= 2  (16MB)
-
+// #32   8:4= 2    (16MB)
 	if (refStartSW1a >= refStart) {
 	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW1a, encStart, (uint32_t)(refEnd-refStartSW1a), 8);	
 		if (FoundAtPosition!=NULL) {
@@ -1860,7 +2315,19 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 4:2= 2    (4KB)
+// #33   6:3= 2    (128KB)
+	if (refStartSW128kb >= refStart) {
+	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW128kb, encStart, (uint32_t)(refEnd-refStartSW128kb), 6);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=6;
+				// The first four bits should be:
+				*retIndex=(((refEnd-FoundAtPosition)<<7)&0xFFFF80)|0x0C;
+				*ShortMediumLongOFFSET=3;
+				return;
+		}
+	}
+
+// #34   4:2= 2    (4KB)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOTTER >= refStart)
@@ -1889,8 +2356,7 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 6:4= 1.5  (16MB)
-
+// #35   6:4= 1.5  (16MB)
 	if (refStartSW1a >= refStart) {
 	FoundAtPosition = Railgun_BawBaw_reverse (refStartSW1a, encStart, (uint32_t)(refEnd-refStartSW1a), 6);	
 		if (FoundAtPosition!=NULL) {
@@ -1903,7 +2369,19 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 		}
 	}
 
-// 4:3= 1.3  (1MB)
+// #36   3:2= 1.5  (256B)
+	if (refStartSW1c >= refStart) {
+	FoundAtPosition = Railgun_Baw_reverse (refStartSW1c, encStart, (uint32_t)(refEnd-refStartSW1c), 3);	
+		if (FoundAtPosition!=NULL) {
+				*retMatch=3;
+				// The first four bits should be:
+				*retIndex=(((refEnd-FoundAtPosition)<<8)&0xFF00)|0x03; // xx ... x[LLOO]
+				*ShortMediumLongOFFSET=2;
+				return;
+		}
+	}
+
+// #37   4:3= 1.3  (1MB)
 /*
 	// Pre-emptive strike, matches should be sought close to the lookahead (cache-friendliness) [
 	if (refStartHOT >= refStart)
@@ -1946,22 +2424,6 @@ void SearchIntoSlidingWindow(unsigned int* ShortMediumLongOFFSET, unsigned int* 
 				return;
 		}
 	}
-
-/*
-// 3:2 = 1.5
-
-	if (refStartSW1c >= refStart) {
-	FoundAtPosition = Railgun_Baw_reverse (refStartSW1c, encStart, (uint32_t)(refEnd-refStartSW1c), 3);	
-		if (FoundAtPosition!=NULL) {
-				*retMatch=3;
-				// The first four bits should be:
-				                                                                    // 0011b = 0x3;
-				*retIndex=(((refEnd-FoundAtPosition)<<8)&0xFF00)|0x03; // xx ... x[LLOO]
-				*ShortMediumLongOFFSET=2;
-				return;
-		}
-	}
-*/
 
 
 #else				
@@ -2014,6 +2476,7 @@ uint64_t NakaCompress(char* ret, char* src, uint64_t srcSize){
 	int GLOBAL32B=0;
 	int GLOBAL48B=0;
 	int GLOBAL3=0;
+	int GLOBAL5bytes=0;
 	unsigned int ShortMediumLongOFFSET=0;
 		unsigned int ShortMediumLongOFFSET1=0;// Tsuyo
 		int TsuyoHEURISTIC;
@@ -2080,10 +2543,10 @@ NumberOfFullLiterals++;
 			notMatch++;
 			srcIndex++;
 			if ((srcIndex-1) % (1<<16) > srcIndex % (1<<16)) {
-				ProgressIndicator = (int)( (srcIndex+1)*(double)100/(srcSize+1) );
-				SPD=(((double)CLOCKS_PER_SEC*srcIndex/(double)(clock() - clocks1 + 1)));
-				if (SPD >999999) SPD=999999;
-				//printf("%s; Each rotation means 64KB are encoded; Speed: %sB/s; Done %d%%; Compression Ratio: %.2f:1; Matches(24/32/48): %s/%s/%s    \r", Auberge[Melnitchka++], _ui64toaKAZEzerocomma(SPD, llTOaDigits4, 10)+(26-7) ,ProgressIndicator, (double)(srcIndex) / (double)(retIndex),  _ui64toaKAZEcomma(GLOBAL24B, llTOaDigits2, 10), _ui64toaKAZEcomma(GLOBAL32B, llTOaDigits, 10), _ui64toaKAZEcomma(GLOBAL48B, llTOaDigits3, 10) );
+				//ProgressIndicator = (int)( (srcIndex+1)*(double)100/(srcSize+1) );
+				//SPD=(((double)CLOCKS_PER_SEC*srcIndex/(double)(clock() - clocks1 + 1)));
+				//if (SPD >999999) SPD=999999;
+				//printf("%s; Each rotation means 64KB are encoded; Speed: %sB/s; Done %d%%; Compression Ratio: %.2f:1; Matches(24/32/48): %s/%s/%s; Washigan Matches(5bytes offsets): %s   \r", Auberge[Melnitchka++], _ui64toaKAZEzerocomma(SPD, llTOaDigits4, 10)+(26-7) ,ProgressIndicator, (double)(srcIndex) / (double)(retIndex),  _ui64toaKAZEcomma(GLOBAL24B, llTOaDigits2, 10), _ui64toaKAZEcomma(GLOBAL32B, llTOaDigits, 10), _ui64toaKAZEcomma(GLOBAL48B, llTOaDigits3, 10), _ui64toaKAZEcomma(GLOBAL5bytes, llTOaDigits5, 10) );
 				Melnitchka = Melnitchka & 3; // 0 1 2 3: 00 01 10 11
 			}
 // 2of2
@@ -2104,6 +2567,7 @@ NumberOfFullLiterals++;
 			if ( match==32 ) GLOBAL32B++;
 			if ( match==48 ) GLOBAL48B++;
 			if ( match==3 ) GLOBAL3++;
+			if ( ShortMediumLongOFFSET==5 ) GLOBAL5bytes++;
 		}
 		else
 			match=0; // Nothing to find.
@@ -2130,9 +2594,9 @@ NumberOfFullLiterals++;
 			srcIndex++;
 			if ((srcIndex-1) % (1<<16) > srcIndex % (1<<16)) {
 				ProgressIndicator = (int)( (srcIndex+1)*(double)100/(srcSize+1) );
-				SPD=(((double)CLOCKS_PER_SEC*srcIndex/(double)(clock() - clocks1 + 1)));
-				if (SPD >999999) SPD=999999;
-				//printf("%s; Each rotation means 64KB are encoded; Speed: %sB/s; Done %d%%; Compression Ratio: %.2f:1; Matches(24/32/48): %s/%s/%s    \r", Auberge[Melnitchka++], _ui64toaKAZEzerocomma(SPD, llTOaDigits4, 10)+(26-7) ,ProgressIndicator, (double)(srcIndex) / (double)(retIndex),  _ui64toaKAZEcomma(GLOBAL24B, llTOaDigits2, 10), _ui64toaKAZEcomma(GLOBAL32B, llTOaDigits, 10), _ui64toaKAZEcomma(GLOBAL48B, llTOaDigits3, 10) );
+				//SPD=(((double)CLOCKS_PER_SEC*srcIndex/(double)(clock() - clocks1 + 1)));
+				//if (SPD >999999) SPD=999999;
+				//printf("%s; Each rotation means 64KB are encoded; Speed: %sB/s; Done %d%%; Compression Ratio: %.2f:1; Matches(24/32/48): %s/%s/%s; Washigan Matches(5bytes offsets): %s    \r", Auberge[Melnitchka++], _ui64toaKAZEzerocomma(SPD, llTOaDigits4, 10)+(26-7) ,ProgressIndicator, (double)(srcIndex) / (double)(retIndex),  _ui64toaKAZEcomma(GLOBAL24B, llTOaDigits2, 10), _ui64toaKAZEcomma(GLOBAL32B, llTOaDigits, 10), _ui64toaKAZEcomma(GLOBAL48B, llTOaDigits3, 10), _ui64toaKAZEcomma(GLOBAL5bytes, llTOaDigits5, 10) );
 				Melnitchka = Melnitchka & 3; // 0 1 2 3: 00 01 10 11
 			}
 		} else {
@@ -2183,27 +2647,31 @@ NumberOfFullLiterals++;
 			//retIndex++;
 			//retIndex++;
 			 //retIndex++;
+			if ( ShortMediumLongOFFSET==5 ) {
+			ret[retIndex]=0x93;
+			memcpy(&ret[retIndex+1],&index,ShortMediumLongOFFSET-1);
+			} else
 			memcpy(&ret[retIndex],&index,ShortMediumLongOFFSET);
 			retIndex = retIndex + ShortMediumLongOFFSET;
 //                     / \
 // ---------------------|
 			srcIndex+=match;
-			if ((srcIndex-match) % (1<<16) > srcIndex % (1<<16)) {
+			/*if ((srcIndex-match) % (1<<16) > srcIndex % (1<<16)) {
 				ProgressIndicator = (int)( (srcIndex+1)*(double)100/(srcSize+1) );
 				SPD=(((double)CLOCKS_PER_SEC*srcIndex/(double)(clock() - clocks1 + 1)));
 				if (SPD >999999) SPD=999999;
-				//printf("%s; Each rotation means 64KB are encoded; Speed: %sB/s; Done %d%%; Compression Ratio: %.2f:1; Matches(24/32/48): %s/%s/%s    \r", Auberge[Melnitchka++], _ui64toaKAZEzerocomma(SPD, llTOaDigits4, 10)+(26-7) ,ProgressIndicator, (double)(srcIndex) / (double)(retIndex),  _ui64toaKAZEcomma(GLOBAL24B, llTOaDigits2, 10), _ui64toaKAZEcomma(GLOBAL32B, llTOaDigits, 10), _ui64toaKAZEcomma(GLOBAL48B, llTOaDigits3, 10) );
+				printf("%s; Each rotation means 64KB are encoded; Speed: %sB/s; Done %d%%; Compression Ratio: %.2f:1; Matches(24/32/48): %s/%s/%s; Washigan Matches(5bytes offsets): %s    \r", Auberge[Melnitchka++], _ui64toaKAZEzerocomma(SPD, llTOaDigits4, 10)+(26-7) ,ProgressIndicator, (double)(srcIndex) / (double)(retIndex),  _ui64toaKAZEcomma(GLOBAL24B, llTOaDigits2, 10), _ui64toaKAZEcomma(GLOBAL32B, llTOaDigits, 10), _ui64toaKAZEcomma(GLOBAL48B, llTOaDigits3, 10), _ui64toaKAZEcomma(GLOBAL5bytes, llTOaDigits5, 10) );
 				Melnitchka = Melnitchka & 3; // 0 1 2 3: 00 01 10 11
-			}
+			}*/
 		}
 	}
 	if(notMatch > 0){
 		*notMatchStart=(unsigned char)((notMatch)<<(4));
 		*notMatchStart=(unsigned char)((notMatch)<<(4)) | 0x03; // Entag it as Literal
 	}
-	SPD=(((double)CLOCKS_PER_SEC*srcIndex/(double)(clock() - clocks1 + 1)));
-	if (SPD >999999) SPD=999999;
-				//printf("%s; Each rotation means 64KB are encoded; Speed: %sB/s; Done %d%%; Compression Ratio: %.2f:1; Matches(24/32/48): %s/%s/%s    \n", Auberge[Melnitchka++], _ui64toaKAZEzerocomma(SPD, llTOaDigits4, 10)+(26-7) ,100, (double)(srcIndex) / (double)(retIndex),  _ui64toaKAZEcomma(GLOBAL24B, llTOaDigits2, 10), _ui64toaKAZEcomma(GLOBAL32B, llTOaDigits, 10), _ui64toaKAZEcomma(GLOBAL48B, llTOaDigits3, 10) );
+	//SPD=(((double)CLOCKS_PER_SEC*srcIndex/(double)(clock() - clocks1 + 1)));
+	//if (SPD >999999) SPD=999999;
+	//			printf("%s; Each rotation means 64KB are encoded; Speed: %sB/s; Done %d%%; Compression Ratio: %.2f:1; Matches(24/32/48): %s/%s/%s; Washigan Matches(5bytes offsets): %s    \n", Auberge[Melnitchka++], _ui64toaKAZEzerocomma(SPD, llTOaDigits4, 10)+(26-7) ,100, (double)(srcIndex) / (double)(retIndex),  _ui64toaKAZEcomma(GLOBAL24B, llTOaDigits2, 10), _ui64toaKAZEcomma(GLOBAL32B, llTOaDigits, 10), _ui64toaKAZEcomma(GLOBAL48B, llTOaDigits3, 10), _ui64toaKAZEcomma(GLOBAL5bytes, llTOaDigits5, 10) );
 
 	//printf("NumberOfFullLiterals (lower-the-better): %d\n", NumberOfFullLiterals );
 	//printf("Tsuyo_HEURISTIC_APPLIED_thrice_back-to-back: %d\n", TsuyoHEURISTICAPPLIED );
@@ -2222,8 +2690,10 @@ uint64_t NakaDecompress (char* ret, char* src, uint64_t srcSize) {
 	char* srcLOCAL = src;
 	char* srcEndLOCAL = src+srcSize;
 	unsigned int DWORDtrio;
+	unsigned int DWORDtrio2;
 	unsigned int DWORDtrioDumbo;
 	unsigned int MatchLen;
+	unsigned int Gear;
 	while (srcLOCAL < srcEndLOCAL) {
 		DWORDtrio = *(unsigned int*)srcLOCAL;
 		MatchLen = (DWORDtrio&0x0C); // 0|4|8|12
@@ -2241,33 +2711,45 @@ uint64_t NakaDecompress (char* ret, char* src, uint64_t srcSize) {
 #endif
 */
 
-// Sizewise priority:
-//  4:1= 4    (16B)   #01 32:2= 16   (256B)
-//  8:1= 8    (16B)   #02 48:4= 12   (64MB)
-// 12:1= 12   (16B)   #03 24:2= 12   (4KB)
-// 16:1= Flag (16B)   #04 12:1= 12   (16B)
-//  4:2= 2    (4KB)   #05 32:4= 8    (64MB)
-//  6:2= 3    (1KB)   #06 24:3= 8    (1MB)
-//  8:2= 4    (4KB)   #07 16:2= 8    (4KB)
-// 12:2= 6    (4KB)   #08  8:1= 8    (16B)
-// 16:2= 8    (4KB)   #09 24:4= 6    (256MB)
-// 24:2= 12   (4KB)   #10 12:2= 6    (4KB)
-// 32:2= 16   (256B)  #11 16:3= 5.3  (1MB)
-//  4:3= 1.3  (1MB)   #12 16:4= 4    (16MB)F
-//  8:3= 2.6  (1MB)   #13 16:4= 4    (64MB)S
-// 12:3= 4    (1MB)   #14 12:3= 4    (1MB)
-// 16:3= 5.3  (1MB)   #15  8:2= 4    (4KB)
-// 24:3= 8    (1MB)   #16  4:1= 4    (16B)
-//  6:4= 1.5  (16MB)  #17 14:4= 3.5  (16MB)
-//  8:4= 2    (16MB)  #18 12:4= 3    (16MB)
-// 10:4= 2.5  (16MB)  #19  6:2= 3    (1KB)
-// 12:4= 3    (16MB)  #20  8:3= 2.6  (1MB)
-// 14:4= 3.5  (16MB)  #21 10:4= 2.5  (16MB)
-// 16:4= 4    (16MB)F #22  8:4= 2    (16MB)
-// 16:4= 4    (64MB)S #23  4:2= 2    (4KB)
-// 24:4= 6    (256MB) #24  6:4= 1.5  (16MB)
-// 32:4= 8    (64MB)  #25  4:3= 1.3  (1MB)
-// 48:4= 12   (64MB) 
+// Sizewise/MatchLenWise priority:
+//  4:1= 4    (16B)   #01 128:5= 25.6 (512MB)
+//  8:1= 8    (16B)   #02 112:5= 22.4 (512MB)
+// 12:1= 12   (16B)   #03  96:5= 19.2 (512MB)
+// 16:1= Flag (16B)   #04  80:5= 16   (512MB)
+//  3:2= 1.5  (256B)  #05  30:2= 15   (512B)
+//  4:2= 2    (4KB)   #06  64:5= 12.8 (512MB)
+//  6:2= 3    (512B)  #07  24:2= 12   (4KB)
+//  8:2= 4    (4KB)   #08  12:1= 12   (16B)
+// 12:2= 6    (4KB)   #09  22:2= 11   (512B)  
+// 14:2= 7    (512B)  #10  30:3= 10   (128KB)  
+// 16:2= 8    (4KB)   #11  48:5= 9.6  (512MB)  
+// 22:2= 11   (512B)  #12  24:3= 8    (1MB)    
+// 24:2= 12   (4KB)   #13  16:2= 8    (4KB)
+// 30:2= 15   (512B)  #14   8:1= 8    (16B)
+//  4:3= 1.3  (1MB)   #15  22:3= 7.3  (128KB)
+//  6:3= 2    (128KB) #16  14:2= 7    (512B)
+//  8:3= 2.6  (1MB)   #17  32:5= 6.4  (512MB)
+// 12:3= 4    (1MB)   #18  24:4= 6    (256MB)
+// 14:3= 4.6  (128KB) #19  12:2= 6    (4KB)
+// 16:3= 5.3  (1MB)   #20  16:3= 5.3  (1MB)
+// 22:3= 7.3  (128KB) #21  14:3= 4.6  (128KB)
+// 24:3= 8    (1MB)   #22  16:4= 4    (16MB)F
+// 30:3= 10   (128KB) #23  12:3= 4    (1MB)
+//  6:4= 1.5  (16MB)  #24   8:2= 4    (4KB)
+//  8:4= 2    (16MB)  #25   4:1= 4    (16B)
+// 10:4= 2.5  (16MB)  #26  14:4= 3.5  (16MB)
+// 12:4= 3    (16MB)  #27  16:5= 3.2  (512MB)
+// 14:4= 3.5  (16MB)  #28  12:4= 3    (16MB)
+// 16:4= 4    (16MB)F #29   6:2= 3    (512B)
+// 24:4= 6    (256MB) #30   8:3= 2.6  (1MB)
+// 16:5= 3.2  (512MB) #31  10:4= 2.5  (16MB)
+// 32:5= 6.4  (512MB) #32   8:4= 2    (16MB)
+// 48:5= 9.6  (512MB) #33   6:3= 2    (128KB)
+// 64:5= 12.8 (512MB) #34   4:2= 2    (4KB)
+// 80:5= 16   (512MB) #35   6:4= 1.5  (16MB)
+// 96:5= 19.2 (512MB) #36   3:2= 1.5  (256B)
+//112:5= 22.4 (512MB) #37   4:3= 1.3  (1MB)
+//128:5= 25.6 (512MB)
 // |1stLSB    |2ndLSB  |3rdLSB   |
 // -------------------------------
 // |OO|LL|xxxx|xxxxxxxx|xxxxxx|xx|
@@ -2286,13 +2768,14 @@ uint64_t NakaDecompress (char* ret, char* src, uint64_t srcSize) {
 		if ( ((DWORDtrio & 0xFF)>>4) <= 8 ) { // 9 not used, only 1..8
 			if ( ((DWORDtrio & 0xFF)>>4) == 0 ) {
 			#ifdef _N_GP
-				memcpy(retLOCAL, (const char *)( (uint64_t)(retLOCAL-((DWORDtrio&0xFFFF)>>8))) ), 32); // No need of DWORDtrio&0xFFFFFFFF
+//				memcpy(retLOCAL, (const char *)( (uint64_t)(retLOCAL-((DWORDtrio&0xFFFF)>>8))) ), 32); // No need of DWORDtrio&0xFFFFFFFF
 			#endif
 			#ifdef _N_XMM
-				NotSoSlowCopy128bit( (const char *)( (uint64_t)(retLOCAL-((DWORDtrio&0xFFFF)>>8))+16*(0) ), retLOCAL +16*(0));
-				NotSoSlowCopy128bit( (const char *)( (uint64_t)(retLOCAL-((DWORDtrio&0xFFFF)>>8))+16*(1) ), retLOCAL +16*(1));
+//				NotSoSlowCopy128bit( (const char *)( (uint64_t)(retLOCAL-((DWORDtrio&0xFFFF)>>8))+16*(0) ), retLOCAL +16*(0));
+//				NotSoSlowCopy128bit( (const char *)( (uint64_t)(retLOCAL-((DWORDtrio&0xFFFF)>>8))+16*(1) ), retLOCAL +16*(1));
 			#endif
-			retLOCAL+= 32; 
+			*(uint32_t*)(retLOCAL+4*(0)) = *(uint32_t*)(retLOCAL-((DWORDtrio&0xFFFF)>>8)+4*(0)); 
+			retLOCAL+= 3; 
 			srcLOCAL+= 2;
 			} else {
 //			#ifdef _N_GP
@@ -2305,7 +2788,7 @@ uint64_t NakaDecompress (char* ret, char* src, uint64_t srcSize) {
 			retLOCAL+= ((DWORDtrio & 0xFF)>>4);
 			srcLOCAL+= ((DWORDtrio & 0xFF)>>4)+1;
 			}
-		} else {
+		} else if ( ((DWORDtrio & 0xFF)>>4) > 9 ) {
 			#ifdef _N_GP
 				memcpy(retLOCAL, (const char *)( (uint64_t)(retLOCAL-(DWORDtrio>>8))) ), 16); // No need of DWORDtrio&0xFFFFFFFF
 			#endif
@@ -2314,31 +2797,39 @@ uint64_t NakaDecompress (char* ret, char* src, uint64_t srcSize) {
 			#endif
 			retLOCAL+= (18 - ((DWORDtrio & 0xFF)>>4))<<1; 
 			srcLOCAL+= 4; // 6|8|10|12|14|16 in 16MB window
-		}
-		} else if ( (DWORDtrio & 0x0f) == 0x0C ) { 
-			if ( (DWORDtrio & 0x30) == 0 ) {
-			// 6:2 in 256B x 4 = 1KB window
-			*(uint64_t*)(retLOCAL+8*(0)) = *(uint64_t*)((retLOCAL-( (DWORDtrio&(0xFFFF))>>6 ))+8*(0)); 
-			retLOCAL+= 6;
-			srcLOCAL+= 2;
-			} else {
+		} else { // i.e. 9
+			DWORDtrio2 = *(unsigned int*)(srcLOCAL+1); // First 3bits: 0..7
+			for (MatchLen=0; MatchLen<= (DWORDtrio2&0x7); MatchLen++) {
 			#ifdef _N_GP
-				memcpy(retLOCAL, (const char *)( (uint64_t)(retLOCAL-(DWORDtrio>>6)) ), 48);
+				memcpy(retLOCAL +(MatchLen<<4), (const char *)( (uint64_t)(retLOCAL-(DWORDtrio2>>3))+(MatchLen<<4)) ), 16);
 			#endif
 			#ifdef _N_XMM
-				NotSoSlowCopy128bit( (const char *)( (uint64_t)(retLOCAL-(DWORDtrio>>6))+16*(0) ), retLOCAL +16*(0));
-				NotSoSlowCopy128bit( (const char *)( (uint64_t)(retLOCAL-(DWORDtrio>>6))+16*(1) ), retLOCAL +16*(1));
-				NotSoSlowCopy128bit( (const char *)( (uint64_t)(retLOCAL-(DWORDtrio>>6))+16*(2) ), retLOCAL +16*(2));
+				NotSoSlowCopy128bit( (const char *)( (uint64_t)(retLOCAL-(DWORDtrio2>>3))+(MatchLen<<4) ), retLOCAL +(MatchLen<<4));
 			#endif
-			retLOCAL+= (DWORDtrio & 0x30); // 16|32|48
-			srcLOCAL+= 4; // 48:4
 			}
+			retLOCAL+= MatchLen<<4; // after the 'for' it is 1..8
+			srcLOCAL+= 5; //  16|32|48|64|80|96|112|128 in 512MB window (5+24)bit i.e. :5
+		}
+		} else if ( (DWORDtrio & 0x0f) == 0x0C ) { 
+			// 0011LLGx xxxxxxxx xxxxxxxx, 11LL is matchlength, 2bytes window: 1+8=512B; 3bytes window: 1+8+8=128KB
+			Gear = (DWORDtrio>>3)&0x8; // 0/8 is 3/2 bytes respectively
+			//*(uint64_t*)(retLOCAL+8*(0)) = *(uint64_t*)((retLOCAL-( (DWORDtrio&((0xFFFFFF)>>Gear))>>7 ))+8*(0)); 
+			#ifdef _N_GP
+				memcpy(retLOCAL, (const char *)( (uint64_t)(retLOCAL-((DWORDtrio&((0xFFFFFF)>>Gear))>>7)) ), 32);
+			#endif
+			#ifdef _N_XMM
+				NotSoSlowCopy128bit( (const char *)( (uint64_t)(retLOCAL-((DWORDtrio&((0xFFFFFF)>>Gear))>>7))+16*(0) ), retLOCAL +16*(0));
+				NotSoSlowCopy128bit( (const char *)( (uint64_t)(retLOCAL-((DWORDtrio&((0xFFFFFF)>>Gear))>>7))+16*(1) ), retLOCAL +16*(1));
+			#endif
+			retLOCAL+= (DWORDtrio & 0x3C)>>1; // (12+0)>>1=6 | (12+16)>>1=14 | (12+32)>>1=22 | (12+48)>>1=30
+			srcLOCAL+= 3-(Gear>>3);
 		} else if ( (DWORDtrio & 0x03) == 0x00 ) {
 			// MatchLen 0|4|8 <<1 0|8|16
 			MatchLen=MatchLen<<1; // To avoid 'LEA'
 			*(uint64_t*)(retLOCAL+8*(0)) = *(uint64_t*)((retLOCAL-( (DWORDtrio&(0xFFFFFFFF>>MatchLen))>>4 ))+8*(0)); 
-			*(uint64_t*)(retLOCAL+8*(1)) = *(uint64_t*)((retLOCAL-( (DWORDtrio&(0xFFFFFFFF>>MatchLen))>>4 ))+8*(1)); 
-			*(uint64_t*)(retLOCAL+8*(2)) = *(uint64_t*)((retLOCAL-( (DWORDtrio&(0xFFFFFFFF>>MatchLen))>>4 ))+8*(2)); 
+//			*(uint64_t*)(retLOCAL+8*(1)) = *(uint64_t*)((retLOCAL-( (DWORDtrio&(0xFFFFFFFF>>MatchLen))>>4 ))+8*(1)); 
+//			*(uint64_t*)(retLOCAL+8*(2)) = *(uint64_t*)((retLOCAL-( (DWORDtrio&(0xFFFFFFFF>>MatchLen))>>4 ))+8*(2)); 
+			NotSoSlowCopy128bit( (const char *)( (uint64_t)(retLOCAL-( (DWORDtrio&(0xFFFFFFFF>>MatchLen))>>4 ))+8*(1) ), retLOCAL +8*(1));
 			retLOCAL+= 24;
 			srcLOCAL+= 4-(MatchLen>>3); // 24:2, 24:3, 24:4
 		} else {
@@ -2355,6 +2846,288 @@ uint64_t NakaDecompress (char* ret, char* src, uint64_t srcSize) {
 	}        
 	return (uint64_t)(retLOCAL - ret);
 }
+
+/*
+; 'Washigan+' (3xQWORD -> 1xQWORD+1xXMMWORD) decompression loop, 1a9-1e+6=401 bytes long, 120 instructions long:
+; mark_description "Intel(R) C++ Intel(R) 64 Compiler XE for applications running on Intel(R) 64, Version 15.0.0.108 Build 20140";
+; mark_description "-TP -O3 -QxSSE4.1 -D_N_XMM -D_N_prefetch_4096 -D_N_HIGH_PRIORITY -D_icl_mumbo_jumbo_ -FAcs";
+
+.B2.3::                         
+  0001e 44 8b 1a         mov r11d, DWORD PTR [rdx]              
+  00021 45 89 da         mov r10d, r11d                         
+  00024 44 89 dd         mov ebp, r11d                          
+  00027 41 83 e2 0f      and r10d, 15                           
+  0002b 83 e5 0c         and ebp, 12                            
+  0002e 41 83 fa 03      cmp r10d, 3                            
+  00032 0f 85 a9 00 00 
+        00               jne .B2.13 
+.B2.4::                         
+  00038 41 0f b6 eb      movzx ebp, r11b                        
+  0003c c1 ed 04         shr ebp, 4                             
+  0003f 83 fd 08         cmp ebp, 8                             
+  00042 77 36            ja .B2.8 
+.B2.5::                         
+  00044 85 ed            test ebp, ebp                          
+  00046 75 1e            jne .B2.7 
+.B2.6::                         
+  00048 41 0f b7 cb      movzx ecx, r11w                        
+  0004c 48 83 c2 02      add rdx, 2                             
+  00050 c1 e9 08         shr ecx, 8                             
+  00053 48 f7 d9         neg rcx                                
+  00056 48 03 c8         add rcx, rax                           
+  00059 8b 29            mov ebp, DWORD PTR [rcx]               
+  0005b 89 28            mov DWORD PTR [rax], ebp               
+  0005d 48 83 c0 03      add rax, 3                             
+  00061 e9 40 01 00 00   jmp .B2.18 
+.B2.7::                         
+  00066 48 8b 4a 01      mov rcx, QWORD PTR [1+rdx]             
+  0006a 48 89 08         mov QWORD PTR [rax], rcx               
+  0006d 48 03 c5         add rax, rbp                           
+  00070 ff c5            inc ebp                                
+  00072 48 03 d5         add rdx, rbp                           
+  00075 e9 2c 01 00 00   jmp .B2.18 
+.B2.8::                         
+  0007a 83 fd 09         cmp ebp, 9                             
+  0007d 76 25            jbe .B2.10 
+.B2.9::                         
+  0007f 41 c1 eb 08      shr r11d, 8                            
+  00083 48 83 c2 04      add rdx, 4                             
+  00087 f7 dd            neg ebp                                
+  00089 49 f7 db         neg r11                                
+  0008c 4c 03 d8         add r11, rax                           
+  0008f 8d 4c 2d 24      lea ecx, DWORD PTR [36+rbp+rbp]        
+  00093 f2 41 0f f0 03   lddqu xmm0, XMMWORD PTR [r11]          
+  00098 f3 0f 7f 00      movdqu XMMWORD PTR [rax], xmm0         
+  0009c 48 03 c1         add rax, rcx                           
+  0009f e9 02 01 00 00   jmp .B2.18 
+.B2.10::                        
+  000a4 8b 4a 01         mov ecx, DWORD PTR [1+rdx]             
+  000a7 41 89 ca         mov r10d, ecx                          
+  000aa 41 c1 ea 03      shr r10d, 3                            
+  000ae 33 ed            xor ebp, ebp                           
+  000b0 83 e1 07         and ecx, 7                             
+  000b3 49 f7 da         neg r10                                
+  000b6 45 33 db         xor r11d, r11d                         
+  000b9 4c 03 d0         add r10, rax                           
+.B2.11::                        
+  000bc ff c5            inc ebp                                
+  000be f2 43 0f f0 04 
+        13               lddqu xmm0, XMMWORD PTR [r11+r10]      
+  000c4 f3 41 0f 7f 04 
+        03               movdqu XMMWORD PTR [r11+rax], xmm0     
+  000ca 41 83 c3 10      add r11d, 16                           
+  000ce 3b e9            cmp ebp, ecx                           
+  000d0 76 ea            jbe .B2.11 
+.B2.12::                        
+  000d2 c1 e5 04         shl ebp, 4                             
+  000d5 48 83 c2 05      add rdx, 5                             
+  000d9 48 03 c5         add rax, rbp                           
+  000dc e9 c5 00 00 00   jmp .B2.18 
+.B2.13::                        
+  000e1 41 83 fa 0c      cmp r10d, 12                           
+  000e5 74 7b            je .B2.17 
+.B2.14::                        
+  000e7 44 89 d9         mov ecx, r11d                          
+  000ea 83 e1 03         and ecx, 3                             
+  000ed 75 3c            jne .B2.16 
+.B2.15::                        
+  000ef 03 ed            add ebp, ebp                           
+  000f1 41 ba ff ff ff 
+        ff               mov r10d, -1                           
+  000f7 89 e9            mov ecx, ebp                           
+  000f9 41 d3 ea         shr r10d, cl                           
+  000fc 45 23 da         and r11d, r10d                         
+  000ff 41 c1 eb 04      shr r11d, 4                            
+  00103 49 f7 db         neg r11                                
+  00106 4c 03 d8         add r11, rax                           
+  00109 c1 ed 03         shr ebp, 3                             
+  0010c f7 dd            neg ebp                                
+  0010e 83 c5 04         add ebp, 4                             
+  00111 4d 8b 13         mov r10, QWORD PTR [r11]               
+  00114 4c 89 10         mov QWORD PTR [rax], r10               
+  00117 f2 41 0f f0 43 
+        08               lddqu xmm0, XMMWORD PTR [8+r11]        
+  0011d f3 0f 7f 40 08   movdqu XMMWORD PTR [8+rax], xmm0       
+  00122 48 03 d5         add rdx, rbp                           
+  00125 48 83 c0 18      add rax, 24                            
+  00129 eb 7b            jmp .B2.18 
+.B2.16::                        
+  0012b c1 e1 03         shl ecx, 3                             
+  0012e 41 ba ff ff ff 
+        ff               mov r10d, -1                           
+  00134 41 d3 ea         shr r10d, cl                           
+  00137 f7 dd            neg ebp                                
+  00139 45 23 da         and r11d, r10d                         
+  0013c 83 c5 10         add ebp, 16                            
+  0013f 41 c1 eb 04      shr r11d, 4                            
+  00143 49 f7 db         neg r11                                
+  00146 4c 03 d8         add r11, rax                           
+  00149 c1 e9 03         shr ecx, 3                             
+  0014c f7 d9            neg ecx                                
+  0014e 83 c1 04         add ecx, 4                             
+  00151 f2 41 0f f0 03   lddqu xmm0, XMMWORD PTR [r11]          
+  00156 f3 0f 7f 00      movdqu XMMWORD PTR [rax], xmm0         
+  0015a 48 03 c5         add rax, rbp                           
+  0015d 48 03 d1         add rdx, rcx                           
+  00160 eb 44            jmp .B2.18 
+.B2.17::                        
+  00162 44 89 d9         mov ecx, r11d                          
+  00165 bd ff ff ff 00   mov ebp, 16777215                      
+  0016a c1 e9 03         shr ecx, 3                             
+  0016d 83 e1 08         and ecx, 8                             
+  00170 d3 ed            shr ebp, cl                            
+  00172 41 23 eb         and ebp, r11d                          
+  00175 41 83 e3 3c      and r11d, 60                           
+  00179 c1 ed 07         shr ebp, 7                             
+  0017c 48 f7 dd         neg rbp                                
+  0017f 48 03 e8         add rbp, rax                           
+  00182 c1 e9 03         shr ecx, 3                             
+  00185 f7 d9            neg ecx                                
+  00187 41 d1 eb         shr r11d, 1                            
+  0018a 83 c1 03         add ecx, 3                             
+  0018d f2 0f f0 45 00   lddqu xmm0, XMMWORD PTR [rbp]          
+  00192 f3 0f 7f 00      movdqu XMMWORD PTR [rax], xmm0         
+  00196 f2 0f f0 4d 10   lddqu xmm1, XMMWORD PTR [16+rbp]       
+  0019b f3 0f 7f 48 10   movdqu XMMWORD PTR [16+rax], xmm1      
+  001a0 49 03 c3         add rax, r11                           
+  001a3 48 03 d1         add rdx, rcx                           
+.B2.18::                        
+  001a6 49 3b d1         cmp rdx, r9                            
+  001a9 0f 82 6f fe ff 
+        ff               jb .B2.3 
+*/
+
+/*
+; 'Okamigan' (3xQWORD -> 1xQWORD+1xXMMWORD) decompression loop, 18c-21+6=369 bytes long, 106 instructions long:
+; mark_description "Intel(R) C++ Intel(R) 64 Compiler XE for applications running on Intel(R) 64, Version 15.0.0.108 Build 20140";
+; mark_description "-TP -O3 -QxSSE4.1 -D_N_XMM -D_N_prefetch_4096 -D_N_HIGH_PRIORITY -D_icl_mumbo_jumbo_ -FAcs";
+
+.B2.3::                         
+  00021 45 8b 10         mov r10d, DWORD PTR [r8]               
+  00024 45 89 d3         mov r11d, r10d                         
+  00027 44 89 d5         mov ebp, r10d                          
+  0002a 41 83 e3 0f      and r11d, 15                           
+  0002e 83 e5 0c         and ebp, 12                            
+  00031 41 83 fb 03      cmp r11d, 3                            
+  00035 75 75            jne .B2.9 
+.B2.4::                         
+  00037 41 0f b6 ea      movzx ebp, r10b                        
+  0003b c1 ed 04         shr ebp, 4                             
+  0003e 83 fd 08         cmp ebp, 8                             
+  00041 77 44            ja .B2.8 
+.B2.5::                         
+  00043 85 ed            test ebp, ebp                          
+  00045 74 14            je .B2.7 
+.B2.6::                         
+  00047 49 8b 48 01      mov rcx, QWORD PTR [1+r8]              
+  0004b 48 89 08         mov QWORD PTR [rax], rcx               
+  0004e 48 03 c5         add rax, rbp                           
+  00051 ff c5            inc ebp                                
+  00053 4c 03 c5         add r8, rbp                            
+  00056 e9 2e 01 00 00   jmp .B2.16 
+.B2.7::                         
+  0005b 41 0f b7 ca      movzx ecx, r10w                        
+  0005f 49 83 c0 02      add r8, 2                              
+  00063 c1 e9 08         shr ecx, 8                             
+  00066 48 f7 d9         neg rcx                                
+  00069 48 03 c8         add rcx, rax                           
+  0006c f2 0f f0 01      lddqu xmm0, XMMWORD PTR [rcx]          
+  00070 f3 0f 7f 00      movdqu XMMWORD PTR [rax], xmm0         
+  00074 f2 0f f0 49 10   lddqu xmm1, XMMWORD PTR [16+rcx]       
+  00079 f3 0f 7f 48 10   movdqu XMMWORD PTR [16+rax], xmm1      
+  0007e 48 83 c0 20      add rax, 32                            
+  00082 e9 02 01 00 00   jmp .B2.16 
+.B2.8::                         
+  00087 41 c1 ea 08      shr r10d, 8                            
+  0008b 49 83 c0 04      add r8, 4                              
+  0008f f7 dd            neg ebp                                
+  00091 49 f7 da         neg r10                                
+  00094 4c 03 d0         add r10, rax                           
+  00097 8d 4c 2d 24      lea ecx, DWORD PTR [36+rbp+rbp]        
+  0009b f2 41 0f f0 02   lddqu xmm0, XMMWORD PTR [r10]          
+  000a0 f3 0f 7f 00      movdqu XMMWORD PTR [rax], xmm0         
+  000a4 48 03 c1         add rax, rcx                           
+  000a7 e9 dd 00 00 00   jmp .B2.16 
+.B2.9::                         
+  000ac 41 83 fb 0c      cmp r11d, 12                           
+  000b0 75 5e            jne .B2.13 
+.B2.10::                        
+  000b2 41 f7 c2 30 00 
+        00 00            test r10d, 48                          
+  000b9 75 20            jne .B2.12 
+.B2.11::                        
+  000bb 41 0f b7 ca      movzx ecx, r10w                        
+  000bf 49 83 c0 02      add r8, 2                              
+  000c3 c1 e9 06         shr ecx, 6                             
+  000c6 48 f7 d9         neg rcx                                
+  000c9 48 03 c8         add rcx, rax                           
+  000cc 48 8b 29         mov rbp, QWORD PTR [rcx]               
+  000cf 48 89 28         mov QWORD PTR [rax], rbp               
+  000d2 48 83 c0 06      add rax, 6                             
+  000d6 e9 ae 00 00 00   jmp .B2.16 
+.B2.12::                        
+  000db 44 89 d1         mov ecx, r10d                          
+  000de 49 83 c0 04      add r8, 4                              
+  000e2 c1 e9 06         shr ecx, 6                             
+  000e5 48 f7 d9         neg rcx                                
+  000e8 48 03 c8         add rcx, rax                           
+  000eb 49 83 e2 30      and r10, 48                            
+  000ef f2 0f f0 01      lddqu xmm0, XMMWORD PTR [rcx]          
+  000f3 f3 0f 7f 00      movdqu XMMWORD PTR [rax], xmm0         
+  000f7 f2 0f f0 49 10   lddqu xmm1, XMMWORD PTR [16+rcx]       
+  000fc f3 0f 7f 48 10   movdqu XMMWORD PTR [16+rax], xmm1      
+  00101 f2 0f f0 51 20   lddqu xmm2, XMMWORD PTR [32+rcx]       
+  00106 f3 0f 7f 50 20   movdqu XMMWORD PTR [32+rax], xmm2      
+  0010b 49 03 c2         add rax, r10                           
+  0010e eb 79            jmp .B2.16 
+.B2.13::                        
+  00110 44 89 d1         mov ecx, r10d                          
+  00113 83 e1 03         and ecx, 3                             
+  00116 75 3c            jne .B2.15 
+.B2.14::                        
+  00118 03 ed            add ebp, ebp                           
+  0011a 41 bb ff ff ff 
+        ff               mov r11d, -1                           
+  00120 89 e9            mov ecx, ebp                           
+  00122 41 d3 eb         shr r11d, cl                           
+  00125 45 23 d3         and r10d, r11d                         
+  00128 41 c1 ea 04      shr r10d, 4                            
+  0012c 49 f7 da         neg r10                                
+  0012f 4c 03 d0         add r10, rax                           
+  00132 c1 ed 03         shr ebp, 3                             
+  00135 f7 dd            neg ebp                                
+  00137 83 c5 04         add ebp, 4                             
+  0013a 4d 8b 1a         mov r11, QWORD PTR [r10]               
+  0013d 4c 89 18         mov QWORD PTR [rax], r11               
+  00140 f2 41 0f f0 42 
+        08               lddqu xmm0, XMMWORD PTR [8+r10]        
+  00146 f3 0f 7f 40 08   movdqu XMMWORD PTR [8+rax], xmm0       
+  0014b 4c 03 c5         add r8, rbp                            
+  0014e 48 83 c0 18      add rax, 24                            
+  00152 eb 35            jmp .B2.16 
+.B2.15::                        
+  00154 c1 e1 03         shl ecx, 3                             
+  00157 41 bb ff ff ff 
+        ff               mov r11d, -1                           
+  0015d 41 d3 eb         shr r11d, cl                           
+  00160 f7 dd            neg ebp                                
+  00162 45 23 d3         and r10d, r11d                         
+  00165 83 c5 10         add ebp, 16                            
+  00168 41 c1 ea 04      shr r10d, 4                            
+  0016c 49 f7 da         neg r10                                
+  0016f 4c 03 d0         add r10, rax                           
+  00172 c1 e9 03         shr ecx, 3                             
+  00175 f7 d9            neg ecx                                
+  00177 83 c1 04         add ecx, 4                             
+  0017a f2 41 0f f0 02   lddqu xmm0, XMMWORD PTR [r10]          
+  0017f f3 0f 7f 00      movdqu XMMWORD PTR [rax], xmm0         
+  00183 48 03 c5         add rax, rbp                           
+  00186 4c 03 c1         add r8, rcx                            
+.B2.16::                        
+  00189 4d 3b c1         cmp r8, r9                             
+  0018c 0f 82 8f fe ff 
+        ff               jb .B2.3 
+*/
 
 /*
 ; 'Okamigan' decompression loop, 191-21+6=374 bytes long, 108 instructions long:
@@ -5454,7 +6227,7 @@ char * Railgun_Baw_reverse (char * pbTarget, char * pbPattern, uint32_t cbTarget
 			return(NULL);
 }
 
-// Last change: 2016-Nov-14;
+// Last change: 2017-Feb-07;
 // Last change: 2016-Aug-22; fixed Railgun_Swampshine, after that changed with Trolldom.
 // Last change: 2016-Apr-08; small fix in encoding (avoiding possible negative offset if Sliding Window is biggy) from 2015-Mar-03.
 // If you want to help me to improve it, email me at: sanmayce@sanmayce.com
