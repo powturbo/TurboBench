@@ -143,7 +143,6 @@
 [submodule "base64"]
 	path = base64
 	url = https://github.com/aklomp/base64
-[submodule "lz5"]
-	path = lz5
-	url = https://github.com/inikep/lz5
-	branch = lz5_v2.0
+[submodule "lizard"]
+	path = lizard
+	url = https://github.com/inikep/lizard.git
