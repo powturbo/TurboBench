@@ -618,7 +618,7 @@ char * _ui64toaKAZEzerocomma4 (
 //#define _N_prefetch_4096
 
 //Only one must be uncommented:
-#define _WIN32_ENVIRONMENT_
+//#define _WIN32_ENVIRONMENT_
 //#define _POSIX_ENVIRONMENT_
 
 #include <stdio.h>
@@ -629,7 +629,7 @@ char * _ui64toaKAZEzerocomma4 (
 
       clock_t clocks0, clocks1, clocks2;
 
-#if defined(_WIN32_ENVIRONMENT_)
+#if defined(_WIN32)
 #include <io.h> // needed for Windows' 'lseeki64' and 'telli64'
 //Above line must be commented in order to compile with Intel C compiler: an error "can't find io.h" occurs.
 #else
