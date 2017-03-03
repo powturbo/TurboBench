@@ -429,8 +429,8 @@ class Out: public libzpaq::Writer {
   #endif
     
   #if C_LIZARD
-#include "lz5/lib/lz5_compress.h"    //v2.0
-#include "lz5/lib/lz5_decompress.h"
+#include "lizard/lib/lz5_compress.h"    //v2.0
+#include "lizard/lib/lz5_decompress.h"
   #endif
     
   #if C_LZFSEA
