@@ -318,11 +318,11 @@ struct plugg {
 
 struct plugg plugg[] = 
 {
-  { "FASTEST",   "lzturbo,10,11,12,19,20,21,22,29/lz4,0,1/lz5,0,1/chameleon,1,2/density,1,3/memcpy", 						"Fastest de-/compression. HDD/SSD/RAM speed" },
-  { "FAST",      "lzturbo,10,10a,11,12,20,20a,21,22,30,30a,31,32/zlib,1,6,9/brotli,0,1,4,5/lz4,1/zstd,1,5,9/lz5,1,6/memcpy","lz4,lzturbo,zlib class" },
-  { "EFFICIENT", "lzturbo,21,22,30,30a,31,32/brotli,4,5/zlib,5,6/zstd,5,9/lz5,5,6/zling,4/memcpy",							"Compression speed > 'zlib 6' class" },
-  { "MAX",       "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lz5,15/lzlib,9/zstd,20/memcpy",						"Best compression (slow)" },
-  { "OPTIMAL",   "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lz5,15/lzlib,9/zstd,20/zopfli/memcpy", 				"Optimal compression (slow)" },
+  { "FASTEST",   "lzturbo,10,11,12,19,20,21,22,29/lz4,0,1/lizard,10/chameleon,1,2/density,1,3/memcpy", 						"Fastest de-/compression. HDD/SSD/RAM speed" },
+  { "FAST",      "lzturbo,10,10a,11,12,20,20a,21,22,30,30a,31,32/zlib,1,6,9/brotli,0,1,4,5/lz4,1/zstd,1,5,9/memcpy","lz4,lzturbo,zlib class" },
+  { "EFFICIENT", "lzturbo,21,22,30,30a,31,32/brotli,4,5/zlib,5,6/zstd,5,9/zling,4/memcpy",							"Compression speed > 'zlib 6' class" },
+  { "MAX",       "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lizard,19,29,39,49/lzlib,9/zstd,22/memcpy",						"Best compression (slow)" },
+  { "OPTIMAL",   "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lizard,49/lzlib,19,29,39,49/zstd,22/zopfli/memcpy", 				"Optimal compression (slow)" },
   { "BWT",       "bsc_st,4,5/bsc,2/bcm/bzip2/memcpy/", 																		"ST & BWT" },
   { "ECODER",    "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/memcpy/", "Entropy coder" },
 };
