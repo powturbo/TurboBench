@@ -388,7 +388,7 @@ endif
 #-------------------- Entropy Coder -------------------
 ifeq ($(NECODER), 0)
 OB+=FastARI/FastAri.o 
-OB+=rans_static/rANS_static4x8.o rans_static/rANS_static4x16.o rans_static/rANS_static.o rans_static_/arith_static.o
+OB+=rans_static/rANS_static4x8.o rans_static/rANS_static4x16.o rans_static/rANS_static.o rans_static/arith_static.o
 ifeq ($(AVX2),1)
 OB+=rans_static/r32x16b_avx2.o
 endif
