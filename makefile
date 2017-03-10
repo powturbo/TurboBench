@@ -149,10 +149,10 @@ OB+=LZMA-SDK/C/LzFind.o LZMA-SDK/C/LzmaDec.o LZMA-SDK/C/LzmaEnc.o LZMA-SDK/C/Lzm
 OB+=zstd/lib/common/xxhash.o zstd/lib/common/error_private.o zstd/lib/compress/zstd_compress.o zstd/lib/decompress/zstd_decompress.o zstd/lib/compress/fse_compress.o zstd/lib/common/fse_decompress.o zstd/lib/compress/huf_compress.o zstd/lib/decompress/huf_decompress.o zstd/lib/common/zstd_common.o zstd/lib/common/entropy_common.o
 
 ifeq ($(BROTLI), 0)
-OB+=brotli/enc/backward_references.o brotli/enc/static_dict.o 
-else
 #Modified files to disable dictionary.
 OB+=brotli_/enc/backward_references.o brotli_/enc/static_dict.o 
+else
+OB+=brotli/enc/backward_references.o brotli/enc/static_dict.o 
 endif
 OB+=brotli/enc/bit_cost.o brotli/enc/cluster.o brotli/enc/block_splitter.o brotli/enc/encode.o brotli/enc/entropy_encode.o brotli/enc/compress_fragment.o brotli/enc/compress_fragment_two_pass.o brotli/enc/histogram.o \
 	brotli/enc/literal_cost.o brotli/enc/brotli_bit_stream.o brotli/enc/memory.o brotli/enc/metablock.o brotli/dec/bit_reader.o brotli/dec/decode.o brotli/common/dictionary.o \
@@ -359,10 +359,7 @@ endif
 endif
 #-------------------- Encoding ------------------------
 ifeq ($(NENCOD),0)
-fastbase64/src/avxbase64.o: fastbase64/src/avxbase64.c
-	$(CC) -O3 -mavx2 $(MARCH) -Ifastbase64/include $< -c -o $@ 
-
-fastbase64/src/experimentalavxbase64.o: fastbase64/src/experimentalavxbase64.c
+fastbase64/src/fastavxbase64.o: fastbase64/src/fastavxbase64.c
 	$(CC) -O3 -mavx2 $(MARCH) -Ifastbase64/include $< -c -o $@ 
 
 base64/lib/arch/avx2/codec.o: base64/lib/arch/avx2/codec.c
@@ -382,7 +379,7 @@ OB+=TurboBase64/turbob64c.o TurboBase64/turbob64d.o
 OB+=TurboRLE/trlec.o TurboRLE/trled.o
 OB+=fastbase64/src/chromiumbase64.o fastbase64/src/quicktimebase64.o fastbase64/src/scalarbase64.o
 ifeq ($(AVX2),1)
-OB+=fastbase64/src/avxbase64.o fastbase64/src/experimentalavxbase64.o 
+OB+=fastbase64/src/fastavxbase64.o 
 endif
 endif
 #-------------------- Entropy Coder -------------------
