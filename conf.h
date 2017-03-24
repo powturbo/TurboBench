@@ -173,10 +173,6 @@ static inline unsigned long long ctou64(const void *cp) { unsigned long long x; 
 
 //---------------------misc ---------------------------------------------------   
 #define SIZE_ROUNDUP(_n_, _a_) (((size_t)(_n_) + (size_t)((_a_) - 1)) & ~(size_t)((_a_) - 1))
-  #ifndef min
-#define min(x,y) (((x)<(y)) ? (x) : (y))
-#define max(x,y) (((x)>(y)) ? (x) : (y))
-  #endif
   
 #define TEMPLATE2_(_x_, _y_) _x_##_y_
 #define TEMPLATE2(_x_, _y_) TEMPLATE2_(_x_,_y_)
