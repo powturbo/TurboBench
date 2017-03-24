@@ -13,20 +13,20 @@ TurboBench: Compressor Benchmark[![Build Status](https://travis-ci.org/powturbo/
  - Benchmark **multiblock** file as one large block, but each block processed separatelly
  - Avoid **cache szenario** found in other benchmarks with small files
  - Set block size, file size limit,...
- - Set number of **iterations**, number of **runs**, **benchmarks**, set max. **time** per run
+ - Set number of **iterations**, number of **runs**, set max. **time** per run
    and for all benchmarks.
  - Automatic **sort**
- - :new: automatic update & merge of result files
- - :new: **Text**, **html**, **csv**, **markdown** and other output formats without retesting
- - :new: html output with sortable tables
- - :new: **Transfer speed sheet** for different connections or devices: GPRS,2G,3G,4G,DSL,Network,HDD,SSD,RAM
+ - :sparkles: automatic update & merge of result files
+ - **Text**, **html**, **csv**, **markdown** and other output formats without retesting
+ - :sparkles: html output with sortable tables
+ - :sparkles: **Transfer speed sheet** for different connections or devices: GPRS,2G,3G,4G,DSL,Network,HDD,SSD,RAM
  - :+1: **Html plot:** **Speedup** + **Speed/Ratio**
  - **Linux** and **Windows** binaries
  - 100% C/C++, w/o inline assembly 
  - Enable/disable groups or individual codecs at compile time
  - All in one executable, no hassless installing of additional packages, graphic libraries, python,...
  - :+1: build in peak memory usage reporting for compression and decompression in html output
- - :new: **Encoding** and **Transform** plugins 
+ - **Encoding** and **Transform** codecs 
 
 ### Download benchmark executable incl. LzTurbo:
  - [TurboBench Linux](https://sites.google.com/site/powturbo/downloads)
