@@ -123,7 +123,7 @@ enum {
  P_LZFSE,
 #define C_LZFSEA    0 // apple api on Osx. disabled 
  P_LZFSEA,
-#define C_LZLIB 	GPL
+#define C_LZLIB 	COMP2
  P_LZLIB, 
 #define C_LZMA		COMP1 			
  P_LZMA, 
@@ -211,6 +211,7 @@ enum {
 #define C_RLE		ENCOD
  P_RLES,
  P_RLET,
+ P_RLEM,
   //---------- Transform ------------------
 #define C_DIVBWT     C_LIBBSC //_TRANSFORM
  P_DIVBWT,
@@ -301,6 +302,7 @@ enum {
 #include <stdlib.h> 
 #include <string.h>
 #include <time.h>
+#include "conf.h"
 #include "plugins.h"
 
   #if C_BALZ
@@ -443,21 +445,26 @@ class Out: public libzpaq::Writer {
  
   #if C_LZLIB
 #include "lzlib_/bbexample.h"
-struct Lzma_options  {
-  int dictionary_size;		// 4 KiB .. 512 MiB
-  int match_len_limit;		// 5 .. 273
-};
-static const Lzma_options option_mapping[] =  {
-  { 1 << 16,  16 },		// -0 entry values not used
-  { 1 << 20,   5 },		// -1
-  { 3 << 19,   6 },		// -2
-  { 1 << 21,   8 },		// -3
-  { 3 << 20,  12 },		// -4
-  { 1 << 22,  20 },		// -5
-  { 1 << 23,  36 },		// -6
-  { 1 << 24,  68 },		// -7
-  { 3 << 23, 132 },		// -8
-  { 1 << 25, 273 } };	// -9
+  struct Lzma_options
+    {
+    int dictionary_size;		/* 4 KiB .. 512 MiB */
+    int match_len_limit;		/* 5 .. 273 */
+    };
+  /* Mapping from gzip/bzip2 style 1..9 compression modes
+     to the corresponding LZMA compression modes. */
+  const struct Lzma_options option_mapping[] =
+    {
+    {   65535,  16 },		/* -0 (65535,16 chooses fast encoder) */
+    { 1 << 20,   5 },		/* -1 */
+    { 3 << 19,   6 },		/* -2 */
+    { 1 << 21,   8 },		/* -3 */
+    { 3 << 20,  12 },		/* -4 */
+    { 1 << 22,  20 },		/* -5 */
+    { 1 << 23,  36 },		/* -6 */
+    { 1 << 24,  68 },		/* -7 */
+    { 3 << 23, 132 },		/* -8 */
+    { 1 << 25, 273 } };		/* -9 */
+  struct Lzma_options encoder_options;
   #endif
   
   #if C_LZMA
@@ -516,6 +523,8 @@ static const Lzma_options option_mapping[] =  {
 #include "pysap/pysapcompress/hpa106cslzc.h"
 #include "pysap/pysapcompress/hpa107cslzh.h"
 #include "pysap/pysapcompress/hpa105CsObjInt.h"
+#undef max
+#undef min
   #endif
 
   #if C_SHRINKER
@@ -576,6 +585,7 @@ static const Lzma_options option_mapping[] =  {
   #endif  
 
   #if C_ZSTD
+#define ZSTD_STATIC_LINKING_ONLY
 #include "zstd/lib/zstd.h"
   #endif
 
@@ -636,13 +646,14 @@ struct snappy_env env;
   //------------------------------------ Encoding -----------------------------------
   #if C_RLE
 #include "TurboRLE/trle.h"
+#include "TurboRLE/ext/mrle.h"
   #endif
   #if C_TB64
 #include "TurboBase64/turbob64.h"
   #endif
   #if C_SB64
-#include "base64simd/encode/lookup.sse.cpp"
-#include "base64simd/decode/decode.sse.cpp"
+//#include "base64simd/encode/lookup.sse.cpp"
+//#include "base64simd/decode/decode.sse.cpp"
   #endif
 
   #if C_B64
@@ -654,7 +665,7 @@ extern "C" {
   #endif
   #if C_FB64
    #ifdef AVX2_ON
-#include "fastbase64/include/avxbase64.h"
+#include "fastbase64/include/fastavxbase64.h"
 size_t expavx2_base64_decode(char *out, const char *src, size_t srclen);
 size_t expavx2_base64_encode(char* dest, const char* str, size_t len);
    #endif
@@ -770,7 +781,7 @@ struct plugs plugs[] = {
   { P_BCM, 		"bcm", 				C_BCM, 		"1.25",		"bcm",					"Public Domain",	"https://github.com/encode84/bcm", 													"" }, 
   { P_C_BLOSC2, "blosc",			C_C_BLOSC2, "2.0",		"Blosc",				"BSD license",		"https://github.com/Blosc/c-blosc2", 													"0,1,2,3,4,5,6,7,8,9", 64*1024},
   { P_BRIEFLZ,	"brieflz", 		    C_BRIEFLZ, 	"1.1.0",	"BriefLz",				"BSD like",			"https://github.com/jibsen/brieflz", 													"" }, 
-  { P_BROTLI,	"brotli", 			C_BROTLI, 	"16-08",	"Brotli",				"Apache license",	"https://github.com/google/brotli", 													"0,1,2,3,4,5,6,7,8,9,10,11/DOWX"},
+  { P_BROTLI,	"brotli", 			C_BROTLI, 	"16-08",	"Brotli",				"Apache license",	"https://github.com/google/brotli", 													"0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
   { P_BZIP2,	"bzip2", 			C_BZIP2, 	"1.06",		"Bzip2",				"BSD like",			"http://www.bzip.org/downloads.html\thttps://github.com/asimonov-im/bzip2", 			"" }, 
   { P_CHAMELEON,"chameleon",		C_CHAMELEON, "15-03",	"Chameleon",			"Public Domain",	"http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html", 					"1,2" },
   { P_CRUSH,	"crush", 			C_CRUSH, 	"1.0.0",	"Crush",				"Public Domain",	"http://sourceforge.net/projects/crush", 												"0,1,2" },
@@ -781,8 +792,8 @@ struct plugs plugs[] = {
   { P_GIPFELI, 	"gipfeli", 			C_GIPFELI, 	"16-08",	"Gipfeli",				"Apache license",	"https://github.com/google/gipfeli",													"" }, 
   { P_GLZA, 	"glza", 			C_GLZA, 	"16-08",	"glza",					"Apache license",	"https://github.com/jrmuizel/GLZA",													    "" }, 
   { P_HEATSHRINK,"heatshrink",		C_HEATSHRINK,"0.4.1",	"heatshrink",			"BSD license",		"https://github.com/atomicobject/heatshrink",											"" },
-  { P_LIBBSC_ST,"bsc_st", 			C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"3,4,5,6,7,8" }, 
-  { P_LIBBSC, 	"bsc", 				C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"1,2"}, 
+ // { P_LIBBSC_ST,"bsc_st", 			C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"3,4,5,6,7,8" }, 
+  { P_LIBBSC, 	"bsc", 				C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"0,3,4,5,6,7,8/p:e#"}, 
   { P_LIBDEFLATE,"libdeflate", 	    C_LIBDEFLATE,"16-06",	"libdeflate",			"CC0 license",		"https://github.com/ebiggers/libdeflate",												"1,2,3,4,5,6,7,8,9,12/dg"}, 
   { P_LIBLZF, 	"lzf", 				C_LIBLZF, 	"1.06",		"LibLZF",				"BSD license",		"http://oldhome.schmorp.de/marc/liblzf.html\thttps://github.com/nemequ/liblzf",			"" },
   { P_LIBLZG,  	"lzg", 				C_LIBLZG,   "1.0.8",	"LibLzg",				"zlib-license",		"https://github.com/mbitsnbites/liblzg\thttp://liblzg.bitsnbites.eu/e",					"1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
@@ -792,10 +803,10 @@ struct plugs plugs[] = {
   { P_LIZARD,  	"lizard",			C_LIZARD, 	"2.0",	    "Lizard",				"BSD license",		"https://github.com/inikep/lizard",														"10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" }, 
   { P_LZFSE, 	"lzfse", 			C_LZFSE, 	"16-08",	"lzfse",				"BSD licence",		"https://github.com/lzfse/lzfse","" },
   { P_LZFSEA, 	"lzfsea", 			C_LZFSEA, 	"2015",		"lzfsea",				"iOS and OS X",		"https://developer.apple.com/library/ios/documentation/Performance/Reference/Compression/index.html","" },
-  { P_LZHAM, 	"lzham", 			C_LZHAM,	"1.1",		"Lzham",				"MIT license",		"https://github.com/richgel999/lzham_codec_devel",										"1,2,3,4/x" }, 
-  { P_LZLIB, 	"lzlib", 			C_LZLIB, 	"1.7",		"Lzlib",				"GPL license",		"http://www.nongnu.org/lzip\thttps://github.com/daniel-baumann/lzlib",					"1,2,3,4,5,6,7,8,9" },
+  { P_LZHAM, 	"lzham", 			C_LZHAM,	"1.1",		"Lzham",				"MIT license",		"https://github.com/richgel999/lzham_codec_devel",										"1,2,3,4/t#:fb#:x#" },
+  { P_LZLIB, 	"lzlib", 			C_LZLIB, 	"1.9",		"Lzlib",				"BSD license",		"http://www.nongnu.org/lzip\thttps://github.com/daniel-baumann/lzlib",					"1,2,3,4,5,6,7,8,9/d#:fb#" },
   { P_LZMAT, 	"lzmat", 			C_LZMAT, 	"1.0",		"Lzmat",				"GPL license",		"https://github.com/nemequ/lzmat\thttp://www.matcode.com/lzmat.htm",					"" },
-  { P_LZMA,  	"lzma", 			C_LZMA, 	"9.35",		"Lzma",					"Public Domain",	"http://7-zip.org\thttps://github.com/jljusten/LZMA-SDK", 								"0,1,2,3,4,5,6,7,8,9" }, 
+  { P_LZMA,  	"lzma", 			C_LZMA, 	"9.35",		"Lzma",					"Public Domain",	"http://7-zip.org\thttps://github.com/jljusten/LZMA-SDK", 								"0,1,2,3,4,5,6,7,8,9/d#:fb#:lp#:lc#:pb#:a#:mt#" }, 
 
   { P_LZO1b, 	"lzo1b", 			C_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"1,9,99,999" },  
   { P_LZO1c, 	"lzo1c",			C_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"1,9,99,999" },
@@ -827,7 +838,7 @@ struct plugs plugs[] = {
   { P_ZLIB, 	"zlib", 			C_ZLIB, 	"1.2.8",	"zlib",					"zlib license",		"http://zlib.net\thttps://github.com/madler/zlib", 										"1,2,3,4,5,6,7,8,9" },
   { P_ZLING, 	"zling", 	   		C_ZLING, 	"16-01",	"Libzling",				"BSD license",		"https://github.com/richox/libzling",													"0,1,2,3,4" }, 
   { P_ZOPFLI, 	"zopfli",			C_ZOPFLI, 	"16-04",	"Zopfli",				"Apache license",	"https://code.google.com/p/zopfli",														""}, 
-  { P_ZSTD, 	"zstd", 			C_ZSTD,		"1.0.0",	"ZSTD",					"BSD license+Patents","https://github.com/facebook/zstd", 													"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },
+  { P_ZSTD, 	"zstd", 			C_ZSTD,		"1.0.0",	"ZSTD",					"BSD license+Patents","https://github.com/facebook/zstd", 													"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22/d#" },
 //-----------------------------------------------------------------------------------	  
   { P_MCPY, 	"imemcpy", 			C_MEMCPY, 	".",		"inline memcpy",		"------------",		"--------------------------------------",												"" },
   { P_LMCPY, 	"memcpy",			C_MEMCPY,  	".",		"library memcpy",		"",					"",																						"" },
@@ -858,8 +869,9 @@ struct plugs plugs[] = {
   { P_TORNADOHF,"tornado_huff", 	C_TORNADOHF,"0.6a",		"Tornado Huf",			"GPL license",		"http://freearc.org/Research.aspx\thttps://github.com/nemequ/tornado" ,					"" },
   { P_ZLIBH, 	"zlibh",			C_ZLIBH, 	"1.2.8",	"zlib Huffmann",		"BSD license",		"https://github.com/Cyan4973/FiniteStateEntropy",										"", E_HUF },
   //---- Encoding ------
-  { P_RLES, 	"srle",	    		C_RLE, 	    "16-01", 	"TurboRLE ESC",			"            ",		"https://sites.google.com/site/powturbo",  												"0,8,16,32,64" },
-  { P_RLET, 	"trle",	    		C_RLE, 	    "16-01", 	"TurboRLE",			    "            ",		"https://sites.google.com/site/powturbo",  												"" },
+  { P_RLES, 	"srle",	    		C_RLE, 	    "16-01", 	"TurboRLE ESC",			"            ",		"https://github.com/powturbo/TurboRLE",  												"0,8,16,32,64" },
+  { P_RLET, 	"trle",	    		C_RLE, 	    "16-01", 	"TurboRLE",			    "            ",		"https://github.com/powturbo/TurboRLE",  												"" },
+  { P_RLEM, 	"mrle",	    		C_RLE, 	    "16-01", 	"Mespostine RLE",	    "            ",		"https://github.com/powturbo/TurboRLE",  												"" },
   
   { P_FB64AVX,		"fb64_avx2",    C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
   { P_FB64CHROMIUM, "fb64chromium", C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
@@ -890,12 +902,38 @@ struct plugs plugs[] = {
 #define max(x,y) (((x)>(y)) ? (x) : (y))
   #endif
 
+#define Kb (1u<<10)
+#define Mb (1u<<20)
+#define Gb (1u<<30)
+#define KB 1000
+#define MB 1000000
+#define GB 1000000000
+
+unsigned argtoi(char *s, unsigned def) {
+  char *p; 
+  unsigned n = strtol(s, &p, 10),f = 1;
+  switch(*p) {
+    case 'K': f = KB; break;
+    case 'M': f = MB; break;
+    case 'G': f = GB; break;
+    case 'k': f = Kb; break;
+    case 'm': f = Mb; break;
+    case 'g': f = Gb; break;
+    case 'b': def = 0;
+	default: if(!def) return n>=32?0xffffffffu:(1u << n); f = def; 
+  }
+  return n*f;
+}
+
 void libmemcpy(unsigned char *dst, unsigned char *src, int len) {
   void *(*memcpy_ptr)(void *, const void *, size_t) = memcpy;
   if (time(NULL) == 1) 
     memcpy_ptr = NULL;
   memcpy_ptr(dst, src, len);
 }
+
+static int dicsize;
+int coddicsize(int _dicsize) { dicsize = _dicsize; }	
 
 static char _workmem[1<<16],*workmem=_workmem;
 static int state_size,dstate_size;
@@ -992,8 +1030,12 @@ void codexit(int codec) {
 } 
 
 int brotlidic,brotlictx,brotlirep;
+#define powof2(n) !((n)&((n)-1))
 
-int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int codec, int lev, char *prm) {  int outlen; unsigned char *oend=out+outsize;
+int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int codec, int lev, char *prm) { int outlen; unsigned char *oend=out+outsize;
+  unsigned dsize = dicsize; char *q;
+  if(q = strchr(prm,'d')) dsize = argtoi(q+(q[1]=='='?2:1),0); 
+
   switch(codec) { 
       #ifdef LZTURBO  
     #include "../beplugc.c"
@@ -1012,7 +1054,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         #ifdef _C_BLOSC2LZ
       return blosclz_compress(lev, in, inlen, out, outsize);
         #else
-      return blosc_compress(lev/*clevel*/, 0/*doshuffle*/, 1/*typesize*/, inlen, in, out, outsize /*inlen+BLOSC_MAX_OVERHEAD*/);
+      return blosc_compress(lev, strchr(prm,'s')?1:0/*doshuffle*/, (q=strchr(prm,'t'))?atoi(q+(q[1]=='='?2:1)):1/*typesize*/, inlen, in, out, outsize/*inlen+BLOSC_MAX_OVERHEAD*/);
         #endif 
       #endif 
 
@@ -1021,25 +1063,27 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif
 	  
       #if C_BROTLI
-    case P_BROTLI: { int lgwin,mode=0; char *q; if(q = strchr(prm,'m')) mode = *++q - '0';
-	    if(lev==11) lgwin = 30; if(strchr(prm,'w')) lgwin=22; else if(strchr(prm,'W')) lgwin=30; 			   if(strchr(prm,'D')) brotlidic++; if(strchr(prm,'R')) brotlirep++; if(strchr(prm,'X')) brotlictx++;
+    case P_BROTLI: { int lgwin = BROTLI_DEFAULT_WINDOW, mode = BROTLI_DEFAULT_MODE; brotlidic = brotlictx = brotlirep = 0; 
+	    if(q = strchr(prm,'m')) mode = atoi(q+(q[1]=='='?2:1));
+	    if(dsize) lgwin = bsr32(dsize)-powof2(dsize); 
+		if(strchr(prm,'V')) brotlidic++; //	if(strchr(prm,'R')) brotlirep++; if(strchr(prm,'X')) brotlictx++;
         size_t esize = outsize; 
-        int rc = BrotliEncoderCompress(lev, lgwin, mode, inlen, (uint8_t*)in, &esize, (uint8_t*)out);          brotlidic = brotlictx = brotlirep = 0; 
+        int rc = BrotliEncoderCompress(lev, lgwin, mode, inlen, (uint8_t*)in, &esize, (uint8_t*)out); 		
         return rc?esize:0; 
       }
 	  #endif    
 
       #if C_LIBBSC
-	case P_LIBBSC_ST: return bsc_compress(in, out, inlen,                  0/*LZPHASHSIZE*/,  0/*LIBBSC_DEFAULT_LZPMINLEN*/,                  lev, lev>4?LIBBSC_CODER_QLFC_ADAPTIVE:LIBBSC_CODER_QLFC_STATIC, 0);
-	case P_LIBBSC:    return bsc_compress(in, out, inlen,/*18*/LIBBSC_DEFAULT_LZPHASHSIZE,/*32*/ LIBBSC_DEFAULT_LZPMINLEN, LIBBSC_BLOCKSORTER_BWT, lev,                                                       LIBBSC_DEFAULT_FEATURES);
+	case P_LIBBSC: 
+	  return bsc_compress(in, out, inlen,/*18*/strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPHASHSIZE,/*32*/ strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPMINLEN, lev<3?1:lev, (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1, LIBBSC_DEFAULT_FEATURES);
 	  #endif
 
 	  #if C_LIBDEFLATE
 	case P_LIBDEFLATE:  { 
        struct libdeflate_compressor *dc = libdeflate_alloc_compressor(lev); 
-            if(prm && *prm=='d') outlen = libdeflate_deflate_compress(dc,in, inlen,out, outsize);
-       else if(prm && *prm=='g') outlen = libdeflate_gzip_compress(   dc,in, inlen,out, outsize);
-       else                      outlen = libdeflate_zlib_compress(   dc,in, inlen,out, outsize); 
+            if(strchr(prm,'d')) outlen = libdeflate_deflate_compress(dc,in, inlen,out, outsize);
+       else if(strchr(prm,'g')) outlen = libdeflate_gzip_compress(   dc,in, inlen,out, outsize);
+       else                     outlen = libdeflate_zlib_compress(  dc,in, inlen,out, outsize); 
 	   libdeflate_free_compressor(dc); return outlen;
 	  } 
 	  #endif
@@ -1054,7 +1098,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if C_CSC
     case P_CSC: { 
-        CSCProps prop; CSCEncProps_Init(&prop, inlen<(1<<30)?inlen:(1<<30), lev); CSCEnc_WriteProperties(&prop, (uint8_t*)out, 0);
+        CSCProps prop; CSCEncProps_Init(&prop, dsize?bsr32(dsize)-powof2(dsize):(1<<29), lev); CSCEnc_WriteProperties(&prop, (uint8_t*)out, 0);
         MemISeqInStream  si; si.s.Read  = (int(*)(void *, void *, size_t *))cscread;  si.in  = in;                  si.inlen  = inlen;
 	    MemISeqOutStream so; so.s.Write = (size_t(*)(void *, const void *, size_t  ))cscwrite; so.out = out + CSC_PROP_SIZE; so.outlen = CSC_PROP_SIZE;
 	    CSCEncHandle eh = CSCEnc_Create(&prop, (ISeqOutStream*)&so, NULL); CSCEnc_Encode(eh, (ISeqInStream*)&si, NULL); CSCEnc_Encode_Flush(eh); CSCEnc_Destroy(eh);
@@ -1068,7 +1112,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  
       #if C_DENSITY
     case P_DENSITY: { 
-	    density_buffer_processing_result rs = density_buffer_compress((const uint8_t *)in, inlen,                                 (uint8_t*)out,      outsize, (const DENSITY_COMPRESSION_MODE)lev/*, DENSITY_BLOCK_TYPE_DEFAULT, NULL, NULL*/);
+	    density_buffer_processing_result rs = density_buffer_compress((const uint8_t *)in, inlen, (uint8_t*)out, outsize, (const DENSITY_COMPRESSION_MODE)lev/*, DENSITY_BLOCK_TYPE_DEFAULT, NULL, NULL*/);
         return rs.state?0:rs.bytesWritten;
 	  }
       #endif        (
@@ -1123,49 +1167,50 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if C_LZHAM
-    case P_LZHAM:    
-		lzham_uint32 m_table_max_update_interval;
-		lzham_uint32 m_table_update_interval_slow_rate;
-
-
-	  { static int dicbits[] = { 24, 24, 24, 26, 29, 29 }; if(lev > 4) lev = 4;
-	    lzham_compress_params hprm; memset(&hprm, 0, sizeof(hprm)); 
-		hprm.m_struct_size 						      = sizeof(hprm);
-        hprm.m_dict_size_log2           			  = dicbits[lev];
-        hprm.m_level                    			  = (lzham_compress_level)lev; if(hprm.m_level > LZHAM_COMP_LEVEL_UBER) hprm.m_level = LZHAM_COMP_LEVEL_UBER;
-        hprm.m_compress_flags   					 |= LZHAM_COMP_FLAG_FORCE_SINGLE_THREADED_PARSING;
-        hprm.m_max_helper_threads                     = 0;
-		if(lev == 4 && *prm == 'x') {
-          hprm.m_compress_flags   				     |= LZHAM_COMP_FLAG_EXTREME_PARSING;
-          hprm.m_fast_bytes        				      = LZHAM_MAX_FAST_BYTES;
-		  hprm.m_extreme_parsing_max_best_arrivals    = 4;										
-		}
-		hprm.m_table_update_rate   				      = LZHAM_DEFAULT_TABLE_UPDATE_RATE;		
+    case P_LZHAM: { static int dicbits[] = { 24, 24, 24, 26, 29, 29 }; lzham_compress_params p; memset(&p, 0, sizeof(p)); p.m_struct_size = sizeof(p);
+                               p.m_dict_size_log2                    = out[0] = dsize?(bsr32(dsize)-powof2(dsize)):dicbits[lev]; //printf("[%u,%u] ", dsize, p.m_dict_size_log2);
+                               p.m_level                             = (lzham_compress_level)lev;
+                               p.m_compress_flags                   |= LZHAM_COMP_FLAG_FORCE_SINGLE_THREADED_PARSING;
+                               p.m_compress_flags                   |= strchr(prm,'x')?LZHAM_COMP_FLAG_EXTREME_PARSING:0;
+        if(q=strchr(prm,'t'))  p.m_max_helper_threads                = atoi(q+(q[1]=='='?2:1));
+        if(q=strstr(prm,"fb")) p.m_fast_bytes                        = atoi(q+(q[2]=='='?3:2));
+		if(q=strchr(prm,'x'))  { unsigned x = atoi(q+(q[1]=='='?2:1)); p.m_extreme_parsing_max_best_arrivals = x<4?4:x; }
+		                       p.m_table_update_rate   				 = LZHAM_DEFAULT_TABLE_UPDATE_RATE;		
         size_t outlen        = outsize;		
 		lzham_uint32 adler32 = 0;
-        lzham_compress_status_t rc = lzham_compress_memory(&hprm, (lzham_uint8*)out, &outlen, (const lzham_uint8 *)in, inlen, &adler32); 
+        lzham_compress_status_t rc = lzham_compress_memory(&p, (lzham_uint8*)out+1, &outlen, (const lzham_uint8 *)in, inlen, &adler32);
         return rc == LZHAM_COMP_STATUS_SUCCESS?outlen:-rc;
-      }
+    }
       #endif
 		
+      #if C_LZMA
         #ifdef __x86_64__
            #define DICSIZE (1<<30)
         #else
            #define DICSIZE (1<<27)
         #endif
-      #if C_LZMA
-	case P_LZMA: { CLzmaEncProps p;	LzmaEncProps_Init(&p); p.level = lev; p.numThreads = 1; 
-	    char *q;  
-	    if(q=strchr(prm,'c')) { p.lc = *++q - '0'; if(p.lc <= 0) p.lc = 0; if(p.lc > 8) p.lc = 8; }
-	    if(q=strchr(prm,'p')) { p.lp = *++q - '0'; if(p.lp <= 0) p.lp = 0; if(p.lp > 4) p.lp = 4; }
-	    if(lev==9) p.fb = 273,p.dictSize=inlen<DICSIZE?inlen:DICSIZE; LzmaEncProps_Normalize(&p);
-        SizeT psize = LZMA_PROPS_SIZE, outlen = outsize - LZMA_PROPS_SIZE;
-  	    return LzmaEncode(out+LZMA_PROPS_SIZE, &outlen, in, inlen, &p, out, &psize, 0, NULL, &g_Alloc, &g_Alloc) == SZ_OK?outlen+LZMA_PROPS_SIZE:0;
-	  }
+	case P_LZMA: { CLzmaEncProps p;	LzmaEncProps_Init(&p); p.level = lev; p.numThreads = 1; char *q; 
+	  if(q=strstr(prm,"lc")) p.lc         = atoi(q+(q[2]=='='?3:2)); 
+	  if(q=strstr(prm,"lp")) p.lp         = atoi(q+(q[2]=='='?3:2)); 
+	  if(q=strstr(prm,"pb")) p.pb         = atoi(q+(q[2]=='='?3:2)); 
+	  if(q=strstr(prm,"fb")) p.fb         = atoi(q+(q[2]=='='?3:2));else if(q=strstr(prm,"nice=")) p.fb = atoi(q+5); 
+	  if(q=strstr(prm,"mc")) p.mc         = atoi(q+(q[2]=='='?3:2));  
+	  if(q=strstr(prm,"mt")) p.numThreads = atoi(q+(q[2]=='='?3:2));
+	  if(q=strchr(prm,'a'))  p.algo       = atoi(q+(q[1]=='='?2:1));
+	  if(q=strstr(prm,"mf=bt")) p.btMode  = 1, p.numHashBytes = atoi(q+5);
+	  if(q=strstr(prm,"mf=hc")) p.btMode  = 0, p.numHashBytes = atoi(q+5);
+	  if(dsize) p.dictSize = dsize; if(p.dictSize>inlen)  p.dictSize=inlen; if(p.dictSize>DICSIZE)  p.dictSize=DICSIZE; //printf("dsize=%u, %d,%d,%d:%d, %d,%d, %d,%d\n ", p.dictSize, p.lc,p.lp,p.pb,p.fb, p.mc,p.algo, p.btMode,p.numHashBytes);
+	  LzmaEncProps_Normalize(&p);
+      SizeT psize = LZMA_PROPS_SIZE, outlen = outsize - LZMA_PROPS_SIZE;
+  	  return LzmaEncode(out+LZMA_PROPS_SIZE, &outlen, in, inlen, &p, out, &psize, 0, NULL, &g_Alloc, &g_Alloc) == SZ_OK?outlen+LZMA_PROPS_SIZE:0;
+	}
       #endif
 	
       #if C_LZLIB
-	case P_LZLIB:  { unsigned outlen; bbcompress( (const uint8_t *)in, inlen, (uint8_t *)out, (int * const)&outlen,  option_mapping[lev].dictionary_size, option_mapping[lev].match_len_limit); return outlen; }
+	case P_LZLIB:  { long outlen=outsize; unsigned ds = dsize?dsize:option_mapping[lev].dictionary_size, mlen=option_mapping[lev].match_len_limit; 
+      if(q=strstr(prm,"fb")) mlen = atoi(q+(q[2]=='='?3:2)); if(ds > inlen) ds = inlen; //printf("(%u,%d,%u)", ds, mlen, inlen);
+	  bbcompress( (const uint8_t *)in, inlen, (uint8_t *)out, &outlen,  ds, mlen); return outlen; 
+	}
       #endif
 	    
 	  #if C_LIBLZG
@@ -1176,9 +1221,9 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	case P_LIBSLZ: { if(lev > 7) lev = 7;
       unsigned blk = 16384 << lev;      
       struct slz_stream strm;
-            if(prm && *prm=='d') slz_init(&strm, !!lev, SLZ_FMT_DEFLATE);
-       else if(prm && *prm=='g') slz_init(&strm, !!lev, SLZ_FMT_GZIP);
-       else                      slz_init(&strm, !!lev, SLZ_FMT_ZLIB);
+            if(strchr(prm,'d')) slz_init(&strm, !!lev, SLZ_FMT_DEFLATE);
+       else if(strchr(prm,'g')) slz_init(&strm, !!lev, SLZ_FMT_GZIP);
+       else                     slz_init(&strm, !!lev, SLZ_FMT_ZLIB);
       unsigned char *ip, *op=out;
       for(ip = in, in += inlen; ip < in; ) { 
         unsigned iplen = in - ip; iplen = iplen>blk?blk:iplen;       
@@ -1339,10 +1384,15 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif	    
 
 	  #if C_ZSTD
-    case P_ZSTD: ZSTD_compress( out, outsize, in, inlen, lev); break;
+    case P_ZSTD: { //ZSTD_compress( out, outsize, in, inlen, lev); 
+      ZSTD_parameters p = ZSTD_getParams(lev, inlen, 0);
+      p.fParams.contentSizeFlag = 1;
+      if(dsize) p.cParams.windowLog = bsr32(dsize)-powof2(dsize);
+      return ZSTD_compress_advanced(ZSTD_createCCtx(), out, outsize, in, inlen, NULL, 0, p);
+	}
       #endif   
     //------------------------- Encoding
-     #if C_RLE 
+     #if C_RLE 	 
           #define _ESC8  0x5 //0xda  
           #define _ESC16 0xdad5
           #define _ESC32 0xdad5abad
@@ -1355,7 +1405,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         case 32: return srlec32(in, inlen, out, _ESC32); 
         case 64: return srlec64(in, inlen, out, _ESC64);
       } break;
-    case P_RLET: return trlec(in, inlen, out); 
+    case P_RLET: return trlec(in, inlen, out);
+    case P_RLEM: return mrlec(in, inlen, out);
       #endif 
 
 	  #if C_B64
@@ -1533,7 +1584,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	  #endif
 
       #if C_LIBBSC
-	case P_LIBBSC_ST: 
+	//case P_LIBBSC_ST: 
 	case P_LIBBSC:	   return bsc_decompress(in, inlen, out, outlen, 0);
 	  #endif
 	
@@ -1632,19 +1683,16 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if C_LZHAM
-    case P_LZHAM: { static int dicbits[]={ 24, 24, 24, 26, 29, 29 };
-	    lzham_decompress_params prm; memset(&prm, 0, sizeof(prm));
-        prm.m_struct_size    = sizeof(prm);
-        prm.m_dict_size_log2 = dicbits[lev];
-        size_t outl          = outlen;
-		lzham_uint32 adler32 = 0;																
-        lzham_decompress_status_t rc = lzham_decompress_memory(&prm, (lzham_uint8*)out, &outl, in, inlen, &adler32);	//if(rc!=LZHAM_COM_STATUS_SUCCESS) die("rc=%d ", rc);
-        return rc == LZHAM_COMP_STATUS_SUCCESS?outlen:-1;	
-	  }
+    case P_LZHAM: { lzham_decompress_params p; memset(&p, 0, sizeof(p)); p.m_struct_size = sizeof(p);
+      p.m_dict_size_log2    = in[0];
+      size_t outl           = outlen;
+	  lzham_uint32 adler32  = 0;																
+      return lzham_decompress_memory(&p, (lzham_uint8*)out, &outl, in+1, inlen, &adler32) == LZHAM_COMP_STATUS_SUCCESS?outlen:-1;	
+	}
       #endif
 	  
       #if C_LZLIB
-	case P_LZLIB: { int out_len = outlen; bbdecompress( in, outlen, out, &out_len ); } break;
+	case P_LZLIB: { long out_len = outlen; bbdecompress( in, outlen, out, &out_len ); } break;
       #endif 
 	  
 	  #if C_LZMA
@@ -1806,6 +1854,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
         case 64: return  srled64(in, inlen, out, outlen, _ESC64);
       } break;
     case P_RLET: return trled(in, inlen, out, outlen); 
+    case P_RLEM: return mrled(in, out, outlen); 
       #endif
 	  #if C_B64
     case P_B64_AVX2:  { size_t outlen; base64_decode(in, inlen, out, &outlen, BASE64_FORCE_AVX2);  return inlen; }
