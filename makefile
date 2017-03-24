@@ -103,6 +103,7 @@ endif
 NCPP=0
 
 DDEBUG=-DNDEBUG -s
+#DDEBUG=-g
 #-------------- compressor specific
 ifeq ($(BASE64),1)
 DEFS+=-DBASE64
@@ -281,7 +282,7 @@ OB+=lzham_codec_devel/lzhamcomp/lzham_lzbase.o lzham_codec_devel/lzhamcomp/lzham
 ifeq ($(UNAME), Windows)
 OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
-
+OB+=lzlib-1.9/lzlib.o lzlib_/bbexample.o 
 ifeq ($(NSIMD),0)
 OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o 
 OB+=nakamichi/Nakamichi_Washigan.o
@@ -321,9 +322,9 @@ LZFSE=
 endif
 #----------------------- GPL -------------------------
 lzmat/lzmat_dec.o: lzmat/lzmat_dec.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
+	$(CC) -O2 -D"__int64=long long" $(MARCH) $(CFLAGS) $< -c -o $@
 lzmat/lzmat_enc.o: lzmat/lzmat_enc.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
+	$(CC) -O2 -D"__int64=long long" $(MARCH) $(CFLAGS) $< -c -o $@
 
 LZO = lzo/src/lzo1.o lzo/src/lzo1a.o lzo/src/lzo1a_99.o lzo/src/lzo1b_1.o lzo/src/lzo1b_2.o lzo/src/lzo1b_3.o lzo/src/lzo1b_4.o lzo/src/lzo1b_5.o \
 lzo/src/lzo1b_6.o lzo/src/lzo1b_7.o lzo/src/lzo1b_8.o lzo/src/lzo1b_9.o lzo/src/lzo1b_99.o lzo/src/lzo1b_9x.o lzo/src/lzo1b_cc.o \
@@ -347,7 +348,6 @@ endif
 
 ifeq ($(GPL), 1)
 OB+=$(LZMAT) $(LZO) $(ECGPL) $(MSCOMPRESS)
-OB+=lzlib-1.8/lzlib.o lzlib_/bbexample.o 
 OB+=lzmat/lzmat_enc.o lzmat/lzmat_dec.o
 OB+=lzoma_/pack.o lzoma_/unpack.o lzoma_/divsufsort.o
 OB+=ms-compress/src/mscomp.o ms-compress/src/lznt1_compress.o ms-compress/src/lznt1_decompress.o ms-compress/src/xpress_compress.o ms-compress/src/xpress_decompress.o ms-compress/src/xpress_huff_compress.o ms-compress/src/xpress_huff_decompress.o
@@ -376,7 +376,7 @@ ifeq ($(BASE64),1)
 OB+=base64/lib/libbase64.o
 endif
 OB+=TurboBase64/turbob64c.o TurboBase64/turbob64d.o
-OB+=TurboRLE/trlec.o TurboRLE/trled.o
+OB+=TurboRLE/trlec.o TurboRLE/trled.o TurboRLE/ext/mrle.o
 OB+=fastbase64/src/chromiumbase64.o fastbase64/src/quicktimebase64.o fastbase64/src/scalarbase64.o
 ifeq ($(AVX2),1)
 OB+=fastbase64/src/fastavxbase64.o 
