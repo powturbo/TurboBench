@@ -1,5 +1,5 @@
 /**
-    Copyright (C) powturbo 2013-2016
+    Copyright (C) powturbo 2013-2017
     GPL v2 License
   
     This program is free software; you can redistribute it and/or modify
@@ -56,94 +56,8 @@
 
 #include <time.h>
 #include "conf.h"   
+#include "time_.h"
 #include "plugins.h" 
-//--------------------------------------- Time ------------------------------------------------------------------------
-#include <time.h>
-typedef unsigned long long tm_t;
-#define TM_T 1000000.0
-  #ifdef _WIN32
-#include <windows.h>
-static LARGE_INTEGER tps;
-static tm_t tmtime(void) { LARGE_INTEGER tm; QueryPerformanceCounter(&tm); return (tm_t)((double)tm.QuadPart*1000000.0/tps.QuadPart); }
-static tm_t tminit() { QueryPerformanceFrequency(&tps); tm_t t0=tmtime(),ts; while((ts = tmtime())==t0); return ts; } 
-  #else
-static   tm_t tmtime(void)    { struct timespec tm; clock_gettime(CLOCK_MONOTONIC, &tm); return (tm_t)tm.tv_sec*1000000ull + tm.tv_nsec/1000; }
-static   tm_t tminit()        { tm_t t0=tmtime(),ts; while((ts = tmtime())==t0); return ts; }
-  #endif 
-static double tmsec( tm_t tm) { return (double)tm/1000000.0; }
-static double tmmsec(tm_t tm) { return (double)tm/1000.0; }
-//---------------------------------------- bench ----------------------------------------------------------------------
-#define MIS   4000000.0
-#define TMIS(__l,__t)         ((__t)>=0.000001?((double)(__l)/MIS)/((__t)/TM_T):0.0)
-
-#define MBS   1000000.0
-#define TMBS(__l,__t)         ((__t)>=0.000001?((double)(__l)/MBS)/((__t)/TM_T):0.0)
-#define TM_TX TM_T 
-
-#define TMDEF unsigned tm_r,tm_R,tm_c; tm_t _t0,_tc,_ts; double _tmbs=0.0;
-#define TMSLEEP do { tm_T = tmtime(); if(!tm_0) tm_0 = tm_T; else if(tm_T - tm_0 > tm_TX) { printf("S \b\b\b");fflush(stdout); sleep(tm_slp); tm_0=tmtime();} } while(0)
-#define TMBEG(_c_, _tm_reps_, _tm_Reps_) \
-  for(tm_c=_c_,tm_tm = (1ull<<63),tm_rm=1,tm_R=0,_ts=tmtime(); tm_R < _tm_Reps_; tm_R++) { printf("%8.2f %.2d_%d\b\b\b\b\b\b\b\b\b\b\b\b\b",_tmbs,tm_R+1,tm_c);fflush(stdout);\
-    for(_t0 = tminit(), tm_r=0; tm_r < _tm_reps_;) {
- 
-#define TMEND(_len_) tm_T = tmtime(); tm_r++; if((_tc = (tm_T - _t0)) > tm_tx) break; }\
-  if(_tc/(double)tm_r < (double)tm_tm/(double)tm_rm) { tm_tm = _tc; tm_rm=tm_r; tm_c++; double _d = (double)tm_tm/(double)tm_rm; _tmbs=TMBS(_len_, _d); } else if(_tc/tm_tm>1.2) TMSLEEP; if(tm_T-_ts > tm_TX) break;\
-  if((tm_R & 7)==7) { sleep(tm_slp); _ts=tmtime(); } }
-
-#define TMVARS static unsigned tm_repc = 1<<30, tm_Repc = 2, tm_repd = 1<<30, tm_Repd = 2, tm_rm, tm_slp = 25;\
-               static tm_t     tm_tm, tm_tx = TM_TX, tm_TX = 30*TM_TX, tm_0, tm_T, tm_RepkT=24*3600*TM_TX;
-TMVARS;
-
-//: b 512, kB 1000, K  1024,  MB 1000*1000,  M  1024*1024,  GB  1000*1000*1000,  G 1024*1024*1024
-#define Kb (1u<<10)
-#define Mb (1u<<20)
-#define Gb (1u<<30)
-#define KB 1000
-#define MB 1000000
-#define GB 1000000000
- 
-unsigned argtoi(char *s) {
-  char *p; 
-  unsigned n = strtol(s, &p, 10),f=1; 
-  switch(*p) {
-    case 'K': f = KB; break;
-    case 'M': f = MB; break;
-    case 'G': f = GB; break;
-    case 'k': f = Kb; break;
-    case 'm': f = Mb; break;
-    case 'g': f = Gb; break;
-	default:  f = Mb;
-  }
-  return n*f;
-}
-
-unsigned long long argtol(char *s) {
-  char *p;
-  unsigned long long n = strtol(s, &p, 10),f=1; 
-  switch(*p) {
-    case 'K': f = KB; break;
-    case 'M': f = MB; break;
-    case 'G': f = GB; break;
-    case 'k': f = Kb; break;
-    case 'm': f = Mb; break;
-    case 'g': f = Gb; break;
-	default:  f = MB;	
-  }
-  return n*f;
-}
-
-unsigned long long argtot(char *s) {
-  char *p;
-  unsigned long long n = strtol(s, &p, 10),f=1; 
-  switch(*p) {
-    case 'h': f = 3600000; break;
-    case 'm': f = 60000;   break;
-    case 's': f = 1000;    break;
-    case 'M': f = 1;       break;
-	default:  f = 1000;	
-  }
-  return n*f;
-}
 
 int strpref(const char *const *str, int n, char sep1, char sep2) {
   int i, j=0;
@@ -155,8 +69,6 @@ int strpref(const char *const *str, int n, char sep1, char sep2) {
 	  }
   return 0;
 }
-
-void memrcpy(unsigned char *out, unsigned char *in, unsigned n) { int i; for(i = 0; i < n; i++) out[i] = ~in[i]; }
 
 int memcheck(unsigned char *in, unsigned n, unsigned char *cpy, int cmp) { 
   int i;
@@ -207,7 +119,6 @@ void _vfree(void *p, size_t size) {
 #include <dlfcn.h>
 static ALIGNED(char, mem_heap[1<<20],32);
 static char *mem_heapp = mem_heap;
-static size_t mem_peak, mem_used;
 
 static void *(*mem_malloc)(size_t);
 static void *(*mem_calloc)(size_t, size_t);
@@ -223,20 +134,6 @@ static __attribute__((constructor)) void mem_init(void) {
   mem_memalign = dlsym(RTLD_NEXT, "memalign");
   if(!mem_malloc || !mem_calloc || !mem_realloc || !mem_free || !mem_memalign)
     die("malloc not found\n");
-}
-
-size_t mempeak() { return mem_peak; }
-
-size_t mempeakinit() { mem_peak = mem_used = 0; return mem_peak; }
-
-void mem_add(size_t size) { 
-  if((mem_used += size) > mem_peak) 
-  { mem_peak = mem_used; }
-}
-
-void mem_sub(size_t size) { 
-  if(mem_used > size) 
-    mem_used -= size; 
 }
 
 void *malloc(size_t size) {
@@ -290,12 +187,22 @@ void free(void *p) {
    mem_sub(malloc_usable_size(p));
   (*mem_free)(p); 
 } 
-  #else
-#define mempeak()
-#define mempeakinit() 0
-void mem_add(size_t size) {}
-void mem_sub(size_t size) {}
   #endif
+
+static size_t mem_peak, mem_used;
+size_t mempeak() { return mem_peak; }
+
+size_t mempeakinit() { mem_peak = mem_used = 0; return mem_peak; }
+
+void mem_add(size_t size) { 
+  if((mem_used += size) > mem_peak) 
+  { mem_peak = mem_used; }
+}
+
+void mem_sub(size_t size) { 
+  if(mem_used > size) 
+    mem_used -= size; 
+}
 
 //--------------------------------------- TurboBench ------------------------------------------------------------------
 enum { 
@@ -310,6 +217,7 @@ enum {
 };
 
 char *fmtext[] = { "txt", "txt", "html", "htm", "md", "vbul", "csv", "tsv", "squash" };
+#define LSIZE 512
 
 //------------- plugin : usage ---------------------------------
 struct plugg { 
@@ -395,9 +303,11 @@ void plugsprtv(FILE *f, int fmt) {
 }
 
 //------------------ plugin: process ----------------------------------
+#define PRM_SIZE 64
+#define TMS_SIZE 20
 struct plug { 
   int       id,err,blksize,lev;
-  char      *s,prm[17],tms[20]; 
+  char      *s,prm[PRM_SIZE+1],tms[TMS_SIZE+1]; 
   long long len,memc,memd;
   double    tc,td,tck,tdk;
 };
@@ -405,7 +315,7 @@ struct plug {
 struct plug plug[255],plugt[255];
 int         seg_ans = 32*1024, seg_huf = 32*1024, seg_anx = 12*1024, seg_hufx=11*1024;
 static int  cmp = 2,trans;
-int verbose=1;
+static int verbose=1;
 double      fac = 1.3;
 
 int plugins(struct plug *plug, struct plugs *gs, int *pk, unsigned bsize, int bsizex, int lev, char *prm) { 
@@ -419,8 +329,7 @@ int plugins(struct plug *plug, struct plugs *gs, int *pk, unsigned bsize, int bs
   plug[k].err = 0; 
   plug[k].s   = gs->s; 
   plug[k].lev = lev; 
-  strncpy(plug[k].prm, prm?prm:(char *)"", 16); 
-  plug[k].prm[16] = 0;
+  strncpy(plug[k].prm, prm?prm:(char *)"", PRM_SIZE); plug[k].prm[PRM_SIZE] = 0;
   plug[k].tms[0]  = 0;
   if(gs->flag & E_ANS)  
     plug[k].blksize = seg_ans;
@@ -462,9 +371,9 @@ int plugreg(struct plug *plug, char *cmd, int k, int bsize, int bsizex) {
         lev = -1; 
         prm = cempty; 
       }
-      else if(isalnum(*cmd)) {
+      else if(isalnum(*cmd) || *cmd == ':') {
         prm = cmd;
-        while(isalnum(*cmd) || *cmd == '_' || *cmd == '-') 
+        while(isalnum(*cmd) || *cmd == '_' || *cmd == '-'  || *cmd == ':' || *cmd == '=') 
           cmd++; 
         if(*cmd) 
           *cmd++ = 0; 
@@ -626,18 +535,18 @@ void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, doubl
   double ratio  = RATIO(plug->len,totinlen),    
          //ratio  = FACTOR(plug->len,totinlen),
          tc     = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td);
-  char   name[65]; 
+  char   name[256]; 
   if(plug->lev >= 0) 
     sprintf(name, "%s%s %d%s", plug->err?"?":"", plug->s, plug->lev, plug->prm);
   else
     sprintf(name, "%s%s%s",    plug->err?"?":"", plug->s,            plug->prm);
- 
+  
   int c = 0, d = 0, n = 0;
   if(tc > *ptc) { c++; n++; *ptc = tc; } 
   if(td > *ptd) { d++; n++; *ptd = td; } 
   switch(fmt) {
     case FMT_TEXT:     
-      fprintf(f,"%12"PRId64"   %5.1f   %8.2f   %8.2f   %-16s%s\n", 
+      fprintf(f,"%12"PRId64"   %5.1f   %8.2f   %8.2f   %-32s %s\n", 
         plug->len, ratio, tc, td, name, finame); 
       break;
     case FMT_VBULLETIN:
@@ -731,7 +640,7 @@ static inline double spdup(double td, long long len, int i, long long totinlen) 
 
 void plugprtp(struct plug *plug, long long totinlen, char *finame, int fmt, int speedup, FILE *f) {
   int  i;
-  char name[65]; 
+  char name[255]; 
   if(plug->lev>=0) 
     sprintf(name, "%s%s%s%d%s", plug->err?"?":"", plug->s, fmt==FMT_MARKDOWN?"_":" ", plug->lev, plug->prm);
   else
@@ -739,7 +648,7 @@ void plugprtp(struct plug *plug, long long totinlen, char *finame, int fmt, int 
   if(fmt == FMT_HTML) 
     fprintf(f, "<tr><td>%s</td>", name);
   else 
-    fprintf(f, "%-16s", name);															 
+    fprintf(f, "%-32s", name);															 
 
   for(i = 0; i < BWSIZE; i++) {
     switch(fmt) {
@@ -927,7 +836,6 @@ int plugprts(struct plug *plug, int k, char *finame, int xstdout, unsigned long 
   FILE *fo = xstdout>=0?stdout:fopen(s, "w");
   if(!fo) 
     die("file create error for '%s'\n", finame); 
-
   plugprth( fo, fmt, t);
   plugprtth(fo, fmt);
   for(g = plugt; g < plugt+k; g++) 
@@ -988,50 +896,56 @@ int plugprts(struct plug *plug, int k, char *finame, int xstdout, unsigned long 
 } 
 
 int plugread(struct plug *plug, char *finame, long long *totinlen) {
-  char s[256],name[33];
+  char s[LSIZE+1],name[33];
   struct plug *p=plug;
   FILE *fi = fopen(finame, "r"); 
   if(!fi) return -1;
 
-  fgets(s, 255, fi);
-  for(p = plug;;) { 
-    p->tms[0] = 0;
-	char ss[256],*t = ss,*q;
-	if(!fgets(ss, 255, fi)) break;
-	for(q = t;  *q && *q != '\t'; q++);  *q++ = 0; strcpy(s, t); t = q;
+  fgets(s, LSIZE, fi);
+  for(p = plug;;) {
+    p->tms[0] = name[0] = 0;
+	char ss[LSIZE+1],*t = ss,*q;
+	if(!fgets(ss, LSIZE, fi)) break; ss[strlen(ss)-1]=0; if(!strlen(ss)) break; 
+
+	for(q = t;  *q && *q != '\t'; q++);  *q++ = 0; strncpy(s, t, LSIZE); s[LSIZE]=0; t = q;
 	*totinlen = strtoull(t, &t, 10);   
 	p->len    = strtoull(++t, &t, 10);
 	p->td     = strtod(  ++t, &t);
 	p->tc     = strtod(  ++t, &t);
-	for(q = ++t; *q && *q != '\t'; q++); *q++ = 0; strcpy(name,t); t=q;
-	p->lev    = strtoul(t, &t, 10);
-	for(q = t; *q && *q != '\t'; q++);   *q++ = 0; strcpy(p->prm,t); t = q;
+	for(q = ++t; *q && *q != '\t'; q++); *q++ = 0; strncpy(name,t,32); name[32]=0; t=q;
+	p->lev    = strtoul(t, &t, 10); 
+	while(*t && isspace(*t)) t++;
+	for(q = t; *q && *q != '\t'; q++);   *q++ = 0; strncpy(p->prm, t, PRM_SIZE); p->prm[PRM_SIZE]=0; t = q;
 	p->memc   = strtoull(t, &t, 10);
     p->memd   = strtoull(++t, &t, 10);
-    for(q = ++t; *q && *q != '\t'; q++); *q++ = 0; strcpy(p->tms,t); t = q;
-    //int i = sscanf(ss, "%s\t%"PRId64"\t%"PRId64"\t%lf\t%lf\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%s", s, totinlen, &p->len, &p->td, &p->tc, name, &p->lev, p->prm, &p->memc, &p->memd, p->tms); if(i != 11) break;
+    for(q = ++t; *q && *q != '\t'; q++); *q++ = 0; strncpy(p->tms, t, TMS_SIZE); p->tms[TMS_SIZE]=0; t = q;
     if(p->prm[0]=='?') 
       p->prm[0]=0;
-    int i;
-    for(i = 0; plugs[i].id >=0; i++) 
+    int i;  							
+    for(i = 0; plugs[i].id >=0; i++) {  
       if(!strcmp(name, plugs[i].s)) { 
         p->s  = plugs[i].s; 
-        p->id = plugs[i].id; 											if(verbose>1) { fprintf(stdout, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d%s\t%s\t%"PRId64"\t%"PRId64"\n", s, *totinlen, p->len, p->td, p->tc, p->s, p->lev, p->prm, p->tms, p->memc, p->memd); fflush(stdout); }
+        p->id = plugs[i].id; 											if(verbose>1) { fprintf(stdout, "$%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d%s\t%s\t%"PRId64"\t%"PRId64"\n", s, *totinlen, p->len, p->td, p->tc, p->s, p->lev, p->prm, p->tms, p->memc, p->memd); fflush(stdout); }
         p++;
         break; 
-      } 																	      		
+      } 
+    }	  
   }
   fclose(fi);
   return p - plug;
 }
 
 //----------------------------------- Benchmark -----------------------------------------------------------------------------
+  #ifndef min
+#define min(x,y) (((x)<(y)) ? (x) : (y))
+#define max(x,y) (((x)>(y)) ? (x) : (y))
+  #endif
+
 static int mcpy=0, mode, tincx, fuzz;
 
 int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned outsize, unsigned bsize, int id, int lev, char *prm) { 
   unsigned char *op,*oe = _out + outsize;
-  TMDEF;
-  TMBEG(0,tm_repc,tm_Repc);     mempeakinit();                                           
+  TMBEG(tm_rep,tm_Rep);     mempeakinit();                                           
   unsigned char *in,*ip;																							
   for(op = _out, in = _in; in < _in+_inlen; ) { 
     unsigned inlen,bs; 
@@ -1061,8 +975,7 @@ int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned ou
 
 int bedecomp(unsigned char *_in, int _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm) { 
   unsigned char *ip;
-  TMDEF; 
-  TMBEG(0,tm_repd,tm_Repd);     mempeakinit();
+  TMBEG(tm_rep2,tm_Rep2);     mempeakinit();
   unsigned char *out,*op;
   for(ip = _in, out = _out; out < _out+_outlen;) {
     unsigned outlen,bs; 
@@ -1117,7 +1030,7 @@ unsigned mininlen;
 
 unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long filenmax, unsigned bsize, struct plug *plugr, int tid, int krep) {
   size_t outsize;   
-  FILE *fi = strcmp(finame,"stdin")?fopen(finame, "rb"):stdin; if(!fi) { perror(finame); die("open error '%s'\n", finame); }
+  FILE *fi = strcmp(finame,"stdin")?fopen(finame, "rb"):stdin; if(!fi) { perror(finame); return 0; /*die("open error '%s'\n", finame);*/ }
   char *p; 
   if((p = strrchr(finame, '\\')) || (p = strrchr(finame, '/'))) finame = p+1; 	if(verbose>1) printf("'%s'\n", finame);
   p = finame; 
@@ -1180,9 +1093,9 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
 	plug->len += outlen; 
     plug->tc  += (tc += (double)tm_tm/((double)tm_rm*nb)); 
 	plug->memc = mempeak() - peak;
-    if(tm_Repc > 1) 
+    if(tm_Rep > 1) 
       TMSLEEP;
-																								if(verbose && inlen == filen) { double ratio = (double)outlen*100.0/inlen; printf("%12u   %5.1f   %8.2f   ", outlen, ratio, TMBS(inlen,tc)); fflush(stdout); }
+																		if(verbose && inlen == filen) { double ratio = (double)outlen*100.0/inlen; printf("%12u   %5.1f   %8.2f   ", outlen, ratio, TMBS(inlen,tc)); fflush(stdout); }
     if(cmp) {
       unsigned char *cpy = _cpy; 
       if(fuzz & 2) cpy = (_cpy+insizem) - l;
@@ -1190,12 +1103,12 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
       peak = mempeakinit();
 	  unsigned cpylen = bedecomp(out, outlen, cpy, l*nb, bsize, plug->id,plug->lev, plug->prm)/nb; 
 	  td = (double)tm_tm/((double)tm_rm*nb);		
-      plug->memd = mempeak() - peak;                                                             if(verbose && inlen == filen) { printf("%8.2f   %-16s%s\n", TMBS(inlen,td), name, finame); }
+      plug->memd = mempeak() - peak;                                    if(verbose && inlen == filen) { printf("%8.2f   %-16s %s\n", TMBS(inlen,td), name, finame); }
       int e = memcheck(in, l, cpy, fuzz?3:cmp);  
       plug->err = plug->err?plug->err:e;
       BEPOST;																	
  	  plug->td += td; 
-	} else 																						 if(verbose && inlen == filen) { printf("%8.2f   %-16s%s\n", 0.0, name, finame); }
+	} else 																if(verbose && inlen == filen) { printf("%8.2f   %-16s %s\n", 0.0, name, finame); }
 	if(totinlen >= filen) 
       break;
   }	  
@@ -1211,10 +1124,11 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
 }
 
 void usage(char *pgm) {
-  fprintf(stderr, "\nTurboBench Copyright (c) 2013-2016 Powturbo %s\n", __DATE__);
+  fprintf(stderr, "\nTurboBench Copyright (c) 2013-2017 Powturbo %s\n", __DATE__);
   fprintf(stderr, "Usage: %s [options] [file]\n", pgm);
   fprintf(stderr, " -eS      S = compressors/groups separated by '/' Parameter can be specified after ','\n");
-  fprintf(stderr, " -b#s     # = blocksize (default filesize,). max=1GB\n");
+  fprintf(stderr, " -b#s     # = blocksize (default filesize). max=1GB\n");
+  fprintf(stderr, " -d#      # = log2 dictionary size: 15-30 (default blocksize).Only brotli,lzham,lzlib,lzma,zstd\n");
   fprintf(stderr, " -B#s     # = max. benchmark filesize (default 1GB) ex. -B4G\n");
   fprintf(stderr, " -s#s     # = min. buffer size to duplicate & test small files (ex. -s50)\n");
   fprintf(stderr, "          s = modifier s:K,M,G=(1000, 1.000.000, 1.000.000.000) s:k,m,h=(1024,1Mb,1Gb). (default m) ex. 64k or 64K\n");
@@ -1247,8 +1161,9 @@ void usage(char *pgm) {
   fprintf(stderr, " -m       process multiple blocks per file.\n");
   BEUSAGE;
   fprintf(stderr, "ex. ./turbobench enwik9 -eFAST/bzip2/lzma,5,9\n");
-  fprintf(stderr, "ex. ./turbobench enwik9 -eFAST/OPTIMAL/bsc,2 -i0\n");
+  fprintf(stderr, "ex. ./turbobench enwik9 -eFAST/OPTIMAL/bsc,0:e2 -i0\n");
   fprintf(stderr, "ex. ./turbobench eECODER -R\"entropy coder test\"\n");
+  fprintf(stderr, "ex. ./turbobench enwik9 -elzma,9:fb273:lc2:lp2\n");
   exit(0);
 } 
 
@@ -1257,7 +1172,8 @@ void printfile(char *finame, int xstdout, int fmt, char *rem) {
   int       k = plugread(plugt, finame, &totinlen); 
   char      *p, s[256];
   if(k < 0)
-    die(stderr, "file open error for '%s'\n", finame); 
+    die(stderr, "file open error for '%s'\n", finame);
+
   if(!k) return;
   strncpy(s, finame, 255); 
   s[255]=0;
@@ -1269,31 +1185,7 @@ void printfile(char *finame, int xstdout, int fmt, char *rem) {
   #ifdef __MINGW32__
 extern int _CRT_glob = 1;
   #endif
-
-  #define BITS 32
-#define BIT_SET(  p, n) (p[(n)/BITS] |=  (0x8000u>>((n)%BITS)))
-#define BIT_CLEAR(p, n) (p[(n)/BITS] &= ~(0x8000u>>((n)%BITS)))
-#define BIT_ISSET(p, n) (p[(n)/BITS] &   (0x8000u>>((n)%BITS)))
-tst1() 
-	{
-unsigned i;
-#define A (((r ^ l) & (r & l)) )
-
-//#define A r==0 || l==0
-#define A (l | r) & ( l & r) == i&0xf
-#define A r i&16
-#define A (r ^ l)
-#define A r==0xf || l==0xf
-unsigned p[256]={0};
-for(i=0;i<256;i++) { unsigned l = i & 0xf, r = i >> 4; //if((i%16) == 0) printf("\n"); //printf("%d,", A); 
-  if(A) BIT_SET(p,i);//p[i]=1; //
-} 
-//for(i=0;i<256;i++) { if((i%16) == 0) printf("\n"); printf("0x%x,", p[i]);}
-for(i = 0; i < 8; i++) { printf("0x%x,", p[i]); }
- exit(0);
-	}
-
-int main(int argc, char* argv[]) { //tst1();//lzdbgon();
+int main(int argc, char* argv[]) { 
   int xstdout=-1,xstdin=-1;
   int                recurse  = 0, xplug = 0,tm_Repk=1,plot=-1,fmt=0,fno,merge=0,rprio=1;
   unsigned           bsize    = 1u<<30, bsizex=0;
@@ -1308,15 +1200,16 @@ int main(int argc, char* argv[]) { //tst1();//lzdbgon();
     static struct option long_options[] = {
       { "help", 	0, 0, 'h'},
       { 0, 		    0, 0, 0}
-    };
-    if((c = getopt_long(argc, argv, "12345:6:7:8:9:A:b:B:C:e:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oOPp:Q:rRs:S:t:T:Uv:V:W:X:Y:Z:", long_options, &option_index)) == -1) break;
+    }; 
+    if((c = getopt_long(argc, argv, "12345:6:7:8:9:A:b:B:C:d:e:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oOPp:Q:rRs:S:t:T:Uv:V:W:X:Y:Z:", long_options, &option_index)) == -1) break;
     switch(c) { 
       case 0:
         printf("Option %s", long_options[option_index].name);
         if(optarg) printf (" with arg %s", optarg);  printf ("\n");
         break;
-      case 'b': bsize    = argtoi(optarg); bsizex++; break;
+      case 'b': bsize    = argtoi(optarg,Mb); bsizex++; break;
       case 'B': filenmax = argtol(optarg);    		 break;
+      case 'd': coddicsize(argtoi(optarg,0));        break; 
       case 'C': cmp      = atoi(optarg);      		 break;
       case 'e': scmd     = optarg;            		 break;
       case 'F': fac      = strtod(optarg, NULL); 	 break;
@@ -1324,14 +1217,14 @@ int main(int argc, char* argv[]) { //tst1();//lzdbgon();
       case 'g': merge++;		 			 		 break;
       case 'G': plotmcpy++;	 			 		 	 break;
 
-      case 'i': if((tm_repc  = atoi(optarg))<=0) 
-		          tm_repc=tm_Repc=1;         		 break;
-      case 'I': tm_Repc  = atoi(optarg);       		 break;
-      case 'j': if((tm_repd  = atoi(optarg))<=0) 
-		          tm_repd=tm_Repd=1;         		 break;
-      case 'J': tm_Repd  = atoi(optarg);      		 break;
-      case 'k': if((tm_Repk  = atoi(optarg))<=0) tm_repc=tm_Repc=tm_repd=tm_Repd=tm_Repk=1; break;
-      case 'K': tm_RepkT = argtot(optarg);     		 break;
+      case 'i': if((tm_rep  = atoi(optarg))<=0) 
+		          tm_rep=tm_Rep=1;         		 break;
+      case 'I': tm_Rep  = atoi(optarg);       		 break;
+      case 'j': if((tm_rep2  = atoi(optarg))<=0) 
+		          tm_rep2=tm_Rep2=1;         		 break;
+      case 'J': tm_Rep2  = atoi(optarg);      		 break;
+      case 'k': if((tm_Repk  = atoi(optarg))<=0) tm_rep=tm_Rep=tm_rep2=tm_Rep2=tm_Repk=1; break;
+      //case 'K': tm_RepkT = argtot(optarg);     		 break;
       case 'L': tm_slp   = atoi(optarg);      		 break;
  	  case 't': tm_tx    = atoi(optarg)*TM_T; 		 break;
  	  case 'T': tm_TX    = atoi(optarg)*TM_T; 		 break;
@@ -1346,10 +1239,10 @@ int main(int argc, char* argv[]) { //tst1();//lzdbgon();
       case 'Q': divxy    = atoi(optarg); 
                 if(divxy>3) divxy=3;                 break;
       case 'D': rprio=0;		 			 		 break;
-      case 's': mininlen = argtoi(optarg);    		 break;
+      case 's': mininlen = argtoi(optarg,1);    	 break;
       case 'v': verbose  = atoi(optarg);       		 break;
-      case 'Y': seg_ans  = argtoi(optarg);           break;
-      case 'Z': seg_huf  = argtoi(optarg);           break;  
+      case 'Y': seg_ans  = argtoi(optarg,1);         break;
+      case 'Z': seg_huf  = argtoi(optarg,1);         break;  
       case '1': xlog     =  xlog?0:1; 				 break;
       case '2': ylog     =  ylog?0:1;                break;
       case '3': xlog2    = xlog2?0:1;                break;
@@ -1388,7 +1281,7 @@ int main(int argc, char* argv[]) { //tst1();//lzdbgon();
       printfile(argvx[fno], xstdout, fmt, rem);
     exit(0);
   }
-  if((tm_repc|tm_Repc|tm_repd|tm_Repd) ==1) 
+  if((tm_rep|tm_Rep|tm_rep2|tm_Rep2) ==1) 
     tm_Repk = 1;
   if(rprio) { 
       #ifdef _WIN32
@@ -1399,23 +1292,42 @@ int main(int argc, char* argv[]) { //tst1();//lzdbgon();
   }
   if(!scmd) scmd = "FAST";
   for(s[0] = 0;;) {
-    char *q; int i;
+    char *q; 
+	int i=0;
     if(!*scmd) break;
     if(q = strchr(scmd,'/')) *q = '\0';
-    for(i = 0; i < PLUGGSIZE; i++)
-      if(!strcmp(scmd, plugg[i].id)) { 
-        strcat(s, "ON/"); 
-        strcat(s, plugg[i].s); 
-        strcat(s, "OFF/"); 
-        break;
-      }
+	FILE *fi = fopen("turbobench.ini", "r");
+	if(fi) {
+	  char ss[LSIZE+1];
+	  while(fgets(ss, LSIZE, fi)) {
+        char *t = ss,*u;  																	
+        while(isspace(*t)) t++; u = t; while(isalnum(*u) || ispunct(*u)) u++; *u = 0; 
+        if(!strcmp(scmd, t)) {  
+		  for(t=++u;isspace(*t);t++); u = t; while(isalnum(*u) || ispunct(*u)) u++; *u = 0;
+          strcat(s, "/ON/"); 
+          strcat(s, t);
+          strcat(s, "/OFF/"); 
+		  i = 1;
+          break;
+        }
+	  }
+	  fclose(fi);
+	}
+	if(!i)
+      for(i = 0; i < PLUGGSIZE; i++) 
+        if(!strcmp(scmd, plugg[i].id)) { 
+          strcat(s, "/ON/"); 
+          strcat(s, plugg[i].s); 
+          strcat(s, "/OFF/"); 
+          break;
+        }		
     if(i >= PLUGGSIZE) { 
       strcat(s,scmd); 
       strcat(s,"/"); 
     }
     scmd = q?(q+1):(char*)"";
   }
-
+  
   unsigned k = plugreg(plug, s, 0, bsize, bsizex);
   if(k > 1 && argc == 1 && !strcmp(argvx[0],"stdin")) { printf("multiple codecs not allowed when reading from stdin"); exit(0); }
 
@@ -1445,13 +1357,12 @@ int main(int argc, char* argv[]) { //tst1();//lzdbgon();
         if(p->memc > g->memc) g->memc = p->memc;
         if(p->memd > g->memd) g->memd = p->memd;						
 	  }
+	  g->id  = p->id;
       g->s   = p->s;
       g->lev = p->lev;
       strcpy(g->prm, p->prm);
-	  g->id  = p->id;
       if(g->tck < g->tc) g->tc = g->tck;
-      if(g->tdk < g->td) g->td = g->tdk;
-      if(tmtime() - tmk0 > tm_RepkT) break;
+      if(g->tdk < g->td) g->td = g->tdk;      //if(tmtime() - tmk0 > tm_RepkT) break;
     } 
   }
     BENCHSTA;
@@ -1475,16 +1386,16 @@ int main(int argc, char* argv[]) { //tst1();//lzdbgon();
   }
 
   sprintf(s, "%s.tbb", finame);
-  if(merge /*|| tm_repc <= 1 || tm_repd <= 1*/) {
+  if(merge || tm_rep <= 1 && tm_rep2 <= 1) {
     if(merge == 1) 
       plugprts(plugt, k, s, 1, totinlen, FMT_TEXT, rem);	
     exit(0);
   }
 
   long long _totinlen;
-  int       gk = plugread(plug, s, &_totinlen);
+  int       gk = plugread(plug, s, &_totinlen);  
   if(_totinlen != totinlen) 
-    gk = 0;  
+    gk = 0;                  
   FILE *fo = fopen(s, "w");
   if(fo) {
     char tms[20];
@@ -1495,11 +1406,11 @@ int main(int argc, char* argv[]) { //tst1();//lzdbgon();
 	
     struct plug *g;
     fprintf(fo, "dataset\tsize\tcsize\tdtime\tctime\tcodec\tlevel\tparam\tcmem\tdmem\ttime\n");
-    for(p = plugt; p < plugt+k; p++) {
-      for(g = plug; g < plug+gk; g++) 
+    for(p = plugt; p < plugt+k; p++) { 																
+      for(g = plug; g < plug+gk; g++) { 
         if(g->id >= 0 && !strcmp(g->s, p->s) && g->lev == p->lev && !strcmp(g->prm, p->prm)) {
           if(g->len == p->len) {
-            int u=0;
+            int u = 0;
             if(g->td < p->td || p->td < 0.01) 
 			  p->td = g->td,u++;
             if(g->tc < p->tc || p->tc < 0.01) 
@@ -1507,17 +1418,19 @@ int main(int argc, char* argv[]) { //tst1();//lzdbgon();
 
             if(g->memd != p->memd) u++;
             if(g->memc != p->memc) u++;
-            strcpy(p->tms, u?tms:g->tms);		//printf("(%lld %lld) ", g->memc, g->memd);printf("(%lld %lld) ", p->memc, p->memd);
+            strcpy(p->tms, u?tms:g->tms);
           } 
           g->id = -1;
           break; 
         }
+      } 
       fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%s\n", finame, totinlen, p->len, p->td, p->tc, p->s, p->lev, p->prm[0]?p->prm:"?", p->memc, p->memd, p->tms[0]?p->tms:tms);
     }
     for(g = plug; g < plug+gk; g++) 
-      if(g->id >= 0)
+      if(g->id >= 0) {
         fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%s\n", finame, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, g->tms[0]?g->tms:tms);
-    fclose(fo);
+      }
+	fclose(fo);
     printfile(s, 0, FMT_TEXT, rem);
   }
 }
