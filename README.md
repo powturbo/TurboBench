@@ -230,7 +230,7 @@ All compressors with latest versions 16.08.2016b <br>
 
 ##### - Groups FASTEST,FAST,EFFICIENT,MAX,OPTIMAL,BWT:
   + test all fast compressors in the lz4, lzturbo, zlib class<br />
-
+    (additional groups can be defined in the "turbobench.ini" file)
 
         ./turbobench -eFAST file
 
@@ -276,5 +276,5 @@ All compressors with latest versions 16.08.2016b <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 19 MAR 2017
+Last update: 24 MAR 2017
 
