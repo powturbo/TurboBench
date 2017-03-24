@@ -1,28 +1,20 @@
 /*  Lzlib - Compression library for the lzip format
-    Copyright (C) 2009-2016 Antonio Diaz Diaz.
+    Copyright (C) 2009-2017 Antonio Diaz Diaz.
 
-    This library is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+    This library is free software. Redistribution and use in source and
+    binary forms, with or without modification, are permitted provided
+    that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this library.  If not, see <http://www.gnu.org/licenses/>.
-
-    As a special exception, you may use this file as part of a free
-    software library without restriction.  Specifically, if other files
-    instantiate templates or use macros or inline functions from this
-    file, or you compile this file and link it with other files to
-    produce an executable, this file does not by itself cause the
-    resulting executable to be covered by the GNU General Public
-    License.  This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General
-    Public License.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
 #ifndef max
@@ -179,8 +171,10 @@ static inline void CRC32_update_buf( uint32_t * const crc,
                                      const int size )
   {
   int i;
+  uint32_t c = *crc;
   for( i = 0; i < size; ++i )
-    *crc = crc32[(*crc^buffer[i])&0xFF] ^ ( *crc >> 8 );
+    c = crc32[(c^buffer[i])&0xFF] ^ ( c >> 8 );
+  *crc = c;
   }
 
 
@@ -240,7 +234,7 @@ static inline bool Fh_set_dictionary_size( File_header data, const unsigned sz )
     {
     const unsigned base_size = 1 << data[5];
     const unsigned fraction = base_size / 16;
-    int i;
+    unsigned i;
     for( i = 7; i >= 1; --i )
       if( base_size - ( i * fraction ) >= sz )
         { data[5] |= ( i << 5 ); break; }

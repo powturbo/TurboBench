@@ -16,11 +16,11 @@ availability:
      merging of damaged copies of a file.
 
    * The lzip format is as simple as possible (but not simpler). The
-     lzip manual provides the code of a simple decompressor along with a
-     detailed explanation of how it works, so that with the only help of
-     the lzip manual it would be possible for a digital archaeologist to
-     extract the data from a lzip file long after quantum computers
-     eventually render LZMA obsolete.
+     lzip manual provides the source code of a simple decompressor along
+     with a detailed explanation of how it works, so that with the only
+     help of the lzip manual it would be possible for a digital
+     archaeologist to extract the data from a lzip file long after
+     quantum computers eventually render LZMA obsolete.
 
    * Additionally the lzip reference implementation is copylefted, which
      guarantees that it will remain free forever.
@@ -87,7 +87,7 @@ range encoding), Igor Pavlov (for putting all the above together in
 LZMA), and Julian Seward (for bzip2's CLI).
 
 
-Copyright (C) 2009-2016 Antonio Diaz Diaz.
+Copyright (C) 2009-2017 Antonio Diaz Diaz.
 
 This file is free documentation: you have unlimited permission to copy,
 distribute and modify it.

@@ -11,7 +11,7 @@ File: lzlib.info,  Node: Top,  Next: Introduction,  Up: (dir)
 Lzlib Manual
 ************
 
-This manual is for Lzlib (version 1.8, 17 May 2016).
+This manual is for Lzlib (version 1.9-rc1, 15 March 2017).
 
 * Menu:
 
@@ -29,7 +29,7 @@ This manual is for Lzlib (version 1.8, 17 May 2016).
 * Concept index::               Index of concepts
 
 
-   Copyright (C) 2009-2016 Antonio Diaz Diaz.
+   Copyright (C) 2009-2017 Antonio Diaz Diaz.
 
    This manual is free documentation: you have unlimited permission to
 copy, distribute and modify it.
@@ -57,11 +57,11 @@ availability:
      (lziprecover)Data safety.
 
    * The lzip format is as simple as possible (but not simpler). The
-     lzip manual provides the code of a simple decompressor along with
-     a detailed explanation of how it works, so that with the only help
-     of the lzip manual it would be possible for a digital
-     archaeologist to extract the data from a lzip file long after
-     quantum computers eventually render LZMA obsolete.
+     lzip manual provides the source code of a simple decompressor
+     along with a detailed explanation of how it works, so that with
+     the only help of the lzip manual it would be possible for a
+     digital archaeologist to extract the data from a lzip file long
+     after quantum computers eventually render LZMA obsolete.
 
    * Additionally the lzip reference implementation is copylefted, which
      guarantees that it will remain free forever.
@@ -83,7 +83,7 @@ traditional zlib interface.
 
    Compression/decompression is done when the read function is called.
 This means the value returned by the position functions will not be
-updated until a read call, even if a lot of data is written. If you
+updated until a read call, even if a lot of data are written. If you
 want the data to be compressed in advance, just call the read function
 with a SIZE equal to 0.
 
@@ -127,6 +127,10 @@ people: Abraham Lempel and Jacob Ziv (for the LZ algorithm), Andrey
 Markov (for the definition of Markov chains), G.N.N. Martin (for the
 definition of range encoding), Igor Pavlov (for putting all the above
 together in LZMA), and Julian Seward (for bzip2's CLI).
+
+   LANGUAGE NOTE: Uncompressed = not compressed = plain data; it may
+never have been compressed. Decompressed is used to refer to data which
+have undergone the process of decompression.
 
 
 File: lzlib.info,  Node: Library version,  Next: Buffering,  Prev: Introduction,  Up: Top
@@ -258,7 +262,7 @@ calling 'LZ_compress_errno' before using it.
      Frees all dynamically allocated data structures for this stream.
      This function discards any unprocessed input and does not flush
      any pending output. After a call to 'LZ_compress_close', ENCODER
-     can no more be used as an argument to any LZ_compress function.
+     can no longer be used as an argument to any LZ_compress function.
 
  -- Function: int LZ_compress_finish ( struct LZ_Encoder * const
           ENCODER )
@@ -375,7 +379,7 @@ verified by calling 'LZ_decompress_errno' before using it.
      Frees all dynamically allocated data structures for this stream.
      This function discards any unprocessed input and does not flush
      any pending output. After a call to 'LZ_decompress_close', DECODER
-     can no more be used as an argument to any LZ_decompress function.
+     can no longer be used as an argument to any LZ_decompress function.
 
  -- Function: int LZ_decompress_finish ( struct LZ_Decoder * const
           DECODER )
@@ -786,18 +790,18 @@ Concept index
 
 Tag Table:
 Node: Top220
-Node: Introduction1301
-Node: Library version5918
-Node: Buffering6563
-Node: Parameter limits7783
-Node: Compression functions8742
-Node: Decompression functions15282
-Node: Error codes21450
-Node: Error messages23425
-Node: Data format24004
-Node: Examples26569
-Node: Problems30650
-Node: Concept index31222
+Node: Introduction1307
+Node: Library version6119
+Node: Buffering6764
+Node: Parameter limits7984
+Node: Compression functions8943
+Node: Decompression functions15485
+Node: Error codes21655
+Node: Error messages23630
+Node: Data format24209
+Node: Examples26774
+Node: Problems30855
+Node: Concept index31427
 
 End Tag Table
 

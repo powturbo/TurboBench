@@ -1,3 +1,16 @@
+2017-03-15  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.9-rc1 released.
+	* main.c: Continue testing if any input file is a terminal.
+
+2017-02-07  Antonio Diaz Diaz  <antonio@gnu.org>
+
+	* Version 1.9-pre1 released.
+	* License changed to "2-clause BSD".
+	* Compression time of option '-0' has been reduced by 3%.
+	* Compression time of options -1 to -9 has been reduced by 1%.
+	* Decompression time has been reduced by 3%.
+
 2016-05-17  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.8 released.
@@ -20,7 +33,7 @@
 2014-08-27  Antonio Diaz Diaz  <antonio@gnu.org>
 
 	* Version 1.6 released.
-	* Compression ratio of option -9 has been slightly increased.
+	* Compression ratio of option '-9' has been slightly increased.
 	* configure: Added new option '--disable-static'.
 	* configure: Added new option '--disable-ldconfig'.
 	* Makefile.in: Ignore errors from ldconfig.
@@ -165,7 +178,7 @@
 	* Version 0.1 released.
 
 
-Copyright (C) 2009-2016 Antonio Diaz Diaz.
+Copyright (C) 2009-2017 Antonio Diaz Diaz.
 
 This file is a collection of facts, and thus it is not copyrightable,
 but just in case, you have unlimited permission to copy, distribute and

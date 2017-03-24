@@ -1,5 +1,5 @@
 /*  Buffer to buffer example - Test program for the lzlib library
-    Copyright (C) 2010-2016 Antonio Diaz Diaz.
+    Copyright (C) 2010-2017 Antonio Diaz Diaz.
 
     This program is free software: you have unlimited permission
     to copy, distribute and modify it.

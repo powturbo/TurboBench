@@ -15,7 +15,8 @@ objs = carg_parser.o main.o
 .PHONY : all install install-bin install-info install-man \
          install-strip install-compress install-strip-compress \
          install-bin-strip install-info-compress install-man-compress \
-         install-as-lzip uninstall uninstall-bin uninstall-info uninstall-man \
+         install-as-lzip \
+         uninstall uninstall-bin uninstall-info uninstall-man \
          doc info man check dist clean distclean
 
 all : $(progname_static) $(progname_shared)
@@ -155,6 +156,7 @@ dist : doc
 	tar -Hustar --owner=root --group=root -cvf $(DISTNAME).tar \
 	  $(DISTNAME)/AUTHORS \
 	  $(DISTNAME)/COPYING \
+	  $(DISTNAME)/COPYING.GPL \
 	  $(DISTNAME)/ChangeLog \
 	  $(DISTNAME)/INSTALL \
 	  $(DISTNAME)/Makefile.in \
@@ -164,13 +166,13 @@ dist : doc
 	  $(DISTNAME)/doc/$(progname).1 \
 	  $(DISTNAME)/doc/$(pkgname).info \
 	  $(DISTNAME)/doc/$(pkgname).texi \
+	  $(DISTNAME)/*.h \
+	  $(DISTNAME)/*.c \
 	  $(DISTNAME)/testsuite/check.sh \
 	  $(DISTNAME)/testsuite/test.txt \
 	  $(DISTNAME)/testsuite/test2.txt \
 	  $(DISTNAME)/testsuite/test.txt.lz \
-	  $(DISTNAME)/testsuite/test_sync.lz \
-	  $(DISTNAME)/*.h \
-	  $(DISTNAME)/*.c
+	  $(DISTNAME)/testsuite/test_sync.lz
 	rm -f $(DISTNAME)
 	lzip -v -9 $(DISTNAME).tar
 

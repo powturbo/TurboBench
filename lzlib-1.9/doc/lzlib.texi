@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 17 May 2016
-@set VERSION 1.8
+@set UPDATED 15 March 2017
+@set VERSION 1.9-rc1
 
 @dircategory Data Compression
 @direntry
@@ -50,7 +50,7 @@ This manual is for Lzlib (version @value{VERSION}, @value{UPDATED}).
 @end menu
 
 @sp 1
-Copyright @copyright{} 2009-2016 Antonio Diaz Diaz.
+Copyright @copyright{} 2009-2017 Antonio Diaz Diaz.
 
 This manual is free documentation: you have unlimited permission
 to copy, distribute and modify it.
@@ -83,10 +83,10 @@ including error-checked merging of damaged copies of a file.
 
 @item
 The lzip format is as simple as possible (but not simpler). The lzip
-manual provides the code of a simple decompressor along with a detailed
-explanation of how it works, so that with the only help of the lzip
-manual it would be possible for a digital archaeologist to extract the
-data from a lzip file long after quantum computers eventually render
+manual provides the source code of a simple decompressor along with a
+detailed explanation of how it works, so that with the only help of the
+lzip manual it would be possible for a digital archaeologist to extract
+the data from a lzip file long after quantum computers eventually render
 LZMA obsolete.
 
 @item
@@ -111,7 +111,7 @@ traditional zlib interface.
 
 Compression/decompression is done when the read function is called. This
 means the value returned by the position functions will not be updated
-until a read call, even if a lot of data is written. If you want the
+until a read call, even if a lot of data are written. If you want the
 data to be compressed in advance, just call the read function with a
 @var{size} equal to 0.
 
@@ -154,6 +154,10 @@ Abraham Lempel and Jacob Ziv (for the LZ algorithm), Andrey Markov (for
 the definition of Markov chains), G.N.N. Martin (for the definition of
 range encoding), Igor Pavlov (for putting all the above together in
 LZMA), and Julian Seward (for bzip2's CLI).
+
+LANGUAGE NOTE: Uncompressed = not compressed = plain data; it may never
+have been compressed. Decompressed is used to refer to data which have
+undergone the process of decompression.
 
 
 @node Library version
@@ -293,7 +297,7 @@ for example INT64_MAX.
 Frees all dynamically allocated data structures for this stream. This
 function discards any unprocessed input and does not flush any pending
 output. After a call to @samp{LZ_compress_close}, @var{encoder} can no
-more be used as an argument to any LZ_compress function.
+longer be used as an argument to any LZ_compress function.
 @end deftypefun
 
 
@@ -427,7 +431,7 @@ pointer must not be used and should be freed with
 Frees all dynamically allocated data structures for this stream. This
 function discards any unprocessed input and does not flush any pending
 output. After a call to @samp{LZ_decompress_close}, @var{decoder} can no
-more be used as an argument to any LZ_decompress function.
+longer be used as an argument to any LZ_decompress function.
 @end deftypefun
 
 

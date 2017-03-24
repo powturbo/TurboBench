@@ -1,28 +1,20 @@
 /*  Lzlib - Compression library for the lzip format
-    Copyright (C) 2009-2016 Antonio Diaz Diaz.
+    Copyright (C) 2009-2017 Antonio Diaz Diaz.
 
-    This library is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+    This library is free software. Redistribution and use in source and
+    binary forms, with or without modification, are permitted provided
+    that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this library.  If not, see <http://www.gnu.org/licenses/>.
-
-    As a special exception, you may use this file as part of a free
-    software library without restriction.  Specifically, if other files
-    instantiate templates or use macros or inline functions from this
-    file, or you compile this file and link it with other files to
-    produce an executable, this file does not by itself cause the
-    resulting executable to be covered by the GNU General Public
-    License.  This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General
-    Public License.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
 static bool Mb_normalize_pos( struct Matchfinder_base * const mb )
@@ -32,11 +24,11 @@ static bool Mb_normalize_pos( struct Matchfinder_base * const mb )
   if( !mb->at_stream_end )
     {
     int i;
-    const int offset = mb->pos - mb->dictionary_size - mb->before_size;
+    const int offset = mb->pos - mb->before_size - mb->dictionary_size;
     const int size = mb->stream_pos - offset;
     memmove( mb->buffer, mb->buffer + offset, size );
     mb->partial_data_pos += offset;
-    mb->pos -= offset;
+    mb->pos -= offset;		/* pos = before_size + dictionary_size */
     mb->stream_pos -= offset;
     for( i = 0; i < mb->num_prev_positions; ++i )
       mb->prev_positions[i] -= min( mb->prev_positions[i], offset );
@@ -82,8 +74,9 @@ static bool Mb_init( struct Matchfinder_base * const mb,
   mb->num_prev_positions = size;
   mb->pos_array_size = pos_array_factor * ( mb->dictionary_size + 1 );
   size += mb->pos_array_size;
-  if( size * sizeof (int32_t) <= size ) mb->prev_positions = 0;
-  else mb->prev_positions = (int32_t *)malloc( size * sizeof (int32_t) );
+  if( size * sizeof mb->prev_positions[0] <= size ) mb->prev_positions = 0;
+  else mb->prev_positions =
+    (int32_t *)malloc( size * sizeof mb->prev_positions[0] );
   if( !mb->prev_positions ) { free( mb->buffer ); return false; }
   mb->pos_array = mb->prev_positions + mb->num_prev_positions;
   for( i = 0; i < mb->num_prev_positions; ++i ) mb->prev_positions[i] = 0;
@@ -100,7 +93,7 @@ static void Mb_adjust_dictionary_size( struct Matchfinder_base * const mb )
     mb->dictionary_size =
     mb->pos_limit = max( min_dictionary_size, mb->stream_pos );
     size = 1 << max( 16, real_bits( mb->dictionary_size - 1 ) - 2 );
-    if( mb->dictionary_size > 1 << 26 )
+    if( mb->dictionary_size > 1 << 26 )		/* 64 MiB */
       size >>= 1;
     mb->key4_mask = size - 1;
     size += mb->num_prev_positions23;
@@ -126,7 +119,7 @@ static void Mb_reset( struct Matchfinder_base * const mb )
 
 
      /* End Of Stream mark => (dis == 0xFFFFFFFFU, len == min_match_len) */
-static bool LZeb_full_flush( struct LZ_encoder_base * const eb )
+static void LZeb_try_full_flush( struct LZ_encoder_base * const eb )
   {
   int i;
   const int pos_state = Mb_data_position( &eb->mb ) & pos_state_mask;
@@ -134,7 +127,8 @@ static bool LZeb_full_flush( struct LZ_encoder_base * const eb )
   File_trailer trailer;
   if( eb->member_finished ||
       Cb_free_bytes( &eb->renc.cb ) < max_marker_size + eb->renc.ff_count + Ft_size )
-    return false;
+    return;
+  eb->member_finished = true;
   Re_encode_bit( &eb->renc, &eb->bm_match[state][pos_state], 1 );
   Re_encode_bit( &eb->renc, &eb->bm_rep[state], 0 );
   LZeb_encode_pair( eb, 0xFFFFFFFFU, min_match_len, pos_state );
@@ -144,7 +138,6 @@ static bool LZeb_full_flush( struct LZ_encoder_base * const eb )
   Ft_set_member_size( trailer, Re_member_position( &eb->renc ) + Ft_size );
   for( i = 0; i < Ft_size; ++i )
     Cb_put_byte( &eb->renc.cb, trailer[i] );
-  return true;
   }
 
 
@@ -183,7 +176,7 @@ static void LZeb_reset( struct LZ_encoder_base * const eb,
   Bm_array_init( eb->bm_rep2, states );
   Bm_array_init( eb->bm_len[0], states * pos_states );
   Bm_array_init( eb->bm_dis_slot[0], len_states * (1 << dis_slot_bits) );
-  Bm_array_init( eb->bm_dis, modeled_distances - end_dis_model );
+  Bm_array_init( eb->bm_dis, modeled_distances - end_dis_model + 1 );
   Bm_array_init( eb->bm_align, dis_align_size );
   Lm_init( &eb->match_len_model );
   Lm_init( &eb->rep_len_model );

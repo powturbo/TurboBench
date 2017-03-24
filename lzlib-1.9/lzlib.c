@@ -1,28 +1,20 @@
 /*  Lzlib - Compression library for the lzip format
-    Copyright (C) 2009-2016 Antonio Diaz Diaz.
+    Copyright (C) 2009-2017 Antonio Diaz Diaz.
 
-    This library is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
+    This library is free software. Redistribution and use in source and
+    binary forms, with or without modification, are permitted provided
+    that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this library.  If not, see <http://www.gnu.org/licenses/>.
-
-    As a special exception, you may use this file as part of a free
-    software library without restriction.  Specifically, if other files
-    instantiate templates or use macros or inline functions from this
-    file, or you compile this file and link it with other files to
-    produce an executable, this file does not by itself cause the
-    resulting executable to be covered by the GNU General Public
-    License.  This exception does not however invalidate any other
-    reasons why the executable file might be covered by the GNU General
-    Public License.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 */
 
 #include <stdbool.h>
@@ -387,7 +379,7 @@ int LZ_decompress_reset( struct LZ_Decoder * const d )
 
 int LZ_decompress_sync_to_member( struct LZ_Decoder * const d )
   {
-  int skipped = 0;
+  unsigned skipped = 0;
   if( !verify_decoder( d ) ) return -1;
   if( d->lz_decoder )
     { LZd_free( d->lz_decoder ); free( d->lz_decoder ); d->lz_decoder = 0; }
@@ -434,7 +426,7 @@ int LZ_decompress_read( struct LZ_Decoder * const d,
       d->fatal = true;
       return -1;
       }
-    if( !Fh_verify( d->member_header ) )
+    if( !Fh_verify_magic( d->member_header ) )
       {
       /* unreading the header prevents sync_to_member from skipping a member
          if leading garbage is shorter than a full header; "lgLZIP\x01\x0C" */
@@ -442,6 +434,13 @@ int LZ_decompress_read( struct LZ_Decoder * const d,
         d->lz_errno = LZ_header_error;
       else
         d->lz_errno = LZ_library_error;
+      d->fatal = true;
+      return -1;
+      }
+    if( !Fh_verify_version( d->member_header ) ||
+        !isvalid_ds( Fh_get_dictionary_size( d->member_header ) ) )
+      {
+      d->lz_errno = LZ_data_error;	/* bad version or bad dict size */
       d->fatal = true;
       return -1;
       }
@@ -493,7 +492,8 @@ int LZ_decompress_write( struct LZ_Decoder * const d,
   result = Rd_write_data( d->rdec, buffer, size );
   while( d->seeking )
     {
-    int size2, skipped = 0;
+    int size2;
+    unsigned skipped = 0;
     if( Rd_find_header( d->rdec, &skipped ) ) d->seeking = false;
     d->partial_in_size += skipped;
     if( result >= size ) break;

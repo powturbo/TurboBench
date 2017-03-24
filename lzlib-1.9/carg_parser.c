@@ -1,5 +1,5 @@
 /*  Arg_parser - POSIX/GNU command line argument parser. (C version)
-    Copyright (C) 2006-2016 Antonio Diaz Diaz.
+    Copyright (C) 2006-2017 Antonio Diaz Diaz.
 
     This library is free software. Redistribution and use in source and
     binary forms, with or without modification, are permitted provided
@@ -94,7 +94,7 @@ static char parse_long_option( struct Arg_parser * const ap,
       else if( index < 0 ) index = i;		/* First nonexact match found */
       else if( options[index].code != options[i].code ||
                options[index].has_arg != options[i].has_arg )
-        ambig = 1;			/* Second or later nonexact match found */
+        ambig = 1;		/* Second or later nonexact match found */
       }
 
   if( ambig && !exact )
@@ -230,7 +230,9 @@ char ap_init( struct Arg_parser * const ap,
       }
     else
       {
-      if( !in_order )
+      if( in_order )
+        { if( !push_back_record( ap, 0, argv[argind++] ) ) return 0; }
+      else
         {
         void * tmp = ap_resize_buffer( non_options,
                        ( non_options_size + 1 ) * sizeof *non_options );
@@ -238,7 +240,6 @@ char ap_init( struct Arg_parser * const ap,
         non_options = (const char **)tmp;
         non_options[non_options_size++] = argv[argind++];
         }
-      else if( !push_back_record( ap, 0, argv[argind++] ) ) return 0;
       }
     }
   if( ap->error ) free_data( ap );
