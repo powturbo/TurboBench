@@ -264,7 +264,6 @@ All compressors with latest versions 16.08.2016b <br>
 
 		make NCOMP2=1 NECODER=1 NSIMD=1
 
-
 ### Environment:
 ###### OS/Compiler (32 + 64 bits):
 - Linux: GNU GCC (>=4.6) 
