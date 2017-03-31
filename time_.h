@@ -106,13 +106,13 @@ static double tmmsec(tm_t tm) { return (double)tm/1000.0; }
   else if(_tm_t>tm_tm*1.2) TMSLEEP;   													if(tm_verbose) printf("%8.2f %.2d_%d\b\b\b\b\b\b\b\b\b\b\b\b\b",TMBS(_len_, (double)tm_tm*TM_C/tm_rm),_tm_R+1,_tm_c),fflush(stdout);\
   if(tmtime()-_tm_ts > tm_TX) break;\
   if((_tm_R & 7)==7) sleep(tm_slp),_tm_ts=tmtime(); } }
- 
+  
 static unsigned tm_rep = 1<<20, tm_Rep = 3, tm_rep2 = 1<<20, tm_Rep2 = 4, tm_slp = 20, tm_rm;
-static tm_t     tm_tx = TM_T, tm_TX = 10*TM_T, tm_0, tm_T, tm_verbose=1, tm_tm;
+static tm_t     tm_tx = TM_T, tm_TX = 20*TM_T, tm_0, tm_T, tm_verbose=1, tm_tm;
 static void tm_init(int _tm_Rep, int _tm_verbose) { tm_verbose = _tm_verbose; if(_tm_Rep) tm_Rep = _tm_Rep; tm_tx =  tminit(); Sleep(500); tm_tx = tmtime() - tm_tx; /*printf("tm_tx=%llu %lld\n", tm_tx, (long long)CLOCKS_PER_SEC);*/ tm_TX = 10*tm_tx; }
 
-#define TMBENCH(_name_, _func_, _len_)  do { if(tm_verbose) printf("%-32s: ", _name_?_name_:#_func_ ); TMBEG(tm_rep, tm_Rep) _func_; TMEND(_len_); if(tm_verbose) printf("%8.2f           \n", TMBS(_len_, (double)tm_tm*TM_C/(double)tm_rm) ); } while(0)
-#define TMBENCHF(_name_,_func_, _len_, _res_)  do { if(tm_verbose) printf("%-32s: ", _name_?_name_:#_func_ ); TMBEG(tm_rep, tm_Rep) if(_func_ != _res_) { printf("ERROR: %lld != %lld", (long long)_func_, (long long)_res_ ); exit(0); }; TMEND(_len_); if(tm_verbose) printf("%8.2f           \n", TMBS(_len_,(double)tm_tm*TM_C/(double)tm_rm) ); } while(0)
+#define TMBENCH(_name_, _func_, _len_)  do { if(tm_verbose) printf("%s ", _name_?_name_:#_func_); TMBEG(tm_rep, tm_Rep) _func_; TMEND(_len_); if(tm_verbose) printf("%8.2f      \b\b\b\b\b", TMBS(_len_, (double)tm_tm*TM_C/(double)tm_rm) ); } while(0)
+#define TMBENCHF(_name_,_func_, _len_, _res_)  do { if(tm_verbose) printf("%s ", _name_?_name_:#_func_ ); TMBEG(tm_rep, tm_Rep) if(_func_ != _res_) { printf("ERROR: %lld != %lld", (long long)_func_, (long long)_res_ ); exit(0); }; TMEND(_len_); if(tm_verbose) printf("%8.2f      \b\b\b\b\b", TMBS(_len_,(double)tm_tm*TM_C/(double)tm_rm) ); } while(0)
 
 #define Kb (1u<<10)
 #define Mb (1u<<20)
