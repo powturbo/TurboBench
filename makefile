@@ -16,7 +16,7 @@ CXX ?= g++
 # Run turbobench w/o output : afl-fuzz -i testcase_dir -o finding_dir -- ./turbobench -elzturbo,12 -v0 -gg -k0
 #CC=~/b/afl/afl-gcc 
 #CXX=~/b/afl/afl-g++
-#-----------------------------------------------
+#----------------------------------------------
 ifeq ($(OS),Windows_NT)
   UNAME := Windows
 CC=gcc
