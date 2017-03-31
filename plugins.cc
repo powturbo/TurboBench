@@ -102,7 +102,8 @@ enum {
 #define C_HEATSHRINK COMP2
  P_HEATSHRINK,
 #define C_LIBBSC     COMP2    
- P_LIBBSC, P_LIBBSC_ST,  
+ P_LIBBSC,   
+ P_LIBBSCC,   
 #define C_LIBDEFLATE COMP2	
  P_LIBDEFLATE,
 #define C_LIBLZF     COMP2 
@@ -682,9 +683,10 @@ size_t chromium_base64_decode(char* dest, const char* src, size_t len);
   #endif
 
   //------------------------------------ Transform ----------------------------------
-  #if C_DIVBWT 
+  #if C_DIVBWT || C_LIBBSC
 #include "libbsc/libbsc/bwt/divsufsort/divsufsort.h"
 #include "libbsc/libbsc/bwt/bwt.h"
+#include "libbsc/libbsc/coder/coder.h"
   #endif
   //------------------------------------ Entropy Coder ------------------------------
   #if C_FASTAC
@@ -781,7 +783,7 @@ struct plugs plugs[] = {
   { P_BCM, 		"bcm", 				C_BCM, 		"1.25",		"bcm",					"Public Domain",	"https://github.com/encode84/bcm", 													"" }, 
   { P_C_BLOSC2, "blosc",			C_C_BLOSC2, "2.0",		"Blosc",				"BSD license",		"https://github.com/Blosc/c-blosc2", 													"0,1,2,3,4,5,6,7,8,9", 64*1024},
   { P_BRIEFLZ,	"brieflz", 		    C_BRIEFLZ, 	"1.1.0",	"BriefLz",				"BSD like",			"https://github.com/jibsen/brieflz", 													"" }, 
-  { P_BROTLI,	"brotli", 			C_BROTLI, 	"16-08",	"Brotli",				"Apache license",	"https://github.com/google/brotli", 													"0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
+  { P_BROTLI,	"brotli", 			C_BROTLI, 	"17-03",	"Brotli",				"Apache license",	"https://github.com/google/brotli", 													"0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
   { P_BZIP2,	"bzip2", 			C_BZIP2, 	"1.06",		"Bzip2",				"BSD like",			"http://www.bzip.org/downloads.html\thttps://github.com/asimonov-im/bzip2", 			"" }, 
   { P_CHAMELEON,"chameleon",		C_CHAMELEON, "15-03",	"Chameleon",			"Public Domain",	"http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html", 					"1,2" },
   { P_CRUSH,	"crush", 			C_CRUSH, 	"1.0.0",	"Crush",				"Public Domain",	"http://sourceforge.net/projects/crush", 												"0,1,2" },
@@ -792,16 +794,16 @@ struct plugs plugs[] = {
   { P_GIPFELI, 	"gipfeli", 			C_GIPFELI, 	"16-08",	"Gipfeli",				"Apache license",	"https://github.com/google/gipfeli",													"" }, 
   { P_GLZA, 	"glza", 			C_GLZA, 	"16-08",	"glza",					"Apache license",	"https://github.com/jrmuizel/GLZA",													    "" }, 
   { P_HEATSHRINK,"heatshrink",		C_HEATSHRINK,"0.4.1",	"heatshrink",			"BSD license",		"https://github.com/atomicobject/heatshrink",											"" },
- // { P_LIBBSC_ST,"bsc_st", 			C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"3,4,5,6,7,8" }, 
   { P_LIBBSC, 	"bsc", 				C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"0,3,4,5,6,7,8/p:e#"}, 
-  { P_LIBDEFLATE,"libdeflate", 	    C_LIBDEFLATE,"16-06",	"libdeflate",			"CC0 license",		"https://github.com/ebiggers/libdeflate",												"1,2,3,4,5,6,7,8,9,12/dg"}, 
+  { P_LIBBSCC, 	"bscqlfc", 			C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"1,2"}, 
+  { P_LIBDEFLATE,"libdeflate", 	    C_LIBDEFLATE,"17-03",	"libdeflate",			"CC0 license",		"https://github.com/ebiggers/libdeflate",												"1,2,3,4,5,6,7,8,9,12/dg"}, 
   { P_LIBLZF, 	"lzf", 				C_LIBLZF, 	"1.06",		"LibLZF",				"BSD license",		"http://oldhome.schmorp.de/marc/liblzf.html\thttps://github.com/nemequ/liblzf",			"" },
   { P_LIBLZG,  	"lzg", 				C_LIBLZG,   "1.0.8",	"LibLzg",				"zlib-license",		"https://github.com/mbitsnbites/liblzg\thttp://liblzg.bitsnbites.eu/e",					"1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
   { P_LIBZPAQ,  "zpaq", 			C_LIBZPAQ, 	"7.10",		"Libzpaq",				"Public Domain",	"https://github.com/zpaq/zpaq",															"0,1,2,3,4,5" }, 
   { P_LIBSLZ, 	"slz",				C_LIBSLZ, 	"1.0.0",	"libslz",				"BSD license",	    "http://git.1wt.eu/web/libslz.git/",													"0,1,2,3,4,5,6,7,8,9" },
-  { P_LZ4,  	"lz4",				C_LZ4, 		"15-10",	"Lz4",					"BSD license",		"https://github.com/Cyan4973/lz4", 														"0,1,9,12,16" }, 
+  { P_LZ4,  	"lz4",				C_LZ4, 		"",	"Lz4",					"BSD license",		"https://github.com/Cyan4973/lz4", 														"0,1,9,12,16" }, 
   { P_LIZARD,  	"lizard",			C_LIZARD, 	"2.0",	    "Lizard",				"BSD license",		"https://github.com/inikep/lizard",														"10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" }, 
-  { P_LZFSE, 	"lzfse", 			C_LZFSE, 	"16-08",	"lzfse",				"BSD licence",		"https://github.com/lzfse/lzfse","" },
+  { P_LZFSE, 	"lzfse", 			C_LZFSE, 	"17-03",	"lzfse",				"BSD licence",		"https://github.com/lzfse/lzfse","" },
   { P_LZFSEA, 	"lzfsea", 			C_LZFSEA, 	"2015",		"lzfsea",				"iOS and OS X",		"https://developer.apple.com/library/ios/documentation/Performance/Reference/Compression/index.html","" },
   { P_LZHAM, 	"lzham", 			C_LZHAM,	"1.1",		"Lzham",				"MIT license",		"https://github.com/richgel999/lzham_codec_devel",										"1,2,3,4/t#:fb#:x#" },
   { P_LZLIB, 	"lzlib", 			C_LZLIB, 	"1.9",		"Lzlib",				"BSD license",		"http://www.nongnu.org/lzip\thttps://github.com/daniel-baumann/lzlib",					"1,2,3,4,5,6,7,8,9/d#:fb#" },
@@ -819,12 +821,12 @@ struct plugs plugs[] = {
   { P_LZSSE2,	"lzsse2",   	    C_LZSSE,	"16-04",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													"1,2,3,4,5,6,7,8,9,12,16,17"}, 
   { P_LZSSE4,	"lzsse4",   	    C_LZSSE,	"16-04",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													"0,1,2,3,4,5,6,7,8,9,12,16,17"}, 
   { P_LZSSE8,	"lzsse8",   	    C_LZSSE,	"16-04",	"lzsse",				"BSD license",		"https://github.com/ConorStokes/LZSSE",													"0,1,2,3,4,5,6,7,8,9,12,16,17"}, 
-  { P_MINIZ, 	"miniz", 			C_MINIZ,	"15-06",	"miniz zlib-replacement","Public domain",	"https://github.com/richgel999/miniz", 													"1,2,3,4,5,6,7,8,9" },
+  { P_MINIZ, 	"miniz", 			C_MINIZ,	"17-03",	"miniz zlib-replacement","Public domain",	"https://github.com/richgel999/miniz", 													"1,2,3,4,5,6,7,8,9" },
   { P_MSCOMPRESS,"mscompress", 		C_MSCOMPRESS,"16.06",	"ms-compress",			"GPL license",		"https://github.com/coderforlife/ms-compress", 											"2,3,4" }, 
   { P_NAKA, 	"naka", 			C_NAKA,		"15-10",	"Nakamichi Kintaro",	"Public Domain",    "http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188",	"" },
   { P_PITHY, 	"pithy",			C_PITHY, 	"2011",		"Pithy",	  			"BSD license",		"https://github.com/johnezang/pithy",													"0,1,2,3,4,5,6,7,8,9" },
   { P_QUICKLZ, 	"quicklz",			C_QUICKLZ, 	"1.5.1",	"Quicklz",	  			"GPL license",		"http://www.quicklz.com\thttps://github.com/robottwo/quicklz",							"1,2,3" },
-  { P_SAP, 	    "sap",				C_SAP, 		"16-04",	"sap",		  			"GPL license",		"https://github.com/CoreSecurity/pysap",												"0,1,2"	},
+  { P_SAP, 	    "sap",				C_SAP, 		"17-03",	"sap",		  			"GPL license",		"https://github.com/CoreSecurity/pysap",												"0,1,2"	},
   { P_SHRINKER, "shrinker",			C_SHRINKER, "0.1/r9",	"Shrinker",				"BSD license",		"https://code.google.com/p/data-shrinker",												"", 0, (1<<26) },
   { P_SHOCO,    "shoco",			C_SHOCO, 	"2015",		"Shoco",				"MIT license",		"https://github.com/Ed-von-Schleck/shoco",												"" },
   { P_SNAPPY, 	"snappy",			C_SNAPPY, 	"1.1.2",	"Snappy",				"Apache license",	"https://github.com/google/snappy"														""	},
@@ -835,7 +837,7 @@ struct plugs plugs[] = {
   { P_XPACK, 	"xpack", 			C_XPACK,	"16-08",	"xpack",				"BSD license",		"https://github.com/ebiggers/xpack", 													"1,2,3,4,5,6,7,8,9" },
   { P_YALZ77, 	"yalz77", 			C_YALZ77, 	"15-09",	"Yalz77",				"Public domain",	"https://github.com/ivan-tkatchev/yalz77",												"1,6,12" },
   { P_YAPPY, 	"yappy",			C_YAPPY, 	"2011",		"Yappy",				"",					"" ,																					"" },//crash windows
-  { P_ZLIB, 	"zlib", 			C_ZLIB, 	"1.2.8",	"zlib",					"zlib license",		"http://zlib.net\thttps://github.com/madler/zlib", 										"1,2,3,4,5,6,7,8,9" },
+  { P_ZLIB, 	"zlib", 			C_ZLIB, 	"1.2.9",	"zlib",					"zlib license",		"http://zlib.net\thttps://github.com/madler/zlib", 										"1,2,3,4,5,6,7,8,9" },
   { P_ZLING, 	"zling", 	   		C_ZLING, 	"16-01",	"Libzling",				"BSD license",		"https://github.com/richox/libzling",													"0,1,2,3,4" }, 
   { P_ZOPFLI, 	"zopfli",			C_ZOPFLI, 	"16-04",	"Zopfli",				"Apache license",	"https://code.google.com/p/zopfli",														""}, 
   { P_ZSTD, 	"zstd", 			C_ZSTD,		"1.0.0",	"ZSTD",					"BSD license+Patents","https://github.com/facebook/zstd", 													"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22/d#" },
@@ -844,24 +846,24 @@ struct plugs plugs[] = {
   { P_LMCPY, 	"memcpy",			C_MEMCPY,  	".",		"library memcpy",		"",					"",																						"" },
   { P_BCMEC, 	"bcmec", 			C_BCMEC, 	"1.0",		"bcm range coder",		"Public Domain",	"http://sourceforge.net/projects/bcm",													"" },
   { P_FSC, 		"fsc", 				C_FSC, 		"15-05",	"Finite State Coder",	"Apache license",	"https://github.com/skal65535/fsc",														"", E_ANS },
-  { P_FSE, 		"fse", 				C_FSE, 		"16-05",	"Finite State Entropy",	"BSD license",		"https://github.com/Cyan4973/FiniteStateEntropy",										"", E_ANS },
-  { P_FSEH,		"fsehuf", 			C_FSE, 		"16-08",	"Finite State Entropy",	"BSD license",		"https://github.com/Cyan4973/FiniteStateEntropy",										"", E_HUF },
+  { P_FSE, 		"fse", 				C_FSE, 		"",	"Finite State Entropy",	"BSD license",		"https://github.com/Cyan4973/FiniteStateEntropy",										"", E_ANS },
+  { P_FSEH,		"fsehuf", 			C_FSE, 		"",	"Finite State Entropy",	"BSD license",		"https://github.com/Cyan4973/FiniteStateEntropy",										"", E_HUF },
   { P_FPAQC,	"fpaqc", 			C_FPAQC, 	"07-12",	"Fpaqc:Asymmetric Binary Coder","GPL license",	"http://www.mattmahoney.net/dc/",														"" },
   { P_SHRC,	    "fpaq0p_sh",		C_SHRC, 	"2010",	    "Bitwise RC",			"           ",		"http://encode.ru/threads/1153-Simple-binary-rangecoder-demo",							"" },
   { P_SHRCV,	"vecrc_sh",			C_SHRC, 	"2012",	    "Bitwise vector RC",	"           ",		"http://encode.ru/threads/1200-Vectorized-rangecoder",									"" },
   { P_FASTHF,  	"FastHF", 			C_FASTHF, 	"2006",		"Fast HF",				"BSD like",			"http://www.cipr.rpi.edu/research/SPIHT/",												"" },
   { P_FASTARI,  "FastAri", 			C_FASTARI, 	"15-10",	"FastAri",				"MIT license",		"https://github.com/davidcatt/FastARI", 												"" },
   { P_FASTAC,  	"FastAC", 			C_FASTAC, 	"2006",		"Fast AC",				"BSD like",			"http://www.cipr.rpi.edu/research/SPIHT/",												"" },
-  { P_JAC, 		"arith_static",		C_JAC, 		"15-07",	"Range Coder/J.Bonfield","BSD license",		"https://github.com/jkbonfield/rans_static",													"", E_ANS},
+  { P_JAC, 		"arith_static",		C_JAC, 		"17-03",	"Range Coder/J.Bonfield","BSD license",		"https://github.com/jkbonfield/rans_static",													"", E_ANS},
   { P_FQZ0, 	"fqz0",				C_FQZ, 		"15-03",	"FQZ/PPMD Range Coder",	"Public Domain",	"http://encode.ru/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder",			""},
   { P_PPMDEC, 	"ppmdec", 			C_PPMDEC,	"15-03",	"PPMD Range Coder",		"Public Domain",	"http://encode.ru/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder",  		""},
 
-  { P_JRANS4_8o0, "rans_static8",	C_JRANS, 	"16-08",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
-  { P_JRANS4_8o1, "rans_static8o1", C_JRANS, 	"16-08",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
-  { P_JRANS4_16o0,"rans_static16",  C_JRANS,	"16-08",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
-  { P_JRANS4_16o1,"rans_static16o1",C_JRANS,    "16-08",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
-  { P_JRANS4_32o0,"rans_static32",  C_JRANS,	"16-10",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
-  { P_JRANS4_32o1,"rans_static32o1",C_JRANS,    "16-10",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
+  { P_JRANS4_8o0, "rans_static8",	C_JRANS, 	"",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
+  { P_JRANS4_8o1, "rans_static8o1", C_JRANS, 	"",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
+  { P_JRANS4_16o0,"rans_static16",  C_JRANS,	"",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
+  { P_JRANS4_16o1,"rans_static16o1",C_JRANS,    "",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
+  { P_JRANS4_32o0,"rans_static32",  C_JRANS,	"",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
+  { P_JRANS4_32o1,"rans_static32o1",C_JRANS,    "",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
   
   { P_NANS,	    "naniarans",		C_NANS, 	"2015",	    "Nania Adaptive rANS",	"           ",		"http://encode.ru/threads/2079-nARANS-(Nania-Adaptive-Range-Variant-of-ANS)",			"", E_ANS},
   { P_POLHF,    "polar", 			C_POLHF, 	"10-07",	"Polar Codes",			"GPL license",		"http://www.ezcodesample.com/prefixer/prefixer_article.html",							"" },
@@ -869,9 +871,9 @@ struct plugs plugs[] = {
   { P_TORNADOHF,"tornado_huff", 	C_TORNADOHF,"0.6a",		"Tornado Huf",			"GPL license",		"http://freearc.org/Research.aspx\thttps://github.com/nemequ/tornado" ,					"" },
   { P_ZLIBH, 	"zlibh",			C_ZLIBH, 	"1.2.8",	"zlib Huffmann",		"BSD license",		"https://github.com/Cyan4973/FiniteStateEntropy",										"", E_HUF },
   //---- Encoding ------
-  { P_RLES, 	"srle",	    		C_RLE, 	    "16-01", 	"TurboRLE ESC",			"            ",		"https://github.com/powturbo/TurboRLE",  												"0,8,16,32,64" },
-  { P_RLET, 	"trle",	    		C_RLE, 	    "16-01", 	"TurboRLE",			    "            ",		"https://github.com/powturbo/TurboRLE",  												"" },
-  { P_RLEM, 	"mrle",	    		C_RLE, 	    "16-01", 	"Mespostine RLE",	    "            ",		"https://github.com/powturbo/TurboRLE",  												"" },
+  { P_RLES, 	"srle",	    		C_RLE, 	    "", 	"TurboRLE ESC",			"            ",		"https://github.com/powturbo/TurboRLE",  												"0,8,16,32,64" },
+  { P_RLET, 	"trle",	    		C_RLE, 	    "", 	"TurboRLE",			    "            ",		"https://github.com/powturbo/TurboRLE",  												"" },
+  { P_RLEM, 	"mrle",	    		C_RLE, 	    "", 	"Mespostine RLE",	    "            ",		"https://github.com/powturbo/TurboRLE",  												"" },
   
   { P_FB64AVX,		"fb64_avx2",    C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
   { P_FB64CHROMIUM, "fb64chromium", C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
@@ -1004,7 +1006,7 @@ int codini(size_t insize, int codec) {
       #endif
 
       #if C_LIBBSC
-    case P_LIBBSC: case P_LIBBSC_ST: bsc_init(LIBBSC_FEATURE_FASTMODE); bsc_st_init(LIBBSC_FEATURE_FASTMODE); break;
+    case P_LIBBSC: case P_LIBBSCC: bsc_init(LIBBSC_FEATURE_FASTMODE); bsc_st_init(LIBBSC_FEATURE_FASTMODE); break;
       #endif
 
       #ifdef LZTURBO  
@@ -1074,9 +1076,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif    
 
       #if C_LIBBSC
-	case P_LIBBSC: 
-	  return bsc_compress(in, out, inlen,/*18*/strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPHASHSIZE,/*32*/ strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPMINLEN, lev<3?1:lev, (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1, LIBBSC_DEFAULT_FEATURES);
+	case P_LIBBSC: return bsc_compress(in, out, inlen,/*18*/strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPHASHSIZE,/*32*/ strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPMINLEN, lev<3?1:lev, (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1, LIBBSC_DEFAULT_FEATURES);
+	case P_LIBBSCC:return bsc_coder_compress(in, out, inlen, lev, LIBBSC_DEFAULT_FEATURES);
 	  #endif
+    int bsc_coder_compress(const unsigned char * input, unsigned char * output, int n, int coder, int features);
 
 	  #if C_LIBDEFLATE
 	case P_LIBDEFLATE:  { 
@@ -1405,7 +1408,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         case 32: return srlec32(in, inlen, out, _ESC32); 
         case 64: return srlec64(in, inlen, out, _ESC64);
       } break;
-    case P_RLET: return trlec(in, inlen, out);
+    case P_RLET: return trlec(in, inlen, out);//return brlec8(in, inlen, out, out+inlen);
     case P_RLEM: return mrlec(in, inlen, out);
       #endif 
 
@@ -1584,8 +1587,8 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	  #endif
 
       #if C_LIBBSC
-	//case P_LIBBSC_ST: 
 	case P_LIBBSC:	   return bsc_decompress(in, inlen, out, outlen, 0);
+	case P_LIBBSCC:	   return bsc_coder_decompress(in, out, lev, LIBBSC_DEFAULT_FEATURES);
 	  #endif
 	
 	  #if C_LIBDEFLATE
