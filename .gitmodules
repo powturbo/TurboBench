@@ -143,6 +143,3 @@
 [submodule "lizard"]
 	path = lizard
 	url = https://github.com/inikep/lizard.git
-[submodule "c-blosc2"]
-	path = c-blosc2
-	url = https://github.com/powturbo/c-blosc2.git
