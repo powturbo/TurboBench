@@ -143,6 +143,3 @@
 [submodule "rans_static"]
 	path = rans_static
 	url = https://github.com/powturbo/rans_static.git
-[submodule "c-blosc2"]
-	path = c-blosc2
-	url = https://github.com/Blosc/c-blosc2.git
