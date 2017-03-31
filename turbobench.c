@@ -1218,12 +1218,13 @@ int main(int argc, char* argv[]) {
       case 'G': plotmcpy++;	 			 		 	 break;
 
       case 'i': if((tm_rep  = atoi(optarg))<=0) 
-		          tm_rep=tm_Rep=1;         		 break;
+                  tm_rep=tm_Rep=1;         		     break;
       case 'I': tm_Rep  = atoi(optarg);       		 break;
       case 'j': if((tm_rep2  = atoi(optarg))<=0) 
 		          tm_rep2=tm_Rep2=1;         		 break;
       case 'J': tm_Rep2  = atoi(optarg);      		 break;
-      case 'k': if((tm_Repk  = atoi(optarg))<=0) tm_rep=tm_Rep=tm_rep2=tm_Rep2=tm_Repk=1; break;
+      case 'k': if((tm_Repk = atoi(optarg))<=0) 
+                  tm_rep=tm_Rep=tm_rep2=tm_Rep2=tm_Repk=1; break;
       //case 'K': tm_RepkT = argtot(optarg);     		 break;
       case 'L': tm_slp   = atoi(optarg);      		 break;
  	  case 't': tm_tx    = atoi(optarg)*TM_T; 		 break;
