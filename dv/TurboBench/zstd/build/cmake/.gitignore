@@ -1,7 +1,0 @@
-# cmake artefacts
-CMakeCache.txt
-CMakeFiles
-Makefile
-cmake_install.cmake
-cmake_uninstall.cmake
-*.1
