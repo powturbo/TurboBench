@@ -133,7 +133,7 @@ DEFS+=-DLZTURBO
 endif
 
 #------------- 
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/include -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include   
+CFLAGS+=$(DDEBUG) -fopenmp -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/include -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include   
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -ICSC/src/libcsc -D_7Z_TYPES_ -Ibrotli/include -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 
 all:  turbobench
@@ -287,6 +287,7 @@ ifeq ($(NSIMD),0)
 OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o 
 OB+=nakamichi/Nakamichi_Washigan.o
 endif
+#OB+=marlin/src/codec/marlin.cc
 OB+=miniz/miniz.o miniz/miniz_tdef.o miniz/miniz_tinfl.o
 
 OB+=pithy/pithy.o
@@ -417,7 +418,7 @@ OB+=polar/polar.o fpaqc/fpaqc.o
 endif
 #--------------------------------------------------------------------
 turbobench: $(OB) turbobench.o  
-	$(CXX) $^ $(LDFLAGS) -o turbobench
+	$(CXX) $^ $(LDFLAGS) -fopenmp -o turbobench
 
 .c.o:
 	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@  
