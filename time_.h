@@ -9,8 +9,8 @@
 #define Sleep(ms) usleep((ms) * 1000)
   #endif
 
-#if defined (__i386__) || defined( __x86_64__ ) 
-  #ifdef _MSC_VER  
+#if defined (__i386__) || defined( __x86_64__ )
+  #ifdef _MSC_VER
 #include <intrin.h> // __rdtsc
   #else
 #include <x86intrin.h>
@@ -47,7 +47,7 @@
   #endif
 #else
 #define RDTSC_INI(_c_)
-#define RDTSC(_c_)	  
+#define RDTSC(_c_)
 #endif
 
 #define tmrdtscini() ({ tm_t _c; __asm volatile("" ::: "memory"); RDTSC_INI(_c); _c; })
@@ -71,12 +71,18 @@ typedef unsigned long long tm_t;
     #ifdef _WIN32
 static LARGE_INTEGER tps;
 static tm_t tmtime(void) { LARGE_INTEGER tm; QueryPerformanceCounter(&tm); return (tm_t)((double)tm.QuadPart*1000000.0/tps.QuadPart); }
-static tm_t tminit() { QueryPerformanceFrequency(&tps); tm_t t0=tmtime(),ts; while((ts = tmtime())==t0); return ts; } 
+static tm_t tminit() { QueryPerformanceFrequency(&tps); tm_t t0=tmtime(),ts; while((ts = tmtime())==t0); return ts; }
     #else
-      #ifdef __MACH__
+      #ifdef __APPLE__
+#include <AvailabilityMacros.h>
+        #ifndef MAC_OS_X_VERSION_10_12
+#define MAC_OS_X_VERSION_10_12 101200
+        #endif
+#define CIVETWEB_APPLE_HAVE_CLOCK_GETTIME defined(__APPLE__) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12
+        #if !(CIVETWEB_APPLE_HAVE_CLOCK_GETTIME)
 #include <sys/time.h>
-#define CLOCK_REALTIME 0 
-#define CLOCK_MONOTONIC 0 
+#define CLOCK_REALTIME 0
+#define CLOCK_MONOTONIC 0
 int clock_gettime(int /*clk_id*/, struct timespec* t) {
     struct timeval now;
     int rv = gettimeofday(&now, NULL);
@@ -85,7 +91,8 @@ int clock_gettime(int /*clk_id*/, struct timespec* t) {
     t->tv_nsec = now.tv_usec * 1000;
     return 0;
 }
-      #endif	
+        #endif
+      #endif
 static   tm_t tmtime(void)    { struct timespec tm; clock_gettime(CLOCK_MONOTONIC, &tm); return (tm_t)tm.tv_sec*1000000ull + tm.tv_nsec/1000; }
 static   tm_t tminit()        { tm_t t0=tmtime(),ts; while((ts = tmtime())==t0); return ts; }
     #endif
@@ -108,7 +115,7 @@ static double tmmsec(tm_t tm) { return (double)tm/1000.0; }
   if((_tm_R & 7)==7) sleep(tm_slp),_tm_ts=tmtime(); } }
   
 static unsigned tm_rep = 1<<20, tm_Rep = 3, tm_rep2 = 1<<20, tm_Rep2 = 4, tm_slp = 20, tm_rm;
-static tm_t     tm_tx = TM_T, tm_TX = 20*TM_T, tm_0, tm_T, tm_verbose=1, tm_tm;
+static tm_t     tm_tx = TM_T, tm_TX = 120*TM_T, tm_0, tm_T, tm_verbose=1, tm_tm;
 static void tm_init(int _tm_Rep, int _tm_verbose) { tm_verbose = _tm_verbose; if(_tm_Rep) tm_Rep = _tm_Rep; tm_tx =  tminit(); Sleep(500); tm_tx = tmtime() - tm_tx; /*printf("tm_tx=%llu %lld\n", tm_tx, (long long)CLOCKS_PER_SEC);*/ tm_TX = 10*tm_tx; }
 
 #define TMBENCH(_name_, _func_, _len_)  do { if(tm_verbose) printf("%s ", _name_?_name_:#_func_); TMBEG(tm_rep, tm_Rep) _func_; TMEND(_len_); if(tm_verbose) printf("%8.2f      \b\b\b\b\b", TMBS(_len_, (double)tm_tm*TM_C/(double)tm_rm) ); } while(0)
