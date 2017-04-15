@@ -23,8 +23,8 @@ CC=gcc
 CXX=g++
 else
   UNAME := $(shell uname -s)
-ifeq ($(UNAME),$(filter $(UNAME),Linux Darwin FreeBSD GNU/kFreeBSD))
-LDFLAGS+=-lpthread -lrt
+ifeq ($(UNAME),$(filter $(UNAME),Linux FreeBSD GNU/kFreeBSD))
+LDFLAGS+=-lpthread -lrt 
 endif
 endif
 
@@ -132,8 +132,14 @@ ifeq ($(LZTURBO),1)
 DEFS+=-DLZTURBO
 endif
 
+ifeq ($(OPENMP),1)
+CFLAGS+=-fopenmp
+LDFLAGS+=-fopenmp 
+endif
+
 #------------- 
-CFLAGS+=$(DDEBUG) -fopenmp -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/include -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include   
+# 
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/include -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include   
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -ICSC/src/libcsc -D_7Z_TYPES_ -Ibrotli/include -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 
 all:  turbobench
@@ -418,8 +424,8 @@ OB+=polar/polar.o fpaqc/fpaqc.o
 endif
 #--------------------------------------------------------------------
 turbobench: $(OB) turbobench.o  
-	$(CXX) $^ $(LDFLAGS) -fopenmp -o turbobench
-
+	$(CXX) $^ $(LDFLAGS) -o turbobench
+#-fopenmp 
 .c.o:
 	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@  
 
