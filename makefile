@@ -136,7 +136,7 @@ ifeq ($(OPENMP),1)
 CFLAGS+=-fopenmp
 LDFLAGS+=-fopenmp 
 endif
-
+ 
 #------------- 
 # 
 CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/include -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include   
