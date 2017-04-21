@@ -1078,7 +1078,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif    
 
       #if C_LIBBSC
-	case P_LIBBSC: return bsc_compress(in, out, inlen,/*18*/strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPHASHSIZE,/*32*/ strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPMINLEN, lev<3?1:lev, (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1, LIBBSC_DEFAULT_FEATURES);
+	case P_LIBBSC: return bsc_compress(in, out, inlen,/*18*/strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPHASHSIZE,/*32*/ strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPMINLEN, lev<3?1:lev, (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1, 
+                                                                                                          LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING));
 	case P_LIBBSCC:return bsc_coder_compress(in, out, inlen, lev, LIBBSC_DEFAULT_FEATURES);
 	  #endif
     int bsc_coder_compress(const unsigned char * input, unsigned char * output, int n, int coder, int features);
