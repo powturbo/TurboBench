@@ -133,7 +133,7 @@ DEFS+=-DLZTURBO
 endif
 
 ifeq ($(OPENMP),1)
-CFLAGS+=-fopenmp
+DEFS+=-fopenmp -DLIBBSC_OPENMP_SUPPORT
 LDFLAGS+=-fopenmp 
 endif
  
