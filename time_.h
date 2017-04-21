@@ -111,7 +111,7 @@ static double tmmsec(tm_t tm) { return (double)tm/1000.0; }
 #define TMEND(_len_) _tm_r++; if((_tm_t = tmtime() - _tm_t0) > tm_tx) break; } \
   if(_tm_t < tm_tm) { if(tm_tm == 1ull<<63) { tm_rm = _tm_r; /*printf("reps=%d ", tm_rm);*/ } tm_tm = _tm_t; _tm_c++; } \
   else if(_tm_t>tm_tm*1.2) TMSLEEP;   													if(tm_verbose) printf("%8.2f %.2d_%d\b\b\b\b\b\b\b\b\b\b\b\b\b",TMBS(_len_, (double)tm_tm*TM_C/tm_rm),_tm_R+1,_tm_c),fflush(stdout);\
-  if(tmtime()-_tm_ts > tm_TX) break;\
+  if((tmtime()-_tm_ts && _tm_R < 8) > tm_TX) break;\
   if((_tm_R & 7)==7) sleep(tm_slp),_tm_ts=tmtime(); } }
   
 static unsigned tm_rep = 1<<20, tm_Rep = 3, tm_rep2 = 1<<20, tm_Rep2 = 4, tm_slp = 20, tm_rm;
