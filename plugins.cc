@@ -1011,6 +1011,10 @@ int codini(size_t insize, int codec) {
     case P_LIBBSC: case P_LIBBSCC: bsc_init(LIBBSC_FEATURE_FASTMODE); bsc_st_init(LIBBSC_FEATURE_FASTMODE); break;
       #endif
 
+      #if C_LIBSLZ
+         slz_make_crc_table();
+         slz_prepare_dist_table();
+      #endif
       #ifdef LZTURBO  
     #include "../beplug0.h"
       #endif
@@ -1394,7 +1398,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       ZSTD_parameters p = ZSTD_getParams(lev, inlen, 0);
       p.fParams.contentSizeFlag = 1;
       if(dsize) p.cParams.windowLog = bsr32(dsize)-powof2(dsize);
-      return ZSTD_compress_advanced(ZSTD_createCCtx(), out, outsize, in, inlen, NULL, 0, p);
+      ZSTD_CCtx *ctx = ZSTD_createCCtx();
+      unsigned rc = ZSTD_compress_advanced(ctx, out, outsize, in, inlen, NULL, 0, p);
+      ZSTD_freeCCtx(ctx); 
+      return rc; 
 	}
       #endif   
     //------------------------- Encoding
