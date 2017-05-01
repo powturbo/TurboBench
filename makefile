@@ -139,8 +139,8 @@ endif
  
 #------------- 
 # 
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/include -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include   
-CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -ICSC/src/libcsc -D_7Z_TYPES_ -Ibrotli/include -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common -D_7ZIP_ST $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/c/include -Ibrotli/c/enc -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include   
+CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -Ibrotli/c/include -Ibrotli/c/enc -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 
 all:  turbobench
 
@@ -159,11 +159,11 @@ ifeq ($(BROTLI), 0)
 #Modified files to disable dictionary.
 OB+=brotli_/enc/backward_references.o brotli_/enc/static_dict.o 
 else
-OB+=brotli/enc/backward_references.o brotli/enc/static_dict.o 
+OB+=brotli/c/enc/backward_references.o brotli/c/enc/static_dict.o 
 endif
-OB+=brotli/enc/bit_cost.o brotli/enc/cluster.o brotli/enc/block_splitter.o brotli/enc/encode.o brotli/enc/entropy_encode.o brotli/enc/compress_fragment.o brotli/enc/compress_fragment_two_pass.o brotli/enc/histogram.o \
-	brotli/enc/literal_cost.o brotli/enc/brotli_bit_stream.o brotli/enc/memory.o brotli/enc/metablock.o brotli/dec/bit_reader.o brotli/dec/decode.o brotli/common/dictionary.o \
-	brotli/dec/huffman.o brotli/dec/state.o brotli/enc/utf8_util.o brotli/enc/backward_references_hq.o brotli/enc/dictionary_hash.o
+OB+=brotli/c/enc/bit_cost.o brotli/c/enc/cluster.o brotli/c/enc/block_splitter.o brotli/c/enc/encode.o brotli/c/enc/entropy_encode.o brotli/c/enc/compress_fragment.o brotli/c/enc/compress_fragment_two_pass.o brotli/c/enc/histogram.o \
+	brotli/c/enc/literal_cost.o brotli/c/enc/brotli_bit_stream.o brotli/c/enc/memory.o brotli/c/enc/metablock.o brotli/c/dec/bit_reader.o brotli/c/dec/decode.o brotli/c/common/dictionary.o \
+	brotli/c/dec/huffman.o brotli/c/dec/state.o brotli/c/enc/utf8_util.o brotli/c/enc/backward_references_hq.o brotli/c/enc/dictionary_hash.o
 
 ifeq ($(HAVE_ZLIB), 1)
 ifeq ($(STATIC),1)
