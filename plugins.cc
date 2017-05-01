@@ -343,8 +343,8 @@ enum {
   #endif
   
   #if C_BROTLI
-#include "brotli/include/brotli/encode.h"
-#include "brotli/include/brotli/decode.h"
+#include "brotli/c/include/brotli/encode.h"
+#include "brotli/c/include/brotli/decode.h"
   #endif
 
   #if C_CSC
