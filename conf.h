@@ -85,11 +85,11 @@ static inline unsigned short bswap16(unsigned short x) { return __builtin_bswap3
 static inline int bsr32(int x) { return x ? 32 - __builtin_clz(x) : 0; }
     #ifdef _WIN64
 static inline int bsr64(unsigned long long x) { unsigned long z = 0; _BitScanForward64(&z, x); return 64 - z; }
-static inline int clz64(unsigned long long x) { unsigned long z = 0; _BitScanForward64(&z, x); return z; }
-static inline int ctz64(unsigned long long x) { unsigned long z = 0; _BitScanReverse64(&z, x); return z; }
+static inline int ctz64(unsigned long long x) { unsigned long z = 0; _BitScanForward64(&z, x); return z; }
+static inline int clz64(unsigned long long x) { unsigned long z = 0; _BitScanReverse64(&z, x); return z; }
     #endif
-static inline int clz32(unsigned           x) { unsigned      z = 0; _BitScanForward(  &z, x); return 32 - z; }
-static inline int ctz32(unsigned           x) { unsigned      z = 0; _BitScanReverse(  &z, x); return z; }
+static inline int ctz32(unsigned           x) { unsigned      z = 0; _BitScanForward(  &z, x); return z; }
+static inline int clz32(unsigned           x) { unsigned      z = 0; _BitScanReverse(  &z, x); return z; }
 #define rol32(x,s) _lrotl(x, s)
 #define ror32(x,s) _lrotr(x, s)
 
