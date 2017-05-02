@@ -42,7 +42,7 @@ traditional zlib interface.
 
 Compression/decompression is done when the read function is called. This
 means the value returned by the position functions will not be updated
-until a read call, even if a lot of data is written. If you want the
+until a read call, even if a lot of data are written. If you want the
 data to be compressed in advance, just call the read function with a
 size equal to 0.
 

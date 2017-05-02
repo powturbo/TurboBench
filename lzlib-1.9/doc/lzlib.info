@@ -11,7 +11,7 @@ File: lzlib.info,  Node: Top,  Next: Introduction,  Up: (dir)
 Lzlib Manual
 ************
 
-This manual is for Lzlib (version 1.9-rc1, 15 March 2017).
+This manual is for Lzlib (version 1.9, 11 April 2017).
 
 * Menu:
 
@@ -790,18 +790,18 @@ Concept index
 
 Tag Table:
 Node: Top220
-Node: Introduction1307
-Node: Library version6119
-Node: Buffering6764
-Node: Parameter limits7984
-Node: Compression functions8943
-Node: Decompression functions15485
-Node: Error codes21655
-Node: Error messages23630
-Node: Data format24209
-Node: Examples26774
-Node: Problems30855
-Node: Concept index31427
+Node: Introduction1303
+Node: Library version6115
+Node: Buffering6760
+Node: Parameter limits7980
+Node: Compression functions8939
+Node: Decompression functions15481
+Node: Error codes21651
+Node: Error messages23626
+Node: Data format24205
+Node: Examples26770
+Node: Problems30851
+Node: Concept index31423
 
 End Tag Table
 

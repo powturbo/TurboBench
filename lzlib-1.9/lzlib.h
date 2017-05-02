@@ -23,7 +23,7 @@ extern "C" {
 
 #define LZ_API_VERSION 1
 
-static const char * const LZ_version_string = "1.9-rc1";
+static const char * const LZ_version_string = "1.9";
 
 enum LZ_Errno { LZ_ok = 0,         LZ_bad_argument, LZ_mem_error,
                 LZ_sequence_error, LZ_header_error, LZ_unexpected_eof,

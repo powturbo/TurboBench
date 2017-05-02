@@ -6,8 +6,8 @@
 @finalout
 @c %**end of header
 
-@set UPDATED 15 March 2017
-@set VERSION 1.9-rc1
+@set UPDATED 11 April 2017
+@set VERSION 1.9
 
 @dircategory Data Compression
 @direntry

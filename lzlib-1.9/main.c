@@ -71,7 +71,7 @@
 
 void cleanup_and_fail( const int retval );
 void show_error( const char * const msg, const int errcode, const bool help );
-void show_file_error( const char * const name, const char * const msg,
+void show_file_error( const char * const filename, const char * const msg,
                       const int errcode );
 void internal_error( const char * const msg );
 
@@ -826,11 +826,11 @@ void show_error( const char * const msg, const int errcode, const bool help )
   }
 
 
-void show_file_error( const char * const name, const char * const msg,
+void show_file_error( const char * const filename, const char * const msg,
                       const int errcode )
   {
   if( verbosity < 0 ) return;
-  fprintf( stderr, "%s: %s: %s", program_name, name, msg );
+  fprintf( stderr, "%s: %s: %s", program_name, filename, msg );
   if( errcode > 0 ) fprintf( stderr, ": %s", strerror( errcode ) );
   fputc( '\n', stderr );
   }

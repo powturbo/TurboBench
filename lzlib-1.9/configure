@@ -6,7 +6,7 @@
 # to copy, distribute and modify it.
 
 pkgname=lzlib
-pkgversion=1.9-rc1
+pkgversion=1.9
 soversion=1
 progname=minilzip
 progname_static=${progname}
@@ -65,7 +65,7 @@ while [ $# != 0 ] ; do
 		echo "To assign makefile variables (e.g., CC, CFLAGS...), specify them as"
 		echo "arguments to configure in the form VAR=VALUE."
 		echo
-		echo "Options: [defaults in brackets]"
+		echo "Options and variables: [defaults in brackets]"
 		echo "  -h, --help            display this help and exit"
 		echo "  -V, --version         output version information and exit"
 		echo "  --srcdir=DIR          find the sources in DIR [. or ..]"
