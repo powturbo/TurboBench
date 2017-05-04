@@ -157,7 +157,7 @@ OB+=zstd/lib/common/xxhash.o zstd/lib/common/error_private.o zstd/lib/compress/z
 
 ifeq ($(BROTLI), 0)
 #Modified files to disable dictionary.
-OB+=brotli_/enc/backward_references.o brotli_/enc/static_dict.o 
+OB+=brotli_/c/enc/static_dict.o brotli/c/enc/backward_references.o
 else
 OB+=brotli/c/enc/backward_references.o brotli/c/enc/static_dict.o 
 endif
@@ -238,10 +238,10 @@ LZSSE/lzsse2/lzsse2.o: LZSSE/lzsse2/lzsse2.cpp
 	$(CC) -O3 -D"SIZE_MAX=4294967295u" -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
 LZSSE/lzsse4/lzsse4.o: LZSSE/lzsse4/lzsse4.cpp
-	$(CC) -O3 -D"SIZE_MAX=4294967295u" -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
+	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
 LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
-	$(CC) -O3 -D"SIZE_MAX=4294967295u" -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
+	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
 # AVX2
 rans_static/r32x16b_avx2.o: rans_static/r32x16b_avx2.c
