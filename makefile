@@ -238,10 +238,10 @@ LZSSE/lzsse2/lzsse2.o: LZSSE/lzsse2/lzsse2.cpp
 	$(CC) -O3 -D"SIZE_MAX=4294967295u" -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
 LZSSE/lzsse4/lzsse4.o: LZSSE/lzsse4/lzsse4.cpp
-	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
+	$(CC) -O3 -D"SIZE_MAX=4294967295u" -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
 LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
-	$(CC) -O3 -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
+	$(CC) -O3 -D"SIZE_MAX=4294967295u" -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
 # AVX2
 rans_static/r32x16b_avx2.o: rans_static/r32x16b_avx2.c
