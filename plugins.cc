@@ -1082,9 +1082,9 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif    
 
       #if C_LIBBSC
-	case P_LIBBSC: return bsc_compress(in, out, inlen,/*18*/strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPHASHSIZE,/*32*/ strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPMINLEN, lev<3?1:lev, (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1, 
-                                                                                                          LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING));
-	case P_LIBBSCC:return bsc_coder_compress(in, out, inlen, lev, LIBBSC_DEFAULT_FEATURES);
+	#define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING)
+	case P_LIBBSC: return bsc_compress(      in, out, inlen,/*18*/strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPHASHSIZE,/*32*/ strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPMINLEN, lev<3?1:lev, (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1, BSC_MODE);
+	case P_LIBBSCC:return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
 	  #endif
     int bsc_coder_compress(const unsigned char * input, unsigned char * output, int n, int coder, int features);
 
@@ -1597,8 +1597,8 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	  #endif
 
       #if C_LIBBSC
-	case P_LIBBSC:	   return bsc_decompress(in, inlen, out, outlen, 0);
-	case P_LIBBSCC:	   return bsc_coder_decompress(in, out, lev, LIBBSC_DEFAULT_FEATURES);
+	case P_LIBBSC:	   return bsc_decompress(in, inlen, out, outlen, BSC_MODE);
+	case P_LIBBSCC:	   return bsc_coder_decompress(in, out, lev, BSC_MODE);
 	  #endif
 	
 	  #if C_LIBDEFLATE
@@ -1884,7 +1884,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if C_DIVBWT
     case P_DIVBWT: memcpy(out, in+4, outlen); bsc_bwt_decode(out, outlen, *(unsigned *)in, 0, NULL, 0); return inlen;
-    case P_ST: { memcpy(out, in+4, inlen-4); bsc_st_decode(out, inlen-4, lev, *(unsigned *)(in), 0); break; }
+    case P_ST: {   memcpy(out, in+4, inlen-4); bsc_st_decode(out, inlen-4, lev, *(unsigned *)(in), 0); break; }
       #endif
 	  #if C_FB64
         #ifdef AVX2_ON
