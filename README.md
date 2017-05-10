@@ -23,7 +23,7 @@ TurboBench: Compressor Benchmark[![Build Status](https://travis-ci.org/powturbo/
 CPU: Sandy bridge i7-2600k at 4.4GHz, gcc 6.3, single thread.
 - Realistic and practical benchmark with large files
 - No PURE cache benchmark
-- All compressors with latest versions (2017-05-09)
+- All compressors with latest versions (2017-05-10)
 
 ##### - Data files:
 #### TurboBench compressor benchmark:
