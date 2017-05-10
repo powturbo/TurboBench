@@ -3,96 +3,69 @@ TurboBench: Compressor Benchmark[![Build Status](https://travis-ci.org/powturbo/
 + **TurboBench**
  - The only benchmark program including **[LzTurbo](https://sites.google.com/site/powturbo/)**
  - 100% in-memory benchmark, no I/O overhead
- - Include (>60) allmost all popular, latest or fastest compressors in one compiled package
- - No other compressor benchmark includes more codecs or offer more precision and features
+ - Include (>70) allmost all popular, latest or fastest compressors in one compiled package
  - Benchmarking **Entropy Coders**, **Lz77**, **Rolz**, **BWT** and **Context mixing** compressors
- - **Minimum** plugins call **overhead**
- - Set one, a group or several compressors to benchmark at the command line
  - **Multiple** input files with **recursive** directories
  - Concatenate **multiple small files** into one multiblock file
- - Benchmark **multiblock** file as one large block, but each block processed separatelly
- - Avoid **cache szenario** found in other benchmarks with small files
- - Set block size, file size limit,...
- - Set number of **iterations**, number of **runs**, set max. **time** per run
-   and for all benchmarks.
- - Automatic **sort**
- - :sparkles: automatic update & merge of result files
+ - Avoid **cache szenario** and **cpu throttling** found in other benchmarks
+ - Automatic **sort**, update and merge of result files
  - **Text**, **html**, **csv**, **markdown** and other output formats without retesting
- - :sparkles: html output with sortable tables
  - :sparkles: **Transfer speed sheet** for different connections or devices: GPRS,2G,3G,4G,DSL,Network,HDD,SSD,RAM
  - :+1: **Html plot:** **Speedup** + **Speed/Ratio**
  - **Linux** and **Windows** binaries
- - 100% C/C++, w/o inline assembly 
- - Enable/disable groups or individual codecs at compile time
  - All in one executable, no hassless installing of additional packages, graphic libraries, python,...
  - :+1: build in peak memory usage reporting for compression and decompression in html output
- - **Encoding** and **Transform** codecs 
 
 ### Download benchmark executable incl. LzTurbo:
  - [TurboBench Linux](https://sites.google.com/site/powturbo/downloads)
  - [TurboBench Windows](https://sites.google.com/site/powturbo/downloads)
 
 ### Benchmark:
-CPU: Sandy bridge i7-2600k at 4.2GHz, gcc 5.2, ubuntu 15.10, single thread.
+CPU: Sandy bridge i7-2600k at 4.4GHz, gcc 6.3, single thread.
 - Realistic and practical benchmark with large files
 - No PURE cache benchmark
+- All compressors with latest versions (2017-05-09)
 
 ##### - Data files:
 #### TurboBench compressor benchmark:
-- File [app3.tar binary Portable Apps Suite](http://compressionratings.com/download.html)
-
-- [html output+Speedup](http://htmlpreview.github.io/?https://github.com/powturbo/TurboBench/master/turbobench_/app3.tar.html)
-  (download app3.tar.html to local file for better browsing)
-
-------------------------------------------------------------------------
-![Seedup](turbobench_/app3.tar.png "Speedup: Transfer+decompression")
-------------------------------------------------------------------------
-![Speed/Ratio](turbobench_/app3r.tar.png "Speed/Ratio: Decompression")
-------------------------------------------------------------------------
+- File [app3.tar binary Portable Apps Suite]
 
  (bold = pareto)  MB=1.000.000
 
 |C Size|ratio%|C MB/s|D MB/s|Name|
 |--------:|-----:|--------:|--------:|----------------|
-|32798929| 32.8|**2.79**|**65.49**|**lzma 9**|
-|32922377| 32.9|1.61|**69.65**|**lzturbo 49**|
-|33761620| 33.7|2.64|**277.04**|**lzham 4**|
-|34109576| 34.1|2.17|**1318.56**|**lzturbo 39**|
-|35638896| 35.6|1.19|950.41|zstd 20|
-|36944243| 36.9|**69.99**|**1411.77**|**lzturbo 32**|
-|37313258| 37.3|2.40|**2149.57**|**lzturbo 29**|
-|41668560| 41.6|0.19|246.43|brotli 11|
-|45799999| 45.8|27.03|354.38|brotli 6|
-|46304388| 46.3|35.75|347.99|brotli 5|
-|46492542| 46.4|**191.69**|1186.68|**lzturbo 31**|
-|46875269| 46.8|48.58|695.99|zstd 9|
-|48836109| 48.8|113.95|676.74|zstd 5|
-|49324183| 49.3|141.06|337.46|brotli 1|
+|32823983| 32.8|**3.40**|**67.92**|**lzma 9**|
+|32925079| 32.9|1.70|**70.67**|**lzturbo 49**|
+|33761620| 33.7|2.30|**276.52**|**lzham 4**|
+|33936389| 33.9|2.57|**1701.35**|**lzturbo 39**|
+|34105370| 34.1|3.32|952.59|zstd 22|
+|36751363| 36.7|**48.30**|**1701.59**|**lzturbo 32**|
+|36920708| 36.7|2.98|**2355.32**|**lzturbo 29**|
+|42328364| 42.3|0.38|295.29|brotli 11 16mb|
+|46546059| 46.5|**163.77**|1489.57|**lzturbo 31**|
+|46805879| 46.8|44.66|940.64|zstd 9|
+|48152545| 48.1|52.94|349.62|brotli 4|
+|49773790| 49.7|38.08|1952.73|lzturbo 22|
 |49860700| 49.8|16.94|295.99|zlib 9|
-|49918739| 49.9|**288.52**|1082.09|**lzturbo 30a**|
 |49962678| 49.9|35.70|294.24|zlib 6|
-|50027825| 50.0|52.85|1899.72|lzturbo 22|
-|50311200| 50.3|**312.35**|1090.91|**lzturbo 30**|
-|50337788| 50.3|6.73|1428.58|lz5 9|
-|52597358| 52.5|262.30|2068.57|lzturbo 21|
+|50278958| 50.2|**282.43**|1372.91|**lzturbo 30**|
+|52509931| 52.5|**290.96**|347.16|brotli 1|
+|52549655| 52.5|239.35|2153.41|lzturbo 21|
 |52928477| 52.9|69.17|276.75|zlib 1|
-|53112430| 53.1|298.70|442.42|zstd 1|
-|54265487| 54.2|2.01|**3883.96**|**lzturbo 19**|
-|54423519| 54.4|46.33|1918.40|lz4 9|
-|55400947| 55.3|**465.29**|1900.38|**lzturbo 20a**|
-|55764172| 55.7|405.79|1517.45|lz5 1|
-|55923645| 55.9|141.96|3713.00|lzturbo 12|
-|57606731| 57.6|263.89|3500.06|lzturbo 11|
-|59090242| 59.0|**631.43**|2099.72|**lzturbo 20**|
-|60016380| 60.0|596.92|3361.22|lzturbo 10a|
-|61460109| 61.4|**705.32**|3500.41|**lzturbo 10**|
-|61938605| 61.9|671.21|2069.81|lz4 1|
+|52983490| 52.9|**393.67**|984.00|zstd 1|
+|54251482| 54.2|2.60|**4367.15**|**lzturbo 19**|
+|54410769| 54.4|46.37|3305.22|lz4 9|
+|55923645| 55.9|188.40|4200.23|lzturbo 12|
+|57606731| 57.6|386.90|3948.64|lzturbo 11|
+|59085723| 59.0|**698.39**|2196.24|**lzturbo 20**|
+|61455711| 61.4|**800.71**|4003.54|**lzturbo 10**|
+|61938605| 61.9|730.46|3330.40|lz4 1|
 |100098564|100.0|**8647.84**|**8408.10**|**memcpy**|
 
 ------------------------------------------------------------------------
 
 Hardware: ODROID C2 - ARM 64 bits - 2Ghz CPU, OS: Ubuntu 16.04, gcc 5.3<br>
-All compressors with latest versions 16.08.2016b <br>
+Compressors with versions 16.08.2016 <br>
 [pd3d.tar](http://www.cbloom.com/pd3d.7z) - 3D Test Set (RAD Game Tools)
 
 
@@ -110,16 +83,63 @@ All compressors with latest versions 16.08.2016b <br>
 |11059511| 34.6|1.74|98.16|zlib 9|
 |11121480| 34.8|7.63|97.47|zlib 6|
 |12649309| 39.6|0.61|**366.17**|**lzturbo 29**|
-|12838230| 40.2|0.74|179.61|lz5 15|
 |13302907| 41.6|19.07|**435.28**|**lzturbo 21**|
 |14237494| 44.5|0.66|**500.67**|**lzturbo 19**|
 |14283317| 44.7|10.04|329.14|lz4 9|
 |14723054| 46.1|**103.21**|483.81|**lzturbo 20**|
 |14814049| 46.4|8.14|484.09|lzturbo 12|
-|14926456| 46.7|20.71|238.37|lz5 1|
 |16069593| 50.3|**121.12**|365.08|**lz4 1**|
 |16166867| 50.6|111.43|475.66|lzturbo 10|
 |31952896|100.0|**1676.10**|**1704.00**|**memcpy**|
+
+### Testing:
+  + List all plugins: "./turbobench -l2"<br />
+  + List all compiled codecs: "./turbobench -l1"<br />
+  + type "./turbobench -h" for help
+
+##### - Groups FASTEST,FAST,EFFICIENT,MAX,OPTIMAL,BWT:
+  + test all fast compressors in the lz4, lzturbo, zlib class<br />
+    (additional groups can be defined in the "turbobench.ini" file)
+
+        ./turbobench -eFAST file
+
+##### - Codecs:
+
+  + individual codec test (output to screen & file.tbb)<br />
+
+
+        ./turbobench -elzturbo,19,29,39/brotli,6/zlib,6 file
+
+  + retest or test other compressors and merge the results to file.tbb<br />
+
+
+        ./turbobench -eFAST/bzip2 file
+
+##### - Print + Plot
+
+   + Print result file + "transfer+decompression speedup" plot to file.html for browsing
+
+
+        ./turbobench -p2 -S2 file.tbb
+
+   
+### Compile:
+
+  		git clone --recursive git://github.com/powturbo/TurboBench.git
+        cd TurboBench
+  		make
+
+###### Turbobench mini: compile (only popular codecs)
+
+		make NCOMP2=1 NECODER=1 NSIMD=1
+
+### Environment:
+###### OS/Compiler (32 + 64 bits):
+- Linux: GNU GCC (>=4.6) 
+- clang (>=3.2) 
+- Windows: MinGW
+- Windows: Visual Studio 2015
+- ARM 64 bits/ gcc 
 
 ### Plugins:
 #### Compressor Lz77,Rolz,Bwt,zpaq:
@@ -156,7 +176,7 @@ All compressors with latest versions 16.08.2016b <br>
  - [LZSSE v16-03-28](https://github.com/ConorStokes/LZSSE)
  - [Miniz v13-10](https://github.com/richgel999/miniz) 
  - [ms-compress v16.07](https://github.com/coderforlife/ms-compress) 
- - [Nakamichi Washigan](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188) :new:
+ - [Nakamichi Washigan](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188)
  - [Oodle v2.3.0](http://www.radgametools.com/oodle.htm) (only win64 binary)
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
@@ -223,57 +243,8 @@ All compressors with latest versions 16.08.2016b <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-### Testing:
-  + List all plugins: "./turbobench -l2"<br />
-  + List all compiled codecs: "./turbobench -l1"<br />
-  + type "./turbobench -h" for help
-
-##### - Groups FASTEST,FAST,EFFICIENT,MAX,OPTIMAL,BWT:
-  + test all fast compressors in the lz4, lzturbo, zlib class<br />
-    (additional groups can be defined in the "turbobench.ini" file)
-
-        ./turbobench -eFAST file
-
-##### - Codecs:
-
-  + individual codec test (output to screen & file.tbb)<br />
-
-
-        ./turbobench -elzturbo,19,29,39/brotli,6/zlib,6 file
-
-  + retest or test other compressors and merge the results to file.tbb<br />
-
-
-        ./turbobench -eFAST/bzip2 file
-
-##### - Print + Plot
-
-   + Print result file + "transfer+decompression speedup" plot to file.html for browsing
-
-
-        ./turbobench -p2 -S2 file.tbb
-
-   
-### Compile:
-
-  		git clone --recursive git://github.com/powturbo/TurboBench.git
-        cd TurboBench
-  		make
-
-###### Turbobench mini: compile (only popular codecs)
-
-		make NCOMP2=1 NECODER=1 NSIMD=1
-
-### Environment:
-###### OS/Compiler (32 + 64 bits):
-- Linux: GNU GCC (>=4.6) 
-- clang (>=3.2) 
-- Windows: MinGW
-- Windows: Visual Studio 2015
-- ARM 64 bits/ gcc 
-
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 09 MAY 2017
+Last update: 10 MAY 2017
 
