@@ -8,10 +8,9 @@ TurboBench: Compressor Benchmark[![Build Status](https://travis-ci.org/powturbo/
  - Concatenate **multiple small files** into one multiblock file
  - Avoid **cache szenario** and **cpu throttling** found in other benchmarks
  - Automatic **sort**, update and merge of result files
- - **Text**, **html**, **csv**, **markdown** and other output formats without retesting
+ - **Text**, **html**, **csv**, **markdown** output
  - :sparkles: **Transfer speed sheet** for different connections or devices: GPRS,2G,3G,4G,DSL,Network,HDD,SSD,RAM
  - :+1: **Html plot:** **Speedup** + **Speed/Ratio**
- - **Linux** and **Windows** binaries
  - All in one executable, no hassless installing of additional packages, graphic libraries, python,...
  - :+1: build in peak memory usage reporting for compression and decompression in html output
 
@@ -167,9 +166,9 @@ Compressors with versions 16.08.2016 <br>
  - [lizard v2.0](https://github.com/inikep/lz5) 
  - [Lzfse](https://github.com/lzfse/lzfse)
  - [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) 
- - [Lzlib v1.8](http://www.nongnu.org/lzip) 
+ - [Lzlib v1.9](http://www.nongnu.org/lzip) 
  - [Lzmat v1.0](https://github.com/nemequ/lzmat) 
- - [Lzma v9.35](http://7-zip.org) 
+ - [Lzma](http://7-zip.org) 
  - [Lzo v2.09](http://www.oberhumer.com/opensource/lzo) 
  - [Lzoma v16-06](https://github.com/alef78/lzoma) 
  - [LZSSE v16-03-28](https://github.com/ConorStokes/LZSSE)
@@ -179,7 +178,7 @@ Compressors with versions 16.08.2016 <br>
  - [Oodle v2.3.0](http://www.radgametools.com/oodle.htm) (only win64 binary)
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
- - [sap v16-12](https://github.com/CoreSecurity/pysap) 
+ - [sap v17-05](https://github.com/CoreSecurity/pysap) 
  - [shoco v2015](https://github.com/Ed-von-Schleck/shoco) 
  - [Shrinker v0.1/r9](https://code.google.com/p/data-shrinker) 
  - [Snappy v1.1.3](https://github.com/google/snappy) 
@@ -191,7 +190,7 @@ Compressors with versions 16.08.2016 <br>
  - [zlib v1.2.8 2017.01](http://zlib.net)
  - [zlib-ng v1.2.8](https://github.com/Dead2/zlib-ng)
  - [libzling v2017-01](https://github.com/richox/libzling) 
- - [xpack v16-06](https://github.com/ebiggers/xpack) 
+ - [xpack](https://github.com/ebiggers/xpack) 
  - [zopfli v16-05](https://code.google.com/p/zopfli) 
  - [zstd v1.1.2](https://github.com/facebook/zstd)
  - [zpaq v7.15](https://github.com/zpaq/zpaq) 
