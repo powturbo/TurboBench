@@ -15,17 +15,16 @@ TurboBench: Compressor Benchmark[![Build Status](https://travis-ci.org/powturbo/
  - :+1: build in peak memory usage reporting for compression and decompression in html output
 
 ### Download benchmark executable incl. LzTurbo:
- - [TurboBench Linux](https://sites.google.com/site/powturbo/downloads)
- - [TurboBench Windows](https://sites.google.com/site/powturbo/downloads)
+ - [TurboBench Windows/Linux](https://sites.google.com/site/powturbo/downloads)
 
 ### Benchmark:
+- see also: [Compression Benchmark](https://sites.google.com/site/powturbo/compression-benchmark)
+
 CPU: Sandy bridge i7-2600k at 4.4GHz, gcc 6.3, single thread.
 - Realistic and practical benchmark with large files
 - No PURE cache benchmark
 - All compressors with latest versions (2017-05-10)
 
-##### - Data files:
-#### TurboBench compressor benchmark:
 - File [app3.tar binary Portable Apps Suite](https://)
 
  (bold = pareto)  MB=1.000.000
@@ -158,6 +157,7 @@ Compressors with versions 16.08.2016 <br>
  - [Gipfeli v16.08](https://github.com/google/gipfeli) 
  - [glza v16-08](https://github.com/jrmuizel/GLZA)
  - [heatshrink v0.4.1](https://github.com/atomicobject/heatshrink) 
+ - [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l) 
  - [bsc v3.1.0](https://github.com/IlyaGrebnov/libbsc) 
  - [Libdeflate](https://github.com/ebiggers/libdeflate) 
  - [LibLZF v1.06](http://oldhome.schmorp.de/marc/liblzf.html) 
@@ -193,7 +193,7 @@ Compressors with versions 16.08.2016 <br>
  - [libzling v2017-01](https://github.com/richox/libzling) 
  - [xpack](https://github.com/ebiggers/xpack) 
  - [zopfli v16-05](https://code.google.com/p/zopfli) 
- - [zstd v1.1.2](https://github.com/facebook/zstd)
+ - [zstd v1.1.3](https://github.com/facebook/zstd)
  - [zpaq v7.15](https://github.com/zpaq/zpaq) 
 
 #### Entropy coder:
@@ -234,9 +234,9 @@ Compressors with versions 16.08.2016 <br>
 
 #### Encoding:
  - [TurboRLE](https://github.com/powturbo/TurboRLE) Turbo Run Length Encoding
- - [TurboBase64](https://github.com/powturbo/TurboBase64) Turbo Base64 Encoding/Decoding :new:
- - [fastbase64](https://github.com/lemire/fastbase64) Base64 Encoding :new:
- - [base64](https://github.com/aklomp/base64) Fast Base64 stream encoder/decoder :new:
+ - [TurboBase64](https://github.com/powturbo/TurboBase64) Turbo Base64 Encoding/Decoding 
+ - [fastbase64](https://github.com/lemire/fastbase64) Base64 Encoding 
+ - [base64](https://github.com/aklomp/base64) Fast Base64 stream encoder/decoder 
 
 #### Transform:
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
@@ -245,5 +245,5 @@ Compressors with versions 16.08.2016 <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 10 MAY 2017
+Last update: 20 MAY 2017
 
