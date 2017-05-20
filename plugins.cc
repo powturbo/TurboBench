@@ -101,6 +101,14 @@ enum {
  P_GLZA,
 #define C_HEATSHRINK COMP2
  P_HEATSHRINK,
+
+   #ifdef IGZIP
+#define C_IGZIP		 COMP2
+   #else
+#define C_IGZIP		 0
+   #endif	
+ P_IGZIP,
+
 #define C_LIBBSC     COMP2    
  P_LIBBSC,   
  P_LIBBSCC,   
@@ -399,6 +407,10 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 
   #if C_HEATSHRINK
 #include "heatshrink_/heatshrink.h"
+  #endif
+
+  #if C_IGZIP
+#include "isa-l/include/igzip_lib.h"
   #endif
 
   #if C_LIBLZG
@@ -796,6 +808,7 @@ struct plugs plugs[] = {
   { P_GIPFELI, 	"gipfeli", 			C_GIPFELI, 	"16-08",	"Gipfeli",				"Apache license",	"https://github.com/google/gipfeli",													"" }, 
   { P_GLZA, 	"glza", 			C_GLZA, 	"16-08",	"glza",					"Apache license",	"https://github.com/jrmuizel/GLZA",													    "" }, 
   { P_HEATSHRINK,"heatshrink",		C_HEATSHRINK,"0.4.1",	"heatshrink",			"BSD license",		"https://github.com/atomicobject/heatshrink",											"" },
+  { P_IGZIP,  	"igzip",			C_IGZIP, 	 "",	"igzip",					"BSD3",				"https://github.com/01org/isa-l",														"0,1" }, 
   { P_LIBBSC, 	"bsc", 				C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"0,3,4,5,6,7,8/p:e#"}, 
   { P_LIBBSCC, 	"bscqlfc", 			C_LIBBSC, 	"3.1.0",	"bsc",					"Apache license",	"https://github.com/IlyaGrebnov/libbsc",												"1,2"}, 
   { P_LIBDEFLATE,"libdeflate", 	    C_LIBDEFLATE,"17-04",	"libdeflate",			"CC0 license",		"https://github.com/ebiggers/libdeflate",												"1,2,3,4,5,6,7,8,9,12/dg"}, 
@@ -1150,6 +1163,21 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if C_HEATSHRINK
     case P_HEATSHRINK:   return hscompress(in, inlen, out);
+      #endif
+
+
+      #if C_IGZIP
+    case P_IGZIP: struct isal_zstream s;
+	  isal_deflate_stateless_init(&s);
+	  if(lev == 1) { s.level = 1; s.level_buf_size = ISAL_DEF_LVL1_DEFAULT; if(!(s.level_buf = malloc(ISAL_DEF_LVL1_DEFAULT))) die("igzip:malloc error\n");}
+	  s.end_of_stream = 1;
+	  s.flush         = NO_FLUSH; //FULL_FLUSH;
+	  s.next_in       = in;  s.avail_in  = inlen;
+	  s.next_out      = out; s.avail_out = outsize;
+	  s.level         = lev;
+	  isal_deflate_stateless(&s);
+	  if(s.level_buf) free(s.level_buf);
+	  return s.total_out;
       #endif
 
 	  #if C_LIBLZF  
@@ -1665,6 +1693,13 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if C_HEATSHRINK
     case P_HEATSHRINK: return hsdecompress(in, inlen, out, outlen); 
+      #endif
+
+      #if C_IGZIP
+    case P_IGZIP: struct inflate_state s; isal_inflate_init(&s);
+	s.next_in  = in;  s.avail_in  = inlen;
+	s.next_out = out; s.avail_out = outlen;
+	isal_inflate_stateless(&s); break;
       #endif
 
 	  #if C_LIBLZF 
