@@ -146,3 +146,6 @@
 [submodule "rans_static"]
 	path = rans_static
 	url = https://github.com/jkbonfield/rans_static.git
+[submodule "isa-l"]
+	path = isa-l
+	url = https://github.com/01org/isa-l.git
