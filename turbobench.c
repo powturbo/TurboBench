@@ -1185,6 +1185,17 @@ void printfile(char *finame, int xstdout, int fmt, char *rem) {
   #ifdef __MINGW32__
 extern int _CRT_glob = 1;
   #endif
+unsigned xbits[256] = {0};
+#define XSTPRT { int i; for(i = 0; i < 256; i++) if(xbits[i]) printf("%d:%d,", i, xbits[i]); }
+#define XSTPRT if(xbits[1]) printf("%d:%d", xbits[0], xbits[0]/xbits[1])
+//#define XSTDEF 
+//#define XSTINC(_x_) 
+//#define XSTPRT 
+
+//XSTDEF;
+
+void ansprt(void) { XSTPRT; }
+
 int main(int argc, char* argv[]) { 
   int xstdout=-1,xstdin=-1;
   int                recurse  = 0, xplug = 0,tm_Repk=1,plot=-1,fmt=0,fno,merge=0,rprio=1;
@@ -1385,6 +1396,7 @@ int main(int argc, char* argv[]) {
     if((p = strrchr(finame, '\\')) || (p = strrchr(finame, '/'))) 
       finame = p+1;
   }
+  ansprt();
 
   sprintf(s, "%s.tbb", finame);
   if(merge || tm_rep <= 1 && tm_rep2 <= 1) {
