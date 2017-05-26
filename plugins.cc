@@ -816,7 +816,7 @@ struct plugs plugs[] = {
   { P_LIBLZG,  	"lzg", 				C_LIBLZG,   "1.0.8",	"LibLzg",				"zlib-license",		"https://github.com/mbitsnbites/liblzg\thttp://liblzg.bitsnbites.eu/e",					"1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
   { P_LIBZPAQ,  "zpaq", 			C_LIBZPAQ, 	"7.10",		"Libzpaq",				"Public Domain",	"https://github.com/zpaq/zpaq",															"0,1,2,3,4,5" }, 
   { P_LIBSLZ, 	"slz",				C_LIBSLZ, 	"1.0.0",	"libslz",				"BSD license",	    "http://git.1wt.eu/web/libslz.git/",													"0,1,2,3,4,5,6,7,8,9" },
-  { P_LZ4,  	"lz4",				C_LZ4, 		"",	"Lz4",					"BSD license",		"https://github.com/Cyan4973/lz4", 														"0,1,9,12,16" }, 
+  { P_LZ4,  	"lz4",				C_LZ4, 		"",			"Lz4",					"BSD license",		"https://github.com/Cyan4973/lz4", 														"0,1,9,12,16" }, 
   { P_LIZARD,  	"lizard",			C_LIZARD, 	"2.0",	    "Lizard",				"BSD license",		"https://github.com/inikep/lizard",														"10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" }, 
   { P_LZFSE, 	"lzfse", 			C_LZFSE, 	"17-03",	"lzfse",				"BSD licence",		"https://github.com/lzfse/lzfse","" },
   { P_LZFSEA, 	"lzfsea", 			C_LZFSEA, 	"2015",		"lzfsea",				"iOS and OS X",		"https://developer.apple.com/library/ios/documentation/Performance/Reference/Compression/index.html","" },
