@@ -82,14 +82,25 @@ static inline unsigned short bswap16(unsigned short x) { return __builtin_bswap3
 #define unlikely(x)   	(x)
 #define __builtin_prefetch(x) //_mm_prefetch(x, _MM_HINT_NTA)
 
-static inline int bsr32(int x) { return x ? 32 - __builtin_clz(x) : 0; }
+_LIBCPP_ALWAYS_INLINE int __builtin_clzl(unsigned long mask)
+{
+  unsigned long where;
+  // Search from LSB to MSB for first set bit.
+  // Returns zero if no set bit is found.
+  if (_BitScanReverse(&where, mask))
+    return static_cast<int>(31 - where);
+  return 32; // Undefined Behavior.
+}
+
+static inline int __bsr32(int x) { unsigned long z;      _BitScanReverse(&z, x); return z; }
+static inline int bsr32(  int x) { unsigned long z = -1; _BitScanReverse(&z, x); return z+1; }
     #ifdef _WIN64
-static inline int bsr64(unsigned long long x) { unsigned long z = 0; _BitScanForward64(&z, x); return 64 - z; }
-static inline int ctz64(unsigned long long x) { unsigned long z = 0; _BitScanForward64(&z, x); return z; }
-static inline int clz64(unsigned long long x) { unsigned long z = 0; _BitScanReverse64(&z, x); return z; }
+static inline int bsr64(unsigned long long x) {          long z = -1; _BitScanForward64(&z, x); return z+1; }
+static inline int ctz64(unsigned long long x) { unsigned long z = 0;  _BitScanForward64(&z, x); return z; }
+static inline int clz64(unsigned long long x) { unsigned long z = 0;  _BitScanReverse64(&z, x); return z; }
     #endif
-static inline int ctz32(unsigned           x) { unsigned      z = 0; _BitScanForward(  &z, x); return z; }
-static inline int clz32(unsigned           x) { unsigned      z = 0; _BitScanReverse(  &z, x); return z; }
+static inline int ctz32(unsigned           x) { unsigned long z = 0;  _BitScanForward(  &z, x); return z; }
+static inline int clz32(unsigned           x) { unsigned long z = 0;  _BitScanReverse(  &z, x); return z; }
 #define rol32(x,s) _lrotl(x, s)
 #define ror32(x,s) _lrotr(x, s)
 
