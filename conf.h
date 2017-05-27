@@ -80,17 +80,7 @@ static inline unsigned short bswap16(unsigned short x) { return __builtin_bswap3
 #define THREADLOCAL		__declspec(thread)
 #define likely(x)     	(x)
 #define unlikely(x)   	(x)
-#define __builtin_prefetch(x) //_mm_prefetch(x, _MM_HINT_NTA)
-
-_LIBCPP_ALWAYS_INLINE int __builtin_clzl(unsigned long mask)
-{
-  unsigned long where;
-  // Search from LSB to MSB for first set bit.
-  // Returns zero if no set bit is found.
-  if (_BitScanReverse(&where, mask))
-    return static_cast<int>(31 - where);
-  return 32; // Undefined Behavior.
-}
+#define __builtin_prefetch(x) _mm_prefetch(x, _MM_HINT_NTA)
 
 static inline int __bsr32(int x) { unsigned long z;      _BitScanReverse(&z, x); return z; }
 static inline int bsr32(  int x) { unsigned long z = -1; _BitScanReverse(&z, x); return z+1; }
@@ -193,7 +183,6 @@ static inline unsigned long long ctou64(const void *cp) { unsigned long long x; 
 
 //---------------------misc ---------------------------------------------------
 #define SIZE_ROUNDUP(_n_, _a_) (((size_t)(_n_) + (size_t)((_a_) - 1)) & ~(size_t)((_a_) - 1))
-#define ALIGN_DOWN(__ptr, __a) ((void *)((uintptr_t)(__ptr) & ~(uintptr_t)((__a) - 1)))
   
 #define TEMPLATE2_(_x_, _y_) _x_##_y_
 #define TEMPLATE2(_x_, _y_) TEMPLATE2_(_x_,_y_)
