@@ -1,13 +1,18 @@
-#include <stdint.h>
+//#include <stdint.h>
 #include <time.h>
 
-  #ifdef _WIN32
+#ifdef _WIN32
 #include <windows.h>
+  #ifndef sleep
 #define sleep(n) Sleep((n) * 1000)
-  #else
+  #endif
+typedef unsigned __int64 uint64_t;
+typedef unsigned __int64 tm_t;
+#else
+typedef unsigned long long tm_t;
 #include <unistd.h>
 #define Sleep(ms) usleep((ms) * 1000)
-  #endif
+#endif
 
 #if defined (__i386__) || defined( __x86_64__ )
   #ifdef _MSC_VER
@@ -53,7 +58,6 @@
 #define tmrdtscini() ({ tm_t _c; __asm volatile("" ::: "memory"); RDTSC_INI(_c); _c; })
 #define tmrdtsc()    ({ tm_t _c; RDTSC(_c); _c; })
 
-typedef unsigned long long tm_t;
 #ifndef TM_F
 #define TM_F 1  // TM_F=4 -> MI/s
 #endif
@@ -70,8 +74,15 @@ typedef unsigned long long tm_t;
 #define TMBS(__l,__t)         ((__t)>=0.000001?((double)(__l)/(1000000.0*TM_F))/((__t)/TM_T):0.0)
     #ifdef _WIN32
 static LARGE_INTEGER tps;
-static tm_t tmtime(void) { LARGE_INTEGER tm; QueryPerformanceCounter(&tm); return (tm_t)((double)tm.QuadPart*1000000.0/tps.QuadPart); }
-static tm_t tminit() { QueryPerformanceFrequency(&tps); tm_t t0=tmtime(),ts; while((ts = tmtime())==t0); return ts; }
+static tm_t tmtime(void) { 
+  LARGE_INTEGER tm;
+  tm_t t;  
+  QueryPerformanceCounter(&tm);
+  t = (double)tm.QuadPart*1000000.0/tps.QuadPart; 
+  return t;
+}
+
+static tm_t tminit() { tm_t t0,ts; QueryPerformanceFrequency(&tps); t0 = tmtime(); while((ts = tmtime())==t0); return ts; }
     #else
       #ifdef __APPLE__
 #include <AvailabilityMacros.h>
