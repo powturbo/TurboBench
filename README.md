@@ -245,5 +245,5 @@ Compressors with versions 16.08.2016 <br>
 ### References:
 - [CompFuzz Results](https://github.com/nemequ/compfuzz/wiki/Results) - list of vulnerable codecs
 
-Last update: 27 MAY 2017
+Last update: 30 MAY 2017
 
