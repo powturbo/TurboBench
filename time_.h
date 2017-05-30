@@ -1,4 +1,3 @@
-//#include <stdint.h>
 #include <time.h>
 
 #ifdef _WIN32
@@ -74,14 +73,7 @@ typedef unsigned long long tm_t;
 #define TMBS(__l,__t)         ((__t)>=0.000001?((double)(__l)/(1000000.0*TM_F))/((__t)/TM_T):0.0)
     #ifdef _WIN32
 static LARGE_INTEGER tps;
-static tm_t tmtime(void) { 
-  LARGE_INTEGER tm;
-  tm_t t;  
-  QueryPerformanceCounter(&tm);
-  t = (double)tm.QuadPart*1000000.0/tps.QuadPart; 
-  return t;
-}
-
+static tm_t tmtime(void) { LARGE_INTEGER tm; tm_t t; QueryPerformanceCounter(&tm);  t = (double)tm.QuadPart*1000000.0/tps.QuadPart; return t; }
 static tm_t tminit() { tm_t t0,ts; QueryPerformanceFrequency(&tps); t0 = tmtime(); while((ts = tmtime())==t0); return ts; }
     #else
       #ifdef __APPLE__
@@ -95,12 +87,12 @@ static tm_t tminit() { tm_t t0,ts; QueryPerformanceFrequency(&tps); t0 = tmtime(
 #define CLOCK_REALTIME 0
 #define CLOCK_MONOTONIC 0
 int clock_gettime(int /*clk_id*/, struct timespec* t) {
-    struct timeval now;
-    int rv = gettimeofday(&now, NULL);
-    if (rv) return rv;
-    t->tv_sec  = now.tv_sec;
-    t->tv_nsec = now.tv_usec * 1000;
-    return 0;
+  struct timeval now;
+  int rv = gettimeofday(&now, NULL);
+  if (rv) return rv;
+  t->tv_sec  = now.tv_sec;
+  t->tv_nsec = now.tv_usec * 1000;
+  return 0;
 }
         #endif
       #endif
