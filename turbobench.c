@@ -1072,7 +1072,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
 
   while((inlen = fread(_in, 1, insize, fi)) > 0) {    
     unsigned char *in = _in; 
-    if(fuzz & 1) { in = (_in+insizem)-inlen; memmove(in, _in, inlen); }
+    if(fuzz & 1) { in = (_in+insizem)-inlen; memmove(in, _in, inlen); /*in[inlen-1] = in[inlen];*/ }
     double   tc = 0.0, td = 0.0;         
     unsigned l = inlen,outlen;
 	totinlen += inlen;																
