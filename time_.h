@@ -8,8 +8,9 @@
 typedef unsigned __int64 uint64_t;
 typedef unsigned __int64 tm_t;
 #else
-typedef unsigned long long tm_t;
+#include <stdint.h>
 #include <unistd.h>
+typedef uint64_t tm_t;
 #define Sleep(ms) usleep((ms) * 1000)
 #endif
 
@@ -27,7 +28,7 @@ typedef unsigned long long tm_t;
 				"mov %%edx, %0\n"							\
 				"mov %%eax, %1\n": "=r" (_ch), "=r" (_cl)::	\
 				"%rax", "%rbx", "%rcx", "%rdx");			\
-  _c_ = (unsigned long long)_ch << 32 | _cl;				\
+  _c_ = (uint64_t)_ch << 32 | _cl;				\
 } while(0)
 
 #define RDTSC(_c_) do { unsigned _cl, _ch;					\
@@ -36,7 +37,7 @@ typedef unsigned long long tm_t;
                "mov %%eax, %1\n"							\
                "cpuid\n\t": "=r" (_ch), "=r" (_cl):: "%rax",\
                "%rbx", "%rcx", "%rdx");\
-  _c_ = (unsigned long long)_ch << 32 | _cl;\
+  _c_ = (uint64_t)_ch << 32 | _cl;\
 } while(0)
   #else
 #define RDTSC(_c_) do { unsigned _cl, _ch;\
@@ -45,7 +46,7 @@ typedef unsigned long long tm_t;
 				: "=a"(_cl), "=d"(_ch)\
 				: "a"(0)\
 				: "%ebx", "%ecx");\
-  _c_ = (unsigned long long)_ch << 32 | _cl;\
+  _c_ = (uint64_t)_ch << 32 | _cl;\
 } while(0)
 #define RDTSC_INI(_c_) RDTSC(_c_)
   #endif
@@ -58,22 +59,31 @@ typedef unsigned long long tm_t;
 #define tmrdtsc()    ({ tm_t _c; RDTSC(_c); _c; })
 
 #ifndef TM_F
-#define TM_F 1  // TM_F=4 -> MI/s
+#define TM_F 1.0  // TM_F=4 -> MI/s
 #endif
 
   #ifdef RDTSC_ON
 #define tminit() tmrdtscini()
 #define tmtime() tmrdtsc()
 #define TM_T					CLOCKS_PER_SEC
-#define TMBS(__l,__t)       	(double)(__t)/((double)(__l))
+static double TMBS(unsigned l, tm_t t) { double dt=t,dl=l; return t/l; }
 #define TM_C 1000
   #else
 #define TM_T 1000000.0
 #define TM_C 1
-#define TMBS(__l,__t)         ((__t)>=0.000001?((double)(__l)/(1000000.0*TM_F))/((__t)/TM_T):0.0)
+static double TMBS(unsigned l, tm_t tm) { double dl=l,dt=tm; return dt>=0.000001?(dl/(1000000.0*TM_F))/(dt/TM_T):0.0; }
     #ifdef _WIN32
 static LARGE_INTEGER tps;
-static tm_t tmtime(void) { LARGE_INTEGER tm; tm_t t; QueryPerformanceCounter(&tm);  t = (double)tm.QuadPart*1000000.0/tps.QuadPart; return t; }
+static tm_t tmtime(void) { 
+  LARGE_INTEGER tm;
+  tm_t t;
+  double d;  
+  QueryPerformanceCounter(&tm);
+  d = tm.QuadPart;
+  t = d*1000000.0/tps.QuadPart; 
+  return t;
+}
+
 static tm_t tminit() { tm_t t0,ts; QueryPerformanceFrequency(&tps); t0 = tmtime(); while((ts = tmtime())==t0); return ts; }
     #else
       #ifdef __APPLE__
@@ -87,20 +97,20 @@ static tm_t tminit() { tm_t t0,ts; QueryPerformanceFrequency(&tps); t0 = tmtime(
 #define CLOCK_REALTIME 0
 #define CLOCK_MONOTONIC 0
 int clock_gettime(int /*clk_id*/, struct timespec* t) {
-  struct timeval now;
-  int rv = gettimeofday(&now, NULL);
-  if (rv) return rv;
-  t->tv_sec  = now.tv_sec;
-  t->tv_nsec = now.tv_usec * 1000;
-  return 0;
+    struct timeval now;
+    int rv = gettimeofday(&now, NULL);
+    if (rv) return rv;
+    t->tv_sec  = now.tv_sec;
+    t->tv_nsec = now.tv_usec * 1000;
+    return 0;
 }
         #endif
       #endif
-static   tm_t tmtime(void)    { struct timespec tm; clock_gettime(CLOCK_MONOTONIC, &tm); return (tm_t)tm.tv_sec*1000000ull + tm.tv_nsec/1000; }
+static   tm_t tmtime(void)    { struct timespec tm; clock_gettime(CLOCK_MONOTONIC, &tm); return (tm_t)tm.tv_sec*1000000 + tm.tv_nsec/1000; }
 static   tm_t tminit()        { tm_t t0=tmtime(),ts; while((ts = tmtime())==t0); return ts; }
     #endif
-static double tmsec( tm_t tm) { return (double)tm/1000000.0; }
-static double tmmsec(tm_t tm) { return (double)tm/1000.0; }
+static double tmsec( tm_t tm) { double d = tm; return d/1000000.0; }
+static double tmmsec(tm_t tm) { double d = tm; return d/1000.0; }
 #endif
 //---------------------------------------- bench ----------------------------------------------------------------------
 #define TM_TX TM_T
@@ -108,12 +118,12 @@ static double tmmsec(tm_t tm) { return (double)tm/1000.0; }
 #define TMSLEEP do { tm_T = tmtime(); if(!tm_0) tm_0 = tm_T; else if(tm_T - tm_0 > tm_TX) { if(tm_verbose) { printf("S \b\b");fflush(stdout);} sleep(tm_slp); tm_0=tmtime();} } while(0)
 
 #define TMBEG(_tm_reps_, _tm_Reps_) { unsigned _tm_r,_tm_c=0,_tm_R; tm_t _tm_t0,_tm_t,_tm_ts;\
-  for(tm_rm = _tm_reps_, tm_tm = 1ull<<63,_tm_R = 0,_tm_ts=tmtime(); _tm_R < _tm_Reps_; _tm_R++) { tm_t _tm_t0 = tminit();\
+  for(tm_rm = _tm_reps_, tm_tm = (tm_t)1<<63,_tm_R = 0,_tm_ts=tmtime(); _tm_R < _tm_Reps_; _tm_R++) { tm_t _tm_t0 = tminit();\
     for(_tm_r=0;_tm_r < tm_rm;) {
  
 #define TMEND(_len_) _tm_r++; if((_tm_t = tmtime() - _tm_t0) > tm_tx) break; } \
-  if(_tm_t < tm_tm) { if(tm_tm == 1ull<<63) tm_rm = _tm_r; tm_tm = _tm_t; _tm_c++; } \
-  else if(_tm_t>tm_tm*1.2) TMSLEEP;   													if(tm_verbose) printf("%8.2f %2d_%.2d\b\b\b\b\b\b\b\b\b\b\b\b\b\b",TMBS(_len_, (double)tm_tm*TM_C/tm_rm),_tm_R+1,_tm_c),fflush(stdout);\
+  if(_tm_t < tm_tm) { if(tm_tm == (tm_t)1<<63) tm_rm = _tm_r; tm_tm = _tm_t; _tm_c++; } \
+  else if(_tm_t>tm_tm*1.2) TMSLEEP;   													if(tm_verbose) { double d = tm_tm*TM_C,dr=tm_rm; printf("%8.2f %2d_%.2d\b\b\b\b\b\b\b\b\b\b\b\b\b\b",TMBS(_len_, d/dr),_tm_R+1,_tm_c),fflush(stdout); }\
   if(tmtime()-_tm_ts > tm_TX && _tm_R < 8) break;\
   if((_tm_R & 7)==7) sleep(tm_slp),_tm_ts=tmtime(); } }
   
@@ -121,7 +131,7 @@ static unsigned tm_rep = 1<<20, tm_Rep = 3, tm_rep2 = 1<<20, tm_Rep2 = 4, tm_slp
 static tm_t     tm_tx = TM_T, tm_TX = 120*TM_T, tm_0, tm_T, tm_verbose=1, tm_tm;
 static void tm_init(int _tm_Rep, int _tm_verbose) { tm_verbose = _tm_verbose; if(_tm_Rep) tm_Rep = _tm_Rep; tm_tx =  tminit(); Sleep(500); tm_tx = tmtime() - tm_tx; tm_TX = 10*tm_tx; }
 
-#define TMBENCH(_name_, _func_, _len_)  do { if(tm_verbose) printf("%s ", _name_?_name_:#_func_); TMBEG(tm_rep, tm_Rep) _func_; TMEND(_len_); if(tm_verbose) printf("%8.2f      \b\b\b\b\b", TMBS(_len_, (double)tm_tm*TM_C/(double)tm_rm) ); } while(0)
+#define TMBENCH(_name_, _func_, _len_)  do { if(tm_verbose) printf("%s ", _name_?_name_:#_func_); TMBEG(tm_rep, tm_Rep) _func_; TMEND(_len_); { double dm = tm_tm,dr=tm_rm; if(tm_verbose) printf("%8.2f      \b\b\b\b\b", TMBS(_len_, dm*TM_C/dr) );} } while(0)
 #define TMBENCHF(_name_,_func_, _len_, _res_)  do { if(tm_verbose) printf("%s ", _name_?_name_:#_func_ ); TMBEG(tm_rep, tm_Rep) if(_func_ != _res_) { printf("ERROR: %lld != %lld", (long long)_func_, (long long)_res_ ); exit(0); }; TMEND(_len_); if(tm_verbose) printf("%8.2f      \b\b\b\b\b", TMBS(_len_,(double)tm_tm*TM_C/(double)tm_rm) ); } while(0)
 
 #define Kb (1u<<10)
@@ -146,9 +156,9 @@ static unsigned argtoi(char *s, unsigned def) {
   }
   return n*f;
 }
-static unsigned long long argtol(char *s) {
+static uint64_t argtol(char *s) {
   char *p;
-  unsigned long long n = strtol(s, &p, 10),f=1;
+  uint64_t n = strtol(s, &p, 10),f=1;
   switch(*p) {
     case 'K': f = KB; break;
     case 'M': f = MB; break;
@@ -162,9 +172,9 @@ static unsigned long long argtol(char *s) {
   return n*f;
 }
 
-static unsigned long long argtot(char *s) {
+static uint64_t argtot(char *s) {
   char *p;
-  unsigned long long n = strtol(s, &p, 10),f=1; 
+  uint64_t n = strtol(s, &p, 10),f=1; 
   switch(*p) {
     case 'h': f = 3600000; break;
     case 'm': f = 60000;   break;
