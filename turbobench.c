@@ -1399,7 +1399,7 @@ int main(int argc, char* argv[]) {
   ansprt();
 
   sprintf(s, "%s.tbb", finame);
-  if(merge || tm_rep <= 1 && tm_rep2 <= 1) {
+  if(merge /*|| tm_rep <= 1 && tm_rep2 <= 1*/) {
     if(merge == 1) 
       plugprts(plugt, k, s, 1, totinlen, FMT_TEXT, rem);	
     exit(0);
