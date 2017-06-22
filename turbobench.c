@@ -1056,9 +1056,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
   if(insizem && !(_in = _valloc(insizem,1)))
     die("malloc error in size=%u\n", insizem);
   
-  unsigned char *_cpy = _in, *out = (unsigned char*)_valloc(outsize,2);
-  if(!out)
-    die("malloc error out size=%u\n", outsize);
+  unsigned char *_cpy = _in, *out = (unsigned char*)_valloc(outsize,2);  		if(!out) die("malloc error out size=%u\n", outsize);
 
   if((cmp || tid) && insizem && !(_cpy = _valloc(insizem,3)))
     die("malloc error cpy size=%u\n", insizem);
@@ -1097,14 +1095,14 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
       TMSLEEP;
 																		if(verbose && inlen == filen) { double ratio = (double)outlen*100.0/inlen; printf("%12u   %5.1f   %8.2f   ", outlen, ratio, TMBS(inlen,tc)); fflush(stdout); }
     if(cmp) {
-      unsigned char *cpy = _cpy; 
-      if(fuzz & 2) cpy = (_cpy+insizem) - l;
-	  if(_cpy != _in) memrcpy(cpy, in, l);
+      unsigned char *cpz = _cpy; 
+      if(fuzz & 2) cpz = (_cpy+insizem) - l;
+	  if(_cpy != _in) memrcpy(cpz, in, l);
       peak = mempeakinit();
-	  unsigned cpylen = bedecomp(out, outlen, cpy, l*nb, bsize, plug->id,plug->lev, plug->prm)/nb; 
+	  unsigned cpylen = bedecomp(out, outlen, cpz, l*nb, bsize, plug->id,plug->lev, plug->prm)/nb; 
 	  td = (double)tm_tm/((double)tm_rm*nb);		
       plug->memd = mempeak() - peak;                                    if(verbose && inlen == filen) { printf("%8.2f   %-16s %s\n", TMBS(inlen,td), name, finame); }
-      int e = memcheck(in, l, cpy, fuzz?3:cmp);  
+      int e = memcheck(in, l, cpz, fuzz?3:cmp);  
       plug->err = plug->err?plug->err:e;
       BEPOST;																	
  	  plug->td += td; 
