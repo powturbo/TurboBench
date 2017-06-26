@@ -193,7 +193,7 @@ Compressors with versions 16.08.2016 <br>
  - [libzling v2017-01](https://github.com/richox/libzling) 
  - [xpack](https://github.com/ebiggers/xpack) 
  - [zopfli v16-05](https://code.google.com/p/zopfli) 
- - [zstd v1.1.3](https://github.com/facebook/zstd)
+ - [zstd v1.3.0](https://github.com/facebook/zstd)
  - [zpaq v7.15](https://github.com/zpaq/zpaq) 
 
 #### Entropy coder:
@@ -242,5 +242,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 22 JUN 2017
+Last update: 26 JUN 2017
 
