@@ -11,6 +11,7 @@ CC ?= gcc
 CXX ?= g++
 #CC=clang
 #CXX=clang++
+#CC=gcc-7
 #----- Compile for 'American Fuzzy Lop (http://lcamtuf.coredump.cx/afl/) 
 # add '-static' to LDFLAG
 # Run turbobench w/o output : afl-fuzz -i testcase_dir -o finding_dir -- ./turbobench -elzturbo,12 -v0 -gg -k0
