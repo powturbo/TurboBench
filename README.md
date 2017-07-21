@@ -227,6 +227,7 @@ Compressors with versions 16.08.2016 <br>
  - [Tornado Huf v0.6a](http://freearc.org/Research.aspx) 
  - [zlib Huffmann v1.2.8](https://github.com/Cyan4973/FiniteStateEntropy) 
  - [Fast HF v2006](http://www.cipr.rpi.edu/research/SPIHT/) 
+ - [FPC](https://github.com/algorithm314/FPC)
  - [FSE Huff v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
  - [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html)
  - [inline memcpy](https://github.com/powturbo/TurboBench)
@@ -242,5 +243,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 16 Jul 2017
+Last update: 21 Jul 2017
 
