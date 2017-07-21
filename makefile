@@ -412,7 +412,7 @@ OB+=ppmdec/ppmdec.o
 OB+=ans_nania/narans.o 
 OB+=fpaq0p/fpaq0p_sh.o 
 OB+=vecrc/vector_rc.o
-
+OB+=FPC/fpc.o
 #ifeq ($(NCOMP1), 0)
 #OB+=FiniteStateEntropy/lib/fse.o FiniteStateEntropy/lib/huff0.o
 #endif
