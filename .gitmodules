@@ -149,3 +149,6 @@
 [submodule "isa-l"]
 	path = isa-l
 	url = https://github.com/01org/isa-l.git
+[submodule "FPC"]
+	path = FPC
+	url = https://github.com/algorithm314/FPC.git
