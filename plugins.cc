@@ -243,6 +243,8 @@ enum {
  P_FASTHF,
 #define C_FSC 		ECODER    
  P_FSC,
+#define C_FPC 		ECODER    
+ P_FPC,
 #define C_FSE 		COMP1    
  P_FSE, 
  P_FSEH, 
@@ -775,6 +777,10 @@ extern "C" {
 #include "FastARI/FastAri.h"
   #endif
 
+  #if C_FPC
+#include "FPC/fpc.h"
+  #endif
+
   #if C_FSC
 #include "fsc/fsc.h"
   #endif
@@ -860,6 +866,7 @@ struct plugs plugs[] = {
   { P_MCPY, 	"imemcpy", 			C_MEMCPY, 	".",		"inline memcpy",		"------------",		"--------------------------------------",												"" },
   { P_LMCPY, 	"memcpy",			C_MEMCPY,  	".",		"library memcpy",		"",					"",																						"" },
   { P_BCMEC, 	"bcmec", 			C_BCMEC, 	"1.0",		"bcm range coder",		"Public Domain",	"http://sourceforge.net/projects/bcm",													"" },
+  { P_FPC, 		"fpc", 				C_FPC, 		"",	"Fast Prefix Coder",	"BSD license",		"https://github.com/algorithm314/FPC",															"0,8,9,10,11,12,16,32,48,63" },
   { P_FSC, 		"fsc", 				C_FSC, 		"15-05",	"Finite State Coder",	"Apache license",	"https://github.com/skal65535/fsc",														"", E_ANS },
   { P_FSE, 		"fse", 				C_FSE, 		"",	"Finite State Entropy",	"BSD license",		"https://github.com/Cyan4973/FiniteStateEntropy",										"", E_ANS },
   { P_FSEH,		"fsehuf", 			C_FSE, 		"",	"Finite State Entropy",	"BSD license",		"https://github.com/Cyan4973/FiniteStateEntropy",										"", E_HUF },
@@ -1529,6 +1536,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_FPAQC:   return absc(in, inlen, out, outsize); 
       #endif
 
+      #if C_FPC
+    case P_FPC:  return comp_block(out,in,inlen,lev*1024); 
+      #endif
+
       #if C_FQZ
     case P_FQZ0:  { unsigned int outlen; compress_block(in, inlen, out, &outlen); return outlen; }
       #endif
@@ -1973,6 +1984,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       } break;
       #endif
 	  
+      #if C_FPC
+    case P_FPC:  return dec_block(out,in,inlen,outlen); 
+      #endif
+
 	  #if C_FSC
     case P_FSC:     { size_t outsize = 0; uint8_t *op = NULL; int ok = FSCDecode(in, inlen, &op, &outsize); if(ok) { memcpy(out,op,outlen); free(op); } } break;
 	  #endif
