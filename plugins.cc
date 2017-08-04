@@ -1985,7 +1985,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 	  
       #if C_FPC
-    case P_FPC:  return FPC_decompress(out,in,inlen,outlen); 
+    case P_FPC:  return FPC_decompress(out,outlen,in,inlen); 
       #endif
 
 	  #if C_FSC
