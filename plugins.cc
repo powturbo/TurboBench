@@ -713,6 +713,10 @@ size_t chromium_base64_decode(char* dest, const char* src, size_t len);
 #include "fasthf/binary_codec.h"
   #endif
   
+  #if C_FPC
+#include "FPC/fpc.h"
+  #endif
+
   #if C_FSE
 #include "zstd/lib/common/fse.h"
 #include "zstd/lib/common/huf.h"
@@ -775,10 +779,6 @@ extern "C" {
 
   #if C_FASTARI
 #include "FastARI/FastAri.h"
-  #endif
-
-  #if C_FPC
-#include "FPC/fpc.h"
   #endif
 
   #if C_FSC
@@ -1537,7 +1537,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if C_FPC
-    case P_FPC:  return comp_block(out,in,inlen,lev*1024); 
+    case P_FPC:  return FPC_compress(out,in,inlen,lev*1024); 
       #endif
 
       #if C_FQZ
@@ -1985,7 +1985,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 	  
       #if C_FPC
-    case P_FPC:  return dec_block(out,in,inlen,outlen); 
+    case P_FPC:  return FPC_decompress(out,in,inlen,outlen); 
       #endif
 
 	  #if C_FSC
