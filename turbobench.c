@@ -116,6 +116,21 @@ void _vfree(void *p, size_t size) {
 } 
 
   #if !defined(NMEMSIZE) && !defined(_WIN32)
+static size_t mem_peak, mem_used;
+size_t mempeak() { return mem_peak; }
+
+size_t mempeakinit() { mem_peak = mem_used = 0; return mem_peak; }
+
+void mem_add(size_t size) { 
+  if((mem_used += size) > mem_peak) 
+  { mem_peak = mem_used; }
+}
+
+void mem_sub(size_t size) { 
+  if(mem_used > size) 
+    mem_used -= size; 
+}
+
 #include <dlfcn.h>
 static ALIGNED(char, mem_heap[1<<20],32);
 static char *mem_heapp = mem_heap;
@@ -188,22 +203,6 @@ void free(void *p) {
   (*mem_free)(p); 
 } 
   #endif
-
-static size_t mem_peak, mem_used;
-size_t mempeak() { return mem_peak; }
-
-size_t mempeakinit() { mem_peak = mem_used = 0; return mem_peak; }
-
-void mem_add(size_t size) { 
-  if((mem_used += size) > mem_peak) 
-  { mem_peak = mem_used; }
-}
-
-void mem_sub(size_t size) { 
-  if(mem_used > size) 
-    mem_used -= size; 
-}
-
 //--------------------------------------- TurboBench ------------------------------------------------------------------
 enum { 
   FMT_TEXT=1, 
