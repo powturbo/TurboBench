@@ -1100,7 +1100,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	    if(dsize) lgwin = bsr32(dsize)-powof2(dsize); 
 		if(strchr(prm,'V')) brotlidic++; //	if(strchr(prm,'R')) brotlirep++; if(strchr(prm,'X')) brotlictx++;
         size_t esize = outsize; 
-        int rc = BrotliEncoderCompress(lev, lgwin, mode, inlen, (uint8_t*)in, &esize, (uint8_t*)out); 		
+        int rc = BrotliEncoderCompress(lev, lgwin, (BrotliEncoderMode)mode, (size_t)inlen, (uint8_t*)in, &esize, (uint8_t*)out); 		
         return rc?esize:0; 
       }
 	  #endif    
@@ -1204,7 +1204,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #endif
 
 	  #if C_LIZARD
-    case P_LIZARD: return Lizard_compress(in, out, inlen, outsize, lev); 
+    case P_LIZARD: return Lizard_compress((const char*)in, (char*)out, inlen, outsize, lev); 
 	  #endif
 
       #if C_LZFSE
@@ -1473,11 +1473,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	case P_FB64AVX: 	 { size_t outlen = outsize; avx2_base64_encode(     in,inlen,out,&outlen);return outlen; }
 	case P_FB64EXPAVX:	 { 							return expavx2_base64_encode(  out,in,inlen); }
 	    #endif
-
-	case P_FB64CHROMIUM:  return chromium_base64_encode( out,in,inlen);
-	case P_FB64LINUX:     return linux_base64_encode(    out,in,in+inlen);
-	case P_FB64QUICKTIME: return quicktime_base64_encode(out,in,inlen);
-	case P_FB64SCALAR:   { size_t outlen = outsize; scalar_base64_encode(   in,inlen,out,&outlen);return outlen; }
+	case P_FB64CHROMIUM:  return chromium_base64_encode( (char*)out, (const char*)in, inlen);
+	case P_FB64LINUX:     return linux_base64_encode(    (char*)out, (const char*)in, (const char*)(in+inlen));
+	case P_FB64QUICKTIME: return quicktime_base64_encode((char*)out, (const char*)in, inlen);
+	case P_FB64SCALAR:   { size_t outlen = outsize; scalar_base64_encode(   (const char*)in,inlen,(char*)out,&outlen);return outlen; }
 	  #endif
 
 	  #if C_SB64
@@ -1944,10 +1943,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	case P_FB64EXPAVX:	 { size_t _outlen = outlen; expavx2_base64_decode(  out,in,inlen);return inlen; }
 	    #endif
 
-	case P_FB64CHROMIUM:  chromium_base64_decode( out,in,inlen);   return inlen;
-	case P_FB64LINUX:     linux_base64_decode(    out,in,in+inlen);return inlen;
-	case P_FB64QUICKTIME: quicktime_base64_decode(out,in);         return inlen;
-	case P_FB64SCALAR:   { size_t _outlen = outlen; scalar_base64_decode(	 in,inlen,out,&_outlen);return inlen; }
+	case P_FB64CHROMIUM:  chromium_base64_decode( (char*)out,(const char*)in,inlen); return inlen;
+	case P_FB64LINUX:     linux_base64_decode(    (char*)out,(const char*)in,(const char*)in+inlen); return inlen;
+	case P_FB64QUICKTIME: quicktime_base64_decode((char*)out,(const char*)in);         return inlen;
+	case P_FB64SCALAR:   { size_t _outlen = outlen; scalar_base64_decode(	 (const char*)in,inlen,(char*)out,&_outlen);return inlen; }
 	  #endif
 
 	  #if C_SB64
@@ -2012,13 +2011,13 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
 	  #if C_JRANS
-    case P_JRANS4_16o0: rans_uncompress_to(16,in, inlen, out, &outlen,0); break;
-    case P_JRANS4_16o1: rans_uncompress_to(16,in, inlen, out, &outlen,1); break;
-    case P_JRANS4_8o0:  rans_uncompress_to( 8,in, inlen, out, &outlen,0); break;
-    case P_JRANS4_8o1:  rans_uncompress_to( 8,in, inlen, out, &outlen,1); break; 	
+    case P_JRANS4_16o0: rans_uncompress_to(16,in, inlen, out, (unsigned int *)&outlen,0); break;
+    case P_JRANS4_16o1: rans_uncompress_to(16,in, inlen, out, (unsigned int *)&outlen,1); break;
+    case P_JRANS4_8o0:  rans_uncompress_to( 8,in, inlen, out, (unsigned int *)&outlen,0); break;
+    case P_JRANS4_8o1:  rans_uncompress_to( 8,in, inlen, out, (unsigned int *)&outlen,1); break; 	
 	    #ifdef AVX2_ON	 
-    case P_JRANS4_32o0: rans_uncompress_to_32x16(in, inlen, out, &outlen,0); break;
-    case P_JRANS4_32o1: rans_uncompress_to_32x16(in, inlen, out, &outlen,1); break;
+    case P_JRANS4_32o0: rans_uncompress_to_32x16(in, inlen, out, (unsigned int *)&outlen,0); break;
+    case P_JRANS4_32o1: rans_uncompress_to_32x16(in, inlen, out, (unsigned int *)&outlen,1); break;
 	    #endif
 	  #endif
 
