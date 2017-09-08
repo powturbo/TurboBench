@@ -7,10 +7,10 @@
 #
 # snappy:    "cp snappy_/* snappy" (or configure snappy) & type make
 # GPL: "make GPL=1" to include GPL libraries
-#CC ?= gcc
-#CXX ?= g++
-CC=clang
-CXX=clang++
+CC ?= gcc
+CXX ?= g++
+#CC=clang
+#CXX=clang++
 #CC=gcc-7
 #----- Compile for 'American Fuzzy Lop (http://lcamtuf.coredump.cx/afl/) 
 # add '-static' to LDFLAG
