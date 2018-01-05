@@ -122,9 +122,6 @@
 [submodule "lizard"]
 	path = lizard
 	url = https://github.com/inikep/lizard.git
-[submodule "rans_static"]
-	path = rans_static
-	url = https://github.com/jkbonfield/rans_static.git
 [submodule "FPC"]
 	path = FPC
 	url = https://github.com/algorithm314/FPC.git
