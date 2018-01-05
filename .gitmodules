@@ -113,9 +113,6 @@
 [submodule "FPC"]
 	path = FPC
 	url = https://github.com/algorithm314/FPC.git
-[submodule "brotli"]
-	path = brotli
-	url = https://github.com/google/brotli.git
 [submodule "lz4"]
 	path = lz4
 	url = https://github.com/lz4/lz4
