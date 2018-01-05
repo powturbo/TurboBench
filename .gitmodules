@@ -149,3 +149,6 @@
 [submodule "brotli"]
 	path = brotli
 	url = https://github.com/google/brotli.git
+[submodule "c-blosc2"]
+	path = c-blosc2
+	url = https://github.com/Blosc/c-blosc2
