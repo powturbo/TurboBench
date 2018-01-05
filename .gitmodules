@@ -149,3 +149,6 @@
 [submodule "miniz"]
 	path = miniz
 	url = https://github.com/richgel999/miniz
+[submodule "brieflz"]
+	path = brieflz
+	url = https://github.com/jibsen/brieflz
