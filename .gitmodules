@@ -62,9 +62,6 @@
 [submodule "quicklz"]
 	path = quicklz
 	url = https://github.com/robottwo/quicklz.git
-[submodule "snappy"]
-	path = snappy
-	url = https://github.com/google/snappy.git
 [submodule "snappy-c"]
 	path = snappy-c
 	url = https://github.com/andikleen/snappy-c.git
