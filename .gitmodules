@@ -149,3 +149,6 @@
 [submodule "brieflz"]
 	path = brieflz
 	url = https://github.com/jibsen/brieflz
+[submodule "fastbase64"]
+	path = fastbase64
+	url = https://github.com/lemire/fastbase64
