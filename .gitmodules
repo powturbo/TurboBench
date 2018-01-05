@@ -104,9 +104,6 @@
 [submodule "lzfse"]
 	path = lzfse
 	url = https://github.com/lzfse/lzfse.git
-[submodule "zstd"]
-	path = zstd
-	url = https://github.com/facebook/zstd.git
 [submodule "TurboBase64"]
 	path = TurboBase64
 	url = https://github.com/powturbo/TurboBase64.git
