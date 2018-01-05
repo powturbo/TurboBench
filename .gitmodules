@@ -149,3 +149,6 @@
 [submodule "fastbase64"]
 	path = fastbase64
 	url = https://github.com/lemire/fastbase64
+[submodule "isa-l"]
+	path = isa-l
+	url = https://github.com/01org/isa-l
