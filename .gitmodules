@@ -149,3 +149,6 @@
 [submodule "zlib-ng"]
 	path = zlib-ng
 	url = https://github.com/Dead2/zlib-ng
+[submodule "c-blosc2"]
+	path = c-blosc2
+	url = https://github.com/Blosc/c-blosc2
