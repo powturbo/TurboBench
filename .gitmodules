@@ -122,9 +122,6 @@
 [submodule "lz4"]
 	path = lz4
 	url = https://github.com/lz4/lz4
-[submodule "pysap"]
-	path = pysap
-	url = https://github.com/CoreSecurity/pysap
 [submodule "rans_static"]
 	path = rans_static
 	url = https://github.com/jkbonfield/rans_static
