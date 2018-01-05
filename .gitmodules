@@ -107,9 +107,6 @@
 [submodule "bcm"]
 	path = bcm
 	url = https://github.com/encode84/bcm.git
-[submodule "libdeflate"]
-	path = libdeflate
-	url = https://github.com/ebiggers/libdeflate.git
 [submodule "xpack"]
 	path = xpack
 	url = https://github.com/ebiggers/xpack.git
