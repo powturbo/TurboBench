@@ -149,3 +149,6 @@
 [submodule "FPC"]
 	path = FPC
 	url = https://github.com/algorithm314/FPC.git
+[submodule "brieflz"]
+	path = brieflz
+	url = https://github.com/jibsen/brieflz
