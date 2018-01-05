@@ -122,9 +122,6 @@
 [submodule "zstd"]
 	path = zstd
 	url = https://github.com/facebook/zstd.git
-[submodule "fastbase64"]
-	path = fastbase64
-	url = https://github.com/lemire/fastbase64.git
 [submodule "TurboBase64"]
 	path = TurboBase64
 	url = https://github.com/powturbo/TurboBase64.git
