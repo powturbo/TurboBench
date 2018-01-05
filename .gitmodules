@@ -149,3 +149,6 @@
 [submodule "isa-l"]
 	path = isa-l
 	url = https://github.com/01org/isa-l
+[submodule "libdeflate"]
+	path = libdeflate
+	url = https://github.com/ebiggers/libdeflate
