@@ -149,3 +149,6 @@
 [submodule "libdeflate"]
 	path = libdeflate
 	url = https://github.com/ebiggers/libdeflate
+[submodule "miniz"]
+	path = miniz
+	url = https://github.com/richgel999/miniz
