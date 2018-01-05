@@ -149,3 +149,6 @@
 [submodule "snappy"]
 	path = snappy
 	url = https://github.com/google/snappy
+[submodule "zlib-ng"]
+	path = zlib-ng
+	url = https://github.com/Dead2/zlib-ng
