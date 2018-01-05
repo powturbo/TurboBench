@@ -149,3 +149,6 @@
 [submodule "c-blosc2"]
 	path = c-blosc2
 	url = https://github.com/Blosc/c-blosc2
+[submodule "fastbase64"]
+	path = fastbase64
+	url = https://github.com/lemire/fastbase64
