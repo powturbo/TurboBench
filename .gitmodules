@@ -122,9 +122,6 @@
 [submodule "lz4"]
 	path = lz4
 	url = https://github.com/lz4/lz4
-[submodule "rans_static"]
-	path = rans_static
-	url = https://github.com/jkbonfield/rans_static
 [submodule "snappy"]
 	path = snappy
 	url = https://github.com/google/snappy
