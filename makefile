@@ -268,10 +268,10 @@ OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/code
 OB+=libdeflate/lib/adler32.o libdeflate/lib/aligned_malloc.o libdeflate/lib/crc32.o libdeflate/lib/x86_cpu_features.o \
     libdeflate/lib/deflate_compress.o libdeflate/lib/deflate_decompress.o libdeflate/lib/gzip_compress.o libdeflate/lib/gzip_decompress.o libdeflate/lib/zlib_compress.o libdeflate/lib/zlib_decompress.o 
 OB+=bzip2/blocksort.o bzip2/huffman.o bzip2/crctable.o bzip2/randtable.o bzip2/compress.o bzip2/decompress.o bzip2/bzlib.o
-OB+=density/src/buffers/buffer.o density/src/core/algorithms.o density/src/structure/header.o density/src/globals.o density/src/streams/stream.o \
-	density/src/core/chameleon/chameleon_decode.o density/src/core/chameleon/chameleon_dictionary.o density/src/core/chameleon/chameleon_encode.o \
-	density/src/core/lion/lion_decode.o density/src/core/lion/lion_dictionary.o density/src/core/lion/lion_encode.o density/src/core/lion/lion_form_model.o \
-	density/src/core/cheetah/cheetah_decode.o density/src/core/cheetah/cheetah_dictionary.o density/src/core/cheetah/cheetah_encode.o 
+OB+=density/src/buffers/buffer.o density/src/algorithms/algorithms.o density/src/algorithms/dictionaries.o density/src/structure/header.o density/src/globals.o density/src/buffers/buffer.o \
+	density/src/algorithms/chameleon/core/chameleon_decode.o density/src/algorithms/chameleon/core/chameleon_encode.o \
+	density/src/algorithms/lion/core/lion_decode.o density/src/algorithms/lion/core/lion_encode.o density/src/algorithms/lion/forms/lion_form_model.o \
+	density/src/algorithms/cheetah/core/cheetah_decode.o density/src/algorithms/cheetah/core/cheetah_encode.o 
 OB+=FastLZ/fastlz.o 
 ifeq ($(GLZA),1)
 OB+=glza/GLZAcomp.o glza/GLZAformat.o glza/GLZAcompress.o glza/GLZAencode.o glza/GLZAdecode.o glza/GLZAmodel.o 
@@ -315,7 +315,8 @@ ifeq ($(NCPP), 0)
 OB+=CSC/src/libcsc/csc_analyzer.o CSC/src/libcsc/csc_coder.o CSC/src/libcsc/csc_dec.o CSC/src/libcsc/csc_default_alloc.o CSC/src/libcsc/csc_enc.o CSC/src/libcsc/csc_encoder_main.o CSC/src/libcsc/csc_filters.o CSC/src/libcsc/csc_lz.o CSC/src/libcsc/csc_memio.o \
 	CSC/src/libcsc/csc_mf.o CSC/src/libcsc/csc_model.o CSC/src/libcsc/csc_profiler.o 
 OB+=doboz/Source/Doboz/Compressor.o doboz/Source/Doboz/Decompressor.o doboz/Source/Doboz/Dictionary.o
-OB+=libzling/src/libzling.o libzling/src/libzling_huffman.o libzling/src/libzling_utils.o libzling/src/libzling_lz.o libzling_/libzling_utils_mem.o 
+# Disabled : compile error in gcc 7.2
+#OB+=libzling/src/libzling.o libzling/src/libzling_huffman.o libzling/src/libzling_utils.o libzling/src/libzling_lz.o libzling_/libzling_utils_mem.o 
 OB+=zpaq/libzpaq.o
 ifeq ($(SNAPPY), 1)
 OB+=snappy/snappy-sinksource.o snappy/snappy-stubs-internal.o snappy/snappy.o
