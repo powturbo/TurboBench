@@ -186,7 +186,7 @@ enum {
  P_YAPPY,
 #define C_ZLIB		COMP1	
  P_ZLIB, 
-#define C_ZLING	    COMP2
+#define C_ZLING	    0 //COMP2
  P_ZLING,  
 #define C_ZOPFLI	COMP2	
  P_ZOPFLI, 
@@ -1146,7 +1146,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  
       #if C_DENSITY
     case P_DENSITY: { 
-	    density_buffer_processing_result rs = density_buffer_compress((const uint8_t *)in, inlen, (uint8_t*)out, outsize, (const DENSITY_COMPRESSION_MODE)lev/*, DENSITY_BLOCK_TYPE_DEFAULT, NULL, NULL*/);
+	    density_processing_result rs = density_compress((const uint8_t *)in, inlen, (uint8_t*)out, outsize, (const DENSITY_ALGORITHM)lev/*, DENSITY_BLOCK_TYPE_DEFAULT, NULL, NULL*/);
         return rs.state?0:rs.bytesWritten;
 	  }
       #endif        (
@@ -1678,7 +1678,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	  #endif
 	  
       #if C_DENSITY
-    case P_DENSITY: { density_buffer_processing_result rs = density_buffer_decompress((uint8_t *)in, inlen, (uint8_t*)out, outlen+DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE);  return rs.state?0:rs.bytesWritten; }
+    case P_DENSITY: { density_processing_result rs = density_decompress((uint8_t *)in, inlen, (uint8_t*)out, outlen/*+DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE*/);  return rs.state?0:rs.bytesWritten; }
       #endif
 
       #if C_FASTARI
