@@ -243,5 +243,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 27 Feb 2018
+Last update: 04 Mar 2018
 
