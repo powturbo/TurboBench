@@ -357,6 +357,12 @@ enum {
 #include "brotli/c/include/brotli/decode.h"
   #endif
 
+  #if C_LZMA
+#include "LZMA-SDK/C/Alloc.h"
+#include "LZMA-SDK/C/LzmaEnc.h"
+#include "LZMA-SDK/C/LzmaDec.h"
+  #endif
+
   #if C_CSC
 #include "CSC/src/libcsc/csc_enc.h"
 #include "CSC/src/libcsc/csc_dec.h"
@@ -484,12 +490,6 @@ class Out: public libzpaq::Writer {
   struct Lzma_options encoder_options;
   #endif
   
-  #if C_LZMA
-#include "LZMA-SDK/C/Alloc.h"
-#include "LZMA-SDK/C/LzmaEnc.h"
-#include "LZMA-SDK/C/LzmaDec.h"
-  #endif
-
   #if C_LZMAT
 #include "lzmat/lzmat.h"
   #endif
