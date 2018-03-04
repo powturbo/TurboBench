@@ -115,7 +115,10 @@ void _vfree(void *p, size_t size) {
     #endif
 } 
 
-  #if !defined(NMEMSIZE) && !defined(_WIN32)
+  #if defined(NMEMSIZE) || defined(_WIN32) 
+#define mempeakinit() 0
+#define mempeak() 0
+  #else
 static size_t mem_peak, mem_used;
 size_t mempeak() { return mem_peak; }
 
