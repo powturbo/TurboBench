@@ -152,3 +152,6 @@
 [submodule "brotli"]
 	path = brotli
 	url = https://github.com/google/brotli.git
+[submodule "fast-lzma2"]
+	path = fast-lzma2
+	url = https://github.com/conor42/fast-lzma2
