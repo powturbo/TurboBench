@@ -91,6 +91,8 @@ enum {
  P_DOBOZ, 
 #define C_FASTLZ 	 COMP2	
  P_FASTLZ, 
+#define C_FLZMA2	 COMP1 			
+ P_FLZMA2, 
 #define C_GIPFELI    COMP2	 
  P_GIPFELI,
    #ifdef GLZA
@@ -402,6 +404,11 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
   #if C_DOBOZ
 #include "doboz/Source/Doboz/Compressor.h"
 #include "doboz/Source/Doboz/Decompressor.h"
+  #endif
+
+  #if C_FLZMA2
+#include "fast-lzma2/lzma2_enc.h"
+#include "fast-lzma2/lzma2_dec.h"
   #endif
 
   #if C_GIPFELI
@@ -811,6 +818,7 @@ struct plugs plugs[] = {
   { P_DENSITY, 	"density",        	C_DENSITY,	"0.12.0",	"Density",				"BSD license",		"https://github.com/centaurean/density",												"1,2,3" },
   { P_DOBOZ,	"doboz",			C_DOBOZ, 	"14-01-14",	"Doboz",				"BSD Like",			"https://bitbucket.org/attila_afra\thttps://github.com/nemequ/doboz", 					"" },  //crash on windows
   { P_FASTLZ,	"fastlz", 			C_FASTLZ,	"0.1.0",	"FastLz",				"BSD like",			"http://fastlz.org\thttps://github.com/ariya/FastLZ",									"1,2" },
+  { P_FLZMA2,  	"flzma2", 			C_LZMA, 	"2018.3",	"Fast-lzma2",			"BSD",				"https://github.com/conor42/fast-lzma2", 												"0,1,2,3,4,5,6,7,8,9,10,11/mt#" }, 
   { P_GIPFELI, 	"gipfeli", 			C_GIPFELI, 	"16-08",	"Gipfeli",				"Apache license",	"https://github.com/google/gipfeli",													"" }, 
   { P_GLZA, 	"glza", 			C_GLZA, 	"16-08",	"glza",					"Apache license",	"https://github.com/jrmuizel/GLZA",													    "" }, 
   { P_HEATSHRINK,"heatshrink",		C_HEATSHRINK,"0.4.1",	"heatshrink",			"BSD license",		"https://github.com/atomicobject/heatshrink",											"" },
@@ -1232,6 +1240,9 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     }
       #endif
 		
+      #if C_FLZMA2
+    case P_FLZMA2: { unsigned nbThreads = 1; char *q; if(q=strstr(prm,"mt")) nbThreads = atoi(q+(q[2]=='='?3:2)); return FL2_compressMt(out, outsize, in, inlen, lev, nbThreads); }
+      #endif
       #if C_LZMA
         #ifdef __x86_64__
            #define DICSIZE (1<<30)
@@ -1250,7 +1261,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  if(q=strstr(prm,"mf=hc")) p.btMode  = 0, p.numHashBytes = atoi(q+5);
 	  if(dsize) p.dictSize = dsize; if(p.dictSize>inlen)  p.dictSize=inlen; if(p.dictSize>DICSIZE)  p.dictSize=DICSIZE; //printf("dsize=%u, %d,%d,%d:%d, %d,%d, %d,%d\n ", p.dictSize, p.lc,p.lp,p.pb,p.fb, p.mc,p.algo, p.btMode,p.numHashBytes);
 	  LzmaEncProps_Normalize(&p);
-      SizeT psize = LZMA_PROPS_SIZE, outlen = outsize - LZMA_PROPS_SIZE;
+      SizeT psize = LZMA_PROPS_SIZE, outlen = outsize - LZMA_PROPS_SIZE; 
   	  return LzmaEncode(out+LZMA_PROPS_SIZE, &outlen, in, inlen, &p, out, &psize, 0, NULL, &g_Alloc, &g_Alloc) == SZ_OK?outlen+LZMA_PROPS_SIZE:0;
 	}
       #endif
@@ -1759,6 +1770,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	case P_LZLIB: { long out_len = outlen; bbdecompress( in, outlen, out, &out_len ); } break;
       #endif 
 	  
+      #if C_FLZMA2
+    case P_FLZMA2: { return FL2_decompress(out, outlen,  in, inlen); }
+      #endif
+
 	  #if C_LZMA
 	case P_LZMA: {  
 	    SizeT ol = outlen, il = inlen - LZMA_PROPS_SIZE; ELzmaStatus sts;
