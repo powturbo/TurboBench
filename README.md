@@ -154,7 +154,8 @@ Compressors with versions 16.08.2016 <br>
  - [Density v0.13.0](https://github.com/centaurean/density) 
  - [Doboz v14-01-14](https://bitbucket.org/attila_afra) 
  - [FastLz v0.1.0](http://fastlz.org) 
- - [Gipfeli v16.08](https://github.com/google/gipfeli) 
+ - [FastLz v0.1.0](http://fastlz.org) 
+ - [Fast-lzma](https://github.com/conor42/fast-lzma2) 
  - [glza v16-08](https://github.com/jrmuizel/GLZA)
  - [heatshrink v0.4.1](https://github.com/atomicobject/heatshrink) 
  - [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l) 
@@ -243,5 +244,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 04 Mar 2018
+Last update: 11 Mar 2018
 
