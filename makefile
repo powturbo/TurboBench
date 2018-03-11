@@ -298,6 +298,10 @@ ifeq ($(UNAME), Windows)
 OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
 OB+=lzlib-1.9/lzlib.o lzlib_/bbexample.o 
+OB+=fast-lzma2/fl2_common.o fast-lzma2/fl2_compress.o fast-lzma2/fl2_decompress.o fast-lzma2/lzma2_dec.o fast-lzma2/lzma2_enc.o fast-lzma2/radix_bitpack.o fast-lzma2/radix_mf.o fast-lzma2/radix_struct.o \
+fast-lzma2/range_enc.o fast-lzma2/threading.o fast-lzma2/fl2pool.o 
+#fast-lzma2/xxhash.o fast-lzma2/error_private.o  
+
 ifeq ($(NSIMD),0)
 OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o 
 OB+=nakamichi/Nakamichi_Washigan.o
