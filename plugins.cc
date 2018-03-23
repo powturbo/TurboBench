@@ -847,7 +847,7 @@ struct plugs plugs[] = {
   { P_LZHAM, 	"lzham", 			C_LZHAM,	"1.1",		"Lzham",				"MIT license",		"https://github.com/richgel999/lzham_codec_devel",										"1,2,3,4/t#:fb#:x#" },
   { P_LZLIB, 	"lzlib", 			C_LZLIB, 	"1.9",		"Lzlib",				"BSD license",		"http://www.nongnu.org/lzip\thttps://github.com/daniel-baumann/lzlib",					"1,2,3,4,5,6,7,8,9/d#:fb#" },
   { P_LZMAT, 	"lzmat", 			C_LZMAT, 	"1.0",		"Lzmat",				"GPL license",		"https://github.com/nemequ/lzmat\thttp://www.matcode.com/lzmat.htm",					"" },
-  { P_LZMA,  	"lzma", 			C_LZMA, 	"9.35",		"Lzma",					"Public Domain",	"http://7-zip.org\thttps://github.com/sisong/lzma", 								"0,1,2,3,4,5,6,7,8,9/d#:fb#:lp#:lc#:pb#:a#:mt#" }, 
+  { P_LZMA,  	"lzma", 			C_LZMA, 	"18.01",	"Lzma",					"Public Domain",	"http://7-zip.org\thttps://github.com/sisong/lzma", 								"0,1,2,3,4,5,6,7,8,9/d#:fb#:lp#:lc#:pb#:a#:mt#" }, 
 
   { P_LZO1b, 	"lzo1b", 			C_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"1,9,99,999" },  
   { P_LZO1c, 	"lzo1c",			C_LZO, 		"2.09",		"Lzo",					"GPL license",		"http://www.oberhumer.com/opensource/lzo\thttps://github.com/nemequ/lzo",				"1,9,99,999" },
