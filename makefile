@@ -179,7 +179,8 @@ ifeq ($(STATIC),1)
 OB+=/usr/lib/x86_64-linux-gnu/libz.a
 else
 ifeq ($(ZLIB_NG), 1)
-OB+=zlib-ng/libz.a
+DEFS+=-DZLIB_NG
+OB+=zlib-ng/libz-ng.a
 else
 OB+=-lz
 endif
@@ -200,6 +201,12 @@ endif
 
 OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
 endif
+
+OB+=libdeflate/lib/adler32.o libdeflate/lib/aligned_malloc.o libdeflate/lib/crc32.o libdeflate/lib/arm/cpu_features.o libdeflate/lib/x86/cpu_features.o \
+    libdeflate/lib/deflate_compress.o libdeflate/lib/deflate_decompress.o libdeflate/lib/gzip_compress.o libdeflate/lib/gzip_decompress.o libdeflate/lib/zlib_compress.o libdeflate/lib/zlib_decompress.o 
+ 
+OB+=libslz/src/slz.o 
+
 endif
 
 #----------------------- COMP2 -----------------------
@@ -269,8 +276,6 @@ OB+=chameleon/chameleon.o
 OB+=crush/crush.o
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/platform/platform.o libbsc/libbsc/filters/detectors.o \
 	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o $(DIVSUFSORT) libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o
-OB+=libdeflate/lib/adler32.o libdeflate/lib/aligned_malloc.o libdeflate/lib/crc32.o libdeflate/lib/x86/cpu_features.o \
-    libdeflate/lib/deflate_compress.o libdeflate/lib/deflate_decompress.o libdeflate/lib/gzip_compress.o libdeflate/lib/gzip_decompress.o libdeflate/lib/zlib_compress.o libdeflate/lib/zlib_decompress.o 
 OB+=bzip2/blocksort.o bzip2/huffman.o bzip2/crctable.o bzip2/randtable.o bzip2/compress.o bzip2/decompress.o bzip2/bzlib.o
 OB+=density/src/buffers/buffer.o density/src/algorithms/algorithms.o density/src/algorithms/dictionaries.o density/src/structure/header.o density/src/globals.o density/src/buffers/buffer.o \
 	density/src/algorithms/chameleon/core/chameleon_decode.o density/src/algorithms/chameleon/core/chameleon_encode.o \
@@ -288,7 +293,6 @@ endif
 #OB+=kraken/kraken.o 
 OB+=liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o 
 OB+=liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o 
-OB+=libslz/src/slz.o 
 OB+=lizard/lib/lizard_compress.o lizard/lib/lizard_decompress.o
 OB+=lzfse/src/lzfse_decode_base.o lzfse/src/lzfse_decode.o lzfse/src/lzfse_encode_base.o lzfse/src/lzfse_encode.o lzfse/src/lzfse_fse.o lzfse/src/lzvn_decode_base.o lzfse/src/lzvn_encode_base.o
 OB+=lzham_codec_devel/lzhamcomp/lzham_lzbase.o lzham_codec_devel/lzhamcomp/lzham_lzcomp.o lzham_codec_devel/lzhamcomp/lzham_lzcomp_internal.o \
@@ -410,7 +414,6 @@ endif
 #-------------------- Entropy Coder -------------------
 ifeq ($(NECODER), 0)
 OB+=FastARI/FastAri.o 
-OB+=rans_static/rANS_static4x8.o rans_static/rANS_static4x16.o rans_static/rANS_static.o rans_static/arith_static.o
 ifeq ($(AVX2),1)
 OB+=rans_static/r32x16b_avx2.o
 endif
@@ -422,6 +425,9 @@ OB+=ans_nania/narans.o
 OB+=fpaq0p/fpaq0p_sh.o 
 OB+=vecrc/vector_rc.o
 OB+=FPC/fpc.o
+#ifeq ($(NCOMP2), 0)
+OB+=rans_static/rANS_static4x8.o rans_static/rANS_static4x16.o rans_static/rANS_static.o rans_static/arith_static.o
+#endif
 #ifeq ($(NCOMP1), 0)
 #OB+=FiniteStateEntropy/lib/fse.o FiniteStateEntropy/lib/huff0.o
 #endif
