@@ -91,7 +91,7 @@ enum {
  P_DOBOZ, 
 #define C_FASTLZ 	 COMP2	
  P_FASTLZ, 
-#define C_FLZMA2	 COMP1 			
+#define C_FLZMA2	 COMP2 			
  P_FLZMA2, 
 #define C_GIPFELI    COMP2	 
  P_GIPFELI,
@@ -114,13 +114,13 @@ enum {
 #define C_LIBBSC     COMP2    
  P_LIBBSC,   
  P_LIBBSCC,   
-#define C_LIBDEFLATE COMP2	
+#define C_LIBDEFLATE COMP1	
  P_LIBDEFLATE,
 #define C_LIBLZF     COMP2 
  P_LIBLZF,  
 #define C_LIBLZG	COMP2	  
  P_LIBLZG,
-#define C_LIBSLZ	COMP2	  
+#define C_LIBSLZ	COMP1	  
  P_LIBSLZ,
 #define C_LIBZPAQ	COMP2	
  P_LIBZPAQ, 
@@ -159,6 +159,11 @@ enum {
 #define C_MSCOMPRESS	GPL  
  P_MSCOMPRESS, 
 #define C_NAKA	    COMP2
+   #ifndef NSIMD
+#define C_NAKA	    COMP2
+   #else
+#define C_NAKA	    0
+   #endif
  P_NAKA,
 #define C_PITHY   	COMP2    
  P_PITHY, 
@@ -252,16 +257,21 @@ enum {
  P_FSEH, 
 #define C_FQZ 	 	ECODER    
  P_FQZ0,
-#define C_JAC 	    	ECODER    
- P_JAC, 
+ #if 1 //ndef NSIMD
 #define C_JRANS		ECODER 
+#define C_JAC 	    	ECODER    
+ #else
+#define C_JRANS		0
+#define C_JAC 	    	0
+ #endif
+ P_JAC, 
  P_JRANS4_8o0,
  P_JRANS4_8o1,
  P_JRANS4_16o0,
  P_JRANS4_16o1,
  P_JRANS4_32o0,
  P_JRANS4_32o1,
-
+  
 #define C_FPAQC 	GPL
  P_FPAQC,
 #define C_NANS		ECODER 
@@ -595,7 +605,7 @@ class Out: public libzpaq::Writer {
      #if C_ZLIBLIB
 #include <zlib.h>
      #elif defined(ZLIB_NG)
-#include "zlib-ng/zlib.h"
+#include "zlib-ng/zlib-ng.h"
      #elif defined(ZLIB_INTEL)
 #include "zlib_intel/zlib.h"
      #else
