@@ -7,9 +7,6 @@
 [submodule "FastLZ"]
 	path = FastLZ
 	url = https://github.com/ariya/FastLZ.git
-[submodule "LZMA-SDK"]
-	path = LZMA-SDK
-	url = https://github.com/jljusten/LZMA-SDK.git
 [submodule "bzip2"]
 	path = bzip2
 	url = https://github.com/asimonov-im/bzip2.git
@@ -155,3 +152,6 @@
 [submodule "fast-lzma2"]
 	path = fast-lzma2
 	url = https://github.com/conor42/fast-lzma2
+[submodule "lzma"]
+	path = lzma
+	url = https://github.com/sisong/lzma
