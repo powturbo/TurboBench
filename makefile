@@ -179,8 +179,10 @@ ifeq ($(STATIC),1)
 OB+=/usr/lib/x86_64-linux-gnu/libz.a
 else
 ifeq ($(ZLIB_NG), 1)
+#1 create libz.a: "cd zlib-ng" , "./configure --zlib_compat"
+#2 compile with: "make HAVE_ZLIB=1 ZLIB_NG=1"
 DEFS+=-DZLIB_NG
-OB+=zlib-ng/libz-ng.a
+OB+=zlib-ng/libz.a
 else
 OB+=-lz
 endif
