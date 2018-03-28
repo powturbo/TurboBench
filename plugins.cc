@@ -605,7 +605,7 @@ class Out: public libzpaq::Writer {
      #if C_ZLIBLIB
 #include <zlib.h>
      #elif defined(ZLIB_NG)
-#include "zlib-ng/zlib-ng.h"
+#include "zlib/zlib.h"
      #elif defined(ZLIB_INTEL)
 #include "zlib_intel/zlib.h"
      #else
