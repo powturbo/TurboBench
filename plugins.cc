@@ -219,7 +219,6 @@ enum {
 #define C_FB64 		ENCOD
  P_FB64AVX,
  P_FB64CHROMIUM,
- P_FB64EXPAVX,
  P_FB64LINUX,
  P_FB64QUICKTIME,
  P_FB64SCALAR,
@@ -699,17 +698,18 @@ extern "C" {
   #endif
   #if C_FB64
    #ifdef AVX2_ON
-#include "fastbase64/include/fastavxbase64.h"
-size_t expavx2_base64_decode(char *out, const char *src, size_t srclen);
-size_t expavx2_base64_encode(char* dest, const char* str, size_t len);
+//#include "fastbase64/include/fastavxbase64.h"
+size_t fast_avx2_base64_decode(char *out, const char *src, size_t len);
+size_t fast_avx2_base64_encode(char* dest, const char* str, size_t len);
    #endif
+
+//#include "fastbase64/include/chromiumbase64.h"
 size_t chromium_base64_encode(char* dest, const char* str, size_t len);
 size_t chromium_base64_decode(char* dest, const char* src, size_t len);
-//#include "fastbase64/include/experimentalavxbase64.h"
-
-#include "fastbase64/include/linuxbase64.h"
-#include "fastbase64/include/quicktimebase64.h"
 #include "fastbase64/include/scalarbase64.h"
+#include "fastbase64/include/quicktimebase64.h"
+#include "fastbase64/include/linuxbase64.h"
+
   #endif
   #if __cplusplus
 }
@@ -917,7 +917,6 @@ struct plugs plugs[] = {
   
   { P_FB64AVX,		"fb64_avx2",    C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
   { P_FB64CHROMIUM, "fb64chromium", C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
-  { P_FB64EXPAVX,	"fb64exp_avx2", C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
   { P_FB64LINUX,	"fb64linux",    C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
   { P_FB64QUICKTIME,"fb64quicktime",C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
   { P_FB64SCALAR,	"fb64scalar",   C_FB64,		 "    ",	"FastBase64",			"BSD license",		"https://github.com/lemire/fastbase64",  						"" },
@@ -1490,8 +1489,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
 	  #if C_FB64
         #ifdef AVX2_ON
-	case P_FB64AVX: 	 { size_t outlen = outsize; avx2_base64_encode(     in,inlen,out,&outlen);return outlen; }
-	case P_FB64EXPAVX:	 { 							return expavx2_base64_encode(  out,in,inlen); }
+	case P_FB64AVX: 	 { size_t outlen = outsize; fast_avx2_base64_encode(  out,   in,inlen);return outlen; }
 	    #endif
 	case P_FB64CHROMIUM:  return chromium_base64_encode( (char*)out, (const char*)in, inlen);
 	case P_FB64LINUX:     return linux_base64_encode(    (char*)out, (const char*)in, (const char*)(in+inlen));
@@ -1657,7 +1655,11 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	  #endif
 	  
       #if C_BROTLI
-    case P_BROTLI: { size_t dsize = outlen; int rc = BrotliDecoderDecompress(inlen,in,&dsize,out); return rc?dsize:0; }
+    case P_BROTLI: { BrotliDecoderState* s = BrotliDecoderCreateInstance(NULL, NULL, NULL); if(!s) return -1;
+		  BrotliDecoderSetParameter(s, BROTLI_DECODER_PARAM_LARGE_WINDOW, 1u); 
+		  size_t total_out, available_in=inlen,available_out=outlen;
+		  int rc = BrotliDecoderDecompressStream(s, &available_in, &in, &available_out, &out, &total_out); return rc?total_out:0;//size_t dsize = outlen; int rc = BrotliDecoderDecompress(inlen,in,&dsize,out); 
+	  }
 	  #endif
 
       #if C_LIBBSC
@@ -1963,8 +1965,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 	  #if C_FB64
         #ifdef AVX2_ON
-	case P_FB64AVX:      { size_t _outlen = outlen; avx2_base64_decode(     in,inlen,out,&_outlen);return inlen; }
-	case P_FB64EXPAVX:	 { size_t _outlen = outlen; expavx2_base64_decode(  out,in,inlen);return inlen; }
+	case P_FB64AVX:      { size_t _outlen = outlen; fast_avx2_base64_decode(out, in,inlen);return inlen; }
 	    #endif
 
 	case P_FB64CHROMIUM:  chromium_base64_decode( (char*)out,(const char*)in,inlen); return inlen;
