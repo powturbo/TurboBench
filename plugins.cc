@@ -803,6 +803,7 @@ extern "C" {
   #endif
 
   #if C_JRANS
+#include "rans_static/rANS_static.h"
 unsigned char *rans_compress_to_32x16(unsigned char *in,  unsigned int in_size,
 				     unsigned char *out, unsigned int *out_size,
 				     int order);
