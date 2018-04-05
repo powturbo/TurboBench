@@ -1154,8 +1154,8 @@ void usage(char *pgm) {
   fprintf(stderr, " -g       -g:no merge w/ old result 'file.tbb', -gg:process w/o output (use for fuzzing)\n");
   fprintf(stderr, " -o       print on standard output\n");
   fprintf(stderr, " -G       plot memcpy\n");
-  fprintf(stderr, " -1       Plot Speedup linear x-axis (default log)\n");
-  fprintf(stderr, " -3       Plot Ratio/Speed logarithmic x-axis (default linear)\n");
+  fprintf(stderr, " -w       Plot Speedup linear x-axis (default log)\n");
+  fprintf(stderr, " -z       Plot Ratio/Speed logarithmic x-axis (default linear)\n");
   fprintf(stderr, "Multiblock:\n");
   fprintf(stderr, " -Moutput concatenate all input files to multiple blocks file output\n");\
   fprintf(stderr, " -m       process multiple blocks per file.\n");
@@ -1212,7 +1212,7 @@ int main(int argc, char* argv[]) {
       { "help", 	0, 0, 'h'},
       { 0, 		    0, 0, 0}
     }; 
-    if((c = getopt_long(argc, argv, "12345:6:7:8:9:A:b:B:C:d:e:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oOPp:Q:rRs:S:t:T:Uv:V:W:X:Y:Z:", long_options, &option_index)) == -1) break;
+    if((c = getopt_long(argc, argv, "0:1:2:3:4:5:6:7:8:9:A:b:B:C:d:e:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oOPp:Q:rRs:S:t:T:Uv:V:W:w:X:x:Y:y:Z:z:", long_options, &option_index)) == -1) break;
     switch(c) { 
       case 0:
         printf("Option %s", long_options[option_index].name);
@@ -1255,10 +1255,10 @@ int main(int argc, char* argv[]) {
       case 'v': verbose  = atoi(optarg);       		 break;
       case 'Y': seg_ans  = argtoi(optarg,1);         break;
       case 'Z': seg_huf  = argtoi(optarg,1);         break;  
-      case '1': xlog     =  xlog?0:1; 				 break;
-      case '2': ylog     =  ylog?0:1;                break;
-      case '3': xlog2    = xlog2?0:1;                break;
-      case '4': ylog2    = ylog2?0:1;                break;
+      case 'w': xlog     =  xlog?0:1; 				 break;
+      case 'x': ylog     =  ylog?0:1;                break;
+      case 'y': xlog2    = xlog2?0:1;                break;
+      case 'z': ylog2    = ylog2?0:1;                break;
         #ifdef LZTURBO
       case 'M': beb      = optarg; 		 			 break; 
         #else
