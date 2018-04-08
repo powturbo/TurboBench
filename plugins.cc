@@ -91,7 +91,7 @@ enum {
  P_DOBOZ, 
 #define C_FASTLZ 	 COMP2	
  P_FASTLZ, 
-#define C_FLZMA2	 COMP2 			
+#define C_FLZMA2	 0 //COMP2 	Disabled because of Compile error
  P_FLZMA2, 
 #define C_GIPFELI    COMP2	 
  P_GIPFELI,
