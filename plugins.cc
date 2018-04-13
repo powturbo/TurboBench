@@ -1572,7 +1572,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
 	  #if C_FSE
     case P_FSE:     { size_t o = FSE_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); return inlen; } return o; }
-    case P_FSEH:    { size_t o = HUF_compress4X_wksp(out, outsize, in, inlen, 255, 11, workmem, workmemsize); //HUF_compress(out, outsize, in, inlen); 
+    case P_FSEH:    { size_t o = HUF_compress(out, outsize, in, inlen); //HUF_compress4X_wksp(out, outsize, in, inlen, 255, 11, workmem, workmemsize); //; 
       if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); return inlen; } return o; 
     }
       #endif 
