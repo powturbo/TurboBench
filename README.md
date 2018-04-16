@@ -32,13 +32,12 @@ CPU: Sandy bridge i7-2600k at 4.4GHz, gcc 6.3, single thread.
 |C Size|ratio%|C MB/s|D MB/s|Name|
 |--------:|-----:|--------:|--------:|----------------|
 |32823983| 32.8|**3.40**|**67.92**|**lzma 9**|
-|32925079| 32.9|1.70|**70.67**|**lzturbo 49**|
-|33761620| 33.7|2.30|**276.52**|**lzham 4**|
+|32872154| 32.8|0.31|**315.27**|**brotli 11d27**|
+|32925079| 32.9|1.70|70.67|lzturbo 49|
 |33936389| 33.9|2.57|**1701.35**|**lzturbo 39**|
 |34105370| 34.1|3.32|952.59|zstd 22|
 |36751363| 36.7|**48.30**|**1701.59**|**lzturbo 32**|
 |36920708| 36.7|2.98|**2355.32**|**lzturbo 29**|
-|42328364| 42.3|0.38|295.29|brotli 11 16mb|
 |46546059| 46.5|**163.77**|1489.57|**lzturbo 31**|
 |46805879| 46.8|44.66|940.64|zstd 9|
 |48152545| 48.1|52.94|349.62|brotli 4|
@@ -244,5 +243,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 13 Apr 2018
+Last update: 16 Apr 2018
 
