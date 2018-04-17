@@ -467,6 +467,12 @@ clean:
 	find . -name "*.o" -type f -delete
 	find . -name "*~" -type f -delete
 	find . -name "core" -type f -delete
+
+cleana:
+	find . -name "turbobench" -type f -delete
+	find . -name "*.o" -type f -delete
+	find . -name "*~" -type f -delete
+	find . -name "core" -type f -delete
 	rm -r pysap/docs
 	rm -r brotli/tests
 	rm -r brotli/java
