@@ -293,7 +293,7 @@ enum {
 #define C_MYCODEC   COMP2	// Include your codec into TurboBench :search and modify "_MYCODEC" in the following files: plugins.h, plugreg.c. Insert your function calls like mycomp/mydecomp in plugins.cc 
  P_MYCODEC, // User plugin
   #ifdef LZTURBO
-#include "../beplug.h"
+#include "../dev/x/beplug.h"
   #endif
 }; 
    
@@ -623,7 +623,7 @@ class Out: public libzpaq::Writer {
   #endif
 
   #ifdef LZTURBO
-#include "../beplugi.h"
+#include "../dev/x/beplugi.h"
   #endif  
 //-----------------------------
   #if C_FB64
@@ -934,7 +934,7 @@ struct plugs plugs[] = {
 
 //{ P_MYCODEC, 	"mycodec",			C_MYCODEC, 	"0",		"My codec",				"           ",		"",																						"" },
     #ifdef LZTURBO
-  #include "../beplugr.h"
+  #include "../dev/x/beplugr.h"
     #endif  
   { -1 }
 };
@@ -1058,7 +1058,7 @@ int codini(size_t insize, int codec) {
     case P_FSEH: workmemsize = max(4096*sizeof(unsigned), workmemsize); break;
       #endif
       #ifdef LZTURBO  
-    #include "../beplug0.h"
+    #include "../dev/x/beplug0.h"
       #endif
   }
   if(!workmemsize) return 0;
@@ -1088,7 +1088,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
   switch(codec) { 
       #ifdef LZTURBO  
-    #include "../beplugc.c"
+    #include "../dev/x/beplugc.c"
       #endif
 	  
 	  #if C_BALZ
@@ -1632,7 +1632,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int codec, int lev, char *prm) {	
   switch(codec) {
       #ifdef LZTURBO  
-    #include "../beplugd.c"
+    #include "../dev/x/beplugd.c"
       #endif
 
   	  #if C_BALZ
