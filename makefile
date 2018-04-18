@@ -150,7 +150,7 @@ CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include 
 all:  turbobench
 
 ifeq ($(LZTURBO),1)
-include ../lzturbo.mk
+include ../dev/x/lzturbo.mk
 endif
 
 OB+=plugins.o 
