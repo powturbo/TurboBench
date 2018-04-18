@@ -1002,7 +1002,7 @@ int bedecomp(unsigned char *_in, int _inlen, unsigned char *_out, unsigned _outl
 }
 
   #ifdef LZTURBO
-#include "../bebench.h"
+#include "../dev/x/bebench.h"
   #else
 struct plug plugr[32]; int tid;
 #define BEPRE
