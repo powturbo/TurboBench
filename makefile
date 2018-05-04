@@ -307,7 +307,7 @@ OB+=lzham_codec_devel/lzhamcomp/lzham_lzbase.o lzham_codec_devel/lzhamcomp/lzham
 ifeq ($(UNAME), Windows)
 OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
-OB+=lzlib-1.9/lzlib.o lzlib_/bbexample.o 
+OB+=lzlib-1.10/lzlib.o lzlib_/bbexample.o 
 #Compile error: Disabled
 #OB+=fast-lzma2/fl2_common.o fast-lzma2/fl2_compress.o fast-lzma2/fl2_decompress.o fast-lzma2/lzma2_dec.o fast-lzma2/lzma2_enc.o fast-lzma2/radix_bitpack.o fast-lzma2/radix_mf.o fast-lzma2/radix_struct.o \
 #fast-lzma2/range_enc.o fast-lzma2/threading.o fast-lzma2/fl2pool.o 
