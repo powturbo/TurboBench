@@ -22,7 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../lzlib-1.9/lzlib.h"
+#include "../lzlib-1.10/lzlib.h"
 
 #if 0
 /* Returns the address of a malloc'd buffer containing the file data and
