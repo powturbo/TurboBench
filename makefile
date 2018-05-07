@@ -212,17 +212,18 @@ OB+=libslz/src/slz.o
 endif
 
 #----------------------- COMP2 -----------------------
+# O2 instead of O3 because of error gcc 7
 xpack/lib/xpack_common.o: xpack/lib/xpack_common.c
-	$(CC) -O3 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
 
 xpack/lib/xpack_compress.o: xpack/lib/xpack_compress.c
-	$(CC) -O3 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
 
 xpack/lib/xpack_decompress.o: xpack/lib/xpack_decompress.c
-	$(CC) -O3 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
 
 xpack/lib/x86_cpu_features.o: xpack/lib/x86_cpu_features.c
-	$(CC) -O3 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
 
 glza/GLZAmodel.o: glza/GLZAmodel.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
@@ -251,15 +252,15 @@ shrinker/shrinker.o: shrinker/shrinker.c
 wflz/wfLZ.o: wflz/wfLZ.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
 
-# SSE4.1
+# SSE4.1 
 LZSSE/lzsse2/lzsse2.o: LZSSE/lzsse2/lzsse2.cpp
-	$(CC) -O3 -D"SIZE_MAX=4294967295u" -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
+	$(CC) -O2 -D"SIZE_MAX=4294967295u" -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
 LZSSE/lzsse4/lzsse4.o: LZSSE/lzsse4/lzsse4.cpp
-	$(CC) -O3 -D"SIZE_MAX=4294967295u" -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
+	$(CC) -O2 -D"SIZE_MAX=4294967295u" -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
 LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
-	$(CC) -O3 -D"SIZE_MAX=4294967295u" -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
+	$(CC) -O2 -D"SIZE_MAX=4294967295u" -msse4.1 -std=c++0x $(MARCH) $< -c -o $@ 
 
 # AVX2
 rans_static/r32x16b_avx2.o: rans_static/r32x16b_avx2.c
