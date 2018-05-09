@@ -1142,7 +1142,7 @@ void usage(char *pgm) {
   fprintf(stderr, "          t = M:millisecond s:second m:minute h:hour. ex. 3h\n");
   fprintf(stderr, " -D       No process real-time priority setting\n");
   fprintf(stderr, "Check:\n");
-  fprintf(stderr, " -C#      #=0 compress only, #=1 ignore errors, #=2 exit on error, #=3 crash on error\n");
+  fprintf(stderr, " -C#      #=0 compress only, #1=No check #=2 ignore errors, #=3 exit on error, #=4 crash on error\n");
   fprintf(stderr, " -f#      check reading/writing outside bounds: #=1 compress, #=2 decompress, #3:both\n");
   fprintf(stderr, "Output:\n");
   fprintf(stderr, " -v#      # = verbosity 0..3 (default 1)\n");
