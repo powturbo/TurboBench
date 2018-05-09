@@ -1087,10 +1087,6 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
   if(q = strchr(prm,'d')) dsize = argtoi(q+(q[1]=='='?2:1),0); 
 
   switch(codec) { 
-      #ifdef LZTURBO  
-    #include "../dev/x/beplugc.c"
-      #endif
-	  
 	  #if C_BALZ
 	case P_BALZ: return balzcompress(in, inlen, out,lev);
       #endif 
@@ -1621,6 +1617,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_ZLIBH:   return ZLIBH_compress((char* )out, (const char*)in, inlen); 
 	  #endif
 
+      #ifdef LZTURBO  
+    #include "../dev/x/beplugc.c"
+      #endif
+	  
       #if C_MYCODEC 
 //   case P_MYCODEC:   return mycomp(in, inlen, out, outsize);
 	  #endif	
@@ -1631,10 +1631,6 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
   
 int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int codec, int lev, char *prm) {	
   switch(codec) {
-      #ifdef LZTURBO  
-    #include "../dev/x/beplugd.c"
-      #endif
-
   	  #if C_BALZ
 	case P_BALZ: return balzdecompress(in, inlen, out, outlen);
       #endif
@@ -2085,6 +2081,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	  #if C_ZLIBH		
     case P_ZLIBH:  return ZLIBH_decompress((char* )out, (const char*)in);
 	  #endif	
+
+      #ifdef LZTURBO  
+    #include "../dev/x/beplugd.c"
+      #endif
 
       #if C_MYCODEC 
 //   case P_MYCODEC:   return mydecomp(in, inlen, out, outlen);
