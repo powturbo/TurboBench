@@ -23,7 +23,7 @@ CC=gcc
 CXX=g++
 else
   UNAME := $(shell uname -s)
-ifeq ($(UNAME),$(filter $(UNAME),Linux FreeBSD GNU/kFreeBSD))
+ifeq ($(UNAME),$(filter $(UNAME),Darwin FreeBSD GNU/kFreeBSD Linux NetBSD SunOS))
 LDFLAGS+=-lpthread -lrt 
 CFLAGS=-D_7ZIP_ST 
 endif
@@ -95,7 +95,7 @@ endif
 ifeq ($(NMEMSIZE),1)
 DEFS+=-DNMEMSIZE
 else
-ifeq ($(UNAME),$(filter $(UNAME),Linux Darwin FreeBSD GNU/kFreeBSD))
+ifeq ($(UNAME),$(filter $(UNAME),Darwin FreeBSD GNU/kFreeBSD Linux NetBSD SunOS))
 LDFLAGS += -ldl
 endif
 endif
