@@ -204,6 +204,8 @@ Compressors with versions 16.08.2016 <br>
  - [bcm range coder v1.0](http://sourceforge.net/projects/bcm)
  - [FastAri v15-10](https://github.com/davidcatt/FastARI)
 
+ - [AOMedia AV1 entropy coder](hhttps://aomedia.googlesource.com/aom/+/master/aom_dsp/)
+
 ###### bytewise range coder
  - [TurboAC v1.3](https://sites.google.com/site/powturbo)
  - [subotin range coder v2000](http://ezcodesample.com/ralpha/Subbotin.txt)
@@ -243,5 +245,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 04 May 2018
+Last update: 01 Jun 2018
 
