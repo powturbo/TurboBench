@@ -63,6 +63,12 @@ enum {
  P_LMCPY,   // must be 0
  P_MCPY,	// must be 1
 
+   #ifdef AOM
+#define C_AOM	COMP2
+   #else
+#define C_AOM	0
+   #endif
+ P_AOM,
 #define C_BALZ 		COMP2		
  P_BALZ,
 #define C_BCM 		COMP2	
@@ -85,6 +91,12 @@ enum {
  P_CRUSH, 
 #define C_CSC        COMP2    
  P_CSC, 
+   #ifdef DAALA
+#define C_DAALA	COMP2
+   #else
+#define C_DAALA	0
+   #endif
+ P_DAALA,
 #define C_DENSITY    COMP2	
  P_DENSITY, 
 #define C_DOBOZ		 COMP2	 //crash
@@ -329,6 +341,10 @@ enum {
 #include "conf.h"
 #include "plugins.h"
 
+  #if C_AOM
+#include "aom_/aom.h"
+  #endif
+
   #if C_BALZ
 #include "balz/balz.h"
   #endif
@@ -408,6 +424,10 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
   #if C_CRUSH
 #include <stdint.h>
 #include "crush/crush.h"
+  #endif
+
+  #if C_DAALA
+#include "daala_/daala.h"
   #endif
 
   #if C_DOBOZ
@@ -884,7 +904,9 @@ struct plugs plugs[] = {
 //-----------------------------------------------------------------------------------	  
   { P_MCPY, 	"imemcpy", 			C_MEMCPY, 	".",		"inline memcpy",		"------------",		"--------------------------------------",												"" },
   { P_LMCPY, 	"memcpy",			C_MEMCPY,  	".",		"library memcpy",		"",					"",																						"" },
+  { P_AOM, 	    "AOM",				C_AOM, 	    "",		    "AOMEDIA AV1 Entropy coder","        ",		"https://aomedia.googlesource.com/aom/",												""},
   { P_BCMEC, 	"bcmec", 			C_BCMEC, 	"1.0",		"bcm range coder",		"Public Domain",	"http://sourceforge.net/projects/bcm",													"" },
+  { P_DAALA,    "Daala",			C_DAALA, 	"",		     "DAALA Entropy Coder", "        ",			"https://github.com/xiph/daala",												""},
   { P_FPC, 		"fpc", 				C_FPC, 		"",	"Fast Prefix Coder",	"BSD license",		"https://github.com/algorithm314/FPC",															"0,8,9,10,11,12,16,32,48,63" },
   { P_FSC, 		"fsc", 				C_FSC, 		"15-05",	"Finite State Coder",	"Apache license",	"https://github.com/skal65535/fsc",														"", E_ANS },
   { P_FSE, 		"fse", 				C_FSE, 		"",	"Finite State Entropy",	"BSD license",		"https://github.com/Cyan4973/FiniteStateEntropy",										"", E_ANS },
@@ -1515,6 +1537,14 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_LMCPY: libmemcpy(out, in, inlen); return inlen;
 	  #endif	
 
+      #if C_AOM
+    case P_AOM:     return aomenc(in, inlen, out, outsize); 
+      #endif
+
+      #if C_DAALA
+    case P_DAALA:   return daalaenc(in, inlen, out, outsize); 
+      #endif
+
       #if C_BCMEC
 	case P_BCMEC:  return bcmenc(in, inlen, out);
 	  #endif
@@ -1631,6 +1661,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
   
 int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int codec, int lev, char *prm) {	
   switch(codec) {
+      #if C_AOM   	
+    case P_AOM:     aomdec(in, inlen, out, outlen); return outlen;
+	  #endif
+
   	  #if C_BALZ
 	case P_BALZ: return balzdecompress(in, inlen, out, outlen);
       #endif
@@ -1696,6 +1730,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_CRUSH: crush_decompress(in, out, outlen); break;
 	  #endif
 	  
+      #if C_DAALA
+    case P_DAALA:   daaladec(in, inlen, out, outlen); return outlen;
+	  #endif
+
       #if C_DENSITY
     case P_DENSITY: { density_processing_result rs = density_decompress((uint8_t *)in, inlen, (uint8_t*)out, outlen/*+DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE*/);  return rs.state?0:rs.bytesWritten; }
       #endif
