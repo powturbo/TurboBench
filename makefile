@@ -106,6 +106,16 @@ NCPP=0
 DDEBUG=-DNDEBUG -s
 #DDEBUG=-g
 #-------------- compressor specific
+# First download or clone aomedia (git clone https://aomedia.googlesource.com/aom) into TurboBench directory
+ifeq ($(AOM),1)
+DEFS+=-DAOM
+endif
+
+# First download or clone daala (https://github.com/xiph/daala) into TurboBench directory
+ifeq ($(DAALA),1)
+DEFS+=-DDAALA
+endif
+
 ifeq ($(BASE64),1)
 DEFS+=-DBASE64
 endif
@@ -271,6 +281,14 @@ nakamichi/Nakamichi_Okamigan.o: nakamichi/Nakamichi_Okamigan.c
 	
 #WKDM=wkdm/WKdmCompress.o wkdm/WKdmDecompress.o
 ifeq ($(NCOMP2), 0)
+ifeq ($(AOM),1)
+OB+=aom_/aom.o aom/aom_dsp/entenc.o aom/aom_dsp/entdec.o aom/aom_dsp/entcode.o 
+#OB+=daala_/daala.o 
+endif
+ifeq ($(DAALA),1)
+OB+=daala_/daala.o 
+endif
+
 DIVSUFSORT=libbsc/libbsc/bwt/divsufsort/divsufsort.o
 OB+=balz/balz.o
 OB+=bcm_/bcm.o
