@@ -107,6 +107,8 @@ DDEBUG=-DNDEBUG -s
 #DDEBUG=-g
 #-------------- compressor specific
 # First download or clone aomedia (git clone https://aomedia.googlesource.com/aom) into TurboBench directory
+# after cmake, put the generated "aom_config.h" into the aom directory
+# or copy aom_/aom_config.h to aom
 ifeq ($(AOM),1)
 DEFS+=-DAOM
 endif
