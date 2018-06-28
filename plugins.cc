@@ -1689,7 +1689,9 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_BROTLI: { BrotliDecoderState* s = BrotliDecoderCreateInstance(NULL, NULL, NULL); if(!s) return -1;
 		  BrotliDecoderSetParameter(s, BROTLI_DECODER_PARAM_LARGE_WINDOW, 1u); 
 		  size_t total_out, available_in=inlen,available_out=outlen;
-		  int rc = BrotliDecoderDecompressStream(s, &available_in, &in, &available_out, &out, &total_out); return rc?total_out:0;//size_t dsize = outlen; int rc = BrotliDecoderDecompress(inlen,in,&dsize,out); 
+		  int rc = BrotliDecoderDecompressStream(s, &available_in, &in, &available_out, &out, &total_out); 
+          BrotliDecoderDestroyInstance(s);
+          return rc?total_out:0;//size_t dsize = outlen; int rc = BrotliDecoderDecompress(inlen,in,&dsize,out); 
 	  }
 	  #endif
 
