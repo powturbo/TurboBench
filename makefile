@@ -186,6 +186,14 @@ OB+=brotli/c/common/dictionary.o brotli/c/common/transform.o brotli/c/enc/bit_co
 	brotli/c/enc/literal_cost.o brotli/c/enc/brotli_bit_stream.o brotli/c/enc/memory.o brotli/c/enc/metablock.o brotli/c/dec/bit_reader.o brotli/c/dec/decode.o \
 	brotli/c/dec/huffman.o brotli/c/dec/state.o brotli/c/enc/utf8_util.o brotli/c/enc/backward_references_hq.o brotli/c/enc/dictionary_hash.o
 
+ifeq ($(ZLIB_NG), 1)
+#1 create libz.a: "cd zlib-ng" , "./configure --zlib_compat"
+#2 compile with: "make HAVE_ZLIB=1 ZLIB_NG=1"
+DEFS+=-DZLIB_NG
+endif
+
+ifeq ($(ZLIB_DIR),)
+
 ifeq ($(HAVE_ZLIB), 1)
 ifeq ($(STATIC),1)
 OB+=/usr/lib/x86_64-linux-gnu/libz.a
@@ -216,9 +224,17 @@ endif
 OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
 endif
 
+else
+# ZLIB_DIR where the static library lzlib.a is located. Example  make ZLIB_DIR="zlib-gcc.amd64/libz.a"
+#ZLIB_DIR=/usr/lib/x86_64-linux-gnu/libz.a
+#ZLIB_DIR=zlib-ng/libz.a
+#ZLIB_DIR=zlib-gcc.amd64/libz.a
+OB+=$(ZLIB_DIR)/libz.a
+endif
+
 OB+=libdeflate/lib/adler32.o libdeflate/lib/aligned_malloc.o libdeflate/lib/crc32.o libdeflate/lib/arm/cpu_features.o libdeflate/lib/x86/cpu_features.o \
     libdeflate/lib/deflate_compress.o libdeflate/lib/deflate_decompress.o libdeflate/lib/gzip_compress.o libdeflate/lib/gzip_decompress.o libdeflate/lib/zlib_compress.o libdeflate/lib/zlib_decompress.o 
- 
+
 OB+=libslz/src/slz.o 
 
 endif
