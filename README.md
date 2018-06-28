@@ -190,6 +190,7 @@ Compressors with versions 16.08.2016 <br>
  - [yappy v2011]() 
  - [zlib v1.2.8 2017.01](http://zlib.net)
  - [zlib-ng v1.2.8](https://github.com/Dead2/zlib-ng)
+ - [zlib cloudflare](https://github.com/cloudflare/zlib)
  - [libzling v2017-01](https://github.com/richox/libzling) 
  - [xpack](https://github.com/ebiggers/xpack) 
  - [zopfli v16-05](https://code.google.com/p/zopfli) 
@@ -246,5 +247,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 16 Jun 2018
+Last update: 28 Jun 2018
 
