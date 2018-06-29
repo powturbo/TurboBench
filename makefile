@@ -327,7 +327,8 @@ endif
 OB+=heatshrink_/heatshrink.o heatshrink/heatshrink_encoder.o heatshrink/heatshrink_decoder.o
 ifeq ($(IGZIP),1)
 #OB+=isa-l/igzip/igzip.o isa-l/igzip/hufftables_c.o isa-l/igzip/igzip_base.o isa-l/igzip/igzip_icf_base.o isa-l/igzip/crc32_gzip_base.o isa-l/igzip/flatten_ll.o isa-l/igzip/encode_df.o
-OB+=isa-l/.libs/libisal.a
+#OB+=isa-l/.libs/libisal.a
+OB+=libisal.a
 endif
 #OB+=kraken/kraken.o 
 OB+=liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o 
