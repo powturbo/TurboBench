@@ -1219,11 +1219,12 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       static unsigned bs_xlarge[]  = { ISAL_DEF_LVL0_EXTRA_LARGE, ISAL_DEF_LVL1_EXTRA_LARGE, ISAL_DEF_LVL2_EXTRA_LARGE, ISAL_DEF_LVL3_EXTRA_LARGE };
       s.level_buf_size = strchr(prm,'x')?bs_xlarge[lev]:bs_default[lev];
       if(lev && !(s.level_buf = malloc(s.level_buf_size))) die("igzip:malloc error\n"); 
-	  s.end_of_stream = 1;
-	  s.flush         = NO_FLUSH; //FULL_FLUSH;
 	  s.next_in       = in;  s.avail_in  = inlen;
 	  s.next_out      = out; s.avail_out = outsize;
 	  s.level         = lev;
+      s.gzip_flag     = IGZIP_ZLIB_NO_HDR;  // Decompression error with gzip_flag=IGZIP_ZLIB or gzip_flag=IGZIP_GZIP
+      if(strchr(prm,'d')) s.gzip_flag = IGZIP_DEFLATE;
+      if(strchr(prm,'g')) s.gzip_flag = IGZIP_GZIP_NO_HDR;
 	  isal_deflate_stateless(&s);
 	  if(s.level_buf) free(s.level_buf);
 	  return s.total_out;
@@ -1774,10 +1775,14 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if C_IGZIP
-    case P_IGZIP: struct inflate_state s; isal_inflate_init(&s);
-	s.next_in  = in;  s.avail_in  = inlen;
-	s.next_out = out; s.avail_out = outlen;
-	isal_inflate_stateless(&s); break;
+    case P_IGZIP: { struct inflate_state s; int rc; isal_inflate_init(&s);
+         /*    if(prm && *prm == 'd') { s.crc_flag = ISAL_DEFLATE; }
+        else if(prm && *prm == 'g') { s.crc_flag = ISAL_GZIP; }
+        else s.crc_flag = ISAL_ZLIB;*/
+	    s.next_in  = in;  s.avail_in  = inlen;
+	    s.next_out = out; s.avail_out = outlen;
+	    if((rc = isal_inflate_stateless(&s)) != ISAL_DECOMP_OK) die("igzip error. rc=%d\n", rc);
+      } break;
       #endif
 
 	  #if C_LIBLZF 
@@ -1948,6 +1953,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 	  
 	  #if C_LIBSLZ
+    //case P_IGZIP:
 	case P_LIBSLZ: {       
       struct slz_stream strm;
       int fmt=15; 
