@@ -187,7 +187,7 @@ OB+=brotli/c/common/dictionary.o brotli/c/common/transform.o brotli/c/enc/bit_co
 	brotli/c/dec/huffman.o brotli/c/dec/state.o brotli/c/enc/utf8_util.o brotli/c/enc/backward_references_hq.o brotli/c/enc/dictionary_hash.o
 
 ifeq ($(ZLIB_NG), 1)
-#1 create libz.a: "cd zlib-ng" , "./configure --zlib_compat"
+#1 create libz.a: "cd zlib-ng" , "./configure --zlib-compat"
 #2 compile with: "make HAVE_ZLIB=1 ZLIB_NG=1"
 DEFS+=-DZLIB_NG
 endif
@@ -195,14 +195,14 @@ endif
 ifeq ($(ZLIB_DIR),)
 
 ifeq ($(HAVE_ZLIB), 1)
-ifeq ($(STATIC),1)
-OB+=/usr/lib/x86_64-linux-gnu/libz.a
-else
 ifeq ($(ZLIB_NG), 1)
 #1 create libz.a: "cd zlib-ng" , "./configure --zlib_compat"
 #2 compile with: "make HAVE_ZLIB=1 ZLIB_NG=1"
 DEFS+=-DZLIB_NG
 OB+=zlib-ng/libz.a
+else
+ifeq ($(STATIC),1)
+OB+=/usr/lib/x86_64-linux-gnu/libz.a
 else
 OB+=-lz
 endif
