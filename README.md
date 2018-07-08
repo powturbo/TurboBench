@@ -140,7 +140,7 @@ Compressors with versions 16.08.2016 <br>
 
 ### Plugins:
 #### Compressor Lz77,Rolz,Bwt,zpaq:
- - [LzTurbo v1.3](https://sites.google.com/site/powturbo)
+ - [LzTurbo v1.4](https://sites.google.com/site/powturbo)
  - [balz v1.20](http://sourceforge.net/projects/balz) 
  - [bcm v1.25](https://github.com/encode84/bcm) 
  - [Blosc v2.0](https://github.com/Blosc/c-blosc2)
@@ -164,19 +164,19 @@ Compressors with versions 16.08.2016 <br>
  - [LibLzg v1.0.8](https://github.com/mbitsnbites/liblzg) 
  - [LibSLZ v1.0.0](http://1wt.eu/projects/libslz/)
  - [Lz4 v1.7.5](https://github.com/Cyan4973/lz4) 
- - [lizard v2.0](https://github.com/inikep/lz5) 
+ - [lizard](https://github.com/inikep/lz5) 
  - [Lzfse](https://github.com/lzfse/lzfse)
  - [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) 
- - [Lzlib v1.9](http://www.nongnu.org/lzip) 
+ - [Lzlib](http://www.nongnu.org/lzip) 
  - [Lzmat v1.0](https://github.com/nemequ/lzmat) 
  - [Lzma](http://7-zip.org) 
  - [Lzo v2.09](http://www.oberhumer.com/opensource/lzo) 
  - [Lzoma v16-06](https://github.com/alef78/lzoma) 
- - [LZSSE v16-03-28](https://github.com/ConorStokes/LZSSE)
+ - [LZSSE](https://github.com/ConorStokes/LZSSE)
  - [Miniz v13-10](https://github.com/richgel999/miniz) 
  - [ms-compress v16.07](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi Washigan](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188)
- - [Oodle v2.3.0](http://www.radgametools.com/oodle.htm) (only win64 binary)
+ - [Oodle](http://www.radgametools.com/oodle.htm) (only win64 binary)
  - [Pithy v2011](https://github.com/johnezang/pithy) 
  - [Quicklz v1.5.1](http://www.quicklz.com) 
  - [sap v17-05](https://github.com/CoreSecurity/pysap) 
@@ -194,7 +194,7 @@ Compressors with versions 16.08.2016 <br>
  - [libzling v2017-01](https://github.com/richox/libzling) 
  - [xpack](https://github.com/ebiggers/xpack) 
  - [zopfli v16-05](https://code.google.com/p/zopfli) 
- - [zstd v1.3.0](https://github.com/facebook/zstd)
+ - [zstd](https://github.com/facebook/zstd)
  - [zpaq v7.15](https://github.com/zpaq/zpaq) 
 
 #### Entropy coder:
@@ -247,5 +247,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 28 Jun 2018
+Last update: 08 Jul 2018
 
