@@ -237,6 +237,7 @@ struct plugg plugg[] =
   { "ECODER",    "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/memcpy/", "Entropy coder" },
 };
 #define PLUGGSIZE (sizeof(plugg)/sizeof(plugg[0]))
+#define INVLEV -999
 
 void plugsprt(void) {
   struct plugs *gs;
@@ -370,7 +371,7 @@ int plugreg(struct plug *plug, char *cmd, int k, int bsize, int bsizex) {
       char *prm = cmd; 									
       int lev = strtol(cmd, &cmd, 10); 
       if(prm == cmd) { 
-        lev = -1; 
+        lev = INVLEV; 
         prm = cempty; 
       }
       else if(isalnum(*cmd) || *cmd == ':') {
@@ -391,7 +392,7 @@ int plugreg(struct plug *plug, char *cmd, int k, int bsize, int bsizex) {
           char s[33],*q; 
           sprintf(s,"%d", lev); 
           found++; 
-          if(lev<0 && gs->lev && !gs->lev[0] || gs->lev && (q=strstr(gs->lev, s)) && (q==gs->lev || *(q-1) == ',')) {				
+          if(lev==INVLEV && gs->lev && !gs->lev[0] || gs->lev && (q=strstr(gs->lev, s)) && (q==gs->lev || *(q-1) == ',')) {				
             found++; 
             plugins(plug, gs, &k, bsize, bsizex, lev, prm); 
           }
@@ -400,7 +401,7 @@ int plugreg(struct plug *plug, char *cmd, int k, int bsize, int bsizex) {
       if(found<2 && !ignore) {
         if(!found) 
           fprintf(stderr, "codec '%s' not found\n", name);
-        else if(lev<0) 
+        else if(lev == INVLEV) 
           fprintf(stderr, "level [%s] not specified for codec '%s'\n", gs->lev, name );
         else if(gs->lev && gs->lev[0]) 
           fprintf(stderr, "level '%d' for codec '%s' not in range [%s]\n", lev, name, gs->lev);
@@ -538,7 +539,7 @@ void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, doubl
          //ratio  = FACTOR(plug->len,totinlen),
          tc     = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td);
   char   name[256]; 
-  if(plug->lev >= 0) 
+  if(plug->lev != INVLEV) 
     sprintf(name, "%s%s %d%s", plug->err?"?":"", plug->s, plug->lev, plug->prm);
   else
     sprintf(name, "%s%s%s",    plug->err?"?":"", plug->s,            plug->prm);
@@ -643,7 +644,7 @@ static inline double spdup(double td, long long len, int i, long long totinlen) 
 void plugprtp(struct plug *plug, long long totinlen, char *finame, int fmt, int speedup, FILE *f) {
   int  i;
   char name[255]; 
-  if(plug->lev>=0) 
+  if(plug->lev != INVLEV) 
     sprintf(name, "%s%s%s%d%s", plug->err?"?":"", plug->s, fmt==FMT_MARKDOWN?"_":" ", plug->lev, plug->prm);
   else
     sprintf(name, "%s%s%s",    plug->err?"?":"", plug->s,            plug->prm);
@@ -715,7 +716,7 @@ void plugplotb(FILE *f, int fmt, int idiv) {
 void plugplot(struct plug *plug, long long totinlen, int fmt, int speedup, char *s, FILE *f) {
   int  i;
   char name[65];
-  if(plug->lev>=0)
+  if(plug->lev != INVLEV)
     sprintf(name, "%s%s_%d%s", plug->err?"?":"", plug->s, plug->lev, plug->prm);
   else
     sprintf(name, "%s%s%s",    plug->err?"?":"", plug->s,            plug->prm);
@@ -805,7 +806,7 @@ void plugplotc(struct plug *plug, int k, long long totinlen, int fmt, int speedu
       fprintf(f, ",");
       strcat(txt, ","); 
     }
-    if(g->lev >= 0) { 
+    if(g->lev != INVLEV) { 
       char ts[33]; 
       sprintf(ts, "'%s%s%d%s'", divxy>=2?"":g->s, divxy>=2?"":",", g->lev, g->prm); 
       strcat(txt, ts); 
@@ -915,7 +916,7 @@ int plugread(struct plug *plug, char *finame, long long *totinlen) {
 	p->td     = strtod(  ++t, &t);
 	p->tc     = strtod(  ++t, &t);
 	for(q = ++t; *q && *q != '\t'; q++); *q++ = 0; strncpy(name,t,32); name[32]=0; t=q;
-	p->lev    = strtoul(t, &t, 10); 
+	p->lev    = strtol(t, &t, 10); 
 	while(*t && isspace(*t)) t++;
 	for(q = t; *q && *q != '\t'; q++);   *q++ = 0; strncpy(p->prm, t, PRM_SIZE); p->prm[PRM_SIZE]=0; t = q;
 	p->memc   = strtoull(t, &t, 10);
@@ -1038,7 +1039,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
   p = finame; 
 
   char name[65]; 
-  if(plug->lev >= 0) 
+  if(plug->lev != INVLEV) 
     sprintf(name, "%s %d%s", plug->s, plug->lev, plug->prm);
   else
     sprintf(name, "%s%s",    plug->s,            plug->prm);
