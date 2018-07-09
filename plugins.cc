@@ -1704,7 +1704,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	case P_LIBBSCC:	   return bsc_coder_decompress(in, out, lev, BSC_MODE);
 	  #endif
 	
-	  #if 0 //C_LIBDEFLATE
+	  #if C_LIBDEFLATE
 	case P_LIBDEFLATE:  { size_t rc; struct libdeflate_decompressor *dd = libdeflate_alloc_decompressor(); 
             if(prm && *prm=='d') outlen = libdeflate_deflate_decompress(dd, in, inlen,out, outlen, &rc);
        else if(prm && *prm=='g') outlen = libdeflate_gzip_decompress(   dd, in, inlen,out, outlen, &rc);
