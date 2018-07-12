@@ -1,6 +1,6 @@
 TurboBench: Compressor Benchmark[![Build Status](https://travis-ci.org/powturbo/TurboBench.svg?branch=master)](https://travis-ci.org/powturbo/TurboBench)
 ================================
- - The only benchmark program including **[LzTurbo](https://sites.google.com/site/powturbo/)**
+ - The only benchmark program including **[LzTurbo](https://sites.google.com/site/powturbo/compression-benchmark)**
  - 100% in-memory benchmark, no I/O overhead
  - Include (>70) allmost all popular, latest or fastest compressors in one compiled package
  - Benchmarking **Entropy Coders**, **Lz77**, **Rolz**, **BWT** and **Context mixing** compressors
