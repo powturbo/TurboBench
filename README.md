@@ -14,9 +14,6 @@ TurboBench: Compressor Benchmark[![Build Status](https://travis-ci.org/powturbo/
  - All in one executable, no hassless installing of additional packages, graphic libraries, python,...
  - :+1: build in peak memory usage reporting for compression and decompression in html output
 
-### Download benchmark executable incl. LzTurbo:
- - [TurboBench Windows/Linux](https://sites.google.com/site/powturbo/downloads)
-
 ### Benchmark:
 - see also: [Compression Benchmark](https://sites.google.com/site/powturbo/compression-benchmark)
 
