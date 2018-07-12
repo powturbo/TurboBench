@@ -420,6 +420,19 @@ int plugreg(struct plug *plug, char *cmd, int k, int bsize, int bsizex) {
 }
 
 //------------------ plugin: print/plot -----------------------------
+  #ifndef _WIN32
+#define CRED     "\x1b[31m"
+#define CGREEN   "\x1b[32m"
+#define CYELLOW  "\x1b[33m"
+#define CBLUE    "\x1b[34m"
+#define CMAGENTA "\x1b[35m"
+#define CCYAN    "\x1b[36m"
+#define CRESET   "\x1b[0m"
+
+#define BOLDB  "\033[1;32m"
+#define BOLDE  CRESET
+  #endif
+
 struct bandw {
   unsigned long long bw;
   unsigned           rtt; 
@@ -549,8 +562,29 @@ void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, doubl
   if(td > *ptd) { d++; n++; *ptd = td; } 
   switch(fmt) {
     case FMT_TEXT:     
-      fprintf(f,"%12"PRId64"   %5.1f   %8.2f   %8.2f   %-32s %s\n", 
-        plug->len, ratio, tc, td, name, finame); 
+      if(f == stdout) {
+          #ifdef _WIN32
+        HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+        fprintf(f, "%12"PRId64"   %5.1f   ", plug->len, ratio); 
+        #define BBOLD 15
+        if(c) SetConsoleTextAttribute(h, BBOLD);
+        fprintf(f, "%8.2f   ", tc); 
+        if(c) SetConsoleTextAttribute(h, 7);
+        if(d) SetConsoleTextAttribute(h, BBOLD);
+        fprintf(f, "%8.2f   ", td); 
+        if(d) SetConsoleTextAttribute(h, 7);
+        if(n) SetConsoleTextAttribute(h, BBOLD);
+        fprintf(f, "%-16s", name); 
+        if(n) SetConsoleTextAttribute(h, 7);
+        fprintf(f, "%s\n", finame); 
+		#undef BBOLD
+          #else
+        fprintf(f, "%12"PRId64"   %5.1f   %s%8.2f%s   %s%8.2f%s   %s%-16s%s%s\n", 
+          plug->len, ratio, c?BOLDB:"", tc, c?BOLDE:"",  d?BOLDB:"", td, d?BOLDE:"", n?BOLDB:"", name, n?BOLDE:"", finame); 
+          #endif
+      } 
+      else
+        fprintf(f,"%12"PRId64"   %5.1f   %8.2f   %8.2f   %-32s %s\n", plug->len, ratio, tc, td, name, finame); 
       break;
     case FMT_VBULLETIN:
       fprintf(f, "%12"PRId64"   %5.1f   %s%8.2f%s   %s%8.2f%s   %s%-16s%s%s\n", 
