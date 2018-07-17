@@ -1107,7 +1107,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
 
   while((inlen = fread(_in, 1, insize, fi)) > 0) {    
     unsigned char *in = _in; 
-    if(fuzz & 1) { in = (_in+insizem)-inlen; memmove(in, _in, inlen); /*in[inlen-1] = in[inlen];*/ }
+    if(fuzz & 1) { in = (_in+insizem)-inlen; memmove(in, _in, inlen); 			/*printf("SEGFAULT Check");fflush(stdout); in[inlen-1] = in[inlen]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
     double   tc = 0.0, td = 0.0;         
     unsigned l = inlen,outlen;
 	totinlen += inlen;																
@@ -1133,7 +1133,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
 																		if(verbose && inlen == filen) { double ratio = (double)outlen*100.0/inlen; printf("%12u   %5.1f   %8.2f   ", outlen, ratio, TMBS(inlen,tc)); fflush(stdout); }
     if(cmp) {
       unsigned char *cpz = _cpy; 
-      if(fuzz & 2) cpz = (_cpy+insizem) - l;
+      if(fuzz & 2) { cpz = (_cpy+insizem) - l; 											/*printf("SEGFAULT Check");fflush(stdout); cpz[l-1] = cpz[l]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
 	  if(_cpy != _in) memrcpy(cpz, in, l);
       peak = mempeakinit();
 	  unsigned cpylen = bedecomp(out, outlen, cpz, l*nb, bsize, plug->id,plug->lev, plug->prm)/nb; 
