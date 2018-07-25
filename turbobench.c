@@ -91,12 +91,12 @@ int memcheck(unsigned char *in, unsigned n, unsigned char *cpy, int cmp) {
 #define MAP_BITS 28
   #endif
 
-void *_valloc(size_t size, int a) {
+void *_valloc(size_t size, unsigned a) {
   if(!size) return NULL;
     #if defined(_WIN32)
   return VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     #elif defined(USE_MMAP)
-  void *ptr = mmap((size_t)a<<MAP_BITS, size, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+  void *ptr = mmap(NULL/*0(size_t)a<<MAP_BITS*/, size, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
   if(ptr == MAP_FAILED) return NULL;														
   return ptr;
     #else
@@ -665,7 +665,7 @@ void plugprtph(FILE *f, int fmt) {
   }
 }
 
-static inline double spmbs(double td, long long len, int i, long long totinlen) { 
+static inline double spmbs(double td, unsigned long long len, int i, unsigned long long totinlen) { 
   double t = td + len*TM_T/(double)bw[i].bw + blknum*(bw[i].rtt*1000.0); 
   return TMBS(totinlen,t); 
 }
@@ -980,7 +980,7 @@ int plugread(struct plug *plug, char *finame, long long *totinlen) {
 
 static int mcpy=0, mode, tincx, fuzz;
 
-int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned outsize, unsigned bsize, int id, int lev, char *prm) { 
+int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, size_t outsize, unsigned bsize, int id, int lev, char *prm) { 
   unsigned char *op,*oe = _out + outsize;
   TMBEG(tm_rep,tm_Rep);     mempeakinit();                                           
   unsigned char *in,*ip;																							
@@ -993,7 +993,7 @@ int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned ou
     } else inlen = _inlen;
 
     for(ip = in, in += inlen; ip < in; ) { 
-      unsigned iplen = in - ip; iplen = min(iplen, bsize);       
+      size_t iplen = in - ip; iplen = min(iplen, bsize);       
       bs = (min(bsize, iplen) < (1<<16))?2:4;
       int oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);
       if(oplen <= 0 || oplen >= iplen && mcpy) {
@@ -1063,9 +1063,9 @@ int getpagesize() {
 } 
   #endif
 
-unsigned mininlen;
+size_t mininlen;
 
-unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long filenmax, unsigned bsize, struct plug *plugr, int tid, int krep) {
+unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long filenmax, size_t bsize, struct plug *plugr, int tid, int krep) { 
   size_t outsize;   
   FILE *fi = strcmp(finame,"stdin")?fopen(finame, "rb"):stdin; if(!fi) { perror(finame); return 0; /*die("open error '%s'\n", finame);*/ }
   char *p; 
@@ -1078,14 +1078,14 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
   else
     sprintf(name, "%s%s",    plug->s,            plug->prm);
  
-  unsigned long long filen;
+  size_t filen;
   if(finame) {
     fseeko(fi, 0, SEEK_END); filen = ftello(fi); fseeko(fi , 0 , SEEK_SET); if(filen > filenmax) filen = filenmax;
   } else 
     filen = filenmax;
   
-  size_t insize   = min(filen,(1u<<MAP_BITS)); 											if(filen < mininlen) insize = mininlen;
-  int    pagesize = getpagesize();
+  size_t insize   = filen; 			         								if(filen < mininlen) insize = mininlen;
+  size_t pagesize = getpagesize();
   size_t insizem  = (fuzz&3)?SIZE_ROUNDUP(insize, pagesize):(insize+INOVD);
 
   outsize = insize*fac + 10*Mb; 
@@ -1099,21 +1099,21 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
     die("malloc error cpy size=%u\n", insizem);
  
   codini(insize, plug->id);	
-  int       inlen;																	
+  size_t    inlen;																	
   long long totinlen = 0;
   double    ptc = DBL_MAX, ptd = DBL_MAX;
   bsize     = plug->blksize;
   plug->len = plug->tc = plug->td = 0; 											blknum = 0;	
-
-  while((inlen = fread(_in, 1, insize, fi)) > 0) {    
+																								
+  while((inlen = fread(_in, 1, insize, fi)) > 0) {
     unsigned char *in = _in; 
     if(fuzz & 1) { in = (_in+insizem)-inlen; memmove(in, _in, inlen); 			/*printf("SEGFAULT Check");fflush(stdout); in[inlen-1] = in[inlen]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
     double   tc = 0.0, td = 0.0;         
-    unsigned l = inlen,outlen;
+    size_t   l = inlen,outlen;
 	totinlen += inlen;																
     BEPRE;		
 																				memrcpy(out, in, inlen);
-    int nb = 1;
+    unsigned nb = 1;
     if(l < mininlen) {
       bsize = l;
       unsigned char *p;
@@ -1376,7 +1376,7 @@ int main(int argc, char* argv[]) {
   if(k > 1 && argc == 1 && !strcmp(argvx[0],"stdin")) { printf("multiple codecs not allowed when reading from stdin"); exit(0); }
 
   BEINI;
-  if(!filenmax) filenmax = Gb; 
+  if(!filenmax) filenmax = Gb; if(filenmax > 4*GB) filenmax=4*GB;
   long long totinlen = 0;  
   int       krep;
   struct    plug *p;
@@ -1392,7 +1392,7 @@ int main(int argc, char* argv[]) {
       g->len = g->tck = g->tdk = g->memc = g->memd = 0;
       BEFILE;
       for(fno = optind; fno < argc; fno++) {
-	    finame = argvx[fno];																			if(verbose > 1) printf("%s\n", finame);	
+	    finame = argvx[fno];																			if(verbose > 1) printf("%s,%u\n", finame, filenmax);
         totinlen += plugfile(p, finame, filenmax, bsize, plugr, tid, krep);
 	    g->len += p->len;
 	    g->tck += p->tc;
