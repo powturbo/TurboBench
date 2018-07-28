@@ -70,14 +70,14 @@ int strpref(const char *const *str, int n, char sep1, char sep2) {
   return 0;
 }
 
-int memcheck(unsigned char *in, unsigned n, unsigned char *cpy, int cmp) { 
+int memcheck(unsigned char *in, unsigned n, unsigned char *cpy, int cmp, char *finame) { 
   int i;
   if(cmp <= 1) 
     return 0;
   for(i = 0; i < n; i++)
     if(in[i] != cpy[i]) {
       if(cmp > 3) abort(); // crash (AFL) fuzzing
-      printf("ERROR at %d:%x, %x\n", i, in[i], cpy[i]);
+      printf("ERROR at %d:%x, %x file=%s\n", i, in[i], cpy[i], finame);
       if(cmp > 2) exit(EXIT_FAILURE);      
 	  return i+1; 
 	}
@@ -85,7 +85,7 @@ int memcheck(unsigned char *in, unsigned n, unsigned char *cpy, int cmp) {
 }
 //------------------------------- malloc ------------------------------------------------
 #define USE_MMAP
-  #ifdef __WORDSIZE == 64
+  #if __WORDSIZE == 64
 #define MAP_BITS 30
   #else
 #define MAP_BITS 28
@@ -1139,7 +1139,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
 	  unsigned cpylen = bedecomp(out, outlen, cpz, l*nb, bsize, plug->id,plug->lev, plug->prm)/nb; 
 	  td = (double)tm_tm/((double)tm_rm*nb);		
       plug->memd = mempeak() - peak;                                    if(verbose && inlen == filen) { printf("%8.2f   %-16s %s\n", TMBS(inlen,td), name, finame); }
-      int e = memcheck(in, l, cpz, fuzz?3:cmp);  
+      int e = memcheck(in, l, cpz, fuzz?3:cmp, finame);  
       plug->err = plug->err?plug->err:e;
       BEPOST;																	
  	  plug->td += td; 
