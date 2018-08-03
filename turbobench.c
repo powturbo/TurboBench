@@ -560,8 +560,8 @@ void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, doubl
     sprintf(name, "%s%s%s",    plug->err?"?":"", plug->s,            plug->prm);
   
   int c = 0, d = 0, n = 0;
-  if(tc > *ptc) { c++; n++; *ptc = tc; } 
-  if(td > *ptd) { d++; n++; *ptd = td; } 
+  if(!plug->err && tc > *ptc) { c++; n++; *ptc = tc; } 
+  if(!plug->err && td > *ptd) { d++; n++; *ptd = td; } 
   switch(fmt) {
     case FMT_TEXT:     
       if(f == stdout) {
