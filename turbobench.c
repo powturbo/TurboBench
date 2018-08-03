@@ -315,7 +315,8 @@ struct plug {
   double    tc,td,tck,tdk;
 };
 
-struct plug plug[255],plugt[255];
+#define PLUGN 256
+struct plug plug[PLUGN],plugt[PLUGN];
 int         seg_ans = 32*1024, seg_huf = 32*1024, seg_anx = 12*1024, seg_hufx=11*1024;
 static int  cmp = 2,trans;
 int verbose=1;
@@ -326,7 +327,8 @@ int plugins(struct plug *plug, struct plugs *gs, int *pk, unsigned bsize, int bs
   for(i = 0; i < k; i++) 
     if(plug[i].id == gs->id && plug[i].lev == lev && !strcmp(plug[i].prm,prm))
       return -1;
-
+  if(k >= PLUGN) 
+    die("Too many codecs specified\n");
   memset(&plug[k], 0, sizeof(struct plug)); 
   plug[k].id  = gs->id; 
   plug[k].err = 0; 
