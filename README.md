@@ -131,7 +131,7 @@ Compressors with versions 16.08.2016 <br>
 ###### OS/Compiler (32 + 64 bits):
 - Linux: GNU GCC (>=4.6) 
 - clang (>=3.2) 
-- Windows: MinGW
+- Windows: [MinGW-w64](https://sourceforge.net/projects/mingw-w64/)
 - Windows: Visual Studio 2015
 - ARM 64 bits/ gcc 
 
@@ -244,5 +244,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 12 Jul 2018
+Last update: 14 Aug 2018
 
