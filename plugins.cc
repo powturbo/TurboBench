@@ -997,7 +997,7 @@ NOINLINE void libmemcpy(unsigned char *dst, unsigned char *src, int len) {
 }
 
 static int dicsize;
-int coddicsize(int _dicsize) { dicsize = _dicsize; }	
+void coddicsize(int _dicsize) { dicsize = _dicsize; }
 
 static char _workmem[1<<16],*workmem=_workmem;
 static int state_size,dstate_size;
@@ -1088,6 +1088,7 @@ int codini(size_t insize, int codec, int lev) {
     fprintf(stderr, "Malloc error: %d\n", workmemsize); 
     exit(0);
   }
+  return 1;
 }  
 
 void codexit(int codec) { 
@@ -1661,6 +1662,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
  
     defaulf: fprintf(stderr, "library '%d' not included\n", codec);
   } 
+  return 0;
 } 
   
 int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int codec, int lev, char *prm) {	
@@ -2139,6 +2141,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 //   case P_MYCODEC:   return mydecomp(in, inlen, out, outlen);
 	  #endif	
   }
+  return 0;
 }
 
 char *codver(int codec, char *v, char *s) {

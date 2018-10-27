@@ -932,6 +932,7 @@ int plugprts(struct plug *plug, int k, char *finame, int xstdout, unsigned long 
   }
   plugprtf(fo, fmt);
   fclose(fo);
+  return 1;
 } 
 
 int plugread(struct plug *plug, char *finame, long long *totinlen) {

@@ -156,8 +156,8 @@ endif
  
 #------------- 
 # 
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/c/include -Ibrotli/c/enc -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include -Ibrieflz/include
-CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -Ibrotli/c/include -Ibrotli/c/enc -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
+CFLAGS+=$(DDEBUG) -std=gnu99 -Wall -Izstd/lib -Izstd/lib/common $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/c/include -Ibrotli/c/enc -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include -Ibrieflz/include
+CXXFLAGS+=$(DDEBUG) -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -Ibrotli/c/include -Ibrotli/c/enc -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 
 all:  turbobench
 
