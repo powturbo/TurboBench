@@ -38,7 +38,7 @@ extern "C" {
   #endif
 extern struct plugs plugs[];
 int coddicsize(int _dicsize);
-int  codini(size_t insize, int codec);
+int  codini(size_t insize, int codec, int lev);
 void codexit(int codec);
 int  codstart( unsigned char *in, int inlen, int codec);
 int  codcomp(  unsigned char *in, int inlen, unsigned char *out, int outsize, int codec, int lev, char *prm);
