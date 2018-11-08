@@ -156,9 +156,10 @@ endif
  
 #------------- 
 # 
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/c/include -Ibrotli/c/enc -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include
-CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -Ibrotli/c/include -Ibrotli/c/enc -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/c/include -Ibrotli/c/enc -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include -Ibrieflz/include
+CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -Ibrotli/c/include -Ibrotli/c/enc -ICSC/src/libcsc -Imarlin/inc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 
+#CXXFLAGS+=$(DDEBUG) -std=gnu++14 -Wall -Wextra -Wcast-qual -Wcast-align -Wstrict-aliasing=1 -Wswitch-enum -Wundef -pedantic  -Wfatal-errors -Wshadow 
 all:  turbobench
 
 ifeq ($(LZTURBO),1)
@@ -171,7 +172,7 @@ ifeq ($(NCOMP1), 0)
 OB+=lz4/lib/lz4hc.o lz4/lib/lz4.o  
 OB+=lzma/C/Alloc.o lzma/C/LzFind.o lzma/C/LzmaDec.o lzma/C/LzmaEnc.o lzma/C/LzmaLib.o 
 OB+=zstd/lib/common/pool.o zstd/lib/common/xxhash.o zstd/lib/common/error_private.o zstd/lib/compress/hist.o zstd/lib/compress/zstd_compress.o zstd/lib/compress/zstd_double_fast.o zstd/lib/compress/zstd_fast.o zstd/lib/compress/zstd_lazy.o zstd/lib/compress/zstd_ldm.o zstd/lib/compress/zstdmt_compress.o zstd/lib/compress/zstd_opt.o \
-zstd/lib/decompress/zstd_decompress.o zstd/lib/compress/fse_compress.o zstd/lib/common/fse_decompress.o zstd/lib/compress/huf_compress.o zstd/lib/decompress/huf_decompress.o zstd/lib/common/zstd_common.o zstd/lib/common/entropy_common.o
+zstd/lib/decompress/zstd_decompress.o zstd/lib/decompress/zstd_decompress_block.o zstd/lib/decompress/zstd_ddict.o zstd/lib/compress/fse_compress.o zstd/lib/common/fse_decompress.o zstd/lib/compress/huf_compress.o zstd/lib/decompress/huf_decompress.o zstd/lib/common/zstd_common.o zstd/lib/common/entropy_common.o
 ifeq ($(OS),Windows_NT)
 OB+=lzma/C/Threads.o lzma/C/LzFindMt.o 
 endif
@@ -310,7 +311,7 @@ endif
 DIVSUFSORT=libbsc/libbsc/bwt/divsufsort/divsufsort.o
 OB+=balz/balz.o
 OB+=bcm_/bcm.o
-OB+=brieflz/brieflz.o brieflz/depack.o
+OB+=brieflz/src/brieflz.o brieflz/src/depack.o
 OB+=chameleon/chameleon.o
 OB+=crush/crush.o
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/platform/platform.o libbsc/libbsc/filters/detectors.o \
@@ -355,7 +356,6 @@ ifeq ($(NSIMD),0)
 OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o 
 OB+=nakamichi/Nakamichi_Washigan.o
 endif
-#OB+=marlin/src/codec/marlin.cc
 OB+=miniz/miniz.o miniz/miniz_tdef.o miniz/miniz_tinfl.o
 
 OB+=pithy/pithy.o
@@ -464,6 +464,7 @@ OB+=fqz0/f_o0.o
 OB+=ppmdec/ppmdec.o
 OB+=ans_nania/narans.o 
 OB+=fpaq0p/fpaq0p_sh.o 
+#OB+=marlin/src/compress.o marlin/src/configuration.o marlin/src/decompress.o marlin/src/dictionary.o marlin/src/marlin.o
 OB+=vecrc/vector_rc.o
 OB+=FPC/fpc.o
 #ifeq ($(NCOMP2), 0)
