@@ -1100,7 +1100,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
   if((cmp || tid) && insizem && !(_cpy = _valloc(insizem,3)))
     die("malloc error cpy size=%u\n", insizem);
  
-  codini(insize, plug->id);	
+  codini(insize, plug->id, plug->lev);	
   size_t    inlen;																	
   long long totinlen = 0;
   double    ptc = DBL_MAX, ptd = DBL_MAX;
