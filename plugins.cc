@@ -2172,6 +2172,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 //   case P_MYCODEC:   return mydecomp(in, inlen, out, outlen);
 	  #endif	
   }
+  return NULL;
 }
 
 char *codver(int codec, char *v, char *s) {
