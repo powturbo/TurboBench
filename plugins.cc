@@ -1,5 +1,5 @@
 /**
-    Copyright (C) powturbo 2013-2017
+    Copyright (C) powturbo 2013-2018
     GPL v2 License
   
     This program is free software; you can redistribute it and/or modify
@@ -103,7 +103,7 @@ enum {
  P_DOBOZ, 
 #define C_FASTLZ 	 COMP2	
  P_FASTLZ, 
-#define C_FLZMA2	 0 //COMP2 	Disabled because of Compile error
+#define C_FLZMA2	 COMP2 
  P_FLZMA2, 
 #define C_GIPFELI    COMP2	 
  P_GIPFELI,
@@ -285,7 +285,7 @@ enum {
  P_FPAQC,
 #define C_NANS		ECODER 
  P_NANS,      
-#define C_MARLIN	0       
+#define C_MARLIN	0
  P_MARLIN,      
 #define C_PPMDEC	ECODER  
  P_PPMDEC,    
@@ -786,14 +786,15 @@ size_t chromium_base64_decode(char* dest, const char* src, size_t len);
   #endif
 
   #if C_MARLIN
-struct MarlinDictionary;
+#include "marlin/inc/marlin.h"
+/*struct MarlinDictionary;
 //#include "marlin/inc/marlin.h"
 ssize_t Marlin_compress(const MarlinDictionary *dict, uint8_t* dst, size_t dstCapacity, const uint8_t* src, size_t srcSize);
 ssize_t Marlin_decompress(const MarlinDictionary *dict, uint8_t* dst, size_t dstSize, const uint8_t* src, size_t srcSize);
 MarlinDictionary *Marlin_build_dictionary(const char *name, const double hist[256]);
 void Marlin_free_dictionary(MarlinDictionary *dict);
 const MarlinDictionary **Marlin_get_prebuilt_dictionaries();
-const MarlinDictionary * Marlin_estimate_best_dictionary(const MarlinDictionary **dict, const uint8_t* src, size_t srcSize);
+const MarlinDictionary * Marlin_estimate_best_dictionary(const MarlinDictionary **dict, const uint8_t* src, size_t srcSize);*/
   #endif
 
   #if C_POLHF
@@ -1107,11 +1108,11 @@ int codini(size_t insize, int codec, int lev) {
 void codexit(int codec) { 
   if(workmem != _workmem) {
       #if C_MARLIN
-    if(codec == P_MARLIN)  Marlin_free_dictionary((MarlinDictionary *)workmem);
+    if(codec == P_MARLIN) Marlin_free_dictionary((Marlin *)workmem);
     else 
       #endif
     free(workmem/*, workmemsize*/); 
-    workmem = NULL;
+    workmem = _workmem;
   }
     #if C_SNAPPY_C
   if(codec == P_SNAPPY_C)
@@ -1627,11 +1628,13 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
 	  #if C_MARLIN
     case P_MARLIN:  { 
-      double hist[256]; MarlinDictionary *dict;  
-      if(!workmem == _workmem) { dict = Marlin_build_dictionary("marlin", hist); 
+      double hist[256]={}; Marlin *dict;  
+      if(!workmem == _workmem) { 
+        unsigned char *p; for(p=in; p != in+inlen; p++) hist[*p]++;
+        dict = Marlin_build_dictionary("marlin", hist); 
         workmem = (char *)dict;
       } 
-      dict = (MarlinDictionary *)workmem; 
+      dict = (Marlin *)workmem; 
       return Marlin_compress(dict, (uint8_t*)out, outsize, (const uint8_t*)in, inlen); 
     }
       #endif
@@ -2132,7 +2135,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
 	  #if C_MARLIN
-    case P_MARLIN:  Marlin_decompress((MarlinDictionary *)workmem, (uint8_t*)out, outlen, in, inlen); break;
+    case P_MARLIN:  Marlin_decompress((Marlin *)workmem, (uint8_t*)out, outlen, in, inlen); /*Marlin_free_dictionary((Marlin *)workmem);*/ break;
 	  #endif
 
       #if C_NANS
