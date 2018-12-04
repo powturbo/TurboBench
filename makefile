@@ -464,7 +464,7 @@ OB+=fqz0/f_o0.o
 OB+=ppmdec/ppmdec.o
 OB+=ans_nania/narans.o 
 OB+=fpaq0p/fpaq0p_sh.o 
-OB+=marlin/src/compress.o marlin/src/configuration.o marlin/src/decompress.o marlin/src/dictionary.o marlin/src/marlin.o
+#OB+=marlin/src/compress.o marlin/src/configuration.o marlin/src/decompress.o marlin/src/dictionary.o marlin/src/marlin.o
 OB+=vecrc/vector_rc.o
 OB+=FPC/fpc.o
 #ifeq ($(NCOMP2), 0)
