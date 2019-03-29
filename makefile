@@ -348,7 +348,7 @@ OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
 OB+=lzlib-1.10/lzlib.o lzlib_/bbexample.o 
 #Compile error: Disabled
-OB+=fast-lzma2/fl2_common.o fast-lzma2/fl2_compress.o fast-lzma2/fl2_decompress.o fast-lzma2/lzma2_dec.o fast-lzma2/lzma2_enc.o fast-lzma2/radix_bitpack.o fast-lzma2/radix_mf.o fast-lzma2/radix_struct.o \
+OB+=fast-lzma2/dict_buffer.o fast-lzma2/fl2_common.o fast-lzma2/fl2_compress.o fast-lzma2/fl2_decompress.o fast-lzma2/lzma2_dec.o fast-lzma2/lzma2_enc.o fast-lzma2/radix_bitpack.o fast-lzma2/radix_mf.o fast-lzma2/radix_struct.o \
 fast-lzma2/range_enc.o fast-lzma2/fl2_threading.o fast-lzma2/fl2_pool.o fast-lzma2/util.o
 #fast-lzma2/xxhash.o fast-lzma2/fl2_error_private.o  
 
@@ -459,6 +459,7 @@ ifeq ($(AVX2),1)
 OB+=rans_static/r32x16b_avx2.o
 endif
 OB+=zlibh/zlibh.o
+#OB+=nibrans/tenc.o nibrans/tdec.o
 OB+=subotin_/subotin.o 
 OB+=fqz0/f_o0.o
 OB+=ppmdec/ppmdec.o
