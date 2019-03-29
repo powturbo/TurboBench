@@ -182,6 +182,7 @@ Compressors with versions 16.08.2016 <br>
  - [Snappy v1.1.3](https://github.com/google/snappy) 
  - [Snappy-c v1.1.2/14.04](https://github.com/andikleen/snappy-c) 
  - [Tornado v0.6a](http://freearc.org) 
+ - [ULZ](https://github.com/encode84/ulz) 
  - [wfLZ v15-04](https://github.com/ShaneWF/wflz) 
  - [yalz77 v15-09](https://github.com/ivan-tkatchev/yalz77) 
  - [yappy v2011]() 
@@ -244,5 +245,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 04 Dec 2018
+Last update: 29 Mar 2019
 
