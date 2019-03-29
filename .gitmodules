@@ -155,3 +155,6 @@
 [submodule "lzma"]
 	path = lzma
 	url = https://github.com/sisong/lzma
+[submodule "ulz"]
+	path = ulz
+	url = https://github.com/encode84/ulz
