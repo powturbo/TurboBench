@@ -1,5 +1,5 @@
 /**
-    Copyright (C) powturbo 2013-2018
+    Copyright (C) powturbo 2013-2019
     GPL v2 License
   
     This program is free software; you can redistribute it and/or modify
@@ -197,6 +197,8 @@ enum {
  P_TORNADO,  
 #define C_WFLZ 		COMP2    		    
  P_WFLZ,
+#define C_ULZ 		COMP2    		    
+ P_ULZ,
 #define C_YALZ77     COMP2     
  P_YALZ77,
 #define C_YAPPY      COMP2   
@@ -287,6 +289,8 @@ enum {
  P_NANS,      
 #define C_MARLIN	0
  P_MARLIN,      
+#define C_NIBRANS	0
+ P_NIBRANS,      
 #define C_PPMDEC	ECODER  
  P_PPMDEC,    
 #define C_SHRC		ECODER 
@@ -596,6 +600,10 @@ class Out: public libzpaq::Writer {
 #include "tornado_/tormem.h"
   #endif
 
+  #if C_ULZ
+#include "ulz/src/ulz.hpp"
+  #endif
+
   #if C_WKDM
 #include "wkdm/WKdm.h"
   #endif
@@ -834,6 +842,11 @@ extern "C" {
 #include "fsc/fsc.h"
   #endif
 
+  #if C_NIBRANS
+#define NIBRANS_STATIC
+#include "nibrans/nibrans.h"
+  #endif
+
   #if C_JRANS
 #include "rans_static/rANS_static.h"
 unsigned char *rans_compress_to_32x16(unsigned char *in,  unsigned int in_size,
@@ -904,7 +917,8 @@ struct plugs plugs[] = {
   { P_SNAPPY, 	"snappy",			C_SNAPPY, 	"1.1.2",	"Snappy",				"Apache license",	"https://github.com/google/snappy"														""	},
   { P_SNAPPY_C, "snappy_c",			C_SNAPPY_C,	"1.1.2",	"Snappy-c",				"BSD Like",			"https://github.com/andikleen/snappy-c",												"" },
   { P_TORNADO, 	"tornado", 			C_TORNADO, 	"0.6a",		"Tornado",				"GPL license",		"http://freearc.org\thttps://github.com/nemequ/tornado",								"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" }, 
-  { P_WFLZ,	    "wflz", 			C_WFLZ, 	"15-04",	"wfLZ",					"CC0 license",		"https://github.com/ShaneWF/wflz",														"1,2" },
+  { P_WFLZ,	"wflz", 			C_WFLZ, 	"15-04",	"wfLZ",					"CC0 license",		"https://github.com/ShaneWF/wflz",														"1,2" },
+  { P_ULZ,	"ulz", 				C_ULZ, 	"2019",	"ULZ",					"Public domain",		"https://github.com/encode84/ulz",														"1,2,3,4,5,6,7,8,9" },
 //{ P_WKDM, 	"WKdm",				C_WKDM, 		"2003",		"WKdm",					"Apple PS License",	"http://www.opensource.apple.com/source/xnu/xnu-1456.1.26/iokit/Kernel/\thttps://github.com/berkus/wkdm", "" }, // crash
   { P_XPACK, 	"xpack", 			C_XPACK,	"16-08",	"xpack",				"BSD license",		"https://github.com/ebiggers/xpack", 													"1,2,3,4,5,6,7,8,9" },
   { P_YALZ77, 	"yalz77", 			C_YALZ77, 	"15-09",	"Yalz77",				"Public domain",	"https://github.com/ivan-tkatchev/yalz77",												"1,6,12" },
@@ -932,6 +946,7 @@ struct plugs plugs[] = {
   { P_JAC, 		"arith_static",		C_JAC, 		"17-03",	"Range Coder/J.Bonfield","BSD license",		"https://github.com/jkbonfield/rans_static",													"", E_ANS},
   { P_FQZ0, 	"fqz0",				C_FQZ, 		"15-03",	"FQZ/PPMD Range Coder",	"Public Domain",	"http://encode.ru/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder",			""},
   { P_MARLIN, 	"Marlin",			C_MARLIN, 	"",		    "Marlin Entropy coder", "        ",			"https://github.com/MartinezTorres/marlin",												""},
+  { P_NIBRANS, 	"nibrans",			C_NIBRANS, 	"",		    "nibrans", "        ",			"https://github.com/BareRose/nibrans",												"" },
   { P_PPMDEC, 	"ppmdec", 			C_PPMDEC,	"15-03",	"PPMD Range Coder",		"Public Domain",	"http://encode.ru/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder",  		""},
 
   { P_JRANS4_8o0, "rans_static8",	C_JRANS, 	"",	"ANS/J.Bonfield",		"Public Domain",	"https://github.com/jkbonfield/rans_static",											"", E_ANS},
@@ -1445,6 +1460,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_TORNADO:      return torcompress(lev, in, out, inlen);
       #endif	
 
+      #if C_ULZ
+    case P_ULZ: { CULZ culz; return culz.Compress(in, inlen, out, lev);  }
+      #endif
+
       #if C_WFLZ
     case P_WFLZ:    return lev<=1?wfLZ_CompressFast( (const uint8_t* WF_RESTRICT const)in, inlen, (uint8_t* WF_RESTRICT const)out, (const uint8_t* WF_RESTRICT)workmem, 0 ):
                                       wfLZ_Compress( (const uint8_t* WF_RESTRICT const)in, inlen, (uint8_t* WF_RESTRICT const)out, (const uint8_t* WF_RESTRICT)workmem, 0 );
@@ -1641,6 +1660,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
 	  #if C_NANS
     case P_NANS:   return nansenc(in, inlen, out, oend);
+      #endif
+
+      #if C_NIBRANS
+    case P_NIBRANS:  { struct nibrans nbra; nibransInit(&nbra); return nibransEncode(&nbra, out, outsize, in, inlen); }
       #endif
 
       #if C_JAC
@@ -1953,6 +1976,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_TORNADO:     return tordecompress(in, out, inlen, outlen);
       #endif
 	  
+      #if C_ULZ
+    case P_ULZ: { CULZ culz; return culz.Decompress(in, inlen, out, outlen); }
+      #endif
+
       #if C_WFLZ
     case P_WFLZ:    wfLZ_Decompress( in, out); return inlen;
 	  #endif
@@ -2142,7 +2169,11 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_NANS:    nansdec(in, inlen, out, outlen); break;
 	  #endif
 
-      #if C_PPMDEC
+       #if C_NIBRANS
+    case P_NIBRANS: { struct nibrans nbra; nibransInit(&nbra); return nibransDecode(&nbra, out, outlen, in, inlen); }
+      #endif
+
+     #if C_PPMDEC
 	case P_PPMDEC:  return ppmddec(in, inlen, out, outlen);
 	  #endif
 
