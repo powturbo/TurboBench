@@ -156,8 +156,10 @@ endif
  
 #------------- 
 # 
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/c/include -Ibrotli/c/enc -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include -Ibrieflz/include
-CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -Ibrotli/c/include -Ibrotli/c/enc -ICSC/src/libcsc -Imarlin/inc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/c/include -Ibrotli/c/enc -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include -Ibrieflz/include 
+#CFLAGS+=-DINLINE=inline -Ilz4ultra/src/libdivsufsort/include -Ilz4ultra/src
+CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -Ibrotli/c/include -Ibrotli/c/enc -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
+#CXXFLAGS+=-Imarlin/inc -Ilz4ultra/src/libdivsufsort/include 
 
 #CXXFLAGS+=$(DDEBUG) -std=gnu++14 -Wall -Wextra -Wcast-qual -Wcast-align -Wstrict-aliasing=1 -Wswitch-enum -Wundef -pedantic  -Wfatal-errors -Wshadow 
 all:  turbobench
@@ -351,7 +353,7 @@ OB+=lzlib-1.10/lzlib.o lzlib_/bbexample.o
 OB+=fast-lzma2/dict_buffer.o fast-lzma2/fl2_common.o fast-lzma2/fl2_compress.o fast-lzma2/fl2_decompress.o fast-lzma2/lzma2_dec.o fast-lzma2/lzma2_enc.o fast-lzma2/radix_bitpack.o fast-lzma2/radix_mf.o fast-lzma2/radix_struct.o \
 fast-lzma2/range_enc.o fast-lzma2/fl2_threading.o fast-lzma2/fl2_pool.o fast-lzma2/util.o
 #fast-lzma2/xxhash.o fast-lzma2/fl2_error_private.o  
-
+#OB+=lz4ultra/src/shrink.o lz4ultra/src/expand.o lz4ultra/src/libdivsufsort/lib/divsufsort.o lz4ultra/src/libdivsufsort/lib/sssort.o lz4ultra/src/libdivsufsort/lib/trsort.o
 ifeq ($(NSIMD),0)
 OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o 
 OB+=nakamichi/Nakamichi_Washigan.o
