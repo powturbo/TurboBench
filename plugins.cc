@@ -69,9 +69,9 @@ enum {
 #define C_AOM	0
    #endif
  P_AOM,
-#define C_BALZ 		COMP2		
+#define C_BALZ 		0 //COMP2
  P_BALZ,
-#define C_BCM 		COMP2	
+#define C_BCM 		0 //COMP2	
  P_BCM,
 #define C_BRIEFLZ 	COMP2	
  P_BRIEFLZ, 
@@ -87,7 +87,7 @@ enum {
 #define C_C_BLOSC2	0
    #endif
  P_C_BLOSC2,
-#define C_CRUSH	 	 COMP2	
+#define C_CRUSH	 	 0 // COMP2	
  P_CRUSH, 
 #define C_CSC        COMP2    
  P_CSC, 
@@ -201,7 +201,7 @@ enum {
  P_TORNADO,  
 #define C_WFLZ 		COMP2    		    
  P_WFLZ,
-#define C_ULZ 		COMP2    		    
+#define C_ULZ 		0 //COMP2    		    
  P_ULZ,
 #define C_YALZ77     COMP2     
  P_YALZ77,
@@ -232,13 +232,13 @@ enum {
 
 #define C_SB64 		0 //ENCOD
  P_SB64SSE,
-#define C_FB64 		ENCOD
+#define C_FB64 		0 //ENCOD
  P_FB64AVX,
  P_FB64CHROMIUM,
  P_FB64LINUX,
  P_FB64QUICKTIME,
  P_FB64SCALAR,
-#define C_TB64		ENCOD
+#define C_TB64		0 //ENCOD
  P_TB64,
  P_TB64S,
 #define C_RLE		ENCOD
@@ -289,7 +289,7 @@ enum {
   
 #define C_FPAQC 	GPL
  P_FPAQC,
-#define C_NANS		ECODER 
+#define C_NANS		0 //ECODER 
  P_NANS,      
 #define C_MARLIN	0
  P_MARLIN,      
@@ -907,7 +907,7 @@ struct plugs plugs[] = {
   { P_LZFSE, 	"lzfse", 			C_LZFSE, 	"17-03",	"lzfse",				"BSD licence",		"https://github.com/lzfse/lzfse","" },
   { P_LZFSEA, 	"lzfsea", 			C_LZFSEA, 	"2015",		"lzfsea",				"iOS and OS X",		"https://developer.apple.com/library/ios/documentation/Performance/Reference/Compression/index.html","" },
   { P_LZHAM, 	"lzham", 			C_LZHAM,	"1.1",		"Lzham",				"MIT license",		"https://github.com/richgel999/lzham_codec_devel",										"1,2,3,4/t#:fb#:x#" },
-  { P_LZLIB, 	"lzlib", 			C_LZLIB, 	"1.9",		"Lzlib",				"BSD license",		"http://www.nongnu.org/lzip\thttps://github.com/daniel-baumann/lzlib",					"1,2,3,4,5,6,7,8,9/d#:fb#" },
+  { P_LZLIB, 	"lzlib", 			C_LZLIB, 	"1.11",		"Lzlib",				"BSD license",		"http://www.nongnu.org/lzip\thttps://github.com/daniel-baumann/lzlib",					"1,2,3,4,5,6,7,8,9/d#:fb#" },
   { P_LZMAT, 	"lzmat", 			C_LZMAT, 	"1.0",		"Lzmat",				"GPL license",		"https://github.com/nemequ/lzmat\thttp://www.matcode.com/lzmat.htm",					"" },
   { P_LZMA,  	"lzma", 			C_LZMA, 	"18.01",	"Lzma",					"Public Domain",	"http://7-zip.org\thttps://github.com/sisong/lzma", 								"0,1,2,3,4,5,6,7,8,9/d#:fb#:lp#:lc#:pb#:a#:mt#" }, 
 
@@ -1306,20 +1306,19 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  #if C_LZ4ULTRA
     #define BSIZE (1<<16)
     case P_LZ4ULTRA: 
-      if(!strchr(prm,"u")) return LZ4_compress_HC((char *)in, (char *)out, inlen, outsize, lev);
-      else { lsza_compressor compressor; lev=4;
-      int nBlockMaxSize = 1 << (8 + (lev << 1));      
-      lz4ultra_compressor_init(&compressor, nBlockMaxSize + BSIZE); 
-      unsigned b=0; unsigned char *ip,*op=out,*cin = malloc(nBlockMaxSize+BSIZE); if(!cin) die("malloc failed.size=%d\n", nBlockMaxSize+BSIZE);
-       for(ip = in, in += inlen; ip < in; ) { unsigned iplen = min(in-ip, nBlockMaxSize);
-         memcpy(cin, cin + BSIZE + (nBlockMaxSize - BSIZE), b); memcpy(cin+BSIZE, ip, iplen);
-         unsigned oplen = lz4ultra_shrink_block(&compressor, cin+BSIZE-b, b, iplen, op, outsize-(op-out));
-         ip += iplen; op += oplen; b = min(iplen,BSIZE);
-       } 
-       lz4ultra_compressor_destroy(&compressor);
-       free(cin);
-       return op-out; 
-     }
+      if(strchr(prm,'u')) { lsza_compressor compressor; lev=4;
+        int nBlockMaxSize = 1 << (8 + (lev << 1));      
+        lz4ultra_compressor_init(&compressor, nBlockMaxSize + BSIZE); 
+        unsigned b=0; unsigned char *ip,*op=out,*cin = malloc(nBlockMaxSize+BSIZE); if(!cin) die("malloc failed.size=%d\n", nBlockMaxSize+BSIZE);
+        for(ip = in, in += inlen; ip < in; ) { unsigned iplen = min(in-ip, nBlockMaxSize);
+          memcpy(cin, cin + BSIZE + (nBlockMaxSize - BSIZE), b); memcpy(cin+BSIZE, ip, iplen);
+          unsigned oplen = lz4ultra_shrink_block(&compressor, cin+BSIZE-b, b, iplen, op, outsize-(op-out));
+          ip += iplen; op += oplen; b = min(iplen,BSIZE);
+        } 
+        lz4ultra_compressor_destroy(&compressor);
+        free(cin);
+        return op-out; 
+      } else { return LZ4_compress_HC((char *)in, (char *)out, inlen, outsize, lev); }
      #undef BSIZE
 	  #endif
 	  
