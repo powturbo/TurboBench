@@ -181,7 +181,7 @@ endif
 
 ifeq ($(BROTLI), 0)
 #Modified files to disable dictionary.
-OB+=brotli_/c/enc/static_dict.o brotli/c/enc/backward_references.o
+#OB+=brotli_/c/enc/static_dict.o brotli/c/enc/backward_references.o
 else
 OB+=brotli/c/enc/backward_references.o brotli/c/enc/static_dict.o 
 endif
@@ -311,11 +311,11 @@ OB+=daala_/daala.o
 endif
 
 DIVSUFSORT=libbsc/libbsc/bwt/divsufsort/divsufsort.o
-OB+=balz/balz.o
-OB+=bcm_/bcm.o
+#OB+=balz/balz.o
+#OB+=bcm_/bcm.o
 OB+=brieflz/src/brieflz.o brieflz/src/depack.o
 OB+=chameleon/chameleon.o
-OB+=crush/crush.o
+#OB+=crush/crush.o
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/platform/platform.o libbsc/libbsc/filters/detectors.o \
 	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o $(DIVSUFSORT) libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o
 OB+=bzip2/blocksort.o bzip2/huffman.o bzip2/crctable.o bzip2/randtable.o bzip2/compress.o bzip2/decompress.o bzip2/bzlib.o
@@ -348,12 +348,13 @@ OB+=lzham_codec_devel/lzhamcomp/lzham_lzbase.o lzham_codec_devel/lzhamcomp/lzham
 ifeq ($(UNAME), Windows)
 OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
-OB+=lzlib-1.10/lzlib.o lzlib_/bbexample.o 
+OB+=lzlib-1.11/lzlib.o lzlib_/bbexample.o 
 #Compile error: Disabled
 OB+=fast-lzma2/dict_buffer.o fast-lzma2/fl2_common.o fast-lzma2/fl2_compress.o fast-lzma2/fl2_decompress.o fast-lzma2/lzma2_dec.o fast-lzma2/lzma2_enc.o fast-lzma2/radix_bitpack.o fast-lzma2/radix_mf.o fast-lzma2/radix_struct.o \
 fast-lzma2/range_enc.o fast-lzma2/fl2_threading.o fast-lzma2/fl2_pool.o fast-lzma2/util.o
 #fast-lzma2/xxhash.o fast-lzma2/fl2_error_private.o  
-#OB+=lz4ultra/src/shrink.o lz4ultra/src/expand.o lz4ultra/src/libdivsufsort/lib/divsufsort.o lz4ultra/src/libdivsufsort/lib/sssort.o lz4ultra/src/libdivsufsort/lib/trsort.o
+#OB+=lz4ultra/src/shrink.o lz4ultra/src/expand.o lz4ultra/src/libdivsufsort/lib/divsufsort.o 
+#OB+=lz4ultra/src/libdivsufsort/lib/sssort.o lz4ultra/src/libdivsufsort/lib/trsort.o
 ifeq ($(NSIMD),0)
 OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o 
 OB+=nakamichi/Nakamichi_Washigan.o
@@ -447,11 +448,11 @@ ifeq ($(BASE64),1)
 #B+=base64/lib/arch/avx/codec.o base64/lib/lib.o base64/lib/arch/generic/codec.o base64/lib/arch/ssse3/codec.o base64/lib/arch/sse41/codec.o base64/lib/arch/sse42/codec.o base64/lib/arch/avx2/codec.o base64/lib/codec_choose.o base64/lib/arch/neon32/codec.o base64/lib/arch/neon64/codec.o
 OB+=base64/lib/libbase64.o
 endif
-OB+=TurboBase64/turbob64c.o TurboBase64/turbob64d.o
+#OB+=TurboBase64/turbob64c.o TurboBase64/turbob64d.o
 OB+=TurboRLE/trlec.o TurboRLE/trled.o TurboRLE/ext/mrle.o
-OB+=fastbase64/src/chromiumbase64.o fastbase64/src/quicktimebase64.o fastbase64/src/scalarbase64.o
+#OB+=fastbase64/src/chromiumbase64.o fastbase64/src/quicktimebase64.o fastbase64/src/scalarbase64.o
 ifeq ($(AVX2),1)
-OB+=fastbase64/src/fastavxbase64.o 
+#OB+=fastbase64/src/fastavxbase64.o 
 endif
 endif
 #-------------------- Entropy Coder -------------------
@@ -465,7 +466,7 @@ OB+=zlibh/zlibh.o
 OB+=subotin_/subotin.o 
 OB+=fqz0/f_o0.o
 OB+=ppmdec/ppmdec.o
-OB+=ans_nania/narans.o 
+#OB+=ans_nania/narans.o 
 OB+=fpaq0p/fpaq0p_sh.o 
 #OB+=marlin/src/compress.o marlin/src/configuration.o marlin/src/decompress.o marlin/src/dictionary.o marlin/src/marlin.o
 OB+=vecrc/vector_rc.o
