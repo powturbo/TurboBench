@@ -479,7 +479,7 @@ OB+=rans_static/rANS_static4x8.o rans_static/rANS_static4x16.o rans_static/rANS_
 #endif
 
 ifeq ($(UNAME), Linux)
-OB+=fsc/fsc_enc.o fsc/fsc_dec.o fsc/fsc_utils.o fsc/bits.o fsc/histo.o fsc/alias.o 
+#OB+=fsc/fsc_enc.o fsc/fsc_dec.o fsc/fsc_utils.o fsc/bits.o fsc/histo.o fsc/alias.o 
 endif
 
 ifeq ($(NCPP), 0)
