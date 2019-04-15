@@ -17,9 +17,6 @@
 [submodule "doboz"]
 	path = doboz
 	url = https://github.com/nemequ/doboz.git
-[submodule "fsc"]
-	path = fsc
-	url = https://github.com/skal65535/fsc.git
 [submodule "gipfeli"]
 	path = gipfeli
 	url = https://github.com/google/gipfeli.git
