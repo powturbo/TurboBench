@@ -89,21 +89,12 @@
 [submodule "LZSSE"]
 	path = LZSSE
 	url = https://github.com/ConorStokes/LZSSE.git
-[submodule "bcm"]
-	path = bcm
-	url = https://github.com/encode84/bcm.git
 [submodule "xpack"]
 	path = xpack
 	url = https://github.com/ebiggers/xpack.git
 [submodule "lzfse"]
 	path = lzfse
 	url = https://github.com/lzfse/lzfse.git
-[submodule "TurboBase64"]
-	path = TurboBase64
-	url = https://github.com/powturbo/TurboBase64.git
-[submodule "base64"]
-	path = base64
-	url = https://github.com/aklomp/base64
 [submodule "lizard"]
 	path = lizard
 	url = https://github.com/inikep/lizard.git
@@ -122,9 +113,6 @@
 [submodule "brieflz"]
 	path = brieflz
 	url = https://github.com/jibsen/brieflz
-[submodule "fastbase64"]
-	path = fastbase64
-	url = https://github.com/lemire/fastbase64
 [submodule "isa-l"]
 	path = isa-l
 	url = https://github.com/01org/isa-l
@@ -155,6 +143,3 @@
 [submodule "lzma"]
 	path = lzma
 	url = https://github.com/sisong/lzma
-[submodule "ulz"]
-	path = ulz
-	url = https://github.com/encode84/ulz
