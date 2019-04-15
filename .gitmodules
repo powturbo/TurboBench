@@ -10,9 +10,6 @@
 [submodule "bzip2"]
 	path = bzip2
 	url = https://github.com/asimonov-im/bzip2.git
-[submodule "lzoma"]
-	path = lzoma
-	url = https://github.com/alef78/lzoma.git
 [submodule "density"]
 	path = density
 	url = https://github.com/centaurean/density.git
