@@ -198,7 +198,6 @@ Compressors with versions 16.08.2016 <br>
  - [Bitwise RC v2010](http://encode.ru/threads/1153-Simple-binary-rangecoder-demo)
  - [Bitwise vector RC v2012](http://encode.ru/threads/1200-Vectorized-rangecoder)
  - [FastAri v15-10](https://github.com/davidcatt/FastARI)
-
  - [AOMedia AV1 entropy coder](https://aomedia.googlesource.com/aom/+/master/aom_dsp/)
  - [Daala entropy coder](https://github.com/xiph/daala)
 
