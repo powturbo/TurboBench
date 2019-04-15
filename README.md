@@ -205,7 +205,7 @@ Compressors with versions 16.08.2016 <br>
  - [TurboAC v1.3](https://sites.google.com/site/powturbo)
  - [subotin range coder v2000](http://ezcodesample.com/ralpha/Subbotin.txt)
  - [Fast AC v2006](http://www.cipr.rpi.edu/research/SPIHT/)
- - [Range Coder/J.Bonfield v15-07](ftp://ftp.sanger.ac.uk/pub/users/jkb)
+ - [Range Coder/J.Bonfield v15-07](https://github.com/jkbonfield/rans_static)
  - [FQZ/PPMD Range Coder v15-03](http://encode.ru/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
  - [PPMD Range Coder v15-03](http://encode.ru/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
 
