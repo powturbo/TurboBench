@@ -263,7 +263,7 @@ enum {
  P_FASTARI,
 #define C_FASTHF	ECODER    
  P_FASTHF,
-#define C_FSC 		ECODER    
+#define C_FSC 		0 //ECODER    
  P_FSC,
 #define C_FPC 		ECODER    
  P_FPC,
