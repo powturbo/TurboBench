@@ -149,7 +149,7 @@ Compressors with versions 16.08.2016 <br>
  - [FastLz v0.1.0](http://fastlz.org) 
  - [FastLz v0.1.0](http://fastlz.org) 
  - [Fast-lzma](https://github.com/conor42/fast-lzma2) 
- - [glza v16-08](https://github.com/jrmuizel/GLZA)
+ - [glza](https://github.com/jrmuizel/GLZA)
  - [heatshrink v0.4.1](https://github.com/atomicobject/heatshrink) 
  - [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l) 
  - [bsc v3.1.0](https://github.com/IlyaGrebnov/libbsc) 
@@ -224,7 +224,7 @@ Compressors with versions 16.08.2016 <br>
  - [zlib Huffmann v1.2.8](https://github.com/Cyan4973/FiniteStateEntropy) 
  - [Fast HF v2006](http://www.cipr.rpi.edu/research/SPIHT/) 
  - [FPC](https://github.com/algorithm314/FPC)
- - [FSE Huff v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
+ - [FSE Huff](https://github.com/Cyan4973/FiniteStateEntropy)
  - [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html)
 
 ###### memcpy
