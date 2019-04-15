@@ -138,14 +138,11 @@ Compressors with versions 16.08.2016 <br>
 ### Plugins:
 #### Compressor Lz77,Rolz,Bwt,zpaq:
  - [LzTurbo v1.4](https://sites.google.com/site/powturbo)
- - [balz v1.20](http://sourceforge.net/projects/balz) 
- - [bcm v1.25](https://github.com/encode84/bcm) 
  - [Blosc v2.0](https://github.com/Blosc/c-blosc2)
  - [BriefLz v1.1.0](https://github.com/jibsen/brieflz) 
  - [Brotli](https://github.com/google/brotli) 
  - [Bzip2 v1.06](http://www.bzip.org/downloads.html) 
  - [Chameleon v15-03](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
- - [Crush v1.0.0](http://sourceforge.net/projects/crush) 
  - [CSC v16-10](https://github.com/fusiyuan2010/CSC) 
  - [Density v0.13.0](https://github.com/centaurean/density) 
  - [Doboz v14-01-14](https://bitbucket.org/attila_afra) 
@@ -182,7 +179,6 @@ Compressors with versions 16.08.2016 <br>
  - [Snappy v1.1.3](https://github.com/google/snappy) 
  - [Snappy-c v1.1.2/14.04](https://github.com/andikleen/snappy-c) 
  - [Tornado v0.6a](http://freearc.org) 
- - [ULZ](https://github.com/encode84/ulz) 
  - [wfLZ v15-04](https://github.com/ShaneWF/wflz) 
  - [yalz77 v15-09](https://github.com/ivan-tkatchev/yalz77) 
  - [yappy v2011]() 
@@ -200,7 +196,6 @@ Compressors with versions 16.08.2016 <br>
  - [TurboRC-Range Coder v1.3](https://sites.google.com/site/powturbo)
  - [Bitwise RC v2010](http://encode.ru/threads/1153-Simple-binary-rangecoder-demo)
  - [Bitwise vector RC v2012](http://encode.ru/threads/1200-Vectorized-rangecoder)
- - [bcm range coder v1.0](http://sourceforge.net/projects/bcm)
  - [FastAri v15-10](https://github.com/davidcatt/FastARI)
 
  - [AOMedia AV1 entropy coder](https://aomedia.googlesource.com/aom/+/master/aom_dsp/)
@@ -222,7 +217,6 @@ Compressors with versions 16.08.2016 <br>
  - [Finite State Coder v15-05](https://github.com/skal65535/fsc)
  - [Finite State Entropy v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
  - [rans_static v16-10](https://github.com/jkbonfield/rans_static)
- - [Nania Adaptive rANS v2015](http://encode.ru/threads/2079-nARANS-(Nania-Adaptive-Range-Variant-of-ANS))
 
 ###### Huffman Coding
  - [TurboHF-Huffmann v1.3](https://sites.google.com/site/powturbo)
@@ -232,6 +226,8 @@ Compressors with versions 16.08.2016 <br>
  - [FPC](https://github.com/algorithm314/FPC)
  - [FSE Huff v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
  - [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html)
+
+###### memcpy
  - [inline memcpy](https://github.com/powturbo/TurboBench)
  - [library memcpy](https://github.com/powturbo/TurboBench)
 
@@ -245,5 +241,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 29 Mar 2019
+Last update: 15 Apr 2019
 
