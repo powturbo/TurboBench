@@ -192,6 +192,7 @@ Compressors with versions 16.08.2016 <br>
  - [zpaq v7.15](https://github.com/zpaq/zpaq) 
 
 #### Entropy coder:
+
 ###### bitwise range coder
  - [TurboRC-Range Coder v1.3](https://sites.google.com/site/powturbo)
  - [Bitwise RC v2010](http://encode.ru/threads/1153-Simple-binary-rangecoder-demo)
