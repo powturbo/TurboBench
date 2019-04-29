@@ -252,7 +252,7 @@ enum {
  P_ST,
   // --------- Entropy coders -------------
  #if C_BCM  
-#define C_BCMEC     ECODER 
+#define C_BCMEC     0 //ECODER 
  #else
 #define C_BCMEC     0
  #endif
@@ -881,7 +881,7 @@ struct plugs plugs[] = {
   { P_BCM, 		"bcm", 				C_BCM, 		"1.25",		"bcm",					"Public Domain",	"https://github.com/encode84/bcm", 													"" }, 
   { P_C_BLOSC2, "blosc",			C_C_BLOSC2, "2.0",		"Blosc",				"BSD license",		"https://github.com/Blosc/c-blosc2", 													"0,1,2,3,4,5,6,7,8,9", 64*1024},
   { P_BRIEFLZ,	"brieflz", 		    C_BRIEFLZ, 	"1.2.0",	"BriefLz",				"BSD like",			"https://github.com/jibsen/brieflz", 													"1,3,6,9" }, 
-  { P_BROTLI,	"brotli", 			C_BROTLI, 	"17-04",	"Brotli",				"Apache license",	"https://github.com/google/brotli", 													"0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
+  { P_BROTLI,	"brotli", 			C_BROTLI, 	"",	"Brotli",				"Apache license",	"https://github.com/google/brotli", 													"0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
   { P_BZIP2,	"bzip2", 			C_BZIP2, 	"1.06",		"Bzip2",				"BSD like",			"http://www.bzip.org/downloads.html\thttps://github.com/asimonov-im/bzip2", 			"" }, 
   { P_CHAMELEON,"chameleon",		C_CHAMELEON, "15-03",	"Chameleon",			"Public Domain",	"http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html", 					"1,2" },
   { P_CRUSH,	"crush", 			C_CRUSH, 	"1.0.0",	"Crush",				"Public Domain",	"http://sourceforge.net/projects/crush", 												"0,1,2" },
@@ -1162,7 +1162,7 @@ static unsigned char *gop,*gip,*giend;
 static size_t getbytes(void *data, size_t n) { n = min(giend-gip,n); memcpy(data, gip, n); gip+=n; return n; }
 static void sendbytes(const void *data, size_t n) { memcpy(gop, data, n); gop += n; }
 
-static unsigned char *getbyte() { return *gip++; }
+static unsigned char getbyte() { return *gip++; }
   #endif
 
 int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int codec, int lev, char *prm) { int outlen; unsigned char *oend=out+outsize;
@@ -1229,8 +1229,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #if C_CSC
     case P_CSC: { 
         CSCProps prop; CSCEncProps_Init(&prop, dsize?bsr32(dsize)-powof2(dsize):(1<<29), lev); CSCEnc_WriteProperties(&prop, (uint8_t*)out, 0);
-        MemISeqInStream  si; si.s.Read  = (int(*)(void *, void *, size_t *))cscread;  si.in  = in;                  si.inlen  = inlen;
-	    MemISeqOutStream so; so.s.Write = (size_t(*)(void *, const void *, size_t  ))cscwrite; so.out = out + CSC_PROP_SIZE; so.outlen = CSC_PROP_SIZE;
+        MemISeqInStream  si; si.s.Read  = (int(*)(const ISeqInStream *, void *, size_t *))cscread;  si.in  = in;                  si.inlen  = inlen;
+	    MemISeqOutStream so; so.s.Write = (size_t(*)(const ISeqOutStream *, const void *, size_t  ))cscwrite; so.out = out + CSC_PROP_SIZE; so.outlen = CSC_PROP_SIZE;
 	    CSCEncHandle eh = CSCEnc_Create(&prop, (ISeqOutStream*)&so, NULL); CSCEnc_Encode(eh, (ISeqInStream*)&si, NULL); CSCEnc_Encode_Flush(eh); CSCEnc_Destroy(eh);
         return so.outlen;
       }
@@ -1511,7 +1511,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif	
 
       #if C_ULZ
-    case P_ULZ: { CULZ culz; return culz.Compress(in, inlen, out, lev);  }
+    case P_ULZ: { ULZ ulz; return ulz.Compress(in, inlen, out, lev);  }
       #endif
 
       #if C_WFLZ
@@ -1767,8 +1767,9 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     defaulf: fprintf(stderr, "library '%d' not included\n", codec);
   } 
 } 
-  
-int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int codec, int lev, char *prm) {	
+
+
+int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int codec, int lev, char *prm) {
   switch(codec) {
       #if C_AOM   	
     case P_AOM:     aomdec(in, inlen, out, outlen); return outlen;
@@ -1796,12 +1797,12 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 	  
       #if C_BROTLI
     case P_BROTLI: { BrotliDecoderState* s = BrotliDecoderCreateInstance(NULL, NULL, NULL); if(!s) return -1;
-		  BrotliDecoderSetParameter(s, BROTLI_DECODER_PARAM_LARGE_WINDOW, 1u); 
-		  size_t total_out, available_in=inlen,available_out=outlen;
-		  int rc = BrotliDecoderDecompressStream(s, &available_in, &in, &available_out, &out, &total_out); 
-          BrotliDecoderDestroyInstance(s);
-          return rc?total_out:0;//size_t dsize = outlen; int rc = BrotliDecoderDecompress(inlen,in,&dsize,out); 
-	  }
+	BrotliDecoderSetParameter(s, BROTLI_DECODER_PARAM_LARGE_WINDOW, 1u); 
+	size_t total_out, available_in=inlen, available_out=outlen; uint8_t *next_in=in, *next_out=out;
+	BrotliDecoderResult rc = BrotliDecoderDecompressStream(s, &available_in, (const uint8_t **)&next_in, &available_out, (uint8_t **)&next_out, &total_out); 
+        BrotliDecoderDestroyInstance(s);
+        return rc?total_out:0; 
+      }
 	  #endif
 
       #if C_LIBBSC
@@ -1830,8 +1831,8 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #if C_CSC
     case P_CSC: { 
         CSCProps prop; CSCDec_ReadProperties(&prop, (uint8_t*)in);
-        MemISeqInStream  si; si.s.Read  = (int(*)(void *, void *, size_t *))cscread;  si.in  = in + CSC_PROP_SIZE; si.inlen  = inlen - CSC_PROP_SIZE;
-	    MemISeqOutStream so; so.s.Write = (size_t(*)(void *, const void *, size_t  ))cscwrite; so.out = out;                so.outlen = 0;
+        MemISeqInStream  si; si.s.Read  = (int(*)(const ISeqInStream *, void *, size_t *))cscread;  si.in  = in + CSC_PROP_SIZE; si.inlen  = inlen - CSC_PROP_SIZE;
+	    MemISeqOutStream so; so.s.Write = (size_t(*)(const ISeqOutStream *, const void *, size_t  ))cscwrite; so.out = out;                so.outlen = 0;
 	    CSCDecHandle dh = CSCDec_Create(&prop, (ISeqInStream*)&si, NULL); CSCDec_Decode(dh, (ISeqOutStream*)&so, NULL); CSCDec_Destroy(dh);
         return si.inlen;
       }
@@ -1899,7 +1900,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if C_SMALLZ4
-    case P_SMALLZ4: if(strchr(prm,'z')) LZ4_decompress_safe((const char *)(in+11), (char *)out, inlen-11, outlen); else { gip = in; giend = in+inlen; gop = out; unlz4(getbyte,sendbytes,NULL); } break;
+    case P_SMALLZ4: 
+      if(strchr(prm,'z')) LZ4_decompress_safe((const char *)(in), (char *)out, inlen, outlen); //smallz4 is not compatible with lz4 block functions.
+      else { gip = in; giend = in+inlen; gop = out; unlz4(getbyte,sendbytes,NULL); } 
+      break; 
       #endif 
 	  
 	  #if C_LZ4ULTRA
@@ -2035,7 +2039,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 	  
       #if C_ULZ
-    case P_ULZ: { CULZ culz; return culz.Decompress(in, inlen, out, outlen); }
+    case P_ULZ: { ULZ ulz; return ulz.Decompress(in, inlen, out, outlen); }
       #endif
 
       #if C_WFLZ
