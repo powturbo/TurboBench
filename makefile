@@ -156,8 +156,8 @@ endif
  
 #------------- 
 # 
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/c/include -Ibrotli/c/enc -Ilibdeflate -Ilibdeflate/common -Ifastbase64/include -Ibrieflz/include 
-#CFLAGS+=-DINLINE=inline -Ilz4ultra/src/libdivsufsort/include -Ilz4ultra/src
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall -Izstd/lib -Izstd/lib/common $(DEFS) -Ilz4/lib -Ilizard/lib -Ibrotli/c/include -Ibrotli/c/enc -Ilibdeflate -Ilibdeflate/common -Ibrieflz/include 
+#CFLAGS+=-Ifastbase64/include -DINLINE=inline -Ilz4ultra/src/libdivsufsort/include -Ilz4ultra/src
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" -Ibrotli/c/include -Ibrotli/c/enc -ICSC/src/libcsc -D_7Z_TYPES_ -DLIBBSC_SORT_TRANSFORM_SUPPORT $(DEFS)
 #CXXFLAGS+=-Imarlin/inc -Ilz4ultra/src/libdivsufsort/include 
 
@@ -333,7 +333,6 @@ ifeq ($(IGZIP),1)
 #OB+=isa-l/.libs/libisal.a
 OB+=libisal.a
 endif
-#OB+=kraken/kraken.o 
 OB+=liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o 
 OB+=liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o 
 OB+=lizard/lib/lizard_compress.o lizard/lib/lizard_decompress.o
