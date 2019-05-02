@@ -1410,7 +1410,7 @@ int main(int argc, char* argv[]) {
       if(g->tck < g->tc) g->tc = g->tck;
       if(g->tdk < g->td) g->td = g->tdk;      //if(tmtime() - tmk0 > tm_RepkT) break;
     } 
-  }
+  } 
     BENCHSTA;
 
   if(argc - optind > 1) {
@@ -1431,7 +1431,7 @@ int main(int argc, char* argv[]) {
       finame = p+1;
   }
   ansprt();
-
+  if(!totinlen) exit(0);
   sprintf(s, "%s.tbb", finame);
   if(merge /*|| tm_rep <= 1 && tm_rep2 <= 1*/) {
     if(merge == 1) 
