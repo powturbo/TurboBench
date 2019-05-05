@@ -118,7 +118,7 @@
 	url = https://github.com/richgel999/miniz
 [submodule "pysap"]
 	path = pysap
-	url = https://github.com/CoreSecurity/pysap
+	url = https://github.com/SecureAuthCorp/pysap
 [submodule "rans_static"]
 	path = rans_static
 	url = https://github.com/jkbonfield/rans_static
