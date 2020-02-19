@@ -1,0 +1,30 @@
+Changes in version 1.11:
+
+In case of decompression error caused by corrupt or truncated data,
+LZ_decompress_read now does not signal the error immediately to the
+application, but waits until all decoded bytes have been read. This
+allows tools like tarlz to recover as much data as possible from damaged
+members.
+
+It is now an error to specify two different operations to minilzip in
+the command line (--decompress and --test).
+
+Minilzip now also checks for errors when closing the input file.
+
+Minilzip now compiles on DOS with DJGPP. (Patch from Robert Riebisch).
+
+The descriptions of '-0..-9', '-m' and '-s' in the manual have been
+improved.
+
+It has been documented that it is safe to call 'LZ_(de)compress_finish'
+as many times as needed. Examples in the manual have been simplified.
+
+The configure script now accepts appending options to CFLAGS using the
+syntax 'CFLAGS+=OPTIONS'.
+
+Makefile targets 'install-bin*' have been renamed to 'install-lib*'. New
+'install-bin*' targets have been created that install a shared minilzip,
+or a static minilzip if the shared library has not been configured.
+
+It has been documented in INSTALL the use of
+CFLAGS+='-D __USE_MINGW_ANSI_STDIO' when compiling on MinGW.
