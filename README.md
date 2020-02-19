@@ -88,6 +88,7 @@ Compressors with versions 16.08.2016 <br>
 |31952896|100.0|**1676.10**|**1704.00**|**memcpy**|
 
 ### Testing:
+  - Build or Download turbobench from [releases](https://github.com/powturbo/TurboBench/releases)
   + List all plugins: "./turbobench -l2"<br />
   + List all compiled codecs: "./turbobench -l1"<br />
   + type "./turbobench -h" for help
@@ -123,7 +124,7 @@ Compressors with versions 16.08.2016 <br>
    
 ### Compile:
 
-  		git clone --recursive git://github.com/powturbo/TurboBench.git
+  		git clone --depth=1 --recursive git://github.com/powturbo/TurboBench.git
         cd TurboBench
   		make
 
@@ -257,5 +258,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 07 Feb 2020
+Last update: 19 Feb 2020
 
