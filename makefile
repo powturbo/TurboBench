@@ -1,4 +1,4 @@
-# powturbo  (c) Copyright 2013-2017
+# powturbo  (c) Copyright 2013-2020
 # ----------- Downloading + Compiling ----------------------
 # git clone --recursive git://github.com/powturbo/TurboBench.git 
 # make
