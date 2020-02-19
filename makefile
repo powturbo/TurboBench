@@ -739,10 +739,21 @@ cleana:
 	find . -name "*.o" -type f -delete
 	find . -name "*~" -type f -delete
 	find . -name "core" -type f -delete
-	rm -r pysap/docs
-	rm -r brotli/tests
-	rm -r brotli/java
-	rm -r brotli/research
+	rm -rf --interactive=never .git
+	rm -rf pysap/docs
+	rm -rf brotli/tests
+	rm -rf brotli/java
+	rm -rf brotli/research
+	rm -rf isa-l/erasure_code
+	rm -rf isa-l/crc
+	rm -rf lzma/bin
+	rm -rf lzma/CPP
+	rm -rf snappy/testdata
+	rm -rf zstd/contrib
+	rm -rf zstd/lib/legacy
+	rm -rf zstd/tests
+	rm -rf zstd/doc
+	rm -rf zlib/contrib
 endif
 
 
