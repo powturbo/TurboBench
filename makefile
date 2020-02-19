@@ -6,7 +6,6 @@
 # Minimum make: "make NCODEC2=1" to compile only brotli,lz4,lzma,zlib and zstd
 #
 # snappy:    "cp snappy_/* snappy" (or configure snappy) & type make
-# GPL: "make GPL=1" to include GPL libraries
 ifeq ($(NCODEC1),1) # Popular codecs
 else
 BROTLI=1
