@@ -1,0 +1,81 @@
+[submodule "FastLZ"]
+	path = FastLZ
+	url = https://github.com/ariya/FastLZ.git
+[submodule "bzip2"]
+	path = bzip2
+	url = https://github.com/asimonov-im/bzip2.git
+[submodule "libbsc"]
+	path = libbsc
+	url = https://github.com/IlyaGrebnov/libbsc.git
+[submodule "lzham_codec_devel"]
+	path = lzham_codec_devel
+	url = https://github.com/richgel999/lzham_codec_devel.git
+[submodule "lzo"]
+	path = lzo
+	url = https://github.com/nemequ/lzo.git
+[submodule "ms-compress"]
+	path = ms-compress
+	url = https://github.com/coderforlife/ms-compress.git
+[submodule "quicklz"]
+	path = quicklz
+	url = https://github.com/robottwo/quicklz.git
+[submodule "zlib"]
+	path = zlib
+	url = https://github.com/madler/zlib.git
+[submodule "zopfli"]
+	path = zopfli
+	url = https://github.com/google/zopfli.git
+[submodule "zpaq"]
+	path = zpaq
+	url = https://github.com/zpaq/zpaq.git
+[submodule "TurboRLE"]
+	path = TurboRLE
+	url = https://github.com/powturbo/TurboRLE.git
+[submodule "LZSSE"]
+	path = LZSSE
+	url = https://github.com/ConorStokes/LZSSE.git
+[submodule "lzfse"]
+	path = lzfse
+	url = https://github.com/lzfse/lzfse.git
+[submodule "lizard"]
+	path = lizard
+	url = https://github.com/inikep/lizard.git
+[submodule "lz4"]
+	path = lz4
+	url = https://github.com/lz4/lz4
+[submodule "snappy"]
+	path = snappy
+	url = https://github.com/google/snappy
+[submodule "zstd"]
+	path = zstd
+	url = https://github.com/facebook/zstd
+[submodule "isa-l"]
+	path = isa-l
+	url = https://github.com/01org/isa-l
+[submodule "libdeflate"]
+	path = libdeflate
+	url = https://github.com/ebiggers/libdeflate
+[submodule "miniz"]
+	path = miniz
+	url = https://github.com/richgel999/miniz
+[submodule "pysap"]
+	path = pysap
+	url = https://github.com/SecureAuthCorp/pysap
+[submodule "zlib-ng"]
+	path = zlib-ng
+	url = https://github.com/Dead2/zlib-ng
+[submodule "brotli"]
+	path = brotli
+	url = https://github.com/google/brotli.git
+[submodule "fast-lzma2"]
+	path = fast-lzma2
+	url = https://github.com/conor42/fast-lzma2
+[submodule "lzma"]
+	path = lzma
+	url = https://github.com/sisong/lzma
+[submodule "lzsa"]
+	path = lzsa
+	url = https://github.com/emmanuel-marty/lzsa
+[submodule "Turbo-Range-Coder"]
+	path = Turbo-Range-Coder
+	url = https://github.com/powturbo/Turbo-Range-Coder
