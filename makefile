@@ -641,8 +641,11 @@ OB+=yappy/yappy.o
 endif
 
 ifeq ($(ZPAQ),1)
+ifeq ($(OS),$(filter $(OS),Darwin))
+else
 CXXFLAGS+=-D_ZPAQ
 OB+=zpaq/libzpaq.o
+endif
 endif
 
 ifeq ($(CSC),1)
