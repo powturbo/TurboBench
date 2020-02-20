@@ -24,7 +24,10 @@
 //	    TurboBench: main program
 #define _CRT_SECURE_NO_WARNINGS
 #define _GNU_SOURCE              
-#define _LARGEFILE64_SOURCE 1 
+#define _LARGEFILE64_SOURCE 1
+  #if defined(__CYGWIN__) && !defined(_WIN32)
+#define _WIN32
+  #endif
 #include <stdio.h>  
 #include <string.h>  
 #include <stdlib.h> 
