@@ -537,12 +537,12 @@ endif
 #-------------------- Encoding ------------------------
 ifeq ($(TURBORLE), 1)
 CXXFLAGS+=-D_TURBORLE
-OB+=TurboRLE/trlec.o TurboRLE/trled.o 
+OB+=Turbo-Run-Length-Encoding/trlec.o Turbo-Run-Length-Encoding/trled.o 
 endif
 
 ifeq ($(MRLE),1)
 CXXFLAGS+=-D_MRLE
-OB+=TurboRLE/ext/mrle.o
+OB+=Turbo-Run-Length-Encoding/ext/mrle.o
 endif
 
 ifeq ($(RLE8),1)
