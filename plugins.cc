@@ -757,8 +757,8 @@ ZEXTERN ZEXPORT int zng_uncompress(unsigned char *dest, size_t *destLen, const u
   #endif
   //------------------------------------ Encoding -----------------------------------
   #if _RLE
-#include "TurboRLE/trle.h"
-#include "TurboRLE/ext/mrle.h"
+#include "Turbo-Run-Length-Encoding/trle.h"
+#include "Turbo-Run-Length-Encoding/ext/mrle.h"
   #endif
 
   #if _TB64
