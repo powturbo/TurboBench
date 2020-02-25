@@ -28,9 +28,6 @@
 [submodule "zpaq"]
 	path = zpaq
 	url = https://github.com/zpaq/zpaq.git
-[submodule "TurboRLE"]
-	path = TurboRLE
-	url = https://github.com/powturbo/TurboRLE.git
 [submodule "LZSSE"]
 	path = LZSSE
 	url = https://github.com/ConorStokes/LZSSE.git
