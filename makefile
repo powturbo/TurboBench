@@ -217,8 +217,8 @@ ifeq ($(LIBDEFLATE), 1)
 ifneq ($(CC), icc)
 CXXFLAGS+=-D_LIBDEFLATE 
 INC+=-Ilibdeflate -Ilibdeflate/common
-OB+=libdeflate/lib/adler32.o libdeflate/lib/aligned_malloc.o libdeflate/lib/crc32.o libdeflate/lib/arm/cpu_features.o libdeflate/lib/x86/cpu_features.o \
-    libdeflate/lib/deflate_compress.o libdeflate/lib/deflate_decompress.o libdeflate/lib/gzip_compress.o libdeflate/lib/gzip_decompress.o libdeflate/lib/zlib_compress.o libdeflate/lib/zlib_decompress.o 
+OB+=libdeflate/lib/adler32.o libdeflate/lib/crc32.o libdeflate/lib/arm/cpu_features.o libdeflate/lib/x86/cpu_features.o \
+    libdeflate/lib/deflate_compress.o libdeflate/lib/deflate_decompress.o libdeflate/lib/gzip_compress.o libdeflate/lib/gzip_decompress.o libdeflate/lib/zlib_compress.o libdeflate/lib/zlib_decompress.o libdeflate/lib/utils.o
 endif
 endif
 
@@ -288,8 +288,8 @@ ifeq ($(ZSTD), 1)
 CXXFLAGS+=-D_ZSTD 
 INC+=-Izstd/lib -Izstd/lib/common
 OB+=zstd/lib/common/pool.o zstd/lib/common/xxhash.o zstd/lib/common/error_private.o \
-    zstd/lib/compress/hist.o zstd/lib/compress/zstd_compress.o zstd/lib/compress/zstd_compress_literals.o zstd/lib/compress/zstd_compress_sequences.o zstd/lib/compress/zstd_compress_superblock.o zstd/lib/compress/zstd_double_fast.o zstd/lib/compress/zstd_fast.o zstd/lib/compress/zstd_lazy.o zstd/lib/compress/zstd_ldm.o zstd/lib/compress/zstdmt_compress.o zstd/lib/compress/zstd_opt.o \
-    zstd/lib/decompress/zstd_decompress.o zstd/lib/decompress/zstd_decompress_block.o zstd/lib/decompress/zstd_ddict.o zstd/lib/compress/fse_compress.o zstd/lib/common/fse_decompress.o zstd/lib/compress/huf_compress.o zstd/lib/decompress/huf_decompress.o zstd/lib/common/zstd_common.o zstd/lib/common/entropy_common.o
+    zstd/lib/compress/hist.o zstd/lib/compress/zstd_compress.o zstd/lib/compress/zstd_compress_literals.o zstd/lib/compress/zstd_compress_sequences.o zstd/lib/compress/zstd_double_fast.o zstd/lib/compress/zstd_fast.o zstd/lib/compress/zstd_lazy.o zstd/lib/compress/zstd_ldm.o zstd/lib/compress/zstdmt_compress.o zstd/lib/compress/zstd_opt.o \
+    zstd/lib/decompress/zstd_decompress.o zstd/lib/decompress/zstd_decompress_block.o zstd/lib/decompress/zstd_ddict.o zstd/lib/compress/fse_compress.o zstd/lib/common/fse_decompress.o zstd/lib/compress/huf_compress.o zstd/lib/decompress/huf_decompress.o zstd/lib/common/zstd_common.o zstd/lib/common/entropy_common.o zstd/lib/compress/zstd_compress_superblock.o
 endif
 
 ifeq ($(ZLIB), 1)
