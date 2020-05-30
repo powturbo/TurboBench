@@ -53,6 +53,7 @@ void print_usage() {
   return;
 }
 
+static struct param_data params;
 
 int main(int argc, char* argv[])
 {
