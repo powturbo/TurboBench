@@ -530,7 +530,7 @@ void plugprtth(FILE *f, int fmt) {
 
   switch(fmt) {
     case FMT_TEXT:     
-      fprintf(f,"      C Size  ratio%%     C MB/s     D MB/s   Name            File\n"); 
+      fprintf(f,"      C Size  ratio%%     C MB/s     D MB/s   SCORE      Name            File\n"); 
       break;
     case FMT_VBULLETIN:
       fprintf(f,"[table]C Size|ratio%|C MB/s|D MB/s|Name|File (MB=1.000.0000)\n"); 
@@ -581,11 +581,12 @@ void plugprttf(FILE *f, int fmt) {
 
 #define RATIO(_clen_, _len_)  ((double)_clen_*100.0/_len_)
 #define FACTOR(_clen_, _len_) ((double)_len_/(double)_clen_)
+#define SCORE(_clen_, _len_,_tc_,_td_) (_tc_ + 2.0 * _td_ + (double)_clen_/1000000.0)  
 
 void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, double *ptc, double *ptd, FILE *f) {
   double ratio  = RATIO(plug->len,totinlen),    
          //ratio  = FACTOR(plug->len,totinlen),
-         tc     = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td);
+         tc     = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td), score = SCORE(plug->len,totinlen,plug->tc,plug->td);
   char   name[256]; 
   if(plug->lev != INVLEV) 
     sprintf(name, "%s%s %d%s", plug->err?"?":"", plug->s, plug->lev, plug->prm);
@@ -601,25 +602,31 @@ void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, doubl
           #ifdef _WIN32
         HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
         fprintf(f, "%12"PRId64"   %5.1f   ", plug->len, ratio); 
-        #define BBOLD 15
+        #define BBOLD 2 //2=green, 15=white
         if(c) SetConsoleTextAttribute(h, BBOLD);
         fprintf(f, "%8.2f   ", tc); 
         if(c) SetConsoleTextAttribute(h, 7);
+		
         if(d) SetConsoleTextAttribute(h, BBOLD);
         fprintf(f, "%8.2f   ", td); 
         if(d) SetConsoleTextAttribute(h, 7);
+		
+        if(n) SetConsoleTextAttribute(h, BBOLD);
+        fprintf(f, "%8.2f   ", score); 
+        if(n) SetConsoleTextAttribute(h, 7);
+
         if(n) SetConsoleTextAttribute(h, BBOLD);
         fprintf(f, "%-16s", name); 
-        if(n) SetConsoleTextAttribute(h, 7);
+        if(n) SetConsoleTextAttribute(h, 7);		
         fprintf(f, "%s\n", finame); 
 		#undef BBOLD
           #else
-        fprintf(f, "%12"PRId64"   %5.1f   %s%8.2f%s   %s%8.2f%s   %s%-16s%s%s\n", 
-          plug->len, ratio, c?BOLDB:"", tc, c?BOLDE:"",  d?BOLDB:"", td, d?BOLDE:"", n?BOLDB:"", name, n?BOLDE:"", finame); 
+        fprintf(f, "%12"PRId64"   %5.1f   %s%8.2f%s   %s%8.2f%s   %s%8.2f%s   %s%-16s%s%s\n", 
+          plug->len, ratio, c?BOLDB:"", tc, c?BOLDE:"",  d?BOLDB:"", td, d?BOLDE:"", n?BOLDB:"", score, n?BOLDE:"", n?BOLDB:"", name, n?BOLDE:"", finame); 
           #endif
       } 
       else
-        fprintf(f,"%12"PRId64"   %5.1f   %8.2f   %8.2f   %-32s %s\n", plug->len, ratio, tc, td, name, finame); 
+        fprintf(f,"%12"PRId64"   %5.1f   %8.2f   %8.2f   %8.2f   %-32s %s\n", plug->len, ratio, tc, td, score, name, finame); 
       break;
     case FMT_VBULLETIN:
       fprintf(f, "%12"PRId64"|%5.1f|%s%8.2f%s|%s%8.2f%s|%s%-16s%s|%s\n", 
@@ -1185,7 +1192,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
   
   unsigned char *_cpy = _in, *out = (unsigned char*)_valloc(outsize,2);  		if(!out) die("malloc error out size=%u\n", outsize);
 
-  if((cmp || tid) && insizem && !(_cpy = _valloc(insizem,3)))
+  if((cmp || tid) && insizem && !(_cpy = _valloc(insizem*3,3)))
     die("malloc error cpy size=%u\n", insizem);
  
   codini(insize, plug->id, plug->lev, plug->prm);	
