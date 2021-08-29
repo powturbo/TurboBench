@@ -26,10 +26,10 @@ FASTLZ=1
 FLZMA2=1
 LIBDEFLATE=1
 #GIPFELI=1
-GLZA=1
+#GLZA=1
 #HEATSHRINK=1
 #IGZIP=1
-LIBBSC=1
+#LIBBSC=1
 #LIBZLING=1
 LIZARD=1
 LZFSE=1
@@ -194,8 +194,8 @@ INC+=-Ibrotli/c/include -Ibrotli/c/enc
 ifeq ($(BROTLILIB), 1)  # Use the libraries created by the brotli own builds
 OB+=brotli/out/libbrotlicommon.so brotli/out/libbrotlidec.so brotli/out/libbrotlienc.so
 else
-OB+=brotli/c/common/constants.o brotli/c/common/context.o brotli/c/common/dictionary.o brotli/c/common/platform.o brotli/c/common/transform.o brotli/c/dec/huffman.o brotli/c/dec/state.o brotli/c/dec/bit_reader.o brotli/c/dec/decode.o\
-    brotli/c/enc/backward_references.o brotli/c/enc/bit_cost.o brotli/c/enc/brotli_bit_stream.o brotli/c/enc/block_splitter.o brotli/c/enc/cluster.o brotli/c/enc/command.o brotli/c/enc/encode.o brotli/c/enc/compress_fragment.o brotli/c/enc/compress_fragment_two_pass.o \
+OB+=brotli/c/common/constants.o brotli/c/common/context.o brotli/c/common/dictionary.o brotli/c/common/platform.o brotli/c/common/transform.o brotli/c/common/shared_dictionary.o brotli/c/dec/huffman.o brotli/c/dec/state.o brotli/c/dec/bit_reader.o brotli/c/dec/decode.o\
+    brotli/c/enc/backward_references.o brotli/c/enc/bit_cost.o brotli/c/enc/brotli_bit_stream.o brotli/c/enc/block_splitter.o brotli/c/enc/cluster.o brotli/c/enc/command.o brotli/c/enc/compound_dictionary.o brotli/c/enc/encode.o brotli/c/enc/encoder_dict.o brotli/c/enc/compress_fragment.o brotli/c/enc/compress_fragment_two_pass.o \
     brotli/c/enc/encoder_dict.o brotli/c/enc/entropy_encode.o brotli/c/enc/histogram.o brotli/c/enc/fast_log.o brotli/c/enc/literal_cost.o  brotli/c/enc/memory.o brotli/c/enc/metablock.o brotli/c/enc/utf8_util.o brotli/c/enc/backward_references_hq.o \
     brotli/c/enc/dictionary_hash.o brotli/c/enc/static_dict.o
 endif
