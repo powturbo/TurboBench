@@ -1,6 +1,6 @@
 /***********************************************************************
 
-Copyright 2014-2018 Kennon Conrad
+Copyright 2014-2020 Kennon Conrad
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -845,7 +845,6 @@ void *rank_scores_thread(void *arg) {
                   || ((new_score_lmi2 + node_score_num_symbols > slmi2) && (slmi2 + num_symbols > new_score_lmi2)))
                 goto rank_scores_thread_move_down;
             }
-
           }
         } while (++rank != num_candidates);
       }
@@ -5677,7 +5676,7 @@ done_building_lcp_tree:
       pthread_join(build_lcp_threads[0], NULL);
       pthread_create(&build_lcp_threads[0], NULL, build_lcp_thread, (void *)&lcp_thread_data[6]);
 #ifdef PRINTON
-    fprintf(stderr, ".");
+      fprintf(stderr, ".");
 #endif
       score_symbol_tree(lcp_thread_data[0].min_symbol, lcp_thread_data[0].max_symbol,
           rank_scores_data_ptr->rank_scores_buffer, node_data, &node_ptrs_num, production_cost, profit_ratio_power,
@@ -5685,8 +5684,7 @@ done_building_lcp_tree:
           UTF8_compliant, symbol_counts);
       for (i = 1 ; i <= 5 ; i++) {
 #ifdef PRINTON
-        if (fast_mode == 0)
-          fprintf(stderr, ".");
+        fprintf(stderr, ".");
 #endif
         pthread_join(build_lcp_threads[i], NULL);
         pthread_create(&build_lcp_threads[i], NULL, build_lcp_thread, (void *)&lcp_thread_data[i + 6]);

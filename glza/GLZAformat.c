@@ -1,6 +1,6 @@
 /***********************************************************************
 
-Copyright 2014-2017 Kennon Conrad
+Copyright 2014-2020 Kennon Conrad
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -134,14 +134,15 @@ uint8_t GLZAformat(size_t insize, uint8_t * inbuf, size_t * outsize_ptr, uint8_t
     in_char_ptr = inbuf;
     while (in_char_ptr != end_char_ptr) {
       if ((*in_char_ptr >= 'A') && (*in_char_ptr <= 'Z')) {
-        if (((*(in_char_ptr + 1) >= 'A') && (*(in_char_ptr + 1) <= 'Z') && (cap_lock_disabled == 0))
-            && ((*(in_char_ptr + 2) < 'a') || (*(in_char_ptr + 2) > 'z'))) {
+        if ((in_char_ptr + 1 < end_char_ptr)
+            && ((*(in_char_ptr + 1) >= 'A') && (*(in_char_ptr + 1) <= 'Z') && (cap_lock_disabled == 0))
+            && ((in_char_ptr + 1 == end_char_ptr) || (*(in_char_ptr + 2) < 'a') || (*(in_char_ptr + 2) > 'z'))) {
           *out_char_ptr++ = 'B';
           *out_char_ptr++ = *in_char_ptr++ + 0x20;
           *out_char_ptr++ = *in_char_ptr++ + 0x20;
-          while ((*in_char_ptr >= 'A') && (*in_char_ptr <= 'Z'))
+          while ((in_char_ptr < end_char_ptr) && (*in_char_ptr >= 'A') && (*in_char_ptr <= 'Z'))
             *out_char_ptr++ = *in_char_ptr++ + 0x20;
-          if ((*in_char_ptr >= 'a') && (*in_char_ptr <= 'z'))
+          if ((in_char_ptr < end_char_ptr) && (*in_char_ptr >= 'a') && (*in_char_ptr <= 'z'))
             *out_char_ptr++ = 'C';
         }
         else {
@@ -204,7 +205,7 @@ uint8_t GLZAformat(size_t insize, uint8_t * inbuf, size_t * outsize_ptr, uint8_t
           order_1_counts[inbuf[i]][inbuf[i + 1]]++;
         }
         symbol_counts[inbuf[k - 1]]++;
-        order_1_counts[inbuf[k - 1]][0xFF & (inbuf[k]-inbuf[0])]++;
+        order_1_counts[inbuf[k - 1]][0xFF & (inbuf[k] - inbuf[0])]++;
         uint8_t failed_test = 0;
         i = k;
         if (insize > 100000) {
@@ -381,7 +382,7 @@ uint8_t GLZAformat(size_t insize, uint8_t * inbuf, size_t * outsize_ptr, uint8_t
       for (k = 0 ; k < 4 ; k++) {
         clear_counts(symbol_counts, order_1_counts);
         symbol_counts[inbuf[k]]++;
-        order_1_counts[inbuf[k]][0xFF & (inbuf[k+stride] - inbuf[k])]++;
+        order_1_counts[inbuf[k]][0xFF & (inbuf[k + stride] - inbuf[k])]++;
         i = k + stride;
         while (i < insize - stride) {
           symbol_counts[0xFF & (inbuf[i] - inbuf[i - stride])]++;

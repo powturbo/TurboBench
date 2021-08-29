@@ -1,6 +1,6 @@
 /***********************************************************************
 
-Copyright 2015 - 2018 Kennon Conrad
+Copyright 2015 - 2020 Kennon Conrad
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -336,18 +336,6 @@ void rescaleFirstCharBinary(uint8_t Context) {
   return;
 }
 
-void InitFreqFirstChar(uint8_t trailing_char, uint8_t leading_char) {
-  FreqFirstChar[0][trailing_char][leading_char] = 1;
-  FreqFirstChar[1][trailing_char][leading_char] = 1;
-  FreqFirstChar[2][trailing_char][leading_char] = 1;
-  FreqFirstChar[3][trailing_char][leading_char] = 1;
-  RangeScaleFirstChar[0][trailing_char]++;
-  RangeScaleFirstChar[1][trailing_char]++;
-  RangeScaleFirstChar[2][trailing_char]++;
-  RangeScaleFirstChar[3][trailing_char]++;
-  return;
-}
-
 void InitFirstCharBin(uint8_t trailing_char, uint8_t leading_char, uint8_t code_length, uint8_t cap_symbol_defined,
     uint8_t cap_lock_symbol_defined) {
   if ((RangeScaleFirstChar[0][trailing_char] != 0)
@@ -370,7 +358,7 @@ void InitFirstCharBin(uint8_t trailing_char, uint8_t leading_char, uint8_t code_
 }
 
 void InitFirstCharBinBinary(uint8_t trailing_char, uint8_t leading_char, uint8_t code_length) {
-  if (RangeScaleFirstChar[0][trailing_char]) {
+  if (RangeScaleFirstChar[0][trailing_char] != 0) {
     if (code_length < 8) {
       FreqFirstCharBinary[trailing_char][leading_char] = 1 << (8 - code_length);
       RangeScaleFirstChar[0][trailing_char] += 1 << (8 - code_length);
@@ -653,7 +641,7 @@ void EncodeMtfType2(uint8_t Context1, uint8_t Context2) {
 
 void EncodeMtfType3(uint8_t Context1, uint8_t Context2, uint8_t Context3) {
   NormalizeEncoder(8 * FREQ_SYM_TYPE_BOT3);
-  uint32_t extra_range = range & (8 * FREQ_SYM_TYPE_BOT3 - 1);  // JUST ADD "extra_range" to low!!!
+  uint32_t extra_range = range & (8 * FREQ_SYM_TYPE_BOT3 - 1);
   uint32_t sum = FreqSymTypePriorType[Context1][0] + FreqSymTypePriorType[Context1][1]
       + FreqSymTypePriorType[Context2][0] + FreqSymTypePriorType[Context2][1]
       + FreqSymTypePriorEnd[Context3][0] + FreqSymTypePriorEnd[Context3][1];
@@ -1182,11 +1170,11 @@ void UpdateFirstChar(uint8_t Symbol, uint8_t SymType, uint8_t LastChar) {
 
 void EncodeFirstCharBinary(uint8_t Symbol, uint8_t LastChar) {
   NormalizeEncoder(FREQ_FIRST_CHAR_BOT);
-  if (RangeScaleFirstCharSection[LastChar][3] > count) {
+  if (Symbol < 0x80) {
     RangeScaleFirstCharSection[LastChar][3] += UP_FREQ_FIRST_CHAR;
-    if (RangeScaleFirstCharSection[LastChar][1] > count) {
+    if (Symbol < 0x40) {
       RangeScaleFirstCharSection[LastChar][1] += UP_FREQ_FIRST_CHAR;
-      if (RangeScaleFirstCharSection[LastChar][0] > count) {
+      if (Symbol < 0x20) {
         RangeScaleFirstCharSection[LastChar][0] += UP_FREQ_FIRST_CHAR;
         if (Symbol == 0) {
           range = FreqFirstCharBinary[LastChar][0] * (range / RangeScaleFirstChar[0][LastChar]);
@@ -1214,7 +1202,7 @@ void EncodeFirstCharBinary(uint8_t Symbol, uint8_t LastChar) {
     }
     else {
       RangeLow = RangeScaleFirstCharSection[LastChar][1];
-      if (RangeScaleFirstCharSection[LastChar][2] > count) {
+      if (Symbol < 0x60) {
         RangeScaleFirstCharSection[LastChar][2] += UP_FREQ_FIRST_CHAR;
         uint8_t FoundIndex = 0x40;
         while (FoundIndex != Symbol)
@@ -1236,9 +1224,9 @@ void EncodeFirstCharBinary(uint8_t Symbol, uint8_t LastChar) {
   }
   else {
     RangeLow = RangeScaleFirstCharSection[LastChar][3];
-    if (RangeLow + RangeScaleFirstCharSection[LastChar][5] > count) {
+    if (Symbol < 0xC0) {
       RangeScaleFirstCharSection[LastChar][5] += UP_FREQ_FIRST_CHAR;
-      if (RangeScaleFirstCharSection[LastChar][4] > count) {
+      if (Symbol < 0xA0) {
         RangeScaleFirstCharSection[LastChar][4] += UP_FREQ_FIRST_CHAR;
         uint8_t FoundIndex = 0x80;
         while (FoundIndex != Symbol)
@@ -1259,7 +1247,7 @@ void EncodeFirstCharBinary(uint8_t Symbol, uint8_t LastChar) {
     }
     else {
       RangeLow += RangeScaleFirstCharSection[LastChar][5];
-      if (RangeScaleFirstCharSection[LastChar][6] > count) {
+      if (Symbol < 0xE0) {
         RangeScaleFirstCharSection[LastChar][6] += UP_FREQ_FIRST_CHAR;
         uint8_t FoundIndex = 0xC0;
         while (FoundIndex != Symbol)
@@ -1785,9 +1773,9 @@ uint8_t DecodeExtraLength() {
 
 uint8_t DecodeINST(uint8_t Context, uint8_t SIDSymbol) {
   NormalizeDecoder(FREQ_INST_BOT);
-uint32_t extra_range = range;
+  uint32_t extra_range = range;
   range /= RangeScaleINST[Context][SIDSymbol];
-extra_range -= range * RangeScaleINST[Context][SIDSymbol];
+  extra_range -= range * RangeScaleINST[Context][SIDSymbol];
   RangeHigh = FreqINST[Context][SIDSymbol][0];
   if (RangeHigh * range + extra_range > code - low) {
     range = range * RangeHigh + extra_range;

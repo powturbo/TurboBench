@@ -19,7 +19,6 @@ uint32_t ReadLow();
 uint32_t ReadRange();
 void NormalizeEncoder(uint32_t bot);
 void NormalizeDecoder(uint32_t bot);
-void InitFreqFirstChar(uint8_t trailing_char, uint8_t leading_char);
 void InitFirstCharBin(uint8_t trailing_char, uint8_t leading_char, uint8_t code_length, uint8_t cap_symbol_defined,
     uint8_t cap_lock_symbol_defined);
 void InitFirstCharBinBinary(uint8_t trailing_char, uint8_t leading_char, uint8_t code_length);

@@ -1,6 +1,6 @@
 /***********************************************************************
 
-Copyright 2014-2018 Kennon Conrad
+Copyright 2014-2020 Kennon Conrad
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -142,17 +142,12 @@ void get_symbol_category(uint32_t symbol_number, uint8_t *sym_type_ptr) {
 
 uint8_t find_first(uint32_t symbol_number) {
   uint8_t first_char;
-//fprintf(stderr,"FF SN %x ", symbol_number);
   uint32_t first_symbol = symbol_array[sd[symbol_number].define_symbol_start_index];
-//fprintf(stderr, "FIRST SYM %x\n", first_symbol);
-  if (first_symbol >= num_base_symbols) {
+  if (first_symbol >= 0x100) {
     if ((first_char = sd[first_symbol].starts) == 0) {
-// fprintf(stderr," FIRST CHAR %x\n", first_char);
       first_char = find_first(first_symbol);
       sd[first_symbol].starts = first_char;
     }
-//else
-// fprintf(stderr,"  FIRST CHAR %x\n", first_char);
     return(first_char);
   }
   return((uint8_t)first_symbol);
@@ -213,7 +208,7 @@ uint8_t find_first_UTF8(uint32_t symbol_number) {
 uint8_t find_last(uint32_t symbol_number) {
   uint8_t last_char;
   uint32_t last_symbol = symbol_array[sd[symbol_number + 1].define_symbol_start_index - 2];
-  if (last_symbol >= num_base_symbols) {
+  if (last_symbol >= 0x100) {
     if ((last_char = sd[last_symbol].ends) == 0) {
       last_char = find_last(last_symbol);
       sd[last_symbol].ends = last_char;
@@ -567,7 +562,7 @@ void encode_dictionary_symbol(uint32_t symbol) {
   }
   else if (UTF8_compliant != 0)
     EncodeFirstChar(first_char, 0, prior_end);
-  else 
+  else
     EncodeFirstCharBinary(first_char, prior_end);
 
   if (code_length > bin_code_length[first_char]) {
@@ -707,10 +702,10 @@ uint8_t embed_define_binary(uint32_t define_symbol, uint8_t in_definition) {
   if (define_symbol_instances != 1)
     new_symbol_code_length = sd[define_symbol].code_length;
   else
-    new_symbol_code_length = 0x20;
+    new_symbol_code_length = max_code_length + 1;
 
   // send symbol length, instances and ergodicity bit
-  if (define_symbol < num_base_symbols) {
+  if (define_symbol < 0x100) {
     symbol_lengths[define_symbol] = new_symbol_code_length;
     EncodeSID(NOT_CAP, 0);
     if (define_symbol_instances == 1)
@@ -736,9 +731,9 @@ uint8_t embed_define_binary(uint32_t define_symbol, uint8_t in_definition) {
 
     if (found_first_symbol == 0) {
       found_first_symbol = 1;
+      nbob[prior_end][max_code_length] = 1;
+      sum_nbob[prior_end] = 1;
       end_char = prior_end;
-      nbob[end_char][max_code_length] = 1;
-      sum_nbob[end_char] = 1;
     }
     if (define_symbol_instances == 1)
       return(1);
@@ -752,7 +747,7 @@ uint8_t embed_define_binary(uint32_t define_symbol, uint8_t in_definition) {
     // count the symbols in the definition
     symbols_in_definition = 0;
     while (define_string_ptr != define_string_end_ptr) {
-      if ((sd[*define_string_ptr].count != 1) || (*define_string_ptr < num_base_symbols))
+      if ((sd[*define_string_ptr].count != 1) || (*define_string_ptr < 0x100))
         symbols_in_definition++;
       else
         symbols_in_definition += count_symbols(*define_string_ptr);
@@ -912,7 +907,7 @@ uint8_t embed_define(uint32_t define_symbol, uint8_t in_definition) {
   if (define_symbol_instances != 1)
     new_symbol_code_length = sd[define_symbol].code_length;
   else
-    new_symbol_code_length = 0x20;
+    new_symbol_code_length = max_code_length + 1;
 
   // send symbol length, instances and ergodicity bit
   if (define_symbol < num_base_symbols) {
@@ -1081,7 +1076,6 @@ uint8_t embed_define(uint32_t define_symbol, uint8_t in_definition) {
               if (symbol_lengths[j1] != 0)
                 InitTrailingCharBin(prior_end, j1, symbol_lengths[j1]);
             } while (j1-- != 0);
-            InitFreqFirstChar(prior_end, prior_end);
           }
         }
       }
@@ -1103,9 +1097,16 @@ uint8_t embed_define(uint32_t define_symbol, uint8_t in_definition) {
     prior_is_cap = (sd[define_symbol].type & 0x20) >> 5;
     if (found_first_symbol == 0) {
       found_first_symbol = 1;
-      end_char = prior_end;
-      nbob[end_char][max_code_length] = 1;
-      sum_nbob[end_char] = 1;
+      if ((cap_encoded != 0) && (prior_end == 'C')) {
+        nbob[define_symbol][max_code_length] = 1;
+        sum_nbob[define_symbol] = 1;
+        end_char = define_symbol;
+      }
+      else {
+        nbob[prior_end][max_code_length] = 1;
+        sum_nbob[prior_end] = 1;
+        end_char = prior_end;
+      }
     }
     if (define_symbol_instances == 1)
       return(1);
@@ -1360,7 +1361,7 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
   uint32_t num_more_than_15_inst_definitions, num_greater_500, num_transmits_over_sqrt2, num_mtfs;
   uint32_t UTF8_value, max_UTF8_value, symbol, symbol_inst, prior_repeats, next_symbol;
   uint32_t min_ranked_symbols, ranked_symbols_save, num_new_symbols, num_symbols_to_code, num_rules_reversed;
-  uint32_t code_length_limit, mtf_miss_code_space, min_code_space, rules_reduced;
+  uint32_t code_length_limit, mtf_miss_code_space, sum_peaks, min_code_space, rules_reduced;
   uint32_t mtf_started[MAX_INSTANCES_FOR_REMOVE + 1], mtf_hits[MAX_INSTANCES_FOR_REMOVE + 1];
   uint32_t mtf_peak[MAX_INSTANCES_FOR_REMOVE + 1], mtf_peak_mtf[MAX_INSTANCES_FOR_REMOVE + 1];
   uint32_t mtf_in_dictionary[MAX_INSTANCES_FOR_REMOVE + 1], mtf_active[MAX_INSTANCES_FOR_REMOVE + 1];
@@ -1374,7 +1375,6 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
 
   verbose = cap_encoded = UTF8_compliant = num_symbols_defined = 0;
   first_define_ptr = 0;
-  base_bits = 8;
   use_mtf = 2;
   if (params != 0) {
     verbose = params->print_dictionary;
@@ -1387,10 +1387,6 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
     cap_encoded = (format >> 1) & 1;
     UTF8_compliant = (format >> 2) & 1;
     format = 1;
-    if (UTF8_compliant != 0) {
-      base_bits = *in_char_ptr++;
-      max_UTF8_value = 0x7F;
-    }
   }
 
   if ((symbol_array = (uint32_t *)malloc(sizeof(uint32_t) * in_size)) == 0) {
@@ -1400,7 +1396,9 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
   symbol_ptr = symbol_array;
 
   if (UTF8_compliant != 0) {
+    base_bits = *in_char_ptr++;
     num_base_symbols = 1 << base_bits;
+    max_UTF8_value = 0x7F;
     while (in_char_ptr < end_char_ptr) {
       temp_char = *in_char_ptr++;
       if (temp_char == INSERT_SYMBOL_CHAR) {
@@ -1438,6 +1436,7 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
     }
   }
   else {
+    base_bits = 8;
     num_base_symbols = 0x100;
     while (in_char_ptr < end_char_ptr) {
       temp_char = *in_char_ptr++;
@@ -1448,7 +1447,7 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
         in_char_ptr++;
       }
       else if (temp_char == INSERT_SYMBOL_CHAR) {
-        symbol = num_base_symbols;
+        symbol = 0x100;
         symbol += 0x10000 * (uint32_t)*in_char_ptr++;
         symbol += 0x100 * (uint32_t)*in_char_ptr++;
         symbol += (uint32_t)*in_char_ptr++;
@@ -1480,8 +1479,10 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
   }
 
   // count the number of instances of each symbol
-  for (i = 0 ; i < num_codes ; i++)
+  for (i = 0 ; i < num_codes ; i++) {
     sd[i].count = 0;
+    sd[i].define_symbol_start_index = 0;
+  }
   symbol_ptr = symbol_array;
   while (symbol_ptr != end_symbol_ptr) {
     symbol = *symbol_ptr++;
@@ -2365,6 +2366,9 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
       mtf_hits[i] = 0;
     peak_array = mtf_peak;
   }
+  sum_peaks = 0;
+  for (i = 2 ; i <= MAX_INSTANCES_FOR_REMOVE ; i++)
+    sum_peaks += peak_array[i];
 
   // Calculate dictionary code lengths
   if (peak_array[2] != 0) {
@@ -2372,9 +2376,20 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
         * (double)peak_array[2] / (double)(mtf_started[2] - mtf_hits[2])));
     if (queue_miss_code_length[2] > 25)
       queue_miss_code_length[2] = 25;
+    if (queue_miss_code_length[2] <= max_regular_code_length)
+      queue_miss_code_length[2] = max_regular_code_length + 1;
   }
   else
     queue_miss_code_length[2] = 25;
+
+  remaining_code_space = 1 << 30;
+  while ((queue_miss_code_length[2] < 25) && (remaining_code_space <
+      (1 << (30 - queue_miss_code_length[2])) * (sum_peaks + 2 * num_more_than_15_inst_definitions)))
+    queue_miss_code_length[2]++;
+  sum_peaks -= peak_array[2];
+  remaining_code_space -= (1 << (30 - queue_miss_code_length[2]));
+  remaining_code_space -= (1 << (30 - queue_miss_code_length[2])) * peak_array[2];
+
   for (i = 3 ; i <= MAX_INSTANCES_FOR_REMOVE ; i++) {
     if (peak_array[i] != 0) {
       queue_miss_code_length[i] = (uint32_t)(0.5 + log2((double)num_symbols_to_code
@@ -2386,6 +2401,17 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
     }
     else
       queue_miss_code_length[i] = queue_miss_code_length[i - 1];
+    while (remaining_code_space <
+        (1 << (30 - queue_miss_code_length[i])) * (sum_peaks + 2 * num_more_than_15_inst_definitions)) {
+      queue_miss_code_length[i]++;
+      uint8_t j =  i;
+      while ((j > 2) && (queue_miss_code_length[j] > queue_miss_code_length[j - 1])) {
+        queue_miss_code_length[--j]++;
+        remaining_code_space += (1 << (30 - queue_miss_code_length[j])) * peak_array[j];
+      }
+    }
+    sum_peaks -= peak_array[i];
+    remaining_code_space -= (1 << (30 - queue_miss_code_length[i])) * peak_array[i];
   }
   if ((use_mtf != 0) && (queue_miss_code_length[12] <= max_regular_code_length))
     max_regular_code_length--;
@@ -2399,11 +2425,10 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
       queue_miss_code_length[i] = max_regular_code_length + 1;
     mtf_miss_code_space += (1 << (30 - queue_miss_code_length[i])) * peak_array[i];
   }
-  max_code_length = queue_miss_code_length[2];
 
+  max_code_length = queue_miss_code_length[2];
   remaining_code_space = (1 << 30) - (1 << (30 - max_code_length)) - mtf_miss_code_space;
   min_code_space = 1 << (30 - (queue_miss_code_length[MAX_INSTANCES_FOR_REMOVE] - 1));
-
   codes_per_code_space = (double)remaining_symbols_to_code / (double)remaining_code_space;
   max_regular_code_length = 1;
   prior_repeats = 0;
@@ -2434,24 +2459,27 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
     if (code_length > max_regular_code_length)
       max_regular_code_length = code_length;
       
-    sd[ranked_symbols[i]].code_length = code_length;
-    remaining_code_space -= 1 << (30 - code_length);
-    remaining_symbols_to_code -= symbol_inst;
-
     if ((i != 0) && (sd[ranked_symbols[i - 1]].code_length > code_length)) {
+      code_length = sd[ranked_symbols[i - 1]].code_length - 1;
+      uint32_t temp_code_length = code_length - 1;
       if (index_last_length[code_length] == -1) {
-        uint32_t temp_code_length = code_length - 1;
-        while (index_last_length[temp_code_length] == -1)
+        while ((index_last_length[temp_code_length] == -1) && (temp_code_length != 0))
           temp_code_length--;
-        index_last_length[code_length] = index_last_length[temp_code_length];
+        index_last_length[code_length] = index_last_length[temp_code_length] + 1;
       }
-      sd[ranked_symbols[++index_last_length[code_length]]].code_length = code_length;
-      while (index_last_length[++code_length] == -1); // do nothing
-      index_last_length[code_length]++;
+      else {
+        index_last_length[code_length]++;
+      }
+      index_last_length[code_length + 1] = i;
+      sd[ranked_symbols[index_last_length[code_length]]].code_length = code_length;
+      sd[ranked_symbols[i]].code_length = code_length + 1;
+    }
+    else {
+      index_last_length[code_length] = i;
       sd[ranked_symbols[i]].code_length = code_length;
     }
-    else
-      index_last_length[code_length] = i;
+    remaining_code_space -= 1 << (30 - code_length);
+    remaining_symbols_to_code -= symbol_inst;
   }
 
   do {
@@ -2752,7 +2780,6 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
           }
           else
             EncodeDictType1(0);
-
           encode_dictionary_symbol(symbol);
           if (sd[symbol].count <= MAX_INSTANCES_FOR_REMOVE) {
             if (sd[symbol].count == sd[symbol].hits)
@@ -2892,6 +2919,7 @@ uint8_t GLZAencode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint8_
       free(sym_list_ptrs[i][j]);
   } while (i--);
   free(symbol_array);
+  free(symbol_array2);
   free(sd);
   free(ranked_symbols);
   free(ranked_symbols2);

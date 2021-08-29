@@ -1,6 +1,6 @@
 /***********************************************************************
 
-Copyright 2014-2018 Kennon Conrad
+Copyright 2014-2020 Kennon Conrad
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -939,7 +939,6 @@ struct sym_data * decode_new(uint32_t * string_index_ptr) {
           if (symbol_lengths[j1] != 0)
             InitTrailingCharBin(prior_end, j1, symbol_lengths[j1]);
         } while (j1-- != 0);
-        InitFreqFirstChar(prior_end, prior_end);
       }
     }
     else {
@@ -1159,26 +1158,24 @@ struct sym_data * decode_new_cap_encoded(uint32_t * string_index_ptr) {
       symbol_strings[end_string_index++] = temp_sym_data.starts = temp_sym_data.bytes.ends = base_symbol;
       temp_sym_data.string_length = 1;
 
-      if (prior_end < START_UTF8_2BYTE_SYMBOLS) {
-        if (base_symbol == 'C') {
-          prior_is_cap = 1;
+      if (base_symbol == 'C') {
+        prior_is_cap = 1;
+        if (max_code_length >= 14)
+          temp_sym_data.bytes.type = 4;
+      }
+      else if (base_symbol == 'B') {
+        prior_is_cap = 1;
+        temp_sym_data.bytes.ends = 'C';
+        if (max_code_length >= 14)
+          temp_sym_data.bytes.type = 4;
+      }
+      else {
+        if (base_symbol == ' ') {
           if (max_code_length >= 14)
             temp_sym_data.bytes.type = 4;
         }
-        else if (base_symbol == 'B') {
-          prior_is_cap = 1;
-          temp_sym_data.bytes.ends = 'C';
-          if (max_code_length >= 14)
-            temp_sym_data.bytes.type = 4;
-        }
-        else {
-          if (base_symbol == ' ') {
-            if (max_code_length >= 14)
-              temp_sym_data.bytes.type = 4;
-          }
-          else if ((base_symbol >= 0x61) && (base_symbol <= 0x7A))
-            temp_sym_data.bytes.type = 1;
-        }
+        else if ((base_symbol >= 0x61) && (base_symbol <= 0x7A))
+          temp_sym_data.bytes.type = 1;
       }
       prior_end = temp_sym_data.bytes.ends;
     }
@@ -1206,7 +1203,7 @@ struct sym_data * decode_new_cap_encoded(uint32_t * string_index_ptr) {
 
     if (find_first_symbol != 0) {
       find_first_symbol = 0;
-      sum_nbob[prior_end] = bin_data[prior_end][max_code_length].nbob = 1;
+      sum_nbob[base_symbol] = bin_data[base_symbol][max_code_length].nbob = 1;
     }
     if (temp_sym_data.bytes.repeats == 0) {
       sym_data_ptr = dadd_single_dictionary_symbol(temp_sym_data.starts);
@@ -1253,6 +1250,7 @@ struct sym_data * decode_new_cap_encoded(uint32_t * string_index_ptr) {
     if (symbols_in_definition == 16)
       symbols_in_definition = get_extra_length();
     saved_prior_is_cap = prior_is_cap;
+
     do { // Build the symbol string from the next symbols_in_definition symbols
       if (prior_is_cap == 0) {
         uint8_t context = 5 + 8 * (prior_type >> 4) + 2 * (prior_type & 7);
@@ -1930,7 +1928,8 @@ uint8_t * GLZAdecode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint
   find_first_symbol = 1;
   queue_offset = queue_size = queue_size_az = queue_size_space = queue_size_other = prior_is_cap = 0;
   new_string_index = 0;
-
+  if (UTF8_compliant != 0)
+    i = 0x90;
   InitDecoder(max_code_length, i, MAX_INSTANCES_FOR_REMOVE + 1 + max_regular_code_length - min_code_length,
       cap_encoded, UTF8_compliant, use_mtf, inbuf);
 
@@ -2168,6 +2167,7 @@ uint8_t * GLZAdecode(size_t in_size, uint8_t * inbuf, size_t * outsize_ptr, uint
     outbuf_index += chars_to_write;
   }
   free(symbol_strings);
+  free(queue_data);
   *outsize_ptr = outbuf_index;
   return(outbuf);
 }
