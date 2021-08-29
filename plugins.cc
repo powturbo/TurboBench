@@ -95,8 +95,14 @@ enum {
 #endif
  P_LIBBSC,
  P_LIBBSCC,   //QLFC
- P_DIVBWT,    //bwt
  P_ST,        //st 
+ P_LIBBSCBWT, //bwt
+
+#ifndef _DIVBWT
+#define _DIVBWT 0
+#endif
+ P_DIVBWT,    //bwt
+
 #ifndef _LIBDEFLATE
 #define _LIBDEFLATE 0
 #endif
@@ -812,11 +818,15 @@ size_t lz4ultra_decompress_inmem(const unsigned char *pFileData, unsigned char *
 
 
   //------------------------------------ Transform ----------------------------------
-  #if _DIVBWT || _LIBBSC
-#include "libbsc/libbsc/bwt/divsufsort/divsufsort.h"
+  #if _LIBBSC
 #include "libbsc/libbsc/bwt/bwt.h"
 #include "libbsc/libbsc/coder/coder.h"
   #endif
+  
+  #if _DIVBWT
+#include "Turbo-Range-Coder/libdivsufsort/include/divsufsort.h"
+ #endif
+  
   //------------------------------------ Entropy Coder ------------------------------
   #if _FASTAC
 #include "EC/fastac/arithmetic_codec.h"
@@ -1038,7 +1048,8 @@ struct plugs plugs[] = {
   { P_RLEM,      "mrle",        _TURBORLE,  "Mespostine RLE",          "" },
   { P_RLE8,      "rle8",        _TURBORLE,  "8 bit RLE",               "1,2,8,16,24,32,48,64/S#s (S:Subsection, s:single)" },
   //----- Transform -----
-  { P_DIVBWT,    "divbwt",      _LIBBSC,    "bwt libdivsufsort/libbsc","" },
+  { P_DIVBWT,    "divbwt",      _DIVBWT,    "bwt libdivsufsort","" },
+  { P_LIBBSCBWT, "bscbwt",      _LIBBSC,    "bwt libbsc",              "" },
   { P_ST,        "st",          _LIBBSC,    "st  libbsc",              "3,4,5,6,7,8" },
   { P_BRC,       "brc",         _BRC,       "Behemoth-Rank-Coding",    "0,1" },
 //{ P_MYCODEC,   "mycodec",     _MYCODEC,  "0",        "My codec",             "           ",      "",                                                                                     "" },
@@ -1292,6 +1303,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING)
     case P_LIBBSC: return bsc_compress(      in, out, inlen,/*18*/strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPHASHSIZE,/*32*/ strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPMINLEN, lev<3?1:lev, (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1, BSC_MODE);
     case P_LIBBSCC:return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
+    case P_LIBBSCBWT: { int bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, 0); *(unsigned *)out = bwtidx; return inlen+4; }
+    case P_ST: { memcpy(out+4,in, inlen); *(unsigned *)(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
       #endif
     int bsc_coder_compress(const unsigned char * input, unsigned char * output, int n, int coder, int features);
 
@@ -1752,10 +1765,9 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
      #endif
 
     //------------------------- Transform -----------------------------
-      #if _LIBBSC
+      #if _DIVBWT
     case P_DIVBWT: { int *sa = (int *)malloc((inlen + 1) * sizeof(int)); if(!sa) return -1;
       unsigned bwtidx = divbwt(in, out+sizeof(bwtidx), sa, inlen, NULL, NULL, 0); free(sa); *(unsigned *)out = bwtidx; return inlen+4; }
-    case P_ST: { memcpy(out+4,in, inlen); *(unsigned *)(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
       #endif
       #if _BRC
     case P_BRC:
@@ -2388,8 +2400,11 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_TB64SSE: return tb64ssedec(  in, inlen, out);
       #endif
 
-      #if _LIBBSC
+      #if _DIVBWT
     case P_DIVBWT: memcpy(out, in+4, outlen); bsc_bwt_decode(out, outlen, *(unsigned *)in, 0, NULL, 0); return inlen;
+      #endif
+      #if _LIBBSC
+    case P_LIBBSCBWT: memcpy(out, in+4, outlen); bsc_bwt_decode(out, outlen, *(unsigned *)in, 1, NULL, 0); break;
     case P_ST: {   memcpy(out, in+4, inlen-4); bsc_st_decode(out, inlen-4, lev, *(unsigned *)(in), 0); break; }
       #endif
 
