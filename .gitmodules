@@ -43,9 +43,6 @@
 [submodule "snappy"]
 	path = snappy
 	url = https://github.com/google/snappy
-[submodule "zstd"]
-	path = zstd
-	url = https://github.com/facebook/zstd
 [submodule "isa-l"]
 	path = isa-l
 	url = https://github.com/01org/isa-l
