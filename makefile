@@ -26,10 +26,10 @@ FASTLZ=1
 FLZMA2=1
 LIBDEFLATE=1
 #GIPFELI=1
-#GLZA=1
+GLZA=1
 #HEATSHRINK=1
 #IGZIP=1
-#LIBBSC=1
+LIBBSC=1
 #LIBZLING=1
 LIZARD=1
 LZFSE=1
@@ -201,11 +201,11 @@ OB+=brotli/c/common/constants.o brotli/c/common/context.o brotli/c/common/dictio
 endif
 endif
 
-DIVSUFSORT=libbsc/libbsc/bwt/divsufsort/divsufsort.o
+DIVSUFSORT=Turbo-Range-Coder/libdivsufsort/lib/divsufsort.o
 ifeq ($(LIBBSC),1)
 CXXFLAGS+=-D_LIBBSC -ICSC/src/libcsc -DLIBBSC_SORT_TRANSFORM_SUPPORT 
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/platform/platform.o libbsc/libbsc/filters/detectors.o \
-	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o $(DIVSUFSORT) libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o
+	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o libbsc/libbsc/bwt/libsais/libsais.o libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o
 endif
 
 ifeq ($(BZIP2),1)
