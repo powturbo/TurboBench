@@ -225,6 +225,10 @@ enum {
 #define _TORNADO 0
 #endif
  P_TORNADO,
+#ifndef _UNISHOX
+#define _UNISHOX 0
+#endif
+ P_UNISHOX,
 #ifndef _WFLZ
 #define _WFLZ 0
 #endif
@@ -496,7 +500,11 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
   #endif
 
   #if _IGZIP
+    #ifdef HAVE_IGZIP
+#include <isa-l.h>
+    #else
 #include "isa-l/include/igzip_lib.h"
+    #endif
   #endif
 
   #if _LIBLZG
@@ -744,6 +752,11 @@ struct snappy_env env;
   #if _SMALLZ4
 #include "smallz4/smallz4.h"
 #include "smallz4/smallz4cat.c"
+  #endif
+
+  #if _UNISHOX
+int unishox2_compressx(  const char *in, int inlen, char *out, int lev);
+int unishox2_decompressx(const char *in, int inlen, char *out, int lev);
   #endif
 
   #if _ZLIB_NG
@@ -1001,6 +1014,7 @@ struct plugs plugs[] = {
   { P_SNAPPY_C,  "snappy_c",    _SNAPPY_C,  "Snappy-c",                "" },
   { P_SMALLZ4,   "smallz4",     _SMALLZ4,   "SmalLz4",                 "6,7,8,9,10,11,12/z" },
   { P_TORNADO,   "tornado",     _TORNADO,   "Tornado",                 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
+  { P_UNISHOX,   "unishox",     _UNISHOX,   "unishox2",                "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
   { P_WFLZ,      "wflz",        _WFLZ,      "wfLZ",                    "1,2" },
   { P_XPACK,     "xpack",       _XPACK,     "xpack",                   "1,2,3,4,5,6,7,8,9" },
   { P_YALZ77,    "yalz77",      _YALZ77,    "Yalz77",                  "1,6,12" },
@@ -1623,7 +1637,11 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _TORNADO
-    case P_TORNADO:      return torcompress(lev, in, out, inlen);
+    case P_TORNADO:   return torcompress(lev, in, out, inlen);
+      #endif
+
+      #if _UNISHOX
+    case P_UNISHOX:   return unishox2_compressx(in, inlen, out, lev);
       #endif
 
       #if _WFLZ
@@ -2269,7 +2287,11 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if _TORNADO
-    case P_TORNADO:     return tordecompress(in, out, inlen, outlen);
+    case P_TORNADO: return tordecompress(in, out, inlen, outlen);
+      #endif
+
+      #if _UNISHOX
+    case P_UNISHOX: return unishox2_decompressx(in, inlen, out, lev);
       #endif
 
       #if _WFLZ
