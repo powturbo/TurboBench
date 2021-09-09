@@ -130,6 +130,7 @@ void _vfree(void *p, size_t size) {
   #else
 static size_t mem_peak, mem_used;
 size_t mempeak() { return mem_peak; }
+size_t memused() { return mem_used; }
 
 size_t mempeakinit() { mem_peak = mem_used = 0; return mem_peak; }
 
@@ -152,6 +153,7 @@ static void *(*mem_calloc)(size_t, size_t);
 static void *(*mem_realloc)(void*, size_t);
 static void  (*mem_free)(void *);
 static void *(*mem_memalign)(size_t, size_t);
+static int (*mem_posix_memalign)(void**, size_t, size_t);
 
 static __attribute__((constructor)) void mem_init(void) {
   mem_malloc   = dlsym(RTLD_NEXT, "malloc" );
@@ -159,6 +161,8 @@ static __attribute__((constructor)) void mem_init(void) {
   mem_free     = dlsym(RTLD_NEXT, "free"   );
   mem_calloc   = dlsym(RTLD_NEXT, "calloc" );
   mem_memalign = dlsym(RTLD_NEXT, "memalign");
+  mem_posix_memalign = dlsym(RTLD_NEXT, "posix_memalign");
+
   if(!mem_malloc || !mem_calloc || !mem_realloc || !mem_free || !mem_memalign)
     die("malloc not found\n");
 }
@@ -199,6 +203,17 @@ void *memalign(size_t nmemb, size_t size) {
   if(p) 
     mem_add(malloc_usable_size(p)); 
   return p;
+}
+
+int posix_memalign(void **ret, size_t nmemb, size_t size) { 
+  size_t _size = nmemb*size;
+
+  mem_add(_size);
+  void *p = (*mem_memalign)(nmemb, size);      
+  if(p) 
+    mem_add(malloc_usable_size(p)); 
+  *ret = p; 
+  return 0;
 }
 
 void *realloc(void *p, size_t size) { 
@@ -1187,8 +1202,8 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
 
   outsize = insize*fac + 10*Mb; 
   unsigned char *_in = NULL;
-  if(insizem && !(_in = _valloc(insizem,1)))
-    die("malloc error in size=%u\n", insizem);
+  if(insizem && !(_in = _valloc(insizem*2,1)))   // insizem * 2 because of sad
+    die("malloc error in size=%u\n", insizem);    
   
   unsigned char *_cpy = _in, *out = (unsigned char*)_valloc(outsize,2);  		if(!out) die("malloc error out size=%u\n", outsize);
 
@@ -1257,6 +1272,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
   fclose(fi); 
   if(verbose && filen > insize) 
     plugprt(plug, totinlen, finame, FMT_TEXT, &ptc, &ptd,stdout);
+  //if(memused()) printf("Mem allocated not freed null\n");          
   return totinlen;
 }
 
