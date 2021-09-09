@@ -1,4 +1,7 @@
-TurboBench:Compressor Benchmark[![Build Status](https://travis-ci.org/powturbo/TurboBench.svg?branch=master)](https://travis-ci.org/powturbo/TurboBench)
+TurboBench:Compressor Benchmark[![Build Status][travisBadge]][travisLink]
+
+[travisBadge]: https://api.travis-ci.com/powturbo/TurboBench.svg?branch=master
+[travisLink]: https://app.travis-ci.com/powturbo/TurboBench
 ================================
  - High performance precision, zero overhead. One might call it the **compression lie detector**
  - The only benchmark program including **[LzTurbo](https://sites.google.com/site/powturbo/compression-benchmark)**
