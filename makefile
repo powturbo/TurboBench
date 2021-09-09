@@ -102,8 +102,8 @@ CXX ?= g++
 #CL = $(CC)
 
 #DEBUG=-DDEBUG -g
-#DDEBUG=-g
-DDEBUG=-DNDEBUG -s
+DDEBUG=-g
+#DDEBUG=-DNDEBUG -s
 
 #------- OS/ARCH -------------------
 ifneq (,$(filter Windows%,$(OS)))
@@ -201,7 +201,7 @@ OB+=brotli/c/common/constants.o brotli/c/common/context.o brotli/c/common/dictio
 endif
 endif
 
-DIVSUFSORT=Turbo-Range-Coder/libdivsufsort/lib/divsufsort.o
+#DIVSUFSORT=Turbo-Range-Coder/libdivsufsort/lib/divsufsort.o
 ifeq ($(LIBBSC),1)
 CXXFLAGS+=-D_LIBBSC -ICSC/src/libcsc -DLIBBSC_SORT_TRANSFORM_SUPPORT 
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/platform/platform.o libbsc/libbsc/filters/detectors.o \
@@ -395,11 +395,11 @@ CXXFLAGS+=-D_LZSA
 CFLAGS+=-Ilzsa/src -Ilzsa/src/libdivsufsort/include
 OB+=lzsa/src/expand_block_v1.o lzsa/src/expand_block_v2.o lzsa/src/expand_context.o lzsa/src/expand_inmem.o lzsa/src/shrink_block_v1.o lzsa/src/shrink_block_v2.o lzsa/src/shrink_inmem.o lzsa/src/shrink_context.o \
     lzsa/src/matchfinder.o lzsa/src/frame.o 
-ifeq ($(DIVSORT), 1)
-else
+#ifeq ($(DIVSORT), 1)
+#else
 OB+=lzsa/src/libdivsufsort/lib/divsufsort.o lzsa/src/libdivsufsort/lib/sssort.o lzsa/src/libdivsufsort/lib/trsort.o
-DIVSORT=1
-endif
+#DIVSORT=1
+#endif
 endif
 
 ifeq ($(MINIZ), 1)
