@@ -102,8 +102,8 @@ CXX ?= g++
 #CL = $(CC)
 
 #DEBUG=-DDEBUG -g
-DDEBUG=-g
-#DDEBUG=-DNDEBUG -s
+#DDEBUG=-g
+DDEBUG=-DNDEBUG -s
 
 #------- OS/ARCH -------------------
 ifneq (,$(filter Windows%,$(OS)))
