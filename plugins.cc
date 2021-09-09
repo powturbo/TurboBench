@@ -1019,7 +1019,7 @@ struct plugs plugs[] = {
   { P_FREQTAB,   "freqtab",     _FREQTAB,   "FreqTable v2.Eugene shelwien", "" },
   { P_FSC,       "fsc",         _FSC,       "Finite State Coder",      "", E_ANS },
   { P_FSE,       "fse",         _ZSTD,      "Finite State Entropy",    "", E_ANS },
-  { P_FSEH,      "fsehuf",      _ZSTD,      "Finite State Entropy",    "", E_HUF },
+  { P_FSEH,      "fsehuf",      _ZSTD,      "Zstd Huffman Coding",     "", E_HUF },
   { P_FPAQC,     "fpaqc",       _FPAQC,     "Asymmetric Binary Coder", "" },
   { P_SHRC,      "fpaq0p_sh",   _SHRC,      "Bitwise RC",              "" },
   { P_SHRCV,     "vecrc_sh",    _VECRC,     "Bitwise vector RC",       "" },
@@ -1181,8 +1181,8 @@ int codini(size_t insize, int codec, int lev, char *prm) {
          slz_prepare_dist_table();
       #endif
 
-      #if _FSE
-    case P_FSEH: workmemsize = max(4096*sizeof(unsigned), workmemsize); break;
+      #if _ZSTD
+//    case P_FSEH: workmemsize = max(4096*sizeof(unsigned), workmemsize); break;
       #endif
 
       #ifdef _LZTURBO
@@ -1253,7 +1253,7 @@ static void sendbytes(const void *data, size_t n) { memcpy(gop, data, n); gop +=
 static unsigned char getbyte() { return *gip++; }
   #endif
 
-int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int codec, int lev, char *prm) { int outlen; unsigned char *oend=out+outsize;
+int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int codec, int lev, char *prm) { int outlen; unsigned char *oend=out+outsize; //printf("#(%d), inlen=%d,outsize=%d\n", codec, inlen, outsize);fflush(stdout);
   unsigned dsize = dicsize; char *q;
   if(q = strchr(prm,'d')) dsize = argtoi(q+(q[1]=='='?2:1),0);
 
@@ -1843,7 +1843,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_FSC:     { size_t outlen = 0; uint8_t *op = NULL; int ok = FSCEncode(in, inlen, &op, &outlen, 12, CODING_METHOD_DEFAULT); if(ok) { memcpy(out, op, outlen); free(op); } return outlen; }
       #endif
 
-      #if _FSE
+      #if _ZSTD
     case P_FSE:     { size_t o = FSE_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); return inlen; } return o; }
     case P_FSEH:    { size_t o = HUF_compress(out, outsize, in, inlen); //HUF_compress4X_wksp(out, outsize, in, inlen, 255, 11, workmem, workmemsize); //;
       if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); return inlen; } return o;
@@ -1971,15 +1971,14 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _MYCODEC
-//   case P_MYCODEC:   return mycomp(in, inlen, out, outsize);
+//    case P_MYCODEC:   return mycomp(in, inlen, out, outsize);
       #endif
 
     defaulf: fprintf(stderr, "library '%d' not included\n", codec);
   }
-}
+} 
 
-
-int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int codec, int lev, char *prm) {
+int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int codec, int lev, char *prm) { 
   switch(codec) {
       #if _AOM
     case P_AOM:     aomdec(in, inlen, out, outlen); return outlen;
@@ -2019,7 +2018,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_LIBBSC:     return bsc_decompress(in, inlen, out, outlen, BSC_MODE);
     case P_LIBBSCC:    return bsc_coder_decompress(in, out, lev, BSC_MODE);
       #endif
-
+ 
       #if _LIBDEFLATE
     case P_LIBDEFLATE:  { size_t rc; struct libdeflate_decompressor *dd = libdeflate_alloc_decompressor();
             if(prm && *prm=='d') outlen = libdeflate_deflate_decompress(dd, in, inlen,out, outlen, &rc);
@@ -2474,7 +2473,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_FSC:     { size_t outsize = 0; uint8_t *op = NULL; int ok = FSCDecode(in, inlen, &op, &outsize); if(ok) { memcpy(out,op,outlen); free(op); } } break;
       #endif
 
-      #if _FSE
+      #if _ZSTD
     case P_FSE:  if(inlen == outlen) memcpy(out, in, outlen); else if(inlen == 1) memset(out,in[0],outlen); else FSE_decompress(out, outlen, in, inlen); break;
     case P_FSEH: if(inlen == outlen) memcpy(out, in, outlen); else if(inlen == 1) memset(out,in[0],outlen); else HUF_decompress(out, outlen, in, inlen); break;
       #endif
