@@ -1059,10 +1059,10 @@ int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, size_t outs
         if(in+inlen>_in+_inlen) inlen = (_in+_inlen)-in;
       } else inlen = _inlen;
 
-      for(ip = in, in += inlen; ip < in; ) { 
+      for(ip = in, in += inlen; ip < in; ) { 												//printf(".");fflush(stdout);
         size_t iplen = in - ip; iplen = min(iplen, bsize);       
         bs = mode?((min(bsize, iplen) < (1<<16))?2:4):0;
-        int oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);
+        int oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);					
         if(oplen <= 0 || oplen >= iplen && mcpy) {
 	      if(mcpy) { memcpy(op+bs, ip, iplen); oplen = iplen; }
 	      else if(oplen <= 0) { op=_out; goto end; }
