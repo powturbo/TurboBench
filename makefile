@@ -42,12 +42,13 @@ LZSSE=1
 #MSCOMPRESS=1
 PYSAP=1
 QUICKLZ=1
-#SCHOCO=1
+#SHOCO=1
 SNAPPY=1
 #SNAPPY_C=1
 TURBORC=1
 TURBORLE=1
 #ZLIB_NG=1
+#UNISHOX=1
 ZOPFLI=1
 ZPAQ=1
 endif
@@ -347,10 +348,12 @@ OB+=glza/GLZAcomp.o glza/GLZAformat.o glza/GLZAcompress.o glza/GLZAencode.o glza
 endif
 
 ifeq ($(IGZIP),1)
-CXXFLAGS+=-DIGZIP
+#install isa-l package 
+CXXFLAGS+=-D_IGZIP -DHAVE_IGZIP
+LDFLAGS+=-lisal
+#$(shell pkg-config --libs libisal)
 #OB+=isa-l/igzip/igzip.o isa-l/igzip/hufftables_c.o isa-l/igzip/igzip_base.o isa-l/igzip/igzip_icf_base.o isa-l/igzip/crc32_gzip_base.o isa-l/igzip/flatten_ll.o isa-l/igzip/encode_df.o
 #OB+=isa-l/.libs/libisal.a
-OB+=/usr/lib/libisal.so
 endif
 
 ifeq ($(LZ4ULTRA), 1)
@@ -434,6 +437,11 @@ endif
 
 ifeq ($(SMALLZ4), 1)
 CXXFLAGS+=-DSMALLZ4
+endif
+
+ifeq ($(UNISHOX), 1)
+CXXFLAGS+=-D_UNISHOX
+OB+=Unishox/unishox2.o turbobench_/unishox.o
 endif
 
 #------------------------- Entropy coder -----------------------------------------
