@@ -251,7 +251,7 @@ endif
 ifeq ($(LZ4), 1)
 CXXFLAGS+=-D_LZ4
 INC+=-Ilz4/lib
-OB+=lz4/lib/lz4hc.o lz4/lib/lz4.o lz4/lib/lz4frame.o
+OB+=lz4/lib/lz4hc.o lz4/lib/lz4.o lz4/lib/lz4frame.o lz4/lib/xxhash.o
 endif
 
 ifeq ($(LZMA), 1)
@@ -290,7 +290,8 @@ CXXFLAGS+=-D_ZSTD
 INC+=-Izstd/lib -Izstd/lib/common
 OB+=zstd/lib/common/pool.o zstd/lib/common/xxhash.o zstd/lib/common/error_private.o \
     zstd/lib/compress/hist.o zstd/lib/compress/zstd_compress.o zstd/lib/compress/zstd_compress_literals.o zstd/lib/compress/zstd_compress_sequences.o zstd/lib/compress/zstd_double_fast.o zstd/lib/compress/zstd_fast.o zstd/lib/compress/zstd_lazy.o zstd/lib/compress/zstd_ldm.o zstd/lib/compress/zstdmt_compress.o zstd/lib/compress/zstd_opt.o \
-    zstd/lib/decompress/zstd_decompress.o zstd/lib/decompress/zstd_decompress_block.o zstd/lib/decompress/zstd_ddict.o zstd/lib/compress/fse_compress.o zstd/lib/common/fse_decompress.o zstd/lib/compress/huf_compress.o zstd/lib/decompress/huf_decompress.o zstd/lib/common/zstd_common.o zstd/lib/common/entropy_common.o zstd/lib/compress/zstd_compress_superblock.o
+    zstd/lib/decompress/zstd_decompress.o zstd/lib/decompress/zstd_decompress_block.o zstd/lib/decompress/zstd_ddict.o zstd/lib/compress/fse_compress.o zstd/lib/common/fse_decompress.o zstd/lib/compress/huf_compress.o zstd/lib/decompress/huf_decompress.o zstd/lib/common/zstd_common.o zstd/lib/common/entropy_common.o zstd/lib/compress/zstd_compress_superblock.o\
+    zstd/lib/decompress/huf_decompress_amd64.o
 endif
 
 ifeq ($(ZLIB), 1)
@@ -729,6 +730,10 @@ turbobench: $(OB) turbobench.o
 
 .cpp.o:
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS) $< -c -o $@ 
+
+.S.o:
+	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@  
+
 
 ifeq ($(OS),Windows_NT)
 clean:
