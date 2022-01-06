@@ -1929,25 +1929,23 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _TURBORC
-    case P_TURBORC: { //int ec = 0; if(q=strchr(prm,'e')) ec = atoi(q+(q[1]=='='?2:1));
+    case P_TURBORC: { //int ec = 0; 
+      unsigned prm1 = 5,prm2 = 6; unsigned char *q;
+      if(q=strchr(prm,'r')) { prm1 = atoi(q+(q[1]=='='?2:1)); prm2 = prm1%10; prm1 = prm1/10; if(prm1>9)prm1=9;if(!prm1) prm1=1; if(prm2>9)prm2=9;if(!prm2) prm2=1; }
       switch(lev) {
-        case 11 : return rcsenc(     in, inlen, out);
-        case 12 : return rcxsenc(    in, inlen, out);
-        case 13 : return rcssenc(    in, inlen, out);
-        case 14 : return rcxssenc(   in, inlen, out);
-        case 21 : return rcrlesenc(  in, inlen, out);
-        case 22 : return rcrlexsenc( in, inlen, out);
-        case 23 : return rcrlessenc( in, inlen, out);
-        case 24 : return rcrlexssenc(in, inlen, out);
-        case 25 : return rcqlfcsenc( in, inlen, out);
-        //case 26 : { unsigned lenmin = 128; if(q = strchr(prm,'l')) lenmin = atoi(q+(q[1]=='='?2:1)); return rcbwtsenc(  in, inlen, out, lenmin); }
+        case 1 : return rcsenc(     in, inlen, out);
+        case 2 : return rcxsenc(    in, inlen, out);
+        case 3 : return rcssenc(    in, inlen, out, prm1, prm2);
+        case 4 : return rcxssenc(   in, inlen, out, prm1, prm2);
+        case 5 : return rcrlesenc(  in, inlen, out);
+        case 6 : return rcrlessenc( in, inlen, out, prm1, prm2);
 
-        case 30 : return rcgsenc8(   in, inlen, out);
-        case 31 : return rcgsenc16(  in, inlen, out);
-        case 32 : return rcgsenc32(  in, inlen, out);
-        case 33 : return rcgssenc8(  in, inlen, out);
-        case 34 : return rcgssenc16( in, inlen, out);
-        case 35 : return rcgssenc32( in, inlen, out);
+        case 26 : return rcgsenc8(   in, inlen, out);
+        case 27 : return rcgsenc16(  in, inlen, out);
+        case 28 : return rcgsenc32(  in, inlen, out);
+        case 29 : return rcgssenc8(  in, inlen, out, prm1, prm2);
+        case 30 : return rcgssenc16( in, inlen, out, prm1, prm2);
+        case 31 : return rcgssenc32( in, inlen, out, prm1, prm2);
 //      case 2 : return trcnenc( in, inlen, out);
       }
     }
@@ -2569,25 +2567,22 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if _TURBORC
     case P_TURBORC: {
+      unsigned prm1 = 5,prm2 = 6; unsigned char *q;
+      if(q=strchr(prm,'r')) { prm1 = atoi(q+(q[1]=='='?2:1)); prm2 = prm1%10; prm1 = prm1/10; if(prm1>9)prm1=9;if(!prm1) prm1=1; if(prm2>9)prm2=9;if(!prm2) prm2=1; }
       switch(lev) {
-        case 11 : return rcsdec(     in, outlen, out);
-        case 12 : return rcxsdec(    in, outlen, out);
-        case 13 : return rcssdec(    in, outlen, out);
-        case 14 : return rcxssdec(   in, outlen, out);
+        case 1 : return rcsdec(     in, outlen, out);
+        case 2 : return rcxsdec(    in, outlen, out);
+        case 3 : return rcssdec(    in, outlen, out, prm1, prm2);
+        case 4 : return rcxssdec(   in, outlen, out, prm1, prm2);
+        case 5 : return rcrlesdec(  in, outlen, out);
+        case 6 : return rcrlessdec( in, outlen, out, prm1, prm2);
 
-        case 21 : return rcrlesdec(  in, outlen, out);
-        case 22 : return rcrlexsdec( in, outlen, out);
-        case 23 : return rcrlessdec( in, outlen, out);
-        case 24 : return rcrlexssdec(in, outlen, out);
-        case 25 : return rcqlfcsdec( in, outlen, out);
-        //case 26 : return rcbwtsdec(  in, outlen, out);
-
-        case 30 : return rcgsdec8(   in, outlen, out);
-        case 31 : return rcgsdec16(  in, outlen, out);
-        case 32 : return rcgsdec32(  in, outlen, out);
-        case 33 : return rcgssdec8(  in, outlen, out);
-        case 34 : return rcgssdec16( in, outlen, out);
-        case 35 : return rcgssdec32( in, outlen, out);
+        case 26 : return rcgsdec8(   in, outlen, out);
+        case 27 : return rcgsdec16(  in, outlen, out);
+        case 28 : return rcgsdec32(  in, outlen, out);
+        case 29 : return rcgssdec8(  in, outlen, out, prm1, prm2);
+        case 30 : return rcgssdec16( in, outlen, out, prm1, prm2);
+        case 31 : return rcgssdec32( in, outlen, out, prm1, prm2);
 //        case 2 : return trcndec( in, outlen, out);
       }
     }
