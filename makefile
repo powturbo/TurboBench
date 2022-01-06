@@ -29,7 +29,7 @@ LIBDEFLATE=1
 GLZA=1
 #HEATSHRINK=1
 #IGZIP=1
-#LIBBSC=1
+LIBBSC=1
 #LIBZLING=1
 LIZARD=1
 LZFSE=1
@@ -523,7 +523,7 @@ endif
 
 ifeq ($(TURBORC),1) 
 CXXFLAGS+=-D_TURBORC
-OB+=Turbo-Range-Coder/turborcs.o Turbo-Range-Coder/turborcss.o #Turbo-Range-Coder/turborcn.o
+OB+=Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rc_ss.o #Turbo-Range-Coder/turborcn.o
 endif
 
 ifeq ($(VECRC),1) 
