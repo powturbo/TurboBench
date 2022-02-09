@@ -52,9 +52,6 @@
 [submodule "miniz"]
 	path = miniz
 	url = https://github.com/richgel999/miniz
-[submodule "pysap"]
-	path = pysap
-	url = https://github.com/SecureAuthCorp/pysap
 [submodule "zlib-ng"]
 	path = zlib-ng
 	url = https://github.com/Dead2/zlib-ng
