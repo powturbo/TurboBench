@@ -1,8 +1,5 @@
-TurboBench:Compressor Benchmark[![Build Status][travisBadge]][travisLink]
-
-[travisBadge]: https://api.travis-ci.com/powturbo/TurboBench.svg?branch=master
-[travisLink]: https://app.travis-ci.com/powturbo/TurboBench
-================================
+TurboBench:Compressor Benchmark
+===================================================================================================
  - High performance precision, zero overhead. One might call it the **compression lie detector**
  - The only benchmark program including **[LzTurbo](https://sites.google.com/site/powturbo/compression-benchmark)**
  - 100% in-memory benchmark, no I/O overhead
@@ -262,5 +259,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 10 SEP 2021
+Last update: 09 FEB 2022
 
