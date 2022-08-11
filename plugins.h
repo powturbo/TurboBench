@@ -1,7 +1,7 @@
 /**
     Copyright (C) powturbo 2013-2021
     GPL v2 License
-  
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -21,16 +21,16 @@
     - twitter  : https://twitter.com/powturbo
     - email    : powturbo [_AT_] gmail [_DOT_] com
 **/
-//	    TurboBench: plugins.h - settings 
+//        TurboBench: plugins.h - settings
 #define E_ANS  0x1
 #define E_HUF  0x2
 
-struct plugs { 
-  int   id; 
+struct plugs {
+  int   id;
   char  *s;
-  int   codec; 
-  char  *name,*lev; 
-  unsigned flag,blksize; 
+  int   codec;
+  char  *name,*lev;
+  unsigned flag,blksize;
 };
 
   #ifdef __cplusplus

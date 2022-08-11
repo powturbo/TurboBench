@@ -41,7 +41,7 @@ enum {
 #ifndef _BZIP2
 #define _BZIP2 0
 #endif
- P_BZIP2, 
+ P_BZIP2,
 #ifndef _CHAMELEON
 #define _CHAMELEON 0
 #endif
@@ -95,7 +95,7 @@ enum {
 #endif
  P_LIBBSC,
  P_LIBBSCC,   //QLFC
- P_ST,        //st 
+ P_ST,        //st
  P_LIBBSCBWT, //bwt
 
 #ifndef _DIVBWT
@@ -338,7 +338,7 @@ enum {
 #ifndef _RECIPARITH
 #define _RECIPARITH 0
 #endif
- P_RECIPARITH,      
+ P_RECIPARITH,
 #ifndef _SHRC
 #define _SHRC 0
 #endif
@@ -761,7 +761,7 @@ int unishox2_decompressx(const char *in, int inlen, char *out, int lev);
 
   #if _ZLIB_NG
 #include "zlib-ng/zconf-ng.h"
-//#include "zlib-ng/zlib-ng.h"     
+//#include "zlib-ng/zlib-ng.h"
 ZEXTERN ZEXPORT const char *zlibng_version(void);
 ZEXTERN ZEXPORT int zng_compress2(unsigned char *dest, size_t *destLen, const unsigned char *source, size_t sourceLen, int level);
 ZEXTERN ZEXPORT int zng_uncompress(unsigned char *dest, size_t *destLen, const unsigned char *source, size_t sourceLen);
@@ -835,11 +835,11 @@ size_t lz4ultra_decompress_inmem(const unsigned char *pFileData, unsigned char *
 #include "libbsc/libbsc/bwt/bwt.h"
 #include "libbsc/libbsc/coder/coder.h"
   #endif
-  
+
   #if _DIVBWT
 #include "Turbo-Range-Coder/libdivsufsort/include/divsufsort.h"
  #endif
-  
+
   //------------------------------------ Entropy Coder ------------------------------
   #if _FASTAC
 #include "EC/fastac/arithmetic_codec.h"
@@ -983,7 +983,7 @@ struct plugs plugs[] = {
   { P_LZ4,       "lz4",         _LZ4,       "Lz4",                     "0,1,9,10,11,12,16/MfsB#" },
   { P_LZ4ULTRA,  "lz4ultra",    _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
   { P_LIZARD,    "lizard",      _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
-  { P_LZFSE,     "lzfse",       _LZFSE,     "lzfse",                   "" },  
+  { P_LZFSE,     "lzfse",       _LZFSE,     "lzfse",                   "" },
   { P_LZFSEA,    "lzfsea",      _LZFSEA,    "lzfsea",                  "" },
   { P_LZHAM,     "lzham",       _LZHAM,     "Lzham",                   "1,2,3,4/t#:fb#:x#" },
   { P_LZLIB,     "lzlib",       _LZLIB,     "Lzlib",                   "1,2,3,4,5,6,7,8,9/d#:fb#" },
@@ -1359,7 +1359,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         density_processing_result rs = density_compress((const uint8_t *)in, inlen, (uint8_t*)out, outsize, (const DENSITY_ALGORITHM)lev/*, DENSITY_BLOCK_TYPE_DEFAULT, NULL, NULL*/);
         return rs.state?0:rs.bytesWritten;
       }
-      #endif       
+      #endif
 
       #if _DOBOZ
     case P_DOBOZ:   { doboz::Compressor c; size_t rc; return c.compress(in,inlen, out, c.getMaxCompressedSize(inlen), rc) == doboz::RESULT_OK ? rc : -1; }
@@ -1929,7 +1929,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _TURBORC
-    case P_TURBORC: { //int ec = 0; 
+    case P_TURBORC: { //int ec = 0;
       unsigned prm1 = 5,prm2 = 6; unsigned char *q;
       if(q=strchr(prm,'r')) { prm1 = atoi(q+(q[1]=='='?2:1)); prm2 = prm1%10; prm1 = prm1/10; if(prm1>9)prm1=9;if(!prm1) prm1=1; if(prm2>9)prm2=9;if(!prm2) prm2=1; }
       switch(lev) {
@@ -1992,9 +1992,9 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
     defaulf: fprintf(stderr, "library '%d' not included\n", codec);
   }
-} 
+}
 
-int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int codec, int lev, char *prm) { 
+int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int codec, int lev, char *prm) {
   switch(codec) {
       #if _AOM
     case P_AOM:     aomdec(in, inlen, out, outlen); return outlen;
@@ -2034,7 +2034,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_LIBBSC:     return bsc_decompress(in, inlen, out, outlen, BSC_MODE);
     case P_LIBBSCC:    return bsc_coder_decompress(in, out, lev, BSC_MODE);
       #endif
- 
+
       #if _LIBDEFLATE
     case P_LIBDEFLATE:  { size_t rc; struct libdeflate_decompressor *dd = libdeflate_alloc_decompressor();
             if(prm && *prm=='d') outlen = libdeflate_deflate_decompress(dd, in, inlen,out, outlen, &rc);

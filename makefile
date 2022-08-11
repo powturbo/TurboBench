@@ -1,6 +1,6 @@
 # powturbo  (c) Copyright 2013-2020
 # ----------- Downloading + Compiling ----------------------
-# git clone --recursive git://github.com/powturbo/TurboBench.git 
+# git clone --recursive git://github.com/powturbo/TurboBench.git
 # make
 #
 # Minimum make: "make NCODEC2=1" to compile only brotli,lz4,lzma,zlib and zstd
@@ -53,7 +53,7 @@ ZOPFLI=1
 ZPAQ=1
 endif
 
-ifeq ($(EC),1) # Encoding Entropy coders / RLE 
+ifeq ($(EC),1) # Encoding Entropy coders / RLE
 #AOM=1
 FASTAC=1
 FASTHF=1
@@ -69,7 +69,7 @@ SUBOTIN=1
 VECRC=1
 endif
 
-ifeq ($(TR),1) # Transform 
+ifeq ($(TR),1) # Transform
 #BRC=1
 endif
 # Archived codecs and other codecs (manual download)
@@ -127,17 +127,17 @@ ifeq ($(ARCH),ppc64le)
 #  SSE=-D__SSSE3__
   CFLAGS=-mcpu=power9 -mtune=power9 $(SSE)
 else ifeq ($(ARCH),aarch64)
-  CFLAGS+=-march=armv8-a 
+  CFLAGS+=-march=armv8-a
 ifneq (,$(findstring clang, $(CC)))
-  CFLAGS+=-march=armv8-a 
+  CFLAGS+=-march=armv8-a
   OPT+=-fomit-frame-pointer
 else
-  CFLAGS+=-march=armv8-a 
+  CFLAGS+=-march=armv8-a
 endif
   SSE=-march=armv8-a
 else ifeq ($(ARCH),$(filter $(ARCH),x86_64))
 # set minimum arch sandy bridge SSE4.1 + AVX
-  SSE=-march=corei7-avx -mtune=corei7-avx 
+  SSE=-march=corei7-avx -mtune=corei7-avx
 # SSE+=-mno-avx -mno-aes
   AVX2=-march=haswell
 #  CFLAGS=$(SSE)
@@ -146,7 +146,7 @@ else
 SNAPPY_C=0
 endif
 
-CFLAGS+=-w -Wall $(DEBUG) $(OPT) 
+CFLAGS+=-w -Wall $(DEBUG) $(OPT)
 
 ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
 LDFLAGS+=-lrt -lpthread
@@ -172,13 +172,13 @@ endif
 
 ifeq ($(OPENMP),1)
 CFLAGS+=-fopenmp -DLIBBSC_OPENMP_SUPPORT
-LDFLAGS+=-fopenmp 
+LDFLAGS+=-fopenmp
 endif
 
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall $(INC)  
+CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall $(INC)
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti $(INC)
 #CXXFLAGS+=-Imarlin/inc
-#CXXFLAGS+=$(DDEBUG) -std=gnu++14 -Wall -Wextra -Wcast-qual -Wcast-align -Wstrict-aliasing -Wswitch-enum -Wundef -pedantic  -Wfatal-errors -Wshadow 
+#CXXFLAGS+=$(DDEBUG) -std=gnu++14 -Wall -Wextra -Wcast-qual -Wcast-align -Wstrict-aliasing -Wswitch-enum -Wundef -pedantic  -Wfatal-errors -Wshadow
 
 all:  turbobench
 
@@ -190,8 +190,8 @@ endif
 
 #--------------------------------- Default codecs --------------------------------------------------------------------------------------------
 ifeq ($(BROTLI), 1)
-CXXFLAGS+=-D_BROTLI 
-INC+=-Ibrotli/c/include -Ibrotli/c/enc 
+CXXFLAGS+=-D_BROTLI
+INC+=-Ibrotli/c/include -Ibrotli/c/enc
 ifeq ($(BROTLILIB), 1)  # Use the libraries created by the brotli own builds
 OB+=brotli/out/libbrotlicommon.so brotli/out/libbrotlidec.so brotli/out/libbrotlienc.so
 else
@@ -204,7 +204,7 @@ endif
 
 #DIVSUFSORT=Turbo-Range-Coder/libdivsufsort/lib/divsufsort.o
 ifeq ($(LIBBSC),1)
-CXXFLAGS+=-D_LIBBSC -ICSC/src/libcsc -DLIBBSC_SORT_TRANSFORM_SUPPORT 
+CXXFLAGS+=-D_LIBBSC -ICSC/src/libcsc -DLIBBSC_SORT_TRANSFORM_SUPPORT
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/platform/platform.o libbsc/libbsc/filters/detectors.o \
 	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o libbsc/libbsc/bwt/libsais/libsais.o libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o
 endif
@@ -216,7 +216,7 @@ endif
 
 ifeq ($(LIBDEFLATE), 1)
 ifneq ($(CC), icc)
-CXXFLAGS+=-D_LIBDEFLATE 
+CXXFLAGS+=-D_LIBDEFLATE
 INC+=-Ilibdeflate -Ilibdeflate/common
 OB+=libdeflate/lib/adler32.o libdeflate/lib/crc32.o libdeflate/lib/arm/cpu_features.o libdeflate/lib/x86/cpu_features.o \
     libdeflate/lib/deflate_compress.o libdeflate/lib/deflate_decompress.o libdeflate/lib/gzip_compress.o libdeflate/lib/gzip_decompress.o libdeflate/lib/zlib_compress.o libdeflate/lib/zlib_decompress.o libdeflate/lib/utils.o
@@ -235,14 +235,14 @@ OB+=lzfse/src/lzfse_decode_base.o lzfse/src/lzfse_decode.o lzfse/src/lzfse_encod
 endif
 
 ifeq ($(LZHAM), 1)
-CXXFLAGS+=-D_LZHAM -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull" 
+CXXFLAGS+=-D_LZHAM -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -D"UINT64_MAX=-1ull"
 OB+=lzham_codec_devel/lzhamcomp/lzham_lzbase.o lzham_codec_devel/lzhamcomp/lzham_lzcomp.o lzham_codec_devel/lzhamcomp/lzham_lzcomp_internal.o \
 	lzham_codec_devel/lzhamcomp/lzham_lzcomp_state.o lzham_codec_devel/lzhamcomp/lzham_match_accel.o lzham_codec_devel/lzhamcomp/lzham_pthreads_threading.o \
 	lzham_codec_devel/lzhamdecomp/lzham_assert.o lzham_codec_devel/lzhamdecomp/lzham_checksum.o lzham_codec_devel/lzhamdecomp/lzham_huffman_codes.o \
 	lzham_codec_devel/lzhamdecomp/lzham_lzdecomp.o lzham_codec_devel/lzhamdecomp/lzham_lzdecompbase.o lzham_codec_devel/lzhamdecomp/lzham_mem.o \
 	lzham_codec_devel/lzhamdecomp/lzham_platform.o lzham_codec_devel/lzhamdecomp/lzham_prefix_coding.o \
 	lzham_codec_devel/lzhamdecomp/lzham_symbol_codec.o lzham_codec_devel/lzhamdecomp/lzham_timer.o lzham_codec_devel/lzhamdecomp/lzham_vector.o \
-	lzham_codec_devel/lzhamlib/lzham_lib.o 
+	lzham_codec_devel/lzhamlib/lzham_lib.o
 ifeq ($(OS), Windows)
 OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
@@ -257,36 +257,36 @@ endif
 ifeq ($(LZMA), 1)
 CXXFLAGS+=-D_LZMA
 CFLAGS+=-D_7ZIP_ST
-CXXFLAGS+=-D_7Z_TYPES_ 
-OB+=lzma/C/Alloc.o lzma/C/LzFind.o lzma/C/LzmaDec.o lzma/C/LzmaEnc.o lzma/C/LzmaLib.o 
+CXXFLAGS+=-D_7Z_TYPES_
+OB+=lzma/C/Alloc.o lzma/C/LzFind.o lzma/C/LzmaDec.o lzma/C/LzmaEnc.o lzma/C/LzmaLib.o
 ifeq ($(OS),Windows_NT)
-OB+=lzma/C/Threads.o lzma/C/LzFindMt.o 
+OB+=lzma/C/Threads.o lzma/C/LzFindMt.o
 endif
 endif
 
 ifeq ($(LZOMA), 1)
 CXXFLAGS+=-D_LZOMA
-OB+=lzoma_/pack.o lzoma_/unpack.o lzoma_/divsufsort.o 
+OB+=lzoma_/pack.o lzoma_/unpack.o lzoma_/divsufsort.o
 endif
 
-ifeq ($(LZSSE), 1) # SSE4.1 
+ifeq ($(LZSSE), 1) # SSE4.1
 ifeq ($(ARCH),$(filter $(ARCH),x86_))
 CXXFLAGS+=-D_LZSSE
 LZSSE/lzsse2/lzsse2.o: LZSSE/lzsse2/lzsse2.cpp
-	$(CXX) -O2 -msse4.1 -std=c++11 $< -c -o $@ 
+	$(CXX) -O2 -msse4.1 -std=c++11 $< -c -o $@
 
 LZSSE/lzsse4/lzsse4.o: LZSSE/lzsse4/lzsse4.cpp
-	$(CXX) -O2 -msse4.1 -std=c++11  $< -c -o $@ 
+	$(CXX) -O2 -msse4.1 -std=c++11  $< -c -o $@
 
 LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
 	$(CXX) -O2 -msse4.1 -std=c++11  $< -c -o $@
 
-OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o 
+OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o
 endif
 endif
 
 ifeq ($(ZSTD), 1)
-CXXFLAGS+=-D_ZSTD 
+CXXFLAGS+=-D_ZSTD
 INC+=-Izstd/lib -Izstd/lib/common
 OB+=zstd/lib/common/pool.o zstd/lib/common/xxhash.o zstd/lib/common/error_private.o \
     zstd/lib/compress/hist.o zstd/lib/compress/zstd_compress.o zstd/lib/compress/zstd_compress_literals.o zstd/lib/compress/zstd_compress_sequences.o zstd/lib/compress/zstd_double_fast.o zstd/lib/compress/zstd_fast.o zstd/lib/compress/zstd_lazy.o zstd/lib/compress/zstd_ldm.o zstd/lib/compress/zstdmt_compress.o zstd/lib/compress/zstd_opt.o \
@@ -322,34 +322,34 @@ CXXFLAGS+=-D_FLZMA2
 #Compile error: Disabled
 OB+=fast-lzma2/dict_buffer.o fast-lzma2/fl2_common.o fast-lzma2/fl2_compress.o fast-lzma2/fl2_decompress.o fast-lzma2/lzma2_dec.o fast-lzma2/lzma2_enc.o fast-lzma2/radix_bitpack.o fast-lzma2/radix_mf.o fast-lzma2/radix_struct.o \
 fast-lzma2/range_enc.o fast-lzma2/fl2_threading.o fast-lzma2/fl2_pool.o fast-lzma2/util.o
-#fast-lzma2/xxhash.o fast-lzma2/fl2_error_private.o  
+#fast-lzma2/xxhash.o fast-lzma2/fl2_error_private.o
 endif
 
 ifeq ($(GLZA), 1)
 CXXFLAGS+=-D_GLZA
 glza/GLZAmodel.o: glza/GLZAmodel.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 
 glza/GLZAcomp.o: glza/GLZAcomp.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 
 glza/GLZAencode.o: glza/GLZAencode.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 
 glza/GLZAcompress.o: glza/GLZAcompress.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 
 glza/GLZAformat.o: glza/GLZAformat.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 
 glza/GLZAdecode.o: glza/GLZAdecode.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 
-OB+=glza/GLZAcomp.o glza/GLZAformat.o glza/GLZAcompress.o glza/GLZAencode.o glza/GLZAdecode.o glza/GLZAmodel.o 
+OB+=glza/GLZAcomp.o glza/GLZAformat.o glza/GLZAcompress.o glza/GLZAencode.o glza/GLZAdecode.o glza/GLZAmodel.o
 endif
 
 ifeq ($(IGZIP),1)
-#install isa-l package 
+#install isa-l package
 CXXFLAGS+=-D_IGZIP -DHAVE_IGZIP
 LDFLAGS+=-lisal
 #$(shell pkg-config --libs libisal)
@@ -360,7 +360,7 @@ endif
 ifeq ($(LZ4ULTRA), 1)
 CXXFLAGS+=-D_LZ4ULTRA
 CXXFLAGS+=-Ilz4ultra/src -Ilz4ultra/src/libdivsufsort/include
-OB+=lz4ultra/src/shrink_inmem.o lz4ultra/src/expand_inmem.o lz4ultra/src/shrink_block.o lz4ultra/src/expand_block.o lz4ultra/src/shrink_context.o lz4ultra/src/matchfinder.o lz4ultra/src/frame.o 
+OB+=lz4ultra/src/shrink_inmem.o lz4ultra/src/expand_inmem.o lz4ultra/src/shrink_block.o lz4ultra/src/expand_block.o lz4ultra/src/shrink_context.o lz4ultra/src/matchfinder.o lz4ultra/src/frame.o
 ifeq ($(DIVSORT), 1)
 else
 OB+=lz4ultra/src/libdivsufsort/lib/divsufsort.o lz4ultra/src/libdivsufsort/lib/sssort.o lz4ultra/src/libdivsufsort/lib/trsort.o
@@ -370,7 +370,7 @@ endif
 
 ifeq ($(LZLIB), 1)
 CXXFLAGS+=-D_LZLIB
-OB+=lzlib-1.11/lzlib.o lzlib_/bbexample.o 
+OB+=lzlib-1.11/lzlib.o lzlib_/bbexample.o
 endif
 
 ifeq ($(ZLIB_NG), 1)
@@ -391,14 +391,14 @@ lzo/src/lzo1f_9x.o lzo/src/lzo1f_d1.o lzo/src/lzo1f_d2.o lzo/src/lzo1x_1.o lzo/s
 lzo/src/lzo1x_9x.o lzo/src/lzo1x_d1.o lzo/src/lzo1x_d2.o lzo/src/lzo1x_d3.o lzo/src/lzo1x_o.o lzo/src/lzo1y_1.o lzo/src/lzo1y_9x.o \
 lzo/src/lzo1y_d1.o lzo/src/lzo1y_d2.o lzo/src/lzo1y_d3.o lzo/src/lzo1y_o.o lzo/src/lzo1z_9x.o lzo/src/lzo1z_d1.o lzo/src/lzo1z_d2.o \
 lzo/src/lzo1z_d3.o lzo/src/lzo1_99.o lzo/src/lzo2a_9x.o lzo/src/lzo2a_d1.o lzo/src/lzo2a_d2.o lzo/src/lzo_crc.o lzo/src/lzo_init.o \
-lzo/src/lzo_ptr.o lzo/src/lzo_str.o lzo/src/lzo_util.o 
+lzo/src/lzo_ptr.o lzo/src/lzo_str.o lzo/src/lzo_util.o
 endif
 
 ifeq ($(LZSA), 1)
 CXXFLAGS+=-D_LZSA
 CFLAGS+=-Ilzsa/src -Ilzsa/src/libdivsufsort/include
 OB+=lzsa/src/expand_block_v1.o lzsa/src/expand_block_v2.o lzsa/src/expand_context.o lzsa/src/expand_inmem.o lzsa/src/shrink_block_v1.o lzsa/src/shrink_block_v2.o lzsa/src/shrink_inmem.o lzsa/src/shrink_context.o \
-    lzsa/src/matchfinder.o lzsa/src/frame.o 
+    lzsa/src/matchfinder.o lzsa/src/frame.o
 #ifeq ($(DIVSORT), 1)
 #else
 OB+=lzsa/src/libdivsufsort/lib/divsufsort.o lzsa/src/libdivsufsort/lib/sssort.o lzsa/src/libdivsufsort/lib/trsort.o
@@ -433,7 +433,7 @@ endif
 
 ifeq ($(SLZ), 1)
 CXXFLAGS+=-D_SLZ
-OB+=libslz/src/slz.o 
+OB+=libslz/src/slz.o
 endif
 
 ifeq ($(SMALLZ4), 1)
@@ -451,14 +451,14 @@ endif
 # or copy aom_/aom_config.h to aom
 ifeq ($(AOM),1)
 CXXFLAGS+=-D_AOM
-OB+=EC/aom_/aom.o EC/aom/aom_dsp/entenc.o EC/aom/aom_dsp/entdec.o EC/aom/aom_dsp/entcode.o 
-#OB+=daala_/daala.o 
+OB+=EC/aom_/aom.o EC/aom/aom_dsp/entenc.o EC/aom/aom_dsp/entdec.o EC/aom/aom_dsp/entcode.o
+#OB+=daala_/daala.o
 endif
 
 # First download or clone daala (https://github.com/xiph/daala) into TurboBench directory
 ifeq ($(DAALA),1)
 CXXFLAGS+=-D_DAALA
-OB+=EC/daala_/daala.o 
+OB+=EC/daala_/daala.o
 endif
 
 ifeq ($(FASTAC),1)
@@ -466,14 +466,14 @@ CXXFLAGS+=-D_FASTAC
 OB+=EC/fastac/arithmetic_codec.o
 endif
 
-ifeq ($(FASTHF),1) 
+ifeq ($(FASTHF),1)
 CXXFLAGS+=-D_FASTHF
 OB+=EC/fasthf/binary_codec.o
 endif
 
-ifeq ($(FPAQ0P),1) 
+ifeq ($(FPAQ0P),1)
 CXXFLAGS+=-D_FPAQ0P
-OB+=EC/fpaq0p/fpaq0p_sh.o 
+OB+=EC/fpaq0p/fpaq0p_sh.o
 endif
 
 ifeq ($(FPC), 1)
@@ -491,62 +491,62 @@ FREQOPT=-march=skylake -fwhole-program -fpermissive -fstrict-aliasing -fomit-fra
 -flto -ffat-lto-objects -Wl,-flto -fuse-linker-plugin -Wl,-O -Wl,--sort-common -Wl,--as-needed -ffunction-sections
 
 EC/freqtab/src/c_mem.o: EC/freqtab/src/c_mem.cpp
-	$(CXX) $(FREQOPT) -O3 -std=c++11 $< -c -o $@ 
+	$(CXX) $(FREQOPT) -O3 -std=c++11 $< -c -o $@
 
 EC/freqtab/src/model.o: EC/freqtab/src/model.cpp
-	$(CXX) $(FREQOPT) -O3 -march=skylake -std=c++11 $< -c -o $@ 
+	$(CXX) $(FREQOPT) -O3 -march=skylake -std=c++11 $< -c -o $@
 endif
 
 OB+=EC/freqtab/src/c_mem.o EC/freqtab/src/coder/model.o
 endif
 
 
-ifeq ($(RANS_S),1) 
+ifeq ($(RANS_S),1)
 CXXFLAGS+=-D_RANS_S
 EC/rans_static/r32x16b_avx2.o: EC/rans_static/r32x16b_avx2.c
-	$(CC) -O3 -mavx2 $(MARCH) $< -c -o $@ 
+	$(CC) -O3 -mavx2 $(MARCH) $< -c -o $@
 OB+=EC/rans_static/rANS_static4x8.o EC/rans_static/rANS_static4x16pr.o EC/rans_static/rANS_static.o EC/rans_static/arith_static.o
 ifeq ($(AVX2),1)
 OB+=EC/rans_static/r32x16b_avx2.o
 endif
 endif
 
-ifeq ($(RECIPARITH),1) 
+ifeq ($(RECIPARITH),1)
 CXXFLAGS+=-D_RECIPARITH
 OB+=EC/recip_arith_/reciparith.o
 endif
 
-ifeq ($(SUBOTIN),1) 
+ifeq ($(SUBOTIN),1)
 CXXFLAGS+=-D_SUBOTIN
-OB+=EC/subotin_/subotin.o 
+OB+=EC/subotin_/subotin.o
 endif
 
-ifeq ($(TURBORC),1) 
+ifeq ($(TURBORC),1)
 CXXFLAGS+=-D_TURBORC
 OB+=Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rc_ss.o #Turbo-Range-Coder/turborcn.o
 endif
 
-ifeq ($(VECRC),1) 
+ifeq ($(VECRC),1)
 CXXFLAGS+=-D_VECRC
 OB+=EC/vecrc/vector_rc.o
 endif
 
-#OB+=FastARI/FastAri.o 
+#OB+=FastARI/FastAri.o
 #OB+=nibrans/tenc.o nibrans/tdec.o
 #OB+=fqz0/f_o0.o
 #OB+=ppmdec/ppmdec.o
-#OB+=ans_nania/narans.o 
+#OB+=ans_nania/narans.o
 #OB+=marlin/src/compress.o marlin/src/configuration.o marlin/src/decompress.o marlin/src/dictionary.o marlin/src/marlin.o
 #endif
 #ifeq ($(NCOMP1), 0)
 #OB+=FiniteStateEntropy/lib/fse.o FiniteStateEntropy/lib/huff0.o
 #endif
-#OB+=fsc/fsc_enc.o fsc/fsc_dec.o fsc/fsc_utils.o fsc/bits.o fsc/histo.o fsc/alias.o 
+#OB+=fsc/fsc_enc.o fsc/fsc_dec.o fsc/fsc_utils.o fsc/bits.o fsc/histo.o fsc/alias.o
 #OB+=polar/polar.o fpaqc/fpaqc.o
 #-------------------- Encoding ------------------------
 ifeq ($(TURBORLE), 1)
 CXXFLAGS+=-D_TURBORLE
-OB+=Turbo-Run-Length-Encoding/trlec.o Turbo-Run-Length-Encoding/trled.o 
+OB+=Turbo-Run-Length-Encoding/trlec.o Turbo-Run-Length-Encoding/trled.o
 endif
 
 ifeq ($(MRLE),1)
@@ -570,20 +570,20 @@ CXXFLAGS+=-D_DENSITY
 OB+=density/src/buffers/buffer.o density/src/algorithms/algorithms.o density/src/algorithms/dictionaries.o density/src/structure/header.o density/src/globals.o density/src/buffers/buffer.o \
 	density/src/algorithms/chameleon/core/chameleon_decode.o density/src/algorithms/chameleon/core/chameleon_encode.o \
 	density/src/algorithms/lion/core/lion_decode.o density/src/algorithms/lion/core/lion_encode.o density/src/algorithms/lion/forms/lion_form_model.o \
-	density/src/algorithms/cheetah/core/cheetah_decode.o density/src/algorithms/cheetah/core/cheetah_encode.o 
+	density/src/algorithms/cheetah/core/cheetah_decode.o density/src/algorithms/cheetah/core/cheetah_encode.o
 endif
 
 ifeq ($(XPACK), 1)
 CXXFLAGS+=-D_XPACK
 # O2 instead of O3 because of error gcc 7
 xpack/lib/xpack_common.o: xpack/lib/xpack_common.c
-	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@
 
 xpack/lib/xpack_compress.o: xpack/lib/xpack_compress.c
-	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@
 
 xpack/lib/xpack_decompress.o: xpack/lib/xpack_decompress.c
-	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@ 
+	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@
 
 xpack/lib/x86_cpu_features.o: xpack/lib/x86_cpu_features.c
 	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@
@@ -601,7 +601,7 @@ endif
 ifeq ($(SHRINKER), 1)
 CXXFLAGS+=-D_SHRINKER
 shrinker/shrinker.o: shrinker/shrinker.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@  
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 OB+=shrinker/Shrinker.o
 endif
 
@@ -609,19 +609,19 @@ ifeq ($(WFLZ), 1)
 CXXFLAGS+=-D_WFLZ
 wflz/wfLZ.o: wflz/wfLZ.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-OB+=wflz/wfLZ.o 
+OB+=wflz/wfLZ.o
 endif
 
 ifeq ($(NAKAMICHI),1)
 CXXFLAGS+=-D_NAKAMICHI
 nakamichi/Nakamichi_Okamigan.o: nakamichi/Nakamichi_Okamigan.c
-	$(CC) -O3 -msse4.1 $(MARCH) $< -c -o $@ 
+	$(CC) -O3 -msse4.1 $(MARCH) $< -c -o $@
 OB+=nakamichi/Nakamichi_Washigan.o
 endif
 
 ifeq ($(FASTLZ),1)
 CXXFLAGS+=-D_FASTLZ
-OB+=FastLZ/fastlz.o 
+OB+=FastLZ/fastlz.o
 endif
 
 ifeq ($(HEATSHRINK),1)
@@ -631,12 +631,12 @@ endif
 
 ifeq ($(LIBLZF),1)
 CXXFLAGS+=-D_LIBLZF
-OB+=liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o 
+OB+=liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o
 endif
 
 ifeq ($(LIBLZG),1)
 CXXFLAGS+=-D_LIBLZG
-OB+=liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o 
+OB+=liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o
 endif
 
 ifeq ($(SHOCO),1)
@@ -646,7 +646,7 @@ endif
 
 ifeq ($(YAPPY),1)
 CXXFLAGS+=-D_YAPPY
-OB+=yappy/yappy.o 
+OB+=yappy/yappy.o
 endif
 
 ifeq ($(ZPAQ),1)
@@ -660,7 +660,7 @@ endif
 ifeq ($(CSC),1)
 CXXFLAGS+=-D_CSC
 OB+=CSC/src/libcsc/csc_analyzer.o CSC/src/libcsc/csc_coder.o CSC/src/libcsc/csc_dec.o CSC/src/libcsc/csc_default_alloc.o CSC/src/libcsc/csc_enc.o CSC/src/libcsc/csc_encoder_main.o CSC/src/libcsc/csc_filters.o CSC/src/libcsc/csc_lz.o CSC/src/libcsc/csc_memio.o \
-	CSC/src/libcsc/csc_mf.o CSC/src/libcsc/csc_model.o CSC/src/libcsc/csc_profiler.o 
+	CSC/src/libcsc/csc_mf.o CSC/src/libcsc/csc_model.o CSC/src/libcsc/csc_profiler.o
 endif
 
 ifeq ($(DOBOZ),1)
@@ -671,7 +671,7 @@ endif
 ifeq ($(LIBZLING),1)
 CXXFLAGS+=-D_LIBZLING
 # Disabled : compile error in gcc 7.2
-#OB+=libzling/src/libzling.o libzling/src/libzling_huffman.o libzling/src/libzling_utils.o libzling/src/libzling_lz.o libzling_/libzling_utils_mem.o 
+#OB+=libzling/src/libzling.o libzling/src/libzling_huffman.o libzling/src/libzling_utils.o libzling/src/libzling_lz.o libzling_/libzling_utils_mem.o
 endif
 
 ifeq ($(BRC), 1)
@@ -696,7 +696,7 @@ tornado_/tormem.o: tornado_/tormem.cpp
 ifeq ($(OS), Linux)
 TORDEF=-DFREEARC_UNIX -DFREEARC_INTEL_BYTE_ORDER
 else
-TORDEF=-DFREEARC_WIN -DFREEARC_INTEL_BYTE_ORDER -D_UNICODE -DUNICODE 
+TORDEF=-DFREEARC_WIN -DFREEARC_INTEL_BYTE_ORDER -D_UNICODE -DUNICODE
 endif
 OB+=tornado_/tormem.o
 endif
@@ -708,7 +708,7 @@ endif
 
 ifeq ($(QUICKLZ), 1)
 CXXFLAGS+=-D_QUICKLZ
-OB+=quicklz_/quicklz1.o quicklz_/quicklz2.o quicklz_/quicklz3.o 
+OB+=quicklz_/quicklz1.o quicklz_/quicklz2.o quicklz_/quicklz3.o
 endif
 
 ifeq ($(PYSAP), 1)
@@ -719,25 +719,25 @@ endif
 #--------------------------------------------------------------------
 OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugins.o
 
-turbobench: $(OB) turbobench.o  
+turbobench: $(OB) turbobench.o
 	$(CXX) $^ $(LDFLAGS) -o turbobench
- 
+
 .c.o:
-	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@  
+	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@
 
 .cc.o:
-	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@ 
+	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
 
 .cpp.o:
-	$(CXX) -O3 $(MARCH) $(CXXFLAGS) $< -c -o $@ 
+	$(CXX) -O3 $(MARCH) $(CXXFLAGS) $< -c -o $@
 
 .S.o:
-	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@  
+	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@
 
 
 ifeq ($(OS),Windows_NT)
 clean:
-	del /S *.o 
+	del /S *.o
 	del /S *~
 	del /S *.exe
 else
