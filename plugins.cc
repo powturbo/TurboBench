@@ -42,6 +42,10 @@ enum {
 #define _BZIP2 0
 #endif
  P_BZIP2, 
+#ifndef _BZIP3
+#define _BZIP3 0
+#endif
+ P_BZIP3, 
 #ifndef _CHAMELEON
 #define _CHAMELEON 0
 #endif
@@ -115,10 +119,10 @@ enum {
 #define _LIBLZG 0
 #endif
  P_LIBLZG,
-#ifndef _LIBSLZ
-#define _LIBSLZ 0
+#ifndef _SLZ
+#define _SLZ 0
 #endif
- P_LIBSLZ,
+ P_SLZ,
 #ifndef _ZPAQ
 #define _ZPAQ 0
 #endif
@@ -209,6 +213,10 @@ enum {
 #define _SHOCO 0
 #endif
  P_SHOCO,
+#ifndef _SMAZ
+#define _SMAZ 0
+#endif
+ P_SMAZ,
 #ifndef _SNAPPY
 #define _SNAPPY 0
 #endif
@@ -225,10 +233,14 @@ enum {
 #define _TORNADO 0
 #endif
  P_TORNADO,
-#ifndef _UNISHOX
-#define _UNISHOX 0
+#ifndef _UNISHOX2
+#define _UNISHOX2 0
 #endif
- P_UNISHOX,
+ P_UNISHOX2,
+#ifndef _UNISHOX3
+#define _UNISHOX3 0
+#endif
+ P_UNISHOX3,
 #ifndef _WFLZ
 #define _WFLZ 0
 #endif
@@ -266,13 +278,22 @@ enum {
  P_FSE,
  P_FSEH,
   // --------- Encoding -------------------
-#ifndef _TURBRLE
+#ifndef _TURBORLE
 #define _TURBORLE 0
 #endif
  P_RLES,
  P_RLET,
+
+#ifndef _MRLE
+#define _MRLE 0
+#endif
  P_RLEM,
+ 
+#ifndef _RLE8
+#define _RLE8 0
+#endif
  P_RLE8,
+ 
   //---------- Transform ------------------
 
 #ifndef _BRC
@@ -313,8 +334,8 @@ enum {
 #define _JAC 0
 #endif
  P_JAC,
-#ifndef _RANS_S
-#define _RANS_S 0
+#ifndef _HTSCODECS
+#define _HTSCODECS 0
 #endif
  P_RANS_S8,
  P_RANS_S16,
@@ -378,37 +399,15 @@ enum {
 #include "conf.h"
 #include "plugins.h"
 
-  #if _ZSTD
-#define ZSTD_STATIC_LINKING_ONLY
-#include "zstd/lib/zstd.h"
-#include "zstd/examples/common.h"
-
-static ZSTD_CDict* createCDict_orDie(const char* dictFileName, int cLevel) {
-  size_t dictSize;
-  void* const dictBuffer = mallocAndLoadFile_orDie(dictFileName, &dictSize);
-  ZSTD_CDict* const cdict = ZSTD_createCDict(dictBuffer, dictSize, cLevel);
-  free(dictBuffer);
-  return cdict;
-}
-
-static ZSTD_DDict* createDDict_orDie(const char* dictFileName) {
-  size_t dictSize;
-  void* const dictBuffer = mallocAndLoadFile_orDie(dictFileName, &dictSize);
-  ZSTD_DDict* const ddict = ZSTD_createDDict(dictBuffer, dictSize);
-  free(dictBuffer);
-  return ddict;
-}
-  #endif
-
   #if _AOM
 #include "EC/aom_/aom.h"
   #endif
 
   #if _C_BLOSC2
     #ifdef C_C_BLOSC2LZ
-#include "c-blosc2/blosc/blosclz.h"
+#include "c-blosc2/blosclz.h"
     #else
-#include "c-blosc2/blosc/blosc.h"
+#include "c-blosc2/include/blosc2.h"
     #endif
   #endif
 
@@ -656,6 +655,7 @@ class Out: public libzpaq::Writer {
 
   #if _TURBORC
 #include "Turbo-Range-Coder/turborc.h"
+#include "Turbo-Range-Coder/rcutil.h"
   #endif
 
   #if _WFLZ
@@ -678,7 +678,7 @@ class Out: public libzpaq::Writer {
 #include "yappy/yappy.hpp"
   #endif
 
-  #if _ZLIB || _LIBSLZ
+  #if _ZLIB || _SLZ
      #if _ZLIBLIB
 #include <zlib.h>
 //     #elif defined(ZLIB_NG)          // zlib-ng.a compatible mode : "./configure --zlib-compat" (see zlib-ng/INSTALL)
@@ -714,6 +714,10 @@ int vsrc_reverse(unsigned char * src, unsigned char * dst, size_t src_size);
 extern "C" {
   #endif
 
+  #if _BZIP3
+#include "bzip3/include/libbz3.h"
+  #endif
+
   #if _CHAMELEON
 #include "chameleon/Chameleon2.h"
   #endif
@@ -730,7 +734,7 @@ extern "C" {
 #include "liblzf/lzf.h"
   #endif
 
-  #if _LIBSLZ
+  #if _SLZ
 #include "libslz/src/slz.h"
   #endif
 
@@ -754,16 +758,24 @@ struct snappy_env env;
 #include "smallz4/smallz4cat.c"
   #endif
 
-  #if _UNISHOX
+  #if _SMAZ
+#include "smaz/smaz.h"
+  #endif
+
+  #if _UNISHOX2
 int unishox2_compressx(  const char *in, int inlen, char *out, int lev);
 int unishox2_decompressx(const char *in, int inlen, char *out, int lev);
+  #endif
+
+  #if _UNISHOX3
+#include "unishox2/Unishox3_Alpha/unishox3.h"
   #endif
 
   #if _ZLIB_NG
 #include "zlib-ng/zconf-ng.h"
 //#include "zlib-ng/zlib-ng.h"     
 ZEXTERN ZEXPORT const char *zlibng_version(void);
-ZEXTERN ZEXPORT int zng_compress2(unsigned char *dest, size_t *destLen, const unsigned char *source, size_t sourceLen, int level);
+ZEXTERN ZEXPORT int zng_compress2( unsigned char *dest, size_t *destLen, const unsigned char *source, size_t sourceLen, int level);
 ZEXTERN ZEXPORT int zng_uncompress(unsigned char *dest, size_t *destLen, const unsigned char *source, size_t sourceLen);
   #endif
 
@@ -775,11 +787,14 @@ ZEXTERN ZEXPORT int zng_uncompress(unsigned char *dest, size_t *destLen, const u
 }
   #endif
   //------------------------------------ Encoding -----------------------------------
-  #if _RLE
+  #if _TURBORLE
 #include "Turbo-Run-Length-Encoding/trle.h"
-#include "Turbo-Run-Length-Encoding/ext/mrle.h"
   #endif
 
+  #if _MRLE
+#include "Turbo-Run-Length-Encoding/ext/mrle.h"
+  #endif
+  
   #if _TB64
 #include "TurboBase64/turbob64.h"
   #endif
@@ -853,21 +868,17 @@ size_t lz4ultra_decompress_inmem(const unsigned char *pFileData, unsigned char *
 #include "EC/FPC/fpc.h"
   #endif
 
-  #if _ZSTD
-#include "zstd/lib/common/fse.h"
-#include "zstd/lib/common/huf.h"
-  #endif
-
   #if _FQZ
 #include "EC/fqz0/f_o0.h"
   #endif
 
-  #if _JAC
+/*  #if _JAC
 #include "EC/rans_static_/arith_static.h"
-  #endif
+  #endif*/
 
-  #if _RANS_S
-#include "EC/rans_static/rANS_static.h"
+  #if _HTSCODECS
+#include "EC/htscodecs/htscodecs/config.h"  
+#include "EC/htscodecs/htscodecs/rANS_static32x16pr.h"
   #endif
 
   #if _FPAQC
@@ -942,7 +953,7 @@ extern "C" {
 #include "EC/nibrans/nibrans.h"
   #endif
 
-  #if _RANS_S
+/*  #if _RANS_S
 #include "EC/rans_static/rANS_static.h"
 unsigned char *rans_compress_to_32x16(unsigned char *in,  unsigned int in_size,
                      unsigned char *out, unsigned int *out_size,
@@ -952,17 +963,42 @@ unsigned char *rans_uncompress_to_32x16(unsigned char *in,  unsigned int in_size
                        int order);
 #define X_PACK 0x80
 #define X_RLE  0x40
-  #endif
+  #endif*/
 
   #if __cplusplus
 }
   #endif
+
+  #if _ZSTD
+#include "zstd/lib/zstd.h"
+#include "zstd/examples/common.h"
+#include "zstd/lib/common/fse.h"
+#include "zstd/lib/common/huf.h"
+
+static ZSTD_CDict* createCDict_orDie(const char* dictFileName, int cLevel) {
+  size_t dictSize;
+  void* const dictBuffer = mallocAndLoadFile_orDie(dictFileName, &dictSize);
+  ZSTD_CDict* const cdict = ZSTD_createCDict(dictBuffer, dictSize, cLevel);
+  free(dictBuffer);
+  return cdict;
+}
+
+static ZSTD_DDict* createDDict_orDie(const char* dictFileName) {
+  size_t dictSize;
+  void* const dictBuffer = mallocAndLoadFile_orDie(dictFileName, &dictSize);
+  ZSTD_DDict* const ddict = ZSTD_createDDict(dictBuffer, dictSize);
+  free(dictBuffer);
+  return ddict;
+}
+  #endif
+
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
   { P_C_BLOSC2,  "blosc",       _C_BLOSC2,  "Blosc",                   "0,1,2,3,4,5,6,7,8,9", 64*1024},
   { P_BRIEFLZ,   "brieflz",     _BRIEFLZ,   "BriefLz",                 "1,3,6,9" },
   { P_BROTLI,    "brotli",      _BROTLI,    "Brotli",                  "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
   { P_BZIP2,     "bzip2",       _BZIP2,     "Bzip2",                   "" },
+  { P_BZIP3,     "bzip3",       _BZIP3,     "Bzip3",                   "" },
   { P_CHAMELEON, "chameleon",   _CHAMELEON, "Chameleon",               "1,2" },
   { P_CSC,       "csc",         _CSC,       "CSC",                     "1,2,3,4,5" },
   { P_DENSITY,   "density",     _DENSITY,   "Density",                 "1,2,3" },
@@ -979,7 +1015,7 @@ struct plugs plugs[] = {
   { P_LIBLZF,    "lzf",         _LIBLZF,    "LibLZF",                  "" },
   { P_LIBLZG,    "lzg",         _LIBLZG,    "LibLzg",                  "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
   { P_ZPAQ,      "zpaq",        _ZPAQ,      "Libzpaq",                 "0,1,2,3,4,5" },
-  { P_LIBSLZ,    "slz",         _LIBSLZ,    "libslz",                  "0,1,2,3,4,5,6,7,8,9" },
+  { P_SLZ,       "slz",         _SLZ,       "libslz",                  "0,1,2,3,4,5,6,7,8,9" },
   { P_LZ4,       "lz4",         _LZ4,       "Lz4",                     "0,1,9,10,11,12,16/MfsB#" },
   { P_LZ4ULTRA,  "lz4ultra",    _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
   { P_LIZARD,    "lizard",      _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
@@ -1010,11 +1046,13 @@ struct plugs plugs[] = {
   { P_PYSAP,     "sap",         _PYSAP,     "sap",                     "0,1,2" },
   { P_SHRINKER,  "shrinker",    _SHRINKER,  "Shrinker",                "", 0, (1<<26) },
   { P_SHOCO,     "shoco",       _SHOCO,     "Shoco",                   "" },
+  { P_SMAZ,      "smaz",        _SMAZ,      "smaz",                    "" },
   { P_SNAPPY,    "snappy",      _SNAPPY,    "Snappy",                  ""  },
   { P_SNAPPY_C,  "snappy_c",    _SNAPPY_C,  "Snappy-c",                "" },
   { P_SMALLZ4,   "smallz4",     _SMALLZ4,   "SmalLz4",                 "6,7,8,9,10,11,12/z" },
   { P_TORNADO,   "tornado",     _TORNADO,   "Tornado",                 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
-  { P_UNISHOX,   "unishox",     _UNISHOX,   "unishox2",                "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
+  { P_UNISHOX2,  "unishox2",    _UNISHOX2,  "unishox2",                "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
+  { P_UNISHOX3,  "unishox3",    _UNISHOX3,  "unishox3",                "" },
   { P_WFLZ,      "wflz",        _WFLZ,      "wfLZ",                    "1,2" },
   { P_XPACK,     "xpack",       _XPACK,     "xpack",                   "1,2,3,4,5,6,7,8,9" },
   { P_YALZ77,    "yalz77",      _YALZ77,    "Yalz77",                  "1,6,12" },
@@ -1047,20 +1085,20 @@ struct plugs plugs[] = {
   { P_POLHF,     "polar",       _POLHF,     "Polar Codes",             "" },
   { P_PPMDEC,    "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
 
-  { P_RANS_S8,   "rans_s8",     _RANS_S,    "ANS/J.Bonfield",          "0,1", E_ANS},
-  { P_RANS_S16,  "rans_s16",    _RANS_S,    "ANS/J.Bonfield",          "0,1", E_ANS},
-  { P_RANS_S32,  "rans_s32",    _RANS_S,    "ANS/J.Bonfield",          "0,1", E_ANS},
+  { P_RANS_S8,   "rans_s8",     _HTSCODECS,    "ANS/J.Bonfield",          "0,1", E_ANS},
+  { P_RANS_S16,  "rans_s16",    _HTSCODECS,    "ANS/J.Bonfield",          "0,1", E_ANS},
+  { P_RANS_S32,  "rans_s32",    _HTSCODECS,    "ANS/J.Bonfield",          "0,1", E_ANS},
   { P_RECIPARITH,"recip_arith", _RECIPARITH,"recip arith",			   "" },
   { P_SUBOTIN,   "subotin",     _SUBOTIN,   "subotin RC",              "" },
   { P_TORNADOHF, "tornado_huff",_TORNADO,   "Tornado Huf",             "" },
-  { P_TURBORC,   "TurboRC",     _TURBORC,   "Turbo Range Coder",       "11,12,13,14,21,22,23,24,25,30,31,32,33,34,35" },
+  { P_TURBORC,   "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,9,10,12,14,17,20,21,90/e#" }, 
   { P_ZLIBH,     "zlibh",       _ZLIB,      "zlib Huffmann",           "8,9,10,11,12,13,14,15,16,32" },
   { P_ZRLE,      "zlibrle",     _ZLIB,      "zlib rle",                "" },
   //---- Encoding ------
   { P_RLES,      "srle",        _TURBORLE,  "TurboRLE ESC",            "0,8,16,32,64" },
   { P_RLET,      "trle",        _TURBORLE,  "TurboRLE",                "" },
-  { P_RLEM,      "mrle",        _TURBORLE,  "Mespostine RLE",          "" },
-  { P_RLE8,      "rle8",        _TURBORLE,  "8 bit RLE",               "1,2,8,16,24,32,48,64/S#s (S:Subsection, s:single)" },
+  { P_RLEM,      "mrle",        _MRLE,      "Mespostine RLE",          "" },
+  { P_RLE8,      "rle8",        _RLE8,      "8 bit RLE",               "1,2,8,16,24,32,48,64/S#s (S:Subsection, s:single)" },
   //----- Transform -----
   { P_DIVBWT,    "divbwt",      _DIVBWT,    "bwt libdivsufsort","" },
   { P_LIBBSCBWT, "bscbwt",      _LIBBSC,    "bwt libbsc",              "" },
@@ -1127,7 +1165,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
 
   switch(codec) {
       #if _C_BLOSC2
-    case P_C_BLOSC2: blosc_init(); blosc_set_nthreads(1);break;
+    case P_C_BLOSC2: blosc2_init(); blosc2_set_nthreads(1);break;
       #endif
 
       #if _FASTARI
@@ -1190,7 +1228,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_LIBBSC: case P_LIBBSCC: bsc_init(LIBBSC_FEATURE_FASTMODE); bsc_st_init(LIBBSC_FEATURE_FASTMODE); break;
       #endif
 
-      #if _LIBSLZ
+      #if _SLZ
          slz_make_crc_table();
          slz_prepare_dist_table();
       #endif
@@ -1230,10 +1268,8 @@ int codend(size_t insize, int codec, int lev, char *prm, int mode) {
   switch(codec) {
       #if _ZSTD
     case P_ZSTD:
-      //if(strchr(prm, 'D')) {
         if(cdictPtr) { ZSTD_freeCDict(cdictPtr); cdictPtr = NULL; }
         if(ddictPtr) { ZSTD_freeDDict(ddictPtr); ddictPtr = NULL; }
-      //}
       break;
       #endif
   }
@@ -1257,6 +1293,7 @@ void codexit(int codec) {
 
 int brotlidic,brotlictx,brotlirep;
 #define powof2(n) !((n)&((n)-1))
+static ALWAYS_INLINE unsigned pow2next(unsigned x) { return x<2?1:(1ull << (__bsr32((x)-1)+1)); }
 
   #if _SMALLZ4
 static unsigned char *gop,*gip,*giend;
@@ -1285,7 +1322,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         #if _C_BLOSC2LZ
       return blosclz_compress(lev, in, inlen, out, outsize);
         #else
-      return blosc_compress(lev, strchr(prm,'s')?1:0/*doshuffle*/, (q=strchr(prm,'t'))?atoi(q+(q[1]=='='?2:1)):1/*typesize*/, inlen, in, out, outsize/*inlen+BLOSC_MAX_OVERHEAD*/);
+      return blosc1_compress(lev, strchr(prm,'s')?1:0/*doshuffle*/, (q=strchr(prm,'t'))?atoi(q+(q[1]=='='?2:1)):1/*typesize*/, inlen, in, out, outsize/*inlen+BLOSC_MAX_OVERHEAD*/);
         #endif
       #endif
 
@@ -1315,7 +1352,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _LIBBSC
     #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING)
-    case P_LIBBSC: return bsc_compress(      in, out, inlen,/*18*/strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPHASHSIZE,/*32*/ strchr(prm,'p')?0:LIBBSC_DEFAULT_LZPMINLEN, lev<3?1:lev, (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1, BSC_MODE);
+    case P_LIBBSC: return bsc_compress(      in, out, inlen,strchr(prm,'p')?0:15,strchr(prm,'p')?0:128, lev<3?1:lev, (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1, BSC_MODE);
     case P_LIBBSCC:return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
     case P_LIBBSCBWT: { int bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, 0); *(unsigned *)out = bwtidx; return inlen+4; }
     case P_ST: { memcpy(out+4,in, inlen); *(unsigned *)(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
@@ -1334,6 +1371,24 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _BZIP2
     case P_BZIP2:    { unsigned outlen = outsize; return BZ2_bzBuffToBuffCompress((char *)out, &outlen, (char *)in, inlen, 9, 0, 0)==BZ_OK?outlen:-1; }
+      #endif
+
+      #if _BZIP3
+    case P_BZIP3:    { 
+	  #define BZIP3_SIZE 511*MB
+	  struct bz3_state *st = bz3_new(BZIP3_SIZE);
+	  unsigned char *ip,*op = out;
+	  for(ip = in; ip < in+inlen;) { 
+		unsigned iplen = (in+inlen) - ip; iplen = min(iplen, BZIP3_SIZE);
+		op+=4; memcpy(op, ip, iplen);
+		int rc = bz3_encode_block(st, op, iplen);
+		if(rc == -1) die("bzip3 encode failed");
+		ctou32(op-4) = rc; op += rc;
+		ip += iplen;		
+	  }
+	  bz3_free(st);
+	  return op - out;
+	}
       #endif
 
       #if _CHAMELEON
@@ -1511,8 +1566,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_LIBLZG: { lzg_encoder_config_t cfg; LZG_InitEncoderConfig(&cfg); cfg.fast = LZG_TRUE; cfg.level = lev; return LZG_Encode(in, inlen, out, outsize, &cfg); }
       #endif
 
-      #if _LIBSLZ
-    case P_LIBSLZ: { if(lev > 7) lev = 7;
+      #if _SLZ
+    case P_SLZ: { if(lev > 7) lev = 7;
       unsigned blk = 16384 << lev;
       struct slz_stream strm;
             if(strchr(prm,'d')) slz_init(&strm, !!lev, SLZ_FMT_DEFLATE);
@@ -1620,6 +1675,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_SHOCO:     return shoco_compress((const char *)in, inlen, (char *)out, outsize);
       #endif
 
+      #if _SMAZ
+    case P_SMAZ:     return smaz_compress((const char *)in, inlen, (char *)out, outsize);
+      #endif
+
       #if _SHRINKER
     case P_SHRINKER:     return shrinker_compress((char *)in, (char *)out, inlen);
       #endif
@@ -1640,8 +1699,11 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_TORNADO:   return torcompress(lev, in, out, inlen);
       #endif
 
-      #if _UNISHOX
-    case P_UNISHOX:   return unishox2_compressx(in, inlen, out, lev);
+      #if _UNISHOX2
+    case P_UNISHOX2:  return unishox2_compressx(in, inlen, out, lev);
+      #endif
+      #if _UNISHOX3
+    case P_UNISHOX3:  { unishox3 usx3; return usx3.compress(in, inlen, USX3_API_OUT_AND_LEN(out,outsize) ); }
       #endif
 
       #if _WFLZ
@@ -1679,7 +1741,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _ZLIB_NG
-    case P_ZLIB_NG:   { uLongf outlen = outsize; int rc = zng_compress2(out, &outlen, in, inlen, lev); if(rc) printf("zlib compress2 rc=%d\n", rc);  return outlen; }
+    case P_ZLIB_NG:   { size_t outlen = outsize; int rc = zng_compress2(out, &outlen, in, inlen, lev); if(rc) printf("zlib compress2 rc=%d\n", rc);  return outlen; }
       #endif
 
       #if _ZLING
@@ -1697,15 +1759,24 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _ZSTD
-    case P_ZSTD: { ZSTD_CCtx *ctx = ZSTD_createCCtx(); ZSTD_parameters p = ZSTD_getParams(lev, inlen, 0);
-      if(dsize) { int windowLog = bsr32(dsize)-powof2(dsize); ZSTD_CCtx_setParameter(ctx, ZSTD_c_windowLog, windowLog); }
-      unsigned rc; if(strchr(prm, 'D')) rc = ZSTD_compress_usingCDict(ctx, out, outsize, in, inlen, cdictPtr); else rc = ZSTD_compress_advanced(ctx, out, outsize, in, inlen, NULL, 0, p);
-      ZSTD_freeCCtx(ctx);
-      return rc;
+    case P_ZSTD: { 
+	  ZSTD_CStream *z = ZSTD_createCStream(); if(!z) return -1;
+      if(dsize) {
+	    int windowLog = bsr32(dsize)-powof2(dsize); 
+		ZSTD_CCtx_setParameter(z, ZSTD_c_enableLongDistanceMatching, 1); 
+	    ZSTD_CCtx_setParameter(z, ZSTD_c_windowLog, windowLog);
+      }
+	  ZSTD_initCStream(z, lev);
+	  ZSTD_inBuffer  ip = { in, (size_t)inlen,   0 };
+	  ZSTD_outBuffer op = { out,(size_t)outsize, 0 };
+	  ZSTD_compressStream(z, &op, &ip);
+	  ZSTD_endStream(z, &op);
+	  ZSTD_freeCStream(z);
+      return op.pos;
     }
       #endif
     //------------------------- Encoding
-     #if _RLE
+     #if _TURBORLE
           #define _ESC8  0x5 //0xda
           #define _ESC16 0xdad5
           #define _ESC32 0xdad5abad
@@ -1719,6 +1790,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         case 64: return srlec64(in, inlen, out, _ESC64);
       } break;
     case P_RLET:  return trlec(in, inlen, out);
+      #endif
+      #if _MRLE
     case P_RLEM:  return mrlec(in, inlen, out);
       #endif
 
@@ -1862,10 +1935,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _ZSTD
-    case P_FSE:     { size_t o = FSE_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); return inlen; } return o; }
-    case P_FSEH:    { size_t o = HUF_compress(out, outsize, in, inlen); //HUF_compress4X_wksp(out, outsize, in, inlen, 255, 11, workmem, workmemsize); //;
-      if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); return inlen; } return o;
-    }
+    //case P_FSE:     { size_t o = FSE_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); o = inlen; } return o; }
+    //case P_FSEH:    { size_t o = HUF_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); o = inlen; } return o;    }
       #endif
 
       #if _MARLIN
@@ -1893,13 +1964,13 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_JAC:  { unsigned outlen; arith_compress_O0(in, inlen, &outlen, out); return outlen; }
       #endif
 
-      #if _RANS_S
-    case P_RANS_S8:     { unsigned outlen = outsize; return rans_compress_to(   8,in, inlen, out, &outlen, lev) ? outlen : 0;}
-    case P_RANS_S16:    { unsigned outlen = outsize; if(strchr(prm,'r')) lev |= X_RLE; if(strchr(prm,'p')) lev |= X_PACK;
-                                                     return rans_compress_to(  16,in, inlen, out, &outlen, lev) ? outlen : 0;
-    }
-        #ifdef AVX2_ON
-    case P_RANS_S32:   { unsigned outlen = outsize; return rans_compress_to_32x16(in, inlen, out, &outlen,lev) ? outlen : 0;}
+      #if _HTSCODECS
+    //case P_RANS_S8:     { unsigned outlen = outsize; return rans_compress_to(   8,in, inlen, out, &outlen, lev) ? outlen : 0;}
+    //case P_RANS_S16:    { unsigned outlen = outsize; if(strchr(prm,'r')) lev |= X_RLE; if(strchr(prm,'p')) lev |= X_PACK;
+    //                                                 return rans_compress_to(  16,in, inlen, out, &outlen, lev) ? outlen : 0;
+    //}
+        #ifdef __AVX2__
+    case P_RANS_S32:   { unsigned outlen = outsize; return rans_compress_O0_32x16_avx2(in, inlen, out, &outlen) ? outlen : 0;}
         #endif
       #endif
 
@@ -1930,23 +2001,25 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _TURBORC
     case P_TURBORC: { //int ec = 0; 
-      unsigned prm1 = 5,prm2 = 6; unsigned char *q;
-      if(q=strchr(prm,'r')) { prm1 = atoi(q+(q[1]=='='?2:1)); prm2 = prm1%10; prm1 = prm1/10; if(prm1>9)prm1=9;if(!prm1) prm1=1; if(prm2>9)prm2=9;if(!prm2) prm2=1; }
+      //unsigned prm1 = 5,prm2 = 6; //if(q=strchr(prm,'r')) { prm1 = atoi(q+(q[1]=='='?2:1)); prm2 = prm1%10; prm1 = prm1/10; if(prm1>9)prm1=9;if(!prm1) prm1=1; if(prm2>9)prm2=9;if(!prm2) prm2=1; }
+	  char *q;
+	  unsigned bwtlev = 9, xprep8=0, forcelzp=0, verbose=0, xsort=0, itmax=0, lenmin=1;
+	  if(q = strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1));  
+	  if(q = strchr(prm,'m')) lenmin = atoi(q+(q[1]=='='?2:1));  
+      #define bwtflag(z) (z==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | forcelzp | (verbose?BWT_VERBOSE:0) | xsort <<14 | itmax <<10 | lenmin
       switch(lev) {
-        case 1 : return rcsenc(     in, inlen, out);
-        case 2 : return rcxsenc(    in, inlen, out);
-        case 3 : return rcssenc(    in, inlen, out, prm1, prm2);
-        case 4 : return rcxssenc(   in, inlen, out, prm1, prm2);
-        case 5 : return rcrlesenc(  in, inlen, out);
-        case 6 : return rcrlessenc( in, inlen, out, prm1, prm2);
-
-        case 26 : return rcgsenc8(   in, inlen, out);
-        case 27 : return rcgsenc16(  in, inlen, out);
-        case 28 : return rcgsenc32(  in, inlen, out);
-        case 29 : return rcgssenc8(  in, inlen, out, prm1, prm2);
-        case 30 : return rcgssenc16( in, inlen, out, prm1, prm2);
-        case 31 : return rcgssenc32( in, inlen, out, prm1, prm2);
-//      case 2 : return trcnenc( in, inlen, out);
+        case  1: return rcsenc(    in, inlen, out);
+        case  2: return rccsenc(   in, inlen, out); 
+        case  3: return rcc2senc(  in, inlen, out);
+        case  4: return rcxsenc(   in, inlen, out);
+        //case  5: mbcset(15); clen = rcx2enc(  in, inlen, out, prdid); break;
+        //case  9: return rcmsenc(  in, inlen, out);       
+        //case 10: return rcm2senc( in, inlen, out);        
+        case 12: return rcrlesenc( in, inlen, out);
+        case 14: return rcrle1senc(in, inlen, out);        //case 17: return rcqlfcsenc(in, inlen, out);
+        //case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
+	//case 21: return utf8enc( in, inlen, out, bwtflag(1)|BWT_COPY|BWT_RATIO);
+	//case 90: return lzpenc( in, inlen, out, 1, 0);
       }
     }
       #endif
@@ -2009,7 +2082,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if _C_BLOSC2
-    case P_C_BLOSC2: return blosc_decompress(in, out, outlen);
+    case P_C_BLOSC2: return blosc1_decompress(in, out, outlen);
       #endif
 
       #if _C_BLOSC2LZ
@@ -2047,6 +2120,22 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if _BZIP2
     case P_BZIP2: { unsigned outsize = outlen; return BZ2_bzBuffToBuffDecompress((char *)out, &outsize, (char *)in, inlen, 0, 0)==BZ_OK?outlen:-1; }
+      #endif
+
+      #if _BZIP3
+    case P_BZIP3: { //size_t outsize = outlen; return bz3_decompress(in, out, inlen, &outsize)==BZ3_OK?outlen:-1; 
+	    struct bz3_state *st = bz3_new(BZIP3_SIZE);
+		unsigned char *ip = in, *op;
+		for(op = out; op < out+outlen;) { 
+		  unsigned iplen = ctou32(ip), oplen = (out+outlen) - op; oplen = min(oplen, BZIP3_SIZE);
+		  memcpy(op, ip+4, iplen);
+		  if(bz3_decode_block(st, op, iplen, oplen) == -1) die("bzip3 decode failed");
+		  op += oplen;	
+          ip += 4+iplen;		  
+		}
+		bz3_free(st);
+		return op-out;
+	  }
       #endif
 
       #if _CHAMELEON
@@ -2268,6 +2357,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_SHOCO:     shoco_decompress((const char *)in, inlen, (char *)out, outlen); return inlen;
       #endif
 
+      #if _SMAZ
+    case P_SMAZ:       smaz_decompress((const char *)in, inlen, (char *)out, outlen); return inlen;
+      #endif
+
       #if _SHRINKER
     case P_SHRINKER:    shrinker_decompress(in, out, outlen); break;
       #endif
@@ -2288,8 +2381,11 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_TORNADO: return tordecompress(in, out, inlen, outlen);
       #endif
 
-      #if _UNISHOX
-    case P_UNISHOX: return unishox2_decompressx(in, inlen, out, lev);
+      #if _UNISHOX2
+    case P_UNISHOX2: return unishox2_decompressx(in, inlen, out, lev);
+      #endif
+      #if _UNISHOX3
+    case P_UNISHOX3: { unishox3 usx3; return usx3.decompress(in, inlen, USX3_API_OUT_AND_LEN(out,outlen) ); }
       #endif
 
       #if _WFLZ
@@ -2323,8 +2419,8 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_YAPPY:    return YappyUnCompress(in, in+inlen, out)-out;
       #endif
 
-      #if _LIBSLZ
-    case P_LIBSLZ: {
+      #if _SLZ
+    case P_SLZ: {
       struct slz_stream strm;
       int fmt=15;
             if(prm && *prm == 'd') fmt=-15;
@@ -2352,7 +2448,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if _ZLIB_NG
     case P_ZOPFLI:
-    case P_ZLIB_NG: { uLongf outsize = outlen; int rc = zng_uncompress(out, &outsize, in, inlen); } break;
+    case P_ZLIB_NG: { size_t outsize = outlen; int rc = zng_uncompress(out, &outsize, in, inlen); } break;
       #endif
 
       #if _ZSTD
@@ -2367,7 +2463,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       break;
       #endif
       //------------ Encoding -----------------------------------------------------------------------
-      #if _RLE
+      #if _TURBORLE
     case P_RLES:
       switch(lev) {
         case  0: return  srled( in, inlen, out, outlen);
@@ -2377,6 +2473,8 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
         case 64: return  srled64(in, inlen, out, outlen, _ESC64);
       } break;
     case P_RLET: return trled(in, inlen, out, outlen);
+      #endif
+      #if _MRLE
     case P_RLEM: return mrled(in, out, outlen);
       #endif
 
@@ -2494,8 +2592,8 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if _ZSTD
-    case P_FSE:  if(inlen == outlen) memcpy(out, in, outlen); else if(inlen == 1) memset(out,in[0],outlen); else FSE_decompress(out, outlen, in, inlen); break;
-    case P_FSEH: if(inlen == outlen) memcpy(out, in, outlen); else if(inlen == 1) memset(out,in[0],outlen); else HUF_decompress(out, outlen, in, inlen); break;
+    //case P_FSE:  if(inlen == outlen) memcpy(out, in, outlen); else if(inlen == 1) memset(out,in[0],outlen); else FSE_decompress(out, outlen, in, inlen); break;
+    //case P_FSEH: if(inlen == outlen) memcpy(out, in, outlen); else if(inlen == 1) memset(out,in[0],outlen); else HUF_decompress(out, outlen, in, inlen); break;
       #endif
 
       #if _FQZ
@@ -2506,11 +2604,11 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_JAC:  { unsigned outlen; arith_uncompress_O0(in, inlen, &outlen, out); } break;
       #endif
 
-      #if _RANS_S
-    case P_RANS_S8   : rans_uncompress_to(    8,in, inlen, out, (unsigned *)&outlen, lev); break;
-    case P_RANS_S16  : rans_uncompress_to(   16,in, inlen, out, (unsigned *)&outlen, lev); break;
-        #ifdef AVX2_ON
-    case P_RANS_S32  : rans_uncompress_to_32x16(in, inlen, out, (unsigned *)&outlen, lev); break;
+      #if _HTSCODECS
+    //case P_RANS_S8   : rans_uncompress_to(    8,in, inlen, out, (unsigned *)&outlen, lev); break;
+    //case P_RANS_S16  : rans_uncompress_to(   16,in, inlen, out, (unsigned *)&outlen, lev); break;
+        #ifdef __AVX2__
+    case P_RANS_S32  : rans_uncompress_O0_32x16_avx2(in, inlen, out, outlen); break;
         #endif
       #endif
 
@@ -2566,25 +2664,24 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if _TURBORC
-    case P_TURBORC: {
-      unsigned prm1 = 5,prm2 = 6; unsigned char *q;
-      if(q=strchr(prm,'r')) { prm1 = atoi(q+(q[1]=='='?2:1)); prm2 = prm1%10; prm1 = prm1/10; if(prm1>9)prm1=9;if(!prm1) prm1=1; if(prm2>9)prm2=9;if(!prm2) prm2=1; }
+    case P_TURBORC: { //unsigned prm1 = 5,prm2 = 6; char *q; //if(q=strchr(prm,'r')) { prm1 = atoi(q+(q[1]=='='?2:1)); prm2 = prm1%10; prm1 = prm1/10; if(prm1>9)prm1=9;if(!prm1) prm1=1; if(prm2>9)prm2=9;if(!prm2) prm2=1; }
+	  unsigned bwtlev = 9;
+	  char *q;
+	  if(q=strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1)); 
       switch(lev) {
-        case 1 : return rcsdec(     in, outlen, out);
-        case 2 : return rcxsdec(    in, outlen, out);
-        case 3 : return rcssdec(    in, outlen, out, prm1, prm2);
-        case 4 : return rcxssdec(   in, outlen, out, prm1, prm2);
-        case 5 : return rcrlesdec(  in, outlen, out);
-        case 6 : return rcrlessdec( in, outlen, out, prm1, prm2);
+        case  1 : return rcsdec(    in, outlen, out);
+        case  2 : return rccsdec(   in, outlen, out);
+        case  3 : return rcc2sdec(  in, outlen, out);
+        case  4 : return rcxsdec(   in, outlen, out);
 
-        case 26 : return rcgsdec8(   in, outlen, out);
-        case 27 : return rcgsdec16(  in, outlen, out);
-        case 28 : return rcgsdec32(  in, outlen, out);
-        case 29 : return rcgssdec8(  in, outlen, out, prm1, prm2);
-        case 30 : return rcgssdec16( in, outlen, out, prm1, prm2);
-        case 31 : return rcgssdec32( in, outlen, out, prm1, prm2);
-//        case 2 : return trcndec( in, outlen, out);
-      }
+        //case  9 : return rcmsdec(   in, outlen, out);
+        //case 10 : return rcm2sdec(  in, outlen, out);
+        case 12 : return rcrlesdec( in, outlen, out);
+        case 14 : return rcrle1sdec(in, outlen, out);        //case 17 : return rcqlfcsdec( in, outlen, out);
+        //case 20 : return rcbwtdec( in, outlen, out, bwtlev, 0);
+        //case 21 : if(inlen==outlen) memcpy(out,in,outlen); else utf8dec( in, outlen, out); return outlen;
+        //case 90 : if(inlen==outlen) memcpy(out,in,outlen); else lzpdec(  in, outlen, out, 1, 0); return outlen;
+      }	  
     }
       #endif
 
@@ -2631,7 +2728,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 char *codver(int codec, char *v, char *s) {
   switch(codec) {
       #if _C_BLOSC2
-    return BLOSC_VERSION_STRING;
+    return BLOSC2_VERSION_STRING;
       #endif
       #if _BRIEFLZ
     case P_BRIEFLZ: sprintf(s,"%d.%d.%d", BLZ_VER_MAJOR, BLZ_VER_MINOR, BLZ_VER_PATCH); break;
