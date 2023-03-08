@@ -76,3 +76,6 @@
 [submodule "zstd"]
 	path = zstd
 	url = https://github.com/facebook/zstd.git
+[submodule "bzip3"]
+	path = bzip3
+	url = https://github.com/kspalaiologos/bzip3
