@@ -1,0 +1,15 @@
+Changes in version 1.13:
+
+The variables AR and ARFLAGS can now be set from configure. (Before you
+needed to run 'make AR=<ar_command>'. (Reported by Hoël Bézier).
+
+In case of error in a numerical argument to a command line option, minilzip
+now shows the name of the option and the range of valid values.
+
+'minilzip --check-lib' now checks that LZ_API_VERSION and LZ_version_string
+match.
+
+Several descriptions have been improved in manual, '--help', and man page.
+
+The texinfo category of the manual has been changed from 'Data Compression'
+to 'Compression' to match that of gzip. (Reported by Alfred M. Szmidt).
