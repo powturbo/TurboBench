@@ -1,5 +1,5 @@
 /**
-    Copyright (C) powturbo 2013-2021
+    Copyright (C) powturbo 2013-2022
     GPL v2 License
 
     This program is free software; you can redistribute it and/or modify
@@ -24,25 +24,20 @@
 //      time_.h : parameter free high precision time/benchmark functions
 #include <time.h>
 #include <float.h>
-
   #ifdef _WIN32
 #include <windows.h>
     #ifndef sleep
 #define sleep(n) Sleep((n) * 1000)
     #endif
-
-typedef unsigned __int64 uint64_t;
-typedef unsigned __int64 tm_t;
+#define uint64_t unsigned __int64
 
   #else
 #include <stdint.h>
 #include <unistd.h>
 #define Sleep(ms) usleep((ms) * 1000)
-
-typedef struct timespec tm_t;
   #endif
 
-#if defined (__i386__) || defined( __x86_64__ )
+#if defined (__i386__) || defined( __x86_64__ )  // ------------------ rdtsc --------------------------
   #ifdef _MSC_VER
 #include <intrin.h> // __rdtsc
   #else
@@ -69,77 +64,83 @@ typedef struct timespec tm_t;
 } while(0)
   #else
 #define RDTSC(_c_) do { unsigned _cl, _ch;\
-  __asm volatile ("cpuid \n"\
+/*  __asm volatile ("cpuid \n"\
                 "rdtsc"\
                 : "=a"(_cl), "=d"(_ch)\
                 : "a"(0)\
                 : "%ebx", "%ecx");\
   _c_ = (uint64_t)_ch << 32 | _cl;\
+} while(0)*/
+#define RDTSC(_c_) do { unsigned _cl, _ch;\
+   __asm volatile("rdtsc" : "=a"(_cl), "=d"(_ch) );\
+  _c_ = (uint64_t)_ch << 32 | _cl;\
 } while(0)
-#define RDTSC_INI(_c_) RDTSC(_c_)
   #endif
-#else
+
+#define RDTSC_INI(_c_) RDTSC(_c_)
+#else                                          // ------------------ time --------------------------
 #define RDTSC_INI(_c_)
 #define RDTSC(_c_)
 #endif
-
-#define tmrdtscini() ({ uint64_t _c; __asm volatile("" ::: "memory"); RDTSC_INI(_c); _c; })
-#define tmrdtsc()    ({ uint64_t _c; RDTSC(_c); _c; })
 
 #ifndef TM_F
 #define TM_F 1.0  // TM_F=4 -> MI/s
 #endif
 
-  #ifdef RDTSC_ON
-#define tminit() tmrdtscini()
-#define tmtime() tmrdtsc()
-#define TM_T                    CLOCKS_PER_SEC
-static double TMBS(unsigned l, double t) { double dt = t, dl = l; return t/l; }
-#define TM_C 1000
+#ifdef _RDTSC //---------------------- rdtsc --------------------------------
+#define TM_M   (CLOCKS_PER_SEC*1000000ull)
+#define TM_PRE 4
+#define TM_MBS "cycle/byte"
+static double TMBS(unsigned l, double t) { return (double)t/(double)l; }
 
-  #else
-#define TM_C 1
+typedef uint64_t tm_t;
+static tm_t   tmtime()                      { uint64_t c; RDTSC(c); return c; }
+static tm_t   tminit()                      { uint64_t c; __asm volatile("" ::: "memory"); RDTSC_INI(c); return c; }
+static double tmdiff(tm_t start, tm_t stop) { return (double)(stop - start); }
+static int    tmiszero(tm_t t)              { return !t; }
+#else          //---------------------- time -----------------------------------
+#define TM_M   1
+#define TM_PRE 2
+#define TM_MBS "MB/s"
 static double TMBS(unsigned l, double t) { return (l/t)/1000000.0; }
 
-    #ifdef _WIN32
+  #ifdef _WIN32 //-------- windows 
 static LARGE_INTEGER tps;
-static tm_t tmtime(void) {
-  LARGE_INTEGER tm;
-  tm_t t;
-  QueryPerformanceCounter(&tm);
-  return tm.QuadPart;
-}
 
-static tm_t tminit() { tm_t t0,ts; QueryPerformanceFrequency(&tps); t0 = tmtime(); while((ts = tmtime())==t0) {}; return ts; }
+typedef unsigned __int64 tm_t;
+static tm_t   tmtime()                      { LARGE_INTEGER tm; tm_t t; QueryPerformanceCounter(&tm); return tm.QuadPart; }
+static tm_t   tminit()                      { tm_t t0,ts; QueryPerformanceFrequency(&tps); t0 = tmtime(); while((ts = tmtime())==t0) {}; return ts; }
 static double tmdiff(tm_t start, tm_t stop) { return (double)(stop - start)/tps.QuadPart; }
-static int tmiszero(tm_t t) { return !t; }
-    #else
-      #ifdef __APPLE__
+static int    tmiszero(tm_t t)              { return !t; }
+  #else        // Linux & compatible / MacOS
+    #ifdef __APPLE__
 #include <AvailabilityMacros.h>
-        #ifndef MAC_OS_X_VERSION_10_12
+      #ifndef MAC_OS_X_VERSION_10_12
 #define MAC_OS_X_VERSION_10_12 101200
-        #endif
+      #endif
 #define CIVETWEB_APPLE_HAVE_CLOCK_GETTIME (defined(__APPLE__) && defined(MAC_OS_X_VERSION_MIN_REQUIRED) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12)
-        #if !(CIVETWEB_APPLE_HAVE_CLOCK_GETTIME)
+      #if !(CIVETWEB_APPLE_HAVE_CLOCK_GETTIME)
 #include <sys/time.h>
 #define CLOCK_REALTIME 0
 #define CLOCK_MONOTONIC 0
 int clock_gettime(int /*clk_id*/, struct timespec* t) {
-    struct timeval now;
-    int rv = gettimeofday(&now, NULL);
-    if (rv) return rv;
-    t->tv_sec  = now.tv_sec;
-    t->tv_nsec = now.tv_usec * 1000;
-    return 0;
+  struct timeval now;
+  int rv = gettimeofday(&now, NULL);
+  if (rv) return rv;
+  t->tv_sec  = now.tv_sec;
+  t->tv_nsec = now.tv_usec * 1000;
+  return 0;
 }
-        #endif
       #endif
-static   tm_t tmtime()                      { struct timespec tm; clock_gettime(CLOCK_MONOTONIC, &tm); return tm; }
-static double tmdiff(tm_t start, tm_t stop) { return (stop.tv_sec - start.tv_sec) + (double)(stop.tv_nsec - start.tv_nsec)/1e9f; }
-static   tm_t tminit()   { tm_t t0 = tmtime(),t; while(!tmdiff(t = tmtime(),t0)) {}; return t; }
-static int tmiszero(tm_t t) { return !(t.tv_sec|t.tv_nsec); }
     #endif
-#endif
+    
+typedef struct timespec tm_t;   
+static tm_t   tmtime()                      { struct timespec tm; clock_gettime(CLOCK_MONOTONIC, &tm); return tm; }
+static double tmdiff(tm_t start, tm_t stop) { return (stop.tv_sec - start.tv_sec) + (double)(stop.tv_nsec - start.tv_nsec)/1e9f; }
+static tm_t   tminit()                      { tm_t t0 = tmtime(),t; while(!tmdiff(t = tmtime(),t0)) {}; return t; }
+static int    tmiszero(tm_t t)              { return !(t.tv_sec|t.tv_nsec); }
+  #endif
+#endif 
 
 //---------------------------------------- bench ----------------------------------------------------------------------
 // for each a function call is repeated until exceding tm_tx seconds.
@@ -161,28 +162,29 @@ static int tmiszero(tm_t t) { return !(t.tv_sec|t.tv_nsec); }
     /*other runs: break the loop only after 'tm_rm' repeats */ \
     _tm_t = tmdiff(_tm_t0, tmtime());\
     /*set min time, recalculte repeats tm_rm based on tm_tx, recalculte number of runs based on tm_TX*/\
-    if(_tm_t < tm_tm) { if(tm_tm == DBL_MAX) { tm_rm = _tm_r; _tm_Rn = tm_TX/_tm_t; _tm_Rn = _tm_Rn<_tm_Rx?_tm_Rn:_tm_Rx; /*printf("[%d,%d] ", tm_rm, _tm_Rn);*/ } tm_tm = _tm_t; _tm_c++; }\
-    else if(_tm_t > tm_tm*1.15) TMSLEEP;/*force sleep at 15% divergence*/\
-    if(tm_verbose) { printf("%8.2f %2d_%.2d\b\b\b\b\b\b\b\b\b\b\b\b\b\b",TMBS(_len_, tm_tm/tm_rm),_tm_R+1,_tm_c),fflush(stdout); }\
+    if(_tm_t < tm_tm) { if(tm_tm == DBL_MAX) { tm_rm = _tm_r; _tm_Rn = tm_TX/_tm_t; _tm_Rn = _tm_Rn<_tm_Rx?_tm_Rn:_tm_Rx; /*printf("repeats=%u,%u,%.4f ", _tm_Rn, _tm_Rx, _tm_t);*/ } \
+	  tm_tm = _tm_t; _tm_c++;\
+    } else if(_tm_t > tm_tm*1.15) TMSLEEP;/*force sleep at 15% divergence*/\
+    if(tm_verbose) { printf("%8.*f %2d_%.2d\b\b\b\b\b\b\b\b\b\b\b\b\b\b",TM_PRE, TMBS(_len_, tm_tm/tm_rm),_tm_R+1,_tm_c),fflush(stdout); }\
     if((_tm_R & 7)==7) sleep(tm_slp); /*pause 20 secs after each 8 runs to avoid cpu trottling*/\
   }\
 }
 
-static unsigned tm_rep = 1<<30, tm_Rep = 3, tm_Rep2 = 3, tm_rm, tm_RepMin = 1, tm_slp = 20, tm_verbose = 2;
+static unsigned tm_rep = 1u<<30, tm_Rep = 3, tm_Rep2 = 3, tm_rm, tm_RepMin = 1, tm_slp = 20, tm_verbose = 2;
 static tm_t tm_0, tm_T;
-static double tm_tm, tm_tx = 1, tm_TX = 60;
+static double tm_tm, tm_tx = 1.0*TM_M, tm_TX = 60.0*TM_M;
 
 static void tm_init(int _tm_Rep, int _tm_verbose) { tm_verbose = _tm_verbose; if(_tm_Rep) tm_Rep = _tm_Rep; }
 
 #define TMBENCH(_name_, _func_, _len_)  do { if(tm_verbose>1) printf("%s ", _name_?_name_:#_func_);\
   TMBEG(tm_Rep) _func_; TMEND(_len_); \
-  double dm = tm_tm, dr = tm_rm; if(tm_verbose) printf("%8.2f      \b\b\b\b\b", TMBS(_len_, dm*TM_C/dr) );\
+  double dm = tm_tm, dr = tm_rm; if(tm_verbose) printf("%8.*f      \b\b\b\b\b", TM_PRE, TMBS(_len_, dm/dr) );\
 } while(0)
 
 // second TMBENCH. Example: use TMBENCH for encoding and TMBENCH2 for decoding
 #define TMBENCH2(_name_, _func_, _len_)  do { \
   TMBEG(tm_Rep2) _func_; TMEND(_len_);\
-  double dm = tm_tm, dr = tm_rm; if(tm_verbose) printf("%8.2f      \b\b\b\b\b", TMBS(_len_, dm*TM_C/dr) );\
+  double dm = tm_tm, dr = tm_rm; if(tm_verbose) printf("%8.*f      \b\b\b\b\b", TM_PRE,TMBS(_len_, dm/dr) );\
   if(tm_verbose>1) printf("%s ", _name_?_name_:#_func_);\
 } while(0)
 
@@ -191,9 +193,17 @@ static void tm_init(int _tm_Rep, int _tm_verbose) { tm_verbose = _tm_verbose; if
   TMBEG(tm_Rep) \
   if(_func_ != _res_) { printf("ERROR: %lld != %lld", (long long)_func_, (long long)_res_ ); exit(0); };\
   TMEND(_len_);\
-  if(tm_verbose) printf("%8.2f      \b\b\b\b\b", TMBS(_len_,(double)tm_tm*TM_C/(double)tm_rm) );\
+  if(tm_verbose) printf("%8.*f      \b\b\b\b\b", TM_PRE, TMBS(_len_,(double)tm_tm/(double)tm_rm) );\
   if(tm_verbose) printf("%s ", _name_?_name_:#_func_ );\
 } while(0)
+
+static void pr(unsigned l, unsigned n) {
+  double r = (double)l*100.0/n;
+  if(r>0.1)  printf("%10u %6.2f%%   ", l, r);
+  else if(r>0.01) printf("%10u %7.3f%%  ", l, r);
+  else printf("%10u %8.4f%% ", l, r); fflush(stdout); 
+}
+
 //----------------------------------------------------------------------------------------------------------------------------------
 #define Kb (1u<<10)
 #define Mb (1u<<20)
