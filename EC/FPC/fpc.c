@@ -26,12 +26,19 @@
 
 //config
 //#define NDEBUG
-#define NUM_STREAMS 3
-#define MAX_BIT_LEN 11
+#define NUM_STREAMS 3      // typical values are 1 ... 4.
+                           // Depends on the then number of available registers
+                           // and the the amount of ILP a CPU can extract.
+                           // 3 is a good all-around value.
+
+#define MAX_BIT_LEN 11     // must be >= 9 and <= AMAX_BIT_LEN = 14
 #define MAX_SYM_NUM 256
 
-#define ADAPTIVE_STEP 2048
-#define BLOCK_OVERHEAD 100 //assume header used for bit lengths is 100 bytes
+#define ADAPTIVE_STEP 2048 // smaller value increases compression ratio,
+                           // but compression speed decreases quadratically
+                           // ADAPTIVE_STEP must be >= 256
+
+#define BLOCK_OVERHEAD 100 // assume header used for bit lengths is 100 bytes
 
 #define AMAX_BIT_LEN 14
 #define HEADER_SIZE (2*(NUM_STREAMS-1))
@@ -74,12 +81,12 @@
 #endif
 
 //macros
-#define MIN(A,B) ((A) < (B)?(A):(B))
+#define MIN(A, B) ((A) < (B)?(A):(B))
 #define CHECK(expr) if(unlikely(expr))
 #define CAT(a, ...) XCAT(a, __VA_ARGS__)
 #define XCAT(a, ...) a##__VA_ARGS__
 
-#define REPEAT_ARG(N,X) CAT(REPA_,N)(X)
+#define REPEAT_ARG(N, X) CAT(REPA_, N)(X)
 #define REPA_0(X)
 #define REPA_1(X) X(0)
 #define REPA_2(X) REPA_1(X) X(1)
@@ -87,7 +94,7 @@
 #define REPA_4(X) REPA_3(X) X(3)
 #define REPA_5(X) REPA_4(X) X(4)
 
-#define REPEAT(N,...) CAT(REP_,N)(__VA_ARGS__)
+#define REPEAT(N,...) CAT(REP_, N)(__VA_ARGS__)
 #define REP_0(...)
 #define REP_1(...) __VA_ARGS__
 #define REP_2(...) REP_1(__VA_ARGS__) __VA_ARGS__
@@ -95,7 +102,7 @@
 #define REP_4(...) REP_3(__VA_ARGS__) __VA_ARGS__
 #define REP_5(...) REP_4(__VA_ARGS__) __VA_ARGS__
 
-#define DEC(X) CAT(DEC_,X)
+#define DEC(X) CAT(DEC_, X)
 #define DEC_1 0
 #define DEC_2 1
 #define DEC_3 2
@@ -111,8 +118,8 @@
 
 #if defined(__GNUC__)
 #	define INLINE static inline __attribute__ ((always_inline))
-#	define likely(x) (__builtin_expect((x) != 0,1))
-#	define unlikely(x) (__builtin_expect((x) != 0,0))
+#	define likely(x) (__builtin_expect((x) != 0, 1))
+#	define unlikely(x) (__builtin_expect((x) != 0, 0))
 #	define PREFETCH(x) __builtin_prefetch(x)
 #	if (__GNUC__ * 100 + __GNUC_MINOR__ >= 403) ||\
 (defined(__clang__) && __has_builtin(__builtin_bswap32) && __has_builtin(__builtin_bswap64))
@@ -152,15 +159,15 @@ typedef uint16_t U16;
 typedef uint8_t U8;
 
 typedef struct{
-	U8 len,sym;
+	U8 len, sym;
 }Dnode;
 
 typedef struct{
-	U16 val,len;
+	U16 val, len;
 }Enode;
 
 typedef struct{
-	U16 freq,sym;
+	U16 freq, sym;
 }Fsym;
 
 //memory stuff
@@ -216,26 +223,26 @@ typedef struct{
 #	error "ERROR:Can not detect endian"
 #endif
 
-#define LOAD(name,T,F)\
+#define LOAD(name, T, F)\
 	INLINE T name (const void* ptr){\
 		T result;                            \
 		memcpy(&result, ptr, sizeof(result));\
 		return F(result);                    \
 	}
-#define WRITE(name,T,F)\
-	INLINE void name (void *ptr,T data){\
+#define WRITE(name, T, F)\
+	INLINE void name (void *ptr, T data){\
 		data = F(data);                 \
-		memcpy(ptr,&data,sizeof(data)); \
+		memcpy(ptr,&data, sizeof(data)); \
 	}
 
-LOAD(L16,U16,)
-LOAD(L32,U32,)
-LOAD(L64,U64,)
-LOAD(LARCH,size_t,)
-WRITE(W16,U16,)
-WRITE(W32,U32,)
-WRITE(W64,U64,)
-WRITE(WARCH,size_t,)
+LOAD(L16, U16,)
+LOAD(L32, U32,)
+LOAD(L64, U64,)
+LOAD(LARCH, size_t,)
+WRITE(W16, U16,)
+WRITE(W32, U32,)
+WRITE(W64, U64,)
+WRITE(WARCH, size_t,)
 
 #ifdef MEM_LITTLE_ENDIAN
 #	define L16_LE L16
@@ -249,33 +256,33 @@ WRITE(WARCH,size_t,)
 #else
 INLINE U16 L16_LE(const void* ptr)
 {
-	U8 *p = (U8 *)ptr;
+	U8 *p = (U8 *) ptr;
 	return p[0] + (p[1] << 8);
 }
-INLINE void W16_LE(void *ptr,U16 data)
+INLINE void W16_LE(void *ptr, U16 data)
 {
-	U8 *p = (U8 *)ptr;
-	p[0] = (U8)data;
+	U8 *p = (U8 *) ptr;
+	p[0] = (U8) data;
 	p[1] = (U8)(data >> 8);
 }
-	LOAD(L32_LE,U32,BSWAP32)
-	LOAD(L64_LE,U64,BSWAP64)
-	WRITE(W32_LE,U32,)
-	WRITE(W64_LE,U64,)
+	LOAD(L32_LE, U32, BSWAP32)
+	LOAD(L64_LE, U64, BSWAP64)
+	WRITE(W32_LE, U32,)
+	WRITE(W64_LE, U64,)
 #	ifdef ARCH64
-		LOAD(LARCH_LE,size_t,BSWAP64)
-		WRITE(WARCH_LE,size_t,BSWAP64)
+		LOAD(LARCH_LE, size_t, BSWAP64)
+		WRITE(WARCH_LE, size_t, BSWAP64)
 #	else
-		LOAD(LARCH_LE,size_t,BSWAP32)
-		WRITE(WARCH_LE,size_t,BSWAP32)
+		LOAD(LARCH_LE, size_t, BSWAP32)
+		WRITE(WARCH_LE, size_t, BSWAP32)
 #	endif
 #endif
 
 /* compute table
 #include <stdio.h>
-int brev(int num,int len)
+int brev(int num, int len)
 {
-	int a,tmp0,tmp1;
+	int a, tmp0, tmp1;
 	for(a = 0;a < len/2;a++){
 		tmp0 = (num >> a) & 1;
 		tmp1 = (num >> (len - a-1)) & 1;
@@ -290,7 +297,7 @@ int main()
 {
 	int a;
 	for(a = 0;a < 128;a++)
-		printf(" %d,",brev(a,7));
+		printf(" %d, ", brev(a, 7));
 }
 */
 
@@ -307,7 +314,7 @@ const U8 trev[128] = {
 //assume num is 14 bits long
 INLINE U32 brev(U32 num)
 {
-	return ((U32)trev[num >> 7]) + (((U32)trev[num & 127]) << 7);
+	return ((U32) trev[num >> 7]) + (((U32) trev[num & 127]) << 7);
 }
 
 /* compute table
@@ -324,7 +331,7 @@ int main(void)
 				printf(", ");
 			else
 				printf(",\n");
-			printf("%.0lf",round((16*log2(a*16+b))));
+			printf("%.0lf", round((16*log2(a*16+b))));
 		}
 	}
 	printf("};\n");
@@ -403,11 +410,11 @@ INLINE int log_int(int a)
 }
 
 //0 <= symbols <= sym_num-1 < 256
-void byte_count(U8 *s,int len,U32 *res,int sym_num)
+void byte_count(U8 *s, int len, U32 *res, int sym_num)
 {
-	U32 a,b1[3*MAX_SYM_NUM]={0};//avoid 3 memsets
-	U32 *b2 = b1 + MAX_SYM_NUM,*b3 = b2 + MAX_SYM_NUM;
-	U8 tmp0,tmp1,tmp2,tmp3;
+	U32 a, b1[3*MAX_SYM_NUM]={0};//avoid 3 memsets
+	U32 *b2 = b1 + MAX_SYM_NUM, *b3 = b2 + MAX_SYM_NUM;
+	U8 tmp0, tmp1, tmp2, tmp3;
 
 	for(a = 0;a < (len & (~7));a += 8){
 		tmp0 = s[a];
@@ -435,10 +442,10 @@ void byte_count(U8 *s,int len,U32 *res,int sym_num)
 }
 
 //freq should be strictly less than 2^16
-void sort_inc(Fsym *input,int num)
+void sort_inc(Fsym *input, int num)
 {
-	U32 a,b,c,sum0,sum1,f0[256] = {0},f1[256] = {0};
-	Fsym tmp[MAX_SYM_NUM],s;
+	U32 a, b, c, sum0, sum1, f0[256] = {0}, f1[256] = {0};
+	Fsym tmp[MAX_SYM_NUM], s;
 	for(a = 0;a < num;a++){
 		b = input[a].freq;
 		f0[b & 255]++;
@@ -471,14 +478,14 @@ void sort_inc(Fsym *input,int num)
 	}
 }
 //on success return 0
-int construct_dec_table(U8 *header_len,Dnode *lookup,int sym_num)
+int construct_dec_table(U8 *header_len, Dnode *lookup, int sym_num)
 {
-	U32 a,b,prev_cum = 0,prev_num = 0,d,base;
+	U32 a, b, prev_cum = 0, prev_num = 0, d, base;
 	U32 count_bit[AMAX_BIT_LEN+1] = {0};
 	U16 tmp;
 
 #ifndef NDEBUG
-	for(a = 0,b = 0;a < sym_num;a++){
+	for(a = 0, b = 0;a < sym_num;a++){
 		if(header_len[a] == 0)
 			continue;
 		b += 1 << (MAX_BIT_LEN - header_len[a]);
@@ -518,24 +525,24 @@ int construct_dec_table(U8 *header_len,Dnode *lookup,int sym_num)
 
 		if(d < (1 << MAX_BIT_LEN)){
 			for(;base < (1 << MAX_BIT_LEN);base += d){
-				*(((U16 *)lookup) + base) = tmp;
+				*(((U16 *) lookup) + base) = tmp;
 				base += d;
-				*(((U16 *)lookup) + base) = tmp;
+				*(((U16 *) lookup) + base) = tmp;
 			}
 		}
 		else
 		//The for loop is not needed because it iterates only once
 			//for(;base < (1 << MAX_BIT_LEN);base += d) 
-				*(((U16 *)lookup) + base) = tmp;
+				*(((U16 *) lookup) + base) = tmp;
 	}
 	return 0;
 }
 
 //assumes it does not contain non existant symbols
 //assume sort not stable
-void construct_enc_table(Enode *lookup,Fsym *s,int num)
+void construct_enc_table(Enode *lookup, Fsym *s, int num)
 {
-	U32 a,count[AMAX_BIT_LEN+1] = {0},prev_num = 0,prev_cum = 0;
+	U32 a, count[AMAX_BIT_LEN+1] = {0}, prev_num = 0, prev_cum = 0;
 	for(a = 0;a < num;a++){
 		count[s[a].freq]++;
 		lookup[s[a].sym].len = s[a].freq;
@@ -554,11 +561,11 @@ void construct_enc_table(Enode *lookup,Fsym *s,int num)
 }
 
 //WARNING!!!:input must have 1 additional free space not counted in num
-void build_prefix_codes(Fsym *input,int num)
+void build_prefix_codes(Fsym *input, int num)
 {
 	//packages[L] conctains elements of L in packages
-	int packages[2][MAX_SYM_NUM+1],L,leaf_pos,package_pos,package_num = 0;
-	int tmp,len,a,b,pnum;
+	int packages[2][MAX_SYM_NUM+1], L, leaf_pos, package_pos, package_num = 0;
+	int tmp, len, a, b, pnum;
 	U8 M[MAX_BIT_LEN][2*MAX_SYM_NUM];//number of leafs up to there - 1
 	input[num].freq = U16MAX;
 
@@ -566,7 +573,7 @@ void build_prefix_codes(Fsym *input,int num)
 	package_num = num / 2;
 	for(a = 0;a < (package_num << 1);a++)
 		M[0][a] = a;
-	for(a = 0,b = 0;a < package_num;a++,b += 2)
+	for(a = 0, b = 0;a < package_num;a++, b += 2)
 		packages[0][a] = input[b].freq + input[b+1].freq;
 
 	for(L = 1;L < MAX_BIT_LEN;L++){
@@ -574,7 +581,7 @@ void build_prefix_codes(Fsym *input,int num)
 		packages[(L-1)%2][package_num] = U16MAX;
 		leaf_pos = package_pos = 0;
 		//M[L][0] is always a leaf
-		for(pnum = 0,a = 0;pnum < len;pnum++,a++){
+		for(pnum = 0, a = 0;pnum < len;pnum++, a++){
 			assert(package_pos <= package_num);
 			if(input[leaf_pos].freq < packages[(L-1)%2][package_pos]){
 				tmp = input[leaf_pos].freq;
@@ -601,25 +608,25 @@ void build_prefix_codes(Fsym *input,int num)
 	for(a = 0;a < num;a++)
 		input[a].freq = 0;
 
-	//calculate result,take 2*n-2 first
+	//calculate result, take 2*n-2 first
 	//bit lenght is the number of leaf occurences for each symbol
 	len = 2*num-2;
 	for(a = L-1;a >= 0 && len > 0;a--){
 		leaf_pos = M[a][len-1];
 		input[leaf_pos].freq++;
-		//printf("len = %d,leaf_pos = %d\n",len,leaf_pos);
+		//printf("len = %d, leaf_pos = %d\n", len, leaf_pos);
 		len = 2*(len -1 -leaf_pos );
 	}
-	for(b = input[num-1].freq,a = num-2;a >= 0;a--){
+	for(b = input[num-1].freq, a = num-2;a >= 0;a--){
 		b += input[a].freq;
 		input[a].freq = b;
 	}
 }
 
-U8 *byte_pos,*init_pos,*byte_end,c;
+U8 *byte_pos, *init_pos, *byte_end, c;
 U32 nibble_count;
 
-INLINE void init_nibble(U8 *pos,U8 *end)
+INLINE void init_nibble(U8 *pos, U8 *end)
 {
 	byte_pos = pos;
 	init_pos = pos;
@@ -651,7 +658,7 @@ INLINE void put_nibble(U8 n)
 		c = n;
 	}else{
 		c |= n << 4;
-		*byte_pos++ = (U8)c;
+		*byte_pos++ = (U8) c;
 	}
 }
 
@@ -669,16 +676,16 @@ INLINE U32 get_input_nibbles()
 }
 
 //return bytes written
-U32 write_prefix_descr(Enode *lookup,U8 *res,int sym_num)
+U32 write_prefix_descr(Enode *lookup, U8 *res, int sym_num)
 {
-	U32 previous,count,a;
-	init_nibble(res,0);
+	U32 previous, count, a;
+	init_nibble(res, 0);
 	for(a = 0;a < sym_num;a++){
 		count = 1;
 		previous = lookup[a].len;
 
 		while(a+1 < sym_num && previous == lookup[a+1].len)
-			count++,a++;
+			count++, a++;
 
 		if(count == 1){
 			put_nibble(previous);
@@ -707,10 +714,10 @@ U32 write_prefix_descr(Enode *lookup,U8 *res,int sym_num)
 }
 
 //on error return 0
-U32 read_prefix_descr(U8 *len,U8 *in,U8 *end,int sym_num)
+U32 read_prefix_descr(U8 *len, U8 *in, U8 *end, int sym_num)
 {
-	int bl,previous = 0,a = 0,c;
-	init_nibble(in,end);
+	int bl, previous = 0, a = 0, c;
+	init_nibble(in, end);
 	while(a < sym_num){
 		bl = get_nibble();
 		CHECK(bl == 100)
@@ -742,20 +749,20 @@ U32 read_prefix_descr(U8 *len,U8 *in,U8 *end,int sym_num)
 	return get_input_nibbles();
 }
 
-INLINE void write_header(U16 *pos,U32 *stream_size)
+INLINE void write_header(U16 *pos, U32 *stream_size)
 {
 	for(U32 a = 0;a < NUM_STREAMS-1;a++)
-		W16_LE(pos+a,stream_size[a]);//missaligned LE
+		W16_LE(pos+a, stream_size[a]);//missaligned LE
 }
 
 //1 stream a time
 //dest should have some 8 more free bytes
-INLINE int prefix_codes_encode(U8 *dest,U8 *src,int sym_num,const Enode *lookup)
+INLINE int prefix_codes_encode(U8 *dest, U8 *src, int sym_num, const Enode *lookup)
 {
 	U8 *src_end = src + sym_num - (sym_num%(RENORM_NUM*NUM_STREAMS));
-	U8 *dest_start = dest,sym,bl;
-	U32 bits_av = 0,tmp;
-	size_t bits = 0,code;
+	U8 *dest_start = dest, sym, bl;
+	U32 bits_av = 0, tmp;
+	size_t bits = 0, code;
 
 	while(src < src_end){
 		REPEAT(RENORM_NUM,
@@ -766,7 +773,7 @@ INLINE int prefix_codes_encode(U8 *dest,U8 *src,int sym_num,const Enode *lookup)
 			bits |= code << bits_av;
 			bits_av += bl;
 		)
-		WARCH_LE(dest,bits);
+		WARCH_LE(dest, bits);
 		tmp = bits_av >> 3;
 		bits_av &= 7;
 		bits >>= tmp << 3;
@@ -784,7 +791,7 @@ INLINE int prefix_codes_encode(U8 *dest,U8 *src,int sym_num,const Enode *lookup)
 		bits_av += bl;
 	}
 	//renormalise
-	WARCH_LE(dest,bits);
+	WARCH_LE(dest, bits);
 	dest += (bits_av+7) >> 3;
 
 	return dest - dest_start;
@@ -812,7 +819,7 @@ INLINE int prefix_codes_encode(U8 *dest,U8 *src,int sym_num,const Enode *lookup)
 	if(bits_av##A < MAX_BIT_LEN){\
 		int dist;\
 		if((dist = stream_end - stream_pos##A) > 1){\
-			bits##A |= ((size_t)L16_LE(stream_pos##A)) << bits_av##A;\
+			bits##A |= ((size_t) L16_LE(stream_pos##A)) << bits_av##A;\
 			stream_pos##A += 2;\
 			bits_av##A += 16;\
 		}else if (dist > 0){\
@@ -837,7 +844,7 @@ INLINE int prefix_codes_encode(U8 *dest,U8 *src,int sym_num,const Enode *lookup)
 }
 
 #define PREFIX_DEC_END(A)\
-	if(dest >= dest_end)break;\
+	if(dest >= dest_end) break;\
 	code = bits##A & ((1 << MAX_BIT_LEN)-1);\
 	bl = lookup[code].len;\
 	bits##A >>= bl;\
@@ -853,10 +860,10 @@ INLINE int prefix_codes_encode(U8 *dest,U8 *src,int sym_num,const Enode *lookup)
 	 && stream_pos##A <= stream_end
 
 //on success return 0
-int prefix_codes_decode(U8 *dest,int dest_size,U8 *src,int src_size,const Dnode *lookup)
+int prefix_codes_decode(U8 *dest, int dest_size, U8 *src, int src_size, const Dnode *lookup)
 {
-	REPEAT_ARG(NUM_STREAMS,DEC_DECLARE);
-	U32 code,bl;
+	REPEAT_ARG(NUM_STREAMS, DEC_DECLARE);
+	U32 code, bl;
 	U8 *dest_end = dest + dest_size - (dest_size%(RENORM_NUM * NUM_STREAMS));
 	U8 *other = src + HEADER_SIZE;
 	U8 *stream_end = src + src_size;
@@ -867,22 +874,22 @@ int prefix_codes_decode(U8 *dest,int dest_size,U8 *src,int src_size,const Dnode 
 
 	stream_end -= UNROLL_NUM * ARCH_SIZE;
 
-	REPEAT_ARG(DEC(NUM_STREAMS),DEC_INIT)
-	CAT(stream_pos,DEC(NUM_STREAMS)) = other;
+	REPEAT_ARG(DEC(NUM_STREAMS), DEC_INIT)
+	CAT(stream_pos, DEC(NUM_STREAMS)) = other;
 
-	while(likely(dest < dest_end REPEAT_ARG(NUM_STREAMS,TEST_STREAM_END))){
+	while(likely(dest < dest_end REPEAT_ARG(NUM_STREAMS, TEST_STREAM_END))){
 
 #if USE_PREFETCH == 1
-		REPEAT_ARG(NUM_STREAMS,PREFETCH_STREAM)
+		REPEAT_ARG(NUM_STREAMS, PREFETCH_STREAM)
 #endif
 
 		REPEAT(UNROLL_NUM,// We unroll loop
 			//renormalise
-			REPEAT_ARG(NUM_STREAMS,RENORM_DEC)
+			REPEAT_ARG(NUM_STREAMS, RENORM_DEC)
 
 			//dec
 			REPEAT(RENORM_NUM,
-				REPEAT_ARG(NUM_STREAMS,PREFIX_DEC))
+				REPEAT_ARG(NUM_STREAMS, PREFIX_DEC))
 		)
 	}
 	//finalise
@@ -890,30 +897,30 @@ int prefix_codes_decode(U8 *dest,int dest_size,U8 *src,int src_size,const Dnode 
 
 	dest_end += dest_size%(RENORM_NUM * NUM_STREAMS);
 	while(1){
-		REPEAT_ARG(NUM_STREAMS,RENORM_DEC_END);
-		REPEAT_ARG(NUM_STREAMS,PREFIX_DEC_END);
+		REPEAT_ARG(NUM_STREAMS, RENORM_DEC_END);
+		REPEAT_ARG(NUM_STREAMS, PREFIX_DEC_END);
 	}
 	return 0;
 }
 
-//encode bytes,return bytes written
+//encode bytes, return bytes written
 //size < 64Kb
-int FPC_compress_block(void *output,const void *in,int size,int sym_num)
+int FPC_compress_block(void *output, const void *in, int size, int sym_num)
 {
-	U32 a,b,count[MAX_SYM_NUM] = {0},stream_size[NUM_STREAMS],compressed_size;
-	U8 *out_start = (U8 *)output,*header_start,*out = (U8 *)output;
+	U32 a, b, count[MAX_SYM_NUM] = {0}, stream_size[NUM_STREAMS], compressed_size;
+	U8 *out_start = (U8 *) output, *header_start, *out = (U8 *) output;
 	Fsym s[MAX_SYM_NUM+1];
 	Enode lookup[MAX_SYM_NUM];
 
 	if(size < MIN_COMPRESSIBLE_SIZE)
 		goto no_comp;
 
-	byte_count((U8 *)in,size,count,256);
+	byte_count((U8 *) in, size, count, 256);
 
 	for(a = 0;a < sym_num;a++)
-		s[a] = (Fsym){(U16)count[a],(U16)a};
+		s[a] = (Fsym){(U16) count[a], (U16) a};
 
-	sort_inc(s,sym_num);
+	sort_inc(s, sym_num);
 
 	if(s[sym_num - 1].freq == size){
 		*out = s[sym_num -1].sym;
@@ -924,25 +931,25 @@ int FPC_compress_block(void *output,const void *in,int size,int sym_num)
 	for(a = 0;a < sym_num && s[a].freq == 0;a++);
 	assert(sym_num - a != 1);
 
-	build_prefix_codes(s+a,sym_num - a);
+	build_prefix_codes(s+a, sym_num - a);
 
 	//fast path for uncompressed
-	//printf("bit_len = %d,%d,%d\n",s[sym_num-1].freq,s[sym_num-2].freq,s[sym_num-3].freq);
+	//printf("bit_len = %d,%d,%d\n", s[sym_num-1].freq, s[sym_num-2].freq, s[sym_num-3].freq);
 	if(sym_num >= 2 && s[sym_num-1].freq >= 7 && s[sym_num-2].freq == 8)
 		goto no_comp;
 
-	construct_enc_table(lookup,s,sym_num);
+	construct_enc_table(lookup, s, sym_num);
 
 	//U32 t[17] = {0};
-	//for(a = 0;a < 256;a++)t[lookup[a].len]++;//debug
-	//for(a = 0;a <= 12;a++)printf("len %d = %.3lf %% \n",a,100*((double)t[a])/256);
+	//for(a = 0;a < 256;a++) t[lookup[a].len]++;//debug
+	//for(a = 0;a <= 12;a++) printf("len %d = %.3lf %% \n", a, 100*((double) t[a])/256);
 
-	out += write_prefix_descr(lookup,out,sym_num);
+	out += write_prefix_descr(lookup, out, sym_num);
 	header_start = out;
 	out += HEADER_SIZE;
 
 	for(a = 0;a < NUM_STREAMS;a++){
-		b = prefix_codes_encode(out,((U8 *)in)+a,size-a,lookup);
+		b = prefix_codes_encode(out, ((U8 *) in)+a, size-a, lookup);
 		stream_size[a] = b;
 		out += b;
 	}
@@ -950,56 +957,56 @@ int FPC_compress_block(void *output,const void *in,int size,int sym_num)
 	compressed_size = (U32 )(out - out_start);
 	if(compressed_size >= size){
 no_comp:
-		memcpy(output,in,size);
+		memcpy(output, in, size);
 		return size;
 	}
 
-	write_header((U16 *)header_start,stream_size);
+	write_header((U16 *) header_start, stream_size);
 
 	return compressed_size;
 }
 
 //return uncompressed bytes
 //on error return -1
-int FPC_decompress_block(void * output,int out_size,const void *input,int in_size,int sym_num)
+int FPC_decompress_block(void * output, int out_size, const void *input, int in_size, int sym_num)
 {
 	if(in_size == 1){//RLE
-		memset(output,*((char*)input),out_size);
+		memset(output, *((char*) input), out_size);
 		return in_size;
 	}
 
 	if(in_size == out_size){//uncompressed
-		memcpy(output,input,in_size);
+		memcpy(output, input, in_size);
 		return in_size;
 	}
 
 	Dnode lookup[1 << MAX_BIT_LEN];
-	U8 *in = (U8 *)input,*out = (U8 *)output;
+	U8 *in = (U8 *) input, *out = (U8 *) output;
 	U8 bit_len[MAX_SYM_NUM];
 	U32 bit_descr_size;
 
-	bit_descr_size = read_prefix_descr(bit_len,in,in + in_size,sym_num);
+	bit_descr_size = read_prefix_descr(bit_len, in, in + in_size, sym_num);
 	CHECK(bit_descr_size == 0)
 		return -1;
 
-	CHECK(construct_dec_table(bit_len,lookup,sym_num) != 0)
+	CHECK(construct_dec_table(bit_len, lookup, sym_num) != 0)
 		return -1;
 
 	//decode
-	CHECK(prefix_codes_decode(out,out_size,in + bit_descr_size,in_size - bit_descr_size,lookup))
+	CHECK(prefix_codes_decode(out, out_size, in + bit_descr_size, in_size - bit_descr_size, lookup))
 		return -1;
 	return in_size;
 }
 
-INLINE size_t block_encode(void *output,void *input,int bsize)
+INLINE size_t block_encode(void *output, const void *input, int bsize)
 {
-	W16_LE(output,bsize);//LE
-	size_t tmp = FPC_compress_block(((char *)output) + 4,input,bsize,256);
-	W16_LE(((char*)output) + 2,tmp);//LE
+	W16_LE(output, bsize);//LE
+	size_t tmp = FPC_compress_block(((char *) output) + 4, input, bsize, 256);
+	W16_LE(((char*) output) + 2, tmp);//LE
 	return 4 + tmp;
 }
 
-size_t comp_adaptive(void * output,void * input,size_t inlen)
+size_t comp_adaptive(void * output, const void * input, size_t inlen)
 {
 
 #define STEP ADAPTIVE_STEP
@@ -1012,10 +1019,13 @@ size_t comp_adaptive(void * output,void * input,size_t inlen)
 	int Cfreq[ADAPT_MOD][256];
 	int dp[ADAPT_MOD];
 	U8 *block_size = (U8 *) malloc((inlen/STEP)+1);
-	U8 *in = (U8 *)input,*out = (U8 *)output,*out_start = (U8 *) output;
+	const U8 *in = (const U8*) input;
+	U8 *out = (U8 *) output, *out_start = (U8 *) output;
 
 	CHECK(block_size == 0)
-		return 0;//ERROR
+		return 0;//ERROR, can't malloc
+
+	block_size[0] = 0;
 
 	//init
 	int block_end = inlen / STEP;
@@ -1030,11 +1040,11 @@ size_t comp_adaptive(void * output,void * input,size_t inlen)
 		int cur = (a / STEP) % ADAPT_MOD;
 		int prev = (cur + 1) % ADAPT_MOD;
 
-		memcpy(Cfreq[cur],Cfreq[prev],256*sizeof(int));
+		memcpy(Cfreq[cur], Cfreq[prev], 256*sizeof(int));
 		for(;b >= a;b--)
 			Cfreq[cur][in[b]]++;
 
-		int best = INT_MAX,bsize = 0;
+		int best = INT_MAX, bsize = 0;
 		for(int c = 1;c <= MBLOCK && (c*STEP) <= inlen - a;c++){
 			//bits = -sum(ni*log2(ni) + total*log2(total))
 			int res = 0;
@@ -1055,9 +1065,9 @@ size_t comp_adaptive(void * output,void * input,size_t inlen)
 				res = (res/16)/8 + BLOCK_OVERHEAD;
 			if(res >= c*STEP)
 				res = c*STEP + 4;
-			//printf("pos = %d,bpb = %.2f,bsize = %d,est = %d,real = %d\n",a,8.0*((double)res)/(c*STEP),c*STEP/1024,res,4+prefix_encode(out,in + a,c*STEP,256));
+			//printf("pos = %d, bpb = %.2f, bsize = %d, est = %d, real = %d\n", a, 8.0*((double) res)/(c*STEP), c*STEP/1024, res, 4+prefix_encode(out, in + a, c*STEP, 256));
 			res += dp[(cur + c)%ADAPT_MOD];
-			//res = 4 + prefix_encode(out,in + a,c*STEP,256) + dp[(cur + c)%ADAPT_MOD];
+			//res = 4 + prefix_encode(out, in + a, c*STEP, 256) + dp[(cur + c)%ADAPT_MOD];
 			if(res <= best){
 				best = res;
 				bsize = c;
@@ -1069,14 +1079,14 @@ size_t comp_adaptive(void * output,void * input,size_t inlen)
 	}
 	//now encode using block sizes
 	int a = 0;
-	out += block_encode(out,in,(inlen % STEP) + (block_size[0] * STEP));
+	out += block_encode(out, in, (inlen % STEP) + (block_size[0] * STEP));
 	in += block_size[0] * STEP;
 	a = block_size[0];
 
 	in += inlen % STEP;
 	for(;a < block_end;a += block_size[a]){
 		//printf("bsize = %d\n", block_size[a]*STEP/1024);
-		out += block_encode(out,in,block_size[a] * STEP);
+		out += block_encode(out, in, block_size[a] * STEP);
 		in += block_size[a] * STEP;
 	}
 	free(block_size);
@@ -1086,23 +1096,26 @@ size_t comp_adaptive(void * output,void * input,size_t inlen)
 //return compressed size
 //bsize < 64KB
 //if bsize == 0 then adaptive
-size_t FPC_compress(void * output,void * input,size_t inlen,int bsize)
+size_t FPC_compress(void * output, const void * input, size_t inlen, int bsize)
 {
 	if(bsize == 0)
-		return comp_adaptive(output,input,inlen);
-	char *in = (char *) input,*out = (char *)output,*out_start = (char *)output;
+		return comp_adaptive(output, input, inlen);
+
+	const char *in = (const char *) input;
+	char *out = (char *) output, *out_start = (char *) output;
 	while(inlen > 0){
-		U32 step = MIN(inlen,bsize);
-		out += block_encode(out,in,step);
+		U32 step = MIN(inlen, bsize);
+		out += block_encode(out, in, step);
 		in += step;
 		inlen -= step;
 	}
 	return (size_t)(out - out_start);
 }
 
-size_t FPC_decompress(void * output,size_t max_output,void * input,size_t inlen)
+size_t FPC_decompress(void * output, size_t max_output, const void * input, size_t inlen)
 {
-	char *in = (char *)input,*out_start = (char *)output,*out = (char *)output;
+	const char *in = (char *) input;
+	char *out_start = (char *) output, *out = (char *) output;
 	char *out_end = out + max_output;
 	while(out < out_end && inlen >= 4){
 		U32 d = L16_LE(in);//LE
@@ -1111,7 +1124,7 @@ size_t FPC_decompress(void * output,size_t max_output,void * input,size_t inlen)
 		inlen -= 4;
 		CHECK(e > inlen || out + d > out_end)
 			return 0;
-		CHECK(FPC_decompress_block(out,d,in,e,256) == -1)
+		CHECK(FPC_decompress_block(out, d, in, e, 256) == -1)
 #ifdef TEST_CORRUPT
 			;
 #else
