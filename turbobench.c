@@ -66,6 +66,11 @@
 #include "time_.h"
 #include "plugins.h" 
 
+double weissman(double ratio, double bandwith, double bandwithlo, double bandwithhi ) {
+  return ratio * log10( 1 + bandwith/(bandwithlo*ratio) ) - (bandwithhi > 0?ratio * log10( 1 + bandwith/(bandwithhi*ratio) ):0.0);
+  //return ratio * log10( ( ratio + bandwith/bandwithlo ) / ( ratio + bandwith/bandwithhi ) )
+}
+
 int strpref(const char *const *str, int n, char sep1, char sep2) {
   int i, j=0;
   for(;;j++)
@@ -1054,21 +1059,21 @@ int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, size_t outs
     for(op = _out, in = _in; in < _in+_inlen; ) {
       unsigned inlen,bs; 
       if(mode) { 														blknum++;
-        inlen = ctou32(in); in += 4; 
+        inlen      = ctou32(in); in += 4; 
         ctou32(op) = inlen; op += 4; //vbput32(op, inlen); 
         if(in+inlen>_in+_inlen) inlen = (_in+_inlen)-in;
       } else inlen = _inlen;
 
       for(ip = in, in += inlen; ip < in; ) { 												//printf(".");fflush(stdout);
         size_t iplen = in - ip; iplen = min(iplen, bsize);       
-        bs = mode?((min(bsize, iplen) < (1<<16))?2:4):0;
+        bs = (mode || bsize < inlen)?((min(bsize, iplen) < (1<<16))?2:4):0;
         int oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);					
         if(oplen <= 0 || oplen >= iplen && mcpy) {
 	      if(mcpy) { memcpy(op+bs, ip, iplen); oplen = iplen; }
 	      else if(oplen <= 0) { op=_out; goto end; }
 	    }
         if(bs == 2 && oplen >= (1<<16)) { printf("Output larger than input! Use option '-P'\n"); exit(-1); }
-        if(mode) { bs==2?(ctou16(op) = oplen):(ctou32(op) = oplen); } op += oplen+bs; ip += iplen; 
+        if(mode || bsize < inlen) { bs==2?(ctou16(op) = oplen):(ctou32(op) = oplen); } op += oplen+bs; ip += iplen; 
         if(op > _out+outsize) 
 	      die("Overflow error %llu, %u in lib=%d\n", outsize, (int)(op - _out), id);                                                      
       }
@@ -1091,10 +1096,9 @@ int bedecomp(unsigned char *_in, int _inlen, unsigned char *_out, unsigned _outl
         outlen = (_out+_outlen)-out; 
     } else outlen = _outlen;
     for(op = out, out += outlen; op < out; ) { 
-      unsigned oplen = out - op; 
-      oplen = min(oplen, bsize); 
-      bs = mode?((min(bsize,oplen)<(1<<16))?2:4):0;
-      int l, iplen = mode?(bs==2?ctou16(ip):ctou32(ip)):_inlen; ip += bs;
+      unsigned oplen = out - op; oplen = min(oplen, bsize); 
+      bs = (mode || bsize < outlen)?((min(bsize, oplen)<(1<<16))?2:4):0;
+      int l, iplen = (mode || bsize < outlen)?(bs==2?ctou16(ip):ctou32(ip)):_inlen; ip += bs;
       if(mcpy && iplen==oplen) 
         memcpy(op, ip, oplen); 
 	  else l = coddecomp(ip, iplen, op, oplen, id, lev,prm);
