@@ -32,13 +32,13 @@ const uint8_t MAX_BITS_IN_CODE = 25;
 const uint32_t UNIQUE_SYMBOL = 0xFFFFFFFF;
 const uint32_t READ_SIZE = 0x80000;
 
-static uint8_t UTF8_compliant, cap_encoded, prior_is_cap, end_char, prior_end, use_mtf, queue_offset;
-static uint8_t max_code_length, max_regular_code_length, found_first_symbol, cap_symbol_defined, cap_lock_symbol_defined;
-static uint8_t symbol_lengths[0x100], bin_code_length[0x100], sym_list_bits[0x100][26], queue_miss_code_length[16];
-static uint16_t nbob[0x100][26], sum_nbob[0x100], fbob[0x100][26];
-static uint16_t queue_size, queue_size_az, queue_size_space, queue_size_other;
-static uint32_t prior_symbol, num_grammar_rules, num_codes, num_base_symbols, num_transmits;
-static uint32_t queue[0x100], nsob[0x100][26], *sym_list_ptrs[0x100][26], *symbol_array;
+uint8_t UTF8_compliant, cap_encoded, prior_is_cap, end_char, prior_end, use_mtf, queue_offset;
+uint8_t max_code_length, max_regular_code_length, found_first_symbol, cap_symbol_defined, cap_lock_symbol_defined;
+uint8_t symbol_lengths[0x100], bin_code_length[0x100], sym_list_bits[0x100][26], queue_miss_code_length[16];
+uint16_t nbob[0x100][26], sum_nbob[0x100], fbob[0x100][26];
+uint16_t queue_size, queue_size_az, queue_size_space, queue_size_other;
+uint32_t prior_symbol, num_grammar_rules, num_codes, num_base_symbols, num_transmits;
+uint32_t queue[0x100], nsob[0x100][26], *sym_list_ptrs[0x100][26], *symbol_array;
 
 struct symbol_data {
   uint8_t starts, ends, code_length, type;

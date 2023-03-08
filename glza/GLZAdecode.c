@@ -45,8 +45,8 @@ static uint8_t queue[0x100], queue_az[0x100], queue_space[0x100], queue_other[0x
 static uint8_t symbol_lengths[0x100], bin_code_length[0x100], lookup_bits[0x100][0x1000];
 static uint8_t out_char0[0x40064], out_char1[0x40064], queue_miss_code_length[15];
 static uint8_t *out_char_ptr, *start_char_ptr, *end_outbuf, *outbuf, *symbol_strings;
-atomic_uchar done_parsing, symbol_buffer_owner[2];
-FILE * fd;
+static atomic_uchar done_parsing, symbol_buffer_owner[2];
+static FILE * fd;
 
 // type: bit 0: string starts a-z, bit1: nonergodic, bit2: wordness determined, bit3: sent mtf
 //       bits 5 - 4:  0: not a word, 1: word, 2: word & likely followed by ' ', 3: word & >= 15 repeats (ending sub)symbol
