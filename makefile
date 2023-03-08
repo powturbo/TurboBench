@@ -422,7 +422,7 @@ endif
 
 ifeq ($(LZLIB), 1)
 CXXFLAGS+=-D_LZLIB
-OB+=lzlib-1.11/lzlib.o lzlib_/bbexample.o 
+OB+=lzlib-1.13/lzlib.o lzlib_/bbexample.o 
 endif
 
 ifeq ($(ZLIB_NG), 1)
