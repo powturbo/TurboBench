@@ -3,7 +3,7 @@
 # git clone --recursive git://github.com/powturbo/TurboBench.git 
 # make
 #
-# Minimum make: "make NCODEC2=1" to compile only brotli,lz4,lzma,zlib and zstd
+# Minimum make: "make NCODEC2=2" to compile only brotli,lz4,lzma,zlib and zstd
 #
 # snappy:    "cp snappy_/* snappy" (or configure snappy) & type make
 #LZTURBO=1
@@ -41,7 +41,7 @@ LIBDEFLATE=1
 #IGZIP=1
 LIBBSC=1
 #LIBZLING=1
-# lzard disabled (conflict between lizard & ZSTD FSE/HUF ) 2023.02.09
+# lizard disabled (conflict between lizard & ZSTD FSE/HUF ) 2023.02.09
 #LIZARD=1
 #LZ4ULTRA=1
 LZFSE=1
@@ -53,7 +53,7 @@ LZSSE=1
 #MINIZ=1
 #MSCOMPRESS=1
 #PYSAP=1
-# oodle dll like "oo2core_9_win64.dll" must be in the same directoty as turbobench.exe
+# oodle dll 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
 OODLE=1
 QUICKLZ=1
 #SHOCO=1
@@ -333,20 +333,10 @@ CFLAGS+=-Izstd/lib -Izstd/lib/common
 ZT0=zstd/lib/common/
 ZTC=zstd/lib/compress/
 ZTD=zstd/lib/decompress/
-#ZT0=zstd/lib/obj/conf_8ec6754e56c29d27864cdc511c5baaea/static/
-#ZTC=$(ZT0)
-#ZTD=$(ZT0)
-#CFLAGS+=-DZSTD_DISABLE_ASM=1
 OB+=$(ZT0)pool.o $(ZT0)xxhash.o $(ZT0)error_private.o $(ZT0)fse_decompress.o $(ZT0)zstd_common.o $(ZT0)entropy_common.o \
     $(ZTC)hist.o $(ZTC)zstd_compress.o $(ZTC)zstd_compress_literals.o $(ZTC)zstd_compress_sequences.o $(ZTC)zstd_double_fast.o $(ZTC)zstd_fast.o $(ZTC)zstd_lazy.o \
 	$(ZTC)zstd_ldm.o $(ZTC)zstdmt_compress.o $(ZTC)zstd_opt.o $(ZTC)fse_compress.o $(ZTC)huf_compress.o $(ZTC)zstd_compress_superblock.o \
     $(ZTD)zstd_decompress.o $(ZTD)zstd_decompress_block.o $(ZTD)zstd_ddict.o $(ZTD)huf_decompress.o $(ZTD)huf_decompress_amd64.o
-	
-#OB+=$(ZT)pool.o $(ZT)xxhash.o $(ZT)error_private.o \
-#$(ZT)hist.o $(ZT)zstd_compress.o $(ZT)zstd_compress_literals.o $(ZT)zstd_compress_sequences.o $(ZT)zstd_double_fast.o $(ZT)zstd_fast.o $(ZT)zstd_lazy.o $(ZT)zstd_ldm.o $(ZT)zstdmt_compress.o $(ZT)zstd_opt.o \
-#    $(ZT)zstd_decompress.o $(ZT)zstd_decompress_block.o $(ZT)zstd_ddict.o $(ZT)fse_compress.o $(ZT)fse_decompress.o $(ZT)huf_compress.o $(ZT)huf_decompress.o $(ZT)zstd_common.o $(ZT)entropy_common.o $(ZT)zstd_compress_superblock.o\
-#    $(ZT)huf_decompress_amd64.o
-#OB+=zstd/lib/dll/libzstd.dll
 endif
 endif
 
@@ -492,10 +482,7 @@ endif
 
 ifeq ($(OODLE), 1)
 CXXFLAGS+=-D_OODLE
-ifeq ($(OS), Windows)
-else
 LDFLAGS+=liboo2corelinux64.a
-endif
 endif
 
 ifeq ($(SLZ), 1)
