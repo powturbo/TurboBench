@@ -765,6 +765,7 @@ int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char
 typedef struct OodleLZ_CompressOptions {
   char dummy[255];
 };
+    #if _WIN32
 #define __cdecl
 typedef long long (__cdecl *fOodleLZ_Compress)(int codec, void *in, long long inlen, void *out, int lev, void *options, void *dict, void *p6, void *tmp, long long tmplen);
 typedef long long (__cdecl *fOodleLZ_Decompress)(void *in, long long inlen, void *out, long long outlen, int crc, int p5, long long verb, void *dic, long long diclen, void *p9, long long p10, void *p11=0, long long p12=0, int p13=0);
@@ -772,8 +773,12 @@ typedef struct OodleLZ_CompressOptions *(__cdecl *fOodleLZ_CompressOptions_GetDe
 static fOodleLZ_Compress                   OodleLZ_Compress_;
 static fOodleLZ_Decompress                 OodleLZ_Decompress_;
 static fOodleLZ_CompressOptions_GetDefault OodleLZ_CompressOptions_GetDefault_;
-  #endif
-  
+    #else
+long long OodleLZ_Compress(int codec, void *in, long long inlen, void *out, int lev, void *options, void *dict, void *p6, void *tmp, long long tmplen);
+long long OodleLZ_Decompress(void *in, long long inlen, void *out, long long outlen, int crc, int p5, long long verb, void *dic, long long diclen, void *p9, long long p10, void *p11=0, long long p12=0, int p13=0);
+OodleLZ_CompressOptions *OodleLZ_CompressOptions_GetDefault(int compid, int level);    
+    #endif
+  #endif  
   #if _SNAPPY_C
 #include "snappy-c/snappy.h"
 struct snappy_env env;
@@ -1712,10 +1717,15 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _OODLE
     case P_OODLE: {
-	  int nodll = strchr(prm,'c'), level = abs(lev), comp = level/10; level = (level>99?level-100:level)%10; if(lev<0) level = -level;  
+	  int nodll = strchr(prm,'c'), level = abs(lev), comp = level/10; level = (level>99?level-100:level)%10; if(lev<0) level = -level;    
 	  if(!nodll) {
+	      #if _WIN32
 	    OodleLZ_CompressOptions copts = *OodleLZ_CompressOptions_GetDefault_(comp, level);
-        return OodleLZ_Compress_(comp, in, inlen, out, level, &copts, 0, 0, 0, 0);
+            return OodleLZ_Compress_(comp, in, inlen, out, level, &copts, 0, 0, 0, 0);
+              #else
+	    OodleLZ_CompressOptions copts = *OodleLZ_CompressOptions_GetDefault(comp, level);
+            return OodleLZ_Compress(comp, in, inlen, out, level, &copts, 0, 0, 0, 0);
+              #endif
 	  } 
 	   #if _OODLESRC
 	  else {
@@ -2421,7 +2431,11 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_OODLE: { 
 	  int nodll = strchr(prm,'d');  
 	  if(!nodll) {
-        int rc = OodleLZ_Decompress_(in, inlen, out, outlen, 0,0,0,0,0,0,0,0,0,0);
+	    #if _WIN32
+          int rc = OodleLZ_Decompress_(in, inlen, out, outlen, 0,0,0,0,0,0,0,0,0,0);
+            #else
+          int rc = OodleLZ_Decompress(in, inlen, out, outlen, 0,0,0,0,0,0,0,0,0,0);
+            #endif
         return outlen;
 	  } 
 	    #if _OODLESRC
