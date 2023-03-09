@@ -41,7 +41,7 @@ LIBDEFLATE=1
 #IGZIP=1
 LIBBSC=1
 #LIBZLING=1
-# conflict between lizard & ZSTD FSE/HUF
+# lzard disabled (conflict between lizard & ZSTD FSE/HUF ) 2023.02.09
 #LIZARD=1
 #LZ4ULTRA=1
 LZFSE=1
@@ -53,6 +53,8 @@ LZSSE=1
 #MINIZ=1
 #MSCOMPRESS=1
 #PYSAP=1
+# oodle dll like "oo2core_9_win64.dll" must be in the same directoty as turbobench.exe
+OODLE=1
 QUICKLZ=1
 #SHOCO=1
 #SLZ=1
@@ -81,12 +83,15 @@ FPAQC=1
 #FREQTAB=1
 FPC=1
 FQZ0=1
+# fse,fsehuf disabled as not available in zstd (20230209)
+#FSE=1
+#FSEHUF=1
 RANS_S=1
 #RECIPARITH=1
 SUBOTIN=1
 #TORNADO=1
 VECRC=1
- TurboRC + libsais
+#TurboRC + libsais
 #TURBORC=1
 LIBSAIS=1
 endif
@@ -403,11 +408,12 @@ endif
 
 ifeq ($(IGZIP),1)
 #install isa-l package 
-CXXFLAGS+=-D_IGZIP -DHAVE_IGZIP
+CXXFLAGS+=-D_IGZIP -DHAVE_IGZIP 
+#-Iisa-l -Iisa-l_
 LDFLAGS+=-lisal
 #$(shell pkg-config --libs libisal)
 #OB+=isa-l/igzip/igzip.o isa-l/igzip/hufftables_c.o isa-l/igzip/igzip_base.o isa-l/igzip/igzip_icf_base.o isa-l/igzip/crc32_gzip_base.o isa-l/igzip/flatten_ll.o isa-l/igzip/encode_df.o
-#OB+=isa-l/.libs/libisal.a
+#OB+=isa-l_/libisal.a
 endif
 
 ifeq ($(LZ4ULTRA), 1)
@@ -482,6 +488,10 @@ ifeq ($(GIPFELI), 1)
 CXXFLAGS+=-D_GIPFELI
 OB+=gipfeli/lz77.o gipfeli/entropy.o gipfeli/entropy_code_builder.o gipfeli/decompress.o gipfeli/gipfeli-internal.o
 #endif
+endif
+
+ifeq ($(OODLE), 1)
+CXXFLAGS+=-D_OODLE
 endif
 
 ifeq ($(SLZ), 1)
