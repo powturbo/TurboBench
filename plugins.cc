@@ -1,5 +1,5 @@
 /**
-    Copyright (C) powturbo 2013-2021
+    Copyright (C) powturbo 2013-2023
     GPL v2 License
 
     This program is free software; you can redistribute it and/or modify
@@ -209,6 +209,13 @@ enum {
 #define _PYSAP 0
 #endif
  P_PYSAP,
+#ifndef _OODLE 
+#define _OODLE 0
+#endif
+#ifndef _OODLESRC 
+#define _OODLESRC 0
+#endif
+ P_OODLE, 
 #ifndef _SHOCO
 #define _SHOCO 0
 #endif
@@ -275,7 +282,13 @@ enum {
 #define _ZSTD 0
 #endif
  P_ZSTD,
+#ifndef _FSE
+#define _FSE 0
+#endif
  P_FSE,
+#ifndef _FSEHUF
+#define _FSEHUF 0
+#endif 
  P_FSEH,
   // --------- Encoding -------------------
 #ifndef _TURBORLE
@@ -748,6 +761,19 @@ int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char 
 int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len);
   #endif
 
+  #if _OODLE
+typedef struct OodleLZ_CompressOptions {
+  char dummy[255];
+};
+#define __cdecl
+typedef long long (__cdecl *fOodleLZ_Compress)(int codec, void *in, long long inlen, void *out, int lev, void *options, void *dict, void *p6, void *tmp, long long tmplen);
+typedef long long (__cdecl *fOodleLZ_Decompress)(void *in, long long inlen, void *out, long long outlen, int crc, int p5, long long verb, void *dic, long long diclen, void *p9, long long p10, void *p11=0, long long p12=0, int p13=0);
+typedef struct OodleLZ_CompressOptions *(__cdecl *fOodleLZ_CompressOptions_GetDefault)(int compid, int level);
+static fOodleLZ_Compress                   OodleLZ_Compress_;
+static fOodleLZ_Decompress                 OodleLZ_Decompress_;
+static fOodleLZ_CompressOptions_GetDefault OodleLZ_CompressOptions_GetDefault_;
+  #endif
+  
   #if _SNAPPY_C
 #include "snappy-c/snappy.h"
 struct snappy_env env;
@@ -1070,8 +1096,8 @@ struct plugs plugs[] = {
   { P_FPC,       "fpc",         _FPC,       "Fast Prefix Coder",       "0,8,9,10,11,12,16,32,48,63" },
   { P_FREQTAB,   "freqtab",     _FREQTAB,   "FreqTable v2.Eugene shelwien", "" },
   { P_FSC,       "fsc",         _FSC,       "Finite State Coder",      "", E_ANS },
-  { P_FSE,       "fse",         _ZSTD,      "Finite State Entropy",    "", E_ANS },
-  { P_FSEH,      "fsehuf",      _ZSTD,      "Zstd Huffman Coding",     "", E_HUF },
+  { P_FSE,       "fse",         _FSE,       "Finite State Entropy",    "", E_ANS },
+  { P_FSEH,      "fsehuf",      _FSEHUF,    "Zstd Huffman Coding",     "", E_HUF },
   { P_FPAQC,     "fpaqc",       _FPAQC,     "Asymmetric Binary Coder", "" },
   { P_SHRC,      "fpaq0p_sh",   _SHRC,      "Bitwise RC",              "" },
   { P_SHRCV,     "vecrc_sh",    _VECRC,     "Bitwise vector RC",       "" },
@@ -1082,6 +1108,7 @@ struct plugs plugs[] = {
   { P_FQZ0,      "fqz0",        _FQZ0,      "FQZ/PPMD Range Coder",    ""},
   { P_MARLIN,    "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
   { P_NIBRANS,   "nibrans",     _NIBRANS,   "nibrans",                 ""},
+  { P_OODLE, 	 "oodle", 		_OODLE, 	"Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
   { P_POLHF,     "polar",       _POLHF,     "Polar Codes",             "" },
   { P_PPMDEC,    "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
 
@@ -1201,6 +1228,24 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_CHAMELEON: workmemsize = sizeof(struct Chameleon); break;
       #endif
 
+      #if _OODLE
+    case P_OODLE: 
+        #if _WIN32
+      { HINSTANCE hdll; int i;  
+	    char oodle[33];
+	    for(i = 9; i >= 4; i--) {
+		  sprintf(oodle, "oo2core_%d_win64.dll", i);
+	      if(hdll = LoadLibrary(oodle)) break;
+        }
+  	    if(!hdll) { printf("oo2core_?_win64.dll not found\n"); exit(-1); }
+	    if(!(OodleLZ_Compress_   = (fOodleLZ_Compress  )GetProcAddress(hdll, "OodleLZ_Compress"  ))) { printf("OodleLZ_Compress not found\n");   exit(-1); }
+	    if(!(OodleLZ_Decompress_ = (fOodleLZ_Decompress)GetProcAddress(hdll, "OodleLZ_Decompress"))) { printf("OodleLZ_Decompress not found\n"); exit(-1); }
+	    if(!(OodleLZ_CompressOptions_GetDefault_ = (fOodleLZ_CompressOptions_GetDefault)GetProcAddress(hdll, "OodleLZ_CompressOptions_GetDefault"))) { printf("OodleLZ_CompressOptions_GetDefault not found\n"); exit(-1); }
+      } 
+        #endif 
+        break;
+      #endif
+
       #if _QUICKLZ
     case P_QUICKLZ:
       state_size  = max(qlz_get_setting1(1), max(qlz_get_setting2(1), qlz_get_setting3(1))); workmemsize = max(state_size, workmemsize);
@@ -1233,7 +1278,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
          slz_prepare_dist_table();
       #endif
 
-      #if _ZSTD
+      #if _FSEHUF
 //    case P_FSEH: workmemsize = max(4096*sizeof(unsigned), workmemsize); break;
       #endif
 
@@ -1665,6 +1710,22 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_QUICKLZ: { memset(workmem,0,workmemsize); return lev<=1?qlz_compress1((char *)in, (char *)out, inlen, workmem):(lev<=2?qlz_compress2((char *)in, (char *)out, inlen, workmem):qlz_compress3((char *)in, (char *)out, inlen, workmem)); }
       #endif
 
+      #if _OODLE
+    case P_OODLE: {
+	  int nodll = strchr(prm,'c'), level = abs(lev), comp = level/10; level = (level>99?level-100:level)%10; if(lev<0) level = -level;  
+	  if(!nodll) {
+	    OodleLZ_CompressOptions copts = *OodleLZ_CompressOptions_GetDefault_(comp, level);
+        return OodleLZ_Compress_(comp, in, inlen, out, level, &copts, 0, 0, 0, 0);
+	  } 
+	   #if _OODLESRC
+	  else {
+	    OodleLZ_CompressOptions copts = *OodleLZ_CompressOptions_GetDefault(comp, level);
+        return OodleLZ_Compress(comp, in, inlen, out, level, &copts, 0, 0, 0, 0);
+	  }
+	   #endif
+    }
+      #endif
+
       #if _PYSAP
     case P_PYSAP: { CsObjectInt c; SAP_INT bytes_read, bytes_written; int rc = c.CsInitCompr((SAP_BYTE *)out, inlen, lev); out += CS_HEAD_SIZE; outsize -= CS_HEAD_SIZE;
         c.CsCompr(inlen, in, inlen, out, outsize, lev, &bytes_read, &bytes_written); return bytes_written+CS_HEAD_SIZE;
@@ -1934,9 +1995,12 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_FSC:     { size_t outlen = 0; uint8_t *op = NULL; int ok = FSCEncode(in, inlen, &op, &outlen, 12, CODING_METHOD_DEFAULT); if(ok) { memcpy(out, op, outlen); free(op); } return outlen; }
       #endif
 
-      #if _ZSTD
-    //case P_FSE:     { size_t o = FSE_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); o = inlen; } return o; }
-    //case P_FSEH:    { size_t o = HUF_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); o = inlen; } return o;    }
+      #if _FSE
+    case P_FSE:     { size_t o = FSE_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); o = inlen; } return o; }
+	  #endif
+	  
+      #if _FSEHUF
+    case P_FSEH:    { size_t o = HUF_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); o = inlen; } return o;    }
       #endif
 
       #if _MARLIN
@@ -2353,6 +2417,22 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
      case P_MSCOMPRESS: { size_t _outlen=outlen; return ms_decompress((MSCompFormat)lev, in, inlen, out, &_outlen)==MSCOMP_OK?inlen:0; }
       #endif
 
+      #if _OODLE
+    case P_OODLE: { 
+	  int nodll = strchr(prm,'d');  
+	  if(!nodll) {
+        int rc = OodleLZ_Decompress_(in, inlen, out, outlen, 0,0,0,0,0,0,0,0,0,0);
+        return outlen;
+	  } 
+	    #if _OODLESRC
+	  else {
+        int rc = OodleLZ_Decompress(in, inlen, out, outlen, 0,0,0,0,0,0,0,0,0,0);
+        return outlen;
+	  }
+	    #endif
+    } 
+	  #endif
+
       #if _SHOCO
     case P_SHOCO:     shoco_decompress((const char *)in, inlen, (char *)out, outlen); return inlen;
       #endif
@@ -2591,9 +2671,12 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_FSC:     { size_t outsize = 0; uint8_t *op = NULL; int ok = FSCDecode(in, inlen, &op, &outsize); if(ok) { memcpy(out,op,outlen); free(op); } } break;
       #endif
 
-      #if _ZSTD
-    //case P_FSE:  if(inlen == outlen) memcpy(out, in, outlen); else if(inlen == 1) memset(out,in[0],outlen); else FSE_decompress(out, outlen, in, inlen); break;
-    //case P_FSEH: if(inlen == outlen) memcpy(out, in, outlen); else if(inlen == 1) memset(out,in[0],outlen); else HUF_decompress(out, outlen, in, inlen); break;
+      #if _FSE
+    case P_FSE:  if(inlen == outlen) memcpy(out, in, outlen); else if(inlen == 1) memset(out,in[0],outlen); else FSE_decompress(out, outlen, in, inlen); break;
+      #endif
+	  
+      #if _FSEHUF
+    case P_FSEH: if(inlen == outlen) memcpy(out, in, outlen); else if(inlen == 1) memset(out,in[0],outlen); else HUF_decompress(out, outlen, in, inlen); break;
       #endif
 
       #if _FQZ
