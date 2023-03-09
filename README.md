@@ -124,7 +124,7 @@ Compressors with versions 16.08.2016 <br>
    
 ### Compile:
 
-  		git clone --depth=1 --recursive git://github.com/powturbo/TurboBench.git
+  		git clone --depth=1 --recursive https://github.com/powturbo/TurboBench.git
         cd TurboBench
   		make
 
