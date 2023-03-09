@@ -482,7 +482,6 @@ endif
 
 ifeq ($(OODLE), 1)
 CXXFLAGS+=-D_OODLE
-LDFLAGS+=liboo2corelinux64.a
 endif
 
 ifeq ($(SLZ), 1)
