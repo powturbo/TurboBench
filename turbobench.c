@@ -246,6 +246,7 @@ unsigned *stackini(void) {
 
 size_t stackpeak(unsigned *_sp) {
   unsigned *sp;
+  if(!_sp) return 0;
   for(sp = _sp - STACK_SIZE; *sp == STACK_MAGIC; sp++);
   return (_sp - sp)*sizeof(unsigned);
 }
