@@ -667,8 +667,8 @@ class Out: public libzpaq::Writer {
   #endif
 
   #if _TURBORC
-#include "Turbo-Range-Coder/turborc.h"
-#include "Turbo-Range-Coder/rcutil.h"
+#include "Turbo-Range-Coder/include/turborc.h"
+//#include "Turbo-Range-Coder/rcutil.h"
   #endif
 
   #if _WFLZ
