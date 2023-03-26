@@ -232,7 +232,7 @@ LIBSAIS=1
 endif
 
 ifeq ($(LIBSAIS),1)
-OB+=libbsc/libbsc/platform/platform.o libbsc/libbsc/bwt/libsais/libsais.o 
+OB+=libbsc/libbsc/platform/platform.o libbsc/libbsc/bwt/libsais/libsais.o libbsc/libbsc/bwt/libsais/libsais.o 
 endif
 
 ifeq ($(BZIP2),1)
@@ -582,9 +582,8 @@ endif
 ifeq ($(TURBORC),1) 
 CXXFLAGS+=-D_TURBORC
 CFLAGS+=-D_BWT
-OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o 
-#Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o Turbo-Range-Coder/rcbwt_s.o Turbo-Range-Coder/rcbwt_ss.o 
-#Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o   
+OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
+  Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o
 LIBSAIS=1
 endif
 
