@@ -1414,7 +1414,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _LIBBSC
     #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING)
-    case P_LIBBSC: return bsc_compress(      in, out, inlen,strchr(prm,'p')?0:15,strchr(prm,'p')?0:128, lev<3?1:lev, (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1, BSC_MODE);
+    case P_LIBBSC: { int ec = (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1; ec = ec==0?3:(ec>3?3:ec);  return bsc_compress(      in, out, inlen,strchr(prm,'p')?0:15,strchr(prm,'p')?0:128, lev<3?1:lev, ec, BSC_MODE);}
     case P_LIBBSCC:return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
     case P_LIBBSCBWT: { int bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, 0); *(unsigned *)out = bwtidx; return inlen+4; }
     case P_ST: { memcpy(out+4,in, inlen); *(unsigned *)(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
@@ -2082,12 +2082,12 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _TURBORC
     case P_TURBORC: { //int ec = 0; 
-      //unsigned prm1 = 5,prm2 = 6; //if(q=strchr(prm,'r')) { prm1 = atoi(q+(q[1]=='='?2:1)); prm2 = prm1%10; prm1 = prm1/10; if(prm1>9)prm1=9;if(!prm1) prm1=1; if(prm2>9)prm2=9;if(!prm2) prm2=1; }
 	  char *q;
-	  unsigned bwtlev = 9, xprep8=0, forcelzp=0, verbose=0, xsort=0, itmax=0, lenmin=1;
+	  unsigned bwtlev = 9, xprep8=0, forcelzp=0, verbose=0, xsort=0, itmax=0, lenmin=1, nutf8=0;
 	  if(q = strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1));  
 	  if(q = strchr(prm,'m')) lenmin = atoi(q+(q[1]=='='?2:1));  
-      #define bwtflag(z) (z==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | forcelzp | (verbose?BWT_VERBOSE:0) | xsort <<14 | itmax <<10 | lenmin
+	  if(q = strchr(prm,'u')) nutf8  = 1;  
+      #define bwtflag(z) (z==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | forcelzp | (verbose?BWT_VERBOSE:0) | (nutf8?BWT_NUTF8:0) | xsort <<14 | itmax <<10 | lenmin
       switch(lev) {
         case  1: return rcsenc(    in, inlen, out);
         case  2: return rccsenc(   in, inlen, out); 
@@ -2098,7 +2098,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         //case 10: return rcm2senc( in, inlen, out);        
         case 12: return rcrlesenc( in, inlen, out);
         case 14: return rcrle1senc(in, inlen, out);        //case 17: return rcqlfcsenc(in, inlen, out);
-        //case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
+        case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
+		default: return 0;
 	//case 21: return utf8enc( in, inlen, out, bwtflag(1)|BWT_COPY|BWT_RATIO);
 	//case 90: return lzpenc( in, inlen, out, 1, 0);
       }
@@ -2778,7 +2779,8 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
         //case 10 : return rcm2sdec(  in, outlen, out);
         case 12 : return rcrlesdec( in, outlen, out);
         case 14 : return rcrle1sdec(in, outlen, out);        //case 17 : return rcqlfcsdec( in, outlen, out);
-        //case 20 : return rcbwtdec( in, outlen, out, bwtlev, 0);
+        case 20 : return rcbwtdec( in, outlen, out, bwtlev, 0);
+		default: return;
         //case 21 : if(inlen==outlen) memcpy(out,in,outlen); else utf8dec( in, outlen, out); return outlen;
         //case 90 : if(inlen==outlen) memcpy(out,in,outlen); else lzpdec(  in, outlen, out, 1, 0); return outlen;
       }	  
