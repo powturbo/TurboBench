@@ -67,9 +67,6 @@
 [submodule "lzsa"]
 	path = lzsa
 	url = https://github.com/emmanuel-marty/lzsa
-[submodule "Turbo-Range-Coder"]
-	path = Turbo-Range-Coder
-	url = https://github.com/powturbo/Turbo-Range-Coder
 [submodule "Turbo-Run-Length-Encoding"]
 	path = Turbo-Run-Length-Encoding
 	url = https://github.com/powturbo/Turbo-Run-Length-Encoding.git
