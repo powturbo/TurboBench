@@ -2086,7 +2086,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 	  unsigned bwtlev = 9, xprep8=0, forcelzp=0, verbose=0, xsort=0, itmax=0, lenmin=1, nutf8=0;
 	  if(q = strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1));  
 	  if(q = strchr(prm,'m')) lenmin = atoi(q+(q[1]=='='?2:1));  
-	  if(q = strchr(prm,'u')) nutf8  = 1;  
+	  if(q = strchr(prm,'U')) nutf8  = 1;  
       #define bwtflag(z) (z==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | forcelzp | (verbose?BWT_VERBOSE:0) | (nutf8?BWT_NUTF8:0) | xsort <<14 | itmax <<10 | lenmin
       switch(lev) {
         case  1: return rcsenc(    in, inlen, out);
