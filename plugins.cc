@@ -1240,10 +1240,11 @@ int codini(size_t insize, int codec, int lev, char *prm) {
 	  sprintf(oodle, "oo2core_%d_win64.dll", i);
 	  if(hdll = LoadLibrary(oodle)) break;
         }
-  	if(!hdll) { printf("oo2core_?_win64.dll not found\n"); exit(-1); }
-	if(!(OodleLZ_Compress_   = (fOodleLZ_Compress  )GetProcAddress(hdll, "OodleLZ_Compress"  ))) { printf("OodleLZ_Compress not found\n");   exit(-1); }
-	if(!(OodleLZ_Decompress_ = (fOodleLZ_Decompress)GetProcAddress(hdll, "OodleLZ_Decompress"))) { printf("OodleLZ_Decompress not found\n"); exit(-1); }
-	if(!(OodleLZ_CompressOptions_GetDefault_ = (fOodleLZ_CompressOptions_GetDefault)GetProcAddress(hdll, "OodleLZ_CompressOptions_GetDefault"))) { printf("OodleLZ_CompressOptions_GetDefault not found\n"); exit(-1); }
+  	if(hdll) {
+	  if(!(OodleLZ_Compress_   = (fOodleLZ_Compress  )GetProcAddress(hdll, "OodleLZ_Compress"  ))) { printf("OodleLZ_Compress not found\n");   exit(-1); }
+	  if(!(OodleLZ_Decompress_ = (fOodleLZ_Decompress)GetProcAddress(hdll, "OodleLZ_Decompress"))) { printf("OodleLZ_Decompress not found\n"); exit(-1); }
+	  if(!(OodleLZ_CompressOptions_GetDefault_ = (fOodleLZ_CompressOptions_GetDefault)GetProcAddress(hdll, "OodleLZ_CompressOptions_GetDefault"))) { printf("OodleLZ_CompressOptions_GetDefault not found\n"); exit(-1); }
+        } else fprintf(stderr,"oo2core_9_win64.dll not found\n");
       } 
         #else
       { 
@@ -1253,11 +1254,12 @@ int codini(size_t insize, int codec, int lev, char *prm) {
         strcpy(oodle, "./liboo2corelinux64.so.9");
           #endif
         void *hdll = dlopen(oodle, RTLD_LAZY);
-        if(!hdll) die("oodle shared library '%s' not found.'%s'\n", oodle, dlerror());
-        if(!(OodleLZ_Compress_   = (fOodleLZ_Compress  )dlsym(hdll, "OodleLZ_Compress"  ))) { printf("OodleLZ_Compress not found\n");   exit(-1); }
-	if(!(OodleLZ_Decompress_ = (fOodleLZ_Decompress)dlsym(hdll, "OodleLZ_Decompress"))) { printf("OodleLZ_Decompress not found\n"); exit(-1); }
-	if(!(OodleLZ_CompressOptions_GetDefault_ = (fOodleLZ_CompressOptions_GetDefault)dlsym(hdll, "OodleLZ_CompressOptions_GetDefault"))) { 
-	 printf("OodleLZ_CompressOptions_GetDefault not found\n"); exit(-1); }
+        if(hdll) { 
+          if(!(OodleLZ_Compress_   = (fOodleLZ_Compress  )dlsym(hdll, "OodleLZ_Compress"  ))) { printf("OodleLZ_Compress not found\n");   exit(-1); }
+	  if(!(OodleLZ_Decompress_ = (fOodleLZ_Decompress)dlsym(hdll, "OodleLZ_Decompress"))) { printf("OodleLZ_Decompress not found\n"); exit(-1); }
+	  if(!(OodleLZ_CompressOptions_GetDefault_ = (fOodleLZ_CompressOptions_GetDefault)dlsym(hdll, "OodleLZ_CompressOptions_GetDefault"))) { 
+	   printf("OodleLZ_CompressOptions_GetDefault not found\n"); exit(-1); }
+        } else fprintf("oodle shared library '%s' not found.'%s'\n", oodle, dlerror());   
       }
       #endif 
       break;
@@ -1732,7 +1734,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       int nodll = strchr(prm,'c'), level = abs(lev), comp = level/10; level = (level>99?level-100:level)%10; if(lev<0) level = -level;    
       if(!nodll) {
 	OodleLZ_CompressOptions copts = *OodleLZ_CompressOptions_GetDefault_(comp, level);
-        return OodleLZ_Compress_(comp, in, inlen, out, level, &copts, 0, 0, 0, 0);
+        return OodleLZ_Compress_?OodleLZ_Compress_(comp, in, inlen, out, level, &copts, 0, 0, 0, 0):0;
       } 
         #if _OODLESRC
       else {
@@ -2147,6 +2149,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
     defaulf: fprintf(stderr, "library '%d' not included\n", codec);
   }
+  return 0;
 } 
 
 int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int codec, int lev, char *prm) { 
@@ -2432,23 +2435,23 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if _MSCOMPRESS
-     case P_MSCOMPRESS: { size_t _outlen=outlen; return ms_decompress((MSCompFormat)lev, in, inlen, out, &_outlen)==MSCOMP_OK?inlen:0; }
+     case P_MSCOMPRESS: { size_t _outlen = outlen; return ms_decompress((MSCompFormat)lev, in, inlen, out, &_outlen)==MSCOMP_OK?inlen:0; }
       #endif
 
       #if _OODLE
     case P_OODLE: { 
       int nodll = strchr(prm,'d');  
       if(!nodll) {
-        int rc = OodleLZ_Decompress_(in, inlen, out, outlen, 0,0,0,0,0,0,0,0,0,0);
-        return outlen;
+        int rc = OodleLZ_Decompress_?OodleLZ_Decompress_(in, inlen, out, outlen, 0,0,0,0,0,0,0,0,0,0):0;
+        return rc;
       } 
 	#if _OODLESRC
       else {
         int rc = OodleLZ_Decompress(in, inlen, out, outlen, 0,0,0,0,0,0,0,0,0,0);
-        return outlen;
+        return rc;
       }
 	#endif
-    } 
+    }
       #endif
 
       #if _SHOCO
