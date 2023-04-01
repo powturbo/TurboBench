@@ -1255,11 +1255,13 @@ int codini(size_t insize, int codec, int lev, char *prm) {
           #endif
         void *hdll = dlopen(oodle, RTLD_LAZY);
         if(hdll) { 
-          if(!(OodleLZ_Compress_   = (fOodleLZ_Compress  )dlsym(hdll, "OodleLZ_Compress"  ))) { printf("OodleLZ_Compress not found\n");   exit(-1); }
-	  if(!(OodleLZ_Decompress_ = (fOodleLZ_Decompress)dlsym(hdll, "OodleLZ_Decompress"))) { printf("OodleLZ_Decompress not found\n"); exit(-1); }
-	  if(!(OodleLZ_CompressOptions_GetDefault_ = (fOodleLZ_CompressOptions_GetDefault)dlsym(hdll, "OodleLZ_CompressOptions_GetDefault"))) { 
-	   printf("OodleLZ_CompressOptions_GetDefault not found\n"); exit(-1); }
-        } else fprintf("oodle shared library '%s' not found.'%s'\n", oodle, dlerror());   
+          if(!(OodleLZ_Compress_   = (fOodleLZ_Compress  )dlsym(hdll, "OodleLZ_Compress"  ))) 
+            die("OodleLZ_Compress not found\n");
+	  if(!(OodleLZ_Decompress_ = (fOodleLZ_Decompress)dlsym(hdll, "OodleLZ_Decompress"))) 
+	    die("OodleLZ_Decompress not found\n");
+	  if(!(OodleLZ_CompressOptions_GetDefault_ = (fOodleLZ_CompressOptions_GetDefault)dlsym(hdll, "OodleLZ_CompressOptions_GetDefault")))  
+	    die("OodleLZ_CompressOptions_GetDefault not found\n");
+        } else fprintf(stderr,"oodle shared library '%s' not found.'%s'\n", oodle, dlerror());   
       }
       #endif 
       break;
