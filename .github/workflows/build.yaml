@@ -14,9 +14,9 @@ jobs:
         os:
           - ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
+      uses: actions/checkout@v2
+      with:
         submodules: 'true'
-        ssh-key: ${{ secrets.PRIVATE_KEY_FOR_DEPLOY_KEY_IN_SUBMODULE }}
+        token: ${{ secrets.PAT_TOKEN }}
       - run: make
       - run: ./trle trle
