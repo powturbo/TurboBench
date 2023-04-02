@@ -1,5 +1,6 @@
-TurboBench:Compressor Benchmark
-===================================================================================================
+## TurboBench:Compressor Benchmark
+[![Build ubuntu](https://github.com/powturbo/TurboBench/actions/workflows/build.yaml/badge.svg)](https://github.com/powturbo/TurboBench/actions/workflows/build.yaml)
+
  - High performance precision, zero overhead. One might call it the **compression lie detector**
  - The only benchmark program including **[LzTurbo](https://sites.google.com/site/powturbo/compression-benchmark)**
  - 100% in-memory benchmark, no I/O overhead
