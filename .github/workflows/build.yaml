@@ -14,9 +14,8 @@ jobs:
         os:
           - ubuntu-latest
     steps:
-      uses: actions/checkout@v2
-      with:
-        submodules: 'true'
-        token: ${{ secrets.PAT_TOKEN }}
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
       - run: make
       - run: ./trle trle
