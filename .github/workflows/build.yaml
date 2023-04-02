@@ -18,4 +18,4 @@ jobs:
         with:
           submodules: 'true'
       - run: make
-      - run: ./trle trle
+      - run: ./turbobench turbobench
