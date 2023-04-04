@@ -2785,7 +2785,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
         case 12 : return rcrlesdec( in, outlen, out);
         case 14 : return rcrle1sdec(in, outlen, out);        //case 17 : return rcqlfcsdec( in, outlen, out);
         case 20 : return rcbwtdec( in, outlen, out, bwtlev, 0);
-		default: return;
+		default: return 0;
         //case 21 : if(inlen==outlen) memcpy(out,in,outlen); else utf8dec( in, outlen, out); return outlen;
         //case 90 : if(inlen==outlen) memcpy(out,in,outlen); else lzpdec(  in, outlen, out, 1, 0); return outlen;
       }	  
