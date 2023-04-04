@@ -770,7 +770,7 @@ typedef struct OodleLZ_CompressOptions {
 };
 #define __cdecl
 typedef long long (__cdecl *fOodleLZ_Compress)(int codec, void *in, long long inlen, void *out, int lev, void *options, void *dict, void *p6, void *tmp, long long tmplen);
-typedef long long (__cdecl *fOodleLZ_Decompress)(void *in, long long inlen, void *out, long long outlen, int crc, int p5, long long verb, void *dic, long long diclen, void *p9, long long p10, void *p11=0, long long p12=0, int p13=0);
+typedef long long (__cdecl *fOodleLZ_Decompress)(void *in, long long inlen, void *out, long long outlen, int crc, int p5, long long verb, void *dic, long long diclen, void *p9, long long p10, void *p11, long long p12, int p13);
 typedef struct OodleLZ_CompressOptions *(__cdecl *fOodleLZ_CompressOptions_GetDefault)(int compid, int level);
 static fOodleLZ_Compress                   OodleLZ_Compress_;
 static fOodleLZ_Decompress                 OodleLZ_Decompress_;
