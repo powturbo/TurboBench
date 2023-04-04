@@ -21,7 +21,7 @@ jobs:
         with:
           submodules: 'true'
       - run: make
-      - run: ./turborc -e0 turborc
+      - run: ./turbobench turbobench
       
   windows:
     runs-on: windows-latest
@@ -40,5 +40,5 @@ jobs:
     - name: make
       run: |
         make
-        ./turborc -e0 turborc.exe
+        ./turbobench turbobench.exe
  
