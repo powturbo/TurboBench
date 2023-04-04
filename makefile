@@ -241,8 +241,8 @@ OB+=bzip2/blocksort.o bzip2/huffman.o bzip2/crctable.o bzip2/randtable.o bzip2/c
 endif
 
 ifeq ($(BZIP3),1)
-CXXFLAGS+=-D_BZIP3
-CFLAGS+=-DVERSION=1 -Ibzip3/include
+CXXFLAGS+=-D_BZIP3 
+CFLAGS+=-DVERSION=1 -Ibzip3/include -Wno-int-conversion
 OB+=bzip3/src/libbz3.o
 endif
 
