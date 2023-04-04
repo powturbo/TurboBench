@@ -1733,7 +1733,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _OODLE
     case P_OODLE: {
-      int nodll = strchr(prm,'c'), level = abs(lev), comp = level/10; level = (level>99?level-100:level)%10; if(lev<0) level = -level;    
+      int nodll = strchr(prm,'c')?1:0, level = abs(lev), comp = level/10; level = (level>99?level-100:level)%10; if(lev<0) level = -level;    
       if(!nodll) {
 	OodleLZ_CompressOptions copts = *OodleLZ_CompressOptions_GetDefault_(comp, level);
         return OodleLZ_Compress_?OodleLZ_Compress_(comp, in, inlen, out, level, &copts, 0, 0, 0, 0):0;
@@ -2442,7 +2442,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if _OODLE
     case P_OODLE: { 
-      int nodll = strchr(prm,'d');  
+      int nodll = strchr(prm,'d')?1:0;  
       if(!nodll) {
         int rc = OodleLZ_Decompress_?OodleLZ_Decompress_(in, inlen, out, outlen, 0,0,0,0,0,0,0,0,0,0):0;
         return rc;
