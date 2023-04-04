@@ -1,4 +1,4 @@
-name: linux
+name: build
 on:
   push:
     branches:
@@ -7,16 +7,38 @@ on:
     branches:
       - master
 jobs:
-  build:
+  linux:
     runs-on: '${{ matrix.os }}'
     strategy:
+      fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
+        os: [ubuntu-latest, macos-latest]
+        compiler: ["gcc", "clang"]
+    env:      
+      CC: ${{ matrix.compiler }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: 'true'
-      - run: git submodule update --init --recursive
       - run: make
-      - run: ./turbobench turbobench
+      - run: ./turborc -e0 turborc
+      
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        install: make mingw-w64-x86_64-gcc
+        update: true
+    - name: make
+      run: |
+        make
+        ./turborc -e0 turborc.exe
+ 
