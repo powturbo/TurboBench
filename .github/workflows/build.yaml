@@ -22,6 +22,7 @@ jobs:
           submodules: 'true'
       - run: git submodule update --init --recursive
       - run: make
+      - run: ./turbobench -l1
       - run: ./turbobench turbobench
       
   windows:
@@ -40,5 +41,6 @@ jobs:
           update: true
       - run: git submodule update --init --recursive
       - run: make
+      - run: ./turbobench -l1
       - run: ./turbobench turbobench.exe
  
