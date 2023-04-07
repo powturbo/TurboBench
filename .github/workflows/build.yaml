@@ -18,6 +18,8 @@ jobs:
       CC: ${{ matrix.compiler }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: 'true'     
       - run: git submodule update --init --recursive
       - run: make
       - run: lscpu
@@ -35,6 +37,8 @@ jobs:
       CC: ${{ matrix.compiler }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
       - run: git submodule update --init --recursive
       - run: make
       - run: sysctl -n machdep.cpu.brand_string
