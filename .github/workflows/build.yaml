@@ -12,35 +12,50 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         compiler: ["gcc", "clang"]
     env:      
       CC: ${{ matrix.compiler }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: 'true'
       - run: git submodule update --init --recursive
       - run: make
+      - run: lscpu
       - run: ./turbobench -l1
       - run: ./turbobench turbobench
-      
+
+  macos:
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest]
+        compiler: ["clang"]
+    env:      
+      CC: ${{ matrix.compiler }}
+    steps:
+      - uses: actions/checkout@v3
+      - run: git submodule update --init --recursive
+      - run: make
+      - run: sysctl -n machdep.cpu.brand_string
+      - run: ./turbobench -l1
+      - run: ./turbobench turbobench
+
   windows:
     runs-on: windows-latest
     defaults:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: 'true'
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          install: git make mingw-w64-x86_64-gcc
-          update: true
+    - uses: actions/checkout@v3
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        install: make mingw-w64-x86_64-gcc
+        update: true
       - run: git submodule update --init --recursive
       - run: make
       - run: ./turbobench -l1
-      - run: ./turbobench turbobench.exe
+      - run: ./turbobench turbobench
+
  
