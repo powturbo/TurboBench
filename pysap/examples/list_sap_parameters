@@ -1,0 +1,65 @@
+#<SAP parameter>:<check type in [FILE|EQUAL|NOTEQUAL|INF|SUP|REGEX]>:<expected value>
+auth/no_check_in_some_cases:EQUAL:Y
+auth/rfc_authority_check:SUP:1
+dbms/type::
+DIR_AUDIT:FILE:.
+FN_AUDIT:FILE:.
+gw/acl_mode:EQUAL:1
+gw/logging:REGEX:(?=.*ACTION)(?=.*LOGFILE)(?=.*SWITCHTF)
+gw/monitor:EQUAL:1
+gw/proxy_check::
+gw/prxy_info:FILE:$(DIR_DATA)$(DIR_SEP)$(FN_SEC_INFO)
+gw/reg_info:FILE:$(DIR_DATA)$(DIR_SEP)$(FN_REG_INFO)
+gw/reg_no_conn_info:EQUAL:255
+gw/sec_info:FILE:$(DIR_DATA)$(DIR_SEP)$(FN_SEC_INFO)
+gw/sim_mode:EQUAL:0
+icm/HTTP/logging_0:REGEX:(?=.*PREFIX)(?=.*LOGFILE)(?=.*MAXSIZEKB)(?=.*SWITCHT)(?=.* LOGFORMA)
+icm/HTTP/logging_1:REGEX:.*PREFIX.*LOGFILE.*MAXSIZEKB.*SWITCHT.* LOGFORMA.*
+icm/HTTP/logging_2:REGEX:.*PREFIX.*LOGFILE.*MAXSIZEKB.*SWITCHT.* LOGFORMA.*
+icm/HTTP/logging_3:REGEX:.*PREFIX.*LOGFILE.*MAXSIZEKB.*SWITCHT.* LOGFORMA.*
+icm/HTTP/logging_4:REGEX:.*PREFIX.*LOGFILE.*MAXSIZEKB.*SWITCHT.* LOGFORMA.*
+icm/server_port_0::
+icm/server_port_1::
+icm/server_port_2::
+icm/server_port_3::
+icm/server_port_4::
+INSTANCE_NAME::
+j2ee/dbname::
+j2ee/dbtype::
+login/fails_to_user_lock:INF:6
+login/min_password_lng:SUP:8
+login/no_automatic_user_sapstar:EQUAL:1
+login/password_compliance_to_current_policy:EQUAL:1
+login/password_downwards_compatibility:INF:2
+login/system_client::
+ms/acl_file_admin:FILE:.*
+ms/acl_file_extbnd:FILE:.*
+ms/acl_file_ext:FILE:.*
+ms/acl_file_int:FILE:.*
+ms/acl_info:FILE:.*
+ms/admin_port:EQUAL:0
+ms/audit:SUP:1
+ms/http_logging:EQUAL:1
+ms/monitor:EQUAL:0
+rdisp/extbnd_port::
+rdisp/msserv:EQUAL:0
+rdisp/msserv_internal:NOTEQUAL:0
+rec/client:EQUAL:ALL
+rsau/enable:EQUAL:1
+rsau/ip_only:REGEX:.*
+rsau/max_diskspace/local:REGEX:.*
+rsau/max_diskspace/per_day:REGEX:.*
+rsau/max_diskspace/per_file:REGEX:.*
+rsdb/ssfs_connect:EQUAL:1
+rslg/local/file:FILE:.*
+rslg/max_diskspace/local:REGEX:.*
+SAPDBHOST::
+SAPFQDN::
+SAPSYSTEM::
+SAPSYSTEMNAME::
+service/http/acl_file:FILE:.*
+service/https/acl_file:FILE:.*
+service/protectedwebmethods:REGEX:SDEFAULT|DEFAULT
+snc/enable:EQUAL:1
+system/secure_communication:EQUAL:ON
+system/type::

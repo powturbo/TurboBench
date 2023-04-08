@@ -79,3 +79,6 @@
 [submodule "lzo"]
 	path = lzo
 	url = https://github.com/nemequ/lzo.git
+[submodule "EC/htscodecs"]
+	path = EC/htscodecs
+	url = https://github.com/samtools/htscodecs.git

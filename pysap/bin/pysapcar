@@ -1,0 +1,316 @@
+#!/usr/bin/env python2
+# encoding: utf-8
+# pysap - Python library for crafting SAP's network protocols packets
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# Author:
+#   Martin Gallo (@martingalloar)
+#   Code contributed by SecureAuth to the OWASP CBAS project
+#
+
+# Standard imports
+import logging
+from sys import stdin
+from os import makedirs, utime, path
+from os import sep as dir_separator
+from argparse import ArgumentParser
+# Custom imports
+import pysap
+from pysapcompress import DecompressError
+from pysap.SAPCAR import SAPCARArchive, SAPCARInvalidChecksumException, SAPCARInvalidFileException
+
+
+# Try to import OS-dependent functions
+try:
+    from os import chmod, fchmod
+except ImportError:
+    chmod = fchmod = None
+
+
+pysapcar_usage = """
+
+create archive with specified files:
+pysapcar -c[v][f archive] [file1 file2 [/n filename] ...]
+
+list the contents of an archive:
+pysapcar -t[v][f archive] [file1 file2 ...]
+
+extract files from an archive:
+pysapcar -x[v][f archive] [-o outdir] [file1 file2 ...]
+
+append files to an archive:
+pysapcar -a[v][f archive] [file1 file2 [/n filename] ...]
+
+"""
+
+
+class PySAPCAR(object):
+
+    # Private attributes
+    _logger = None
+
+    # Instance attributes
+    mode = None
+    log_level = None
+    archive_fd = None
+
+    @staticmethod
+    def parse_options():
+        """Parses command-line options.
+        """
+        description = "Basic and experimental implementation of SAPCAR archive format."
+
+        parser = ArgumentParser(usage=pysapcar_usage, description=description, epilog=pysap.epilog)
+        parser.add_argument("--version", action="version", version="%(prog)s {}".format(pysap.__version__))
+
+        # Commands
+        parser.add_argument("-c", dest="create", action="store_true", help="Create archive with specified files")
+        parser.add_argument("-x", dest="extract", action="store_true", help="Extract files from an archive")
+        parser.add_argument("-t", dest="list", action="store_true", help="List the contents of an archive")
+        parser.add_argument("-a", dest="append", action="store_true", help="Append files to an archive")
+        parser.add_argument("-f", dest="filename", help="Archive filename", metavar="FILE")
+        parser.add_argument("-o", dest="outdir", help="Path to directory where to extract files")
+
+        misc = parser.add_argument_group("Misc options")
+        misc.add_argument("-v", "--verbose", dest="verbose", action="store_true", help="Verbose output")
+        misc.add_argument("-e", "--enforce-checksum", dest="enforce_checksum", action="store_true",
+                          help="Whether the checksum validation is enforced. A file with an invalid checksum won't be "
+                               "extracted. When not set, only a warning would be thrown if checksum is invalid.")
+        misc.add_argument("-b", "--break-on-error", dest="break_on_error", action="store_true",
+                          help="Whether the extraction would continue if an error is identified.")
+
+        (options, args) = parser.parse_known_args()
+
+        return options, args
+
+    @property
+    def logger(self):
+        """Sets the logger of the cli tool.
+        """
+        if self._logger is None:
+            self._logger = logging.getLogger("pysap.pysapcar")
+            self._logger.setLevel(logging.DEBUG if self.verbose else logging.INFO)
+            self._logger.addHandler(logging.StreamHandler())
+        return self._logger
+
+    def main(self):
+        """Main routine for parsing options and dispatch desired action.
+        """
+        options, args = self.parse_options()
+
+        # Set the verbosity
+        self.verbose = options.verbose
+
+        self.logger.info("pysapcar version: %s", pysap.__version__)
+
+        # Check the mode the archive file should be opened
+        if options.list or options.extract:
+            self.mode = "r"
+        elif options.create:
+            self.mode = "w"
+        elif options.append:
+            self.mode = "r+"
+        else:  # default to read mode
+            self.mode = "r"
+
+        # Opens the input/output file
+        self.archive_fd = None
+        if options.filename:
+            try:
+                self.archive_fd = open(options.filename, self.mode)
+            except IOError as e:
+                self.logger.error("pysapcar: error opening '%s' (%s)" % (options.filename, e.strerror))
+                return
+        else:
+            self.archive_fd = stdin
+
+        # Execute the action
+        try:
+            if options.create or options.append:
+                self.append(options, args)
+            elif options.list:
+                self.list(options, args)
+            elif options.extract:
+                self.extract(options, args)
+        finally:
+            self.archive_fd.close()
+
+    def open_archive(self):
+        """Opens the archive file to work with it and returns
+        the SAP Car Archive object.
+        """
+        try:
+            sapcar = SAPCARArchive(self.archive_fd, mode=self.mode)
+            self.logger.info("pysapcar: Processing archive '%s' (version %s)", self.archive_fd.name, sapcar.version)
+        except Exception as e:
+            self.logger.error("pysapcar: Error processing archive '%s' (%s)", self.archive_fd.name, e.message)
+            return None
+        return sapcar
+
+    @staticmethod
+    def target_files(filenames, target_filenames=None):
+        """Generates the list of files to work on. It calculates
+        the intersection between the file names selected in
+        command-line and the ones in the archive to work on.
+
+        :param filenames: filenames in the archive
+        :param target_filenames: filenames to work on
+
+        :return: filename
+        """
+        files = set(filenames)
+        if target_filenames:
+            files = files.intersection(set(target_filenames))
+
+        for filename in files:
+            yield filename
+
+    def append(self, options, args):
+        """Appends a file to the archive file.
+        """
+
+        if len(args) < 1:
+            self.logger.error("pysapcar: no files specified for appending")
+            return
+
+        # Open the archive file
+        sapcar = self.open_archive()
+        if not sapcar:
+            return
+
+        while len(args):
+            filename = filename_in_archive = args.pop(0)
+
+            self.logger.debug(args)
+            if len(args) >= 2 and args[0] == "/n":
+                args.pop(0)
+                filename_in_archive = args.pop(0)
+
+            sapcar.add_file(filename, archive_filename=filename_in_archive)
+            if filename != filename_in_archive:
+                self.logger.info("d %s (original name %s)", filename_in_archive, filename)
+            else:
+                self.logger.info("d %s", filename)
+
+        sapcar.write()
+
+    def list(self, options, args):
+        """List files inside the archive file and print their
+        attributes: permissions, size, timestamp and filename.
+        """
+        # Open the archive file
+        sapcar = self.open_archive()
+        if not sapcar:
+            return
+        # Print the info of each file
+        for filename in self.target_files(sapcar.files_names, args):
+            fil = sapcar.files[filename]
+            self.logger.info("{}  {:>10}    {} {}".format(fil.permissions, fil.size, fil.timestamp, fil.filename))
+
+    def extract(self, options, args):
+        """Extract files from the archive file.
+        """
+        CONTINUE = 1
+        SKIP = 2
+        STOP = 3
+
+        # Open the archive file
+        sapcar = self.open_archive()
+        if not sapcar:
+            return
+
+        # Warn if permissions can't be set
+        if not chmod:
+            self.logger.warning("pysapcar: Setting extracted files permissions not implemented in this platform")
+
+        # Extract each file in the archive
+        no = 0
+        for filename in self.target_files(sapcar.files_names, args):
+            flag = CONTINUE
+            fil = sapcar.files[filename]
+            filename = path.normpath(filename.replace("\x00", ""))  # Take out null bytes if found
+            if options.outdir:
+                # Have to strip directory separator from the beginning of the file name, because path.join disregards
+                # all previous components if any of the following components is an absolute path
+                filename = path.join(path.normpath(options.outdir), filename.lstrip(dir_separator))
+
+            if fil.is_directory():
+                # If the directory doesn't exist, create it and set permissions and timestamp
+                if not path.exists(filename):
+                    makedirs(filename)
+                    if chmod:
+                        chmod(filename, fil.perm_mode)
+                    utime(filename, (fil.timestamp_raw, fil.timestamp_raw))
+                self.logger.info("d %s", filename)
+                no += 1
+
+            elif fil.is_file():
+                # If the file references a directory that is not there, create it first
+                file_dirname = path.dirname(filename)
+                if file_dirname and not path.exists(file_dirname):
+                    # mkdir barfs if archive contains /foo/bar/bash but not /foo/bar directory.
+                    # makedirs creates intermediate directories as well
+                    makedirs(file_dirname)
+                    self.logger.info("d %s", file_dirname)
+
+                # Try to extract the file and handle potential errors
+                try:
+                    data = fil.open(enforce_checksum=options.enforce_checksum).read()
+                except (SAPCARInvalidFileException, DecompressError) as e:
+                    self.logger.error("pysapcar: Invalid SAP CAR file '%s' (%s)", self.archive_fd.name, e.message)
+                    if options.break_on_error:
+                        flag = STOP
+                    else:
+                        flag = SKIP
+                except SAPCARInvalidChecksumException:
+                    self.logger.error("pysapcar: Invalid checksum found for file '%s'", fil.filename)
+                    if options.enforce_checksum:
+                        flag = STOP
+
+                # Check the result before starting to write the file
+                if flag == SKIP:
+                    self.logger.info("pysapcar: Skipping execution of file '%s'", fil.filename)
+                    continue
+                elif flag == STOP:
+                    self.logger.info("pysapcar: Stopping extraction")
+                    break
+
+                # Write the new file and set permissions
+                try:
+                    with open(filename, "wb") as new_file:
+                        new_file.write(data)
+                        if fchmod:
+                            fchmod(new_file.fileno(), fil.perm_mode)
+                except IOError as e:
+                    self.logger.error("pysapcar: Failed to extract file '%s', reason: %s", filename, e.strerror)
+                    if options.break_on_error:
+                        break
+
+                # Set the timestamp
+                utime(filename, (fil.timestamp_raw, fil.timestamp_raw))
+
+                # If this path is reached and checksum is not valid, means checksum is not enforced, so we should warn
+                # only.
+                if not fil.check_checksum():
+                    self.logger.warning("pysapcar: checksum error in '%s' !", filename)
+
+                self.logger.info("d %s", filename)
+                no += 1
+            else:
+                self.logger.warning("pysapcar: Invalid file type '%s'", filename)
+
+        self.logger.info("pysapcar: %d file(s) processed", no)
+
+
+if __name__ == "__main__":
+    pysapcar = PySAPCAR()
+    pysapcar.main()

@@ -1,0 +1,2 @@
+scapy==2.4.4
+cryptography==2.9.2
