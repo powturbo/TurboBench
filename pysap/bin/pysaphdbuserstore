@@ -1,0 +1,201 @@
+#!/usr/bin/env python2
+# encoding: utf-8
+# pysap - Python library for crafting SAP's network protocols packets
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# Author:
+#   Martin Gallo (@martingalloar)
+#   Code contributed by SecureAuth to the OWASP CBAS project
+#
+
+# Standard imports
+import logging
+from os import environ
+from os.path import join
+from socket import gethostname
+from argparse import ArgumentParser
+# Custom imports
+import pysap
+from pysap.SAPSSFS import SAPSSFSKey, SAPSSFSData
+
+
+pysaphdbuserstore_usage = """
+
+list command:
+-------------
+
+- list all records in a SSFS data file
+
+  pysaphdbuserstore -c list -[v][d <ssfs.dat>]
+
+
+get command:
+-------------------
+
+- get information about a key value
+
+  pysaphdbuserstore -c get -[v][d <ssfs.dat>] [-k <ssfs.key>]
+
+- decrypt a key value
+
+  pysaphdbuserstore -c get -[v][d <ssfs.dat>] [-k <ssfs.key>] [--decrypt] [<key name>]
+
+"""
+
+
+class PySAPHDBUserStore(object):
+
+    # Private attributes
+    _logger = None
+
+    # Instance attributes
+    mode = None
+    log_level = None
+
+    commands = ["list", "get"]
+
+    def parse_options(self):
+        """Parses command-line options.
+        """
+
+        description = "Basic and experimental implementation of hdbuserstore tool."
+
+        parser = ArgumentParser(usage=pysaphdbuserstore_usage, description=description, epilog=pysap.epilog)
+
+        # Commands
+        parser.add_argument("-c", dest="command", help="Command", choices=self.commands)
+        parser.add_argument("-k", dest="key_filename", help="SSFS Key filename", metavar="FILE")
+        parser.add_argument("-d", dest="data_filename", help="SSFS Data filename", metavar="FILE")
+
+        parser.add_argument_group("List command options")
+
+        get = parser.add_argument_group("Get command options")
+        get.add_argument("--decrypt", dest="decrypt", action="store_false", help="Whether to try to decrypt the value")
+
+        misc = parser.add_argument_group("Misc options")
+        misc.add_argument("--deleted", dest="deleted", action="store_true", help="Show deleted records")
+        misc.add_argument("-v", dest="verbose", action="store_true", help="Verbose output")
+
+        options, args = parser.parse_known_args()
+
+        return options, args
+
+    @property
+    def logger(self):
+        """Sets the logger of the cli tool.
+        """
+        if self._logger is None:
+            self._logger = logging.getLogger("pysap")
+            self._logger.setLevel(logging.DEBUG if self.verbose else logging.INFO)
+            self._logger.addHandler(logging.StreamHandler())
+        return self._logger
+
+    def main(self):
+        """Main routine for parsing options and dispatch desired command.
+        """
+        options, args = self.parse_options()
+
+        # Set the verbosity
+        self.verbose = options.verbose
+
+        # Obtain the default paths to key and data files
+        if not options.key_filename:
+            options.key_filename = join(environ["HOME"], ".hdb", gethostname(), "SSFS_HDB.KEY")
+        if not options.data_filename:
+            options.data_filename = join(environ["HOME"], ".hdb", gethostname(), "SSFS_HDB.DAT")
+
+        self.logger.info("pysaphdbuserstore version: %s", pysap.__version__)
+
+        # Dispatch the command
+        if options.command in self.commands:
+            getattr(self, options.command)(options, args)
+        else:
+            self.logger.error("pysaphdbuserstore: Invalid command '%s'", options.command)
+            self.logger.error("pysaphdbuserstore: Valid commands are: %s", ",".join(self.commands))
+
+    def open_file(self, filename, cls, type):
+        """Opens a file to work with it and tries to parse it.
+
+        :param filename: name of the file to open
+        :type filename: string
+
+        :param cls: class to use for parsing the file
+        :type cls: type
+
+        :param type: name of the file type
+        :type type: string
+
+        :return: parsed packet
+        :rtype: Packet
+        """
+
+        try:
+            with open(filename) as f:
+                obj = cls(f.read())
+            self.logger.info("pysaphdbuserstore: Reading {} file '{}'".format(type, filename))
+        except IOError as e:
+            self.logger.error("pysaphdbuserstore: Error reading {} file '{}' ({})".format(type, filename, e.message))
+            return None
+
+        return obj
+
+    def list(self, options, args):
+        """List records in a SSFS Data file
+        """
+
+        # Parse the data file
+        try:
+            ssfs_data = self.open_file(options.data_filename, SAPSSFSData, "SSFS Data")
+        except Exception:
+            self.logger.error("pysaphdbuserstore: Unable to read data in file {}\n".format(options.data_filename))
+
+        for ssfs_record in ssfs_data.records:
+            if options.deleted or not ssfs_record.deleted:
+                self.logger.info("%s\t%s\t%s",
+                                 ssfs_record.key_name.rstrip(" "),
+                                 "Plaintext" if ssfs_record.is_stored_as_plaintext else "Encrypted",
+                                 ssfs_record.timestamp)
+
+    def get(self, options, args):
+        """Get a record value in a SSFS Data file
+        """
+
+        # Parse the key file
+        try:
+            ssfs_key = self.open_file(options.key_filename, SAPSSFSKey, "SSFS Key")
+        except Exception:
+            self.logger.error("pysaphdbuserstore: Unable to read key in file {}\n".format(options.key_filename))
+
+        # Parse the data file
+        try:
+            ssfs_data = self.open_file(options.data_filename, SAPSSFSData, "SSFS Data")
+        except Exception:
+            self.logger.error("pysaphdbuserstore: Unable to read data in file {}\n".format(options.data_filename))
+
+        for arg in args:
+            if ssfs_data.has_record(arg):
+                for ssfs_record in ssfs_data.get_records(arg):
+                    if options.deleted or not ssfs_record.deleted:
+                        self.logger.info("Is Deleted   : %s", ssfs_record.deleted)
+                        self.logger.info("Is Valid     : %s", ssfs_record.valid)
+                        self.logger.info("Record Key   : %s", ssfs_record.key_name)
+                        self.logger.info("Time Stamp   : %s", ssfs_record.timestamp)
+                        self.logger.info("Host Name    : %s", ssfs_record.host)
+                        self.logger.info("OS-User      : %s", ssfs_record.user)
+                        self.logger.info("Record Value : %s", ssfs_record.get_plain_data(ssfs_key))
+            else:
+                self.logger.info("Record with key %s not found in data file.", arg)
+
+
+if __name__ == "__main__":
+    pysaphdbuserstore = PySAPHDBUserStore()
+    pysaphdbuserstore.main()

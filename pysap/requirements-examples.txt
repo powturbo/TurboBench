@@ -1,0 +1,4 @@
+tabulate==0.8.9
+netaddr==0.8.0
+PyJWT==1.7.1
+requests
