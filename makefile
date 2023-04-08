@@ -58,7 +58,8 @@ GIPFELI=1
 # glza not working on all systems
 GLZA=1
 HEATSHRINK=1
-# make -f Makefile.unx  arch=mingw  host_cpu=x86_64  CC=gcc AS=nasm AR=ar STRIP=strip LDFLAGS=  CFLAGS_mingw=-m64
+# linux: install libtool -> ./autogen.sh && ./configure && make -> sudo make install 
+# windows: make -f Makefile.unx  arch=mingw  host_cpu=x86_64  CC=gcc AS=nasm AR=ar STRIP=strip LDFLAGS=  CFLAGS_mingw=-m64
 ISA_L=1
 #LIBZLING=1
 LZ4ULTRA=1
@@ -74,8 +75,8 @@ SMAZ=1
 #SNAPPY_C=1
 #MRLE=1
 RLE8=1
-# cd zlib-ng  bash ./configure && make
-ZLIB_NG=1
+# windows: cd zlib-ng  bash ./configure && make 
+#ZLIB_NG=1
 #UNISHOX2=1
 #UNISHOX3=1
 endif
@@ -410,7 +411,8 @@ ifeq ($(OS),Windows)
 LDFLAGS+=isa-l_/win64/isa-l.a
 else
 #ISA-L library needs to be installed before use
-LDFLAGS+=-lisa-l
+#LDFLAGS+=-lisa-l
+LDFLAGS+=isa-l_/linux/libisal.a
 CXXFLAGS+=-DHAVE_IGZIP -D_ISA_L
 endif
 endif
@@ -436,7 +438,8 @@ CXXFLAGS+=-D_ZLIB_NG
 ifeq ($(OS),Windows)
 OB+=msys-z-ng.dll
 else
-OB+=zlib-ng_/linux64/libz-ng.a
+#install zlib-ng
+OB+=-lz-ng
 endif
 endif
 
