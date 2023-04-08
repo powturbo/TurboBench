@@ -90,10 +90,10 @@ enum {
 #define _HEATSHRINK 0
 #endif
  P_HEATSHRINK,
-#ifndef _IGZIP
-#define _IGZIP 0
+#ifndef _ISA_L
+#define _ISA_L 0
 #endif
- P_IGZIP,
+ P_ISA_L,
 #ifndef _LIBBSC
 #define _LIBBSC 0
 #endif
@@ -305,8 +305,13 @@ enum {
 #ifndef _RLE8
 #define _RLE8 0
 #endif
+ P_RLE8X,
+ P_RLE8SH,
+ P_RLE8MMTF,
+ P_RLE8XMMTF,
  P_RLE8,
- 
+ P_RLE8M,
+ P_RLE8U,
   //---------- Transform ------------------
 
 #ifndef _BRC
@@ -350,9 +355,9 @@ enum {
 #ifndef _HTSCODECS
 #define _HTSCODECS 0
 #endif
- P_RANS_S8,
- P_RANS_S16,
- P_RANS_S32,
+ P_RANS32x16_128,
+ P_RANS32x16_256,
+ P_RANS32x16_512,
 #ifndef _FPAQC
 #define _FPAQC 0
 #endif
@@ -511,7 +516,7 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 #include "heatshrink_/heatshrink.h"
   #endif
 
-  #if _IGZIP
+  #if _ISA_L
     #ifdef HAVE_IGZIP
 #include <isa-l.h>
     #else
@@ -1036,7 +1041,7 @@ struct plugs plugs[] = {
   { P_GIPFELI,   "gipfeli",     _GIPFELI,   "Gipfeli",                 "" },
   { P_GLZA,      "glza",        _GLZA,      "glza",                    "" },
   { P_HEATSHRINK,"heatshrink",  _HEATSHRINK,"heatshrink",              "" },
-  { P_IGZIP,     "igzip",       _IGZIP,     "igzip",                   "0,1,2,3" },
+  { P_ISA_L,     "igzip",       _ISA_L,     "igzip",                   "0,1,2,3" },
   { P_LIBBSC,    "bsc",         _LIBBSC,    "bsc",                     "0,3,4,5,6,7,8/p:e#"},
   { P_LIBBSCC,   "bscqlfc",     _LIBBSC,    "bsc",                     "1,2"},
   { P_LIBDEFLATE,"libdeflate",  _LIBDEFLATE,"libdeflate",              "1,2,3,4,5,6,7,8,9,12/dg"},
@@ -1091,48 +1096,54 @@ struct plugs plugs[] = {
   { P_ZOPFLI,    "zopfli",      _ZOPFLI,    "Zopfli",                  ""},
   { P_ZSTD,      "zstd",        _ZSTD,      "ZSTD",                    "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13,-14,-15,-16,-17,-18,-19,-20,-21,-22/d#" },
 //------------------------------------------------------------------
-  { P_MCPY,      "imemcpy",     _MEMCPY,    "inline memcpy",           "" },
-  { P_LMCPY,     "memcpy",      _MEMCPY,    "library memcpy",          "" },
-  { P_AOM,       "AOM",         _AOM,       "AV1 Entropy coder",       ""},
-  { P_DAALA,     "Daala",       _DAALA,     "DAALA Entropy Coder",     ""},
-  { P_FPC,       "fpc",         _FPC,       "Fast Prefix Coder",       "0,8,9,10,11,12,16,32,48,63" },
-  { P_FREQTAB,   "freqtab",     _FREQTAB,   "FreqTable v2.Eugene shelwien", "" },
-  { P_FSC,       "fsc",         _FSC,       "Finite State Coder",      "", E_ANS },
-  { P_FSE,       "fse",         _FSE,       "Finite State Entropy",    "", E_ANS },
-  { P_FSEH,      "fsehuf",      _FSEHUF,    "Zstd Huffman Coding",     "", E_HUF },
-  { P_FPAQC,     "fpaqc",       _FPAQC,     "Asymmetric Binary Coder", "" },
-  { P_SHRC,      "fpaq0p_sh",   _SHRC,      "Bitwise RC",              "" },
-  { P_SHRCV,     "vecrc_sh",    _VECRC,     "Bitwise vector RC",       "" },
-  { P_FASTHF,    "FastHF",      _FASTHF,    "Fast HF",                 "" },
-  { P_FASTARI,   "FastAri",     _FASTARI,   "FastAri",                 "" },
-  { P_FASTAC,    "FastAC",      _FASTAC,    "Fast AC",                 "" },
-  { P_JAC,       "arith_static",_JAC,       "Range Coder/J.Bonfield",  "", E_ANS},
-  { P_FQZ0,      "fqz0",        _FQZ0,      "FQZ/PPMD Range Coder",    ""},
-  { P_MARLIN,    "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
-  { P_NIBRANS,   "nibrans",     _NIBRANS,   "nibrans",                 ""},
-  { P_OODLE, 	 "oodle", 		_OODLE, 	"Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
-  { P_POLHF,     "polar",       _POLHF,     "Polar Codes",             "" },
-  { P_PPMDEC,    "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
+  { P_MCPY,         "imemcpy",     _MEMCPY,    "inline memcpy",           "" },
+  { P_LMCPY,        "memcpy",      _MEMCPY,    "library memcpy",          "" },
+  { P_AOM,          "AOM",         _AOM,       "AV1 Entropy coder",       ""},
+  { P_DAALA,        "Daala",       _DAALA,     "DAALA Entropy Coder",     ""},
+  { P_FPC,          "fpc",         _FPC,       "Fast Prefix Coder",       "0,8,9,10,11,12,16,32,48,63" },
+  { P_FREQTAB,      "freqtab",     _FREQTAB,   "FreqTable v2.Eugene shelwien", "" },
+  { P_FSC,          "fsc",         _FSC,       "Finite State Coder",      "", E_ANS },
+  { P_FSE,          "fse",         _FSE,       "Finite State Entropy",    "", E_ANS },
+  { P_FSEH,         "fsehuf",      _FSEHUF,    "Zstd Huffman Coding",     "", E_HUF },
+  { P_FPAQC,        "fpaqc",       _FPAQC,     "Asymmetric Binary Coder", "" },
+  { P_SHRC,         "fpaq0p_sh",   _SHRC,      "Bitwise RC",              "" },
+  { P_SHRCV,        "vecrc_sh",    _VECRC,     "Bitwise vector RC",       "" },
+  { P_FASTHF,       "FastHF",      _FASTHF,    "Fast HF",                 "" },
+  { P_FASTARI,      "FastAri",     _FASTARI,   "FastAri",                 "" },
+  { P_FASTAC,       "FastAC",      _FASTAC,    "Fast AC",                 "" },
+  { P_JAC,          "arith_static",_JAC,       "Range Coder/J.Bonfield",  "", E_ANS},
+  { P_FQZ0,         "fqz0",        _FQZ0,      "FQZ/PPMD Range Coder",    ""},
+  { P_MARLIN,       "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
+  { P_NIBRANS,      "nibrans",     _NIBRANS,   "nibrans",                 ""},
+  { P_OODLE, 	    "oodle", 		_OODLE, 	"Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
+  { P_POLHF,        "polar",       _POLHF,     "Polar Codes",             "" },
+  { P_PPMDEC,       "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
 
-  { P_RANS_S8,   "rans_s8",     _HTSCODECS,    "ANS/J.Bonfield",          "0,1", E_ANS},
-  { P_RANS_S16,  "rans_s16",    _HTSCODECS,    "ANS/J.Bonfield",          "0,1", E_ANS},
-  { P_RANS_S32,  "rans_s32",    _HTSCODECS,    "ANS/J.Bonfield",          "0,1", E_ANS},
-  { P_RECIPARITH,"recip_arith", _RECIPARITH,"recip arith",			   "" },
-  { P_SUBOTIN,   "subotin",     _SUBOTIN,   "subotin RC",              "" },
-  { P_TORNADOHF, "tornado_huff",_TORNADO,   "Tornado Huf",             "" },
-  { P_TURBORC,   "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,9,10,12,14,17,20,21,90/e#" }, 
-  { P_ZLIBH,     "zlibh",       _ZLIB,      "zlib Huffmann",           "8,9,10,11,12,13,14,15,16,32" },
-  { P_ZRLE,      "zlibrle",     _ZLIB,      "zlib rle",                "" },
+  { P_RANS32x16_256,"rans32x16avx2",  _HTSCODECS, "RANS/J.Bonfield", "0,1", E_ANS},
+  { P_RANS32x16_512,"rans32x16avx512",_HTSCODECS, "RANS/J.Bonfield", "0,1", E_ANS},
+  { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",			   "" },
+  { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",              "" },
+  { P_TORNADOHF,    "tornado_huff",_TORNADO,   "Tornado Huf",             "" },
+  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,9,10,12,14,17,20,21,90/e#" }, 
+  { P_ZLIBH,        "zlibh",       _ZLIB,      "zlib Huffmann",           "8,9,10,11,12,13,14,15,16,32" },
+  { P_ZRLE,         "zlibrle",     _ZLIB,      "zlib rle",                "" },
   //---- Encoding ------
-  { P_RLES,      "srle",        _TURBORLE,  "TurboRLE ESC",            "0,8,16,32,64" },
-  { P_RLET,      "trle",        _TURBORLE,  "TurboRLE",                "" },
-  { P_RLEM,      "mrle",        _MRLE,      "Mespostine RLE",          "" },
-  { P_RLE8,      "rle8",        _RLE8,      "8 bit RLE",               "1,2,8,16,24,32,48,64/S#s (S:Subsection, s:single)" },
-  //----- Transform -----
-  { P_DIVBWT,    "divbwt",      _DIVBWT,    "bwt libdivsufsort","" },
-  { P_LIBBSCBWT, "bscbwt",      _LIBBSC,    "bwt libbsc",              "" },
-  { P_ST,        "st",          _LIBBSC,    "st  libbsc",              "3,4,5,6,7,8" },
-  { P_BRC,       "brc",         _BRC,       "Behemoth-Rank-Coding",    "0,1" },
+  { P_RLES,         "srle",        _TURBORLE,  "TurboRLE ESC",            "0,8,16,32,64" },
+  { P_RLET,         "trle",        _TURBORLE,  "TurboRLE",                "" },
+  { P_RLEM,         "mrle",        _MRLE,      "Mespostine RLE",          "" },
+
+  { P_RLE8X,        "rle8x",       _RLE8,      "8 bit RLE",               "8,16,24,32,48,64/s:single" },
+  { P_RLE8SH,       "rle8sh",      _RLE8,      "8 bit RLE",               "8" },
+  { P_RLE8MMTF,     "rle8mmtf",    _RLE8,      "8 bit RLE",               "128,256" },
+  { P_RLE8XMMTF,    "rle8xmmtf",   _RLE8,      "8 bit RLE",               "128,256" },
+  { P_RLE8,         "rle8",        _RLE8,      "8 bit RLE",               "8/s" },
+  { P_RLE8M,        "rle8m",       _RLE8,      "8 bit RLE",               "8/S#:subsection" },
+  { P_RLE8U,        "rle8u",       _RLE8,      "8 bit RLE",               "8/s:single)" },
+ //----- Transform -----
+  { P_DIVBWT,       "divbwt",      _DIVBWT,    "bwt libdivsufsort","" },
+  { P_LIBBSCBWT,    "bscbwt",      _LIBBSC,    "bwt libbsc",              "" },
+  { P_ST,           "st",          _LIBBSC,    "st  libbsc",              "3,4,5,6,7,8" },
+  { P_BRC,          "brc",         _BRC,       "Behemoth-Rank-Coding",    "0,1" },
 //{ P_MYCODEC,   "mycodec",     _MYCODEC,  "0",        "My codec",             "           ",      "",                                                                                     "" },
     #ifdef _LZTURBO
   #include "../dev/x/beplugr.h"
@@ -1508,8 +1519,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
 
-      #if _IGZIP
-    case P_IGZIP: struct isal_zstream s;
+      #if _ISA_L
+    case P_ISA_L: struct isal_zstream s;
       isal_deflate_stateless_init(&s);
       static unsigned bs_default[] = { ISAL_DEF_LVL0_DEFAULT,     ISAL_DEF_LVL1_DEFAULT,     ISAL_DEF_LVL2_DEFAULT,     ISAL_DEF_LVL3_DEFAULT };
       static unsigned bs_xlarge[]  = { ISAL_DEF_LVL0_EXTRA_LARGE, ISAL_DEF_LVL1_EXTRA_LARGE, ISAL_DEF_LVL2_EXTRA_LARGE, ISAL_DEF_LVL3_EXTRA_LARGE };
@@ -1878,13 +1889,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _RLE8
-    case P_RLE8:
-      switch(lev) {
-        case 1 : { int subSections = 0; if(q=strchr(prm,'S')) subSections = atoi(q+(q[1]=='='?2:1));
-          return subSections?rle8m_compress(subSections, in, inlen, out, outsize):(strchr(prm,'s')?rle8_compress_only_max_frequency(in, inlen, out, outsize):rle8_compress(in, inlen, out, outsize));
-        }
-        case 2 : return strchr(prm,'s')?rle8_ultra_compress_only_max_frequency(in, inlen, out, outsize):rle8_ultra_compress(in, inlen, out, outsize);
-
+	case P_RLE8X:
+	  switch(lev) {
         case  8 : return strchr(prm,'s')?rle8_extreme_single_compress(in, inlen, out, outlen):rle8_extreme_multi_compress( in, inlen, out, outsize);
         case 16 : return rle16_extreme_compress(in, inlen, out, outsize);
         case 24 : return rle24_extreme_compress(in, inlen, out, outsize);
@@ -1892,6 +1898,23 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         case 48 : return rle48_extreme_compress(in, inlen, out, outsize);
         case 64 : return rle64_extreme_compress(in, inlen, out, outsize);
       }
+	  break;
+	case P_RLE8SH: return rle8_sh_compress(in, inlen, out, outsize);
+	case P_RLE8MMTF:
+	  switch(lev) {
+	    case 128: return rle_mmtf128_encode(in, inlen, out, outsize);
+	    case 256: return rle_mmtf128_encode(in, inlen, out, outsize);
+	  }
+	  break;
+	case P_RLE8XMMTF:
+	  switch(lev) {
+	    case 128: return rle8_extreme_mmtf128_compress(in, inlen, out, outsize);
+	    case 256: return rle8_extreme_mmtf128_compress(in, inlen, out, outsize); // no avx2
+	  }
+	  break;
+    case P_RLE8 : return strchr(prm,'s')?rle8_compress_only_max_frequency(in, inlen, out, outsize):rle8_compress(in, inlen, out, outsize);
+    case P_RLE8U: return strchr(prm,'s')?rle8_ultra_compress_only_max_frequency(in, inlen, out, outsize):rle8_ultra_compress(in, inlen, out, outsize);
+    case P_RLE8M: { char *q; int subSections = 0; if(q = strchr(prm,'S')) subSections = atoi(q+(q[1] == '='?2:1)); return rle8m_compress(subSections, in, inlen, out, outsize); }
       #endif
 
       #if _B64
@@ -2050,13 +2073,9 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _HTSCODECS
-    //case P_RANS_S8:     { unsigned outlen = outsize; return rans_compress_to(   8,in, inlen, out, &outlen, lev) ? outlen : 0;}
-    //case P_RANS_S16:    { unsigned outlen = outsize; if(strchr(prm,'r')) lev |= X_RLE; if(strchr(prm,'p')) lev |= X_PACK;
-    //                                                 return rans_compress_to(  16,in, inlen, out, &outlen, lev) ? outlen : 0;
-    //}
-        #ifdef __AVX2__
-    case P_RANS_S32:   { unsigned outlen = outsize; return rans_compress_O0_32x16_avx2(in, inlen, out, &outlen) ? outlen : 0;}
-        #endif
+//     case P_RANS32x16_128: { unsigned outlen = outsize; return rans_compress_O0_32x16_sse4(  in, inlen, out, &outlen) ? outlen : 0;}
+     case P_RANS32x16_256: { unsigned outlen = outsize; return rans_compress_O0_32x16_avx2(  in, inlen, out, &outlen) ? outlen : 0;}
+     case P_RANS32x16_512: { unsigned outlen = outsize; return rans_compress_O0_32x16_avx512(in, inlen, out, &outlen) ? outlen : 0;}
       #endif
 
       #if _PPMDEC
@@ -2281,8 +2300,8 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_HEATSHRINK: return hsdecompress(in, inlen, out, outlen);
       #endif
 
-      #if _IGZIP
-    case P_IGZIP: { struct inflate_state s; int rc; isal_inflate_init(&s);
+      #if _ISA_L
+    case P_ISA_L: { struct inflate_state s; int rc; isal_inflate_init(&s);
          /*    if(prm && *prm == 'd') { s.crc_flag = ISAL_DEFLATE; }
         else if(prm && *prm == 'g') { s.crc_flag = ISAL_GZIP; }
         else s.crc_flag = ISAL_ZLIB;*/
@@ -2542,7 +2561,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if _ZLIB
-    //case P_IGZIP: case P_LIBDEFLATE:
+    //case P_ISA_L: case P_LIBDEFLATE:
         #if _ZLIB_NG == 0
     case P_ZOPFLI:
         #endif
@@ -2582,17 +2601,32 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if _RLE8
-    case P_RLE8:
-      switch(lev) {
-        case  1 : { int subSections = 0; char *q; if(q=strchr(prm,'S')) subSections = atoi(q+(q[1]=='='?2:1)); return subSections?rle8m_decompress(in, inlen, out, outlen):rle8_decompress(in, inlen, out, outlen); }
-        case  2 : return    rle8_ultra_decompress(in, inlen, out, outlen);
-        case  8 : return  rle8_extreme_decompress(in, inlen, out, outlen);
+	case P_RLE8X:
+	  switch(lev) {
+        case  8 : return rle8_extreme_decompress(in, inlen, out, outlen);
         case 16 : return rle16_extreme_decompress(in, inlen, out, outlen);
         case 24 : return rle24_extreme_decompress(in, inlen, out, outlen);
         case 32 : return rle32_extreme_decompress(in, inlen, out, outlen);
         case 48 : return rle48_extreme_decompress(in, inlen, out, outlen);
         case 64 : return rle64_extreme_decompress(in, inlen, out, outlen);
-     }
+      }
+	  break;
+	case P_RLE8SH: return rle8_sh_decompress(in, inlen, out, outlen);
+	case P_RLE8MMTF:
+	  switch(lev) {
+	    case 128 : return rle_mmtf128_decode(in, inlen, out, outlen);
+	    case 256 : return rle_mmtf128_decode(in, inlen, out, outlen);
+	  }
+	  break;
+	case P_RLE8XMMTF:
+	  switch(lev) {
+	    case 128 : return rle8_extreme_mmtf128_decompress(in, inlen, out, outlen);
+	    case 256 : return rle8_extreme_mmtf128_decompress(in, inlen, out, outlen);
+	  }
+	  break;
+    case P_RLE8 : return rle8_decompress(in, inlen, out, outlen);
+    case P_RLE8U: return rle8_ultra_decompress(in, inlen, out, outlen);
+    case P_RLE8M: return rle8m_decompress(in, inlen, out, outlen);
       #endif
 
       #if _B64
@@ -2711,11 +2745,9 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if _HTSCODECS
-    //case P_RANS_S8   : rans_uncompress_to(    8,in, inlen, out, (unsigned *)&outlen, lev); break;
-    //case P_RANS_S16  : rans_uncompress_to(   16,in, inlen, out, (unsigned *)&outlen, lev); break;
-        #ifdef __AVX2__
-    case P_RANS_S32  : rans_uncompress_O0_32x16_avx2(in, inlen, out, outlen); break;
-        #endif
+//    case P_RANS32x16_128 : rans_uncompress_O0_32x16_sse4(  in, inlen, out, outlen); break;
+    case P_RANS32x16_256 : rans_uncompress_O0_32x16_avx2(  in, inlen, out, outlen); break;
+    case P_RANS32x16_512 : rans_uncompress_O0_32x16_avx512(in, inlen, out, outlen); break;
       #endif
 
       #if _FPAQC
