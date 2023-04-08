@@ -25,52 +25,59 @@ ZLIB=1
 endif
 
 ifneq ($(NCODEC2),1) # Notable codecs
-#BLOSC=1
-#BRIEFLZ=1
 BZIP2=1
 BZIP3=1
-#CSC=1
-#DENSITY=1
 FASTLZ=1
 FLZMA2=1
 LIBDEFLATE=1
-#GIPFELI=1
-# glza not working on all systems
-#GLZA=1
-#HEATSHRINK=1
-#IGZIP=1
 LIBBSC=1
-#LIBZLING=1
 # lizard disabled (conflict between lizard & ZSTD FSE/HUF ) 2023.02.09
 #LIZARD=1
-#LZ4ULTRA=1
 LZFSE=1
 LZHAM=1
 LZLIB=1
 LZO=1
 LZSA=1
 LZSSE=1
-#MINIZ=1
-#MSCOMPRESS=1
-#PYSAP=1
 # oodle dll 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
 OODLE=1
 QUICKLZ=1
-#SHOCO=1
-#SLZ=1
-#SMALLZ4=1
-#SMAZ=1
 SNAPPY=1
-#SNAPPY_C=1
 TURBORC=1
 TURBORLE=1
-#MRLE=1
-#RLE8=1
-#ZLIB_NG=1
-#UNISHOX2=1
-#UNISHOX3=1
 ZOPFLI=1
 ZPAQ=1
+endif
+
+ifeq ($(CODEC3),1) # Manual download
+BLOSC=1
+BRIEFLZ=1
+CSC=1
+DENSITY=1
+GIPFELI=1
+# glza not working on all systems
+GLZA=1
+HEATSHRINK=1
+# make -f Makefile.unx  arch=mingw  host_cpu=x86_64  CC=gcc AS=nasm AR=ar STRIP=strip LDFLAGS=  CFLAGS_mingw=-m64
+ISA_L=1
+#LIBZLING=1
+LZ4ULTRA=1
+# configure miniz or copy miniz_/miniz_export.h to miniz
+MINIZ=1
+MSCOMPRESS=1
+PYSAP=1
+# oodle dll 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
+SHOCO=1
+SLZ=1
+SMALLZ4=1
+SMAZ=1
+#SNAPPY_C=1
+#MRLE=1
+RLE8=1
+# cd zlib-ng  bash ./configure && make
+ZLIB_NG=1
+#UNISHOX2=1
+#UNISHOX3=1
 endif
 
 ifeq ($(EC),1) # Encoding Entropy coders / RLE 
@@ -86,7 +93,7 @@ FQZ0=1
 # fse,fsehuf disabled as not available in zstd (20230209)
 #FSE=1
 #FSEHUF=1
-RANS_S=1
+HTSCODECS=1
 #RECIPARITH=1
 SUBOTIN=1
 #TORNADO=1
@@ -258,7 +265,7 @@ endif
 ifeq ($(LIZARD), 1)
 CXXFLAGS+=-D_LIZARD
 CFLAGS+=-Ilizard/lib
-OB+=lizard/lib/lizard_compress.o lizard/lib/lizard_decompress.o lizard/lib/entropy/huf_compress.o lizard/lib/entropy/huf_decompress.o lizard/lib/entropy/fse_compress.o lizard/lib/entropy/fse_decompress.o
+OB+=lizard/lib/lizard_compress.o lizard/lib/lizard_decompress.o lizard/lib/entropy/huf_decompress.o lizard/lib/entropy/huf_compress.o lizard/lib/entropy/fse_compress.o lizard/lib/entropy/fse_decompress.o
 endif
 
 ifeq ($(LZFSE), 1)
@@ -333,7 +340,7 @@ CFLAGS+=-Izstd/lib -Izstd/lib/common
 ZT0=zstd/lib/common/
 ZTC=zstd/lib/compress/
 ZTD=zstd/lib/decompress/
-OB+=$(ZT0)pool.o $(ZT0)xxhash.o $(ZT0)error_private.o $(ZT0)fse_decompress.o $(ZT0)zstd_common.o $(ZT0)entropy_common.o \
+OB+=$(ZT0)pool.o $(ZT0)xxhash.o $(ZT0)error_private.o $(ZTC)huf_compress.o $(ZTD)huf_decompress.o $(ZT0)fse_decompress.o $(ZT0)zstd_common.o $(ZT0)entropy_common.o \
     $(ZTC)hist.o $(ZTC)zstd_compress.o $(ZTC)zstd_compress_literals.o $(ZTC)zstd_compress_sequences.o $(ZTC)zstd_double_fast.o $(ZTC)zstd_fast.o $(ZTC)zstd_lazy.o \
 	$(ZTC)zstd_ldm.o $(ZTC)zstdmt_compress.o $(ZTC)zstd_opt.o $(ZTC)fse_compress.o $(ZTC)huf_compress.o $(ZTC)zstd_compress_superblock.o \
     $(ZTD)zstd_decompress.o $(ZTD)zstd_decompress_block.o $(ZTD)zstd_ddict.o $(ZTD)huf_decompress.o $(ZTD)huf_decompress_amd64.o
@@ -356,8 +363,7 @@ ifeq ($(BLOSC),1)
 CXXFLAGS+=-D_C_BLOSC2
 CFLAGS+=-Ic-blosc2/include -Ic-blosc2/blosc2/include
 OB+=c-blosc2/blosc/blosc2.o c-blosc2/blosc/blosclz.o c-blosc2/blosc/frame.o c-blosc2/blosc/sframe.o c-blosc2/blosc/schunk.o c-blosc2/blosc/blosc2-stdio.o c-blosc2/blosc/fastcopy.o c-blosc2/blosc/stune.o \
-    c-blosc2/blosc/delta.o c-blosc2/blosc/shuffle.o c-blosc2/blosc/shuffle-generic.o c-blosc2/blosc/shuffle-sse2.o c-blosc2/blosc/timestamp.o c-blosc2/blosc/trunc-prec.o
-#c-blosc2/blosc/bitshuffle-generic.o  	
+    c-blosc2/blosc/delta.o c-blosc2/blosc/shuffle.o c-blosc2/blosc/shuffle-generic.o c-blosc2/blosc/shuffle-sse2.o c-blosc2/blosc/timestamp.o c-blosc2/blosc/trunc-prec.o c-blosc2/blosc/bitshuffle-generic.o  	
 endif
 
 ifeq ($(BRIEFLZ),1)
@@ -396,14 +402,17 @@ glza/GLZAdecode.o: glza/GLZAdecode.c
 OB+=glza/GLZAcomp.o glza/GLZAformat.o glza/GLZAcompress.o glza/GLZAencode.o glza/GLZAdecode.o glza/GLZAmodel.o 
 endif
 
-ifeq ($(IGZIP),1)
-#install isa-l package 
-CXXFLAGS+=-D_IGZIP -DHAVE_IGZIP 
-#-Iisa-l -Iisa-l_
-LDFLAGS+=-lisal
-#$(shell pkg-config --libs libisal)
-#OB+=isa-l/igzip/igzip.o isa-l/igzip/hufftables_c.o isa-l/igzip/igzip_base.o isa-l/igzip/igzip_icf_base.o isa-l/igzip/crc32_gzip_base.o isa-l/igzip/flatten_ll.o isa-l/igzip/encode_df.o
-#OB+=isa-l_/libisal.a
+ifeq ($(ISA_L),1)
+CXXFLAGS+=-D_ISA_L
+ifeq ($(OS),Windows)
+# msys2 build: install nasm and type:
+# mingw32-make -f Makefile.unx  arch=mingw  host_cpu=x86_64  have_as_w_avx512= CC=gcc AS=yasm AR=ar STRIP=strip LDFLAGS=  CFLAGS_mingw=-m64
+LDFLAGS+=isa-l_/win64/isa-l.a
+else
+#ISA-L library needs to be installed before use
+LDFLAGS+=-lisa-l
+CXXFLAGS+=-DHAVE_IGZIP -D_ISA_L
+endif
 endif
 
 ifeq ($(LZ4ULTRA), 1)
@@ -424,8 +433,11 @@ endif
 ifeq ($(ZLIB_NG), 1)
 #CMD:= $(shell cd zlib-ng && ./configure && make && cd ..)
 CXXFLAGS+=-D_ZLIB_NG
-#OB+=zlib-ng_/libz-ng.a
-OB+=zlib-ng/msys-z-ng.dll
+ifeq ($(OS),Windows)
+OB+=msys-z-ng.dll
+else
+OB+=zlib-ng_/linux64/libz-ng.a
+endif
 endif
 
 ifeq ($(LZO),1)
@@ -559,14 +571,21 @@ OB+=EC/freqtab/src/c_mem.o EC/freqtab/src/coder/model.o
 endif
 
 
-ifeq ($(RANS_S),1) 
-CXXFLAGS+=-D_RANS_S
-EC/rans_static/r32x16b_avx2.o: EC/rans_static/r32x16b_avx2.c
+ifeq ($(HTSCODECS),1) 
+CXXFLAGS+=-D_HTSCODECS -DHAVE_AVX2 -DHAVE_AVX512 -DHAVE_SSE4_1 -DHAVE_SSSE3 -DHAVE_POPCNT
+EC/htscodecs/htscodecs/rANS_static32x16pr_avx2.o: EC/htscodecs/htscodecs/rANS_static32x16pr_avx2.c
 	$(CC) -O3 -mavx2 $(MARCH) $< -c -o $@ 
-OB+=EC/rans_static/rANS_static4x8.o EC/rans_static/rANS_static4x16pr.o EC/rans_static/rANS_static.o EC/rans_static/arith_static.o
-ifeq ($(AVX2),1)
-OB+=EC/rans_static/r32x16b_avx2.o
-endif
+	
+EC/htscodecs/htscodecs/rANS_static32x16pr_sse4.o: EC/htscodecs/htscodecs/rANS_static32x16pr_sse4.c
+	$(CC) -O3 -msse4.2 -DHAVE_SSE4_1 -DHAVE_SSSE3 -DHAVE_POPCNT $(MARCH) $< -c -o $@ 
+
+EC/htscodecs/htscodecs/rANS_static32x16pr_avx512.o: EC/htscodecs/htscodecs/rANS_static32x16pr_avx512.c
+	$(CC) -O3 -mavx512f $(MARCH) $< -c -o $@ 
+	
+OB+=EC/htscodecs/htscodecs/pack.o EC/htscodecs/htscodecs/rANS_static.o\
+ EC/htscodecs/htscodecs/rANS_static32x16pr.o EC/htscodecs/htscodecs/rANS_static32x16pr_avx2.o EC/htscodecs/htscodecs/rANS_static32x16pr_avx512.o\
+ EC/htscodecs/htscodecs/rANS_static32x16pr_sse4.o EC/htscodecs/htscodecs/rANS_static4x16pr.o EC/htscodecs/htscodecs/rle.o  EC/htscodecs/htscodecs/utils.o
+# EC/htscodecs/htscodecs/rANS_static32x16pr_neon.o EC/htscodecs/htscodecs/tokenise_name3.o
 endif
 
 ifeq ($(RECIPARITH),1) 
@@ -617,7 +636,9 @@ endif
 
 ifeq ($(RLE8),1)
 CXXFLAGS+=-D_RLE8
-OB+=rle8/src/rle8_cpu.o rle8/src/rle8_ultra_cpu.o rle8/src/rle8_extreme_cpu.o rle8/src/rleX_extreme_cpu.o rle8/src/rle24_extreme_cpu.o rle8/src/rle48_extreme_cpu.o
+OB+=rle8/src/rle128_extreme_cpu.o rle8/src/rle24_extreme_cpu.o rle8/src/rle48_extreme_cpu.o rle8/src/rle8_cpu.o rle8/src/rle8_extreme_cpu.o rle8/src/rle8_extreme_mmtf.o \
+  rle8/src/rle8_ultra_cpu.o rle8/src/rle_mmtf.o rle8/src/rle_sh.o rle8/src/rleX_extreme_cpu.o 
+#rle8/src/rle8_ocl.o   
 endif
 
 #-------------------------------------- Archived ----------------------------------
@@ -804,7 +825,7 @@ turbobench: $(OB) turbobench.o
 	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@  
 
 
-ifeq ($(OS),Windows_NT)
+ifeq ($(OS),Windows)
 clean:
 	del /S *.o 
 	del /S *~
