@@ -1401,6 +1401,7 @@ int main(int argc, char* argv[]) {
         #endif
       case 's': mininlen = argtoi(optarg,1);    	 break;
       case 'v': verbose  = atoi(optarg);       		 break;
+      case 'V': tm_verbose = atoi(optarg);           break;
       case 'Y': seg_ans  = argtoi(optarg,1);         break;
       case 'Z': seg_huf  = argtoi(optarg,1);         break;  
       case 'w': xlog     =  xlog?0:1; 				 break;
@@ -1419,7 +1420,7 @@ int main(int argc, char* argv[]) {
     xplug==1?plugsprt():plugsprtv(stdout, fmt); 
     exit(0); 
   }
-  tm_init(0, verbose);  
+  tm_init(0, tm_verbose);  
   if(argc <= optind) {
       #ifdef _WIN32
     setmode( fileno(stdin), O_BINARY ); 
