@@ -1,7 +1,0 @@
-Sphinx==1.8.5
-ipykernel
-nbsphinx==0.5.1
-pyx==0.12.1
-ipython<6.0
-m2r==0.2.1
-mistune==0.8.4
