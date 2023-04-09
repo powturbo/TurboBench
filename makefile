@@ -75,7 +75,7 @@ SMAZ=1
 #MRLE=1
 RLE8=1
 # cd zlib-ng  bash ./configure && make
-ZLIB_NG=1
+#ZLIB_NG=1
 #UNISHOX2=1
 #UNISHOX3=1
 endif
@@ -410,8 +410,9 @@ ifeq ($(OS),Windows)
 LDFLAGS+=isa-l_/win64/isa-l.a
 else
 #ISA-L library needs to be installed before use
-LDFLAGS+=-lisa-l
 CXXFLAGS+=-DHAVE_IGZIP -D_ISA_L
+#LDFLAGS+=-lisa-l
+LDFLAGS+=isa-l_/linux/libisal.a
 endif
 endif
 
