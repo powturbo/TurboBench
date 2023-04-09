@@ -2074,8 +2074,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _HTSCODECS
 //     case P_RANS32x16_128: { unsigned outlen = outsize; return rans_compress_O0_32x16_sse4(  in, inlen, out, &outlen) ? outlen : 0;}
-     case P_RANS32x16_256: { unsigned outlen = outsize; return rans_compress_O0_32x16_avx2(  in, inlen, out, &outlen) ? outlen : 0;}
-     case P_RANS32x16_512: { unsigned outlen = outsize; return rans_compress_O0_32x16_avx512(in, inlen, out, &outlen) ? outlen : 0;}
+     case P_RANS32x16_256: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16_avx2(  in, inlen, out, &outlen):rans_compress_O0_32x16_avx2(  in, inlen, out, &outlen)) ? outlen : 0;}
+     case P_RANS32x16_512: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16_avx512(in, inlen, out, &outlen):rans_compress_O0_32x16_avx512(in, inlen, out, &outlen)) ? outlen : 0;}
       #endif
 
       #if _PPMDEC
@@ -2746,8 +2746,8 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if _HTSCODECS
 //    case P_RANS32x16_128 : rans_uncompress_O0_32x16_sse4(  in, inlen, out, outlen); break;
-    case P_RANS32x16_256 : rans_uncompress_O0_32x16_avx2(  in, inlen, out, outlen); break;
-    case P_RANS32x16_512 : rans_uncompress_O0_32x16_avx512(in, inlen, out, outlen); break;
+    case P_RANS32x16_256 : lev?rans_uncompress_O1_32x16_avx2(  in, inlen, out, outlen):rans_uncompress_O0_32x16_avx2(  in, inlen, out, outlen); break;
+    case P_RANS32x16_512 : lev?rans_uncompress_O1_32x16_avx512(in, inlen, out, outlen):rans_uncompress_O0_32x16_avx512(in, inlen, out, outlen); break;
       #endif
 
       #if _FPAQC
