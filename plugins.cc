@@ -1119,9 +1119,9 @@ struct plugs plugs[] = {
   { P_POLHF,        "polar",       _POLHF,     "Polar Codes",             "" },
   { P_PPMDEC,       "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
 
-  { P_RANS32x16_256,"rans32x16avx2",  _HTSCODECS, "RANS/J.Bonfield", "0,1", E_ANS},
-  { P_RANS32x16_512,"rans32x16avx512",_HTSCODECS, "RANS/J.Bonfield", "0,1", E_ANS},
-  { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",			   "" },
+  { P_RANS32x16_256,"rans32avx2",  _HTSCODECS, "htscodecs",               "0,1", E_ANS},
+  { P_RANS32x16_512,"rans32avx512",_HTSCODECS, "htscodecs",               "0,1", E_ANS},
+  { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",			  "" },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",              "" },
   { P_TORNADOHF,    "tornado_huff",_TORNADO,   "Tornado Huf",             "" },
   { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,9,10,12,14,17,20,21,90/e#" }, 
@@ -1144,7 +1144,7 @@ struct plugs plugs[] = {
   { P_LIBBSCBWT,    "bscbwt",      _LIBBSC,    "bwt libbsc",              "" },
   { P_ST,           "st",          _LIBBSC,    "st  libbsc",              "3,4,5,6,7,8" },
   { P_BRC,          "brc",         _BRC,       "Behemoth-Rank-Coding",    "0,1" },
-//{ P_MYCODEC,   "mycodec",     _MYCODEC,  "0",        "My codec",             "           ",      "",                                                                                     "" },
+//{ P_MYCODEC,   "mycodec",     _MYCODEC,  "0",        "My codec",             "           ",      "",        "" },   // Example for your codec
     #ifdef _LZTURBO
   #include "../dev/x/beplugr.h"
     #endif
