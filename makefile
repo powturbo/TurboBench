@@ -75,7 +75,7 @@ SMAZ=1
 #MRLE=1
 RLE8=1
 # cd zlib-ng  bash ./configure && make
-#ZLIB_NG=1
+ZLIB_NG=1
 #UNISHOX2=1
 #UNISHOX3=1
 endif
@@ -528,8 +528,8 @@ $(L)anscdfs.o: $(L)anscdf.c $(L)anscdf_.h
 
 $(L)anscdfx.o: $(L)anscdf.c $(L)anscdf_.h
 	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(L)anscdf.c -o $(L)anscdfx.o 
-OB+=$(L)anscdfx.o 
-#$(L)anscdfs.o#$(L)anscdf0.o
+OB+=$(L)anscdfx.o $(L)anscdf0.o
+#$(L)anscdfs.o#
 endif
 
 # First download or clone aomedia (git clone https://aomedia.googlesource.com/aom) into TurboBench directory
