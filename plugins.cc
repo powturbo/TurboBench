@@ -673,6 +673,7 @@ class Out: public libzpaq::Writer {
 
   #if _TURBORC
 #include "Turbo-Range-Coder/include/turborc.h"
+#include "Turbo-Range-Coder/include/anscdf.h"
 //#include "Turbo-Range-Coder/rcutil.h"
   #endif
 
@@ -1124,7 +1125,7 @@ struct plugs plugs[] = {
   { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",			  "" },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",              "" },
   { P_TORNADOHF,    "tornado_huff",_TORNADO,   "Tornado Huf",             "" },
-  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,9,10,12,14,17,20,21,90/e#" }, 
+  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,9,10,13,14,17,20,21,55,90/e#" }, 
   { P_ZLIBH,        "zlibh",       _ZLIB,      "zlib Huffmann",           "8,9,10,11,12,13,14,15,16,32" },
   { P_ZRLE,         "zlibrle",     _ZLIB,      "zlib rle",                "" },
   //---- Encoding ------
@@ -2116,10 +2117,11 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         case  2: return rccsenc(   in, inlen, out); 
         case  3: return rcc2senc(  in, inlen, out);
         case  4: return rcxsenc(   in, inlen, out);
+        case 55: return anscdfenc( in, inlen, out, outsize, 1<<21);
         //case  5: mbcset(15); clen = rcx2enc(  in, inlen, out, prdid); break;
         //case  9: return rcmsenc(  in, inlen, out);       
         //case 10: return rcm2senc( in, inlen, out);        
-        case 12: return rcrlesenc( in, inlen, out);
+        case 13: return rcrlesenc( in, inlen, out);
         case 14: return rcrle1senc(in, inlen, out);        //case 17: return rcqlfcsenc(in, inlen, out);
         case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
 		default: return 0;
@@ -2811,10 +2813,11 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
         case  2 : return rccsdec(   in, outlen, out);
         case  3 : return rcc2sdec(  in, outlen, out);
         case  4 : return rcxsdec(   in, outlen, out);
+        case  55: return anscdfdec(   in, outlen, out, 1<<21);
 
         //case  9 : return rcmsdec(   in, outlen, out);
         //case 10 : return rcm2sdec(  in, outlen, out);
-        case 12 : return rcrlesdec( in, outlen, out);
+        case 13 : return rcrlesdec( in, outlen, out);
         case 14 : return rcrle1sdec(in, outlen, out);        //case 17 : return rcqlfcsdec( in, outlen, out);
         case 20 : return rcbwtdec( in, outlen, out, bwtlev, 0);
 		default: return 0;
