@@ -187,7 +187,7 @@ static void tm_init(int _tm_Rep, int _tm_verbose) { tm_verbose = _tm_verbose; if
 #define TMBENCH2(_name_, _func_, _len_)  do { \
   TMBEG(tm_Rep2) _func_; TMEND(_len_);\
   double dm = tm_tm, dr = tm_rm; if(tm_verbose>2) printf("%8.*f      \b\b\b\b\b", TM_PRE,TMBS(_len_, dm/dr) );else if(tm_verbose) printf("%8.*f      ", TM_PRE,TMBS(_len_, dm/dr) );\
-  if(tm_verbose>=1) printf("%s ", _name_?_name_:#_func_);\
+  if(tm_verbose>3) printf("%s ", _name_?_name_:#_func_);\
 } while(0)
 
 // Check
