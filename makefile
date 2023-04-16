@@ -517,20 +517,6 @@ OB+=Unishox2/Unishox3_Alpha/unishox3.o
 endif
 
 #------------------------- Entropy coder -----------------------------------------
-ifeq ($(TURBORC), 1)
-CFLAGS+=-D_ANS
-L=Turbo-Range-Coder/
-$(L)anscdf0.o: $(L)anscdf.c $(L)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -mno-sse2 -falign-loops=32 $(L)anscdf.c -o $(L)anscdf0.o  
-
-$(L)anscdfs.o: $(L)anscdf.c $(L)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes -falign-loops=32 $(L)anscdf.c -o $(L)anscdfs.o  
-
-$(L)anscdfx.o: $(L)anscdf.c $(L)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(L)anscdf.c -o $(L)anscdfx.o 
-OB+=$(L)anscdfx.o $(L)anscdf0.o
-#$(L)anscdfs.o#
-endif
 
 # First download or clone aomedia (git clone https://aomedia.googlesource.com/aom) into TurboBench directory
 # after cmake, put the generated "aom_config.h" into the aom directory
@@ -615,10 +601,21 @@ OB+=EC/subotin_/subotin.o
 endif
 
 ifeq ($(TURBORC),1) 
-CXXFLAGS+=-D_TURBORC
+L=Turbo-Range-Coder/
+$(L)anscdf0.o: $(L)anscdf.c $(L)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) -mno-sse2 -falign-loops=32 $(L)anscdf.c -o $(L)anscdf0.o  
+
+$(L)anscdfs.o: $(L)anscdf.c $(L)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes -falign-loops=32 $(L)anscdf.c -o $(L)anscdfs.o  
+
+$(L)anscdfx.o: $(L)anscdf.c $(L)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(L)anscdf.c -o $(L)anscdfx.o 
+
+CXXFLAGS+=-D_TURBORC -D_ANS
 CFLAGS+=-D_BWT
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
-  Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o Turbo-Range-Coder/anscdf.o
+  Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o \
+  Turbo-Range-Coder/anscdf0.o Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
 LIBSAIS=1
 endif
 
@@ -874,5 +871,4 @@ cleana:
 	rm -rf zstd/doc
 	rm -rf zlib/contrib
 endif
-
 
