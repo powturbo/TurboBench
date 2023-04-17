@@ -355,6 +355,7 @@ enum {
 #ifndef _HTSCODECS
 #define _HTSCODECS 0
 #endif
+ P_ARITHDYN,
  P_RANS32x16_128,
  P_RANS32x16_256,
  P_RANS32x16_512,
@@ -912,6 +913,7 @@ size_t lz4ultra_decompress_inmem(const unsigned char *pFileData, unsigned char *
 
   #if _HTSCODECS
 #include "EC/htscodecs/htscodecs/config.h"  
+#include "EC/htscodecs/htscodecs/arith_dynamic.h"  
 #include "EC/htscodecs/htscodecs/rANS_static32x16pr.h"
   #endif
 
@@ -1120,6 +1122,7 @@ struct plugs plugs[] = {
   { P_POLHF,        "polar",       _POLHF,     "Polar Codes",             "" },
   { P_PPMDEC,       "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
 
+  { P_ARITHDYN,     "arith_dyn",   _HTSCODECS, "htscodecs",               "0,1"},
   { P_RANS32x16_256,"rans32avx2",  _HTSCODECS, "htscodecs",               "0,1", E_ANS},
   { P_RANS32x16_512,"rans32avx512",_HTSCODECS, "htscodecs",               "0,1", E_ANS},
   { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",			  "" },
@@ -2074,6 +2077,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _HTSCODECS
+     case P_ARITHDYN: { unsigned outlen = outsize; arith_compress_to(  in, inlen, out, &outlen, lev); return outlen; }
 //     case P_RANS32x16_128: { unsigned outlen = outsize; return rans_compress_O0_32x16_sse4(  in, inlen, out, &outlen) ? outlen : 0;}
      case P_RANS32x16_256: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16_avx2(  in, inlen, out, &outlen):rans_compress_O0_32x16_avx2(  in, inlen, out, &outlen)) ? outlen : 0;}
      case P_RANS32x16_512: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16_avx512(in, inlen, out, &outlen):rans_compress_O0_32x16_avx512(in, inlen, out, &outlen)) ? outlen : 0;}
@@ -2747,6 +2751,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if _HTSCODECS
+     case P_ARITHDYN: arith_uncompress_to(  in, inlen, out, &outlen); return outlen;
 //    case P_RANS32x16_128 : rans_uncompress_O0_32x16_sse4(  in, inlen, out, outlen); break;
     case P_RANS32x16_256 : lev?rans_uncompress_O1_32x16_avx2(  in, inlen, out, outlen):rans_uncompress_O0_32x16_avx2(  in, inlen, out, outlen); break;
     case P_RANS32x16_512 : lev?rans_uncompress_O1_32x16_avx512(in, inlen, out, outlen):rans_uncompress_O0_32x16_avx512(in, inlen, out, outlen); break;
