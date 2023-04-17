@@ -2117,7 +2117,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         case  2: return rccsenc(   in, inlen, out); 
         case  3: return rcc2senc(  in, inlen, out);
         case  4: return rcxsenc(   in, inlen, out);
-        case 55: return anscdfenc( in, inlen, out, outsize, 1<<21);
+        case 55: return anscdfenc( in, inlen, out, 1<<21);
         //case  5: mbcset(15); clen = rcx2enc(  in, inlen, out, prdid); break;
         //case  9: return rcmsenc(  in, inlen, out);       
         //case 10: return rcm2senc( in, inlen, out);        
