@@ -75,7 +75,7 @@ SMAZ=1
 #MRLE=1
 RLE8=1
 # cd zlib-ng  bash ./configure && make
-ZLIB_NG=1
+#ZLIB_NG=1
 #UNISHOX2=1
 #UNISHOX3=1
 endif
@@ -584,7 +584,7 @@ EC/htscodecs/htscodecs/rANS_static32x16pr_sse4.o: EC/htscodecs/htscodecs/rANS_st
 EC/htscodecs/htscodecs/rANS_static32x16pr_avx512.o: EC/htscodecs/htscodecs/rANS_static32x16pr_avx512.c
 	$(CC) -O3 -mavx512f $(MARCH) $< -c -o $@ 
 	
-OB+=EC/htscodecs/htscodecs/pack.o EC/htscodecs/htscodecs/rANS_static.o\
+OB+=EC/htscodecs/htscodecs/arith_dynamic.o EC/htscodecs/htscodecs/pack.o EC/htscodecs/htscodecs/rANS_static.o\
  EC/htscodecs/htscodecs/rANS_static32x16pr.o EC/htscodecs/htscodecs/rANS_static32x16pr_avx2.o EC/htscodecs/htscodecs/rANS_static32x16pr_avx512.o\
  EC/htscodecs/htscodecs/rANS_static32x16pr_sse4.o EC/htscodecs/htscodecs/rANS_static4x16pr.o EC/htscodecs/htscodecs/rle.o  EC/htscodecs/htscodecs/utils.o
 # EC/htscodecs/htscodecs/rANS_static32x16pr_neon.o EC/htscodecs/htscodecs/tokenise_name3.o
