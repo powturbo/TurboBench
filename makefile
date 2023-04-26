@@ -66,6 +66,7 @@ LZ4ULTRA=1
 MINIZ=1
 MSCOMPRESS=1
 PYSAP=1
+# needs ffi bindings
 QCOMPRESS=1
 # oodle dll 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
 SHOCO=1
