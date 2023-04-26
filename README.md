@@ -16,6 +16,12 @@
  - All in one executable, no hassless installing of additional packages, graphic libraries, python,...
  - :+1: build in peak memory usage reporting for compression and decompression in html output
 
+### Release:
+  - Build or Download turbobench from [releases](https://github.com/powturbo/TurboBench/releases)
+  + List all plugins: "./turbobench -l2"<br />
+  + List all compiled codecs: "./turbobench -l1"<br />
+  + type "./turbobench -h" for help
+
 ### Benchmark:
 - see also: [Compression Benchmark](https://sites.google.com/site/powturbo/compression-benchmark)
 
@@ -87,12 +93,6 @@ Compressors with versions 16.08.2016 <br>
 |16069593| 50.3|**121.12**|365.08|**lz4 1**|
 |16166867| 50.6|111.43|475.66|lzturbo 10|
 |31952896|100.0|**1676.10**|**1704.00**|**memcpy**|
-
-### Testing:
-  - Build or Download turbobench from [releases](https://github.com/powturbo/TurboBench/releases)
-  + List all plugins: "./turbobench -l2"<br />
-  + List all compiled codecs: "./turbobench -l1"<br />
-  + type "./turbobench -h" for help
 
 ##### - Groups FASTEST,FAST,EFFICIENT,MAX,OPTIMAL,BWT:
   + test all fast compressors in the lz4, lzturbo, zlib class<br />
@@ -185,7 +185,8 @@ Compressors with versions 16.08.2016 <br>
  - [Miniz](https://github.com/richgel999/miniz) 
  - [ms-compress](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi Washigan](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188)
- - [Oodle](http://www.radgametools.com/oodle.htm) (only win64 binary)
+ - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux)
+ - [Quantile Compression](https://github.com/mwlon/quantile-compression)
  - [Pithy](https://github.com/johnezang/pithy) 
  - [Quicklz](http://www.quicklz.com) 
  - [sap](https://github.com/CoreSecurity/pysap) 
@@ -258,5 +259,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 09 FEB 2022
+Last update: 26 APR 2022
 
