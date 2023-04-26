@@ -201,6 +201,11 @@ enum {
 #define _QUICKLZ 0
 #endif
  P_QUICKLZ,
+#ifndef _QCOMPRESS
+#define _QCOMPRESS 0
+#endif
+ P_QCOMPRESS32,
+ P_QCOMPRESS64,
 #ifndef _SHRINKER
 #define _SHRINKER 0
 #endif
@@ -656,6 +661,24 @@ class Out: public libzpaq::Writer {
 #undef min
   #endif
 
+  #if _QCOMPRESS
+#include "q_compress/q_compress.h"
+typedef FfiVec (*fauto_compress_i32)(int *nums, unsigned len, unsigned level);
+typedef FfiVec (*fauto_compress_i64)(long long *nums, unsigned len, unsigned level);
+typedef void   (*ffree_compressed)(FfiVec ffi_vec);
+typedef FfiVec (*fauto_decompress_i32)( unsigned char *compressed, unsigned len );
+typedef void   (*ffree_i32)(FfiVec c_vec);
+typedef FfiVec (*fauto_decompress_i64)( unsigned char *compressed, unsigned len );
+typedef void   (*ffree_i64)(FfiVec c_vec);
+static fauto_compress_i32   auto_compress_i32_;
+static fauto_compress_i64   auto_compress_i64_;
+static ffree_compressed     free_compressed_;
+static fauto_decompress_i32 auto_decompress_i32_;
+static fauto_decompress_i64 auto_decompress_i64_;
+static ffree_i32 free_i32_;
+static ffree_i64 free_i64_;
+  #endif
+
   #if _SHRINKER
 #include "shrinker/Shrinker.h"
   #endif
@@ -808,10 +831,13 @@ int unishox2_decompressx(const char *in, int inlen, char *out, int lev);
 
   #if _ZLIB_NG
 #include "zlib-ng/zconf-ng.h"
-//#include "zlib-ng/zlib-ng.h"     
-ZEXTERN ZEXPORT const char *zlibng_version(void);
-ZEXTERN ZEXPORT int zng_compress2( unsigned char *dest, size_t *destLen, const unsigned char *source, size_t sourceLen, int level);
-ZEXTERN ZEXPORT int zng_uncompress(unsigned char *dest, size_t *destLen, const unsigned char *source, size_t sourceLen);
+//#include "zlib-ng_/zlib-ng.h" 
+#define Z_EXTERN
+#define Z_EXPORT   
+Z_EXTERN Z_EXPORT const char *zlibng_version(void);
+Z_EXTERN Z_EXPORT int32_t zng_compress2(uint8_t *dest, size_t *destLen, const uint8_t *source, size_t sourceLen, int32_t level);
+Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const uint8_t *source, size_t sourceLen);
+
   #endif
 
   #if _ZOPFLI
@@ -1079,6 +1105,8 @@ struct plugs plugs[] = {
   { P_NAKA,      "naka",        _NAKA,      "Nakamichi Washigan",      "" },
   { P_PITHY,     "pithy",       _PITHY,     "Pithy",                   "0,1,2,3,4,5,6,7,8,9" },
   { P_QUICKLZ,   "quicklz",     _QUICKLZ,   "Quicklz",                 "1,2,3" },
+  { P_QCOMPRESS32, "qcomp32",   _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
+  { P_QCOMPRESS64, "qcomp64",   _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
   { P_PYSAP,     "sap",         _PYSAP,     "sap",                     "0,1,2" },
   { P_SHRINKER,  "shrinker",    _SHRINKER,  "Shrinker",                "", 0, (1<<26) },
   { P_SHOCO,     "shoco",       _SHOCO,     "Shoco",                   "" },
@@ -1244,7 +1272,28 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #if _CHAMELEON
     case P_CHAMELEON: workmemsize = sizeof(struct Chameleon); break;
       #endif
-
+      #if _QCOMPRESS
+    case P_QCOMPRESS32:
+    case P_QCOMPRESS64:
+        #if _WIN32
+        #else
+      { //printf("QCOMPRESS INIT\n");fflush(stdout);
+        char *qcomp = "./libq_compress_ffi.so";
+        void *hdll = dlopen(qcomp, RTLD_LAZY);
+        if(hdll) { 
+          if(!(auto_compress_i32_   =   (fauto_compress_i32)dlsym(hdll, "auto_compress_i32")))   die("fauto_compress_i32 not found\n");
+          if(!(auto_compress_i64_   =   (fauto_compress_i64)dlsym(hdll, "auto_compress_i64")))   die("fauto_compress_i64 not found\n");
+	  if(!(free_compressed_     =     (ffree_compressed)dlsym(hdll, "free_compressed")))     die("ffree_compressed not found\n");
+          if(!(auto_decompress_i32_ = (fauto_decompress_i32)dlsym(hdll, "auto_decompress_i32"))) die("auto_decompress_i32 not found\n");
+          if(!(auto_decompress_i64_ = (fauto_decompress_i64)dlsym(hdll, "auto_decompress_i64"))) die("auto_decompress_i64 not found\n");
+	  if(!(free_i32_            =            (ffree_i32)dlsym(hdll, "free_i32")))            die("free_i32 not found\n");
+	  if(!(free_i64_            =            (ffree_i64)dlsym(hdll, "free_i64")))            die("free_i64 not found\n");
+	  //printf("QCOMPRESS Found\n");fflush(stdout);
+        } else fprintf(stderr,"oodle shared library '%s' not found.'%s'\n", qcomp, dlerror());   
+      }
+      #endif 
+      break;
+      #endif
       #if _OODLE
     case P_OODLE: 
       char oodle[65];
@@ -1737,13 +1786,22 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #if _NAKA
     case P_NAKA:    return NakaCompress( (char *)out, (char *)in, inlen);
        #endif
-
+ 
       #if _PITHY
     case P_PITHY: return pithy_Compress((const char *)in, inlen, (char *)out, outsize, lev);
       #endif
 
       #if _QUICKLZ
     case P_QUICKLZ: { memset(workmem,0,workmemsize); return lev<=1?qlz_compress1((char *)in, (char *)out, inlen, workmem):(lev<=2?qlz_compress2((char *)in, (char *)out, inlen, workmem):qlz_compress3((char *)in, (char *)out, inlen, workmem)); }
+      #endif
+
+      #if _QCOMPRESS
+    case P_QCOMPRESS32: {
+      FfiVec v = auto_compress_i32_((int *)in, inlen/4, lev); memcpy(out, v.ptr, v.len); free_compressed_(v); return v.len;
+    } break;
+    case P_QCOMPRESS64: {
+      FfiVec v = auto_compress_i64_((long long *)in, inlen/8, lev); memcpy(out, v.ptr, v.len); free_compressed_(v); return v.len;
+    } break;
       #endif
 
       #if _OODLE
@@ -2121,7 +2179,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         case  2: return rccsenc(   in, inlen, out); 
         case  3: return rcc2senc(  in, inlen, out);
         case  4: return rcxsenc(   in, inlen, out);
-        case 55: return anscdfenc( in, inlen, out, 1<<21);
+        //case 55: return anscdfenc( in, inlen, out, 1<<21);
         //case  5: mbcset(15); clen = rcx2enc(  in, inlen, out, prdid); break;
         //case  9: return rcmsenc(  in, inlen, out);       
         //case 10: return rcm2senc( in, inlen, out);        
@@ -2425,6 +2483,11 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if _QUICKLZ
     case P_QUICKLZ: { lev= (in[0]>>2)&3; outlen = lev<=1?qlz_decompress1((char*)in, out, workmem):(lev<=2?qlz_decompress2((char*)in, out, workmem):qlz_decompress3((char*)in, out, workmem)); } break;
+      #endif
+
+      #if _QCOMPRESS
+    case P_QCOMPRESS32: { FfiVec v = auto_decompress_i32_(in, inlen); memcpy(out, v.ptr, outlen); free_i32_(v); return outlen;}
+    case P_QCOMPRESS64: { FfiVec v = auto_decompress_i64_(in, inlen); memcpy(out, v.ptr, outlen); free_i64_(v); return outlen;}
       #endif
 
       #if _PYSAP
@@ -2818,7 +2881,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
         case  2 : return rccsdec(   in, outlen, out);
         case  3 : return rcc2sdec(  in, outlen, out);
         case  4 : return rcxsdec(   in, outlen, out);
-        case  55: return anscdfdec(   in, outlen, out, 1<<21);
+        //case  55: return anscdfdec(   in, outlen, out, 1<<21);
 
         //case  9 : return rcmsdec(   in, outlen, out);
         //case 10 : return rcm2sdec(  in, outlen, out);
