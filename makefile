@@ -49,7 +49,7 @@ ZOPFLI=1
 ZPAQ=1
 endif
 
-ifeq ($(CODEC3),1) # Manual download
+ifeq ($(CODEC3),1) # Manual download or manual build
 BLOSC=1
 BRIEFLZ=1
 CSC=1
@@ -66,6 +66,7 @@ LZ4ULTRA=1
 MINIZ=1
 MSCOMPRESS=1
 PYSAP=1
+QCOMPRESS=1
 # oodle dll 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
 SHOCO=1
 SLZ=1
@@ -74,8 +75,10 @@ SMAZ=1
 #SNAPPY_C=1
 #MRLE=1
 RLE8=1
+# install (only dynamic) zlib-ng 
 # cd zlib-ng  bash ./configure && make
-#ZLIB_NG=1
+# install or copy zlib-ng (.so on linux or .dll on windows) to turbobench directory  
+ZLIB_NG=1
 #UNISHOX2=1
 #UNISHOX3=1
 endif
@@ -431,13 +434,18 @@ CXXFLAGS+=-D_LZLIB
 OB+=lzlib-1.13/lzlib.o lzlib_/bbexample.o 
 endif
 
+ifeq ($(QCOMPRESS), 1)
+CXXFLAGS+=-D_QCOMPRESS
+#LDFLAGS+=-lqc_compress_ffi
+endif
+
 ifeq ($(ZLIB_NG), 1)
 #CMD:= $(shell cd zlib-ng && ./configure && make && cd ..)
 CXXFLAGS+=-D_ZLIB_NG
 ifeq ($(OS),Windows)
 OB+=msys-z-ng.dll
 else
-OB+=zlib-ng_/linux64/libz-ng.a
+LDFLAGS+=-lz-ng
 endif
 endif
 
@@ -496,6 +504,7 @@ endif
 ifeq ($(OODLE), 1)
 CXXFLAGS+=-D_OODLE
 endif
+
 
 ifeq ($(SLZ), 1)
 CXXFLAGS+=-D_SLZ
@@ -601,21 +610,22 @@ OB+=EC/subotin_/subotin.o
 endif
 
 ifeq ($(TURBORC),1) 
-L=Turbo-Range-Coder/
-$(L)anscdf0.o: $(L)anscdf.c $(L)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -mno-sse2 -falign-loops=32 $(L)anscdf.c -o $(L)anscdf0.o  
+TRC=Turbo-Range-Coder/
+$(TRC)anscdf0.o: $(TRC)anscdf.c $(TRC)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) -D_NCPUISA -mno-sse2 -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdf0.o  
 
-$(L)anscdfs.o: $(L)anscdf.c $(L)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes -falign-loops=32 $(L)anscdf.c -o $(L)anscdfs.o  
+$(TRC)anscdfs.o: $(TRC)anscdf.c $(TRC)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfs.o  
 
-$(L)anscdfx.o: $(L)anscdf.c $(L)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(L)anscdf.c -o $(L)anscdfx.o 
+$(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfx.o 
 
-CXXFLAGS+=-D_TURBORC -D_ANS
+CXXFLAGS+=-D_TURBORC 
+#-D_ANS
 CFLAGS+=-D_BWT
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
-  Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o \
-  Turbo-Range-Coder/anscdf0.o Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
+  Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o 
+#  Turbo-Range-Coder/anscdf0.o Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
 LIBSAIS=1
 endif
 
