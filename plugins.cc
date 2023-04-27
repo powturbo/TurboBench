@@ -396,6 +396,10 @@ enum {
 #define _SUBOTIN 0
 #endif
  P_SUBOTIN,
+#ifndef _SSERC
+#define _SSERC 0
+#endif
+ P_SSERC,
 #ifndef _POLHF
 #define _POLHF 0
 #endif
@@ -749,10 +753,6 @@ int vsrc_forwards(unsigned char * src, unsigned char * dst, size_t src_size);
 int vsrc_reverse(unsigned char * src, unsigned char * dst, size_t src_size);
   #endif
 
-  #if _RLE8
-#include "rle8/src/rle8.h"
-  #endif
-
   #if __cplusplus
 extern "C" {
   #endif
@@ -848,6 +848,49 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
 }
   #endif
   //------------------------------------ Encoding -----------------------------------
+  #if _SSERC
+#include "EC/sserangecoding/sserangecoder.h"
+unsigned ssercenc(unsigned char *_in, unsigned inlen, unsigned char *_out) {
+  sserangecoder::uint8_vec  in(inlen);
+  sserangecoder::uint8_vec  out;
+  sserangecoder::uint32_vec sym_freq(256);
+  sserangecoder::uint32_vec scaled_cum_prob;
+  memcpy(&in[0], _in, inlen);  
+  
+  for(uint32_t i = 0; i < in.size(); i++)
+	sym_freq[in[i]]++;
+  unsigned a = 256; while(a > 1 && !sym_freq[a-1]) a--; 
+  if(!sserangecoder::vrange_create_cum_probs(scaled_cum_prob, sym_freq)) return -1; 
+  sserangecoder::vrange_encode(in, out, scaled_cum_prob);
+
+  unsigned char *op = _out;
+  *op++ = a - 1;  
+  for(int i = 0; i < a; i++) *(uint16_t *)op = scaled_cum_prob[i+1] - scaled_cum_prob[i], op +=2;  
+  memcpy(op, &out[0], out.size()); 
+  op += out.size();
+  return op - _out;
+}
+
+unsigned ssercdec(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned outlen) {
+  sserangecoder::uint8_vec  out(outlen);  
+  unsigned char *ip = _in;
+  unsigned a = 1 + (*ip++), inlen = _inlen - (a*2+1);
+  sserangecoder::uint8_vec in(inlen);                        						             
+
+  sserangecoder::uint32_vec dec_table(a);
+  sserangecoder::uint32_vec scaled_cum_prob(a+1);
+  
+  unsigned cum = 0,i;
+  for(i = 0; i < a; i++) scaled_cum_prob[i] = cum, cum+=*(uint16_t *)ip, ip+=2;  
+  scaled_cum_prob[i] = cum;                                                      
+  memcpy(&in[0], ip, inlen); 		
+  sserangecoder::vrange_init_table(a, scaled_cum_prob, dec_table);
+  if(!sserangecoder::vrange_decode(&in[0], in.size(), &out[0], outlen, &dec_table[0])) return -1;
+  memcpy(_out, &out[0], outlen);  													//for(int i=0; i < 10; i++)  printf("%c", out[i]);
+  return outlen;
+}
+  #endif
+  
   #if _TURBORLE
 #include "Turbo-Run-Length-Encoding/include/trle.h"
   #endif
@@ -884,6 +927,11 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
   #if __ARM_NEON
 int neon_base64_decode(char *out, const char *src, size_t srclen);
   #endif
+  
+  #if _RLE8
+#include "rle8/src/rle8.h"
+  #endif
+  
   #if __cplusplus
 extern "C" {
   #endif
@@ -1154,6 +1202,7 @@ struct plugs plugs[] = {
   { P_RANS32x16_256,"rans32avx2",  _HTSCODECS, "htscodecs",               "0,1", E_ANS},
   { P_RANS32x16_512,"rans32avx512",_HTSCODECS, "htscodecs",               "0,1", E_ANS},
   { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",			  "" },
+  { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",           "" },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",              "" },
   { P_TORNADOHF,    "tornado_huff",_TORNADO,   "Tornado Huf",             "" },
   { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,9,10,13,14,17,20,21,55,90/e#" }, 
@@ -1276,20 +1325,30 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_QCOMPRESS32:
     case P_QCOMPRESS64:
         #if _WIN32
+      { HINSTANCE hdll; int i;  
+	    char *qcomp = "./q_compress_ffi.dll";
+  	    if(hdll = LoadLibrary(qcomp)) {
+          if(!(auto_compress_i32_   =   (fauto_compress_i32)GetProcAddress(hdll, "auto_compress_i32")))   die("auto_compress_i32 not found\n");
+          if(!(auto_compress_i64_   =   (fauto_compress_i64)GetProcAddress(hdll, "auto_compress_i64")))   die("auto_compress_i64 not found\n");
+	      if(!(free_compressed_     =     (ffree_compressed)GetProcAddress(hdll, "free_compressed")))     die("free_compressed not found\n");
+          if(!(auto_decompress_i32_ = (fauto_decompress_i32)GetProcAddress(hdll, "auto_decompress_i32"))) die("auto_decompress_i32 not found\n");
+          if(!(auto_decompress_i64_ = (fauto_decompress_i64)GetProcAddress(hdll, "auto_decompress_i64"))) die("auto_decompress_i64 not found\n");
+	      if(!(free_i32_            =            (ffree_i32)GetProcAddress(hdll, "free_i32")))            die("free_i32 not found\n");
+	      if(!(free_i64_            =            (ffree_i64)GetProcAddress(hdll, "free_i64")))            die("free_i64 not found\n");
+        } else fprintf(stderr,"q_compress_ffi.dll not found\n");
+      } 
         #else
-      { //printf("QCOMPRESS INIT\n");fflush(stdout);
-        char *qcomp = "./libq_compress_ffi.so";
+      { char *qcomp = "./libq_compress_ffi.so";
         void *hdll = dlopen(qcomp, RTLD_LAZY);
         if(hdll) { 
           if(!(auto_compress_i32_   =   (fauto_compress_i32)dlsym(hdll, "auto_compress_i32")))   die("fauto_compress_i32 not found\n");
           if(!(auto_compress_i64_   =   (fauto_compress_i64)dlsym(hdll, "auto_compress_i64")))   die("fauto_compress_i64 not found\n");
-	  if(!(free_compressed_     =     (ffree_compressed)dlsym(hdll, "free_compressed")))     die("ffree_compressed not found\n");
+	      if(!(free_compressed_     =     (ffree_compressed)dlsym(hdll, "free_compressed")))     die("ffree_compressed not found\n");
           if(!(auto_decompress_i32_ = (fauto_decompress_i32)dlsym(hdll, "auto_decompress_i32"))) die("auto_decompress_i32 not found\n");
           if(!(auto_decompress_i64_ = (fauto_decompress_i64)dlsym(hdll, "auto_decompress_i64"))) die("auto_decompress_i64 not found\n");
-	  if(!(free_i32_            =            (ffree_i32)dlsym(hdll, "free_i32")))            die("free_i32 not found\n");
-	  if(!(free_i64_            =            (ffree_i64)dlsym(hdll, "free_i64")))            die("free_i64 not found\n");
-	  //printf("QCOMPRESS Found\n");fflush(stdout);
-        } else fprintf(stderr,"oodle shared library '%s' not found.'%s'\n", qcomp, dlerror());   
+	      if(!(free_i32_            =            (ffree_i32)dlsym(hdll, "free_i32")))            die("free_i32 not found\n");
+	      if(!(free_i64_            =            (ffree_i64)dlsym(hdll, "free_i64")))            die("free_i64 not found\n");
+        } else fprintf(stderr,"qcompress shared library '%s' not found.'%s'\n", qcomp, dlerror());   
       }
       #endif 
       break;
@@ -2158,6 +2217,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_SHRCV:   return vecrcenc(in, inlen, out);
       #endif
 
+      #if _SSERC
+    case P_SSERC: return ssercenc(in, inlen, out); break;
+      #endif
+
       #if _SUBOTIN
     case P_SUBOTIN:     return subenc(in, inlen, out, inlen, SYMNUM);
       #endif
@@ -2861,6 +2924,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #if _SHRC
     case P_SHRCV:   vecrcdec(in, outlen, out); break;
     case P_SHRC:    rcshd(in, out, outlen); break;
+      #endif
+
+      #if _SSERC
+    case P_SSERC: return ssercdec(in, inlen, out, outlen); break;
       #endif
 
       #if _SUBOTIN
