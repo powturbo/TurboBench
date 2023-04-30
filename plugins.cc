@@ -91,6 +91,7 @@ enum {
 #endif
  P_HEATSHRINK,
 #ifndef _ISA_L
+
 #define _ISA_L 0
 #endif
  P_ISA_L,
