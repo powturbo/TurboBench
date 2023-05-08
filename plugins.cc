@@ -1229,7 +1229,7 @@ struct plugs plugs[] = {
   { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",           "" },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",              "" },
   { P_TORNADOHF,    "tornado_huff",_TORNADO,   "Tornado Huf",             "" },
-  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,9,10,13,14,17,20,21,55,90/e#" }, 
+  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,20,56/e#s" }, 
   { P_ZLIBH,        "zlibh",       _ZLIB,      "zlib Huffmann",           "8,9,10,11,12,13,14,15,16,32" },
   { P_ZRLE,         "zlibrle",     _ZLIB,      "zlib rle",                "" },
   //---- Encoding ------
@@ -2272,20 +2272,20 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         case  2: return rccsenc(   in, inlen, out); 
         case  3: return rcc2senc(  in, inlen, out);
         case  4: return rcxsenc(   in, inlen, out);
-		case  5: return rcx2senc(   in, inlen, out);
-		case  6: return z==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
-		case  7: return z==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
-		case  8: rcc2senc32(in,inlen,out);
-		case  9: return rcmsenc(    in, inlen, out);
-		case 10: return rcm2senc(   in, inlen, out);
-		case 11: return rcmrsenc(   in, inlen, out);
-		case 12: return rcmrrsenc(  in, inlen, out);
+	case  5: return rcx2senc(   in, inlen, out);
+	case  6: return z==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
+	case  7: return z==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
+	case  8: rcc2senc32(in,inlen,out);
+	case  9: return rcmsenc(    in, inlen, out);
+	case 10: return rcm2senc(   in, inlen, out);
+	case 11: return rcmrsenc(   in, inlen, out);
+	case 12: return rcmrrsenc(  in, inlen, out);
         case 13: return z==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
-		case 14: return z==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
-		case 17: return rcu3senc(   in, inlen, out);
+	case 14: return z==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
+	case 17: return rcu3senc(   in, inlen, out);
         case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
-		
-		default: return 0;
+        case 56: return anscdfenc(    in, inlen, out);
+	default: return 0;
 	//case 21: return utf8enc( in, inlen, out, bwtflag(1)|BWT_COPY|BWT_RATIO);
 	//case 90: return lzpenc( in, inlen, out, 1, 0);
       }
@@ -3002,6 +3002,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
         case 14 : return z==2?rcrle1sdec16(in, outlen, out):rcrle1sdec(in, outlen, out);
         case 17 : return rcu3sdec( in, outlen, out);		
         case 20 : return rcbwtdec( in, outlen, out, bwtlev, 0);
+        case 56 : return anscdfdec(in, outlen, out);
 		default: return 0;
         //case 21 : if(inlen==outlen) memcpy(out,in,outlen); else utf8dec( in, outlen, out); return outlen;
         //case 90 : if(inlen==outlen) memcpy(out,in,outlen); else lzpdec(  in, outlen, out, 1, 0); return outlen;
