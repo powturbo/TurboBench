@@ -91,7 +91,6 @@ enum {
 #endif
  P_HEATSHRINK,
 #ifndef _ISA_L
-
 #define _ISA_L 0
 #endif
  P_ISA_L,
@@ -152,6 +151,10 @@ enum {
 #define _LZFSEA 0
 #endif
  P_LZFSEA,
+#ifndef _LZJODY
+#define _LZJODY 0
+#endif
+ P_LZJODY,
 #ifndef _LZLIB
 #define _LZLIB 0
 #endif
@@ -786,6 +789,10 @@ extern "C" {
 #include "lzfse/src/lzfse.h"
   #endif
 
+  #if _LZJODY
+#include "lzjody/lzjody.h"
+  #endif
+
   #if _MINIZ
 typedef unsigned long mz_ulong;
 int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len, int level);
@@ -851,43 +858,39 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
   //------------------------------------ Encoding -----------------------------------
   #if _SSERC
 #include "EC/sserangecoding/sserangecoder.h"
+#define SSERC_A a //  256 //  
+
 unsigned ssercenc(unsigned char *_in, unsigned inlen, unsigned char *_out) {
-  sserangecoder::uint8_vec  in(inlen);
-  sserangecoder::uint8_vec  out;
+  sserangecoder::uint8_vec  in(inlen), out;
   sserangecoder::uint32_vec sym_freq(256);
-  sserangecoder::uint32_vec scaled_cum_prob;
-  memcpy(&in[0], _in, inlen);  
+  memcpy(&in[0], _in, inlen);  				
   
-  for(uint32_t i = 0; i < in.size(); i++)
-	sym_freq[in[i]]++;
-  unsigned a = 256; while(a > 1 && !sym_freq[a-1]) a--; 
+  for(uint32_t i = 0; i < inlen; i++) sym_freq[_in[i]]++;
+  unsigned a = 256; while(a > 1 && !sym_freq[a-1]) a--;  
+  sserangecoder::uint32_vec scaled_cum_prob(SSERC_A+1);
   if(!sserangecoder::vrange_create_cum_probs(scaled_cum_prob, sym_freq)) return -1; 
-  sserangecoder::vrange_encode(in, out, scaled_cum_prob);
 
   unsigned char *op = _out;
   *op++ = a - 1;  
   for(int i = 0; i < a; i++) *(uint16_t *)op = scaled_cum_prob[i+1] - scaled_cum_prob[i], op +=2;  
+
+  sserangecoder::vrange_encode(in, out, scaled_cum_prob); 
   memcpy(op, &out[0], out.size()); 
   op += out.size();
   return op - _out;
 }
 
-unsigned ssercdec(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned outlen) {
-  sserangecoder::uint8_vec  out(outlen);  
-  unsigned char *ip = _in;
-  unsigned a = 1 + (*ip++), inlen = _inlen - (a*2+1);
-  sserangecoder::uint8_vec in(inlen);                        						             
-
-  sserangecoder::uint32_vec dec_table(a);
-  sserangecoder::uint32_vec scaled_cum_prob(a+1);
+unsigned ssercdec(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen) { 
+  unsigned char *ip = in;
+  unsigned      a = 1 + (*ip++);
+  sserangecoder::uint32_vec scaled_cum_prob(SSERC_A+1);
   
   unsigned cum = 0,i;
-  for(i = 0; i < a; i++) scaled_cum_prob[i] = cum, cum+=*(uint16_t *)ip, ip+=2;  
-  scaled_cum_prob[i] = cum;                                                      
-  memcpy(&in[0], ip, inlen); 		
-  sserangecoder::vrange_init_table(a, scaled_cum_prob, dec_table);
-  if(!sserangecoder::vrange_decode(&in[0], in.size(), &out[0], outlen, &dec_table[0])) return -1;
-  memcpy(_out, &out[0], outlen);  													//for(int i=0; i < 10; i++)  printf("%c", out[i]);
+  for(i = 0; i < a; i++) scaled_cum_prob[i] = cum, cum += *(uint16_t *)ip, ip+=2; scaled_cum_prob[i] = cum;                                                      
+
+  sserangecoder::uint32_vec dec_table(SSERC_A);
+  sserangecoder::vrange_init_table(SSERC_A, scaled_cum_prob, dec_table);
+  if(!sserangecoder::vrange_decode(ip, (in+inlen) - ip, out, outlen, &dec_table[0])) return -1;  //for(int i=0; i < 100; i++)  printf("%c", out[i]);
   return outlen;
 }
   #endif
@@ -1103,6 +1106,25 @@ static ZSTD_DDict* createDDict_orDie(const char* dictFileName) {
 }
   #endif
 
+  #if __cplusplus
+extern "C" {
+  #endif
+  #if _FSE
+#include "fse/fse.h"  
+  #endif
+  #if _FSEHUF
+//#include "fse/huf.h"  
+#define HUF_PUBLIC_API 
+HUF_PUBLIC_API size_t HUF_compress(void* dst, size_t dstCapacity,
+                             const void* src, size_t srcSize);
+HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize,
+                               const void* cSrc, size_t cSrcSize);
+
+  #endif
+  #if __cplusplus
+}
+  #endif
+  
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
   { P_C_BLOSC2,  "blosc",       _C_BLOSC2,  "Blosc",                   "0,1,2,3,4,5,6,7,8,9", 64*1024},
@@ -1132,6 +1154,7 @@ struct plugs plugs[] = {
   { P_LIZARD,    "lizard",      _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
   { P_LZFSE,     "lzfse",       _LZFSE,     "lzfse",                   "" },  
   { P_LZFSEA,    "lzfsea",      _LZFSEA,    "lzfsea",                  "" },
+  { P_LZJODY,    "lzjody",      _LZJODY,    "lzjody",                  "" },
   { P_LZHAM,     "lzham",       _LZHAM,     "Lzham",                   "1,2,3,4/t#:fb#:x#" },
   { P_LZLIB,     "lzlib",       _LZLIB,     "Lzlib",                   "1,2,3,4,5,6,7,8,9/d#:fb#" },
   { P_LZMAT,     "lzmat",       _LZMAT,     "Lzmat",                   "" },
@@ -1183,8 +1206,8 @@ struct plugs plugs[] = {
   { P_FPC,          "fpc",         _FPC,       "Fast Prefix Coder",       "0,8,9,10,11,12,16,32,48,63" },
   { P_FREQTAB,      "freqtab",     _FREQTAB,   "FreqTable v2.Eugene shelwien", "" },
   { P_FSC,          "fsc",         _FSC,       "Finite State Coder",      "", E_ANS },
-  { P_FSE,          "fse",         _FSE,       "Finite State Entropy",    "", E_ANS },
-  { P_FSEH,         "fsehuf",      _FSEHUF,    "Zstd Huffman Coding",     "", E_HUF },
+  { P_FSE,          "fse",         _FSE,       "Finite State Entropy",    "0", E_ANS },
+  { P_FSEH,         "fsehuf",      _FSEHUF,    "Zstd Huffman Coding",     "0", E_HUF },
   { P_FPAQC,        "fpaqc",       _FPAQC,     "Asymmetric Binary Coder", "" },
   { P_SHRC,         "fpaq0p_sh",   _SHRC,      "Bitwise RC",              "" },
   { P_SHRCV,        "vecrc_sh",    _VECRC,     "Bitwise vector RC",       "" },
@@ -1700,6 +1723,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _LZFSEA
     case P_LZFSEA : return compression_encode_buffer(out, outsize, in, inlen, workmem, COMPRESSION_LZFSE);
+      #endif
+
+      #if _LZJODY
+    case P_LZJODY : return lzjody_compress(in, out, 0, inlen);
       #endif
 
       #if _LZHAM
@@ -2233,23 +2260,31 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #if _TURBORC
     case P_TURBORC: { //int ec = 0; 
 	  char *q;
-	  unsigned bwtlev = 9, xprep8=0, forcelzp=0, verbose=0, xsort=0, itmax=0, lenmin=1, nutf8=0;
+	  unsigned bwtlev = 9, xprep8=0, forcelzp=0, verbose=0, xsort=0, itmax=0, lenmin=1, nutf8=0, z=0;
 	  if(q = strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1));  
 	  if(q = strchr(prm,'m')) lenmin = atoi(q+(q[1]=='='?2:1));  
-	  if(q = strchr(prm,'U')) nutf8  = 1;  
+	  if(q = strchr(prm,'U')) nutf8  = 1;
+ 	  if(q = strchr(prm,'s')) z = 2; else if(q = strchr(prm,'u')) z = 4;
+
       #define bwtflag(z) (z==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | forcelzp | (verbose?BWT_VERBOSE:0) | (nutf8?BWT_NUTF8:0) | xsort <<14 | itmax <<10 | lenmin
       switch(lev) {
         case  1: return rcsenc(    in, inlen, out);
         case  2: return rccsenc(   in, inlen, out); 
         case  3: return rcc2senc(  in, inlen, out);
         case  4: return rcxsenc(   in, inlen, out);
-        //case 55: return anscdfenc( in, inlen, out, 1<<21);
-        //case  5: mbcset(15); clen = rcx2enc(  in, inlen, out, prdid); break;
-        //case  9: return rcmsenc(  in, inlen, out);       
-        //case 10: return rcm2senc( in, inlen, out);        
-        case 13: return rcrlesenc( in, inlen, out);
-        case 14: return rcrle1senc(in, inlen, out);        //case 17: return rcqlfcsenc(in, inlen, out);
+		case  5: return rcx2senc(   in, inlen, out);
+		case  6: return z==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
+		case  7: return z==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
+		case  8: rcc2senc32(in,inlen,out);
+		case  9: return rcmsenc(    in, inlen, out);
+		case 10: return rcm2senc(   in, inlen, out);
+		case 11: return rcmrsenc(   in, inlen, out);
+		case 12: return rcmrrsenc(  in, inlen, out);
+        case 13: return z==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
+		case 14: return z==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
+		case 17: return rcu3senc(   in, inlen, out);
         case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
+		
 		default: return 0;
 	//case 21: return utf8enc( in, inlen, out, bwtflag(1)|BWT_COPY|BWT_RATIO);
 	//case 90: return lzpenc( in, inlen, out, 1, 0);
@@ -2482,6 +2517,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if _LZFSEA
     case P_LZFSEA : return compression_decode_buffer(out, outlen, in, inlen, workmem, COMPRESSION_LZFSE);
+      #endif
+
+      #if _LZJODY
+    case P_LZJODY : return lzjody_decompress(in, out, outlen, 0);
       #endif
 
       #if _LIBLZG
@@ -2928,7 +2967,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if _SSERC
-    case P_SSERC: return ssercdec(in, inlen, out, outlen); break;
+    case P_SSERC: return ssercdec(in, inlen, out, outlen);
       #endif
 
       #if _SUBOTIN
@@ -2941,20 +2980,27 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if _TURBORC
     case P_TURBORC: { //unsigned prm1 = 5,prm2 = 6; char *q; //if(q=strchr(prm,'r')) { prm1 = atoi(q+(q[1]=='='?2:1)); prm2 = prm1%10; prm1 = prm1/10; if(prm1>9)prm1=9;if(!prm1) prm1=1; if(prm2>9)prm2=9;if(!prm2) prm2=1; }
-	  unsigned bwtlev = 9;
+	  unsigned bwtlev = 9,z=0;
 	  char *q;
+	  if(inlen >= outlen) { memcpy(out,in, outlen); return inlen; }
 	  if(q=strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1)); 
+	  if(q=strchr(prm,'s')) z=2;
       switch(lev) {
         case  1 : return rcsdec(    in, outlen, out);
         case  2 : return rccsdec(   in, outlen, out);
         case  3 : return rcc2sdec(  in, outlen, out);
         case  4 : return rcxsdec(   in, outlen, out);
-        //case  55: return anscdfdec(   in, outlen, out, 1<<21);
-
-        //case  9 : return rcmsdec(   in, outlen, out);
-        //case 10 : return rcm2sdec(  in, outlen, out);
-        case 13 : return rcrlesdec( in, outlen, out);
-        case 14 : return rcrle1sdec(in, outlen, out);        //case 17 : return rcqlfcsdec( in, outlen, out);
+        case  5 : return rcx2sdec(   in, outlen, out);
+        case  6 : return z==2?rcsdec16(  in, outlen, out):rcsdec32(  in, outlen, out);
+        case  7 : return z==2?rccsdec16( in, outlen, out):rccsdec32( in, outlen, out);
+        case  8 : return rcc2sdec32(in, outlen, out);
+        case  9 : return rcmsdec(   in, outlen, out);
+        case 10 : return rcm2sdec(  in, outlen, out);
+        case 11 : return rcmrsdec(  in, outlen, out);
+        case 12 : return rcmrrsdec( in, outlen, out);		
+        case 13 : return z==2?rcrlesdec16(in, outlen, out):rcrlesdec(in, outlen, out);
+        case 14 : return z==2?rcrle1sdec16(in, outlen, out):rcrle1sdec(in, outlen, out);
+        case 17 : return rcu3sdec( in, outlen, out);		
         case 20 : return rcbwtdec( in, outlen, out, bwtlev, 0);
 		default: return 0;
         //case 21 : if(inlen==outlen) memcpy(out,in,outlen); else utf8dec( in, outlen, out); return outlen;
