@@ -58,6 +58,7 @@ GIPFELI=1
 # glza not working on all systems
 GLZA=1
 HEATSHRINK=1
+#LZJODY=1
 # make -f Makefile.unx  arch=mingw  host_cpu=x86_64  CC=gcc AS=nasm AR=ar STRIP=strip LDFLAGS=  CFLAGS_mingw=-m64
 ISA_L=1
 #LIBZLING=1
@@ -84,7 +85,8 @@ ZLIB_NG=1
 #UNISHOX3=1
 endif
 
-ifeq ($(EC),1) # Encoding Entropy coders / RLE
+# Encoding Entropy coders / RLE
+ifeq ($(EC),1) 
 #AOM=1
 FASTAC=1
 FASTHF=1
@@ -95,10 +97,11 @@ FPAQC=1
 FPC=1
 FQZ0=1
 # fse,fsehuf disabled as not available in zstd (20230209)
-#FSE=1
-#FSEHUF=1
+FSE=1
+FSEHUF=1
 HTSCODECS=1
 #RECIPARITH=1
+#
 SSERC=1
 SUBOTIN=1
 #TORNADO=1
@@ -273,6 +276,12 @@ CFLAGS+=-Ilizard/lib
 OB+=lizard/lib/lizard_compress.o lizard/lib/lizard_decompress.o lizard/lib/entropy/huf_decompress.o lizard/lib/entropy/huf_compress.o lizard/lib/entropy/fse_compress.o lizard/lib/entropy/fse_decompress.o
 endif
 
+ifeq ($(LZ4), 1)
+CXXFLAGS+=-D_LZ4
+CFLAGS+=-Ilz4/lib
+OB+=lz4/lib/lz4hc.o lz4/lib/lz4.o lz4/lib/lz4frame.o lz4/lib/xxhash.o
+endif
+
 ifeq ($(LZFSE), 1)
 CXXFLAGS+=-D_LZFSE
 OB+=lzfse/src/lzfse_decode_base.o lzfse/src/lzfse_decode.o lzfse/src/lzfse_encode_base.o lzfse/src/lzfse_encode.o lzfse/src/lzfse_fse.o lzfse/src/lzvn_decode_base.o lzfse/src/lzvn_encode_base.o
@@ -292,11 +301,11 @@ OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
 endif
 
-ifeq ($(LZ4), 1)
-CXXFLAGS+=-D_LZ4
-CFLAGS+=-Ilz4/lib
-OB+=lz4/lib/lz4hc.o lz4/lib/lz4.o lz4/lib/lz4frame.o lz4/lib/xxhash.o
+ifeq ($(LZJODY), 1)
+CXXFLAGS+=-D_LZJODY
+OB+=lzjody/lzjody.o lzjody/byteplane_xfrm.o
 endif
+
 
 ifeq ($(LZMA), 1)
 CXXFLAGS+=-D_LZMA
@@ -313,8 +322,10 @@ CXXFLAGS+=-D_LZOMA
 OB+=lzoma_/pack.o lzoma_/unpack.o lzoma_/divsufsort.o
 endif
 
-ifeq ($(LZSSE), 1) # SSE4.1
-ifeq ($(ARCH),$(filter $(ARCH),x86_))
+# SSE4.1
+ifeq ($(LZSSE), 1) 
+ifeq ($(ARCH),$(filter $(ARCH),x86_64))
+
 CXXFLAGS+=-D_LZSSE
 LZSSE/lzsse2/lzsse2.o: LZSSE/lzsse2/lzsse2.cpp
 	$(CXX) -O2 -msse4.1 -std=c++11 $< -c -o $@
@@ -345,11 +356,24 @@ CFLAGS+=-Izstd/lib -Izstd/lib/common
 ZT0=zstd/lib/common/
 ZTC=zstd/lib/compress/
 ZTD=zstd/lib/decompress/
-OB+=$(ZT0)pool.o $(ZT0)xxhash.o $(ZT0)error_private.o $(ZTC)huf_compress.o $(ZTD)huf_decompress.o $(ZT0)fse_decompress.o $(ZT0)zstd_common.o $(ZT0)entropy_common.o \
+OB+=$(ZT0)pool.o $(ZT0)xxhash.o $(ZT0)error_private.o $(ZT0)fse_decompress.o $(ZT0)zstd_common.o $(ZT0)entropy_common.o \
     $(ZTC)hist.o $(ZTC)zstd_compress.o $(ZTC)zstd_compress_literals.o $(ZTC)zstd_compress_sequences.o $(ZTC)zstd_double_fast.o $(ZTC)zstd_fast.o $(ZTC)zstd_lazy.o \
-	$(ZTC)zstd_ldm.o $(ZTC)zstdmt_compress.o $(ZTC)zstd_opt.o $(ZTC)fse_compress.o $(ZTC)huf_compress.o $(ZTC)zstd_compress_superblock.o \
-    $(ZTD)zstd_decompress.o $(ZTD)zstd_decompress_block.o $(ZTD)zstd_ddict.o $(ZTD)huf_decompress.o $(ZTD)huf_decompress_amd64.o
+	$(ZTC)zstd_ldm.o $(ZTC)zstdmt_compress.o $(ZTC)zstd_opt.o $(ZTC)fse_compress.o $(ZTC)zstd_compress_superblock.o \
+    $(ZTD)zstd_decompress.o $(ZTD)zstd_decompress_block.o $(ZTD)zstd_ddict.o $(ZTD)huf_decompress_amd64.o
+#$(ZTC)huf_compress.o $(ZTD)huf_decompress.o $(ZTC)huf_compress.o $(ZTD)huf_decompress.o 
 endif
+endif
+
+ifeq ($(FSE), 1)
+CXXFLAGS+=-D_FSE
+OB+=$(LB)fse/fse_compress_.o $(LB)fse/fse_decompress_.o 
+endif
+
+ifeq ($(FSEHUF), 1)
+CXXFLAGS+=-D_FSEHUF
+OB+=$(LB)fse/huf_compress_.o $(LB)fse/huf_decompress_.o 
+else
+OB+=$(LB)zstd/lib/compress/huf_compress.o $(LB)zstd/lib/decompress/huf_decompress.o 
 endif
 
 ifeq ($(ZLIB), 1)
@@ -631,7 +655,7 @@ $(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
 
 CXXFLAGS+=-D_TURBORC
 #-D_ANS
-CFLAGS+=-D_BWT
+CFLAGS+=-D_BWT -D_NCPUISA
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
   Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o
 #  Turbo-Range-Coder/anscdf0.o Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
