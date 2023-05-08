@@ -97,8 +97,8 @@ FPAQC=1
 FPC=1
 FQZ0=1
 # fse,fsehuf disabled as not available in zstd (20230209)
-FSE=1
-FSEHUF=1
+#FSE=1
+#FSEHUF=1
 HTSCODECS=1
 #RECIPARITH=1
 #
@@ -645,7 +645,7 @@ endif
 ifeq ($(TURBORC),1)
 TRC=Turbo-Range-Coder/
 $(TRC)anscdf0.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -D_NCPUISA -mno-sse2 -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdf0.o
+	$(CC) -c -O3 $(CFLAGS) -mno-sse2 -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdf0.o
 
 $(TRC)anscdfs.o: $(TRC)anscdf.c $(TRC)anscdf_.h
 	$(CC) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfs.o
@@ -655,10 +655,10 @@ $(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
 
 CXXFLAGS+=-D_TURBORC
 #-D_ANS
-CFLAGS+=-D_BWT -D_NCPUISA
+CFLAGS+=-D_BWT -ITurbo-Range-Coder/libsais/include
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
-  Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o
-#  Turbo-Range-Coder/anscdf0.o Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
+  Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o \
+  Turbo-Range-Coder/anscdf0.o Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
 LIBSAIS=1
 endif
 
