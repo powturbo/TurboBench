@@ -469,9 +469,11 @@ ifeq ($(ZLIB_NG), 1)
 #CMD:= $(shell cd zlib-ng && ./configure && make && cd ..)
 CXXFLAGS+=-D_ZLIB_NG
 ifeq ($(OS),Windows)
-OB+=msys-z-ng.dll
+#OB+=msys-z-ng.dll
+LDFLAGS+=zlib-ng_/win64/libz-ng.a
 else
-LDFLAGS+=-lz-ng
+#LDFLAGS+=-lz-ng
+LDFLAGS+=zlib-ng_/linux/libz-ng.a
 endif
 endif
 
@@ -655,7 +657,7 @@ $(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
 
 CXXFLAGS+=-D_TURBORC
 #-D_ANS
-CFLAGS+=-D_BWT -ITurbo-Range-Coder/libsais/include
+CFLAGS+=-D_BWT -ITurbo-Range-Coder/libsais/include -D_NCPUISA
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
   Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o \
   Turbo-Range-Coder/anscdf0.o Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
