@@ -49,9 +49,6 @@
 [submodule "miniz"]
 	path = miniz
 	url = https://github.com/richgel999/miniz
-[submodule "zlib-ng"]
-	path = zlib-ng
-	url = https://github.com/Dead2/zlib-ng
 [submodule "brotli"]
 	path = brotli
 	url = https://github.com/google/brotli.git
