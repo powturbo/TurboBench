@@ -79,3 +79,6 @@
 [submodule "EC/htscodecs"]
 	path = EC/htscodecs
 	url = https://github.com/samtools/htscodecs.git
+[submodule "zlib-ng"]
+	path = zlib-ng
+	url = https://github.com/zlib-ng/zlib-ng
