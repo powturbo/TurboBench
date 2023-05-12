@@ -97,8 +97,8 @@ FPAQC=1
 FPC=1
 FQZ0=1
 # fse,fsehuf disabled as not available in zstd (20230209)
-#FSE=1
-#FSEHUF=1
+FSE=1
+FSEHUF=1
 HTSCODECS=1
 #RECIPARITH=1
 #
@@ -366,12 +366,12 @@ endif
 
 ifeq ($(FSE), 1)
 CXXFLAGS+=-D_FSE
-OB+=$(LB)fse/fse_compress_.o $(LB)fse/fse_decompress_.o 
+OB+=$(LB)EC/fse/fse_compress_.o $(LB)EC/fse/fse_decompress_.o 
 endif
 
 ifeq ($(FSEHUF), 1)
 CXXFLAGS+=-D_FSEHUF
-OB+=$(LB)fse/huf_compress_.o $(LB)fse/huf_decompress_.o 
+OB+=$(LB)EC/fse/huf_compress_.o $(LB)EC/fse/huf_decompress_.o 
 else
 OB+=$(LB)zstd/lib/compress/huf_compress.o $(LB)zstd/lib/decompress/huf_decompress.o 
 endif
@@ -549,8 +549,9 @@ OB+=Unishox2/unishox2.o turbobench_/unishox.o
 endif
 
 ifeq ($(UNISHOX3), 1)
-CXXFLAGS+=-D_UNISHOX3
+CXXFLAGS+=-D_UNISHOX3 -Imarisa-trie/include
 OB+=Unishox2/Unishox3_Alpha/unishox3.o
+#LDFLAGS+=msys-marisa-0.dll
 endif
 
 #------------------------- Entropy coder -----------------------------------------
@@ -658,6 +659,9 @@ $(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
 CXXFLAGS+=-D_TURBORC
 #-D_ANS
 CFLAGS+=-D_BWT -ITurbo-Range-Coder/libsais/include
+ifeq ($(LZTURBO),1)
+CFLAGS+=-D_NCPUISA
+endif
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
   Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o \
   Turbo-Range-Coder/anscdf0.o Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
