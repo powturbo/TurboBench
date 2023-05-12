@@ -82,3 +82,6 @@
 [submodule "zlib-ng"]
 	path = zlib-ng
 	url = https://github.com/zlib-ng/zlib-ng
+[submodule "EC/sserangecoding"]
+	path = EC/sserangecoding
+	url = https://github.com/richgel999/sserangecoding.git
