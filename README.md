@@ -211,30 +211,31 @@ Compressors with versions 16.08.2016 <br>
 #### Entropy coder:
 
 ###### bitwise range coder
- - [TurboRC-Range Coder v1.3](https://sites.google.com/site/powturbo)
+ - [TurboRC-Range Coder](https://github.com/powturbo/Turbo-Range-Coder)
  - [Bitwise RC v2010](http://encode.ru/threads/1153-Simple-binary-rangecoder-demo)
  - [Bitwise vector RC v2012](http://encode.ru/threads/1200-Vectorized-rangecoder)
- - [FastAri v15-10](https://github.com/davidcatt/FastARI)
  - [AOMedia AV1 entropy coder](https://aomedia.googlesource.com/aom/+/master/aom_dsp/)
  - [Daala entropy coder](https://github.com/xiph/daala)
- - [Turbo Range Coder](https://github.com/powturbo/Turbo-Range-Coder) 
-
+ - [FastAri v15-10](https://github.com/davidcatt/FastARI)
+ 
 ###### bytewise range coder
  - [TurboAC](https://sites.google.com/site/powturbo)
  - [subotin range coder v2000](http://ezcodesample.com/ralpha/Subbotin.txt)
  - [Fast AC v2006](http://www.cipr.rpi.edu/research/SPIHT/)
- - [Range Coder/J.Bonfield v15-07](https://github.com/jkbonfield/rans_static)
+ - [htscodecs Range Coder](https://github.com/samtools/htscodecs)
  - [FQZ/PPMD Range Coder v15-03](http://encode.ru/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
  - [PPMD Range Coder v15-03](http://encode.ru/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
-
+ - [sserangecoding](https://github.com/richgel999/sserangecoding)
+ 
 ###### ABS: Asymmetric binary systems 
  - [Fpaqc:Asymmetric Binary Coder v07-12](http://www.mattmahoney.net/dc/)
 
 ###### ANS: Asymmetric Numeral Systems
- - [TurboANX-ANS v1.3](https://sites.google.com/site/powturbo)
+ - [TurboANX-ANS](https://sites.google.com/site/powturbo)
+ - [TurborANS](https://sites.google.com/site/powturbo)
  - [Finite State Coder v15-05](https://github.com/skal65535/fsc)
  - [Finite State Entropy v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
- - [rans_static v16-10](https://github.com/jkbonfield/rans_static)
+ - [htscodecs rANS](https://github.com/samtools/htscodecs)
 
 ###### Huffman Coding
  - [TurboHF-Huffmann v1.3](https://sites.google.com/site/powturbo)
@@ -259,5 +260,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 26 APR 2023
+Last update: 12 MAY 2023
 
