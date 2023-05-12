@@ -858,16 +858,15 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
   //------------------------------------ Encoding -----------------------------------
   #if _SSERC
 #include "EC/sserangecoding/sserangecoder.h"
-#define SSERC_A a //  256 //  
 
 unsigned ssercenc(unsigned char *_in, unsigned inlen, unsigned char *_out) {
   sserangecoder::uint8_vec  in(inlen), out;
   sserangecoder::uint32_vec sym_freq(256);
-  memcpy(&in[0], _in, inlen);  				
+  memcpy(&in[0], _in, inlen);                 //sserangecoder::vrange_init();
   
   for(uint32_t i = 0; i < inlen; i++) sym_freq[_in[i]]++;
   unsigned a = 256; while(a > 1 && !sym_freq[a-1]) a--;  
-  sserangecoder::uint32_vec scaled_cum_prob(SSERC_A+1);
+  sserangecoder::uint32_vec scaled_cum_prob(a+1);
   if(!sserangecoder::vrange_create_cum_probs(scaled_cum_prob, sym_freq)) return -1; 
 
   unsigned char *op = _out;
@@ -882,14 +881,14 @@ unsigned ssercenc(unsigned char *_in, unsigned inlen, unsigned char *_out) {
 
 unsigned ssercdec(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen) { 
   unsigned char *ip = in;
-  unsigned      a = 1 + (*ip++);
-  sserangecoder::uint32_vec scaled_cum_prob(SSERC_A+1);
+  unsigned      a = 1 + (*ip++);                                                //sserangecoder::vrange_init();
+  sserangecoder::uint32_vec scaled_cum_prob(a+1);
   
   unsigned cum = 0,i;
   for(i = 0; i < a; i++) scaled_cum_prob[i] = cum, cum += *(uint16_t *)ip, ip+=2; scaled_cum_prob[i] = cum;                                                      
 
-  sserangecoder::uint32_vec dec_table(SSERC_A);
-  sserangecoder::vrange_init_table(SSERC_A, scaled_cum_prob, dec_table);
+  sserangecoder::uint32_vec dec_table(a);
+  sserangecoder::vrange_init_table(a, scaled_cum_prob, dec_table);
   if(!sserangecoder::vrange_decode(ip, (in+inlen) - ip, out, outlen, &dec_table[0])) return -1;  //for(int i=0; i < 100; i++)  printf("%c", out[i]);
   return outlen;
 }
@@ -1110,16 +1109,13 @@ static ZSTD_DDict* createDDict_orDie(const char* dictFileName) {
 extern "C" {
   #endif
   #if _FSE
-#include "fse/fse.h"  
+#include "EC/fse/fse.h"  
   #endif
   #if _FSEHUF
 //#include "fse/huf.h"  
 #define HUF_PUBLIC_API 
-HUF_PUBLIC_API size_t HUF_compress(void* dst, size_t dstCapacity,
-                             const void* src, size_t srcSize);
-HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize,
-                               const void* cSrc, size_t cSrcSize);
-
+HUF_PUBLIC_API size_t HUF_compress(void* dst, size_t dstCapacity, const void* src, size_t srcSize);
+HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void* cSrc, size_t cSrcSize);
   #endif
   #if __cplusplus
 }
@@ -1127,77 +1123,76 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize,
   
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
-  { P_C_BLOSC2,  "blosc",       _C_BLOSC2,  "Blosc",                   "0,1,2,3,4,5,6,7,8,9", 64*1024},
-  { P_BRIEFLZ,   "brieflz",     _BRIEFLZ,   "BriefLz",                 "1,3,6,9" },
-  { P_BROTLI,    "brotli",      _BROTLI,    "Brotli",                  "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
-  { P_BZIP2,     "bzip2",       _BZIP2,     "Bzip2",                   "" },
-  { P_BZIP3,     "bzip3",       _BZIP3,     "Bzip3",                   "" },
-  { P_CHAMELEON, "chameleon",   _CHAMELEON, "Chameleon",               "1,2" },
-  { P_CSC,       "csc",         _CSC,       "CSC",                     "1,2,3,4,5" },
-  { P_DENSITY,   "density",     _DENSITY,   "Density",                 "1,2,3" },
-  { P_DOBOZ,     "doboz",       _DOBOZ,     "Doboz",                   "" },  //crash on windows
-  { P_FASTLZ,    "fastlz",      _FASTLZ,    "FastLz",                  "1,2" },
-  { P_FLZMA2,    "flzma2",      _FLZMA2,    "Fast-lzma2",              "0,1,2,3,4,5,6,7,8,9,10,11/mt#" },
-  { P_GIPFELI,   "gipfeli",     _GIPFELI,   "Gipfeli",                 "" },
-  { P_GLZA,      "glza",        _GLZA,      "glza",                    "" },
-  { P_HEATSHRINK,"heatshrink",  _HEATSHRINK,"heatshrink",              "" },
-  { P_ISA_L,     "igzip",       _ISA_L,     "igzip",                   "0,1,2,3" },
-  { P_LIBBSC,    "bsc",         _LIBBSC,    "bsc",                     "0,3,4,5,6,7,8/p:e#"},
-  { P_LIBBSCC,   "bscqlfc",     _LIBBSC,    "bsc",                     "1,2"},
-  { P_LIBDEFLATE,"libdeflate",  _LIBDEFLATE,"libdeflate",              "1,2,3,4,5,6,7,8,9,12/dg"},
-  { P_LIBLZF,    "lzf",         _LIBLZF,    "LibLZF",                  "" },
-  { P_LIBLZG,    "lzg",         _LIBLZG,    "LibLzg",                  "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
-  { P_ZPAQ,      "zpaq",        _ZPAQ,      "Libzpaq",                 "0,1,2,3,4,5" },
-  { P_SLZ,       "slz",         _SLZ,       "libslz",                  "0,1,2,3,4,5,6,7,8,9" },
-  { P_LZ4,       "lz4",         _LZ4,       "Lz4",                     "0,1,9,10,11,12,16/MfsB#" },
-  { P_LZ4ULTRA,  "lz4ultra",    _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
-  { P_LIZARD,    "lizard",      _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
-  { P_LZFSE,     "lzfse",       _LZFSE,     "lzfse",                   "" },  
-  { P_LZFSEA,    "lzfsea",      _LZFSEA,    "lzfsea",                  "" },
-  { P_LZJODY,    "lzjody",      _LZJODY,    "lzjody",                  "" },
-  { P_LZHAM,     "lzham",       _LZHAM,     "Lzham",                   "1,2,3,4/t#:fb#:x#" },
-  { P_LZLIB,     "lzlib",       _LZLIB,     "Lzlib",                   "1,2,3,4,5,6,7,8,9/d#:fb#" },
-  { P_LZMAT,     "lzmat",       _LZMAT,     "Lzmat",                   "" },
-  { P_LZMA,      "lzma",        _LZMA,      "Lzma",                    "0,1,2,3,4,5,6,7,8,9/d#:fb#:lp#:lc#:pb#:a#:mt#" },
-
-  { P_LZO1b,     "lzo1b",       _LZO,       "Lzo",                     "1,9,99,999" },
-  { P_LZO1c,     "lzo1c",       _LZO,       "Lzo",                     "1,9,99,999" },
-  { P_LZO1f,     "lzo1f",       _LZO,       "Lzo",                     "1,999" },
-  { P_LZO1x,     "lzo1x",       _LZO,       "Lzo",                     "1,11,12,15,999" },
-  { P_LZO1y,     "lzo1y",       _LZO,       "Lzo",                     "1,999" },
-  { P_LZO1z,     "lzo1z",       _LZO,       "Lzo",                     "999" },
-  { P_LZO2a,     "lzo2a",       _LZO,       "Lzo",                     "999" },
-  { P_LZOMA,     "lzoma",       _LZOMA,     "lzoma",                   "1,2,3,4,5,6,7,8,9" },
-  { P_LZSA,      "lzsa",        _LZSA,      "lzsa",                    "9/f#cr" },
-  { P_LZSSE2,    "lzsse2",      _LZSSE,     "lzsse",                   "1,2,3,4,5,6,7,8,9,12,16,17"},
-  { P_LZSSE4,    "lzsse4",      _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
-  { P_LZSSE8,    "lzsse8",      _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
-  { P_MINIZ,     "miniz",       _MINIZ,     "miniz zlib-replace",      "1,2,3,4,5,6,7,8,9" },
-  { P_MSCOMPRESS,"mscompress",  _MSCOMPRESS,"ms-compress",             "2,3,4" },
-  { P_NAKA,      "naka",        _NAKA,      "Nakamichi Washigan",      "" },
-  { P_PITHY,     "pithy",       _PITHY,     "Pithy",                   "0,1,2,3,4,5,6,7,8,9" },
-  { P_QUICKLZ,   "quicklz",     _QUICKLZ,   "Quicklz",                 "1,2,3" },
-  { P_QCOMPRESS32, "qcomp32",   _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
-  { P_QCOMPRESS64, "qcomp64",   _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
-  { P_PYSAP,     "sap",         _PYSAP,     "sap",                     "0,1,2" },
-  { P_SHRINKER,  "shrinker",    _SHRINKER,  "Shrinker",                "", 0, (1<<26) },
-  { P_SHOCO,     "shoco",       _SHOCO,     "Shoco",                   "" },
-  { P_SMAZ,      "smaz",        _SMAZ,      "smaz",                    "" },
-  { P_SNAPPY,    "snappy",      _SNAPPY,    "Snappy",                  ""  },
-  { P_SNAPPY_C,  "snappy_c",    _SNAPPY_C,  "Snappy-c",                "" },
-  { P_SMALLZ4,   "smallz4",     _SMALLZ4,   "SmalLz4",                 "6,7,8,9,10,11,12/z" },
-  { P_TORNADO,   "tornado",     _TORNADO,   "Tornado",                 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
-  { P_UNISHOX2,  "unishox2",    _UNISHOX2,  "unishox2",                "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
-  { P_UNISHOX3,  "unishox3",    _UNISHOX3,  "unishox3",                "" },
-  { P_WFLZ,      "wflz",        _WFLZ,      "wfLZ",                    "1,2" },
-  { P_XPACK,     "xpack",       _XPACK,     "xpack",                   "1,2,3,4,5,6,7,8,9" },
-  { P_YALZ77,    "yalz77",      _YALZ77,    "Yalz77",                  "1,6,12" },
-  { P_YAPPY,     "yappy",       _YAPPY,     "Yappy",                   "" },//crash windows
-  { P_ZLIB,      "zlib",        _ZLIB,      "zlib",                    "1,2,3,4,5,6,7,8,9" },
-  { P_ZLIB_NG,   "zlib_ng",     _ZLIB_NG,   "zlib-ng",                 "1,2,3,4,5,6,7,8,9" },
-  { P_ZLING,     "zling",       _ZLING,     "Libzling",                "0,1,2,3,4" },
-  { P_ZOPFLI,    "zopfli",      _ZOPFLI,    "Zopfli",                  ""},
-  { P_ZSTD,      "zstd",        _ZSTD,      "ZSTD",                    "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13,-14,-15,-16,-17,-18,-19,-20,-21,-22/d#" },
+  { P_C_BLOSC2,   "blosc",       _C_BLOSC2,  "Blosc",                   "0,1,2,3,4,5,6,7,8,9", 64*1024},
+  { P_BRIEFLZ,    "brieflz",     _BRIEFLZ,   "BriefLz",                 "1,3,6,9" },
+  { P_BROTLI,     "brotli",      _BROTLI,    "Brotli",                  "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
+  { P_BZIP2,      "bzip2",       _BZIP2,     "Bzip2",                   "" },
+  { P_BZIP3,      "bzip3",       _BZIP3,     "Bzip3",                   "" },
+  { P_CHAMELEON,  "chameleon",   _CHAMELEON, "Chameleon",               "1,2" },
+  { P_CSC,        "csc",         _CSC,       "CSC",                     "1,2,3,4,5" },
+  { P_DENSITY,    "density",     _DENSITY,   "Density",                 "1,2,3" },
+  { P_DOBOZ,      "doboz",       _DOBOZ,     "Doboz",                   "" },  //crash on windows
+  { P_FASTLZ,     "fastlz",      _FASTLZ,    "FastLz",                  "1,2" },
+  { P_FLZMA2,     "flzma2",      _FLZMA2,    "Fast-lzma2",              "0,1,2,3,4,5,6,7,8,9,10,11/mt#" },
+  { P_GIPFELI,    "gipfeli",     _GIPFELI,   "Gipfeli",                 "" },
+  { P_GLZA,       "glza",        _GLZA,      "glza",                    "" },
+  { P_HEATSHRINK, "heatshrink",  _HEATSHRINK,"heatshrink",              "" },
+  { P_ISA_L,      "igzip",       _ISA_L,     "igzip",                   "0,1,2,3" },
+  { P_LIBBSC,     "bsc",         _LIBBSC,    "bsc",                     "0,3,4,5,6,7,8/p:e#"},
+  { P_LIBBSCC,    "bscqlfc",     _LIBBSC,    "bsc",                     "1,2"},
+  { P_LIBDEFLATE, "libdeflate",  _LIBDEFLATE,"libdeflate",              "1,2,3,4,5,6,7,8,9,12/dg"},
+  { P_LIBLZF,     "lzf",         _LIBLZF,    "LibLZF",                  "" },
+  { P_LIBLZG,     "lzg",         _LIBLZG,    "LibLzg",                  "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
+  { P_ZPAQ,       "zpaq",        _ZPAQ,      "Libzpaq",                 "0,1,2,3,4,5" },
+  { P_SLZ,        "slz",         _SLZ,       "libslz",                  "0,1,2,3,4,5,6,7,8,9" },
+  { P_LZ4,        "lz4",         _LZ4,       "Lz4",                     "0,1,9,10,11,12,16/MfsB#" },
+  { P_LZ4ULTRA,   "lz4ultra",    _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
+  { P_LIZARD,     "lizard",      _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
+  { P_LZFSE,      "lzfse",       _LZFSE,     "lzfse",                   "" },  
+  { P_LZFSEA,     "lzfsea",      _LZFSEA,    "lzfsea",                  "" },
+  { P_LZJODY,     "lzjody",      _LZJODY,    "lzjody",                  "" },
+  { P_LZHAM,      "lzham",       _LZHAM,     "Lzham",                   "1,2,3,4/t#:fb#:x#" },
+  { P_LZLIB,      "lzlib",       _LZLIB,     "Lzlib",                   "1,2,3,4,5,6,7,8,9/d#:fb#" },
+  { P_LZMAT,      "lzmat",       _LZMAT,     "Lzmat",                   "" },
+  { P_LZMA,       "lzma",        _LZMA,      "Lzma",                    "0,1,2,3,4,5,6,7,8,9/d#:fb#:lp#:lc#:pb#:a#:mt#" },
+  { P_LZO1b,      "lzo1b",       _LZO,       "Lzo",                     "1,9,99,999" },
+  { P_LZO1c,      "lzo1c",       _LZO,       "Lzo",                     "1,9,99,999" },
+  { P_LZO1f,      "lzo1f",       _LZO,       "Lzo",                     "1,999" },
+  { P_LZO1x,      "lzo1x",       _LZO,       "Lzo",                     "1,11,12,15,999" },
+  { P_LZO1y,      "lzo1y",       _LZO,       "Lzo",                     "1,999" },
+  { P_LZO1z,      "lzo1z",       _LZO,       "Lzo",                     "999" },
+  { P_LZO2a,      "lzo2a",       _LZO,       "Lzo",                     "999" },
+  { P_LZOMA,      "lzoma",       _LZOMA,     "lzoma",                   "1,2,3,4,5,6,7,8,9" },
+  { P_LZSA,       "lzsa",        _LZSA,      "lzsa",                    "9/f#cr" },
+  { P_LZSSE2,     "lzsse2",      _LZSSE,     "lzsse",                   "1,2,3,4,5,6,7,8,9,12,16,17"},
+  { P_LZSSE4,     "lzsse4",      _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
+  { P_LZSSE8,     "lzsse8",      _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
+  { P_MINIZ,      "miniz",       _MINIZ,     "miniz zlib-replace",      "1,2,3,4,5,6,7,8,9" },
+  { P_MSCOMPRESS, "mscompress",  _MSCOMPRESS,"ms-compress",             "2,3,4" },
+  { P_NAKA,       "naka",        _NAKA,      "Nakamichi Washigan",      "" },
+  { P_PITHY,      "pithy",       _PITHY,     "Pithy",                   "0,1,2,3,4,5,6,7,8,9" },
+  { P_QUICKLZ,    "quicklz",     _QUICKLZ,   "Quicklz",                 "1,2,3" },
+  { P_QCOMPRESS32,"qcomp32",     _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
+  { P_QCOMPRESS64,"qcomp64",     _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
+  { P_PYSAP,      "sap",         _PYSAP,     "sap",                     "0,1,2" },
+  { P_SHRINKER,   "shrinker",    _SHRINKER,  "Shrinker",                "", 0, (1<<26) },
+  { P_SHOCO,      "shoco",       _SHOCO,     "Shoco",                   "" },
+  { P_SMAZ,       "smaz",        _SMAZ,      "smaz",                    "" },
+  { P_SNAPPY,     "snappy",      _SNAPPY,    "Snappy",                  ""  },
+  { P_SNAPPY_C,   "snappy_c",    _SNAPPY_C,  "Snappy-c",                "" },
+  { P_SMALLZ4,    "smallz4",     _SMALLZ4,   "SmalLz4",                 "6,7,8,9,10,11,12/z" },
+  { P_TORNADO,    "tornado",     _TORNADO,   "Tornado",                 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
+  { P_UNISHOX2,   "unishox2",    _UNISHOX2,  "unishox2",                "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
+  { P_UNISHOX3,   "unishox3",    _UNISHOX3,  "unishox3",                "" },
+  { P_WFLZ,       "wflz",        _WFLZ,      "wfLZ",                    "1,2" },
+  { P_XPACK,      "xpack",       _XPACK,     "xpack",                   "1,2,3,4,5,6,7,8,9" },
+  { P_YALZ77,     "yalz77",      _YALZ77,    "Yalz77",                  "1,6,12" },
+  { P_YAPPY,      "yappy",       _YAPPY,     "Yappy",                   "" },//crash windows
+  { P_ZLIB,       "zlib",        _ZLIB,      "zlib",                    "1,2,3,4,5,6,7,8,9" },
+  { P_ZLIB_NG,    "zlib_ng",     _ZLIB_NG,   "zlib-ng",                 "1,2,3,4,5,6,7,8,9" },
+  { P_ZLING,      "zling",       _ZLING,     "Libzling",                "0,1,2,3,4" },
+  { P_ZOPFLI,     "zopfli",      _ZOPFLI,    "Zopfli",                  ""},
+  { P_ZSTD,       "zstd",        _ZSTD,      "ZSTD",                    "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13,-14,-15,-16,-17,-18,-19,-20,-21,-22/d#" },
 //------------------------------------------------------------------
   { P_MCPY,         "imemcpy",     _MEMCPY,    "inline memcpy",           "" },
   { P_LMCPY,        "memcpy",      _MEMCPY,    "library memcpy",          "" },
@@ -1206,8 +1201,8 @@ struct plugs plugs[] = {
   { P_FPC,          "fpc",         _FPC,       "Fast Prefix Coder",       "0,8,9,10,11,12,16,32,48,63" },
   { P_FREQTAB,      "freqtab",     _FREQTAB,   "FreqTable v2.Eugene shelwien", "" },
   { P_FSC,          "fsc",         _FSC,       "Finite State Coder",      "", E_ANS },
-  { P_FSE,          "fse",         _FSE,       "Finite State Entropy",    "0", E_ANS },
-  { P_FSEH,         "fsehuf",      _FSEHUF,    "Zstd Huffman Coding",     "0", E_HUF },
+  { P_FSE,          "fse",         _FSE,       "Finite State Entropy",    "", E_ANS },
+  { P_FSEH,         "fsehuf",      _FSEHUF,    "Zstd Huffman Coding",     "", E_HUF },
   { P_FPAQC,        "fpaqc",       _FPAQC,     "Asymmetric Binary Coder", "" },
   { P_SHRC,         "fpaq0p_sh",   _SHRC,      "Bitwise RC",              "" },
   { P_SHRCV,        "vecrc_sh",    _VECRC,     "Bitwise vector RC",       "" },
@@ -1218,15 +1213,16 @@ struct plugs plugs[] = {
   { P_FQZ0,         "fqz0",        _FQZ0,      "FQZ/PPMD Range Coder",    ""},
   { P_MARLIN,       "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
   { P_NIBRANS,      "nibrans",     _NIBRANS,   "nibrans",                 ""},
-  { P_OODLE, 	    "oodle", 		_OODLE, 	"Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
+  { P_OODLE,        "oodle",        _OODLE,     "Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
   { P_POLHF,        "polar",       _POLHF,     "Polar Codes",             "" },
   { P_PPMDEC,       "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
 
   { P_ARITHDYN,     "arith_dyn",   _HTSCODECS, "htscodecs",               "0,1"},
+//{ P_RANS32x16_128,"rans32sse",   _HTSCODECS, "htscodecs",               "0", E_ANS},
   { P_RANS32x16_256,"rans32avx2",  _HTSCODECS, "htscodecs",               "0,1", E_ANS},
   { P_RANS32x16_512,"rans32avx512",_HTSCODECS, "htscodecs",               "0,1", E_ANS},
-  { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",			  "" },
-  { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",           "" },
+  { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",             "" },
+  { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",           "", E_ANS },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",              "" },
   { P_TORNADOHF,    "tornado_huff",_TORNADO,   "Tornado Huf",             "" },
   { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,20,56/e#s" }, 
@@ -1350,15 +1346,15 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_QCOMPRESS64:
         #if _WIN32
       { HINSTANCE hdll; int i;  
-	    char *qcomp = "./q_compress_ffi.dll";
-  	    if(hdll = LoadLibrary(qcomp)) {
+        char *qcomp = "./q_compress_ffi.dll";
+        if(hdll = LoadLibrary(qcomp)) {
           if(!(auto_compress_i32_   =   (fauto_compress_i32)GetProcAddress(hdll, "auto_compress_i32")))   die("auto_compress_i32 not found\n");
           if(!(auto_compress_i64_   =   (fauto_compress_i64)GetProcAddress(hdll, "auto_compress_i64")))   die("auto_compress_i64 not found\n");
-	      if(!(free_compressed_     =     (ffree_compressed)GetProcAddress(hdll, "free_compressed")))     die("free_compressed not found\n");
+          if(!(free_compressed_     =     (ffree_compressed)GetProcAddress(hdll, "free_compressed")))     die("free_compressed not found\n");
           if(!(auto_decompress_i32_ = (fauto_decompress_i32)GetProcAddress(hdll, "auto_decompress_i32"))) die("auto_decompress_i32 not found\n");
           if(!(auto_decompress_i64_ = (fauto_decompress_i64)GetProcAddress(hdll, "auto_decompress_i64"))) die("auto_decompress_i64 not found\n");
-	      if(!(free_i32_            =            (ffree_i32)GetProcAddress(hdll, "free_i32")))            die("free_i32 not found\n");
-	      if(!(free_i64_            =            (ffree_i64)GetProcAddress(hdll, "free_i64")))            die("free_i64 not found\n");
+          if(!(free_i32_            =            (ffree_i32)GetProcAddress(hdll, "free_i32")))            die("free_i32 not found\n");
+          if(!(free_i64_            =            (ffree_i64)GetProcAddress(hdll, "free_i64")))            die("free_i64 not found\n");
         } else fprintf(stderr,"q_compress_ffi.dll not found\n");
       } 
         #else
@@ -1367,11 +1363,11 @@ int codini(size_t insize, int codec, int lev, char *prm) {
         if(hdll) { 
           if(!(auto_compress_i32_   =   (fauto_compress_i32)dlsym(hdll, "auto_compress_i32")))   die("fauto_compress_i32 not found\n");
           if(!(auto_compress_i64_   =   (fauto_compress_i64)dlsym(hdll, "auto_compress_i64")))   die("fauto_compress_i64 not found\n");
-	      if(!(free_compressed_     =     (ffree_compressed)dlsym(hdll, "free_compressed")))     die("ffree_compressed not found\n");
+          if(!(free_compressed_     =     (ffree_compressed)dlsym(hdll, "free_compressed")))     die("ffree_compressed not found\n");
           if(!(auto_decompress_i32_ = (fauto_decompress_i32)dlsym(hdll, "auto_decompress_i32"))) die("auto_decompress_i32 not found\n");
           if(!(auto_decompress_i64_ = (fauto_decompress_i64)dlsym(hdll, "auto_decompress_i64"))) die("auto_decompress_i64 not found\n");
-	      if(!(free_i32_            =            (ffree_i32)dlsym(hdll, "free_i32")))            die("free_i32 not found\n");
-	      if(!(free_i64_            =            (ffree_i64)dlsym(hdll, "free_i64")))            die("free_i64 not found\n");
+          if(!(free_i32_            =            (ffree_i32)dlsym(hdll, "free_i32")))            die("free_i32 not found\n");
+          if(!(free_i64_            =            (ffree_i64)dlsym(hdll, "free_i64")))            die("free_i64 not found\n");
         } else fprintf(stderr,"qcompress shared library '%s' not found.'%s'\n", qcomp, dlerror());   
       }
       #endif 
@@ -1383,14 +1379,14 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       if(!OodleLZ_Compress_) 
         #if _WIN32
       { HINSTANCE hdll; int i;  
-	for(i = 9; i >= 4; i--) {
-	  sprintf(oodle, "oo2core_%d_win64.dll", i);
-	  if(hdll = LoadLibrary(oodle)) break;
+    for(i = 9; i >= 4; i--) {
+      sprintf(oodle, "oo2core_%d_win64.dll", i);
+      if(hdll = LoadLibrary(oodle)) break;
         }
-  	if(hdll) {
-	  if(!(OodleLZ_Compress_   = (fOodleLZ_Compress  )GetProcAddress(hdll, "OodleLZ_Compress"  ))) { printf("OodleLZ_Compress not found\n");   exit(-1); }
-	  if(!(OodleLZ_Decompress_ = (fOodleLZ_Decompress)GetProcAddress(hdll, "OodleLZ_Decompress"))) { printf("OodleLZ_Decompress not found\n"); exit(-1); }
-	  if(!(OodleLZ_CompressOptions_GetDefault_ = (fOodleLZ_CompressOptions_GetDefault)GetProcAddress(hdll, "OodleLZ_CompressOptions_GetDefault"))) { printf("OodleLZ_CompressOptions_GetDefault not found\n"); exit(-1); }
+    if(hdll) {
+      if(!(OodleLZ_Compress_   = (fOodleLZ_Compress  )GetProcAddress(hdll, "OodleLZ_Compress"  ))) { printf("OodleLZ_Compress not found\n");   exit(-1); }
+      if(!(OodleLZ_Decompress_ = (fOodleLZ_Decompress)GetProcAddress(hdll, "OodleLZ_Decompress"))) { printf("OodleLZ_Decompress not found\n"); exit(-1); }
+      if(!(OodleLZ_CompressOptions_GetDefault_ = (fOodleLZ_CompressOptions_GetDefault)GetProcAddress(hdll, "OodleLZ_CompressOptions_GetDefault"))) { printf("OodleLZ_CompressOptions_GetDefault not found\n"); exit(-1); }
         } else fprintf(stderr,"oo2core_9_win64.dll not found\n");
       } 
         #else
@@ -1404,10 +1400,10 @@ int codini(size_t insize, int codec, int lev, char *prm) {
         if(hdll) { 
           if(!(OodleLZ_Compress_   = (fOodleLZ_Compress  )dlsym(hdll, "OodleLZ_Compress"  ))) 
             die("OodleLZ_Compress not found\n");
-	  if(!(OodleLZ_Decompress_ = (fOodleLZ_Decompress)dlsym(hdll, "OodleLZ_Decompress"))) 
-	    die("OodleLZ_Decompress not found\n");
-	  if(!(OodleLZ_CompressOptions_GetDefault_ = (fOodleLZ_CompressOptions_GetDefault)dlsym(hdll, "OodleLZ_CompressOptions_GetDefault")))  
-	    die("OodleLZ_CompressOptions_GetDefault not found\n");
+      if(!(OodleLZ_Decompress_ = (fOodleLZ_Decompress)dlsym(hdll, "OodleLZ_Decompress"))) 
+        die("OodleLZ_Decompress not found\n");
+      if(!(OodleLZ_CompressOptions_GetDefault_ = (fOodleLZ_CompressOptions_GetDefault)dlsym(hdll, "OodleLZ_CompressOptions_GetDefault")))  
+        die("OodleLZ_CompressOptions_GetDefault not found\n");
         } else fprintf(stderr,"oodle shared library '%s' not found.'%s'\n", oodle, dlerror());   
       }
       #endif 
@@ -1446,6 +1442,9 @@ int codini(size_t insize, int codec, int lev, char *prm) {
          slz_prepare_dist_table();
       #endif
 
+      #if _SSERC
+    case P_SSERC:   sserangecoder::vrange_init(); break;
+      #endif
       #if _FSEHUF
 //    case P_FSEH: workmemsize = max(4096*sizeof(unsigned), workmemsize); break;
       #endif
@@ -1588,20 +1587,20 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _BZIP3
     case P_BZIP3:    { 
-	  #define BZIP3_SIZE 511*MB
-	  struct bz3_state *st = bz3_new(BZIP3_SIZE);
-	  unsigned char *ip,*op = out;
-	  for(ip = in; ip < in+inlen;) { 
-		unsigned iplen = (in+inlen) - ip; iplen = min(iplen, BZIP3_SIZE);
-		op+=4; memcpy(op, ip, iplen);
-		int rc = bz3_encode_block(st, op, iplen);
-		if(rc == -1) die("bzip3 encode failed");
-		ctou32(op-4) = rc; op += rc;
-		ip += iplen;		
-	  }
-	  bz3_free(st);
-	  return op - out;
-	}
+      #define BZIP3_SIZE 511*MB
+      struct bz3_state *st = bz3_new(BZIP3_SIZE);
+      unsigned char *ip,*op = out;
+      for(ip = in; ip < in+inlen;) { 
+        unsigned iplen = (in+inlen) - ip; iplen = min(iplen, BZIP3_SIZE);
+        op+=4; memcpy(op, ip, iplen);
+        int rc = bz3_encode_block(st, op, iplen);
+        if(rc == -1) die("bzip3 encode failed");
+        ctou32(op-4) = rc; op += rc;
+        ip += iplen;        
+      }
+      bz3_free(st);
+      return op - out;
+    }
       #endif
 
       #if _CHAMELEON
@@ -1895,15 +1894,15 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_OODLE: {
       int nodll = strchr(prm,'c')?1:0, level = abs(lev), comp = level/10; level = (level>99?level-100:level)%10; if(lev<0) level = -level;    
       if(!nodll) {
-	OodleLZ_CompressOptions copts = *OodleLZ_CompressOptions_GetDefault_(comp, level);
+    OodleLZ_CompressOptions copts = *OodleLZ_CompressOptions_GetDefault_(comp, level);
         return OodleLZ_Compress_?OodleLZ_Compress_(comp, in, inlen, out, level, &copts, 0, 0, 0, 0):0;
       } 
         #if _OODLESRC
       else {
-	 OodleLZ_CompressOptions copts = *OodleLZ_CompressOptions_GetDefault(comp, level);
+     OodleLZ_CompressOptions copts = *OodleLZ_CompressOptions_GetDefault(comp, level);
         return OodleLZ_Compress(comp, in, inlen, out, level, &copts, 0, 0, 0, 0);
       }
-	#endif
+    #endif
     }
       #endif
 
@@ -2002,18 +2001,18 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _ZSTD
     case P_ZSTD: { 
-	  ZSTD_CStream *z = ZSTD_createCStream(); if(!z) return -1;
+      ZSTD_CStream *z = ZSTD_createCStream(); if(!z) return -1;
       if(dsize) {
-	    int windowLog = bsr32(dsize)-powof2(dsize); 
-		ZSTD_CCtx_setParameter(z, ZSTD_c_enableLongDistanceMatching, 1); 
-	    ZSTD_CCtx_setParameter(z, ZSTD_c_windowLog, windowLog);
+        int windowLog = bsr32(dsize)-powof2(dsize); 
+        ZSTD_CCtx_setParameter(z, ZSTD_c_enableLongDistanceMatching, 1); 
+        ZSTD_CCtx_setParameter(z, ZSTD_c_windowLog, windowLog);
       }
-	  ZSTD_initCStream(z, lev);
-	  ZSTD_inBuffer  ip = { in, (size_t)inlen,   0 };
-	  ZSTD_outBuffer op = { out,(size_t)outsize, 0 };
-	  ZSTD_compressStream(z, &op, &ip);
-	  ZSTD_endStream(z, &op);
-	  ZSTD_freeCStream(z);
+      ZSTD_initCStream(z, lev);
+      ZSTD_inBuffer  ip = { in, (size_t)inlen,   0 };
+      ZSTD_outBuffer op = { out,(size_t)outsize, 0 };
+      ZSTD_compressStream(z, &op, &ip);
+      ZSTD_endStream(z, &op);
+      ZSTD_freeCStream(z);
       return op.pos;
     }
       #endif
@@ -2038,8 +2037,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _RLE8
-	case P_RLE8X:
-	  switch(lev) {
+    case P_RLE8X:
+      switch(lev) {
         case  8 : return strchr(prm,'s')?rle8_extreme_single_compress(in, inlen, out, outlen):rle8_extreme_multi_compress( in, inlen, out, outsize);
         case 16 : return rle16_extreme_compress(in, inlen, out, outsize);
         case 24 : return rle24_extreme_compress(in, inlen, out, outsize);
@@ -2047,20 +2046,20 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         case 48 : return rle48_extreme_compress(in, inlen, out, outsize);
         case 64 : return rle64_extreme_compress(in, inlen, out, outsize);
       }
-	  break;
-	case P_RLE8SH: return rle8_sh_compress(in, inlen, out, outsize);
-	case P_RLE8MMTF:
-	  switch(lev) {
-	    case 128: return rle_mmtf128_encode(in, inlen, out, outsize);
-	    case 256: return rle_mmtf128_encode(in, inlen, out, outsize);
-	  }
-	  break;
-	case P_RLE8XMMTF:
-	  switch(lev) {
-	    case 128: return rle8_extreme_mmtf128_compress(in, inlen, out, outsize);
-	    case 256: return rle8_extreme_mmtf128_compress(in, inlen, out, outsize); // no avx2
-	  }
-	  break;
+      break;
+    case P_RLE8SH: return rle8_sh_compress(in, inlen, out, outsize);
+    case P_RLE8MMTF:
+      switch(lev) {
+        case 128: return rle_mmtf128_encode(in, inlen, out, outsize);
+        case 256: return rle_mmtf128_encode(in, inlen, out, outsize);
+      }
+      break;
+    case P_RLE8XMMTF:
+      switch(lev) {
+        case 128: return rle8_extreme_mmtf128_compress(in, inlen, out, outsize);
+        case 256: return rle8_extreme_mmtf128_compress(in, inlen, out, outsize); // no avx2
+      }
+      break;
     case P_RLE8 : return strchr(prm,'s')?rle8_compress_only_max_frequency(in, inlen, out, outsize):rle8_compress(in, inlen, out, outsize);
     case P_RLE8U: return strchr(prm,'s')?rle8_ultra_compress_only_max_frequency(in, inlen, out, outsize):rle8_ultra_compress(in, inlen, out, outsize);
     case P_RLE8M: { char *q; int subSections = 0; if(q = strchr(prm,'S')) subSections = atoi(q+(q[1] == '='?2:1)); return rle8m_compress(subSections, in, inlen, out, outsize); }
@@ -2190,8 +2189,8 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _FSE
     case P_FSE:     { size_t o = FSE_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); o = inlen; } return o; }
-	  #endif
-	  
+      #endif
+      
       #if _FSEHUF
     case P_FSEH:    { size_t o = HUF_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); o = inlen; } return o;    }
       #endif
@@ -2223,7 +2222,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _HTSCODECS
      case P_ARITHDYN: { unsigned outlen = outsize; arith_compress_to(  in, inlen, out, &outlen, lev); return outlen; }
-//     case P_RANS32x16_128: { unsigned outlen = outsize; return rans_compress_O0_32x16_sse4(  in, inlen, out, &outlen) ? outlen : 0;}
+     //case P_RANS32x16_128: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16(  in, inlen, out, &outlen):     rans_compress_O0_32x16_sse4(  in, inlen, out, &outlen)) ? outlen : 0;}
      case P_RANS32x16_256: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16_avx2(  in, inlen, out, &outlen):rans_compress_O0_32x16_avx2(  in, inlen, out, &outlen)) ? outlen : 0;}
      case P_RANS32x16_512: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16_avx512(in, inlen, out, &outlen):rans_compress_O0_32x16_avx512(in, inlen, out, &outlen)) ? outlen : 0;}
       #endif
@@ -2246,7 +2245,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _SSERC
-    case P_SSERC: return ssercenc(in, inlen, out); break;
+    case P_SSERC: return ssercenc(in, inlen, out);
       #endif
 
       #if _SUBOTIN
@@ -2259,12 +2258,12 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _TURBORC
     case P_TURBORC: { //int ec = 0; 
-	  char *q;
-	  unsigned bwtlev = 9, xprep8=0, forcelzp=0, verbose=0, xsort=0, itmax=0, lenmin=1, nutf8=0, z=0;
-	  if(q = strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1));  
-	  if(q = strchr(prm,'m')) lenmin = atoi(q+(q[1]=='='?2:1));  
-	  if(q = strchr(prm,'U')) nutf8  = 1;
- 	  if(q = strchr(prm,'s')) z = 2; else if(q = strchr(prm,'u')) z = 4;
+      char *q;
+      unsigned bwtlev = 9, xprep8=0, forcelzp=0, verbose=0, xsort=0, itmax=0, lenmin=1, nutf8=0, z=0;
+      if(q = strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1));  
+      if(q = strchr(prm,'m')) lenmin = atoi(q+(q[1]=='='?2:1));  
+      if(q = strchr(prm,'U')) nutf8  = 1;
+      if(q = strchr(prm,'s')) z = 2; else if(q = strchr(prm,'u')) z = 4;
 
       #define bwtflag(z) (z==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | forcelzp | (verbose?BWT_VERBOSE:0) | (nutf8?BWT_NUTF8:0) | xsort <<14 | itmax <<10 | lenmin
       switch(lev) {
@@ -2272,22 +2271,22 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         case  2: return rccsenc(   in, inlen, out); 
         case  3: return rcc2senc(  in, inlen, out);
         case  4: return rcxsenc(   in, inlen, out);
-	case  5: return rcx2senc(   in, inlen, out);
-	case  6: return z==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
-	case  7: return z==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
-	case  8: rcc2senc32(in,inlen,out);
-	case  9: return rcmsenc(    in, inlen, out);
-	case 10: return rcm2senc(   in, inlen, out);
-	case 11: return rcmrsenc(   in, inlen, out);
-	case 12: return rcmrrsenc(  in, inlen, out);
+    case  5: return rcx2senc(   in, inlen, out);
+    case  6: return z==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
+    case  7: return z==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
+    case  8: rcc2senc32(in,inlen,out);
+    case  9: return rcmsenc(    in, inlen, out);
+    case 10: return rcm2senc(   in, inlen, out);
+    case 11: return rcmrsenc(   in, inlen, out);
+    case 12: return rcmrrsenc(  in, inlen, out);
         case 13: return z==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
-	case 14: return z==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
-	case 17: return rcu3senc(   in, inlen, out);
+    case 14: return z==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
+    case 17: return rcu3senc(   in, inlen, out);
         case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
         case 56: return anscdfenc(    in, inlen, out);
-	default: return 0;
-	//case 21: return utf8enc( in, inlen, out, bwtflag(1)|BWT_COPY|BWT_RATIO);
-	//case 90: return lzpenc( in, inlen, out, 1, 0);
+    default: return 0;
+    //case 21: return utf8enc( in, inlen, out, bwtflag(1)|BWT_COPY|BWT_RATIO);
+    //case 90: return lzpenc( in, inlen, out, 1, 0);
       }
     }
       #endif
@@ -2393,18 +2392,18 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if _BZIP3
     case P_BZIP3: { //size_t outsize = outlen; return bz3_decompress(in, out, inlen, &outsize)==BZ3_OK?outlen:-1; 
-	    struct bz3_state *st = bz3_new(BZIP3_SIZE);
-		unsigned char *ip = in, *op;
-		for(op = out; op < out+outlen;) { 
-		  unsigned iplen = ctou32(ip), oplen = (out+outlen) - op; oplen = min(oplen, BZIP3_SIZE);
-		  memcpy(op, ip+4, iplen);
-		  if(bz3_decode_block(st, op, iplen, oplen) == -1) die("bzip3 decode failed");
-		  op += oplen;	
-          ip += 4+iplen;		  
-		}
-		bz3_free(st);
-		return op-out;
-	  }
+        struct bz3_state *st = bz3_new(BZIP3_SIZE);
+        unsigned char *ip = in, *op;
+        for(op = out; op < out+outlen;) { 
+          unsigned iplen = ctou32(ip), oplen = (out+outlen) - op; oplen = min(oplen, BZIP3_SIZE);
+          memcpy(op, ip+4, iplen);
+          if(bz3_decode_block(st, op, iplen, oplen) == -1) die("bzip3 decode failed");
+          op += oplen;  
+          ip += 4+iplen;          
+        }
+        bz3_free(st);
+        return op-out;
+      }
       #endif
 
       #if _CHAMELEON
@@ -2638,12 +2637,12 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
         int rc = OodleLZ_Decompress_?OodleLZ_Decompress_(in, inlen, out, outlen, 0,0,0,0,0,0,0,0,0,0):0;
         return rc;
       } 
-	#if _OODLESRC
+    #if _OODLESRC
       else {
         int rc = OodleLZ_Decompress(in, inlen, out, outlen, 0,0,0,0,0,0,0,0,0,0);
         return rc;
       }
-	#endif
+    #endif
     }
       #endif
 
@@ -2773,8 +2772,8 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if _RLE8
-	case P_RLE8X:
-	  switch(lev) {
+    case P_RLE8X:
+      switch(lev) {
         case  8 : return rle8_extreme_decompress(in, inlen, out, outlen);
         case 16 : return rle16_extreme_decompress(in, inlen, out, outlen);
         case 24 : return rle24_extreme_decompress(in, inlen, out, outlen);
@@ -2782,20 +2781,20 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
         case 48 : return rle48_extreme_decompress(in, inlen, out, outlen);
         case 64 : return rle64_extreme_decompress(in, inlen, out, outlen);
       }
-	  break;
-	case P_RLE8SH: return rle8_sh_decompress(in, inlen, out, outlen);
-	case P_RLE8MMTF:
-	  switch(lev) {
-	    case 128 : return rle_mmtf128_decode(in, inlen, out, outlen);
-	    case 256 : return rle_mmtf128_decode(in, inlen, out, outlen);
-	  }
-	  break;
-	case P_RLE8XMMTF:
-	  switch(lev) {
-	    case 128 : return rle8_extreme_mmtf128_decompress(in, inlen, out, outlen);
-	    case 256 : return rle8_extreme_mmtf128_decompress(in, inlen, out, outlen);
-	  }
-	  break;
+      break;
+    case P_RLE8SH: return rle8_sh_decompress(in, inlen, out, outlen);
+    case P_RLE8MMTF:
+      switch(lev) {
+        case 128 : return rle_mmtf128_decode(in, inlen, out, outlen);
+        case 256 : return rle_mmtf128_decode(in, inlen, out, outlen);
+      }
+      break;
+    case P_RLE8XMMTF:
+      switch(lev) {
+        case 128 : return rle8_extreme_mmtf128_decompress(in, inlen, out, outlen);
+        case 256 : return rle8_extreme_mmtf128_decompress(in, inlen, out, outlen);
+      }
+      break;
     case P_RLE8 : return rle8_decompress(in, inlen, out, outlen);
     case P_RLE8U: return rle8_ultra_decompress(in, inlen, out, outlen);
     case P_RLE8M: return rle8m_decompress(in, inlen, out, outlen);
@@ -2903,7 +2902,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #if _FSE
     case P_FSE:  if(inlen == outlen) memcpy(out, in, outlen); else if(inlen == 1) memset(out,in[0],outlen); else FSE_decompress(out, outlen, in, inlen); break;
       #endif
-	  
+      
       #if _FSEHUF
     case P_FSEH: if(inlen == outlen) memcpy(out, in, outlen); else if(inlen == 1) memset(out,in[0],outlen); else HUF_decompress(out, outlen, in, inlen); break;
       #endif
@@ -2918,7 +2917,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if _HTSCODECS
      case P_ARITHDYN: arith_uncompress_to(  in, inlen, out, &outlen); return outlen;
-//    case P_RANS32x16_128 : rans_uncompress_O0_32x16_sse4(  in, inlen, out, outlen); break;
+    //case P_RANS32x16_128 : lev?rans_uncompress_O0_32x16(       in, inlen, out, outlen):rans_uncompress_O0_32x16_sse4(  in, inlen, out, outlen); break;
     case P_RANS32x16_256 : lev?rans_uncompress_O1_32x16_avx2(  in, inlen, out, outlen):rans_uncompress_O0_32x16_avx2(  in, inlen, out, outlen); break;
     case P_RANS32x16_512 : lev?rans_uncompress_O1_32x16_avx512(in, inlen, out, outlen):rans_uncompress_O0_32x16_avx512(in, inlen, out, outlen); break;
       #endif
@@ -2980,11 +2979,11 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if _TURBORC
     case P_TURBORC: { //unsigned prm1 = 5,prm2 = 6; char *q; //if(q=strchr(prm,'r')) { prm1 = atoi(q+(q[1]=='='?2:1)); prm2 = prm1%10; prm1 = prm1/10; if(prm1>9)prm1=9;if(!prm1) prm1=1; if(prm2>9)prm2=9;if(!prm2) prm2=1; }
-	  unsigned bwtlev = 9,z=0;
-	  char *q;
-	  if(inlen >= outlen) { memcpy(out,in, outlen); return inlen; }
-	  if(q=strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1)); 
-	  if(q=strchr(prm,'s')) z=2;
+      unsigned bwtlev = 9,z=0;
+      char *q;
+      if(inlen >= outlen) { memcpy(out,in, outlen); return inlen; }
+      if(q=strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1)); 
+      if(q=strchr(prm,'s')) z=2;
       switch(lev) {
         case  1 : return rcsdec(    in, outlen, out);
         case  2 : return rccsdec(   in, outlen, out);
@@ -2997,16 +2996,16 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
         case  9 : return rcmsdec(   in, outlen, out);
         case 10 : return rcm2sdec(  in, outlen, out);
         case 11 : return rcmrsdec(  in, outlen, out);
-        case 12 : return rcmrrsdec( in, outlen, out);		
+        case 12 : return rcmrrsdec( in, outlen, out);       
         case 13 : return z==2?rcrlesdec16(in, outlen, out):rcrlesdec(in, outlen, out);
         case 14 : return z==2?rcrle1sdec16(in, outlen, out):rcrle1sdec(in, outlen, out);
-        case 17 : return rcu3sdec( in, outlen, out);		
+        case 17 : return rcu3sdec( in, outlen, out);        
         case 20 : return rcbwtdec( in, outlen, out, bwtlev, 0);
         case 56 : return anscdfdec(in, outlen, out);
-		default: return 0;
+        default: return 0;
         //case 21 : if(inlen==outlen) memcpy(out,in,outlen); else utf8dec( in, outlen, out); return outlen;
         //case 90 : if(inlen==outlen) memcpy(out,in,outlen); else lzpdec(  in, outlen, out, 1, 0); return outlen;
-      }	  
+      }   
     }
       #endif
 
