@@ -404,6 +404,11 @@ enum {
 #define _SSERC 0
 #endif
  P_SSERC,
+#ifndef _GANS
+#define _GANS 0
+#endif
+ P_GANSR,
+ P_GANSW,
 #ifndef _POLHF
 #define _POLHF 0
 #endif
@@ -856,21 +861,26 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
 }
   #endif
   //------------------------------------ Encoding -----------------------------------
+  #if _GANS
+#include "EC/rans.h"
+  #endif
+
   #if _SSERC
 #include "EC/sserangecoding/sserangecoder.h"
-
+static int ssercini;
 unsigned ssercenc(unsigned char *_in, unsigned inlen, unsigned char *_out) {
   sserangecoder::uint8_vec  in(inlen), out;
   sserangecoder::uint32_vec sym_freq(256);
-  memcpy(&in[0], _in, inlen);                 //sserangecoder::vrange_init();
+  memcpy(&in[0], _in, inlen);                 
+  if(!ssercini) sserangecoder::vrange_init(),ssercini++;
   
   for(uint32_t i = 0; i < inlen; i++) sym_freq[_in[i]]++;
   unsigned a = 256; while(a > 1 && !sym_freq[a-1]) a--;  
   sserangecoder::uint32_vec scaled_cum_prob(a+1);
   if(!sserangecoder::vrange_create_cum_probs(scaled_cum_prob, sym_freq)) return -1; 
 
-  unsigned char *op = _out;
-  *op++ = a - 1;  
+  unsigned char *op = _out; 
+  *op++ = a - 1; 
   for(int i = 0; i < a; i++) *(uint16_t *)op = scaled_cum_prob[i+1] - scaled_cum_prob[i], op +=2;  
 
   sserangecoder::vrange_encode(in, out, scaled_cum_prob); 
@@ -881,12 +891,13 @@ unsigned ssercenc(unsigned char *_in, unsigned inlen, unsigned char *_out) {
 
 unsigned ssercdec(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen) { 
   unsigned char *ip = in;
-  unsigned      a = 1 + (*ip++);                                                //sserangecoder::vrange_init();
+  unsigned      a = 1 + (*ip++);                                                
+  if(!ssercini) sserangecoder::vrange_init(),ssercini++;
+
   sserangecoder::uint32_vec scaled_cum_prob(a+1);
   
   unsigned cum = 0,i;
   for(i = 0; i < a; i++) scaled_cum_prob[i] = cum, cum += *(uint16_t *)ip, ip+=2; scaled_cum_prob[i] = cum;                                                      
-
   sserangecoder::uint32_vec dec_table(a);
   sserangecoder::vrange_init_table(a, scaled_cum_prob, dec_table);
   if(!sserangecoder::vrange_decode(ip, (in+inlen) - ip, out, outlen, &dec_table[0])) return -1;  //for(int i=0; i < 100; i++)  printf("%c", out[i]);
@@ -1209,6 +1220,8 @@ struct plugs plugs[] = {
   { P_FASTHF,       "FastHF",      _FASTHF,    "Fast HF",                 "" },
   { P_FASTARI,      "FastAri",     _FASTARI,   "FastAri",                 "" },
   { P_FASTAC,       "FastAC",      _FASTAC,    "Fast AC",                 "" },
+  { P_GANSR, 	    "rygrans",	   _GANS,      "Ryg rANS",                "", E_ANS },
+  { P_GANSW, 	    "rygranssse",  _GANS,      "Ryg rANS",                "", E_ANS },
   { P_JAC,          "arith_static",_JAC,       "Range Coder/J.Bonfield",  "", E_ANS},
   { P_FQZ0,         "fqz0",        _FQZ0,      "FQZ/PPMD Range Coder",    ""},
   { P_MARLIN,       "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
@@ -1218,7 +1231,7 @@ struct plugs plugs[] = {
   { P_PPMDEC,       "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
 
   { P_ARITHDYN,     "arith_dyn",   _HTSCODECS, "htscodecs",               "0,1"},
-//{ P_RANS32x16_128,"rans32sse",   _HTSCODECS, "htscodecs",               "0", E_ANS},
+  { P_RANS32x16_128,"rans32sse",   _HTSCODECS, "htscodecs",               "0", E_ANS},
   { P_RANS32x16_256,"rans32avx2",  _HTSCODECS, "htscodecs",               "0,1", E_ANS},
   { P_RANS32x16_512,"rans32avx512",_HTSCODECS, "htscodecs",               "0,1", E_ANS},
   { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",             "" },
@@ -1443,7 +1456,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #endif
 
       #if _SSERC
-    case P_SSERC:   sserangecoder::vrange_init(); break;
+    case P_SSERC: if(!ssercini) sserangecoder::vrange_init(),ssercini++; break;
       #endif
       #if _FSEHUF
 //    case P_FSEH: workmemsize = max(4096*sizeof(unsigned), workmemsize); break;
@@ -2195,6 +2208,12 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_FSEH:    { size_t o = HUF_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); o = inlen; } return o;    }
       #endif
 
+	  #if _GANS
+        #ifdef __x86_64__
+    case P_GANSR:   return ransrcompress(in, inlen, out);
+    case P_GANSW:   return ranswcompress(in, inlen, out);
+        #endif
+      #endif
       #if _MARLIN
     case P_MARLIN:  {
       double hist[256]={}; Marlin *dict;
@@ -2222,7 +2241,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
 
       #if _HTSCODECS
      case P_ARITHDYN: { unsigned outlen = outsize; arith_compress_to(  in, inlen, out, &outlen, lev); return outlen; }
-     //case P_RANS32x16_128: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16(  in, inlen, out, &outlen):     rans_compress_O0_32x16_sse4(  in, inlen, out, &outlen)) ? outlen : 0;}
+     case P_RANS32x16_128: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16(  in, inlen, out, &outlen):     rans_compress_O0_32x16(  in, inlen, out, &outlen)) ? outlen : 0;}
      case P_RANS32x16_256: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16_avx2(  in, inlen, out, &outlen):rans_compress_O0_32x16_avx2(  in, inlen, out, &outlen)) ? outlen : 0;}
      case P_RANS32x16_512: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16_avx512(in, inlen, out, &outlen):rans_compress_O0_32x16_avx512(in, inlen, out, &outlen)) ? outlen : 0;}
       #endif
@@ -2917,7 +2936,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
 
       #if _HTSCODECS
      case P_ARITHDYN: arith_uncompress_to(  in, inlen, out, &outlen); return outlen;
-    //case P_RANS32x16_128 : lev?rans_uncompress_O0_32x16(       in, inlen, out, outlen):rans_uncompress_O0_32x16_sse4(  in, inlen, out, outlen); break;
+    case P_RANS32x16_128 : lev?rans_uncompress_O0_32x16(       in, inlen, out, outlen):rans_uncompress_O0_32x16_sse4(  in, inlen, out, outlen); break;
     case P_RANS32x16_256 : lev?rans_uncompress_O1_32x16_avx2(  in, inlen, out, outlen):rans_uncompress_O0_32x16_avx2(  in, inlen, out, outlen); break;
     case P_RANS32x16_512 : lev?rans_uncompress_O1_32x16_avx512(in, inlen, out, outlen):rans_uncompress_O0_32x16_avx512(in, inlen, out, outlen); break;
       #endif
@@ -2964,6 +2983,13 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_SHRCV:   vecrcdec(in, outlen, out); break;
     case P_SHRC:    rcshd(in, out, outlen); break;
       #endif
+
+	  #if _GANS
+        #ifdef __x86_64__
+    case P_GANSR:   ransrdecompress(in, outlen, out); return outlen;
+    case P_GANSW:   ranswdecompress(in, outlen, out); return outlen;
+        #endif
+	  #endif
 
       #if _SSERC
     case P_SSERC: return ssercdec(in, inlen, out, outlen);
