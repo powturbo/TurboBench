@@ -2298,11 +2298,11 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case 10: return rcm2senc(   in, inlen, out);
     case 11: return rcmrsenc(   in, inlen, out);
     case 12: return rcmrrsenc(  in, inlen, out);
-        case 13: return z==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
+    case 13: return z==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
     case 14: return z==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
     case 17: return rcu3senc(   in, inlen, out);
-        case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
-        case 56: return anscdfenc(    in, inlen, out);
+    case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
+    case 56: return anscdfenc(    in, inlen, out);
     default: return 0;
     //case 21: return utf8enc( in, inlen, out, bwtflag(1)|BWT_COPY|BWT_RATIO);
     //case 90: return lzpenc( in, inlen, out, 1, 0);
