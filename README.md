@@ -212,8 +212,8 @@ Compressors with versions 16.08.2016 <br>
 
 ###### bitwise range coder
  - [TurboRC-Range Coder](https://github.com/powturbo/Turbo-Range-Coder)
- - [Bitwise RC v2010](http://encode.ru/threads/1153-Simple-binary-rangecoder-demo)
- - [Bitwise vector RC v2012](http://encode.ru/threads/1200-Vectorized-rangecoder)
+ - [Bitwise RC v2010](http://encode.su/threads/1153-Simple-binary-rangecoder-demo)
+ - [Bitwise vector RC v2012](http://encode.su/threads/1200-Vectorized-rangecoder)
  - [AOMedia AV1 entropy coder](https://aomedia.googlesource.com/aom/+/master/aom_dsp/)
  - [Daala entropy coder](https://github.com/xiph/daala)
  - [FastAri v15-10](https://github.com/davidcatt/FastARI)
@@ -223,8 +223,8 @@ Compressors with versions 16.08.2016 <br>
  - [subotin range coder v2000](http://ezcodesample.com/ralpha/Subbotin.txt)
  - [Fast AC v2006](http://www.cipr.rpi.edu/research/SPIHT/)
  - [htscodecs Range Coder](https://github.com/samtools/htscodecs)
- - [FQZ/PPMD Range Coder v15-03](http://encode.ru/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
- - [PPMD Range Coder v15-03](http://encode.ru/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
+ - [FQZ/PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
+ - [PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
  - [sserangecoding](https://github.com/richgel999/sserangecoding)
  
 ###### ABS: Asymmetric binary systems 
@@ -260,5 +260,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 12 MAY 2023
+Last update: 22 MAY 2023
 
