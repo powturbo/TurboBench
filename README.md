@@ -172,6 +172,7 @@ Compressors with versions 16.08.2016 <br>
  - [LibSLZ](http://1wt.eu/projects/libslz/)
  - [Lz4](https://github.com/Cyan4973/lz4) 
  - [Lz4ultra](https://github.com/emmanuel-marty/lz4ultra)
+ - [lzjody](https://github.com/jbruchon/lzjody) :new:2023.06
  - [lizard](https://github.com/inikep/lz5) 
  - [Lzfse](https://github.com/lzfse/lzfse)
  - [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) 
@@ -185,7 +186,7 @@ Compressors with versions 16.08.2016 <br>
  - [Miniz](https://github.com/richgel999/miniz) 
  - [ms-compress](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi Washigan](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188)
- - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux)
+ - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux) :new:2023.05
  - [Quantile Compression](https://github.com/mwlon/quantile-compression)
  - [Pithy](https://github.com/johnezang/pithy) 
  - [Quicklz](http://www.quicklz.com) 
@@ -225,7 +226,7 @@ Compressors with versions 16.08.2016 <br>
  - [htscodecs Range Coder](https://github.com/samtools/htscodecs)
  - [FQZ/PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
  - [PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
- - [sserangecoding](https://github.com/richgel999/sserangecoding)
+ - [sserangecoding](https://github.com/richgel999/sserangecoding) :new:2023.05
  
 ###### ABS: Asymmetric binary systems 
  - [Fpaqc:Asymmetric Binary Coder v07-12](http://www.mattmahoney.net/dc/)
@@ -235,7 +236,7 @@ Compressors with versions 16.08.2016 <br>
  - [TurborANS](https://sites.google.com/site/powturbo)
  - [Finite State Coder v15-05](https://github.com/skal65535/fsc)
  - [Finite State Entropy v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
- - [htscodecs rANS](https://github.com/samtools/htscodecs)
+ - [htscodecs rANS](https://github.com/samtools/htscodecs) :new:2023.05
 
 ###### Huffman Coding
  - [TurboHF-Huffmann v1.3](https://sites.google.com/site/powturbo)
@@ -252,6 +253,7 @@ Compressors with versions 16.08.2016 <br>
 
 #### Encoding:
  - [TurboRLE](https://github.com/powturbo/TurboRLE) Turbo Run Length Encoding
+ - [Hypersonic-rle-kit](https://github.com/rainerzufalldererste/hypersonic-rle-kit) :new:2023.06
  - [TurboBase64](https://github.com/powturbo/TurboBase64) Turbo Base64 Encoding/Decoding 
  - [fastbase64](https://github.com/lemire/fastbase64) Base64 Encoding 
  - [base64](https://github.com/aklomp/base64) Fast Base64 stream encoder/decoder 
@@ -260,5 +262,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 22 MAY 2023
+Last update: 07 JUN 2023
 
