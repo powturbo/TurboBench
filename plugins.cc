@@ -245,6 +245,12 @@ enum {
 #define _SMALLZ4 0
 #endif
  P_SMALLZ4,
+ 
+#ifndef _TCOBS
+#define _TCOBS 0
+#endif
+ P_TCOBS,
+
 #ifndef _TORNADO
 #define _TORNADO 0
 #endif
@@ -311,16 +317,16 @@ enum {
 #endif
  P_RLEM,
  
-#ifndef _RLE8
-#define _RLE8 0
+#ifndef _HRLE
+#define _HRLE 0
 #endif
- P_RLE8X,
- P_RLE8SH,
- P_RLE8MMTF,
- P_RLE8XMMTF,
- P_RLE8,
- P_RLE8M,
- P_RLE8U,
+ P_HRLE,
+ P_HRLESH,
+ P_HRLEMMTF,
+ P_HRLEXMMTF,
+ P_HRLELE,
+ P_HRLEM,
+ P_HRLEU,
   //---------- Transform ------------------
 
 #ifndef _BRC
@@ -704,6 +710,10 @@ static ffree_i64 free_i64_;
 #include "snappy/snappy.h"
   #endif
 
+  #if _TCOBS
+#include "tcobs/Cv2/tcobs.h"
+  #endif
+
   #if _TORNADO
 #include "tornado_/tormem.h"
   #endif
@@ -942,8 +952,8 @@ unsigned ssercdec(unsigned char *in, unsigned inlen, unsigned char *out, unsigne
 int neon_base64_decode(char *out, const char *src, size_t srclen);
   #endif
   
-  #if _RLE8
-#include "rle8/src/rle8.h"
+  #if _HRLE
+#include "hypersonic-rle-kit/src/rle.h"
   #endif
   
   #if __cplusplus
@@ -1156,7 +1166,7 @@ struct plugs plugs[] = {
   { P_LIBLZG,     "lzg",         _LIBLZG,    "LibLzg",                  "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
   { P_ZPAQ,       "zpaq",        _ZPAQ,      "Libzpaq",                 "0,1,2,3,4,5" },
   { P_SLZ,        "slz",         _SLZ,       "libslz",                  "0,1,2,3,4,5,6,7,8,9" },
-  { P_LZ4,        "lz4",         _LZ4,       "Lz4",                     "0,1,9,10,11,12,16/MfsB#" },
+  { P_LZ4,        "lz4",         _LZ4,       "Lz4",                     "0,1,2,3,4,5,6,7,8,9,10,11,12,16/MfsB#" },
   { P_LZ4ULTRA,   "lz4ultra",    _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
   { P_LIZARD,     "lizard",      _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
   { P_LZFSE,      "lzfse",       _LZFSE,     "lzfse",                   "" },  
@@ -1192,6 +1202,7 @@ struct plugs plugs[] = {
   { P_SNAPPY,     "snappy",      _SNAPPY,    "Snappy",                  ""  },
   { P_SNAPPY_C,   "snappy_c",    _SNAPPY_C,  "Snappy-c",                "" },
   { P_SMALLZ4,    "smallz4",     _SMALLZ4,   "SmalLz4",                 "6,7,8,9,10,11,12/z" },
+  { P_TCOBS,      "tcobs",       _TCOBS,     "tcobs",                   "" },
   { P_TORNADO,    "tornado",     _TORNADO,   "Tornado",                 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
   { P_UNISHOX2,   "unishox2",    _UNISHOX2,  "unishox2",                "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
   { P_UNISHOX3,   "unishox3",    _UNISHOX3,  "unishox3",                "" },
@@ -1238,7 +1249,7 @@ struct plugs plugs[] = {
   { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",           "", E_ANS },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",              "" },
   { P_TORNADOHF,    "tornado_huff",_TORNADO,   "Tornado Huf",             "" },
-  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,20,56,64/e#s" }, 
+  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,20,56/e#s" }, 
   { P_ZLIBH,        "zlibh",       _ZLIB,      "zlib Huffmann",           "8,9,10,11,12,13,14,15,16,32" },
   { P_ZRLE,         "zlibrle",     _ZLIB,      "zlib rle",                "" },
   //---- Encoding ------
@@ -1246,13 +1257,13 @@ struct plugs plugs[] = {
   { P_RLET,         "trle",        _TURBORLE,  "TurboRLE",                "" },
   { P_RLEM,         "mrle",        _MRLE,      "Mespostine RLE",          "" },
 
-  { P_RLE8X,        "rle8x",       _RLE8,      "8 bit RLE",               "8,16,24,32,48,64/s:single" },
-  { P_RLE8SH,       "rle8sh",      _RLE8,      "8 bit RLE",               "8" },
-  { P_RLE8MMTF,     "rle8mmtf",    _RLE8,      "8 bit RLE",               "128,256" },
-  { P_RLE8XMMTF,    "rle8xmmtf",   _RLE8,      "8 bit RLE",               "128,256" },
-  { P_RLE8,         "rle8",        _RLE8,      "8 bit RLE",               "8/s" },
-  { P_RLE8M,        "rle8m",       _RLE8,      "8 bit RLE",               "8/S#:subsection" },
-  { P_RLE8U,        "rle8u",       _RLE8,      "8 bit RLE",               "8/s:single)" },
+  { P_HRLELE,       "hrlele",      _HRLE,      "HRLE rle8_low_entropy",   "8" },
+  { P_HRLEM,        "hrlem",       _HRLE,      "HRLE rle8m",              "8/S#:subsection" },  
+  { P_HRLE,         "hrle",        _HRLE,      "HRLE rle8_single/rle8_multi", "8,16,24,32,48,64/s:single" },
+  { P_HRLESH,       "hrlesh",      _HRLE,      "HRLE rle8_sh",             "8" },
+  { P_HRLEMMTF,     "hrlemmtf",    _HRLE,      "HRLE rle8_mmtf128",        "128" },
+  /*{ P_HRLEXMMTF,    "hrlexmmtf",   _HRLE,      "8 bit RLE",               "128,256" },
+  { P_HRLEU,        "hrleu",       _HRLE,      "8 bit RLE",               "8/s:single)" },*/
  //----- Transform -----
   { P_DIVBWT,       "divbwt",      _DIVBWT,    "bwt libdivsufsort","" },
   { P_LIBBSCBWT,    "bscbwt",      _LIBBSC,    "bwt libbsc",              "" },
@@ -1447,7 +1458,8 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #endif
 
       #if _LIBBSC
-    case P_LIBBSC: case P_LIBBSCC: bsc_init(LIBBSC_FEATURE_FASTMODE); bsc_st_init(LIBBSC_FEATURE_FASTMODE); break;
+    #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING)	  
+    case P_LIBBSC: case P_LIBBSCC: bsc_init(BSC_MODE); bsc_st_init(BSC_MODE); break;
       #endif
 
       #if _SLZ
@@ -1949,6 +1961,10 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_SNAPPY_C:   { size_t outlen=outsize; int rc = snappy_compress(&env, (const char *)in, inlen, (char *)out, &outlen); return outlen;}
       #endif
 
+      #if _TCOBS
+    case P_TCOBS:     return TCOBSEncode( out, in, inlen);
+      #endif
+
       #if _TORNADO
     case P_TORNADO:   return torcompress(lev, in, out, inlen);
       #endif
@@ -2049,33 +2065,35 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_RLEM:  return mrlec(in, inlen, out);
       #endif
 
-      #if _RLE8
-    case P_RLE8X:
+      #if _HRLE
+    case P_HRLELE : return rle8_low_entropy_compress(in, inlen, out, outsize);
+    case P_HRLEM: { char *q; int subSections = 0; if(q = strchr(prm,'S')) subSections = atoi(q+(q[1] == '='?2:1)); return rle8m_compress(subSections, in, inlen, out, outsize); }
+      
+    case P_HRLE:
       switch(lev) {
-        case  8 : return strchr(prm,'s')?rle8_extreme_single_compress(in, inlen, out, outlen):rle8_extreme_multi_compress( in, inlen, out, outsize);
-        case 16 : return rle16_extreme_compress(in, inlen, out, outsize);
-        case 24 : return rle24_extreme_compress(in, inlen, out, outsize);
-        case 32 : return rle32_extreme_compress(in, inlen, out, outsize);
-        case 48 : return rle48_extreme_compress(in, inlen, out, outsize);
-        case 64 : return rle64_extreme_compress(in, inlen, out, outsize);
+        case  8 : return strchr(prm,'s')?rle8_single_compress(in, inlen, out, outlen):rle8_multi_compress( in, inlen, out, outsize);
+        case 16 : return rle16_sym_compress(in, inlen, out, outsize);
+        case 24 : return rle24_sym_compress(in, inlen, out, outsize);
+        case 32 : return rle32_sym_compress(in, inlen, out, outsize);
+        case 48 : return rle48_sym_compress(in, inlen, out, outsize);
+        case 64 : return rle64_sym_compress(in, inlen, out, outsize);
       }
       break;
-    case P_RLE8SH: return rle8_sh_compress(in, inlen, out, outsize);
-    case P_RLE8MMTF:
+	  
+    case P_HRLESH: return rle8_sh_compress(in, inlen, out, outsize);
+    case P_HRLEMMTF:
       switch(lev) {
-        case 128: return rle_mmtf128_encode(in, inlen, out, outsize);
-        case 256: return rle_mmtf128_encode(in, inlen, out, outsize);
+        case 128: return rle8_mmtf128_compress(in, inlen, out, outsize);
+        //case 256: return rle8_mmtf256_compress(in, inlen, out, outsize);
       }
       break;
-    case P_RLE8XMMTF:
+    /*case P_HRLEXMMTF:
       switch(lev) {
         case 128: return rle8_extreme_mmtf128_compress(in, inlen, out, outsize);
         case 256: return rle8_extreme_mmtf128_compress(in, inlen, out, outsize); // no avx2
       }
       break;
-    case P_RLE8 : return strchr(prm,'s')?rle8_compress_only_max_frequency(in, inlen, out, outsize):rle8_compress(in, inlen, out, outsize);
-    case P_RLE8U: return strchr(prm,'s')?rle8_ultra_compress_only_max_frequency(in, inlen, out, outsize):rle8_ultra_compress(in, inlen, out, outsize);
-    case P_RLE8M: { char *q; int subSections = 0; if(q = strchr(prm,'S')) subSections = atoi(q+(q[1] == '='?2:1)); return rle8m_compress(subSections, in, inlen, out, outsize); }
+    case P_HRLEU: return strchr(prm,'s')?rle8_low_entropy_compress_only_max_frequency(in, inlen, out, outsize):rle8_ultra_compress(in, inlen, out, outsize);*/
       #endif
 
       #if _B64
@@ -2290,21 +2308,20 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
         case  2: return rccsenc(   in, inlen, out); 
         case  3: return rcc2senc(  in, inlen, out);
         case  4: return rcxsenc(   in, inlen, out);
-        case  5: return rcx2senc(   in, inlen, out);
-        case  6: return z==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
-        case  7: return z==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
-        case  8: rcc2senc32(in,inlen,out);
-        case  9: return rcmsenc(    in, inlen, out);
-        case 10: return rcm2senc(   in, inlen, out);
-        case 11: return rcmrsenc(   in, inlen, out);
-        case 12: return rcmrrsenc(  in, inlen, out);
+    case  5: return rcx2senc(   in, inlen, out);
+    case  6: return z==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
+    case  7: return z==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
+    case  8: rcc2senc32(in,inlen,out);
+    case  9: return rcmsenc(    in, inlen, out);
+    case 10: return rcm2senc(   in, inlen, out);
+    case 11: return rcmrsenc(   in, inlen, out);
+    case 12: return rcmrrsenc(  in, inlen, out);
         case 13: return z==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
-        case 14: return z==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
-        case 17: return rcu3senc(   in, inlen, out);
-        case 20: return rcbwtenc(   in, inlen, out, bwtlev, 0, bwtflag(1));
-        case 56: return anscdfenc(  in, inlen, out);
-        case 64: return anscdf1enc( in, inlen, out);
-        default: return 0;
+    case 14: return z==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
+    case 17: return rcu3senc(   in, inlen, out);
+        case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
+        case 56: return anscdfenc(    in, inlen, out);
+    default: return 0;
     //case 21: return utf8enc( in, inlen, out, bwtflag(1)|BWT_COPY|BWT_RATIO);
     //case 90: return lzpenc( in, inlen, out, 1, 0);
       }
@@ -2539,7 +2556,13 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       #endif
 
       #if _LZJODY
-    case P_LZJODY : return lzjody_decompress(in, out, outlen, 0);
+    case P_LZJODY : {  
+	  unsigned options = *in & 0xc0, l = in[1],rc; l |= ((*in & 0x1f) << 8);
+	  if(l > (LZJODY_BSIZE + 4)) die("lzjody decompression header error\n" );
+      if (options & O_NOCOMPRESS) { memcpy(out, in, outlen); return inlen; }
+	  rc = lzjody_decompress(in+2, out, inlen-2, 0);
+	  if(rc > LZJODY_BSIZE) die("lzjody decompression error.rc=%d\n", rc ); 
+	  return rc; }
       #endif
 
       #if _LIBLZG
@@ -2690,6 +2713,10 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_SNAPPY_C: return snappy_uncompress((const char *)in, inlen, (char *)out);
       #endif
 
+      #if _TCOBS
+    case P_TCOBS:     return TCOBSDecode( out, outlen, in, inlen);
+      #endif
+
       #if _TORNADO
     case P_TORNADO: return tordecompress(in, out, inlen, outlen);
       #endif
@@ -2791,33 +2818,33 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
     case P_RLEM: return mrled(in, out, outlen);
       #endif
 
-      #if _RLE8
-    case P_RLE8X:
+      #if _HRLE
+    case P_HRLELE : return rle8_low_entropy_decompress(in, inlen, out, outlen);
+    case P_HRLEM: return rle8m_decompress(in, inlen, out, outlen);
+    case P_HRLE:
       switch(lev) {
-        case  8 : return rle8_extreme_decompress(in, inlen, out, outlen);
-        case 16 : return rle16_extreme_decompress(in, inlen, out, outlen);
-        case 24 : return rle24_extreme_decompress(in, inlen, out, outlen);
-        case 32 : return rle32_extreme_decompress(in, inlen, out, outlen);
-        case 48 : return rle48_extreme_decompress(in, inlen, out, outlen);
-        case 64 : return rle64_extreme_decompress(in, inlen, out, outlen);
+        case  8 : return rle8_decompress(in, inlen, out, outlen);
+        case 16 : return rle16_sym_decompress(in, inlen, out, outlen);
+        case 24 : return rle24_sym_decompress(in, inlen, out, outlen);
+        case 32 : return rle32_sym_decompress(in, inlen, out, outlen);
+        case 48 : return rle48_sym_decompress(in, inlen, out, outlen);
+        case 64 : return rle64_sym_decompress(in, inlen, out, outlen);
       }
       break;
-    case P_RLE8SH: return rle8_sh_decompress(in, inlen, out, outlen);
-    case P_RLE8MMTF:
+    case P_HRLESH: return rle8_sh_decompress(in, inlen, out, outlen);
+    case P_HRLEMMTF:
       switch(lev) {
-        case 128 : return rle_mmtf128_decode(in, inlen, out, outlen);
-        case 256 : return rle_mmtf128_decode(in, inlen, out, outlen);
+        case 128 : return rle8_mmtf128_decompress(in, inlen, out, outlen);
+        //case 256 : return rle8_mmtf256_decompress(in, inlen, out, outlen);
       }
       break;
-    case P_RLE8XMMTF:
+    /*case P_HRLEXMMTF:
       switch(lev) {
-        case 128 : return rle8_extreme_mmtf128_decompress(in, inlen, out, outlen);
-        case 256 : return rle8_extreme_mmtf128_decompress(in, inlen, out, outlen);
+        case 128 : return rle8_mmtf128_decompress(in, inlen, out, outlen);
+        case 256 : return rle8_mmtf128_decompress(in, inlen, out, outlen);
       }
       break;
-    case P_RLE8 : return rle8_decompress(in, inlen, out, outlen);
-    case P_RLE8U: return rle8_ultra_decompress(in, inlen, out, outlen);
-    case P_RLE8M: return rle8m_decompress(in, inlen, out, outlen);
+    //case P_HRLEU: return rle8_ultra_decompress(in, inlen, out, outlen);*/
       #endif
 
       #if _B64
@@ -3016,7 +3043,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
         case  2 : return rccsdec(   in, outlen, out);
         case  3 : return rcc2sdec(  in, outlen, out);
         case  4 : return rcxsdec(   in, outlen, out);
-        case  5 : return rcx2sdec(  in, outlen, out);
+        case  5 : return rcx2sdec(   in, outlen, out);
         case  6 : return z==2?rcsdec16(  in, outlen, out):rcsdec32(  in, outlen, out);
         case  7 : return z==2?rccsdec16( in, outlen, out):rccsdec32( in, outlen, out);
         case  8 : return rcc2sdec32(in, outlen, out);
@@ -3029,7 +3056,6 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
         case 17 : return rcu3sdec( in, outlen, out);        
         case 20 : return rcbwtdec( in, outlen, out, bwtlev, 0);
         case 56 : return anscdfdec(in, outlen, out);
-        case 64 : return anscdf1dec(in, outlen, out);
         default: return 0;
         //case 21 : if(inlen==outlen) memcpy(out,in,outlen); else utf8dec( in, outlen, out); return outlen;
         //case 90 : if(inlen==outlen) memcpy(out,in,outlen); else lzpdec(  in, outlen, out, 1, 0); return outlen;
