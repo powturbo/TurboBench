@@ -58,11 +58,11 @@ GIPFELI=1
 # glza not working on all systems
 GLZA=1
 HEATSHRINK=1
-#LZJODY=1
 # make -f Makefile.unx  arch=mingw  host_cpu=x86_64  CC=gcc AS=nasm AR=ar STRIP=strip LDFLAGS=  CFLAGS_mingw=-m64
 ISA_L=1
 #LIBZLING=1
 LZ4ULTRA=1
+#LZJODY=1
 # configure miniz or copy miniz_/miniz_export.h to miniz
 MINIZ=1
 MSCOMPRESS=1
@@ -76,11 +76,12 @@ SMALLZ4=1
 SMAZ=1
 #SNAPPY_C=1
 #MRLE=1
-RLE8=1
+HRLE=1
 # install (only dynamic) zlib-ng
 # cd zlib-ng  bash ./configure && make
 # install or copy zlib-ng (.so on linux or .dll on windows) to turbobench directory
 ZLIB_NG=1
+TCOBS=1
 #UNISHOX2=1
 #UNISHOX3=1
 endif
@@ -99,6 +100,7 @@ FQZ0=1
 # fse,fsehuf disabled as not available in zstd (20230209)
 FSE=1
 FSEHUF=1
+GANS=1
 HTSCODECS=1
 #RECIPARITH=1
 #
@@ -360,7 +362,7 @@ OB+=$(ZT0)pool.o $(ZT0)xxhash.o $(ZT0)error_private.o $(ZT0)fse_decompress.o $(Z
     $(ZTC)hist.o $(ZTC)zstd_compress.o $(ZTC)zstd_compress_literals.o $(ZTC)zstd_compress_sequences.o $(ZTC)zstd_double_fast.o $(ZTC)zstd_fast.o $(ZTC)zstd_lazy.o \
 	$(ZTC)zstd_ldm.o $(ZTC)zstdmt_compress.o $(ZTC)zstd_opt.o $(ZTC)fse_compress.o $(ZTC)zstd_compress_superblock.o \
     $(ZTD)zstd_decompress.o $(ZTD)zstd_decompress_block.o $(ZTD)zstd_ddict.o $(ZTD)huf_decompress_amd64.o
-#$(ZTC)huf_compress.o $(ZTD)huf_decompress.o $(ZTC)huf_compress.o $(ZTD)huf_decompress.o 
+#$(ZTC)huf_compress.o $(ZTD)huf_decompress.o  
 endif
 endif
 
@@ -539,6 +541,11 @@ CXXFLAGS+=-D_SLZ
 OB+=libslz/src/slz.o
 endif
 
+ifeq ($(TCOBS), 1)
+CXXFLAGS+=-D_TCOBS -Drestrict=__restrict
+OB+=tcobs/Cv2/tcobsEncode.o tcobs/Cv2/tcobsDecode.o
+endif
+
 ifeq ($(SMALLZ4), 1)
 CXXFLAGS+=-DSMALLZ4
 endif
@@ -610,6 +617,11 @@ endif
 OB+=EC/freqtab/src/c_mem.o EC/freqtab/src/coder/model.o
 endif
 
+ifeq ($(GANS),1)
+CXXFLAGS+=-D_GANS
+OB+=EC/rans.o EC/head_cbloom.o
+endif
+
 ifeq ($(HTSCODECS),1)
 CXXFLAGS+=-D_HTSCODECS -DHAVE_AVX2 -DHAVE_AVX512 -DHAVE_SSE4_1 -DHAVE_SSSE3 -DHAVE_POPCNT
 EC/htscodecs/htscodecs/rANS_static32x16pr_avx2.o: EC/htscodecs/htscodecs/rANS_static32x16pr_avx2.c
@@ -619,7 +631,7 @@ EC/htscodecs/htscodecs/rANS_static32x16pr_sse4.o: EC/htscodecs/htscodecs/rANS_st
 	$(CC) -O3 -msse4.2 -DHAVE_SSE4_1 -DHAVE_SSSE3 -DHAVE_POPCNT $(MARCH) $< -c -o $@
 
 EC/htscodecs/htscodecs/rANS_static32x16pr_avx512.o: EC/htscodecs/htscodecs/rANS_static32x16pr_avx512.c
-	$(CC) -O3 -mavx512f $(MARCH) $< -c -o $@
+	$(CC) -O3 -mavx512bw $(MARCH) $< -c -o $@
 
 OB+=EC/htscodecs/htscodecs/arith_dynamic.o EC/htscodecs/htscodecs/pack.o EC/htscodecs/htscodecs/rANS_static.o\
  EC/htscodecs/htscodecs/rANS_static32x16pr.o EC/htscodecs/htscodecs/rANS_static32x16pr_avx2.o EC/htscodecs/htscodecs/rANS_static32x16pr_avx512.o\
@@ -634,10 +646,10 @@ endif
 
 ifeq ($(SSERC),1)
 EC/sserangecoding/sserangecoder.o: EC/sserangecoding/sserangecoder.cpp
-	$(CXX) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes EC/sserangecoding/sserangecoder.cpp -o EC/sserangecoding/sserangecoder.o
+	$(CXX) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes EC/sserangecoding/sserangecoder.cpp -o EC/sserangecoding/sserangecoder.o 
 
 CXXFLAGS+=-D_SSERC
-OB+=EC/sserangecoding/sserangecoder.o
+OB+=EC/sserangecoding/sserangecoder.o EC/bic.o
 endif
 
 ifeq ($(SUBOTIN),1)
@@ -696,11 +708,12 @@ CXXFLAGS+=-D_MRLE
 OB+=Turbo-Run-Length-Encoding/ext/mrle.o
 endif
 
-ifeq ($(RLE8),1)
-CXXFLAGS+=-D_RLE8
-OB+=rle8/src/rle128_extreme_cpu.o rle8/src/rle24_extreme_cpu.o rle8/src/rle48_extreme_cpu.o rle8/src/rle8_cpu.o rle8/src/rle8_extreme_cpu.o rle8/src/rle8_extreme_mmtf.o \
-  rle8/src/rle8_ultra_cpu.o rle8/src/rle_mmtf.o rle8/src/rle_sh.o rle8/src/rleX_extreme_cpu.o
-#rle8/src/rle8_ocl.o
+ifeq ($(HRLE),1)
+CXXFLAGS+=-D_HRLE
+HRLE=hypersonic-rle-kit
+OB+=$(HRLE)/src/rle_sh.o $(HRLE)/src/rle8_extreme_cpu.o $(HRLE)/src/rle8_low_entropy_cpu.o $(HRLE)/src/rle8_low_entropy_short_cpu.o $(HRLE)/src/rle8_mmtf.o \
+  $(HRLE)/src/rle24_extreme_cpu.o $(HRLE)/src/rle48_extreme_cpu.o $(HRLE)/src/rle128_extreme_cpu.o \
+  $(HRLE)/src/rleX_extreme_cpu.o $(HRLE)/src/simd_platform.o $(HRLE)/src/rle8_mmtf.o
 endif
 
 #-------------------------------------- Archived ----------------------------------
