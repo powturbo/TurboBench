@@ -254,6 +254,7 @@ Compressors with versions 16.08.2016 <br>
 #### Encoding:
  - [TurboRLE](https://github.com/powturbo/TurboRLE) Turbo Run Length Encoding
  - [Hypersonic-rle-kit](https://github.com/rainerzufalldererste/hypersonic-rle-kit) :new:2023.06
+ - [tcobs](https://github.com/rokath/tcobs) short messages compression with COBS framing :new:2023.06
  - [TurboBase64](https://github.com/powturbo/TurboBase64) Turbo Base64 Encoding/Decoding 
  - [fastbase64](https://github.com/lemire/fastbase64) Base64 Encoding 
  - [base64](https://github.com/aklomp/base64) Fast Base64 stream encoder/decoder 
