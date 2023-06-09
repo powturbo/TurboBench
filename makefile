@@ -100,7 +100,7 @@ FQZ0=1
 # fse,fsehuf disabled as not available in zstd (20230209)
 FSE=1
 FSEHUF=1
-GANS=1
+#GANS=1
 HTSCODECS=1
 #RECIPARITH=1
 #
@@ -649,7 +649,7 @@ EC/sserangecoding/sserangecoder.o: EC/sserangecoding/sserangecoder.cpp
 	$(CXX) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes EC/sserangecoding/sserangecoder.cpp -o EC/sserangecoding/sserangecoder.o 
 
 CXXFLAGS+=-D_SSERC
-OB+=EC/sserangecoding/sserangecoder.o EC/bic.o
+OB+=EC/sserangecoding/sserangecoder.o
 endif
 
 ifeq ($(SUBOTIN),1)
