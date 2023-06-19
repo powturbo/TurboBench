@@ -38,13 +38,13 @@ extern "C" {
   #endif
 extern struct plugs plugs[];
 int  coddicsize(int _dicsize);
-int  codini(size_t insize, int codec, int lev, char *prm);
-void codexit(int codec);
+int  codini(  size_t insize, int codec, int lev, char *prm);
+void codexit( int codec);
 int  codstart(size_t insize, int codec, int lev, char *prm, int mode);
 int  codend(  size_t insize, int codec, int lev, char *prm, int mode);
 
-int  codcomp(  unsigned char *in, int inlen, unsigned char *out, int outsize, int codec, int lev, char *prm);
-int  coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen,  int codec, int lev, char *prm);
+unsigned codcomp(  unsigned char *in, unsigned inlen, unsigned char *out, unsigned outsize, int codec, int lev, char *prm);
+unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen,  int codec, int lev, char *prm);
 char *codver(int codec, char *v, char *s);
 void *_valloc(size_t size, unsigned a);
 void _vfree(void *p, size_t size);
