@@ -1541,7 +1541,7 @@ static void sendbytes(const void *data, size_t n) { memcpy(gop, data, n); gop +=
 static unsigned char getbyte() { return *gip++; }
   #endif
 
-int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int codec, int lev, char *prm) { int outlen; unsigned char *oend=out+outsize; //printf("#(%d), inlen=%d,outsize=%d\n", codec, inlen, outsize);fflush(stdout);
+unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outsize, int codec, int lev, char *prm) { unsigned outlen; unsigned char *oend=out+outsize; //printf("#(%d), inlen=%d,outsize=%d\n", codec, inlen, outsize);fflush(stdout);
   unsigned dsize = dicsize; char *q;
   if(q = strchr(prm,'d')) dsize = argtoi(q+(q[1]=='='?2:1),0);
 
@@ -2032,7 +2032,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
     case P_ZSTD: { 
       ZSTD_CStream *z = ZSTD_createCStream(); if(!z) return -1;
       if(dsize) {
-        int windowLog = bsr32(dsize)-powof2(dsize); 
+        unsigned windowLog = bsr32(dsize)-powof2(dsize); 
         ZSTD_CCtx_setParameter(z, ZSTD_c_enableLongDistanceMatching, 1); 
         ZSTD_CCtx_setParameter(z, ZSTD_c_windowLog, windowLog);
       }
@@ -2207,7 +2207,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
       #endif
 
       #if _FQZ
-    case P_FQZ0:  { unsigned int outlen; compress_block(in, inlen, out, &outlen); return outlen; }
+    case P_FQZ0:  { unsigned outlen; compress_block(in, inlen, out, &outlen); return outlen; }
       #endif
 
       #if _FREQTAB
@@ -2372,7 +2372,7 @@ int codcomp(unsigned char *in, int inlen, unsigned char *out, int outsize, int c
   return 0;
 } 
 
-int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int codec, int lev, char *prm) { 
+unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen, int codec, int lev, char *prm) { 
   switch(codec) {
       #if _AOM
     case P_AOM:     aomdec(in, inlen, out, outlen); return outlen;
@@ -3037,7 +3037,7 @@ int coddecomp(unsigned char *in, int inlen, unsigned char *out, int outlen, int 
       char *q;
       if(inlen >= outlen) { memcpy(out,in, outlen); return inlen; }
       if(q=strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1)); 
-      if(q=strchr(prm,'s')) z=2;
+      if(q=strchr(prm,'s')) z = 2;
       switch(lev) {
         case  1 : return rcsdec(    in, outlen, out);
         case  2 : return rccsdec(   in, outlen, out);
