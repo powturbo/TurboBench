@@ -28,6 +28,7 @@
   #if defined(__CYGWIN__) && !defined(_WIN32)
 #define _WIN32
   #endif
+#define _FILE_OFFSET_BITS 64  
 #include <stdio.h>  
 #include <string.h>  
 #include <stdlib.h> 
@@ -356,9 +357,10 @@ void plugsprtv(FILE *f, int fmt) {
 #define PRM_SIZE 64
 #define TMS_SIZE 20
 struct plug { 
-  int       id,err,blksize,lev;
+  int       id,err,lev;
+  unsigned  blksize;
   char      *s,prm[PRM_SIZE+1],tms[TMS_SIZE+1]; 
-  long long len,memc,memd,stkc,stkd;
+  unsigned long long len,memc,memd,stkc,stkd;
   double    tc,td,tck,tdk;
 };
 
@@ -369,7 +371,7 @@ static int  cmp = 2,trans;
 int         verbose=1;
 double      fac = 1.3;
 
-int plugins(struct plug *plug, struct plugs *gs, int *pk, unsigned bsize, int bsizex, int lev, char *prm) { 
+int plugins(struct plug *plug, struct plugs *gs, int *pk, unsigned bsize, unsigned bsizex, int lev, char *prm) { 
   int i,k = *pk;
   for(i = 0; i < k; i++) 
     if(plug[i].id == gs->id && plug[i].lev == lev && !strcmp(plug[i].prm,prm))
@@ -392,7 +394,7 @@ int plugins(struct plug *plug, struct plugs *gs, int *pk, unsigned bsize, int bs
   return 0;
 }
 
-int plugreg(struct plug *plug, char *cmd, int k, int bsize, int bsizex) {
+int plugreg(struct plug *plug, char *cmd, int k, unsigned bsize, unsigned bsizex) {
   static char *cempty=""; 
   int ignore = 0;
 
@@ -604,9 +606,8 @@ void plugprttf(FILE *f, int fmt) {
 #define FACTOR(_clen_, _len_) ((double)_len_/(double)_clen_)
 #define SCORE(_clen_, _len_,_tc_,_td_) (_tc_ + 2.0 * _td_ + (double)_clen_/1000000.0)  
 
-void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, double *ptc, double *ptd, FILE *f) {
-  double ratio  = RATIO(plug->len,totinlen),    
-         //ratio  = FACTOR(plug->len,totinlen),
+void plugprt(struct plug *plug, unsigned long long totinlen, char *finame, int fmt, double *ptc, double *ptd, FILE *f) {
+  double ratio  = RATIO(plug->len,totinlen),           //ratio  = FACTOR(plug->len,totinlen),
          tc     = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td), score = SCORE(plug->len,totinlen,plug->tc,plug->td);
   char   name[256]; 
   if(plug->lev != INVLEV) 
@@ -687,7 +688,7 @@ void plugprt(struct plug *plug, long long totinlen, char *finame, int fmt, doubl
   }
 }
 
-static int blknum, speedup;
+static unsigned blknum, speedup;
 enum { SP_SPEEDUPC=1, SP_SPEEDUPD, SP_TRANSFERC, SP_TRANSFERD, SP_SPEEDUP, SP_TRANSFER };
 #define SP_ISFACTOR(x) (x==SP_SPEEDUPC || x == SP_SPEEDUPD || x == SP_SPEEDUP)
 #define SP_TYPE(x)     (x<SP_SPEEDUP)?(x&1):2        // 0:Decomp 1:Comp 2:Comp+Decomp
@@ -816,7 +817,7 @@ void plugplotb(FILE *f, int fmt, int idiv) {
   fprintf(f, "<div id='myDiv%d' style='width: %dpx; height: %dpx;'></div><script>", idiv, divplot[divxy].x, divplot[divxy].y); 
 }
 
-void plugplot(struct plug *plug, long long totinlen, int fmt, int speedup, char *s, FILE *f) {
+void plugplot(struct plug *plug, unsigned long long totinlen, int fmt, int speedup, char *s, FILE *f) {
   int  i;
   char name[65];
   if(plug->lev != INVLEV)
@@ -999,10 +1000,10 @@ int plugprts(struct plug *plug, int k, char *finame, int xstdout, unsigned long 
   fclose(fo);
 } 
 
-int plugread(struct plug *plug, char *finame, long long *totinlen) {
-  char s[LSIZE+1],name[33];
-  struct plug *p=plug;
-  FILE *fi = fopen(finame, "r"); 
+int plugread(struct plug *plug, char *finame, unsigned long long *totinlen) {
+  char   s[LSIZE+1], name[33];
+  struct plug *p = plug;
+  FILE   *fi = fopen(finame, "r"); 
   if(!fi) return -1;
 
   fgets(s, LSIZE, fi);
@@ -1049,16 +1050,16 @@ int plugread(struct plug *plug, char *finame, long long *totinlen) {
 #define max(x,y) (((x)>(y)) ? (x) : (y))
   #endif
 
-static int mcpy=0, mode, tincx, fuzz;
+static int mcpy = 0, mode, tincx, fuzz;
 
-int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, size_t outsize, unsigned bsize, int id, int lev, char *prm) { 
+unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t outsize, unsigned bsize, int id, int lev, char *prm) { 
   unsigned char *op,*oe = _out + outsize;
-  codstart(_inlen, id, lev, prm, 0);
+  codstart(bsize, id, lev, prm, 0);
   TMBEG(tm_Rep);     
     mempeakinit();                                           
     unsigned char *in,*ip;																							
     for(op = _out, in = _in; in < _in+_inlen; ) {
-      unsigned inlen,bs; 
+      unsigned inlen, bs; 
       if(mode) { 														blknum++;
         inlen      = ctou32(in); in += 4; 
         ctou32(op) = inlen; op += 4; //vbput32(op, inlen); 
@@ -1068,10 +1069,10 @@ int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, size_t outs
       for(ip = in, in += inlen; ip < in; ) { 												//printf(".");fflush(stdout);
         size_t iplen = in - ip; iplen = min(iplen, bsize);       
         bs = (mode || bsize < inlen)?((min(bsize, iplen) < (1<<16))?2:4):0;
-        int oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);					
+        size_t oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);					
         if(oplen <= 0 || oplen >= iplen && mcpy) {
 	      if(mcpy) { memcpy(op+bs, ip, iplen); oplen = iplen; }
-	      else if(oplen <= 0) { op=_out; goto end; }
+	      else if(oplen <= 0) { op = _out; goto end; }
 	    }
         if(bs == 2 && oplen >= (1<<16)) { printf("Output larger than input! Use option '-P'\n"); exit(-1); }
         if(mode || bsize < inlen) { bs==2?(ctou16(op) = oplen):(ctou32(op) = oplen); } op += oplen+bs; ip += iplen; 
@@ -1084,7 +1085,7 @@ int becomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, size_t outs
   return op - _out;;
 }
 
-int bedecomp(unsigned char *_in, int _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm) { 
+int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm) { 
   unsigned char *ip;
   codstart(_inlen, id, lev, prm, 1);
   TMBEG(tm_Rep2);     mempeakinit();
@@ -1127,11 +1128,12 @@ int delim;
 #define PATH_LENMAX 1024
 #define FLENMAX Gb
 
-bebuild(char **files, int argc, int recurse, char *foname, unsigned long long filenmax, int lim) {  
-  FILE *fo = fopen(foname, "wb"); if(!fo) { perror(foname); die("creat error '%s'", foname); }
-  int fno,insize = 100*MB,inlen; char *in = malloc(insize),*finame; 
+void bebuild(char **files, int argc, int recurse, char *foname, unsigned long long filenmax, int lim) {  
+  FILE     *fo = fopen(foname, "wb"); if(!fo) { perror(foname); die("creat error '%s'", foname); }
+  unsigned fno, insize = 100*MB, inlen; 
+  char *in = malloc(insize),*finame; 
   unsigned st_fnum = 0; 
-   unsigned long long st_flen = 0, st_blklen = 0;
+  unsigned long long st_flen = 0, st_blklen = 0;
 
   if(!filenmax) filenmax = FLENMAX;        									fprintf(stdout,"number of files=%d. Max. file length=%llu\n", argc, filenmax); fflush(stdout);
   for(fno = 0; fno < argc; fno++) { 
@@ -1146,7 +1148,7 @@ bebuild(char **files, int argc, int recurse, char *foname, unsigned long long fi
         char *p;  
         for(p = in; p < in+inlen;) {
           char *q = strchr(p, delim);
-          int   l = q - p;
+          unsigned l = q - p;
           fwrite(&l, 1, 4,fo);												st_fnum++; st_blklen += l; st_flen += l+4;
           fwrite(p,  1, l,fo);												if(st_flen >= filenmax) break;		        
           if(!q) break;
@@ -1159,8 +1161,7 @@ bebuild(char **files, int argc, int recurse, char *foname, unsigned long long fi
       }
     } 
     fclose(fi);
-  }
-  																			printf("Number of files=%d, Number of files processed=%d, avglen=%d\n", argc, st_fnum, (int)(st_blklen/st_fnum));
+  }																			printf("Number of files=%d, Number of files processed=%d, avglen=%d\n", argc, st_fnum, (int)(st_blklen/st_fnum));
   fclose(fo);
 }
 
@@ -1184,8 +1185,8 @@ size_t mininlen;
 
 unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long filenmax, size_t bsize, struct plug *plugr, int tid, int krep) { 
   size_t outsize;   
-  FILE *fi = strcmp(finame,"stdin")?fopen(finame, "rb"):stdin; if(!fi) { perror(finame); return 0; /*die("open error '%s'\n", finame);*/ }
-  char *p; 
+  FILE   *fi = strcmp(finame,"stdin")?fopen(finame, "rb"):stdin; if(!fi) { perror(finame); return 0; /*die("open error '%s'\n", finame);*/ }
+  char   *p; 
   if((p = strrchr(finame, '\\')) || (p = strrchr(finame, '/'))) finame = p+1; 	if(verbose>1) printf("'%s'\n", finame);
   p = finame; 
 
@@ -1197,11 +1198,11 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
  
   size_t filen;
   if(finame) {
-    fseeko(fi, 0, SEEK_END); filen = ftello(fi); fseeko(fi , 0 , SEEK_SET); if(filen > filenmax) filen = filenmax;
+    fseeko(fi, 0, SEEK_END); filen = ftello(fi); fseeko(fi , 0 , SEEK_SET); if(filenmax && filen > filenmax) filen = filenmax;
   } else 
-    filen = filenmax;
-  
-  size_t insize   = filen; 			         								if(filen < mininlen) insize = mininlen;
+    filen = filenmax?filenmax:Gb;
+                                                                                //printf("filelenmax=%llu filen=%llu bsize=%u ", filenmax, (unsigned long long)filen, (unsigned)bsize);
+  size_t insize   = filen>bsize?bsize:filen; 			         								if(filen < mininlen) insize = mininlen;
   size_t pagesize = getpagesize();
   size_t insizem  = (fuzz&3)?SIZE_ROUNDUP(insize, pagesize):(insize+INOVD);
 
@@ -1219,14 +1220,15 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
   size_t    inlen;																	
   long long totinlen = 0;
   double    ptc = DBL_MAX, ptd = DBL_MAX;
-  bsize     = plug->blksize;
-  plug->len = plug->tc = plug->td = 0; 											blknum = 0;	
+  bsize     = plug->blksize?plug->blksize:bsize;
+  plug->len = plug->tc = plug->td = 0; 											
+                                                                                blknum = 0;	
 																								
-  while((inlen = fread(_in, 1, insize, fi)) > 0) {
+  while((inlen = fread(_in, 1, insize, fi)) > 0) {                              //printf("READ=%zu ", inlen);  
     unsigned char *in = _in; 
     if(fuzz & 1) { in = (_in+insizem)-inlen; memmove(in, _in, inlen); 			/*printf("SEGFAULT Check");fflush(stdout); in[inlen-1] = in[inlen]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
     double   tc = 0.0, td = 0.0;         
-    size_t   l = inlen,outlen;
+    size_t   l = inlen;
 	totinlen += inlen;																
     BEPRE;		
 																				memrcpy(out, in, inlen);
@@ -1240,35 +1242,34 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
         memcpy(p, in, l);
       }
     }
-    size_t peak = mempeakinit();
+    size_t   peak    = mempeakinit();
     unsigned *_stack = stackini();   
 
-	outlen = becomp(in, l*nb, out, outsize, bsize, plug->id, plug->lev, plug->prm)/nb;
+	size_t outlen =        becomp(in, l*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm)/nb;
 	plug->len += outlen; 
-    plug->tc  += (tc += (double)tm_tm/((double)tm_rm*nb)); 
+    tc = ((double)tm_tm/((double)tm_rm*nb)); plug->tc  += tc; 
 	plug->memc = mempeak() - peak;
     plug->stkc = stackpeak(_stack);
     if(tm_Rep > 1) 
       TMSLEEP;
-																		if(verbose && inlen == filen) { double ratio = (double)outlen*100.0/inlen; printf("%12u   %5.1f   %8.2f   ", outlen, ratio, TMBS(inlen,tc)); fflush(stdout); }
+																		        if(verbose && inlen == filen) { double ratio = (double)outlen*100.0/inlen; printf("%12u   %5.1f   %8.2f   ", outlen, ratio, TMBS(inlen,tc)); fflush(stdout); }
     if(cmp) {
       unsigned char *cpz = _cpy; 
-      if(fuzz & 2) { cpz = (_cpy+insizem) - l; 											/*printf("SEGFAULT Check");fflush(stdout); cpz[l-1] = cpz[l]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
+      if(fuzz & 2) { cpz = (_cpy+insizem) - l; 									/*printf("SEGFAULT Check");fflush(stdout); cpz[l-1] = cpz[l]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
 	  if(_cpy != _in) memrcpy(cpz, in, l);
-      peak = mempeakinit();
+      size_t   peak    = mempeakinit();
       unsigned *_stack = stackini();   
-	  unsigned cpylen = bedecomp(out, outlen, cpz, l*nb, bsize, plug->id,plug->lev, plug->prm)/nb; 
-	  td = (double)tm_tm/((double)tm_rm*nb);		
-      plug->memd = mempeak() - peak;              						if(verbose && inlen == filen) { printf("%8.2f   %-16s %s\n", TMBS(inlen,td), name, finame); }
+	  unsigned cpylen  = bedecomp(out, outlen, cpz, l*nb, bsize, plug->id,plug->lev,plug->prm)/nb; 
+	  td = ((double)tm_tm/((double)tm_rm*nb)); plug->td  += td;		
+      plug->memd = mempeak() - peak;              						        if(verbose && inlen == filen) { printf("%8.2f   %-16s %s\n", TMBS(inlen,td), name, finame); }
       plug->stkd = stackpeak(_stack);
       int e = memcheck(in, l, cpz, fuzz?3:cmp, finame);  
       plug->err = plug->err?plug->err:e;
       BEPOST;																	
- 	  plug->td += td; 
-	} else 																if(verbose && inlen == filen) { printf("%8.2f   %-16s %s\n", 0.0, name, finame); }
+	} else 																        if(verbose && inlen == filen) { printf("%8.2f   %-16s %s\n", 0.0, name, finame); }
 	if(totinlen >= filen) 
       break;
-  }	  
+  }	                                                                            //printf("LEN=%llu ", plug->len);  
   _vfree(out, outsize); 
   _vfree(_in, insizem);
   if(_cpy && _cpy != _in) 
@@ -1328,7 +1329,7 @@ void usage(char *pgm) {
 } 
 
 void printfile(char *finame, int xstdout, int fmt, char *rem) {
-  long long totinlen;
+  unsigned long long totinlen;
   int       k = plugread(plugt, finame, &totinlen); 
   char      *p, s[256];
   if(k < 0)
@@ -1490,30 +1491,28 @@ int main(int argc, char* argv[]) {
   if(beb) { bebuild(&argvx[optind], argc-optind, recurse, beb, filenmax, delim); exit(0); } 
   BEINI;
 
-  if(!filenmax) filenmax = Gb; 
-  if(filenmax > 4ull*GB) filenmax = 4ull*GB;
 																									if(verbose > 5) printf("Process files\n");fflush(stdout);
-  long long totinlen = 0;  
+  unsigned long long totinlen = 0;  
   int       krep;
   struct    plug *p;
   char     *finame = "";
   tm_t      tmk0 = tminit();      
-  for(p = plugt; p < plugt+k; p++) p->tc = p->td = DBL_MAX; 
-  for(krep = 0; krep < tm_Repk; krep++) { 
+  for(p = plugt; p < plugt+k; p++) p->tc = p->td = DBL_MAX;
+  for(krep = 0; krep < tm_Repk; krep++) {
     if(tm_Repk > 1)
       printf("Benchmark: %d from %d\n", krep+1, tm_Repk);
     for(p = plug; p < plug+k; p++) {
-      struct plug *g = &plugt[p-plug];
-	  totinlen = 0;  
-      g->len = g->tck = g->tdk = g->memc = g->memd = g->stkc = g->stkd = 0;
+      struct plug *g = &plugt[p - plug];
+      totinlen = 0; g->len = g->tck = g->tdk = g->memc = g->memd = g->stkc = g->stkd = 0;
       BEFILE;
       for(fno = optind; fno < argc; fno++) {
 	    finame = argvx[fno];																			if(verbose > 1) printf("%s,%u\n", finame, filenmax);fflush(stdout);
+		p->len = p->tc = p->td = 0; 
         totinlen += plugfile(p, finame, filenmax, bsize, plugr, tid, krep);
 	    g->len += p->len;
 	    g->tck += p->tc;
 	    g->tdk += p->td;
-        g->err  = g->err?g->err:p->err;  								
+        g->err = g->err?g->err:p->err;  								
         if(p->memc > g->memc) g->memc = p->memc;
         if(p->memd > g->memd) g->memd = p->memd;						
         if(p->stkc > g->stkc) g->stkc = p->stkc;
@@ -1524,10 +1523,10 @@ int main(int argc, char* argv[]) {
       g->lev = p->lev;
       strcpy(g->prm, p->prm);
       if(g->tck < g->tc) g->tc = g->tck;
-      if(g->tdk < g->td) g->td = g->tdk;      //if(tmtime() - tmk0 > tm_RepkT) break;
+      if(g->tdk < g->td) g->td = g->tdk;      
     } 
   } 
-    BENCHSTA;
+    BENCHSTA;                                                
   if(argc - optind > 1) {
     unsigned clen = strpref(&argvx[optind], argc-optind, '\\', '/');
     strncpy(s, argvx[optind], clen);
