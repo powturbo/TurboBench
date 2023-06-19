@@ -1306,7 +1306,7 @@ unsigned argtoi(char *s, unsigned def) {
   return n*f;
 }
 
-NOINLINE void libmemcpy(unsigned char *dst, unsigned char *src, int len) {
+NOINLINE void libmemcpy(unsigned char *dst, unsigned char *src, size_t len) {
   void *(*memcpy_ptr)(void *, const void *, size_t) = memcpy;
   if (time(NULL) == 1)
     memcpy_ptr = NULL;
