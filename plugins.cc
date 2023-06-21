@@ -30,6 +30,10 @@ enum {
 #define _AOM 0
 #endif
  P_AOM,
+#ifndef _BPC
+#define _BPC 0
+#endif
+ P_BPC,
 #ifndef _BRIEFLZ
 #define _BRIEFLZ 0
 #endif
@@ -454,6 +458,10 @@ enum {
     #endif
   #endif
 
+  #if _BPC
+#include "BitPlaneComp/src/BPCompressor.hh"
+  #endif
+
   #if _BRIEFLZ
 #include "brieflz/include/brieflz.h"
   #endif
@@ -560,10 +568,9 @@ void libzpaq::error(const char* msg) {
   exit(1);
 }
 
-static unsigned char *zin,*zin_;
-static unsigned char *zout;
-#define _putc(__ch, __out) *__out++ = (__ch)
-#define _getc(in, in_) (in<in_?*in++:-1)
+static unsigned char *zin,*zin_,*zout;
+#define _putc(_ch_, _out_) *_out_++ = (_ch_)
+#define _getc(_in_, _ep_) (_in_<_ep_?*_in_++:-1)
 
 class In: public libzpaq::Reader {
   public:
@@ -1145,6 +1152,7 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
   { P_C_BLOSC2,   "blosc",       _C_BLOSC2,  "Blosc",                   "0,1,2,3,4,5,6,7,8,9", 64*1024},
+  { P_BPC,        "bpc",         _BPC,       "bit plane compression",   "" },
   { P_BRIEFLZ,    "brieflz",     _BRIEFLZ,   "BriefLz",                 "1,3,6,9" },
   { P_BROTLI,     "brotli",      _BROTLI,    "Brotli",                  "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
   { P_BZIP2,      "bzip2",       _BZIP2,     "Bzip2",                   "" },
@@ -1563,6 +1571,18 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         #endif
       #endif
 
+      #if _BPC
+	  case P_BPC: {
+        unsigned char *ip, *op=out;
+        for(ip = in, in += inlen; ip < in; ) {
+          unsigned iplen = in - ip; iplen = iplen>_MAX_BYTES_PER_LINE?_MAX_BYTES_PER_LINE:iplen;
+          op += BPCompressor::compressLine((CACHELINE_DATA*)ip, 0);
+          ip += iplen;
+        }
+        return op - out;
+      }
+	  #endif
+	  
       #if _BRIEFLZ
     case P_BRIEFLZ: return blz_pack_level(in, out, inlen, workmem, lev);
       #endif
@@ -1701,7 +1721,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_LIBLZF:    return lzf_compress(in, inlen, out, outsize);
       #endif
 
-      #if _LIBZPAQ
+      #if _ZPAQ
     case P_ZPAQ: { zin = in; zin_ = in+inlen; zout = out; char s[3]; s[0]=lev+'0'; s[1]=0; libzpaq::compress(&zmemin, &zmemout, s); return zout - out; }
       #endif
 
@@ -2394,6 +2414,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_C_BLOSC2LZ: return blosclz_decompress(in, inlen, out, outlen);
       #endif
 
+      #if _BPC
+	  case P_BPC: {
+      #endif
       #if _BRIEFLZ
     case P_BRIEFLZ:     return blz_depack(in, out, outlen);
       #endif
@@ -2569,7 +2592,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_LIBLZG: LZG_Decode(in, inlen, out, outlen); break;
       #endif
 
-      #if _LIBZPAQ
+      #if _ZPAQ
     case P_ZPAQ: { zin = in; zin_ = in+inlen; zout = out; libzpaq::decompress(&zmemin, &zmemout); return zin - in; }
       #endif
 
