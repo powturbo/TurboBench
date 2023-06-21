@@ -47,6 +47,7 @@ TURBORC=1
 TURBORLE=1
 ZOPFLI=1
 ZPAQ=1
+#BPC=1
 endif
 
 ifeq ($(CODEC3),1) # Manual download or manual build
@@ -390,6 +391,10 @@ OB+=zopfli/src/zopfli/blocksplitter.o zopfli/src/zopfli/cache.o zopfli/src/zopfl
 endif
 
 #------------------------------------ Notable codecs ---------------------------------------------------------------------------
+ifeq ($(BPC),1)
+CXXFLAGS+=-D_BPC
+endif
+
 ifeq ($(BLOSC),1)
 CXXFLAGS+=-D_C_BLOSC2
 CFLAGS+=-Ic-blosc2/include -Ic-blosc2/blosc2/include
@@ -676,8 +681,7 @@ CFLAGS+=-D_NCPUISA
 endif
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
   Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o \
-  Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
-#Turbo-Range-Coder/anscdf0.o   
+  Turbo-Range-Coder/anscdf0.o Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
 LIBSAIS=1
 endif
 
