@@ -630,7 +630,7 @@ endif
 
 ifeq ($(HYPRANS), 1)
 CXXFLAGS+=-D_HYPRANS
-OB+=EC/hypersonic-rans/src/rANS32x32_16w.o EC/hypersonic-rans/src/rANS32x64_16w.o EC/hypersonic-rans/src/hist.o 
+OB+=EC/hypersonic-rANS/src/rANS32x32_16w.o EC/hypersonic-rANS/src/rANS32x64_16w.o EC/hypersonic-rANS/src/hist.o 
 endif
 
 ifeq ($(HTSCODECS),1)
@@ -660,7 +660,7 @@ EC/sserangecoding/sserangecoder.o: EC/sserangecoding/sserangecoder.cpp
 	$(CXX) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes EC/sserangecoding/sserangecoder.cpp -o EC/sserangecoding/sserangecoder.o 
 
 CXXFLAGS+=-D_SSERC
-OB+=EC/sserangecoding/sserangecoder.o ../TurboPFor/lib/bic.o
+OB+=EC/sserangecoding/sserangecoder.o
 endif
 
 ifeq ($(SUBOTIN),1)
@@ -687,7 +687,8 @@ CFLAGS+=-D_NCPUISA
 endif
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
   Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o \
-  Turbo-Range-Coder/anscdf0.o Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
+  Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
+#Turbo-Range-Coder/anscdf0.o   
 LIBSAIS=1
 endif
 
