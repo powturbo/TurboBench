@@ -102,6 +102,7 @@ FQZ0=1
 FSE=1
 FSEHUF=1
 #GANS=1
+HYPRANS=1
 HTSCODECS=1
 #RECIPARITH=1
 #
@@ -127,7 +128,7 @@ endif
 #POLAR
 #PPMDEC
 #LZOMA=1
-#SHRINKER=1
+#SHRINKER=1  06975511200
 #TORNADO=1
 #WFLZ=1
 #XPACK=1
@@ -153,7 +154,7 @@ ifneq (,$(filter Windows%,$(OS)))
   OS := Windows
   CC=gcc
   CXX=g++
-#  CC=clang
+# CC=clang
 #  CXX=clang++
   ARCH=x86_64
   LDFLAGS=-Wl,--stack,33554432
@@ -627,6 +628,11 @@ CXXFLAGS+=-D_GANS
 OB+=EC/rans.o EC/head_cbloom.o
 endif
 
+ifeq ($(HYPRANS), 1)
+CXXFLAGS+=-D_HYPRANS
+OB+=EC/hypersonic-rans/src/rANS32x32_16w.o EC/hypersonic-rans/src/rANS32x64_16w.o EC/hypersonic-rans/src/hist.o 
+endif
+
 ifeq ($(HTSCODECS),1)
 CXXFLAGS+=-D_HTSCODECS -DHAVE_AVX2 -DHAVE_AVX512 -DHAVE_SSE4_1 -DHAVE_SSSE3 -DHAVE_POPCNT
 EC/htscodecs/htscodecs/rANS_static32x16pr_avx2.o: EC/htscodecs/htscodecs/rANS_static32x16pr_avx2.c
@@ -654,7 +660,7 @@ EC/sserangecoding/sserangecoder.o: EC/sserangecoding/sserangecoder.cpp
 	$(CXX) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes EC/sserangecoding/sserangecoder.cpp -o EC/sserangecoding/sserangecoder.o 
 
 CXXFLAGS+=-D_SSERC
-OB+=EC/sserangecoding/sserangecoder.o
+OB+=EC/sserangecoding/sserangecoder.o ../TurboPFor/lib/bic.o
 endif
 
 ifeq ($(SUBOTIN),1)
@@ -681,7 +687,7 @@ CFLAGS+=-D_NCPUISA
 endif
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
   Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o \
-  Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
+  Turbo-Range-Coder/anscdf0.o Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
 LIBSAIS=1
 endif
 
@@ -716,6 +722,10 @@ endif
 ifeq ($(HRLE),1)
 CXXFLAGS+=-D_HRLE
 HRLE=hypersonic-rle-kit
+
+$(HRLE)/src/simd_platform.o: $(HRLE)/src/simd_platform.c
+	$(CC) -O2 -mxsave $(MARCH) $(CFLAGS) $< -c -o $@
+
 OB+=$(HRLE)/src/rle_sh.o $(HRLE)/src/rle8_extreme_cpu.o $(HRLE)/src/rle8_low_entropy_cpu.o $(HRLE)/src/rle8_low_entropy_short_cpu.o $(HRLE)/src/rle8_mmtf.o \
   $(HRLE)/src/rle24_extreme_cpu.o $(HRLE)/src/rle48_extreme_cpu.o $(HRLE)/src/rle128_extreme_cpu.o \
   $(HRLE)/src/rleX_extreme_cpu.o $(HRLE)/src/simd_platform.o $(HRLE)/src/rle8_mmtf.o
