@@ -889,8 +889,8 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
 
   #if _SSERC
 #include "EC/sserangecoding/sserangecoder.h"
-#include "../TurboPFor/lib/include_/bic.h"
 static int ssercini;
+#define SSE_BITS 12
 unsigned ssercenc(unsigned char *_in, unsigned inlen, unsigned char *_out) {
   sserangecoder::uint8_vec  in(inlen), out;
   sserangecoder::uint32_vec sym_freq(256);
