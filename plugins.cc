@@ -367,6 +367,11 @@ enum {
 #define _FQZ0 0
 #endif
  P_FQZ0,
+#ifndef _HYPRANS
+#define _HYPRANS 0
+#endif
+ P_HRANS64AVX2,
+ P_HRANS32AVX2,
 #ifndef _JAC
 #define _JAC 0
 #endif
@@ -884,12 +889,13 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
 
   #if _SSERC
 #include "EC/sserangecoding/sserangecoder.h"
+#include "../TurboPFor/lib/include_/bic.h"
 static int ssercini;
 unsigned ssercenc(unsigned char *_in, unsigned inlen, unsigned char *_out) {
   sserangecoder::uint8_vec  in(inlen), out;
   sserangecoder::uint32_vec sym_freq(256);
   memcpy(&in[0], _in, inlen);                 
-  if(!ssercini) sserangecoder::vrange_init(),ssercini++;
+  if(!ssercini) sserangecoder::vrange_init(), ssercini++;
   
   for(uint32_t i = 0; i < inlen; i++) sym_freq[_in[i]]++;
   unsigned a = 256; while(a > 1 && !sym_freq[a-1]) a--;  
@@ -898,8 +904,7 @@ unsigned ssercenc(unsigned char *_in, unsigned inlen, unsigned char *_out) {
 
   unsigned char *op = _out; 
   *op++ = a - 1; 
-  for(int i = 0; i < a; i++) *(uint16_t *)op = scaled_cum_prob[i+1] - scaled_cum_prob[i], op +=2;  
-
+  for(int i = 0; i < a; i++) ctou16(op) = scaled_cum_prob[i], op +=2;  
   sserangecoder::vrange_encode(in, out, scaled_cum_prob); 
   memcpy(op, &out[0], out.size()); 
   op += out.size();
@@ -914,7 +919,8 @@ unsigned ssercdec(unsigned char *in, unsigned inlen, unsigned char *out, unsigne
   sserangecoder::uint32_vec scaled_cum_prob(a+1);
   
   unsigned cum = 0,i;
-  for(i = 0; i < a; i++) scaled_cum_prob[i] = cum, cum += *(uint16_t *)ip, ip+=2; scaled_cum_prob[i] = cum;                                                      
+  for(i = 0; i < a; i++) scaled_cum_prob[i] = ctou16(ip), ip+=2;	
+  scaled_cum_prob[a] = (1<<SSE_BITS); 	
   sserangecoder::uint32_vec dec_table(a);
   sserangecoder::vrange_init_table(a, scaled_cum_prob, dec_table);
   if(!sserangecoder::vrange_decode(ip, (in+inlen) - ip, out, outlen, &dec_table[0])) return -1;  //for(int i=0; i < 100; i++)  printf("%c", out[i]);
@@ -1015,7 +1021,11 @@ size_t lz4ultra_decompress_inmem(const unsigned char *pFileData, unsigned char *
 /*  #if _JAC
 #include "EC/rans_static_/arith_static.h"
   #endif*/
-
+  #if _HYPRANS
+#include "EC/hypersonic-rANS/src/rANS32x32_16w.h"
+#include "EC/hypersonic-rANS/src/rANS32x64_16w.h"
+  #endif
+  
   #if _HTSCODECS
 #include "EC/htscodecs/htscodecs/config.h"  
 #include "EC/htscodecs/htscodecs/arith_dynamic.h"  
@@ -1250,6 +1260,8 @@ struct plugs plugs[] = {
   { P_PPMDEC,       "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
 
   { P_ARITHDYN,     "arith_dyn",   _HTSCODECS, "htscodecs",               "0,1"},
+  { P_HRANS32AVX2,  "hans32avx2",  _HYPRANS,   "hypersonic-rANS 32 avx2", "0", E_ANS},
+  { P_HRANS64AVX2,  "hans64avx2",  _HYPRANS,   "hypersonic-rANS 64 avx2", "0", E_ANS},
   { P_RANS32x16_128,"rans32sse",   _HTSCODECS, "htscodecs",               "0", E_ANS},
   { P_RANS32x16_256,"rans32avx2",  _HTSCODECS, "htscodecs",               "0,1", E_ANS},
   { P_RANS32x16_512,"rans32avx512",_HTSCODECS, "htscodecs",               "0,1", E_ANS},
@@ -1588,12 +1600,13 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _BROTLI
-    case P_BROTLI: { unsigned lgwin, mode = BROTLI_DEFAULT_MODE; size_t esize = outsize;
+    case P_BROTLI: { 
+	  unsigned lgwin = BROTLI_DEFAULT_WINDOW, mode = BROTLI_DEFAULT_MODE; size_t esize = outsize;
       if(q = strchr(prm,'w'))              lgwin = atoi(q+(q[1]=='='?2:1));     // window specified by local parameter w
       else if(dsize)                       lgwin = bsr32(dsize)-powof2(dsize);  // window specified by global option -d
       else if(lev < 10 || strchr(prm,'W')) lgwin = BROTLI_DEFAULT_WINDOW;       // set default=24 for lev<10
-      else                                 lgwin = BROTLI_LARGE_MAX_WINDOW_BITS;// set large window brotli
-      if(q = strchr(prm,'m')) mode = atoi(q+(q[1]=='='?2:1));
+      else                               { lgwin = bsr32(inlen)-powof2(inlen); lgwin = min(lgwin,BROTLI_LARGE_MAX_WINDOW_BITS); }// set large window brotli
+      if(q = strchr(prm,'m')) mode = atoi(q+(q[1]=='='?2:1));	   	  
                                                                             // Only for modified brotli by powturbo -------------------------------------
                                                                             brotlidic = brotlictx = brotlirep = 0;
                                                                             if(strchr(prm,'V'))      brotlidic = 1; // Disable builtin dictionary
@@ -1602,7 +1615,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
                                                                             if(strchr(prm,'x'))      brotlictx = 1; // disable order-2 lit context
                                                                             if(strchr(prm,'X'))      brotlictx = 2; // disable all lit contexts
                                                                             //-----------------------------------------------------------------------
-      int rc = BrotliEncoderCompress(lev, lgwin, (BrotliEncoderMode)mode, (size_t)inlen, (uint8_t*)in, &esize, (uint8_t*)out);
+                                                                           //printf("BROTLI lev=%d lgwin=%d mode=%d l=%d,%d \n", lev, lgwin, mode, inlen, outsize);																			
+      int rc = BrotliEncoderCompress(lev, lgwin, (BrotliEncoderMode)mode, (size_t)inlen, (uint8_t*)in, &esize, (uint8_t*)out); // printf("rc=%d ", rc);
       return rc?esize:0;
     }
       #endif
@@ -2277,6 +2291,25 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_JAC:  { unsigned outlen; arith_compress_O0(in, inlen, &outlen, out); return outlen; }
       #endif
 
+      #if _HYPRANS
+	case P_HRANS32AVX2: { unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
+	  hist_t hist; make_hist(&hist, in, inlen, h); 
+	  switch(h) {
+	    case 10: return rANS32x32_16w_encode_scalar_10(in, inlen, out, outsize, &hist); 
+	    case 11: return rANS32x32_16w_encode_scalar_11(in, inlen, out, outsize, &hist); 
+	    case 12: return rANS32x32_16w_encode_scalar_12(in, inlen, out, outsize, &hist);
+      } 		
+	}
+	case P_HRANS64AVX2: { unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
+	  hist_t hist; make_hist(&hist, in, inlen, h); 
+	  switch(h) {
+	    case 10: return rANS32x64_16w_encode_scalar_10(in, inlen, out, outsize, &hist); 
+	    case 11: return rANS32x64_16w_encode_scalar_11(in, inlen, out, outsize, &hist); 
+	    case 12: return rANS32x64_16w_encode_scalar_12(in, inlen, out, outsize, &hist);
+      } 		
+	}
+	  #endif
+	  
       #if _HTSCODECS
      case P_ARITHDYN: { unsigned outlen = outsize; arith_compress_to(  in, inlen, out, &outlen, lev); return outlen; }
      case P_RANS32x16_128: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16(  in, inlen, out, &outlen):     rans_compress_O0_32x16(  in, inlen, out, &outlen)) ? outlen : 0;}
@@ -2985,6 +3018,22 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_JAC:  { unsigned outlen; arith_uncompress_O0(in, inlen, &outlen, out); } break;
       #endif
 
+      #if _HYPRANS	  
+	case P_HRANS32AVX2: { char *q; unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
+	  switch(h) {
+	    case 10: return rANS32x32_xmmShfl_16w_decode_avx2_varC_10(in, inlen, out, outlen); 
+	    case 11: return rANS32x32_xmmShfl_16w_decode_avx2_varC_11(in, inlen, out, outlen);
+	    case 12: return rANS32x32_xmmShfl_16w_decode_avx2_varC_12(in, inlen, out, outlen);
+      } 		
+	}
+	case P_HRANS64AVX2: { char *q; unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
+	  switch(h) {
+	    case 10: return rANS32x64_xmmShfl_16w_decode_avx2_varC_10(in, inlen, out, outlen); 
+	    case 11: return rANS32x64_xmmShfl_16w_decode_avx2_varC_11(in, inlen, out, outlen);
+	    case 12: return rANS32x64_xmmShfl_16w_decode_avx2_varC_12(in, inlen, out, outlen);
+      } 		
+	}
+	  #endif
       #if _HTSCODECS
      case P_ARITHDYN: arith_uncompress_to(  in, inlen, out, &outlen); return outlen;
     case P_RANS32x16_128 : lev?rans_uncompress_O0_32x16(       in, inlen, out, outlen):rans_uncompress_O0_32x16_sse4(  in, inlen, out, outlen); break;
