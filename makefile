@@ -630,7 +630,7 @@ endif
 
 ifeq ($(HYPRANS), 1)
 CXXFLAGS+=-D_HYPRANS
-OB+=EC/hypersonic-rans/src/rANS32x32_16w.o EC/hypersonic-rans/src/rANS32x64_16w.o EC/hypersonic-rans/src/hist.o 
+OB+=EC/hypersonic-rANS/src/rANS32x32_16w.o EC/hypersonic-rANS/src/rANS32x64_16w.o EC/hypersonic-rANS/src/hist.o 
 endif
 
 ifeq ($(HTSCODECS),1)
@@ -660,7 +660,7 @@ EC/sserangecoding/sserangecoder.o: EC/sserangecoding/sserangecoder.cpp
 	$(CXX) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes EC/sserangecoding/sserangecoder.cpp -o EC/sserangecoding/sserangecoder.o 
 
 CXXFLAGS+=-D_SSERC
-OB+=EC/sserangecoding/sserangecoder.o ../TurboPFor/lib/bic.o
+OB+=EC/sserangecoding/sserangecoder.o
 endif
 
 ifeq ($(SUBOTIN),1)
