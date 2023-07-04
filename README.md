@@ -237,6 +237,7 @@ Compressors with versions 16.08.2016 <br>
  - [Finite State Coder v15-05](https://github.com/skal65535/fsc)
  - [Finite State Entropy v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
  - [htscodecs rANS](https://github.com/samtools/htscodecs) :new:2023.05
+ - [hypersonic-rANS](https://github.com/rainerzufalldererste/hypersonic-rANS) :new:2023.07
 
 ###### Huffman Coding
  - [TurboHF-Huffmann v1.3](https://sites.google.com/site/powturbo)
@@ -263,5 +264,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 19 JUN 2023
+Last update: 04 JUL 2023
 
