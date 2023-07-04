@@ -372,6 +372,8 @@ enum {
 #endif
  P_HRANS64AVX2,
  P_HRANS32AVX2,
+ P_HRANS64AVX512,
+ P_HRANS32AVX512,
 #ifndef _JAC
 #define _JAC 0
 #endif
@@ -889,8 +891,8 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
 
   #if _SSERC
 #include "EC/sserangecoding/sserangecoder.h"
+#include "../TurboPFor/lib/include_/bic.h"
 static int ssercini;
-#define SSE_BITS 12
 unsigned ssercenc(unsigned char *_in, unsigned inlen, unsigned char *_out) {
   sserangecoder::uint8_vec  in(inlen), out;
   sserangecoder::uint32_vec sym_freq(256);
@@ -1259,12 +1261,14 @@ struct plugs plugs[] = {
   { P_POLHF,        "polar",       _POLHF,     "Polar Codes",             "" },
   { P_PPMDEC,       "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
 
-  { P_ARITHDYN,     "arith_dyn",   _HTSCODECS, "htscodecs",               "0,1"},
+  { P_ARITHDYN,     "arith_dyn",   _HTSCODECS, "htscodecs:arith_dyn",     "0,1"},
   { P_HRANS32AVX2,  "hans32avx2",  _HYPRANS,   "hypersonic-rANS 32 avx2", "0", E_ANS},
   { P_HRANS64AVX2,  "hans64avx2",  _HYPRANS,   "hypersonic-rANS 64 avx2", "0", E_ANS},
-  { P_RANS32x16_128,"rans32sse",   _HTSCODECS, "htscodecs",               "0", E_ANS},
-  { P_RANS32x16_256,"rans32avx2",  _HTSCODECS, "htscodecs",               "0,1", E_ANS},
-  { P_RANS32x16_512,"rans32avx512",_HTSCODECS, "htscodecs",               "0,1", E_ANS},
+  { P_HRANS32AVX512,"hans32avx512",_HYPRANS,   "hypersonic-rANS 32 avx512", "0", E_ANS},
+  { P_HRANS64AVX512,"hans64avx512",_HYPRANS,   "hypersonic-rANS 64 avx512", "0", E_ANS},
+  { P_RANS32x16_128,"rans32sse",   _HTSCODECS, "htscodecs:rans32sse",     "0", E_ANS},
+  { P_RANS32x16_256,"rans32avx2",  _HTSCODECS, "htscodecs:rans32avx2",    "0,1", E_ANS},
+  { P_RANS32x16_512,"rans32avx512",_HTSCODECS, "htscodecs:rans32avx512",  "0,1", E_ANS},
   { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",             "" },
   { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",           "", E_ANS },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",              "" },
@@ -1277,11 +1281,11 @@ struct plugs plugs[] = {
   { P_RLET,         "trle",        _TURBORLE,  "TurboRLE",                "" },
   { P_RLEM,         "mrle",        _MRLE,      "Mespostine RLE",          "" },
 
-  { P_HRLELE,       "hrlele",      _HRLE,      "HRLE rle8_low_entropy",   "8" },
-  { P_HRLEM,        "hrlem",       _HRLE,      "HRLE rle8m",              "8/S#:subsection" },  
-  { P_HRLE,         "hrle",        _HRLE,      "HRLE rle8_single/rle8_multi", "8,16,24,32,48,64/s:single" },
-  { P_HRLESH,       "hrlesh",      _HRLE,      "HRLE rle8_sh",             "8" },
-  { P_HRLEMMTF,     "hrlemmtf",    _HRLE,      "HRLE rle8_mmtf128",        "128" },
+  { P_HRLELE,       "hrlele",      _HRLE,      "Hypersonic-RLE rle8_low_entropy",       "8" },
+  { P_HRLEM,        "hrlem",       _HRLE,      "Hypersonic-RLE rle8m",                  "8/S#:subsection" },
+  { P_HRLE,         "hrle",        _HRLE,      "Hypersonic-RLE rle8_single/rle8_multi", "8,16,24,32,48,64/s:single" },
+  { P_HRLESH,       "hrlesh",      _HRLE,      "Hypersonic-RLE rle8_sh",                "8" },
+  { P_HRLEMMTF,     "hrlemmtf",    _HRLE,      "Hypersonic-RLE rle8_mmtf128",           "128" },
   /*{ P_HRLEXMMTF,    "hrlexmmtf",   _HRLE,      "8 bit RLE",               "128,256" },
   { P_HRLEU,        "hrleu",       _HRLE,      "8 bit RLE",               "8/s:single)" },*/
  //----- Transform -----
@@ -2292,7 +2296,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _HYPRANS
-	case P_HRANS32AVX2: { unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
+	case P_HRANS32AVX2:
+	case P_HRANS32AVX512:
+	{ unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
 	  hist_t hist; make_hist(&hist, in, inlen, h); 
 	  switch(h) {
 	    case 10: return rANS32x32_16w_encode_scalar_10(in, inlen, out, outsize, &hist); 
@@ -2300,7 +2306,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 	    case 12: return rANS32x32_16w_encode_scalar_12(in, inlen, out, outsize, &hist);
       } 		
 	}
-	case P_HRANS64AVX2: { unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
+	case P_HRANS64AVX2: 
+	case P_HRANS64AVX512:
+	{ unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
 	  hist_t hist; make_hist(&hist, in, inlen, h); 
 	  switch(h) {
 	    case 10: return rANS32x64_16w_encode_scalar_10(in, inlen, out, outsize, &hist); 
@@ -3031,6 +3039,20 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 	    case 10: return rANS32x64_xmmShfl_16w_decode_avx2_varC_10(in, inlen, out, outlen); 
 	    case 11: return rANS32x64_xmmShfl_16w_decode_avx2_varC_11(in, inlen, out, outlen);
 	    case 12: return rANS32x64_xmmShfl_16w_decode_avx2_varC_12(in, inlen, out, outlen);
+      } 		
+	}
+	case P_HRANS32AVX512: { char *q; unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
+	  switch(h) {
+	    case 10: return rANS32x32_xmmShfl_16w_decode_avx512_varC_10(in, inlen, out, outlen); 
+	    case 11: return rANS32x32_xmmShfl_16w_decode_avx512_varC_11(in, inlen, out, outlen);
+	    case 12: return rANS32x32_xmmShfl_16w_decode_avx512_varC_12(in, inlen, out, outlen);
+      } 		
+	}
+	case P_HRANS64AVX512: { char *q; unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
+	  switch(h) {
+	    case 10: return rANS32x64_xmmShfl_16w_decode_avx512_varC_10(in, inlen, out, outlen); 
+	    case 11: return rANS32x64_xmmShfl_16w_decode_avx512_varC_11(in, inlen, out, outlen);
+	    case 12: return rANS32x64_xmmShfl_16w_decode_avx512_varC_12(in, inlen, out, outlen);
       } 		
 	}
 	  #endif
