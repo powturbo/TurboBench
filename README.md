@@ -223,7 +223,6 @@ Compressors with versions 16.08.2016 <br>
  - [TurboAC](https://sites.google.com/site/powturbo)
  - [subotin range coder v2000](http://ezcodesample.com/ralpha/Subbotin.txt)
  - [Fast AC v2006](http://www.cipr.rpi.edu/research/SPIHT/)
- - [htscodecs Range Coder](https://github.com/samtools/htscodecs)
  - [FQZ/PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
  - [PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
  - [sserangecoding](https://github.com/richgel999/sserangecoding) :new:2023.05
@@ -236,8 +235,6 @@ Compressors with versions 16.08.2016 <br>
  - [TurborANS](https://sites.google.com/site/powturbo)
  - [Finite State Coder v15-05](https://github.com/skal65535/fsc)
  - [Finite State Entropy v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
- - [htscodecs rANS](https://github.com/samtools/htscodecs) :new:2023.05
- - [hypersonic-rANS](https://github.com/rainerzufalldererste/hypersonic-rANS) :new:2023.07
 
 ###### Huffman Coding
  - [TurboHF-Huffmann v1.3](https://sites.google.com/site/powturbo)
@@ -254,7 +251,6 @@ Compressors with versions 16.08.2016 <br>
 
 #### Encoding:
  - [TurboRLE](https://github.com/powturbo/TurboRLE) Turbo Run Length Encoding
- - [Hypersonic-rle-kit](https://github.com/rainerzufalldererste/hypersonic-rle-kit) :new:2023.06
  - [tcobs](https://github.com/rokath/tcobs) short messages compression with COBS framing :new:2023.06
  - [TurboBase64](https://github.com/powturbo/TurboBase64) Turbo Base64 Encoding/Decoding 
  - [fastbase64](https://github.com/lemire/fastbase64) Base64 Encoding 
@@ -264,5 +260,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 04 JUL 2023
+Last update: 07 JUL 2023
 
