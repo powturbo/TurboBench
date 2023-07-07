@@ -24,8 +24,8 @@ jobs:
       - run: make
       - run: lscpu
       - run: ./turbobench_/tb -l1
-      - run: ./turbobench_/tb -eturboanx,64/turbohf,64 -I1 -J15 turbobench
-      - run: ./turbobench_/tb -eturboanx,64 -O96 -I1 -J15 turbobench
+      - run: ./turbobench_/tb -eturboanx,64/turbohf,64 -I1 -J15 enwik8
+      - run: ./turbobench_/tb -eturboanx,64 -O96 -I1 -J15 enwik8
 
   macos:
     runs-on: '${{ matrix.os }}'
