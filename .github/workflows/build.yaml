@@ -23,8 +23,8 @@ jobs:
       - run: git submodule update --init --recursive
       - run: make
       - run: lscpu
-      - run: ./turbobench -l1
-      - run: ./turbobench turbobench
+      - run: ./turbobench_/tb -l1
+      - run: ./turbobench_/tb turbobench
 
   macos:
     runs-on: '${{ matrix.os }}'
