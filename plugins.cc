@@ -367,24 +367,10 @@ enum {
 #define _FQZ0 0
 #endif
  P_FQZ0,
-#ifndef _HYPRANS
-#define _HYPRANS 0
-#endif
- P_HRANS64AVX2,
- P_HRANS32AVX2,
- P_HRANS64AVX512,
- P_HRANS32AVX512,
 #ifndef _JAC
 #define _JAC 0
 #endif
  P_JAC,
-#ifndef _HTSCODECS
-#define _HTSCODECS 0
-#endif
- P_ARITHDYN,
- P_RANS32x16_128,
- P_RANS32x16_256,
- P_RANS32x16_512,
 #ifndef _FPAQC
 #define _FPAQC 0
 #endif
@@ -1023,17 +1009,6 @@ size_t lz4ultra_decompress_inmem(const unsigned char *pFileData, unsigned char *
 /*  #if _JAC
 #include "EC/rans_static_/arith_static.h"
   #endif*/
-  #if _HYPRANS
-#include "EC/hypersonic-rANS/src/rANS32x32_16w.h"
-#include "EC/hypersonic-rANS/src/rANS32x64_16w.h"
-  #endif
-  
-  #if _HTSCODECS
-#include "EC/htscodecs/htscodecs/config.h"  
-#include "EC/htscodecs/htscodecs/arith_dynamic.h"  
-#include "EC/htscodecs/htscodecs/rANS_static32x16pr.h"
-  #endif
-
   #if _FPAQC
 #include "EC/fpaqc/fpaqc.h"
   #endif
@@ -1261,14 +1236,6 @@ struct plugs plugs[] = {
   { P_POLHF,        "polar",       _POLHF,     "Polar Codes",             "" },
   { P_PPMDEC,       "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
 
-  { P_ARITHDYN,     "arith_dyn",   _HTSCODECS, "htscodecs:arith_dyn",     "0,1"},
-  { P_HRANS32AVX2,  "hans32avx2",  _HYPRANS,   "hypersonic-rANS 32 avx2", "0", E_ANS},
-  { P_HRANS64AVX2,  "hans64avx2",  _HYPRANS,   "hypersonic-rANS 64 avx2", "0", E_ANS},
-  { P_HRANS32AVX512,"hans32avx512",_HYPRANS,   "hypersonic-rANS 32 avx512", "0", E_ANS},
-  { P_HRANS64AVX512,"hans64avx512",_HYPRANS,   "hypersonic-rANS 64 avx512", "0", E_ANS},
-  { P_RANS32x16_128,"rans32sse",   _HTSCODECS, "htscodecs:rans32sse",     "0", E_ANS},
-  { P_RANS32x16_256,"rans32avx2",  _HTSCODECS, "htscodecs:rans32avx2",    "0,1", E_ANS},
-  { P_RANS32x16_512,"rans32avx512",_HTSCODECS, "htscodecs:rans32avx512",  "0,1", E_ANS},
   { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",             "" },
   { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",           "", E_ANS },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",              "" },
@@ -2294,37 +2261,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _JAC
     case P_JAC:  { unsigned outlen; arith_compress_O0(in, inlen, &outlen, out); return outlen; }
       #endif
-
-      #if _HYPRANS
-	case P_HRANS32AVX2:
-	case P_HRANS32AVX512:
-	{ unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
-	  hist_t hist; make_hist(&hist, in, inlen, h); 
-	  switch(h) {
-	    case 10: return rANS32x32_16w_encode_scalar_10(in, inlen, out, outsize, &hist); 
-	    case 11: return rANS32x32_16w_encode_scalar_11(in, inlen, out, outsize, &hist); 
-	    case 12: return rANS32x32_16w_encode_scalar_12(in, inlen, out, outsize, &hist);
-      } 		
-	}
-	case P_HRANS64AVX2: 
-	case P_HRANS64AVX512:
-	{ unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
-	  hist_t hist; make_hist(&hist, in, inlen, h); 
-	  switch(h) {
-	    case 10: return rANS32x64_16w_encode_scalar_10(in, inlen, out, outsize, &hist); 
-	    case 11: return rANS32x64_16w_encode_scalar_11(in, inlen, out, outsize, &hist); 
-	    case 12: return rANS32x64_16w_encode_scalar_12(in, inlen, out, outsize, &hist);
-      } 		
-	}
-	  #endif
 	  
-      #if _HTSCODECS
-     case P_ARITHDYN: { unsigned outlen = outsize; arith_compress_to(  in, inlen, out, &outlen, lev); return outlen; }
-     case P_RANS32x16_128: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16(  in, inlen, out, &outlen):     rans_compress_O0_32x16(  in, inlen, out, &outlen)) ? outlen : 0;}
-     case P_RANS32x16_256: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16_avx2(  in, inlen, out, &outlen):rans_compress_O0_32x16_avx2(  in, inlen, out, &outlen)) ? outlen : 0;}
-     case P_RANS32x16_512: { unsigned outlen = outsize; return (lev?rans_compress_O1_32x16_avx512(in, inlen, out, &outlen):rans_compress_O0_32x16_avx512(in, inlen, out, &outlen)) ? outlen : 0;}
-      #endif
-
       #if _PPMDEC
     case P_PPMDEC:  return ppmdenc(in, inlen, out);
       #endif
@@ -3024,43 +2961,6 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _JAC
     case P_JAC:  { unsigned outlen; arith_uncompress_O0(in, inlen, &outlen, out); } break;
-      #endif
-
-      #if _HYPRANS	  
-	case P_HRANS32AVX2: { char *q; unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
-	  switch(h) {
-	    case 10: return rANS32x32_xmmShfl_16w_decode_avx2_varC_10(in, inlen, out, outlen); 
-	    case 11: return rANS32x32_xmmShfl_16w_decode_avx2_varC_11(in, inlen, out, outlen);
-	    case 12: return rANS32x32_xmmShfl_16w_decode_avx2_varC_12(in, inlen, out, outlen);
-      } 		
-	}
-	case P_HRANS64AVX2: { char *q; unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
-	  switch(h) {
-	    case 10: return rANS32x64_xmmShfl_16w_decode_avx2_varC_10(in, inlen, out, outlen); 
-	    case 11: return rANS32x64_xmmShfl_16w_decode_avx2_varC_11(in, inlen, out, outlen);
-	    case 12: return rANS32x64_xmmShfl_16w_decode_avx2_varC_12(in, inlen, out, outlen);
-      } 		
-	}
-	case P_HRANS32AVX512: { char *q; unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
-	  switch(h) {
-	    case 10: return rANS32x32_xmmShfl_16w_decode_avx512_varC_10(in, inlen, out, outlen); 
-	    case 11: return rANS32x32_xmmShfl_16w_decode_avx512_varC_11(in, inlen, out, outlen);
-	    case 12: return rANS32x32_xmmShfl_16w_decode_avx512_varC_12(in, inlen, out, outlen);
-      } 		
-	}
-	case P_HRANS64AVX512: { char *q; unsigned h = 11; if(q = strchr(prm,'h')) h = atoi(q+(q[1]=='='?2:1)); if(h > 12) h = 12; if(h < 10) h = 10;
-	  switch(h) {
-	    case 10: return rANS32x64_xmmShfl_16w_decode_avx512_varC_10(in, inlen, out, outlen); 
-	    case 11: return rANS32x64_xmmShfl_16w_decode_avx512_varC_11(in, inlen, out, outlen);
-	    case 12: return rANS32x64_xmmShfl_16w_decode_avx512_varC_12(in, inlen, out, outlen);
-      } 		
-	}
-	  #endif
-      #if _HTSCODECS
-     case P_ARITHDYN: arith_uncompress_to(  in, inlen, out, &outlen); return outlen;
-    case P_RANS32x16_128 : lev?rans_uncompress_O0_32x16(       in, inlen, out, outlen):rans_uncompress_O0_32x16_sse4(  in, inlen, out, outlen); break;
-    case P_RANS32x16_256 : lev?rans_uncompress_O1_32x16_avx2(  in, inlen, out, outlen):rans_uncompress_O0_32x16_avx2(  in, inlen, out, outlen); break;
-    case P_RANS32x16_512 : lev?rans_uncompress_O1_32x16_avx512(in, inlen, out, outlen):rans_uncompress_O0_32x16_avx512(in, inlen, out, outlen); break;
       #endif
 
       #if _FPAQC
