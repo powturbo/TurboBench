@@ -102,8 +102,8 @@ FQZ0=1
 FSE=1
 FSEHUF=1
 #GANS=1
-HYPRANS=1
-HTSCODECS=1
+#HYPRANS=1
+#HTSCODECS=1
 #RECIPARITH=1
 #
 SSERC=1
@@ -626,28 +626,6 @@ endif
 ifeq ($(GANS),1)
 CXXFLAGS+=-D_GANS
 OB+=EC/rans.o EC/head_cbloom.o
-endif
-
-ifeq ($(HYPRANS), 1)
-CXXFLAGS+=-D_HYPRANS
-OB+=EC/hypersonic-rANS/src/rANS32x32_16w.o EC/hypersonic-rANS/src/rANS32x64_16w.o EC/hypersonic-rANS/src/hist.o 
-endif
-
-ifeq ($(HTSCODECS),1)
-CXXFLAGS+=-D_HTSCODECS -DHAVE_AVX2 -DHAVE_AVX512 -DHAVE_SSE4_1 -DHAVE_SSSE3 -DHAVE_POPCNT
-EC/htscodecs/htscodecs/rANS_static32x16pr_avx2.o: EC/htscodecs/htscodecs/rANS_static32x16pr_avx2.c
-	$(CC) -O3 -mavx2 $(MARCH) $< -c -o $@
-
-EC/htscodecs/htscodecs/rANS_static32x16pr_sse4.o: EC/htscodecs/htscodecs/rANS_static32x16pr_sse4.c
-	$(CC) -O3 -msse4.2 -DHAVE_SSE4_1 -DHAVE_SSSE3 -DHAVE_POPCNT $(MARCH) $< -c -o $@
-
-EC/htscodecs/htscodecs/rANS_static32x16pr_avx512.o: EC/htscodecs/htscodecs/rANS_static32x16pr_avx512.c
-	$(CC) -O3 -mavx512bw $(MARCH) $< -c -o $@
-
-OB+=EC/htscodecs/htscodecs/arith_dynamic.o EC/htscodecs/htscodecs/pack.o EC/htscodecs/htscodecs/rANS_static.o\
- EC/htscodecs/htscodecs/rANS_static32x16pr.o EC/htscodecs/htscodecs/rANS_static32x16pr_avx2.o EC/htscodecs/htscodecs/rANS_static32x16pr_avx512.o\
- EC/htscodecs/htscodecs/rANS_static32x16pr_sse4.o EC/htscodecs/htscodecs/rANS_static4x16pr.o EC/htscodecs/htscodecs/rle.o  EC/htscodecs/htscodecs/utils.o
-# EC/htscodecs/htscodecs/rANS_static32x16pr_neon.o EC/htscodecs/htscodecs/tokenise_name3.o
 endif
 
 ifeq ($(RECIPARITH),1)
