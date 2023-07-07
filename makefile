@@ -99,8 +99,8 @@ FPAQC=1
 FPC=1
 FQZ0=1
 # fse,fsehuf disabled as not available in zstd (20230209)
-FSE=1
-FSEHUF=1
+#FSE=1
+#FSEHUF=1
 #GANS=1
 #HYPRANS=1
 #HTSCODECS=1
