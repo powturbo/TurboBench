@@ -168,36 +168,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_LIBLZF: lzf_decompress(in, inlen, out, outlen); break;
       #endif
 
-      #if _SMALLZ4
-    case P_SMALLZ4:
-      if(!strchr(prm,'z')) { gip = in; giend = in+inlen; gop = out; unlz4(getbyte,sendbytes,NULL); break; }
-      #endif
-
-      #if _LZ4ULTRA
-    case P_LZ4ULTRA:                                                                //if(strchr(prm,'z')) LZ4_decompress_safe((const char *)in, (char *)out, inlen, outlen);
-      if(!strchr(prm,'z')) {
-        unsigned nFlags = 0;
-        if(strchr(prm,'c')) nFlags |= LZ4ULTRA_FLAG_FAVOR_RATIO;
-        if(strchr(prm,'r')) nFlags |= LZ4ULTRA_FLAG_RAW_BLOCK;
-        if(strchr(prm,'i')) nFlags |= LZ4ULTRA_FLAG_INDEP_BLOCKS;
-        if(strchr(prm,'l')) nFlags |= LZ4ULTRA_FLAG_LEGACY_FRAMES;
-        lz4ultra_decompress_inmem(in, out, inlen, outlen, nFlags);//lz4ultra_expand_block(in, inlen, out, 0, outlen);
-        break;
-      } // else fall throught to decompression with lz4
-      #endif
-
-      #if _LZ4
-    case P_LZ4:
-      if(strchr(prm,'M')) { LZ4_decompress_safe((const char *)in, (char *)out, inlen, outlen); break; }
-      else {
-        lz4: LZ4F_dctx *ctx; LZ4F_createDecompressionContext(&ctx, LZ4F_VERSION);
-        size_t ilen = inlen, olen = outlen, rc = LZ4F_decompress(ctx, out, &olen, in, &ilen, NULL);
-        LZ4F_freeDecompressionContext(ctx);
-        return rc;
-      }
-      #endif
-
-      #if _LIZARD
+if _LIZARD
     case P_LIZARD: return Lizard_decompress_safe((const char *)in, (char *)out, inlen, outlen);
       #endif
 
