@@ -63,7 +63,7 @@ jobs:
           update: true
       - run: git submodule update --init --recursive
 #      - run: make
-      - run: ./turbobench -l1
+#      - run: ./turbobench -l1
       - run: turbobench_/t -eturboanx,64/TurboHF,64/memcpy turbobench_/t.exe -I1 -J31
 #      - run: ./turbobench turbobench.exe
 
