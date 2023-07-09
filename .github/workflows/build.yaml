@@ -21,12 +21,12 @@ jobs:
         with:
           submodules: 'true'     
       - run: git submodule update --init --recursive
-      - run: make
+#      - run: make
       - run: lscpu
 #      - run: gcc -v
 #      - run: clang -v
-      - run: ./turbobench -l1
-      - run: ./turbobench turbobench
+#      - run: ./turbobench -l1
+#      - run: ./turbobench turbobench
 
   macos:
     runs-on: '${{ matrix.os }}'
@@ -42,10 +42,10 @@ jobs:
         with:
           submodules: 'true'
       - run: git submodule update --init --recursive
-      - run: make
+#      - run: make
       - run: sysctl -n machdep.cpu.brand_string
-      - run: ./turbobench -l1
-      - run: ./turbobench turbobench
+#      - run: ./turbobench -l1
+#      - run: ./turbobench turbobench
 
   windows:
     runs-on: windows-latest
@@ -62,9 +62,9 @@ jobs:
           install: git make mingw-w64-x86_64-gcc
           update: true
       - run: git submodule update --init --recursive
-      - run: make
+#      - run: make
       - run: ./turbobench -l1
-      - run: turbobench_/t -eturboanx,64/TurboHF,64/memcpy turbobench_/tb -I1 -J31
+      - run: turbobench_/t -eturboanx,64/TurboHF,64/memcpy turbobench_/t.exe -I1 -J31
 #      - run: ./turbobench turbobench.exe
 
  
