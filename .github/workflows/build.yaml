@@ -23,8 +23,8 @@ jobs:
       - run: git submodule update --init --recursive
       - run: make
       - run: lscpu
-      - run: gcc -v
-      - run: clang -v
+#      - run: gcc -v
+#      - run: clang -v
       - run: ./turbobench -l1
       - run: turbobench_/tb -eturboanx,64 turbobench -I1 -J31
 #     - run: ./turbobench turbobench
