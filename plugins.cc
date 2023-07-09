@@ -21,7 +21,7 @@
     - twitter  : https://twitter.com/powturbo
     - email    : powturbo [_AT_] gmail [_DOT_] com
 **/
-//      TurboBench: plugins.cc - compressor plugins
+//     TurboBench: plugins.cc - compressor plugins
 enum {
 #define _MEMCPY 1
  P_LMCPY,   // must be 0
