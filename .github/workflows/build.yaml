@@ -26,7 +26,8 @@ jobs:
 #      - run: gcc -v
 #      - run: clang -v
       - run: ./turbobench -l1
-      - run: turbobench_/tb -eturboanx,64/memcpy turbobench -I1 -J31
+      - run: rm *.tbb
+      - run: turbobench_/tb -eturboanx,64/memcpy turbobench_/tb -I1 -J31
 #     - run:  ./turbobench turbobench
 
   macos:
