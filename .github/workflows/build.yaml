@@ -26,8 +26,8 @@ jobs:
 #      - run: gcc -v
 #      - run: clang -v
       - run: ./turbobench -l1
-      - run: turbobench_/tb -eturboanx,64/memcpy turbobench_/tb -I1 -J31
-#     - run: ./turbobench turbobench
+#      - run: turbobench_/tb -eturboanx,64/memcpy turbobench_/tb -I1 -J31
+      - run: ./turbobench turbobench
 
   macos:
     runs-on: '${{ matrix.os }}'
