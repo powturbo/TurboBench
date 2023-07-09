@@ -24,7 +24,7 @@ jobs:
       - run: make
       - run: lscpu
       - run: ./turbobench -l1
-      - run: turbobench_/tb turboanx,64 turbobench -I1 -J15
+      - run: turbobench_/tb -eturboanx,64 turbobench -I1 -J15
 #      - run: ./turbobench turbobench
 
   macos:
