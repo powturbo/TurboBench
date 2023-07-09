@@ -730,39 +730,4 @@ char *codver(int codec, char *v, char *s) {
     case P_BRIEFLZ: sprintf(s,"%d.%d.%d", BLZ_VER_MAJOR, BLZ_VER_MINOR, BLZ_VER_PATCH); break;
       #endif
 
-      #if _LZ4
-    case P_LZ4:     sprintf(s,"%d.%d.%d", LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE); break;
-      #endif
-
-      #if _LIZARD
-    case P_LIZARD:     sprintf(s,"%d.%d.%d", LIZARD_VERSION_MAJOR, LIZARD_VERSION_MINOR, LIZARD_VERSION_RELEASE); break;
-      #endif
-
-      #if _ZSTD
-    case P_ZSTD:    sprintf(s,"%d.%d.%d", ZSTD_VERSION_MAJOR, ZSTD_VERSION_MINOR, ZSTD_VERSION_RELEASE); break;
-      #endif
-
-      #if _DENSITY
-    case P_DENSITY: sprintf(s,"%d.%d.%d", density_version_major(), density_version_minor(), density_version_revision()); break;
-      #endif
-
-      #if _HEATSHRINK
-    case P_HEATSHRINK: sprintf(s,"%d.%d.%d", HEATSHRINK_VERSION_MAJOR, HEATSHRINK_VERSION_MINOR, HEATSHRINK_VERSION_PATCH); break;
-      #endif
-
-      #if _SNAPPY
-    case P_SNAPPY:  sprintf(s,"%d.%d.%d", SNAPPY_MAJOR, SNAPPY_MINOR, SNAPPY_PATCHLEVEL); break;
-      #endif
-      #if _ZLIB
-    case P_ZLIB:
-      sprintf(s,zlib_version); break;
-      #endif
-      #if _ZLIB_NG
-    case P_ZLIB_NG:
-      sprintf(s,zlibng_version()); break;
-      #endif
-    default:        strcpy(s,v);
-  }
-  return s;
-}
 
