@@ -65,7 +65,7 @@
 #include <time.h>
 #include "conf.h"   
 #include "time_.h"
-#include "plugins.h" 
+#include "plugin.h" 
 
 double weissman(double ratio, double bandwith, double bandwithlo, double bandwithhi ) {
   return ratio * log10( 1 + bandwith/(bandwithlo*ratio) ) - (bandwithhi > 0?ratio * log10( 1 + bandwith/(bandwithhi*ratio) ):0.0);
