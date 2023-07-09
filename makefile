@@ -876,7 +876,7 @@ endif
 CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti
 
-OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugins.o
+OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugin.o
 
 turbobench: $(OB) turbobench.o
 	$(CXX) $^ $(LDFLAGS) -o turbobench
