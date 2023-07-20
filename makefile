@@ -63,6 +63,7 @@ HEATSHRINK=1
 ISA_L=1
 #LIBZLING=1
 LZ4ULTRA=1
+LZAV=1
 #LZJODY=1
 # configure miniz or copy miniz_/miniz_export.h to miniz
 MINIZ=1
@@ -284,6 +285,10 @@ ifeq ($(LZ4), 1)
 CXXFLAGS+=-D_LZ4
 CFLAGS+=-Ilz4/lib
 OB+=lz4/lib/lz4hc.o lz4/lib/lz4.o lz4/lib/lz4frame.o lz4/lib/xxhash.o
+endif
+
+ifeq ($(LZAV), 1)
+CXXFLAGS+=-D_LZAV
 endif
 
 ifeq ($(LZFSE), 1)
