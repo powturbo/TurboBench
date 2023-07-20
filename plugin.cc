@@ -489,6 +489,7 @@ enum {
   #endif
 
   #if _CSC
+#define __7Z_TYPES_H  
 #include "CSC/src/libcsc/csc_enc.h"
 #include "CSC/src/libcsc/csc_dec.h"
 struct MemISeqInStream {
@@ -529,6 +530,8 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
   #endif
 
   #if _FLZMA2
+#define __LZMA_ENC_H  
+#define __LZMA_DEC_H  
 #include "fast-lzma2/lzma2_enc.h"
 #include "fast-lzma2/lzma2_dec.h"
   #endif
