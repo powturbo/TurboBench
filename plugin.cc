@@ -139,14 +139,10 @@ enum {
 #define _LZ4ULTRA 0
 #endif
  P_LZ4ULTRA,
-#ifndef _LIZARD
-#define _LIZARD 0
+#ifndef _LZAV
+#define _LZAV 0
 #endif
- P_LIZARD,
-#ifndef _LZHAM
-#define _LZHAM 0
-#endif
- P_LZHAM,
+ P_LZAV,
 #ifndef _LZFSE
 #define _LZFSE 0
 #endif
@@ -155,6 +151,14 @@ enum {
 #define _LZFSEA 0
 #endif
  P_LZFSEA,
+#ifndef _LZHAM
+#define _LZHAM 0
+#endif
+ P_LZHAM,
+#ifndef _LIZARD
+#define _LIZARD 0
+#endif
+ P_LIZARD,
 #ifndef _LZJODY
 #define _LZJODY 0
 #endif
@@ -580,6 +584,10 @@ class Out: public libzpaq::Writer {
 #include "lz4/lib/lz4.h"
 #include "lz4/lib/lz4hc.h"
 #include "lz4/lib/lz4frame.h"
+  #endif
+
+  #if _LZAV
+#include "lzav/lzav.h"  
   #endif
 
   #if _LIZARD
@@ -1159,11 +1167,12 @@ struct plugs plugs[] = {
   { P_LIBDEFLATE, "libdeflate",  _LIBDEFLATE,"libdeflate",              "1,2,3,4,5,6,7,8,9,12/dg"},
   { P_LIBLZF,     "lzf",         _LIBLZF,    "LibLZF",                  "" },
   { P_LIBLZG,     "lzg",         _LIBLZG,    "LibLzg",                  "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
+  { P_LIZARD,     "lizard",      _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
   { P_ZPAQ,       "zpaq",        _ZPAQ,      "Libzpaq",                 "0,1,2,3,4,5" },
   { P_SLZ,        "slz",         _SLZ,       "libslz",                  "0,1,2,3,4,5,6,7,8,9" },
   { P_LZ4,        "lz4",         _LZ4,       "Lz4",                     "0,1,2,3,4,5,6,7,8,9,10,11,12,16/MfsB#" },
   { P_LZ4ULTRA,   "lz4ultra",    _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
-  { P_LIZARD,     "lizard",      _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
+  { P_LZAV,       "lzav",        _LZAV,      "https://github.com/avaneev/lzav", "" },
   { P_LZFSE,      "lzfse",       _LZFSE,     "lzfse",                   "" },  
   { P_LZFSEA,     "lzfsea",      _LZFSEA,    "lzfsea",                  "" },
   { P_LZJODY,     "lzjody",      _LZJODY,    "lzjody",                  "" },
@@ -1742,8 +1751,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       }
       #endif
 
-      #if _LIZARD
-    case P_LIZARD: return Lizard_compress((const char*)in, (char*)out, inlen, outsize, lev);
+      #if _LZAV
+	case P_LZAV: return lzav_compress_default(in, out, inlen, outsize);
       #endif
 
       #if _LZFSE
@@ -1752,10 +1761,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _LZFSEA
     case P_LZFSEA : return compression_encode_buffer(out, outsize, in, inlen, workmem, COMPRESSION_LZFSE);
-      #endif
-
-      #if _LZJODY
-    case P_LZJODY : return lzjody_compress(in, out, 0, inlen);
       #endif
 
       #if _LZHAM
@@ -1773,6 +1778,14 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         lzham_compress_status_t rc = lzham_compress_memory(&p, (lzham_uint8*)out+1, &outlen, (const lzham_uint8 *)in, inlen, &adler32);
         return rc == LZHAM_COMP_STATUS_SUCCESS?outlen:-rc;
     }
+      #endif
+
+      #if _LZJODY
+    case P_LZJODY : return lzjody_compress(in, out, 0, inlen);
+      #endif
+
+      #if _LIZARD
+    case P_LIZARD: return Lizard_compress((const char*)in, (char*)out, inlen, outsize, lev);
       #endif
 
       #if _FLZMA2
@@ -2546,6 +2559,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _LIZARD
     case P_LIZARD: return Lizard_decompress_safe((const char *)in, (char *)out, inlen, outlen);
+      #endif
+
+      #if _LZAV
+	case P_LZAV: return lzav_decompress(in, out, inlen, outlen);
       #endif
 
       #if _LZFSE
