@@ -321,9 +321,9 @@ CXXFLAGS+=-D_LZMA
 CFLAGS+=-D_7ZIP_ST
 CXXFLAGS+=-D_7Z_TYPES_
 OB+=lzma/C/Alloc.o lzma/C/CpuArch.o lzma/C/LzFind.o lzma/C/LzmaDec.o lzma/C/LzmaEnc.o lzma/C/LzmaLib.o
-ifeq ($(OS),Windows_NT)
-OB+=lzma/C/Threads.o lzma/C/LzFindMt.o
-endif
+#ifeq ($(OS),Windows_NT)
+OB+=lzma/C/Threads.o lzma/C/LzFindMt.o lzma/C/LzFindOpt.o
+#endif
 endif
 
 ifeq ($(LZOMA), 1)
