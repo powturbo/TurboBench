@@ -33,6 +33,7 @@ LIBDEFLATE=1
 LIBBSC=1
 # lizard disabled (conflict between lizard & ZSTD FSE/HUF ) 2023.02.09
 #LIZARD=1
+LZAV=1
 LZFSE=1
 LZHAM=1
 LZLIB=1
@@ -47,6 +48,7 @@ TURBORC=1
 TURBORLE=1
 ZOPFLI=1
 ZPAQ=1
+ZXC=1
 #BPC=1
 endif
 
@@ -63,7 +65,6 @@ HEATSHRINK=1
 ISA_L=1
 #LIBZLING=1
 LZ4ULTRA=1
-LZAV=1
 #LZJODY=1
 # configure miniz or copy miniz_/miniz_export.h to miniz
 MINIZ=1
@@ -193,7 +194,7 @@ else
 SNAPPY_C=0
 endif
 
-CFLAGS+=-w -Wall $(DEBUG) $(OPT)
+CFLAGS+=-w -Wall $(DEBUG) $(OPT) -fpermissive
 
 ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
 LDFLAGS+=-lrt -lpthread
@@ -816,6 +817,25 @@ else
 CXXFLAGS+=-D_ZPAQ
 OB+=zpaq/libzpaq.o
 endif
+endif
+
+ifeq ($(ZXC),1)
+CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
+CFLAGS+=-Izxc/src/lib/vendors 
+#OB+=zxc/src/lib/zxc_common.o zxc/src/lib/zxc_driver.o zxc/src/lib/zxc_dispatch.o 
+# zxc/src/lib/zxc_compress_default.o 
+# zxc/src/lib/zxc_decompress_default.o
+#OB+=
+#ifeq ($(ARCH),aarch64)
+#OB+=zxc/src/lib/zxc_compress_neon.o zxc/src/lib/zxc_decompress_neon.o
+#else
+#OB+=zxc/src/lib/zxc_compress_avx2.o zxc/src/lib/zxc_decompress_avx2.o zxc/src/lib/zxc_compress_avx512.o zxc/src/lib/zxc_decompress_avx512.o
+ifeq ($(OS),Windows)
+LDFLAGS+=zxc_/win64/libzxc.a
+else
+LDFLAGS+=zxc_/linux/libzxc.a
+endif
+
 endif
 
 ifeq ($(CSC),1)
