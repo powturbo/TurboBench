@@ -85,3 +85,6 @@
 [submodule "zxc"]
 	path = zxc
 	url = https://github.com/hellobertrand/zxc.git
+[submodule "lzav"]
+	path = lzav
+	url = https://github.com/avaneev/lzav.git
