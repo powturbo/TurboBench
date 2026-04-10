@@ -193,6 +193,7 @@ else ifeq ($(ARCH),$(filter $(ARCH),x86_64))
 else
 SNAPPY_C=0
 LZHAM=0
+TURBORLE=0
 endif
 
 CFLAGS+=-w -Wall $(DEBUG) $(OPT) -fpermissive -Wimplicit-function-declaration
