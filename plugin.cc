@@ -313,6 +313,10 @@ enum {
 #define _FSEHUF 0
 #endif 
  P_FSEH,
+#ifndef _ZXC
+#define _ZXC 0
+#endif
+ P_ZXC,
   // --------- Encoding -------------------
 #ifndef _TURBORLE
 #define _TURBORLE 0
@@ -787,6 +791,10 @@ int vsrc_reverse(unsigned char * src, unsigned char * dst, size_t src_size);
 extern "C" {
   #endif
 
+  #if _ZXC
+#include "zxc/include/zxc.h"
+  #endif
+
   #if _BZIP3
 #include "bzip3/include/libbz3.h"
   #endif
@@ -1222,6 +1230,7 @@ struct plugs plugs[] = {
   { P_ZLING,      "zling",       _ZLING,     "Libzling",                "0,1,2,3,4" },
   { P_ZOPFLI,     "zopfli",      _ZOPFLI,    "Zopfli",                  ""},
   { P_ZSTD,       "zstd",        _ZSTD,      "ZSTD",                    "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13,-14,-15,-16,-17,-18,-19,-20,-21,-22/d#" },
+  { P_ZXC,        "zxc",         _ZXC,       "zxc",                     "1,2,3,4,5" },
 //------------------------------------------------------------------
   { P_MCPY,         "imemcpy",     _MEMCPY,    "inline memcpy",           "" },
   { P_LMCPY,        "memcpy",      _MEMCPY,    "library memcpy",          "" },
@@ -2066,6 +2075,15 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       return op.pos;
     }
       #endif
+
+	  #if _ZXC
+    case P_ZXC: {
+	  zxc_compress_opts_t opts = {.n_threads = 1, .level = lev, .checksum_enabled = 0};
+	  return zxc_compress(in, inlen, out, outsize, &opts);
+	  
+    }
+      #endif
+
     //------------------------- Encoding
      #if _TURBORLE
           #define _ESC8  0x5 //0xda
@@ -2823,6 +2841,15 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
                 } else ZSTD_decompress( out, outlen, in, inlen);
       break;
       #endif
+	  
+	  #if _ZXC
+    case P_ZXC: {
+	  zxc_decompress_opts_t opts = {.n_threads = 1, .checksum_enabled = 0};
+	  zxc_decompress(in, inlen, out, outlen, &opts);
+	  break;
+    }
+      #endif
+
       //------------ Encoding -----------------------------------------------------------------------
       #if _TURBORLE
     case P_RLES:
