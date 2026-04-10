@@ -35,7 +35,7 @@
 #include <inttypes.h> 
 #include <float.h> 
 #include <errno.h>
-#include <cmath>
+#include <math.h>
 #include <sys/types.h>
 #include <ctype.h>
   #ifndef _WIN32
