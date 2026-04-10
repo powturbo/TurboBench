@@ -233,15 +233,17 @@ endif
 
 #--------------------------------- Default codecs --------------------------------------------------------------------------------------------
 ifeq ($(BROTLI), 1)
-CXXFLAGS+=-D_BROTLI -Ibrotli/c/include
-CFLAGS+=-Ibrotli/c/include -Ibrotli/c/enc
+CXXFLAGS+=-D_BROTLI -Ibrotli/c/include 
+CFLAGS+=-Ibrotli/c/include 
+#-Ibrotli/c/enc
 ifeq ($(BROTLILIB), 1)  # Use the libraries created by the brotli own builds
 OB+=brotli/out/libbrotlicommon.so brotli/out/libbrotlidec.so brotli/out/libbrotlienc.so
 else
-OB+=brotli/c/common/constants.o brotli/c/common/context.o brotli/c/common/dictionary.o brotli/c/common/platform.o brotli/c/common/transform.o brotli/c/common/shared_dictionary.o brotli/c/dec/huffman.o brotli/c/dec/state.o brotli/c/dec/bit_reader.o brotli/c/dec/decode.o\
+OB+=brotli/c/common/constants.o brotli/c/common/context.o brotli/c/common/dictionary.o brotli/c/common/platform.o brotli/c/common/transform.o brotli/c/common/shared_dictionary.o brotli/c/dec/huffman.o brotli/c/dec/prefix.o\
+    brotli/c/dec/state.o brotli/c/dec/static_init.o brotli/c/dec/bit_reader.o brotli/c/dec/decode.o \
     brotli/c/enc/backward_references.o brotli/c/enc/bit_cost.o brotli/c/enc/brotli_bit_stream.o brotli/c/enc/block_splitter.o brotli/c/enc/cluster.o brotli/c/enc/command.o brotli/c/enc/compound_dictionary.o brotli/c/enc/encode.o brotli/c/enc/encoder_dict.o brotli/c/enc/compress_fragment.o brotli/c/enc/compress_fragment_two_pass.o \
     brotli/c/enc/encoder_dict.o brotli/c/enc/entropy_encode.o brotli/c/enc/histogram.o brotli/c/enc/fast_log.o brotli/c/enc/literal_cost.o  brotli/c/enc/memory.o brotli/c/enc/metablock.o brotli/c/enc/utf8_util.o brotli/c/enc/backward_references_hq.o \
-    brotli/c/enc/dictionary_hash.o brotli/c/enc/static_dict.o
+    brotli/c/enc/dictionary_hash.o brotli/c/enc/static_dict.o brotli/c/enc/static_init.o brotli/c/enc/static_dict_lut.o
 endif
 endif
 
@@ -367,9 +369,9 @@ ZT0=zstd/lib/common/
 ZTC=zstd/lib/compress/
 ZTD=zstd/lib/decompress/
 OB+=$(ZT0)pool.o $(ZT0)xxhash.o $(ZT0)error_private.o $(ZT0)fse_decompress.o $(ZT0)zstd_common.o $(ZT0)entropy_common.o \
-    $(ZTC)hist.o $(ZTC)zstd_compress.o $(ZTC)zstd_compress_literals.o $(ZTC)zstd_compress_sequences.o $(ZTC)zstd_double_fast.o $(ZTC)zstd_fast.o $(ZTC)zstd_lazy.o \
+    $(ZTC)hist.o $(ZTC)zstd_compress.o $(ZTC)zstd_compress_literals.o $(ZTC)zstd_compress_sequences.o $(ZTC)zstd_double_fast.o $(ZTC)zstd_fast.o $(ZTC)zstd_lazy.o $(ZTC)/zstd_preSplit.o\
 	$(ZTC)zstd_ldm.o $(ZTC)zstdmt_compress.o $(ZTC)zstd_opt.o $(ZTC)fse_compress.o $(ZTC)zstd_compress_superblock.o \
-    $(ZTD)zstd_decompress.o $(ZTD)zstd_decompress_block.o $(ZTD)zstd_ddict.o $(ZTD)huf_decompress_amd64.o
+    $(ZTD)zstd_decompress.o $(ZTD)zstd_decompress_block.o $(ZTD)zstd_ddict.o $(ZTD)huf_decompress_amd64.o 
 #$(ZTC)huf_compress.o $(ZTD)huf_decompress.o  
 endif
 endif
