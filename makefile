@@ -192,6 +192,7 @@ else ifeq ($(ARCH),$(filter $(ARCH),x86_64))
 #  CFLAGS=$(AVX2)
 else
 SNAPPY_C=0
+LZHAM=0
 endif
 
 CFLAGS+=-w -Wall $(DEBUG) $(OPT) -fpermissive
