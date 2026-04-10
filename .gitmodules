@@ -82,3 +82,6 @@
 [submodule "EC/sserangecoding"]
 	path = EC/sserangecoding
 	url = https://github.com/richgel999/sserangecoding.git
+[submodule "zxc"]
+	path = zxc
+	url = https://github.com/hellobertrand/zxc.git
