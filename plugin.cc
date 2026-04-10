@@ -122,6 +122,7 @@ enum {
 #ifndef _LIBLZG
 #define _LIBLZG 0
 #endif
+
  P_LIBLZG,
 #ifndef _SLZ
 #define _SLZ 0
@@ -2469,7 +2470,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         for(op = out; op < out+outlen;) { 
           unsigned iplen = ctou32(ip), oplen = (out+outlen) - op; oplen = min(oplen, BZIP3_SIZE);
           memcpy(op, ip+4, iplen);
-          if(bz3_decode_block(st, op, iplen, oplen) == -1) die("bzip3 decode failed");
+          if(bz3_decode_block(st, op, iplen, oplen, iplen) == -1) die("bzip3 decode failed");
           op += oplen;  
           ip += 4+iplen;          
         }
