@@ -195,7 +195,7 @@ SNAPPY_C=0
 LZHAM=0
 endif
 
-CFLAGS+=-w -Wall $(DEBUG) $(OPT) -fpermissive
+CFLAGS+=-w -Wall $(DEBUG) $(OPT) -fpermissive -Wimplicit-function-declaration
 
 ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
 LDFLAGS+=-lrt -lpthread
