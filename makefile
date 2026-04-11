@@ -835,7 +835,7 @@ CFLAGS+=-Izxc/src/lib/vendors
 #else
 #OB+=zxc/src/lib/zxc_compress_avx2.o zxc/src/lib/zxc_decompress_avx2.o zxc/src/lib/zxc_compress_avx512.o zxc/src/lib/zxc_decompress_avx512.o
 ifeq ($(OS),Windows)
-LDFLAGS+=-Lzxc_/win64/zxc.lib
+LDFLAGS+=-lzxc_/win64/zxc
 else
 ifeq ($(OS),Darwin)
 LDFLAGS+=zxc_/macos/libzxc.a
