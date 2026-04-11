@@ -1,4 +1,4 @@
-# powturbo  (c) Copyright 2013-2023
+# powturbo  (c) Copyright 2013-2026
 # ----------- Downloading + Compiling ----------------------
 # git clone --recursive git://github.com/powturbo/TurboBench.git
 # make
@@ -48,7 +48,7 @@ TURBORC=0
 TURBORLE=1
 ZOPFLI=1
 ZPAQ=1
-ZXC=0
+ZXC=1
 #BPC=1
 endif
 
