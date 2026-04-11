@@ -837,7 +837,11 @@ CFLAGS+=-Izxc/src/lib/vendors
 ifeq ($(OS),Windows)
 LDFLAGS+=zxc_/win64/libzxc.a
 else
+ifeq ($(OS),Darwin)
+LDFLAGS+=zxc_/macos/libzxc.a
+else
 LDFLAGS+=zxc_/linux/libzxc.a
+endif
 endif
 
 endif
