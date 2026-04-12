@@ -172,7 +172,7 @@ Compressors with versions 16.08.2016 <br>
  - [LibSLZ](http://1wt.eu/projects/libslz/)
  - [Lz4](https://github.com/Cyan4973/lz4) 
  - [Lz4ultra](https://github.com/emmanuel-marty/lz4ultra)
- - [lzjody](https://github.com/jbruchon/lzjody) :new:2023.06
+ - [lzjody](https://github.com/jbruchon/lzjody) 
  - [lizard](https://github.com/inikep/lz5) 
  - [Lzfse](https://github.com/lzfse/lzfse)
  - [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) 
@@ -186,7 +186,7 @@ Compressors with versions 16.08.2016 <br>
  - [Miniz](https://github.com/richgel999/miniz) 
  - [ms-compress](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi Washigan](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188)
- - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux) :new:2023.05
+ - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux) 
  - [Quantile Compression](https://github.com/mwlon/quantile-compression)
  - [Pithy](https://github.com/johnezang/pithy) 
  - [Quicklz](http://www.quicklz.com) 
@@ -208,7 +208,7 @@ Compressors with versions 16.08.2016 <br>
  - [zopfli](https://code.google.com/p/zopfli) 
  - [zstd](https://github.com/facebook/zstd)
  - [zpaq](https://github.com/zpaq/zpaq)
- - [zxc](https://github.com/hellobertrand/zxc) 
+ - [zxc](https://github.com/hellobertrand/zxc) :new:2026.05
 
 
 #### Entropy coder:
