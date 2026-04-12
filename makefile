@@ -44,7 +44,7 @@ LZSSE=1
 OODLE=1
 QUICKLZ=1
 SNAPPY=1
-TURBORC=1
+TURBORC=0
 TURBORLE=1
 ZOPFLI=1
 ZPAQ=1
@@ -656,14 +656,25 @@ OB+=EC/subotin_/subotin.o
 endif
 
 ifeq ($(TURBORC),1)
-TRC=Turbo-Range-Coder/
-$(TRC)anscdf0.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -mno-sse2 -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdf0.o
-$(TRC)anscdfs.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfs.o
+#ifeq ($(ANS), 1)
+CFLAGS+=-D_ANS
+L=Turbo-Range-Coder/
+$(L)anscdf0.o: $(L)anscdf.c $(L)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) $(_SCALAR) -falign-loops=32 $(L)anscdf.c -o $(L)anscdf0.o  
 
-$(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfx.o
+$(L)anscdfs.o: $(L)anscdf.c $(L)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) $(SSE) -falign-loops=32 $(L)anscdf.c -o $(L)anscdfs.o  
+
+OB+=$(L)anscdfs.o 
+ifeq ($(ARCH), x86_64)
+$(L)anscdfx.o: $(L)anscdf.c $(L)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(L)anscdf.c -o $(L)anscdfx.o
+
+OB+=$(L)anscdfx.o 
+#$(L)anscdf0.o
+#endif
+endif
+
 
 CXXFLAGS+=-D_TURBORC
 #-D_ANS
@@ -673,8 +684,7 @@ ifeq ($(LZTURBO),1)
 #-D_NDELTA
 endif
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
-  Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o \
-  Turbo-Range-Coder/anscdfs.o Turbo-Range-Coder/anscdfx.o
+  Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o 
 #Turbo-Range-Coder/anscdf0.o   
 LIBSAIS=1
 endif
