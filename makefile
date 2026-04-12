@@ -44,7 +44,7 @@ LZSSE=1
 OODLE=1
 QUICKLZ=1
 SNAPPY=1
-TURBORC=0
+TURBORC=1
 TURBORLE=1
 ZOPFLI=1
 ZPAQ=1
@@ -193,7 +193,6 @@ else ifeq ($(ARCH),$(filter $(ARCH),x86_64))
 else
 SNAPPY_C=0
 LZHAM=0
-TURBORLE=0
 endif
 
 CFLAGS+=-w -Wall $(DEBUG) $(OPT) -fpermissive -Wimplicit-function-declaration
