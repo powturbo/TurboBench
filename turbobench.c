@@ -1552,7 +1552,7 @@ int main(int argc, char* argv[]) {
       plugprts(plugt, k, s, 1, totinlen, FMT_TEXT, rem);	
     exit(0);
   }
-  printf("\nstack peak=%ull\n", stackpeak(_stack));
+  printf("\nstack peak=%u\n", (unsigned)stackpeak(_stack));
 														
   long long _totinlen;
   int       gk = plugread(plug, s, &_totinlen);
