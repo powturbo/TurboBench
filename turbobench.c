@@ -1355,7 +1355,7 @@ int main(int argc, char* argv[]) {
   unsigned long long filenmax = 0;
   char               *scmd = NULL,*trans=NULL,*beb=NULL,*rem="",s[2049];
   char               *_argvx[1], **argvx=_argvx;
-  unsigned *_stack = stackini();
+
   int c, digit_optind = 0;												if(verbose > 5) printf("START1\n");fflush(stdout);
   for(;;) {
     int this_option_optind = optind ? optind : 1;
@@ -1552,7 +1552,6 @@ int main(int argc, char* argv[]) {
       plugprts(plugt, k, s, 1, totinlen, FMT_TEXT, rem);	
     exit(0);
   }
-  printf("\nstack peak=%u\n", (unsigned)stackpeak(_stack));
 														
   long long _totinlen;
   int       gk = plugread(plug, s, &_totinlen);
