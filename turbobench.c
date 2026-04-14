@@ -1602,5 +1602,5 @@ int main(int argc, char* argv[]) {
     #else
   putchar('\a');
     #endif
-  printf("stack peak=%ull\n", stackpeak(_stack));
+  printf("\nstack peak=%ull\n", stackpeak(_stack));
 }
