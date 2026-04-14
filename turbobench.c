@@ -241,16 +241,16 @@ void free(void *p) {
 static const size_t STACK_SIZE = ((1024*1024*7)/sizeof(unsigned));
 
 unsigned *stackini(void) {
-  unsigned stack[STACK_SIZE],*sp;
-  for(sp = stack; sp != &stack[STACK_SIZE]; sp++) *sp = STACK_MAGIC;
-  return sp;
+  unsigned _sp[STACK_SIZE],*sp = _sp;
+  while(sp < &_sp[STACK_SIZE]) *sp++ = STACK_MAGIC;
+  return _sp;
 }
 
 size_t stackpeak(unsigned *_sp) {
-  unsigned *sp;
+  unsigned *sp = _sp;
   if(!_sp) return 0;
-  for(sp = _sp - STACK_SIZE; *sp == STACK_MAGIC; sp++);
-  return (_sp - sp)*sizeof(unsigned);
+  while(sp < &_sp[STACK_SIZE] && *sp == STACK_MAGIC) sp++;
+  return (sp - _sp)*sizeof(unsigned);
 }
 #endif
 //--------------------------------------- TurboBench ------------------------------------------------------------------
@@ -1355,7 +1355,7 @@ int main(int argc, char* argv[]) {
   unsigned long long filenmax = 0;
   char               *scmd = NULL,*trans=NULL,*beb=NULL,*rem="",s[2049];
   char               *_argvx[1], **argvx=_argvx;
-
+  unsigned *_stack = stackini();
   int c, digit_optind = 0;												if(verbose > 5) printf("START1\n");fflush(stdout);
   for(;;) {
     int this_option_optind = optind ? optind : 1;
@@ -1602,4 +1602,5 @@ int main(int argc, char* argv[]) {
     #else
   putchar('\a');
     #endif
+  printf("stack peak=%ull\n", stackpeak(_stack));
 }
