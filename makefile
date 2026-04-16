@@ -879,7 +879,7 @@ CMD_BUILD_ZXC = $(CC) -O3 $(CFLAGS) -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
 
 $(ZXCDIR)/%.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
 
-$(ZXCDIR)/%_default.o: ZXC_FLAGS = $(SSE) -DZXC_FUNCTION_SUFFIX=_default
+$(ZXCDIR)/%_default.o: ZXC_FLAGS = -DZXC_FUNCTION_SUFFIX=_default
 $(ZXCDIR)/%_default.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
 
 $(ZXCDIR)/%_avx2.o: ZXC_FLAGS = -mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2
