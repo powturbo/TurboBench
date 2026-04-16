@@ -834,10 +834,8 @@ endif
 
 ifeq ($(ZXC),1)
 CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
-CFLAGS+=-Izxc/src/lib/vendors 
-#OB+=zxc/src/lib/zxc_common.o zxc/src/lib/zxc_driver.o zxc/src/lib/zxc_dispatch.o 
-# zxc/src/lib/zxc_compress_default.o 
-# zxc/src/lib/zxc_decompress_default.o
+#CFLAGS+=-Izxc/src/lib/vendors -DZXC_NATIVE_ARCH=OFF -DZXC_DISABLE_SIMD -DZXC_ONLY_DEFAULT
+#OB+=zxc/src/lib/zxc_common.o zxc/src/lib/zxc_driver.o zxc/src/lib/zxc_compress.o zxc/src/lib/zxc_decompress.o zxc/src/lib/zxc_seekable.o zxc/src/lib/zxc_dispatch.o 
 #OB+=
 #ifeq ($(ARCH),aarch64)
 #OB+=zxc/src/lib/zxc_compress_neon.o zxc/src/lib/zxc_decompress_neon.o
