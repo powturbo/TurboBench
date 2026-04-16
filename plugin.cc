@@ -1184,7 +1184,7 @@ struct plugs plugs[] = {
   { P_SLZ,        "slz",         _SLZ,       "libslz",                  "0,1,2,3,4,5,6,7,8,9" },
   { P_LZ4,        "lz4",         _LZ4,       "Lz4",                     "0,1,2,3,4,5,6,7,8,9,10,11,12,16/MfsB#" },
   { P_LZ4ULTRA,   "lz4ultra",    _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
-  { P_LZAV,       "lzav",        _LZAV,      "https://github.com/avaneev/lzav", "" },
+  { P_LZAV,       "lzav",        _LZAV,      "lzav", "" }, // https://github.com/avaneev/lza
   { P_LZFSE,      "lzfse",       _LZFSE,     "lzfse",                   "" },  
   { P_LZFSEA,     "lzfsea",      _LZFSEA,    "lzfsea",                  "" },
   { P_LZJODY,     "lzjody",      _LZJODY,    "lzjody",                  "" },
