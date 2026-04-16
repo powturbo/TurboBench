@@ -31,8 +31,7 @@ FASTLZ=1
 FLZMA2=1
 LIBDEFLATE=1
 LIBBSC=1
-# lizard disabled (conflict between lizard & ZSTD FSE/HUF ) 2023.02.09
-#LIZARD=1
+LIZARD=1
 LZAV=1
 LZFSE=1
 LZHAM=1
@@ -44,7 +43,7 @@ LZSSE=1
 OODLE=1
 QUICKLZ=1
 SNAPPY=1
-TURBORC=0
+TURBORC=1
 TURBORLE=1
 ZOPFLI=1
 ZPAQ=1
@@ -54,19 +53,18 @@ ZXC=1
 endif
 
 ifeq ($(CODEC3),1) # Manual download or manual build
-BLOSC=1
+#BLOSC=1
 BRIEFLZ=1
 CSC=1
-DENSITY=1
+#DENSITY=1 No more available
 GIPFELI=1
 # glza not working on all systems
 GLZA=1
-HEATSHRINK=1
+#HEATSHRINK=1
 # make -f Makefile.unx  arch=mingw  host_cpu=x86_64  CC=gcc AS=nasm AR=ar STRIP=strip LDFLAGS=  CFLAGS_mingw=-m64
 ISA_L=1
 #LIBZLING=1
 LZ4ULTRA=1
-#LZJODY=1
 # configure miniz or copy miniz_/miniz_export.h to miniz
 MINIZ=1
 MSCOMPRESS=1
@@ -86,6 +84,7 @@ HRLE=1
 # install or copy zlib-ng (.so on linux or .dll on windows) to turbobench directory
 ZLIB_NG=1
 TCOBS=1
+# unishox linux only
 #UNISHOX2=1
 #UNISHOX3=1
 endif
@@ -122,6 +121,7 @@ ifeq ($(TR),1) # Transform
 #BRC=1
 endif
 # Archived codecs and other codecs (manual download)
+#LZJODY=1
 #CHAMELEON=1
 #DAALA=1
 #DOBOZ=1
@@ -283,7 +283,7 @@ endif
 ifeq ($(LIZARD), 1)
 CXXFLAGS+=-D_LIZARD
 CFLAGS+=-Ilizard/lib
-OB+=lizard/lib/lizard_compress.o lizard/lib/lizard_decompress.o lizard/lib/entropy/huf_decompress.o lizard/lib/entropy/huf_compress.o lizard/lib/entropy/fse_compress.o lizard/lib/entropy/fse_decompress.o
+OB+=lizard/lib/entropy/entropy_common.o lizard/lib/entropy/hist.o lizard/lib/lizard_compress.o lizard/lib/lizard_decompress.o lizard/lib/entropy/huf_decompress.o lizard/lib/entropy/huf_compress.o lizard/lib/entropy/fse_compress.o lizard/lib/entropy/fse_decompress.o
 endif
 
 ifeq ($(LZ4), 1)
@@ -408,7 +408,7 @@ endif
 
 ifeq ($(BLOSC),1)
 CXXFLAGS+=-D_C_BLOSC2
-CFLAGS+=-Ic-blosc2/include -Ic-blosc2/blosc2/include
+CFLAGS+=-Ic-blosc2/blosc -Ic-blosc2/include -Ic-blosc2/include/blosc2 -DHAVE_ZSTD
 OB+=c-blosc2/blosc/blosc2.o c-blosc2/blosc/blosclz.o c-blosc2/blosc/frame.o c-blosc2/blosc/sframe.o c-blosc2/blosc/schunk.o c-blosc2/blosc/blosc2-stdio.o c-blosc2/blosc/fastcopy.o c-blosc2/blosc/stune.o \
     c-blosc2/blosc/delta.o c-blosc2/blosc/shuffle.o c-blosc2/blosc/shuffle-generic.o c-blosc2/blosc/shuffle-sse2.o c-blosc2/blosc/timestamp.o c-blosc2/blosc/trunc-prec.o c-blosc2/blosc/bitshuffle-generic.o
 endif
@@ -530,7 +530,7 @@ endif
 ifeq ($(SNAPPY), 1)
 # configure or copy directory "snappy_/*" to "snappy"
 ifneq (,$(wildcard snappy/snappy-stubs-public.h))
-CXXFLAGS+=-DSNAPPY
+CXXFLAGS+=-D_SNAPPY
 OB+=snappy/snappy-sinksource.o snappy/snappy-stubs-internal.o snappy/snappy.o
 endif
 endif
@@ -559,7 +559,7 @@ endif
 
 ifeq ($(TCOBS), 1)
 CXXFLAGS+=-D_TCOBS -Drestrict=__restrict
-OB+=tcobs/Cv2/tcobsEncode.o tcobs/Cv2/tcobsDecode.o
+OB+=tcobs/v2/tcobsEncode.o tcobs/v2/tcobsDecode.o
 endif
 
 ifeq ($(SMALLZ4), 1)
@@ -659,20 +659,20 @@ endif
 ifeq ($(TURBORC),1)
 #ifeq ($(ANS), 1)
 CFLAGS+=-D_ANS
-L=Turbo-Range-Coder/
-$(L)anscdf0.o: $(L)anscdf.c $(L)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) $(_SCALAR) -falign-loops=32 $(L)anscdf.c -o $(L)anscdf0.o  
+TRC=Turbo-Range-Coder/
+$(TRC)anscdf0.o: $(TRC)anscdf.c $(TRC)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) $(_SCALAR) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdf0.o  
 
-$(L)anscdfs.o: $(L)anscdf.c $(L)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) $(SSE) -falign-loops=32 $(L)anscdf.c -o $(L)anscdfs.o  
+$(TRC)anscdfs.o: $(TRC)anscdf.c $(TRC)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) $(SSE) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfs.o  
 
-OB+=$(L)anscdfs.o 
+OB+=$(TRC)anscdfs.o 
 ifeq ($(ARCH), x86_64)
-$(L)anscdfx.o: $(L)anscdf.c $(L)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(L)anscdf.c -o $(L)anscdfx.o
+$(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfx.o
 
-OB+=$(L)anscdfx.o 
-#$(L)anscdf0.o
+OB+=$(TRC)anscdfx.o 
+#$(TRC)anscdf0.o
 #endif
 endif
 
@@ -681,8 +681,7 @@ CXXFLAGS+=-D_TURBORC
 #-D_ANS
 CFLAGS+=-D_BWT -ITurbo-Range-Coder/libsais/include
 ifeq ($(LZTURBO),1)
-#CFLAGS+=-D_NCPUISA 
-#-D_NDELTA
+CFLAGS+=-D_NCPUISA -D_NQUANT
 endif
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
   Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o 
