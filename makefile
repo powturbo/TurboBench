@@ -192,6 +192,7 @@ else ifeq ($(ARCH),$(filter $(ARCH),x86_64))
 #  CFLAGS=$(SSE)
 #  CFLAGS=$(AVX2)
 else
+TURBORC=0
 SNAPPY_C=0
 LZHAM=0
 endif
