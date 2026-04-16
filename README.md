@@ -189,7 +189,7 @@ Compressors with versions 16.08.2016 <br>
  - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux) 
  - [Quantile Compression](https://github.com/mwlon/quantile-compression)
  - [Pithy](https://github.com/johnezang/pithy) 
- - [Quicklz](http://www.quicklz.com) 
+ - [Quicklz](https://github.com/robottwo/quicklz) 
  - [sap](https://github.com/CoreSecurity/pysap) 
  - [shoco](https://github.com/Ed-von-Schleck/shoco) 
  - [Shrinker](https://code.google.com/p/data-shrinker) 
@@ -262,5 +262,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 11 APR 2026
+Last update: 16 APR 2026
 
