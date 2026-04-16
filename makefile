@@ -48,6 +48,7 @@ TURBORC=0
 TURBORLE=1
 ZOPFLI=1
 ZPAQ=1
+#ZXCLIB=1
 ZXC=1
 #BPC=1
 endif
@@ -832,25 +833,64 @@ OB+=zpaq/libzpaq.o
 endif
 endif
 
+ifeq ($(ZXCLIB),1)
+CXXFLAGS+=-D_ZXC 
+  ifeq ($(OS),Windows)
+LDFLAGS+=zxc_/win64/libzxc.a
+  else
+    ifeq ($(OS),Darwin)
+LDFLAGS+=zxc_/macos/libzxc.a
+    else
+LDFLAGS+=zxc_/linux/libzxc.a
+    endif
+  endif
+else
 ifeq ($(ZXC),1)
 CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
-#CFLAGS+=-Izxc/src/lib/vendors -DZXC_NATIVE_ARCH=OFF -DZXC_DISABLE_SIMD -DZXC_ONLY_DEFAULT
-#OB+=zxc/src/lib/zxc_common.o zxc/src/lib/zxc_driver.o zxc/src/lib/zxc_compress.o zxc/src/lib/zxc_decompress.o zxc/src/lib/zxc_seekable.o zxc/src/lib/zxc_dispatch.o 
-#OB+=
-#ifeq ($(ARCH),aarch64)
-#OB+=zxc/src/lib/zxc_compress_neon.o zxc/src/lib/zxc_decompress_neon.o
-#else
-#OB+=zxc/src/lib/zxc_compress_avx2.o zxc/src/lib/zxc_decompress_avx2.o zxc/src/lib/zxc_compress_avx512.o zxc/src/lib/zxc_decompress_avx512.o
-ifeq ($(OS),Windows)
-LDFLAGS+=zxc_/win64/libzxc.a
-else
-ifeq ($(OS),Darwin)
-LDFLAGS+=zxc_/macos/libzxc.a
-else
-LDFLAGS+=zxc_/linux/libzxc.a
-endif
-endif
+CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE
+OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o $(ZXCDIR)/zxc_decompress_default.o
+  ifeq ($(ARCH),aarch64)
+OB+=zxc/src/lib/zxc_compress_neon.o zxc/src/lib/zxc_decompress_neon.o
+  else
+OB+=zxc/src/lib/zxc_compress_avx2.o zxc/src/lib/zxc_decompress_avx2.o zxc/src/lib/zxc_compress_avx512.o zxc/src/lib/zxc_decompress_avx512.o
+  endif
+#from lzbench 
+ZXCDIR = zxc/src/lib
+OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o $(ZXCDIR)/zxc_seekable.o $(ZXCDIR)/zxc_decompress_default.o
 
+  ifneq (,$(filter x86_64% amd64% i%86%,$(ARCH)))
+    ifneq (,$(filter x86_64% amd64%,$(ARCH)))
+    OB += $(ZXCDIR)/zxc_compress_avx2.o $(ZXCDIR)/zxc_decompress_avx2.o
+    OB += $(ZXCDIR)/zxc_compress_avx512.o $(ZXCDIR)/zxc_decompress_avx512.o
+    endif
+  endif
+
+  ifneq (,$(filter arm% aarch64%,$(ARCH)))
+    OB += $(ZXCDIR)/zxc_compress_neon.o $(ZXCDIR)/zxc_decompress_neon.o
+        
+    ifneq (,$(filter arm64% aarch64%,$(ARCH)))
+      NEON_FLAGS = -DZXC_USE_NEON64
+    else
+      NEON_FLAGS = -march=armv7-a -mfloat-abi=softfp -mfpu=neon -DZXC_USE_NEON32
+    endif
+  endif
+
+CMD_BUILD_ZXC = $(CC) -O3 $(CFLAGS) -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
+
+$(ZXCDIR)/%.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_default.o: ZXC_FLAGS = $(SSE) -DZXC_FUNCTION_SUFFIX=_default
+$(ZXCDIR)/%_default.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_avx2.o: ZXC_FLAGS = -mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2
+$(ZXCDIR)/%_avx2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_avx512.o: ZXC_FLAGS = -mavx512f -mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512
+$(ZXCDIR)/%_avx512.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_neon.o: ZXC_FLAGS = $(NEON_FLAGS) -DZXC_FUNCTION_SUFFIX=_neon
+$(ZXCDIR)/%_neon.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+endif
 endif
 
 ifeq ($(CSC),1)
