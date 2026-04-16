@@ -1,29 +1,26 @@
 /* zconf-ng.h -- configuration of the zlib-ng compression library
- * Copyright (C) 1995-2016 Jean-loup Gailly, Mark Adler
+ * Copyright (C) 1995-2024 Jean-loup Gailly, Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
-
-/* @(#) $Id$ */
 
 #ifndef ZCONFNG_H
 #define ZCONFNG_H
 
-#if defined(_WINDOWS) && !defined(WINDOWS)
-#  define WINDOWS
-#endif
-#if defined(_WIN32) || defined(__WIN32__)
-#  ifndef WIN32
-#    define WIN32
-#  endif
+#include "zlib_name_mangling-ng.h"
+
+#if !defined(_WIN32) && defined(__WIN32__)
+#  define _WIN32
 #endif
 
-#ifdef __STDC_VERSION__
-#  if __STDC_VERSION__ >= 199901L
-#    ifndef STDC99
-#      define STDC99
-#    endif
-#  endif
+/* Clang macro for detecting declspec support
+ * https://clang.llvm.org/docs/LanguageExtensions.html#has-declspec-attribute
+ */
+#ifndef __has_declspec_attribute
+#  define __has_declspec_attribute(x) 0
 #endif
+
+/* Always define z_const as const */
+#define z_const const
 
 /* Maximum value for memLevel in deflateInit2 */
 #ifndef MAX_MEM_LEVEL
@@ -35,6 +32,9 @@
  * created by gzip. (Files created by minigzip can still be extracted by
  * gzip.)
  */
+#ifndef MIN_WBITS
+#  define MIN_WBITS   8  /* 256 LZ77 window */
+#endif
 #ifndef MAX_WBITS
 #  define MAX_WBITS   15 /* 32K LZ77 window */
 #endif
@@ -52,44 +52,47 @@
  for small objects.
 */
 
-                        /* Type declarations */
+/* Type declarations */
 
+#ifdef ZLIB_INTERNAL
+#  define Z_INTERNAL ZLIB_INTERNAL
+#endif
 
-#if defined(WINDOWS) || defined(WIN32)
-   /* If building or using zlib as a DLL, define ZLIB_DLL.
-    * This is not mandatory, but it offers a little performance increase.
-    */
-#  ifdef ZLIB_DLL
-#    if defined(WIN32) && (!defined(__BORLANDC__) || (__BORLANDC__ >= 0x500))
-#      ifdef ZLIB_INTERNAL
-#        define ZEXTERN extern __declspec(dllexport)
-#      else
-#        define ZEXTERN extern __declspec(dllimport)
-#      endif
-#    endif
-#  endif  /* ZLIB_DLL */
-   /* If building or using zlib with the WINAPI/WINAPIV calling convention,
-    * define ZLIB_WINAPI.
-    * Caution: the standard ZLIB1.DLL is NOT compiled using ZLIB_WINAPI.
-    */
-#  ifdef ZLIB_WINAPI
-#    include <windows.h>
-     /* No need for _export, use ZLIB.DEF instead. */
-     /* For complete Windows compatibility, use WINAPI, not __stdcall. */
-#    define ZEXPORT WINAPI
-#    define ZEXPORTVA WINAPIV
+/* If building or using zlib as a DLL, define ZLIB_DLL.
+ * This is not mandatory, but it offers a little performance increase.
+ */
+#if defined(ZLIB_DLL) && (defined(_WIN32) || (__has_declspec_attribute(dllexport) && __has_declspec_attribute(dllimport)))
+#  ifdef Z_INTERNAL
+#    define Z_EXTERN extern __declspec(dllexport)
+#  else
+#    define Z_EXTERN extern __declspec(dllimport)
 #  endif
 #endif
 
-#ifndef ZEXTERN
-#  define ZEXTERN extern
+/* If building or using zlib with the WINAPI/WINAPIV calling convention,
+ * define ZLIB_WINAPI.
+ * Caution: the standard ZLIB1.DLL is NOT compiled using ZLIB_WINAPI.
+ */
+#if defined(ZLIB_WINAPI) && defined(_WIN32)
+#  include <windows.h>
+   /* No need for _export, use ZLIB.DEF instead. */
+   /* For complete Windows compatibility, use WINAPI, not __stdcall. */
+#  define Z_EXPORT WINAPI
+#  define Z_EXPORTVA WINAPIV
 #endif
-#ifndef ZEXPORT
-#  define ZEXPORT
+
+#ifndef Z_EXTERN
+#  define Z_EXTERN extern
 #endif
-#ifndef ZEXPORTVA
-#  define ZEXPORTVA
+#ifndef Z_EXPORT
+#  define Z_EXPORT
 #endif
+#ifndef Z_EXPORTVA
+#  define Z_EXPORTVA
+#endif
+
+/* Conditional exports */
+#define ZNG_CONDEXPORT Z_EXPORT
 
 /* Fallback for something that includes us. */
 typedef unsigned char Byte;
@@ -107,16 +110,15 @@ typedef void const *voidpc;
 typedef void       *voidpf;
 typedef void       *voidp;
 
-#if 1    /* was set to #if 1 by ./configure */
+#if 1    /* was set to #if 1 by configure/cmake/etc */
 #  define Z_HAVE_UNISTD_H
 #endif
 
-#ifdef NEED_PTRDIFF_T    /* may be set to #if 1 by ./configure */
+#ifdef NEED_PTRDIFF_T    /* may be set to #if 1 by configure/cmake/etc */
 typedef PTRDIFF_TYPE ptrdiff_t;
 #endif
 
 #include <sys/types.h>      /* for off_t */
-#include <stdarg.h>         /* for va_list */
 
 #include <stddef.h>         /* for wchar_t and NULL */
 
@@ -130,7 +132,7 @@ typedef PTRDIFF_TYPE ptrdiff_t;
 #  undef _LARGEFILE64_SOURCE
 #endif
 
-#if defined(Z_HAVE_UNISTD_H) || defined(_LARGEFILE64_SOURCE)
+#if defined(Z_HAVE_UNISTD_H)
 #  include <unistd.h>         /* for SEEK_*, off_t, and _LFS64_LARGEFILE */
 #  ifndef z_off_t
 #    define z_off_t off_t
@@ -159,12 +161,12 @@ typedef PTRDIFF_TYPE ptrdiff_t;
 #  define z_off_t long
 #endif
 
-#if !defined(WIN32) && defined(Z_LARGE64)
+#if !defined(_WIN32) && defined(Z_LARGE64)
 #  define z_off64_t off64_t
 #else
 #  if defined(__MSYS__)
 #    define z_off64_t _off64_t
-#  elif defined(WIN32) && !defined(__GNUC__)
+#  elif defined(_WIN32) && !defined(__GNUC__)
 #    define z_off64_t __int64
 #  else
 #    define z_off64_t z_off_t
