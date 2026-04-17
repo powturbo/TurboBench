@@ -40,7 +40,7 @@ jobs:
         with:
           submodules: 'true'
       - run: git submodule update --init --recursive
-      - run: make STATIC=1
+      - run: make
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l1
       - run: wget -q https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz -O silesia.tar.gz
