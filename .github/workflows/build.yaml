@@ -26,14 +26,14 @@ jobs:
       - run: ./turbobench -l1
       - run: wget -q https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz -O silesia.tar.gz
       - run: gunzip silesia.tar.gz
-      - run: ./turbobench silesia.tar
+      - run: ./turbobench -J15 silesia.tar
 
   macos:
     runs-on: '${{ matrix.os }}'
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest]
+        os: [os: macos-26]
         compiler: ["clang"]
     env:      
       CC: ${{ matrix.compiler }}
@@ -47,7 +47,7 @@ jobs:
       - run: ./turbobench -l1
       - run: wget -q https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz -O silesia.tar.gz
       - run: gunzip silesia.tar.gz
-      - run: ./turbobench silesia.tar
+      - run: ./turbobench -J15 silesia.tar
 #      - run: ./turbobench turbobench
 
   windows:
@@ -67,6 +67,8 @@ jobs:
       - run: git submodule update --init --recursive
       - run: make
       - run: ./turbobench -l1
-      - run: ./turbobench turbobench.exe
+      - run: wget -q https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz -O silesia.tar.gz
+      - run: gunzip silesia.tar.gz
+      - run: ./turbobench -J15 silesia.tar
 
  
