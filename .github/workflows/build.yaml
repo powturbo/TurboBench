@@ -17,7 +17,7 @@ jobs:
     env:      
       CC: ${{ matrix.compiler }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'     
       - run: git submodule update --init --recursive
@@ -36,7 +36,7 @@ jobs:
     env:      
       CC: ${{ matrix.compiler }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
       - run: git submodule update --init --recursive
@@ -53,7 +53,7 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
       - uses: msys2/setup-msys2@v2
