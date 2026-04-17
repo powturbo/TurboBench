@@ -21,7 +21,7 @@ jobs:
         with:
           submodules: 'true'     
       - run: git submodule update --init --recursive
-      - run: make
+      - run: make STATIC=1
       - run: lscpu
       - run: ./turbobench -l1
       - run: ./turbobench turbobench
@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-26]
+        os: [macos-latest]
         compiler: ["clang"]
     env:      
       CC: ${{ matrix.compiler }}
@@ -40,12 +40,10 @@ jobs:
         with:
           submodules: 'true'
       - run: git submodule update --init --recursive
-      - run: make
+      - run: make STATIC=1
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l1
-      - run: wget -q https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz -O silesia.tar.gz
-      - run: gunzip silesia.tar.gz
-      - run: ./turbobench -J15 silesia.tar
+      - run: ./turbobench turbobench
 
   windows:
     runs-on: windows-latest
@@ -62,8 +60,9 @@ jobs:
           install: git make mingw-w64-x86_64-gcc
           update: true
       - run: git submodule update --init --recursive
-      - run: make
+      - run: make STATIC=1
       - run: ./turbobench -l1
-      - run: ./turbobench turbobench
-
- 
+      - run: ./turbobench turbobench.exe
+#      - run: wget -q https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz -O silesia.tar.gz
+#      - run: gunzip silesia.tar.gz
+#      - run: ./turbobench -J15 silesia.tar
