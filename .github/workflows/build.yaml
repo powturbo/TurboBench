@@ -24,10 +24,9 @@ jobs:
       - run: make
       - run: lscpu
       - run: ./turbobench -l1
-      - run: |
-          wget -q https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz -O silesia.tar.gz
-          gunzip silesia.tar.gz
-         ./turbobench silesia.tar
+      - run: wget -q https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz -O silesia.tar.gz
+      - run: gunzip silesia.tar.gz
+      - run: ./turbobench silesia.tar
 
   macos:
     runs-on: '${{ matrix.os }}'
@@ -46,10 +45,9 @@ jobs:
       - run: make
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l1
-      - run: |
-          wget -q https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz -O silesia.tar.gz
-          gunzip silesia.tar.gz
-         ./turbobench silesia.tar
+      - run: wget -q https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz -O silesia.tar.gz
+      - run: gunzip silesia.tar.gz
+      - run: ./turbobench silesia.tar
 #      - run: ./turbobench turbobench
 
   windows:
