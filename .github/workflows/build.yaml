@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [os: macos-latest]
+        os: [macos-26]
         compiler: ["clang"]
     env:      
       CC: ${{ matrix.compiler }}
