@@ -1334,7 +1334,7 @@ void printfile(char *finame, int xstdout, int fmt, char *rem) {
   int       k = plugread(plugt, finame, &totinlen); 
   char      *p, s[256];
   if(k < 0)
-    die(stderr, "file open error for '%s'\n", finame);
+    die("file open error for '%s'\n", finame);
 
   if(!k) return;
   strncpy(s, finame, 255); 
