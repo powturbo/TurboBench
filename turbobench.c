@@ -1190,19 +1190,19 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
   char   *p; 
   if((p = strrchr(finame, '\\')) || (p = strrchr(finame, '/'))) finame = p+1; 	if(verbose>1) printf("'%s'\n", finame);
   p = finame; 
-
+  
   char name[65]; 
   if(plug->lev != INVLEV) 
     sprintf(name, "%s %d%s", plug->s, plug->lev, plug->prm);
   else
     sprintf(name, "%s%s",    plug->s,            plug->prm);
  
-  size_t filen;
+  long long filen;
   if(finame) {
     fseeko(fi, 0, SEEK_END); filen = ftello(fi); fseeko(fi , 0 , SEEK_SET); if(filenmax && filen > filenmax) filen = filenmax;
   } else 
     filen = filenmax?filenmax:Gb;
-                                                                                //printf("filelenmax=%llu filen=%llu bsize=%u ", filenmax, (unsigned long long)filen, (unsigned)bsize);
+																								//printf("filelenmax=%llu filen=%llu bsize=%u ", filenmax, (unsigned long long)filen, (unsigned)bsize);
   size_t insize   = filen>bsize?bsize:filen; 			         								if(filen < mininlen) insize = mininlen;
   size_t pagesize = getpagesize();
   size_t insizem  = (fuzz&3)?SIZE_ROUNDUP(insize, pagesize):(insize+INOVD);
@@ -1224,61 +1224,61 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
   bsize     = plug->blksize?plug->blksize:bsize;
   plug->len = plug->tc = plug->td = 0; 											
                                                                                 blknum = 0;	
-																								
+																						
   while((inlen = fread(_in, 1, insize, fi)) > 0) {                              //printf("READ=%zu ", inlen);  
-    unsigned char *in = _in; 
-    if(fuzz & 1) { in = (_in+insizem)-inlen; memmove(in, _in, inlen); 			/*printf("SEGFAULT Check");fflush(stdout); in[inlen-1] = in[inlen]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
-    double   tc = 0.0, td = 0.0;         
-    size_t   l = inlen;
+    double        tc = 0.0, td = 0.0;         
+    unsigned char *in = _in;
+	size_t        len = inlen;
 	totinlen += inlen;																
-    BEPRE;		
-																				memrcpy(out, in, inlen);
+    if(fuzz & 1) { in = (_in+insizem)-inlen; memmove(in, _in, inlen); 			/*printf("SEGFAULT Check");fflush(stdout); in[inlen-1] = in[inlen]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
+    //BEPRE;		
+																				memrcpy(out, in, len);
     unsigned nb = 1;
-    if(l < mininlen) {
-      bsize = l;
+    if(len < mininlen) {
+      bsize = len;
       unsigned char *p;
-      for(p = in+l; ; p+=l) {
-        if(p+l > in+insize) break;
+      for(p = in+len; ; p+=len) {
+        if(p+len > in+insize) break;
         nb++;
-        memcpy(p, in, l);
+        memcpy(p, in, len);
       }
     }
     size_t   peak    = mempeakinit();
     unsigned *_stack = stackini();   
 
-	size_t outlen =        becomp(in, l*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm)/nb;
+	size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm)/nb;
+	tc = ((double)tm_tm/((double)tm_rm*nb));
 	plug->len += outlen; 
-    tc = ((double)tm_tm/((double)tm_rm*nb)); plug->tc  += tc; 
+    plug->tc  += tc; 
 	plug->memc = mempeak() - peak;
     plug->stkc = stackpeak(_stack);
     if(tm_Rep > 1) 
       TMSLEEP;
-																		        if(verbose && inlen == filen) { double ratio = (double)outlen*100.0/inlen; printf("%12u   %5.1f   %8.2f   ", outlen, ratio, TMBS(inlen,tc)); fflush(stdout); }
+																		        if(verbose && totinlen == filen) { double ratio = (double)plug->len*100.0/totinlen; printf("%12u   %5.1f   %8.2f   ", plug->len, ratio, TMBS(totinlen,plug->tc)); fflush(stdout); }
     if(cmp) {
       unsigned char *cpz = _cpy; 
-      if(fuzz & 2) { cpz = (_cpy+insizem) - l; 									/*printf("SEGFAULT Check");fflush(stdout); cpz[l-1] = cpz[l]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
-	  if(_cpy != _in) memrcpy(cpz, in, l);
+      if(fuzz & 2) { cpz = (_cpy+insizem) - len; 									/*printf("SEGFAULT Check");fflush(stdout); cpz[len-1] = cpz[len]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
+	  if(_cpy != _in) memrcpy(cpz, in, len);
       size_t   peak    = mempeakinit();
       unsigned *_stack = stackini();   
-	  unsigned cpylen  = bedecomp(out, outlen, cpz, l*nb, bsize, plug->id,plug->lev,plug->prm)/nb; 
-	  td = ((double)tm_tm/((double)tm_rm*nb)); plug->td  += td;		
-      plug->memd = mempeak() - peak;              						        if(verbose && inlen == filen) { printf("%8.2f   %-16s %s\n", TMBS(inlen,td), name, finame); }
+	  unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm)/nb;
+	  td = ((double)tm_tm/((double)tm_rm*nb)); 
+	  plug->td  += td;		
+      plug->memd = mempeak() - peak;              						        if(verbose && totinlen == filen) printf("%8.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
       plug->stkd = stackpeak(_stack);
-      int e = memcheck(in, l, cpz, fuzz?3:cmp, finame);  
+      int e = memcheck(in, len, cpz, fuzz?3:cmp, finame);  
       plug->err = plug->err?plug->err:e;
       BEPOST;																	
-	} else 																        if(verbose && inlen == filen) { printf("%8.2f   %-16s %s\n", 0.0, name, finame); }
-	if(totinlen >= filen) 
-      break;
-  }	                                                                            //printf("LEN=%llu ", plug->len);  
+	} else 																        if(verbose && totinlen == filen) { printf("%8.2f   %-16s %s\n", 0.0, name, finame); }
+	if(totinlen >= filen) break;
+  }	                                                                         //printf("ILEN=%llu Olen=%llu c=%f d=%f\n", totinlen, plug->len, plug->tc, plug->td);  
   _vfree(out, outsize); 
   _vfree(_in, insizem);
   if(_cpy && _cpy != _in) 
     _vfree(_cpy, insizem); 
   codexit(plug->id);
   fclose(fi); 
-  if(verbose && filen > insize) 
-    plugprt(plug, totinlen, finame, FMT_TEXT, &ptc, &ptd,stdout);
+  //if(verbose && filen > insize) plugprt(plug, totinlen, finame, FMT_TEXT, &ptc, &ptd,stdout);
   //if(memused()) printf("Mem allocated not freed null\n");          
   return totinlen;
 }
@@ -1556,8 +1556,8 @@ int main(int argc, char* argv[]) {
   long long _totinlen;
   int       gk = plugread(plug, s, &_totinlen);
   if(_totinlen != totinlen) 
-    gk = 0;                  
-  FILE *fo = fopen(s, "w");
+    gk = 0;        
+   FILE *fo = fopen(s, "w");
   if(fo) {
     char tms[20];
     time_t tm; 
@@ -1570,30 +1570,28 @@ int main(int argc, char* argv[]) {
     for(p = plugt; p < plugt+k; p++) { 																
       for(g = plug; g < plug+gk; g++) { 
         if(g->id >= 0 && !strcmp(g->s, p->s) && g->lev == p->lev && !strcmp(g->prm, p->prm)) {
+		  int u = 0; 																//printf("$$$TLEN=%u D=%f %f ", (unsigned)p->len, p->td, g->td);
           if(g->len == p->len) {
-            int u = 0;
-            if(g->td < p->td || p->td < 0.01) 
-			  p->td = g->td,u++;
-            if(g->tc < p->tc || p->tc < 0.01) 
-			  p->tc = g->tc,u++;
+            if(g->tc < p->tc || p->tc == DBL_MAX) p->tc = g->tc,u++;
+            if(g->td < p->td || p->td == DBL_MAX) p->td = g->td,u++;
 
             if(g->memc != p->memc) u++;
             if(g->memd != p->memd) u++;
             if(g->stkc != p->stkc) u++;
             if(g->stkd != p->stkd) u++;
-
             strcpy(p->tms, u?tms:g->tms);
-          } 
+          }																		  	//printf("Id=%d len=%llu,%llu cd=%f,%f\n", g->id, totinlen, g->len, g->tc, g->td); 
           g->id = -1;
           break; 
         }
       } 
       fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", finame, totinlen, p->len, p->td, p->tc, p->s, p->lev, p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
     }
-    for(g = plug; g < plug+gk; g++) 
+    for(g = plug; g < plug+gk; g++) {
       if(g->id >= 0) {
         fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", finame, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, p->stkc, p->stkd, g->tms[0]?g->tms:tms);
       }
+	}
 	fclose(fo);
     printfile(s, 0, FMT_TEXT, rem);
   }
