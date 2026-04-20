@@ -1337,6 +1337,10 @@ static ZSTD_DDict *ddictPtr;
 static char _workmem[1<<16],*workmem=_workmem;
 static int state_size,dstate_size;
 static size_t workmemsize;
+#if _ZXC
+static zxc_cctx *zxc_cctx_ptr = NULL;
+static zxc_dctx *zxc_dctx_ptr = NULL;
+#endif
 
 int codini(size_t insize, int codec, int lev, char *prm) {
   workmemsize = 0;
@@ -1487,6 +1491,13 @@ int codini(size_t insize, int codec, int lev, char *prm) {
 //    case P_FSEH: workmemsize = max(4096*sizeof(unsigned), workmemsize); break;
       #endif
 
+      #if _ZXC
+    case P_ZXC:
+      zxc_cctx_ptr = zxc_create_cctx(NULL);
+      zxc_dctx_ptr = zxc_create_dctx();
+      break;
+      #endif
+
       #ifdef _LZTURBO
     #include "../dev/x/beplug0.h"
       #endif
@@ -1538,6 +1549,12 @@ void codexit(int codec) {
     #if _SNAPPY_C
   if(codec == P_SNAPPY_C)
     snappy_free_env(&env);
+    #endif
+    #if _ZXC
+  if(codec == P_ZXC) {
+    zxc_free_cctx(zxc_cctx_ptr); zxc_cctx_ptr = NULL;
+    zxc_free_dctx(zxc_dctx_ptr); zxc_dctx_ptr = NULL;
+  }
     #endif
 }
 
@@ -2080,8 +2097,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 	  #if _ZXC
     case P_ZXC: {
 	  zxc_compress_opts_t opts = {.n_threads = 1, .level = lev, .checksum_enabled = 0};
-	  return zxc_compress(in, inlen, out, outsize, &opts);
-	  
+	  return zxc_compress_cctx(zxc_cctx_ptr, in, inlen, out, outsize, &opts);
     }
       #endif
 
@@ -2846,7 +2862,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 	  #if _ZXC
     case P_ZXC: {
 	  zxc_decompress_opts_t opts = {.n_threads = 1, .checksum_enabled = 0};
-	  zxc_decompress(in, inlen, out, outlen, &opts);
+	  zxc_decompress_dctx(zxc_dctx_ptr, in, inlen, out, outlen, &opts);
 	  break;
     }
       #endif

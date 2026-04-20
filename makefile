@@ -848,7 +848,6 @@ else
 ifeq ($(ZXC),1)
 CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
 CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE
-OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o $(ZXCDIR)/zxc_decompress_default.o
 
 #from lzbench 
 ZXCDIR = zxc/src/lib
