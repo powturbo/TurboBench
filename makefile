@@ -849,12 +849,11 @@ ifeq ($(ZXC),1)
 CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
 CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE
 
-OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o $(ZXCDIR)/zxc_decompress_default.o \
-         $(ZXCDIR)/zxc_huffman_default.o $(ZXCDIR)/zxc_pstream.o
+OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o $(ZXCDIR)/zxc_decompress_default.o $(ZXCDIR)/zxc_huffman_default.o $(ZXCDIR)/zxc_pstream.o
 
 #from lzbench 
 ZXCDIR = zxc/src/lib
-OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o $(ZXCDIR)/zxc_seekable.o $(ZXCDIR)/zxc_decompress_default.o
+OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o  $(ZXCDIR)/zxc_seekable.o $(ZXCDIR)/zxc_decompress_default.o
 
   ifneq (,$(filter x86_64% amd64% i%86%,$(ARCH)))
     ifneq (,$(filter x86_64% amd64%,$(ARCH)))
@@ -866,7 +865,7 @@ OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZX
   else
     ifneq (,$(filter arm% aarch64%,$(ARCH)))
     OB += $(ZXCDIR)/zxc_compress_neon.o $(ZXCDIR)/zxc_decompress_neon.o
-    OB += $(ZXCDIR)/zxc_huffman_neon.o $(ZXCDIR)/zxc_huffman.o
+    OB += $(ZXCDIR)/zxc_huffman_neon.o $(ZXCDIR)/zxc_huffman_neon.o
         
       ifneq (,$(filter arm64% aarch64%,$(ARCH)))
       NEON_FLAGS = -DZXC_USE_NEON64
