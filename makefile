@@ -866,6 +866,7 @@ OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZX
   else
     ifneq (,$(filter arm% aarch64%,$(ARCH)))
     OB += $(ZXCDIR)/zxc_compress_neon.o $(ZXCDIR)/zxc_decompress_neon.o
+    OB += $(ZXCDIR)/zxc_huffman_neon.o $(ZXCDIR)/zxc_huffman.o
         
       ifneq (,$(filter arm64% aarch64%,$(ARCH)))
       NEON_FLAGS = -DZXC_USE_NEON64
