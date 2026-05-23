@@ -848,11 +848,9 @@ else
 ifeq ($(ZXC),1)
 CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
 CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE
-<<<<<<< HEAD
-=======
+
 OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o $(ZXCDIR)/zxc_decompress_default.o \
          $(ZXCDIR)/zxc_huffman_default.o $(ZXCDIR)/zxc_pstream.o
->>>>>>> d4f5adc (TurboBench: Makefile)
 
 #from lzbench 
 ZXCDIR = zxc/src/lib
