@@ -848,6 +848,11 @@ else
 ifeq ($(ZXC),1)
 CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
 CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE
+<<<<<<< HEAD
+=======
+OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o $(ZXCDIR)/zxc_decompress_default.o \
+         $(ZXCDIR)/zxc_huffman_default.o $(ZXCDIR)/zxc_pstream.o
+>>>>>>> d4f5adc (TurboBench: Makefile)
 
 #from lzbench 
 ZXCDIR = zxc/src/lib
@@ -857,6 +862,8 @@ OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZX
     ifneq (,$(filter x86_64% amd64%,$(ARCH)))
     OB += $(ZXCDIR)/zxc_compress_avx2.o $(ZXCDIR)/zxc_decompress_avx2.o
     OB += $(ZXCDIR)/zxc_compress_avx512.o $(ZXCDIR)/zxc_decompress_avx512.o
+    OB += $(ZXCDIR)/zxc_huffman_avx2.o $(ZXCDIR)/zxc_huffman_avx2.o
+    OB += $(ZXCDIR)/zxc_huffman_avx512.o $(ZXCDIR)/zxc_huffman_avx512.o
     endif
   else
     ifneq (,$(filter arm% aarch64%,$(ARCH)))
@@ -882,6 +889,16 @@ $(ZXCDIR)/%_avx2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
 
 $(ZXCDIR)/%_avx512.o: ZXC_FLAGS = -mavx512f -mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512
 $(ZXCDIR)/%_avx512.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_default.o: ZXC_FLAGS = -DZXC_FUNCTION_SUFFIX=_default
+$(ZXCDIR)/%_default.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_avx2.o: ZXC_FLAGS = -mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2
+$(ZXCDIR)/%_avx2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_avx512.o: ZXC_FLAGS = -mavx512f -mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512
+$(ZXCDIR)/%_avx512.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
 
 $(ZXCDIR)/%_neon.o: ZXC_FLAGS = $(NEON_FLAGS) -DZXC_FUNCTION_SUFFIX=_neon
 $(ZXCDIR)/%_neon.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
