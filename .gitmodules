@@ -88,3 +88,6 @@
 [submodule "lzav"]
 	path = lzav
 	url = https://github.com/avaneev/lzav.git
+[submodule "pivco-huffman"]
+	path = pivco-huffman
+	url = https://github.com/MarcinZukowski/pivco-huffman

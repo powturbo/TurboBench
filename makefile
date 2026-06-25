@@ -962,6 +962,21 @@ CXXFLAGS+=-D_PYSAP
 OB+=pysap/pysapcompress/vpa105CsObjInt.o pysap/pysapcompress/vpa106cslzc.o pysap/pysapcompress/vpa107cslzh.o pysap/pysapcompress/vpa108csulzh.o
 endif
 
+# PivCo-Huffman (https://github.com/MarcinZukowski/pivco-huffman): SIMD tree-walk
+# Huffman, levels 1=PH, 2=PHA.  Submodule built via its own CMake; we link the
+# pre-localized object (libpivco_huffman_local.o) whose vendored FSE_*/HUF_*
+# symbols are localized so they don't clash with the zstd TurboBench bundles.
+# The submodule has its own submodule (ext/fse), so init recursively:
+#   git submodule update --init --recursive pivco-huffman
+ifeq ($(PIVCOHUF), 1)
+PIVCOHUFDIR=pivco-huffman
+CXXFLAGS+=-D_PIVCOHUF=1 -I$(PIVCOHUFDIR)/include
+$(PIVCOHUFDIR)/build/libpivco_huffman_local.o:
+	cmake -S $(PIVCOHUFDIR) -B $(PIVCOHUFDIR)/build -DCMAKE_BUILD_TYPE=Release
+	cmake --build $(PIVCOHUFDIR)/build --target pivco_huffman_local -j
+OB+=$(PIVCOHUFDIR)/build/libpivco_huffman_local.o
+endif
+
 #--------------------------------------------------------------------
 CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti
