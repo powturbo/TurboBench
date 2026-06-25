@@ -438,6 +438,10 @@ enum {
 #define _PIVCOHUF 0
 #endif
  P_PIVCOHUF,          // PivCo-Huffman (ph/pha)
+#ifndef _PHAZ
+#define _PHAZ 0
+#endif
+ P_PHAZ,              // PHAZ: PivCo-Huffman entropy transplant onto zstd
  P_MYCODEC, // User plugin
   #ifdef _LZTURBO
 #include "../dev/x/beplug.h"
@@ -1092,6 +1096,13 @@ const MarlinDictionary * Marlin_estimate_best_dictionary(const MarlinDictionary 
 #include "pivcohuf_file.h"
   #endif
 
+  #if _PHAZ
+// phaz_local.o exports only these (zstd + pivco localized inside the blob).
+// Last arg is a phaz_stats* (passed 0 here); declared void* to avoid the header.
+extern "C" size_t phaz_compress(const void *src, size_t n, void *dst, size_t cap, int level, void *st);
+extern "C" size_t phaz_decompress(const void *src, size_t n, void *dst, size_t cap, void *st);
+  #endif
+
   #if __cplusplus
 extern "C" {
   #endif
@@ -1215,6 +1226,7 @@ struct plugs plugs[] = {
   { P_MINIZ,      "miniz",       _MINIZ,     "miniz zlib-replace",      "1,2,3,4,5,6,7,8,9" },
   { P_MSCOMPRESS, "mscompress",  _MSCOMPRESS,"ms-compress",             "2,3,4" },
   { P_NAKA,       "naka",        _NAKA,      "Nakamichi Washigan",      "" },
+  { P_PHAZ,       "phaz",        _PHAZ,      "PivCo-Huffman/zstd",      "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },  // level = zstd level
   { P_PITHY,      "pithy",       _PITHY,     "Pithy",                   "0,1,2,3,4,5,6,7,8,9" },
   { P_QUICKLZ,    "quicklz",     _QUICKLZ,   "Quicklz",                 "1,2,3" },
   { P_QCOMPRESS32,"qcomp32",     _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
@@ -2426,6 +2438,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
                  if(pivcohuf_compress_ex(in, inlen, out, &ol, lev>=2) != PIVCOHUF_OK) return 0;
                  return (unsigned)ol; }
       #endif
+      #if _PHAZ
+    case P_PHAZ: return (unsigned)phaz_compress(in, inlen, out, outsize, lev, 0);  /* lev = zstd level */
+      #endif
       #if _MYCODEC
 //    case P_MYCODEC:   return mycomp(in, inlen, out, outsize);
       #endif
@@ -3172,6 +3187,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_PIVCOHUF: { size_t ol = outlen;
                  if(pivcohuf_decompress(in, inlen, out, &ol) != PIVCOHUF_OK) return 0;
                  return (unsigned)ol; }
+      #endif
+      #if _PHAZ
+    case P_PHAZ: return (unsigned)phaz_decompress(in, inlen, out, outlen, 0);
       #endif
       #if _MYCODEC
 //   case P_MYCODEC:   return mydecomp(in, inlen, out, outlen);
