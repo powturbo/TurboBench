@@ -434,6 +434,14 @@ enum {
 #define _XPACK 0
 #endif
  P_XPACK,
+#ifndef _PIVCOHUF
+#define _PIVCOHUF 0
+#endif
+ P_PIVCOHUF,          // PivCo-Huffman (ph/pha)
+#ifndef _PHAZ
+#define _PHAZ 0
+#endif
+ P_PHAZ,              // PHAZ: PivCo-Huffman entropy transplant onto zstd
  P_MYCODEC, // User plugin
   #ifdef _LZTURBO
 #include "../dev/x/beplug.h"
@@ -1084,6 +1092,17 @@ const MarlinDictionary * Marlin_estimate_best_dictionary(const MarlinDictionary 
 //#include "my_header.h"
   #endif
 
+  #if _PIVCOHUF
+#include "pivcohuf_file.h"
+  #endif
+
+  #if _PHAZ
+// phaz_local.o exports only these (zstd + pivco localized inside the blob).
+// Last arg is a phaz_stats* (passed 0 here); declared void* to avoid the header.
+extern "C" size_t phaz_compress(const void *src, size_t n, void *dst, size_t cap, int level, void *st);
+extern "C" size_t phaz_decompress(const void *src, size_t n, void *dst, size_t cap, void *st);
+  #endif
+
   #if __cplusplus
 extern "C" {
   #endif
@@ -1207,6 +1226,7 @@ struct plugs plugs[] = {
   { P_MINIZ,      "miniz",       _MINIZ,     "miniz zlib-replace",      "1,2,3,4,5,6,7,8,9" },
   { P_MSCOMPRESS, "mscompress",  _MSCOMPRESS,"ms-compress",             "2,3,4" },
   { P_NAKA,       "naka",        _NAKA,      "Nakamichi Washigan",      "" },
+  { P_PHAZ,       "phaz",        _PHAZ,      "PivCo-Huffman/zstd",      "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },  // level = zstd level
   { P_PITHY,      "pithy",       _PITHY,     "Pithy",                   "0,1,2,3,4,5,6,7,8,9" },
   { P_QUICKLZ,    "quicklz",     _QUICKLZ,   "Quicklz",                 "1,2,3" },
   { P_QCOMPRESS32,"qcomp32",     _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
@@ -1255,6 +1275,7 @@ struct plugs plugs[] = {
   { P_MARLIN,       "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
   { P_NIBRANS,      "nibrans",     _NIBRANS,   "nibrans",                 ""},
   { P_OODLE,        "oodle",        _OODLE,     "Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
+  { P_PIVCOHUF,     "ph",          _PIVCOHUF,  "PivCo-Huffman",           "1,2" },  // 1=PH, 2=PHA (ANS-gated bitmaps)
   { P_POLHF,        "polar",       _POLHF,     "Polar Codes",             "" },
   { P_PPMDEC,       "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
 
@@ -2412,6 +2433,14 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     #include "../dev/x/beplugc.c"
       #endif
 
+      #if _PIVCOHUF
+    case P_PIVCOHUF: { size_t ol = outsize;   /* lev 1=PH, 2=PHA */
+                 if(pivcohuf_compress_ex(in, inlen, out, &ol, lev>=2) != PIVCOHUF_OK) return 0;
+                 return (unsigned)ol; }
+      #endif
+      #if _PHAZ
+    case P_PHAZ: return (unsigned)phaz_compress(in, inlen, out, outsize, lev, 0);  /* lev = zstd level */
+      #endif
       #if _MYCODEC
 //    case P_MYCODEC:   return mycomp(in, inlen, out, outsize);
       #endif
@@ -3154,6 +3183,14 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     #include "../dev/x/beplugd.c"
       #endif
 
+      #if _PIVCOHUF
+    case P_PIVCOHUF: { size_t ol = outlen;
+                 if(pivcohuf_decompress(in, inlen, out, &ol) != PIVCOHUF_OK) return 0;
+                 return (unsigned)ol; }
+      #endif
+      #if _PHAZ
+    case P_PHAZ: return (unsigned)phaz_decompress(in, inlen, out, outlen, 0);
+      #endif
       #if _MYCODEC
 //   case P_MYCODEC:   return mydecomp(in, inlen, out, outlen);
       #endif
