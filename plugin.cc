@@ -198,6 +198,10 @@ enum {
 #define _MINIZ 0
 #endif
  P_MINIZ,
+#ifndef _MISA77
+#define _MISA77 0
+#endif
+ P_MISA77,
 #ifndef _MSCOMPRESS
 #define _MSCOMPRESS 0
 #endif
@@ -672,6 +676,11 @@ class Out: public libzpaq::Writer {
 #include "LZSSE/lzsse2/lzsse2.h"
 #include "LZSSE/lzsse4/lzsse4.h"
 #include "LZSSE/lzsse8/lzsse8.h"
+  #endif
+
+  #if _MISA77
+#include "misa77/include/misa77/misa77.h"
+#include "misa77/include/misa77/experimental.h"
   #endif
 
   #if _MSCOMPRESS
@@ -1224,6 +1233,7 @@ struct plugs plugs[] = {
   { P_LZSSE4,     "lzsse4",      _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
   { P_LZSSE8,     "lzsse8",      _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
   { P_MINIZ,      "miniz",       _MINIZ,     "miniz zlib-replace",      "1,2,3,4,5,6,7,8,9" },
+  { P_MISA77,     "misa77",      _MISA77,    "misa77",                  "0,1,2,3" },
   { P_MSCOMPRESS, "mscompress",  _MSCOMPRESS,"ms-compress",             "2,3,4" },
   { P_NAKA,       "naka",        _NAKA,      "Nakamichi Washigan",      "" },
   { P_PHAZ,       "phaz",        _PHAZ,      "PivCo-Huffman/zstd",      "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },  // level = zstd level
@@ -1251,7 +1261,7 @@ struct plugs plugs[] = {
   { P_ZLING,      "zling",       _ZLING,     "Libzling",                "0,1,2,3,4" },
   { P_ZOPFLI,     "zopfli",      _ZOPFLI,    "Zopfli",                  ""},
   { P_ZSTD,       "zstd",        _ZSTD,      "ZSTD",                    "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13,-14,-15,-16,-17,-18,-19,-20,-21,-22/d#" },
-  { P_ZXC,        "zxc",         _ZXC,       "zxc",                     "1,2,3,4,5" },
+  { P_ZXC,        "zxc",         _ZXC,       "zxc",                     "1,2,3,4,5,6" },
 //------------------------------------------------------------------
   { P_MCPY,         "imemcpy",     _MEMCPY,    "inline memcpy",           "" },
   { P_LMCPY,        "memcpy",      _MEMCPY,    "library memcpy",          "" },
@@ -1961,6 +1971,16 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _MINIZ
     case P_MINIZ:   { uLongf outlen = outsize; int rc = mz_compress2(out, &outlen, in, inlen, lev); if (rc != Z_OK) printf("miniz compress2 rc=%d\n", rc); return outlen; }
+      #endif
+
+      #if _MISA77
+    case P_MISA77: 
+      switch (lev) {
+        case 0: 
+        case 1:  return misa77::experimental::adaptive_compress(in, inlen, out, outsize, lev); 
+        case 3:  return misa77::experimental::yolo_compress(in, inlen, out, outsize); 
+        default: return misa77::compress(in, inlen, out, outsize);                          
+      }
       #endif
 
       #if _NAKA
@@ -2704,8 +2724,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_MINIZ: { uLongf outsize = outlen; int rc = mz_uncompress(out, &outsize, in, inlen); } break;
       #endif
 
+      #if _MISA77
+    case P_MISA77: return misa77::decompress(in, inlen, out, outlen); 
+      #endif
+      
       #if _NAKA
-    case P_NAKA:    return NakaDecompress((char *)out, (char *)in, inlen);
+    case P_NAKA:  return NakaDecompress((char *)out, (char *)in, inlen);
       #endif
       #if _PITHY
     case P_PITHY: return pithy_Decompress((const char *)in, inlen, (char *)out, outlen);
