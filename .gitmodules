@@ -91,3 +91,6 @@
 [submodule "pivco-huffman"]
 	path = pivco-huffman
 	url = https://github.com/MarcinZukowski/pivco-huffman
+[submodule "misa77"]
+	path = misa77
+	url = https://github.com/welcome-to-the-sunny-side/misa77.git
