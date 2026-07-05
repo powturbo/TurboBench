@@ -39,6 +39,7 @@ LZLIB=1
 LZO=1
 LZSA=1
 LZSSE=1
+MISA77=1
 # oodle dll 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
 OODLE=1
 QUICKLZ=1
@@ -528,6 +529,28 @@ CXXFLAGS+=-D_MINIZ
 OB+=miniz/miniz.o miniz/miniz_tdef.o miniz/miniz_tinfl.o
 endif
 
+ifeq ($(MISA77), 1)
+CXXFLAGS+=-D_MISA77
+
+MISA77_DIR = misa77
+MISA77_INC = -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src
+
+CMD_BUILD_MISA77 = $(CXX) $(CXXFLAGS) -std=c++20 $(MISA77_INC) $(MISA77_FLAGS) $< -c -o $@
+misa77/%_avx2.o: CXXFLAGS+=-mavx2
+misa77/%_avx2.o: misa77/%.cpp ; $(CMD_BUILD_MISA77)
+misa77/%_sse2.o: CXXFLAGS+=-msse2
+misa77/%_sse2.o: misa77/%.cpp ; $(CMD_BUILD_MISA77)
+misa77/%.o: misa77/%.cpp ; $(CMD_BUILD_MISA77)
+
+OB+=misa77/src/compress.o $(MISA77_DIR)/src/decompress.o misa77/src/experimental/ecompress.o misa77/src/isa/target_portable.o
+OB+= $(MISA77_DIR)/src/experimental/isa/etarget_portable.o
+ifneq (,$(filter x86_64% amd64%,$(ARCH)))
+  OB += $(MISA77_DIR)/src/isa/target_sse2.o $(MISA77_DIR)/src/isa/target_avx2.o
+  OB += $(MISA77_DIR)/src/experimental/isa/etarget_sse2.o $(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
+endif
+
+endif
+
 ifeq ($(SNAPPY), 1)
 # configure or copy directory "snappy_/*" to "snappy"
 ifneq (,$(wildcard snappy/snappy-stubs-public.h))
@@ -853,14 +876,17 @@ OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZX
 
 #from lzbench 
 ZXCDIR = zxc/src/lib
-OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o  $(ZXCDIR)/zxc_seekable.o $(ZXCDIR)/zxc_decompress_default.o
+OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_dict_sse2.o  $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o  $(ZXCDIR)/zxc_seekable.o $(ZXCDIR)/zxc_decompress_default.o
 
   ifneq (,$(filter x86_64% amd64% i%86%,$(ARCH)))
     ifneq (,$(filter x86_64% amd64%,$(ARCH)))
+    OB += $(ZXCDIR)/zxc_compress_sse2.o $(ZXCDIR)/zxc_decompress_sse2.o
     OB += $(ZXCDIR)/zxc_compress_avx2.o $(ZXCDIR)/zxc_decompress_avx2.o
     OB += $(ZXCDIR)/zxc_compress_avx512.o $(ZXCDIR)/zxc_decompress_avx512.o
+    OB += $(ZXCDIR)/zxc_huffman_sse2.o $(ZXCDIR)/zxc_huffman_sse2.o
     OB += $(ZXCDIR)/zxc_huffman_avx2.o $(ZXCDIR)/zxc_huffman_avx2.o
     OB += $(ZXCDIR)/zxc_huffman_avx512.o $(ZXCDIR)/zxc_huffman_avx512.o
+    OB += $(ZXCDIR)/zxc_dict_sse2.o $(ZXCDIR)/zxc_dict_sse2.o
     endif
   else
     ifneq (,$(filter arm% aarch64%,$(ARCH)))
@@ -881,6 +907,9 @@ $(ZXCDIR)/%.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
 
 $(ZXCDIR)/%_default.o: ZXC_FLAGS = -DZXC_FUNCTION_SUFFIX=_default
 $(ZXCDIR)/%_default.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_sse2.o: ZXC_FLAGS = -msse2 -DZXC_FUNCTION_SUFFIX=_sse2 -DZXC_USE_SSE2
+$(ZXCDIR)/%_sse2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
 
 $(ZXCDIR)/%_avx2.o: ZXC_FLAGS = -mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2
 $(ZXCDIR)/%_avx2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
