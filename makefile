@@ -876,7 +876,7 @@ OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZX
 
 #from lzbench 
 ZXCDIR = zxc/src/lib
-OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_dict_sse2.o  $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o  $(ZXCDIR)/zxc_seekable.o $(ZXCDIR)/zxc_decompress_default.o
+OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o  $(ZXCDIR)/zxc_seekable.o $(ZXCDIR)/zxc_decompress_default.o
 
   ifneq (,$(filter x86_64% amd64% i%86%,$(ARCH)))
     ifneq (,$(filter x86_64% amd64%,$(ARCH)))
@@ -892,6 +892,7 @@ OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_dict_sse2.o  $(ZXCDIR)/zxc_driver.o $(
     ifneq (,$(filter arm% aarch64%,$(ARCH)))
     OB += $(ZXCDIR)/zxc_compress_neon.o $(ZXCDIR)/zxc_decompress_neon.o
     OB += $(ZXCDIR)/zxc_huffman_neon.o $(ZXCDIR)/zxc_huffman_neon.o
+    OB += $(ZXCDIR)/zxc_dict_neon.o $(ZXCDIR)/zxc_dict_neon.o
         
       ifneq (,$(filter arm64% aarch64%,$(ARCH)))
       NEON_FLAGS = -DZXC_USE_NEON64
