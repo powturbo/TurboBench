@@ -184,6 +184,7 @@ Compressors with versions 16.08.2016 <br>
  - [LZSSE](https://github.com/ConorStokes/LZSSE)
  - [LZSA](https://github.com/emmanuel-marty/lzsa)
  - [Miniz](https://github.com/richgel999/miniz) 
+ - [misa77](https://github.com/welcome-to-the-sunny-side/misa77) :new:2026.07
  - [ms-compress](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi Washigan](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188)
  - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux) 
@@ -247,7 +248,8 @@ Compressors with versions 16.08.2016 <br>
  - [FPC](https://github.com/algorithm314/FPC)
  - [FSE Huff](https://github.com/Cyan4973/FiniteStateEntropy)
  - [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html)
-
+ - [Pico-Huffman](https://github.com/MarcinZukowski/pivco-huffman) :new:2026.07
+ 
 ###### memcpy
  - [inline memcpy](https://github.com/powturbo/TurboBench)
  - [library memcpy](https://github.com/powturbo/TurboBench)
