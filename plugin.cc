@@ -1974,12 +1974,11 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _MISA77
-    case P_MISA77: 
+    case P_MISA77:
       switch (lev) {
-        case 0: 
-        case 1:  return misa77::experimental::adaptive_compress(in, inlen, out, outsize, lev); 
-        case 3:  return misa77::experimental::yolo_compress(in, inlen, out, outsize); 
-        default: return misa77::compress(in, inlen, out, outsize);                          
+        case 2:
+        case 3:  return misa77::experimental::adaptive_compress(in, inlen, out, outsize, lev - 2);
+        default: return misa77::compress(in, inlen, out, outsize, misa77::config(lev));
       }
       #endif
 
