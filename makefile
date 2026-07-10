@@ -535,7 +535,7 @@ CXXFLAGS+=-D_MISA77
 MISA77_DIR = misa77
 MISA77_INC = -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src
 
-CMD_BUILD_MISA77 = $(CXX) $(CXXFLAGS) -std=c++20 $(MISA77_INC) $(MISA77_FLAGS) $< -c -o $@
+CMD_BUILD_MISA77 = $(CXX) -O3 $(CXXFLAGS) -std=c++20 $(MISA77_INC) $(MISA77_FLAGS) $< -c -o $@
 misa77/%_avx2.o: CXXFLAGS+=-mavx2
 misa77/%_avx2.o: misa77/%.cpp ; $(CMD_BUILD_MISA77)
 misa77/%_sse2.o: CXXFLAGS+=-msse2
