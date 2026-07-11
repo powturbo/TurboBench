@@ -1261,7 +1261,7 @@ struct plugs plugs[] = {
   { P_ZLING,      "zling",       _ZLING,     "Libzling",                "0,1,2,3,4" },
   { P_ZOPFLI,     "zopfli",      _ZOPFLI,    "Zopfli",                  ""},
   { P_ZSTD,       "zstd",        _ZSTD,      "ZSTD",                    "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13,-14,-15,-16,-17,-18,-19,-20,-21,-22/d#" },
-  { P_ZXC,        "zxc",         _ZXC,       "zxc",                     "1,2,3,4,5,6" },
+  { P_ZXC,        "zxc",         _ZXC,       "zxc",                     "1,2,3,4,5,6,7" },
 //------------------------------------------------------------------
   { P_MCPY,         "imemcpy",     _MEMCPY,    "inline memcpy",           "" },
   { P_LMCPY,        "memcpy",      _MEMCPY,    "library memcpy",          "" },
