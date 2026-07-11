@@ -876,7 +876,7 @@ OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZX
 
 #from lzbench 
 ZXCDIR = zxc/src/lib
-OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o  $(ZXCDIR)/zxc_seekable.o $(ZXCDIR)/zxc_decompress_default.o
+OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o  $(ZXCDIR)/zxc_seekable.o $(ZXCDIR)/zxc_decompress_default.o $(ZXCDIR)/zxc_pivco_tables.o 
 
   ifneq (,$(filter x86_64% amd64% i%86%,$(ARCH)))
     ifneq (,$(filter x86_64% amd64%,$(ARCH)))
