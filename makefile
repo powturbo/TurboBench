@@ -200,7 +200,7 @@ endif
 
 endif
 
-ifneq (,$(findstring aarch64,$(CC) $(ARCH)))
+ifneq (,$(or $(findstring aarch64,$(CC) $(ARCH)),$(findstring arm64,$(CC) $(ARCH))))
   ARCH = aarch64
 else ifneq (,$(findstring riscv64,$(CC) $(ARCH)))
   ARCH = riscv64
