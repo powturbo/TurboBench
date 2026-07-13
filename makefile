@@ -3,149 +3,13 @@
 # git clone --recursive git://github.com/powturbo/TurboBench.git
 # make
 #
-# Minimum make: "make NCODEC2=2" to compile only brotli,lz4,lzma,zlib and zstd
-#
-# snappy:    "cp snappy_/* snappy" (or configure snappy) & type make
 #----------------
 # Cross compile: export CROSS to aarch64 riscv64 loongarch64 or powerpc64le. Ex.:
 # export CROSS=aarch64
 # Testing with qemu
 # qemu-aarch64 -L /usr/aarch64-linux-gnu ./icapp ZIPF
-
 #LZTURBO=1
-#EC=1
-#NCODEC0=1
-#NCODEC1=1
-#NCODEC2=1
 
-ifneq ($(NCODEC0),1) # Minimum codecs
-LZ4=1
-ZSTD=1
-#ZSTDLIB=1
-endif
-
-ifneq ($(NCODEC1),1) # Popular codecs
-BROTLI=1
-LZMA=1
-ZLIB=1
-endif
-
-ifneq ($(NCODEC2),1) # Notable codecs
-BZIP2=1
-BZIP3=1
-FASTLZ=1
-FLZMA2=1
-LIBDEFLATE=1
-LIBBSC=1
-LIZARD=1
-LZAV=1
-LZFSE=1
-LZHAM=1
-LZLIB=1
-LZO=1
-LZSA=1
-LZSSE=1
-MISA77=1
-# oodle dll 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
-OODLE=1
-QUICKLZ=1
-SNAPPY=1
-TURBORC=1
-TURBORLE=1
-ZOPFLI=1
-ZPAQ=1
-ZXC=1
-#ZXCLIB=1
-#BPC=1
-endif
-
-ifeq ($(CODEC3),1) # Manual download or manual build
-#BLOSC=1
-BRIEFLZ=1
-CSC=1
-#DENSITY=1 No more available
-GIPFELI=1
-# glza not working on all systems
-GLZA=1
-#HEATSHRINK=1
-# make -f Makefile.unx  arch=mingw  host_cpu=x86_64  CC=gcc AS=nasm AR=ar STRIP=strip LDFLAGS=  CFLAGS_mingw=-m64
-ISA_L=1
-#LIBZLING=1
-LZ4ULTRA=1
-# configure miniz or copy miniz_/miniz_export.h to miniz
-MINIZ=1
-MSCOMPRESS=1
-PYSAP=1
-# needs ffi bindings
-QCOMPRESS=1
-# oodle dll 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
-SHOCO=1
-SLZ=1
-SMALLZ4=1
-SMAZ=1
-#SNAPPY_C=1
-#MRLE=1
-HRLE=1
-# install (only dynamic) zlib-ng
-# cd zlib-ng  bash ./configure && make
-# install or copy zlib-ng (.so on linux or .dll on windows) to turbobench directory
-ZLIB_NG=1
-TCOBS=1
-# unishox linux only
-#UNISHOX2=1
-#UNISHOX3=1
-endif
-
-# Encoding Entropy coders / RLE
-ifeq ($(EC),1) 
-#AOM=1
-FASTAC=1
-FASTHF=1
-FASTARI=1
-FPAQ0P=1
-FPAQC=1
-#FREQTAB=1
-FPC=1
-FQZ0=1
-# fse,fsehuf disabled as not available in zstd (20230209)
-#FSE=1
-#FSEHUF=1
-#GANS=1
-#HYPRANS=1
-#HTSCODECS=1
-#RECIPARITH=1
-#
-SSERC=1
-SUBOTIN=1
-#TORNADO=1
-VECRC=1
-#TurboRC + libsais
-#TURBORC=1
-LIBSAIS=1
-endif
-
-ifeq ($(TR),1) # Transform
-#BRC=1
-endif
-# Archived codecs and other codecs (manual download)
-#LZJODY=1
-#CHAMELEON=1
-#DAALA=1
-#DOBOZ=1
-#LZMAT=1
-#NAKAMICHI=1
-#PITHY=1
-#POLAR
-#PPMDEC
-#LZOMA=1
-#SHRINKER=1  06975511200
-#TORNADO=1
-#WFLZ=1
-#XPACK=1
-#YALZ77
-#XPACK=1
-
-#-------------------------------------------------
 CC ?= gcc
 #CC ?= clang
 CXX ?= g++
@@ -254,7 +118,7 @@ ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetB
 LDFLAGS+=-lrt -lpthread
 endif
 
-ifeq ($(STATIC),1)
+ifdef STATIC
 LDFLAGS+=-static
 NMEMSIZE=1
 endif
@@ -264,7 +128,7 @@ ifeq ($(OS),$(filter $(OS),Darwin))
 NMEMSIZE=1
 endif
 
-ifeq ($(NMEMSIZE),1)
+ifdef NMEMSIZE
 CFLAGS+=-DNMEMSIZE
 else
 ifeq ($(OS),$(filter $(OS),Darwin FreeBSD GNU/kFreeBSD Linux NetBSD SunOS))
@@ -272,25 +136,25 @@ LDFLAGS += -ldl
 endif
 endif
 
-ifeq ($(OPENMP),1)
+ifdef OPENMP
 CFLAGS+=-fopenmp -DLIBBSC_OPENMP_SUPPORT
 LDFLAGS+=-fopenmp
 endif
 
-all:  turbobench
+all: copy-miniz  turbobench 
 
-ifeq ($(LZTURBO),1)
+ifdef LZTURBO
 CXXFLAGS+=-D_LZTURBO
 CFLAGS+=-D_LZTURBO
 include ../dev/x/lzturbo.mk
 endif
 
-#--------------------------------- Default codecs --------------------------------------------------------------------------------------------
-ifeq ($(BROTLI), 1)
+#--------------------------------- codecs --------------------------------------------------------------------------------------------
+ifneq ($(wildcard brotli/.),)
 CXXFLAGS+=-D_BROTLI -Ibrotli/c/include 
 CFLAGS+=-Ibrotli/c/include 
 #-Ibrotli/c/enc
-ifeq ($(BROTLILIB), 1)  # Use the libraries created by the brotli own builds
+ifdef BROTLILIB  # Use the libraries created by the brotli own builds
 OB+=brotli/out/libbrotlicommon.so brotli/out/libbrotlidec.so brotli/out/libbrotlienc.so
 else
 OB+=brotli/c/common/constants.o brotli/c/common/context.o brotli/c/common/dictionary.o brotli/c/common/platform.o brotli/c/common/transform.o brotli/c/common/shared_dictionary.o brotli/c/dec/huffman.o brotli/c/dec/prefix.o\
@@ -301,59 +165,54 @@ OB+=brotli/c/common/constants.o brotli/c/common/context.o brotli/c/common/dictio
 endif
 endif
 
-ifeq ($(LIBBSC),1)
+ifneq ($(wildcard libbsc/.),)
 CXXFLAGS+=-D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/filters/detectors.o \
 	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o
+OB+=libbsc/libbsc/platform/platform.o libbsc/libbsc/bwt/libsais/libsais.o libbsc/libbsc/bwt/libsais/libsais.o
 LIBSAIS=1
 endif
 
-ifeq ($(LIBSAIS),1)
-OB+=libbsc/libbsc/platform/platform.o libbsc/libbsc/bwt/libsais/libsais.o libbsc/libbsc/bwt/libsais/libsais.o
-endif
-
-ifeq ($(BZIP2),1)
+ifneq ($(wildcard bzip2/.),)
 CXXFLAGS+=-D_BZIP2
 OB+=bzip2/blocksort.o bzip2/huffman.o bzip2/crctable.o bzip2/randtable.o bzip2/compress.o bzip2/decompress.o bzip2/bzlib.o
 endif
 
-ifeq ($(BZIP3),1)
+ifneq ($(wildcard bzip3/.),)
 CXXFLAGS+=-D_BZIP3
 CFLAGS+=-DVERSION=1 -Ibzip3/include -Wno-int-conversion
 OB+=bzip3/src/libbz3.o
 endif
 
-ifeq ($(LIBDEFLATE), 1)
-ifneq ($(CC), icc)
+ifneq ($(wildcard libdeflate/.),)
 CXXFLAGS+=-D_LIBDEFLATE
 CFLAGS+=-Ilibdeflate -Ilibdeflate/common
 OB+=libdeflate/lib/adler32.o libdeflate/lib/crc32.o libdeflate/lib/arm/cpu_features.o libdeflate/lib/x86/cpu_features.o \
     libdeflate/lib/deflate_compress.o libdeflate/lib/deflate_decompress.o libdeflate/lib/gzip_compress.o libdeflate/lib/gzip_decompress.o libdeflate/lib/zlib_compress.o libdeflate/lib/zlib_decompress.o libdeflate/lib/utils.o
 endif
-endif
 
-ifeq ($(LIZARD), 1)
+ifneq ($(wildcard lizard/.),)
 CXXFLAGS+=-D_LIZARD
 CFLAGS+=-Ilizard/lib
 OB+=lizard/lib/entropy/entropy_common.o lizard/lib/entropy/hist.o lizard/lib/lizard_compress.o lizard/lib/lizard_decompress.o lizard/lib/entropy/huf_decompress.o lizard/lib/entropy/huf_compress.o lizard/lib/entropy/fse_compress.o lizard/lib/entropy/fse_decompress.o
 endif
 
-ifeq ($(LZ4), 1)
+ifneq ($(wildcard lz4/.),)
 CXXFLAGS+=-D_LZ4
 CFLAGS+=-Ilz4/lib
 OB+=lz4/lib/lz4hc.o lz4/lib/lz4.o lz4/lib/lz4frame.o lz4/lib/xxhash.o
 endif
 
-ifeq ($(LZAV), 1)
+ifneq ($(wildcard lzav/.),)
 CXXFLAGS+=-D_LZAV
 endif
 
-ifeq ($(LZFSE), 1)
+ifneq ($(wildcard lzfse/.),)
 CXXFLAGS+=-D_LZFSE
 OB+=lzfse/src/lzfse_decode_base.o lzfse/src/lzfse_decode.o lzfse/src/lzfse_encode_base.o lzfse/src/lzfse_encode.o lzfse/src/lzfse_fse.o lzfse/src/lzvn_decode_base.o lzfse/src/lzvn_encode_base.o
 endif
 
-ifeq ($(LZHAM), 1)
+ifneq ($(wildcard lzham/.),)
 CXXFLAGS+=-D_LZHAM -D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp
 OB+=lzham_codec_devel/lzhamcomp/lzham_lzbase.o lzham_codec_devel/lzhamcomp/lzham_lzcomp.o lzham_codec_devel/lzhamcomp/lzham_lzcomp_internal.o \
 	lzham_codec_devel/lzhamcomp/lzham_lzcomp_state.o lzham_codec_devel/lzhamcomp/lzham_match_accel.o lzham_codec_devel/lzhamcomp/lzham_pthreads_threading.o \
@@ -367,13 +226,12 @@ OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
 endif
 
-ifeq ($(LZJODY), 1)
+ifneq ($(wildcard lzjody/.),)
 CXXFLAGS+=-D_LZJODY
 OB+=lzjody/lzjody.o lzjody/byteplane_xfrm.o
 endif
 
-
-ifeq ($(LZMA), 1)
+ifneq ($(wildcard lzma/.),)
 CXXFLAGS+=-D_LZMA
 CFLAGS+=-D_7ZIP_ST
 CXXFLAGS+=-D_7Z_TYPES_
@@ -383,30 +241,23 @@ OB+=lzma/C/Threads.o lzma/C/LzFindMt.o lzma/C/LzFindOpt.o
 #endif
 endif
 
-ifeq ($(LZOMA), 1)
+ifneq ($(wildcard lzoma_/.),)
 CXXFLAGS+=-D_LZOMA
 OB+=lzoma_/pack.o lzoma_/unpack.o lzoma_/divsufsort.o
 endif
 
-# SSE4.1
-ifeq ($(LZSSE), 1) 
-ifeq ($(ARCH),$(filter $(ARCH),x86_64))
-
+ifneq ($(and $(wildcard LZSSE/.),$(filter x86_64,$(ARCH))),)
 CXXFLAGS+=-D_LZSSE
 LZSSE/lzsse2/lzsse2.o: LZSSE/lzsse2/lzsse2.cpp
 	$(CXX) -O2 -msse4.1 -std=c++11 $< -c -o $@
-
 LZSSE/lzsse4/lzsse4.o: LZSSE/lzsse4/lzsse4.cpp
 	$(CXX) -O2 -msse4.1 -std=c++11  $< -c -o $@
-
 LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
 	$(CXX) -O2 -msse4.1 -std=c++11  $< -c -o $@
-
 OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o
 endif
-endif
 
-ifeq ($(ZSTD), 1)
+ifneq ($(wildcard zstd/.),)
 CXXFLAGS+=-D_ZSTD -Izstd/lib -Izstd/lib/common
 ifeq ($(ZSTDLIB), 1)
 # compile zstd: "cd zstd" and then "make"
@@ -425,60 +276,56 @@ ZTD=zstd/lib/decompress/
 OB+=$(ZT0)pool.o $(ZT0)xxhash.o $(ZT0)error_private.o $(ZT0)fse_decompress.o $(ZT0)zstd_common.o $(ZT0)entropy_common.o \
     $(ZTC)hist.o $(ZTC)zstd_compress.o $(ZTC)zstd_compress_literals.o $(ZTC)zstd_compress_sequences.o $(ZTC)zstd_double_fast.o $(ZTC)zstd_fast.o $(ZTC)zstd_lazy.o $(ZTC)/zstd_preSplit.o\
 	$(ZTC)zstd_ldm.o $(ZTC)zstdmt_compress.o $(ZTC)zstd_opt.o $(ZTC)fse_compress.o $(ZTC)zstd_compress_superblock.o \
-    $(ZTD)zstd_decompress.o $(ZTD)zstd_decompress_block.o $(ZTD)zstd_ddict.o $(ZTD)huf_decompress_amd64.o 
-#$(ZTC)huf_compress.o $(ZTD)huf_decompress.o  
+    $(ZTD)zstd_decompress.o $(ZTD)zstd_decompress_block.o $(ZTD)zstd_ddict.o $(ZTD)huf_decompress_amd64.o $(ZTC)huf_compress.o $(ZTD)huf_decompress.o  
 endif
 endif
 
-ifeq ($(FSE), 1)
+FSE := EC/fse
+ifneq ($(wildcard FSE/.),)
 CXXFLAGS+=-D_FSE
 OB+=$(LB)EC/fse/fse_compress_.o $(LB)EC/fse/fse_decompress_.o 
 endif
 
-ifeq ($(FSEHUF), 1)
-CXXFLAGS+=-D_FSEHUF
-OB+=$(LB)EC/fse/huf_compress_.o $(LB)EC/fse/huf_decompress_.o 
-else
-OB+=$(LB)zstd/lib/compress/huf_compress.o $(LB)zstd/lib/decompress/huf_decompress.o 
-endif
+#ifdef FSEHUF
+#CXXFLAGS+=-D_FSEHUF
+#OB+=$(LB)EC/fse/huf_compress_.o $(LB)EC/fse/huf_decompress_.o 
+#else
+#OB+=$(LB)zstd/lib/compress/huf_compress.o $(LB)zstd/lib/decompress/huf_decompress.o 
+#endif
 
-ifeq ($(ZLIB), 1)
+ifneq ($(wildcard zlib/.),)
 CXXFLAGS+=-D_ZLIB
 ZD=zlib/
 OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
 endif
 
-ifeq ($(ZOPFLI), 1)
+ifneq ($(wildcard zopfli/.),)
 CXXFLAGS+=-D_ZOPFLI
 OB+=zopfli/src/zopfli/blocksplitter.o zopfli/src/zopfli/cache.o zopfli/src/zopfli/deflate.o zopfli/src/zopfli/gzip_container.o zopfli/src/zopfli/hash.o zopfli/src/zopfli/util.o zopfli/src/zopfli/lz77.o zopfli/src/zopfli/tree.o zopfli/src/zopfli/squeeze.o zopfli/src/zopfli/katajainen.o zopfli/src/zopfli/zlib_container.o zopfli/src/zopfli/zopfli_lib.o
 endif
 
 #------------------------------------ Notable codecs ---------------------------------------------------------------------------
-ifeq ($(BPC),1)
-CXXFLAGS+=-D_BPC
-endif
-
-ifeq ($(BLOSC),1)
+ifneq ($(wildcard c-blosc2/.),)
 CXXFLAGS+=-D_C_BLOSC2
 CFLAGS+=-Ic-blosc2/blosc -Ic-blosc2/include -Ic-blosc2/include/blosc2 -DHAVE_ZSTD
 OB+=c-blosc2/blosc/blosc2.o c-blosc2/blosc/blosclz.o c-blosc2/blosc/frame.o c-blosc2/blosc/sframe.o c-blosc2/blosc/schunk.o c-blosc2/blosc/blosc2-stdio.o c-blosc2/blosc/fastcopy.o c-blosc2/blosc/stune.o \
     c-blosc2/blosc/delta.o c-blosc2/blosc/shuffle.o c-blosc2/blosc/shuffle-generic.o c-blosc2/blosc/shuffle-sse2.o c-blosc2/blosc/timestamp.o c-blosc2/blosc/trunc-prec.o c-blosc2/blosc/bitshuffle-generic.o
 endif
 
-ifeq ($(BRIEFLZ),1)
+ifneq ($(wildcard brieflz/.),)
 CXXFLAGS+=-D_BRIEFLZ
 CFLAGS+=-Ibrieflz/include
 OB+=brieflz/src/brieflz.o brieflz/src/depack.o
 endif
 
-ifeq ($(FLZMA2),1)
+ifneq ($(wildcard fast-lzma2/.),)
 CXXFLAGS+=-D_FLZMA2
 OB+=fast-lzma2/dict_buffer.o fast-lzma2/fl2_common.o fast-lzma2/fl2_compress.o fast-lzma2/fl2_decompress.o fast-lzma2/lzma2_dec.o fast-lzma2/lzma2_enc.o fast-lzma2/radix_bitpack.o fast-lzma2/radix_mf.o fast-lzma2/radix_struct.o \
 fast-lzma2/range_enc.o fast-lzma2/fl2_threading.o fast-lzma2/fl2_pool.o fast-lzma2/util.o
 #fast-lzma2/xxhash.o fast-lzma2/fl2_error_private.o
 endif
 
-ifeq ($(GLZA), 1)
+ifneq ($(wildcard glza/.),)
 CXXFLAGS+=-D_GLZA
 glza/GLZAmodel.o: glza/GLZAmodel.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
@@ -501,7 +348,7 @@ glza/GLZAdecode.o: glza/GLZAdecode.c
 OB+=glza/GLZAcomp.o glza/GLZAformat.o glza/GLZAcompress.o glza/GLZAencode.o glza/GLZAdecode.o glza/GLZAmodel.o
 endif
 
-ifeq ($(ISA_L),1)
+ifneq ($(wildcard isa-l_NOP/.),)
 CXXFLAGS+=-D_ISA_L
 ifeq ($(OS),Windows)
 # msys2 build: install nasm and type:
@@ -515,7 +362,7 @@ LDFLAGS+=isa-l_/linux/libisal.a
 endif
 endif
 
-ifeq ($(LZ4ULTRA), 1)
+ifneq ($(wildcard lz4ultra/.),)
 CXXFLAGS+=-D_LZ4ULTRA -Ilz4ultra/src -Ilz4ultra/src/libdivsufsort/include
 OB+=lz4ultra/src/shrink_inmem.o lz4ultra/src/expand_inmem.o lz4ultra/src/shrink_block.o lz4ultra/src/expand_block.o lz4ultra/src/shrink_context.o lz4ultra/src/matchfinder.o lz4ultra/src/frame.o
 ifeq ($(DIVSORT), 1)
@@ -525,29 +372,25 @@ DIVSORT=1
 endif
 endif
 
-ifeq ($(LZLIB), 1)
+ifneq ($(wildcard lzlib-1.13/.),)
 CXXFLAGS+=-D_LZLIB
 OB+=lzlib-1.13/lzlib.o lzlib_/bbexample.o
 endif
 
-ifeq ($(QCOMPRESS), 1)
-CXXFLAGS+=-D_QCOMPRESS
-#LDFLAGS+=-lqc_compress_ffi
-endif
-
-ifeq ($(ZLIB_NG), 1)
-#CMD:= $(shell cd zlib-ng && ./configure && make && cd ..)
+ifneq ($(wildcard zlib-ng/.),)
+CMD:= $(shell cd zlib-ng && ./configure && make && cd ..)
 CXXFLAGS+=-D_ZLIB_NG
-ifeq ($(OS),Windows)
+LDFLAGS+=zlib-ng/libz-ng.a
+#ifeq ($(OS),Windows)
 #OB+=msys-z-ng.dll
-LDFLAGS+=zlib-ng_/win64/libz-ng.a
-else
+#LDFLAGS+=zlib-ng_/win64/libz-ng.a
+#else
 #LDFLAGS+=-lz-ng
-LDFLAGS+=zlib-ng_/linux/libz-ng.a
-endif
+#LDFLAGS+=zlib-ng_/linux/libz-ng.a
+#endif
 endif
 
-ifeq ($(LZO),1)
+ifneq ($(wildcard lzo/.),)
 CXXFLAGS+=-D_LZO -Ilzo/include
 CFLAGS+=-Ilzo/include
 OB+= lzo/src/lzo1.o lzo/src/lzo1a.o lzo/src/lzo1a_99.o lzo/src/lzo1b_1.o lzo/src/lzo1b_2.o lzo/src/lzo1b_3.o lzo/src/lzo1b_4.o lzo/src/lzo1b_5.o \
@@ -562,7 +405,7 @@ lzo/src/lzo1z_d3.o lzo/src/lzo1_99.o lzo/src/lzo2a_9x.o lzo/src/lzo2a_d1.o lzo/s
 lzo/src/lzo_ptr.o lzo/src/lzo_str.o lzo/src/lzo_util.o
 endif
 
-ifeq ($(LZSA), 1)
+ifneq ($(wildcard lzsa/.),)
 CXXFLAGS+=-D_LZSA
 CFLAGS+=-Ilzsa/src -Ilzsa/src/libdivsufsort/include
 OB+=lzsa/src/expand_block_v1.o lzsa/src/expand_block_v2.o lzsa/src/expand_context.o lzsa/src/expand_inmem.o lzsa/src/shrink_block_v1.o lzsa/src/shrink_block_v2.o lzsa/src/shrink_inmem.o lzsa/src/shrink_context.o \
@@ -574,34 +417,37 @@ DIVSORT=1
 endif
 endif
 
-ifeq ($(MINIZ), 1)
+.PHONY: copy-miniz
+ifneq ($(wildcard miniz/.),)
+copy-miniz:
+	cp miniz_/miniz_export.h miniz/miniz_export.h
 CXXFLAGS+=-D_MINIZ
 OB+=miniz/miniz.o miniz/miniz_tdef.o miniz/miniz_tinfl.o
 endif
 
-ifeq ($(MISA77), 1)
+ifneq ($(wildcard misa77/.),)
 CXXFLAGS+=-D_MISA77
-
 MISA77_DIR = misa77
 MISA77_INC = -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src
+MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp) $(wildcard $(MISA77_DIR)/src/experimental/*.cpp)
+MISA77_OBJS := $(patsubst %.cpp, %.o, $(MISA77_SRCS))
+MISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 $(MISA77_INC) $(MISA77_FLAGS) $< -c -o $@
+$(MISA77_DIR)/src/%_sse2.o: CXXFLAGS += $(_SSE)
+$(MISA77_DIR)/src/%_avx2.o: CXXFLAGS += $(_AVX2)
+$(MISA77_DIR)/src/%.o: $(MISA77_DIR)/src/%.cpp
+	$(MISA77_BUILD)
+$(MISA77_DIR)/src/experimental/%.o: $(MISA77_DIR)/src/experimental/%.cpp
+	$(MISA77_BUILD)
 
-CMD_BUILD_MISA77 = $(CXX) -O3 $(CXXFLAGS) -std=c++20 $(MISA77_INC) $(MISA77_FLAGS) $< -c -o $@
-misa77/%_avx2.o: CXXFLAGS+=-mavx2
-misa77/%_avx2.o: misa77/%.cpp ; $(CMD_BUILD_MISA77)
-misa77/%_sse2.o: CXXFLAGS+=-msse2
-misa77/%_sse2.o: misa77/%.cpp ; $(CMD_BUILD_MISA77)
-misa77/%.o: misa77/%.cpp ; $(CMD_BUILD_MISA77)
-
-OB+=misa77/src/compress.o $(MISA77_DIR)/src/decompress.o misa77/src/experimental/ecompress.o misa77/src/isa/target_portable.o
-OB+= $(MISA77_DIR)/src/experimental/isa/etarget_portable.o
-ifneq (,$(filter x86_64% amd64%,$(ARCH)))
+OB += $(MISA77_OBJS)
+ifeq ($(ARCH),x86_64)
   OB += $(MISA77_DIR)/src/isa/target_sse2.o $(MISA77_DIR)/src/isa/target_avx2.o
   OB += $(MISA77_DIR)/src/experimental/isa/etarget_sse2.o $(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
 endif
 
 endif
 
-ifeq ($(SNAPPY), 1)
+ifneq ($(wildcard snappy/.),)
 # configure or copy directory "snappy_/*" to "snappy"
 ifneq (,$(wildcard snappy/snappy-stubs-public.h))
 CXXFLAGS+=-D_SNAPPY
@@ -609,46 +455,42 @@ OB+=snappy/snappy-sinksource.o snappy/snappy-stubs-internal.o snappy/snappy.o
 endif
 endif
 
-ifeq ($(SNAPPY_C), 1)
+ifneq ($(wildcard snappy-c/.),)
 CXXFLAGS+=-D_SNAPPY_C
 OB+=snappy-c/snappy.o snappy-c/util.o
 endif
 
-ifeq ($(GIPFELI), 1)
+ifneq ($(wildcard gipfeli/.),)
 #ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
 CXXFLAGS+=-D_GIPFELI
 OB+=gipfeli/lz77.o gipfeli/entropy.o gipfeli/entropy_code_builder.o gipfeli/decompress.o gipfeli/gipfeli-internal.o
 #endif
 endif
 
-ifeq ($(OODLE), 1)
+#ifdef OODLE
 CXXFLAGS+=-D_OODLE
-endif
+# oodle dll 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
+#endif
 
-
-ifeq ($(SLZ), 1)
+ifneq ($(wildcard libslz/.),)
 CXXFLAGS+=-D_SLZ
 OB+=libslz/src/slz.o
 endif
 
-ifeq ($(TCOBS), 1)
+ifneq ($(wildcard tcobs/.),)
 CXXFLAGS+=-D_TCOBS -Drestrict=__restrict
 OB+=tcobs/v2/tcobsEncode.o tcobs/v2/tcobsDecode.o
 endif
 
-ifeq ($(SMALLZ4), 1)
+ifdef SMALLZ4
 CXXFLAGS+=-DSMALLZ4
 endif
 
-ifeq ($(UNISHOX2), 1)
+ifneq ($(wildcard Unishox2/.),)
 CXXFLAGS+=-D_UNISHOX2
 OB+=Unishox2/unishox2.o turbobench_/unishox.o
-endif
-
-ifeq ($(UNISHOX3), 1)
 CXXFLAGS+=-D_UNISHOX3 -Imarisa-trie/include
 OB+=Unishox2/Unishox3_Alpha/unishox3.o
-#LDFLAGS+=msys-marisa-0.dll
 endif
 
 #------------------------- Entropy coder -----------------------------------------
@@ -656,42 +498,42 @@ endif
 # First download or clone aomedia (git clone https://aomedia.googlesource.com/aom) into TurboBench directory
 # after cmake, put the generated "aom_config.h" into the aom directory
 # or copy aom_/aom_config.h to aom
-ifeq ($(AOM),1)
+ifneq ($(wildcard EC/aom/.),)
 CXXFLAGS+=-D_AOM
 OB+=EC/aom_/aom.o EC/aom/aom_dsp/entenc.o EC/aom/aom_dsp/entdec.o EC/aom/aom_dsp/entcode.o
 #OB+=daala_/daala.o
 endif
 
 # First download or clone daala (https://github.com/xiph/daala) into TurboBench directory
-ifeq ($(DAALA),1)
+ifneq ($(wildcard EC/daala/.),)
 CXXFLAGS+=-D_DAALA
 OB+=EC/daala_/daala.o
 endif
 
-ifeq ($(FASTAC),1)
+ifneq ($(wildcard EC/fastac/.),)
 CXXFLAGS+=-D_FASTAC
 OB+=EC/fastac/arithmetic_codec.o
 endif
 
-ifeq ($(FASTHF),1)
+ifneq ($(wildcard EC/fasthf/.),)
 CXXFLAGS+=-D_FASTHF
 OB+=EC/fasthf/binary_codec.o
 endif
 
-ifeq ($(FPAQ0P),1)
+ifneq ($(wildcard EC/fpaq0p/.),)
 CXXFLAGS+=-D_FPAQ0P
 OB+=EC/fpaq0p/fpaq0p_sh.o
 endif
 
-ifeq ($(FPC), 1)
+ifneq ($(wildcard EC/FPC/.),)
 CXXFLAGS+=-D_FPC
 OB+=EC/FPC/fpc.o
 endif
 
-ifeq ($(FREQTAB),1)
+ifdef FREQTAB
 CXXFLAGS+=-D_FREQTAB
 
-ifeq ($(FREQTABO),1)
+ifdef FREQTABO
 FREQOPT=-march=skylake -fwhole-program -fpermissive -fstrict-aliasing -fomit-frame-pointer -I../Lib3 -I../Lib \
 -fno-stack-protector -fno-stack-check -fno-check-new \
 -fno-exceptions -fno-rtti -fno-operator-names \
@@ -707,17 +549,17 @@ endif
 OB+=EC/freqtab/src/c_mem.o EC/freqtab/src/coder/model.o
 endif
 
-ifeq ($(GANS),1)
+ifdef GANS
 CXXFLAGS+=-D_GANS
 OB+=EC/rans.o EC/head_cbloom.o
 endif
 
-ifeq ($(RECIPARITH),1)
+ifdef RECIPARITH
 CXXFLAGS+=-D_RECIPARITH
 OB+=EC/recip_arith_/reciparith.o
 endif
 
-ifeq ($(SSERC),1)
+ifneq ($(wildcard EC/sserangecoding/.),)
 EC/sserangecoding/sserangecoder.o: EC/sserangecoding/sserangecoder.cpp
 	$(CXX) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes EC/sserangecoding/sserangecoder.cpp -o EC/sserangecoding/sserangecoder.o 
 
@@ -725,12 +567,12 @@ CXXFLAGS+=-D_SSERC
 OB+=EC/sserangecoding/sserangecoder.o
 endif
 
-ifeq ($(SUBOTIN),1)
+ifneq ($(wildcard EC/subotin/.),)
 CXXFLAGS+=-D_SUBOTIN
 OB+=EC/subotin_/subotin.o
 endif
 
-ifeq ($(TURBORC),1)
+ifneq ($(wildcard Turbo-Range-Coder/.),)
 #ifeq ($(ANS), 1)
 CFLAGS+=-D_ANS
 TRC=Turbo-Range-Coder/
@@ -754,7 +596,7 @@ endif
 CXXFLAGS+=-D_TURBORC
 #-D_ANS
 CFLAGS+=-D_BWT -ITurbo-Range-Coder/libsais/include
-ifeq ($(LZTURBO),1)
+ifdef LZTURBO
 CFLAGS+=-D_NCPUISA -D_NQUANT
 endif
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
@@ -763,7 +605,7 @@ OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o
 LIBSAIS=1
 endif
 
-ifeq ($(VECRC),1)
+ifneq ($(wildcard EC/vecrc/.),)
 CXXFLAGS+=-D_VECRC
 OB+=EC/vecrc/vector_rc.o
 endif
@@ -781,7 +623,7 @@ endif
 #OB+=fsc/fsc_enc.o fsc/fsc_dec.o fsc/fsc_utils.o fsc/bits.o fsc/histo.o fsc/alias.o
 #OB+=polar/polar.o fpaqc/fpaqc.o
 #-------------------- Encoding ------------------------
-ifeq ($(TURBORLE), 1)
+ifneq ($(wildcard Turbo-Run-Length-Encoding/.),)
 CXXFLAGS+=-D_TURBORLE
 
 TRLEDIR = Turbo-Run-Length-Encoding
@@ -792,14 +634,11 @@ $(TRLEDIR)/%.o: $(TRLEDIR)/%.c ; $(BUILD_TRLE)
 
 OB+=$(TRLEDIR)/trlec.o $(TRLEDIR)/trled.o
 
-endif
-
-ifeq ($(MRLE),1)
 CXXFLAGS+=-D_MRLE
 OB+=Turbo-Run-Length-Encoding/ext/mrle.o
 endif
 
-ifeq ($(HRLE),1)
+ifneq ($(wildcard hypersonic-rle-kit/.),)
 CXXFLAGS+=-D_HRLE
 HRLE=hypersonic-rle-kit
 
@@ -812,12 +651,12 @@ OB+=$(HRLE)/src/rle_sh.o $(HRLE)/src/rle8_extreme_cpu.o $(HRLE)/src/rle8_low_ent
 endif
 
 #-------------------------------------- Archived ----------------------------------
-ifeq ($(CHAMELEON),1)
+ifneq ($(wildcard chameleon/.),)
 CXXFLAGS+=-D_CHAMELEON
 OB+=chameleon/chameleon.o
 endif
 
-ifeq ($(DENSITY),1)
+ifneq ($(wildcard density/.),)
 CXXFLAGS+=-D_DENSITY
 OB+=density/src/buffers/buffer.o density/src/algorithms/algorithms.o density/src/algorithms/dictionaries.o density/src/structure/header.o density/src/globals.o density/src/buffers/buffer.o \
 	density/src/algorithms/chameleon/core/chameleon_decode.o density/src/algorithms/chameleon/core/chameleon_encode.o \
@@ -825,7 +664,7 @@ OB+=density/src/buffers/buffer.o density/src/algorithms/algorithms.o density/src
 	density/src/algorithms/cheetah/core/cheetah_decode.o density/src/algorithms/cheetah/core/cheetah_encode.o
 endif
 
-ifeq ($(XPACK), 1)
+ifneq ($(wildcard xpack/.),)
 CXXFLAGS+=-D_XPACK
 # O2 instead of O3 because of error gcc 7
 xpack/lib/xpack_common.o: xpack/lib/xpack_common.c
@@ -843,70 +682,70 @@ xpack/lib/x86_cpu_features.o: xpack/lib/x86_cpu_features.c
 OB+=xpack/lib/xpack_common.o xpack/lib/xpack_compress.o xpack/lib/xpack_decompress.o xpack/lib/x86_cpu_features.o
 endif
 
-ifeq ($(PITHY), 1)
+ifneq ($(wildcard pithy/.),)
 CXXFLAGS+=-D_PITHY
 pithy/pithy.o: pithy/pithy.c
 	$(CC) -O2 $(MARCH) $(CFLAGS)  $< -c -o $@
 OB+=pithy/pithy.o
 endif
 
-ifeq ($(SHRINKER), 1)
+ifneq ($(wildcard shrinker/.),)
 CXXFLAGS+=-D_SHRINKER
 shrinker/shrinker.o: shrinker/shrinker.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 OB+=shrinker/Shrinker.o
 endif
 
-ifeq ($(WFLZ), 1)
+ifneq ($(wildcard wlfz/.),)
 CXXFLAGS+=-D_WFLZ
 wflz/wfLZ.o: wflz/wfLZ.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 OB+=wflz/wfLZ.o
 endif
 
-ifeq ($(NAKAMICHI),1)
+ifneq ($(wildcard nakamichi/.),)
 CXXFLAGS+=-D_NAKAMICHI
 nakamichi/Nakamichi_Okamigan.o: nakamichi/Nakamichi_Okamigan.c
 	$(CC) -O3 -msse4.1 $(MARCH) $< -c -o $@
 OB+=nakamichi/Nakamichi_Washigan.o
 endif
 
-ifeq ($(FASTLZ),1)
+ifneq ($(wildcard FastLZ/.),)
 CXXFLAGS+=-D_FASTLZ
 OB+=FastLZ/fastlz.o
 endif
 
-ifeq ($(HEATSHRINK),1)
+ifneq ($(wildcard heatshrink_/.),)
 CXXFLAGS+=-D_HEATSHRINK
 OB+=heatshrink_/heatshrink.o heatshrink/heatshrink_encoder.o heatshrink/heatshrink_decoder.o
 endif
 
-ifeq ($(LIBLZF),1)
+ifneq ($(wildcard liblzf/.),)
 CXXFLAGS+=-D_LIBLZF
 OB+=liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o
 endif
 
-ifeq ($(LIBLZG),1)
+ifneq ($(wildcard liblzg/.),)
 CXXFLAGS+=-D_LIBLZG
 OB+=liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o
 endif
 
-ifeq ($(SHOCO),1)
+ifneq ($(wildcard shoco/.),)
 CXXFLAGS+=-D_SHOCO
 OB+=shoco/shoco.o
 endif
 
-ifeq ($(SMAZ),1)
+ifneq ($(wildcard smaz/.),)
 CXXFLAGS+=-D_SMAZ
 OB+=smaz/smaz.o
 endif
 
-ifeq ($(YAPPY),1)
+ifneq ($(wildcard yappy/.),)
 CXXFLAGS+=-D_YAPPY
 OB+=yappy/yappy.o
 endif
 
-ifeq ($(ZPAQ),1)
+ifneq ($(wildcard zpaq/.),)
 ifeq ($(OS),$(filter $(OS),Darwin))
 else
 CXXFLAGS+=-D_ZPAQ
@@ -914,19 +753,7 @@ OB+=zpaq/libzpaq.o
 endif
 endif
 
-ifeq ($(ZXCLIB),1)
-CXXFLAGS+=-D_ZXC 
-  ifeq ($(OS),Windows)
-LDFLAGS+=zxc_/win64/libzxc.a
-  else
-    ifeq ($(OS),Darwin)
-LDFLAGS+=zxc_/macos/libzxc.a
-    else
-LDFLAGS+=zxc_/linux/libzxc.a
-    endif
-  endif
-else
-ifeq ($(ZXC),1)
+ifneq ($(wildcard zxc/.),)
 CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
 CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE
 
@@ -989,31 +816,30 @@ $(ZXCDIR)/%_avx512.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
 $(ZXCDIR)/%_neon.o: ZXC_FLAGS = $(NEON_FLAGS) -DZXC_FUNCTION_SUFFIX=_neon
 $(ZXCDIR)/%_neon.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
 endif
-endif
 
-ifeq ($(CSC),1)
+ifneq ($(wildcard CSC/.),)
 CXXFLAGS+=-D_CSC
 OB+=CSC/src/libcsc/csc_analyzer.o CSC/src/libcsc/csc_coder.o CSC/src/libcsc/csc_dec.o CSC/src/libcsc/csc_default_alloc.o CSC/src/libcsc/csc_enc.o CSC/src/libcsc/csc_encoder_main.o CSC/src/libcsc/csc_filters.o CSC/src/libcsc/csc_lz.o CSC/src/libcsc/csc_memio.o \
 	CSC/src/libcsc/csc_mf.o CSC/src/libcsc/csc_model.o CSC/src/libcsc/csc_profiler.o
 endif
 
-ifeq ($(DOBOZ),1)
+ifneq ($(wildcard doboz/.),)
 CXXFLAGS+=-D_DOBOZ
 OB+=doboz/Source/Doboz/Compressor.o doboz/Source/Doboz/Decompressor.o doboz/Source/Doboz/Dictionary.o
 endif
 
-ifeq ($(LIBZLING),1)
+ifneq ($(wildcard libzling/.),)
 CXXFLAGS+=-D_LIBZLING
 # Disabled : compile error in gcc 7.2
 #OB+=libzling/src/libzling.o libzling/src/libzling_huffman.o libzling/src/libzling_utils.o libzling/src/libzling_lz.o libzling_/libzling_utils_mem.o
 endif
 
-ifeq ($(BRC), 1)
+ifneq ($(wildcard Behemoth-Rank-Coding/.),)
 CXXFLAGS+=-D_BRC
 OB+=Behemoth-Rank-Coding/brc.o
 endif
 #----------------------- GPL -------------------------
-ifeq ($(LZMAT), 1)
+ifneq ($(wildcard lzmat/.),)
 CXXFLAGS+=-DLZMAT
 lzmat/lzmat_dec.o: lzmat/lzmat_dec.c
 	$(CC) -O2 -D"__int64=long long" $(MARCH) $(CFLAGS) $< -c -o $@
@@ -1023,7 +849,7 @@ lzmat/lzmat_enc.o: lzmat/lzmat_enc.c
 OB+=lzmat/lzmat_enc.o lzmat/lzmat_dec.o
 endif
 
-ifeq ($(TORNADO), 1)
+ifneq ($(wildcard tornado/.),)
 CXXFLAGS+=-D_TORNADO
 tornado_/tormem.o: tornado_/tormem.cpp
 	$(CXX) -O3 $(TORDEF) -D__x86_$(ARCH)__ -DFREEARC_$(ARCH)BIT -pipe -fforce-addr -fno-exceptions -fno-rtti -c tornado_/tormem.cpp -o tornado_/tormem.o
@@ -1035,17 +861,17 @@ endif
 OB+=tornado_/tormem.o
 endif
 
-ifeq ($(MSCOMPRESS), 1)
+ifneq ($(wildcard ms-compress/.),)
 CXXFLAGS+=-D_MSCOMPRESS
 OB+=ms-compress/src/mscomp.o ms-compress/src/lznt1_compress.o ms-compress/src/lznt1_decompress.o ms-compress/src/xpress_compress.o ms-compress/src/xpress_decompress.o ms-compress/src/xpress_huff_compress.o ms-compress/src/xpress_huff_decompress.o
 endif
 
-ifeq ($(QUICKLZ), 1)
+ifneq ($(wildcard quicklz_/.),)
 CXXFLAGS+=-D_QUICKLZ
 OB+=quicklz_/quicklz1.o quicklz_/quicklz2.o quicklz_/quicklz3.o
 endif
 
-ifeq ($(PYSAP), 1)
+ifneq ($(wildcard pysap/.),)
 CXXFLAGS+=-D_PYSAP
 OB+=pysap/pysapcompress/vpa105CsObjInt.o pysap/pysapcompress/vpa106cslzc.o pysap/pysapcompress/vpa107cslzh.o pysap/pysapcompress/vpa108csulzh.o
 endif
@@ -1056,14 +882,13 @@ endif
 # symbols are localized so they don't clash with the zstd TurboBench bundles.
 # The submodule has its own submodule (ext/fse), so init recursively:
 #   git submodule update --init --recursive pivco-huffman
-ifeq ($(PIVCOHUF), 1)
+ifneq ($(wildcard pivco-huffman/.),)
 PIVCOHUFDIR=pivco-huffman
 CXXFLAGS+=-D_PIVCOHUF=1 -I$(PIVCOHUFDIR)/include
 $(PIVCOHUFDIR)/build/libpivco_huffman_local.o:
 	cmake -S $(PIVCOHUFDIR) -B $(PIVCOHUFDIR)/build -DCMAKE_BUILD_TYPE=Release
 	cmake --build $(PIVCOHUFDIR)/build --target pivco_huffman_local -j
 OB+=$(PIVCOHUFDIR)/build/libpivco_huffman_local.o
-endif
 
 # PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor;
 # level = zstd level).  Built from the pivco-huffman submodule's extras/phaz via
@@ -1083,7 +908,7 @@ $(PHAZDIR)/build/phaz_local.o:
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
 OB+=$(PHAZDIR)/build/phaz_local.o
 endif
-
+endif
 #--------------------------------------------------------------------
 CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti
