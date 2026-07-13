@@ -442,7 +442,7 @@ $(MISA77_DIR)/src/experimental/isa/%.o: $(MISA77_DIR)/src/experimental/%.cpp
 OB += $(MISA77_OBJS) 
 #OB += $(MISA77_DIR)/src/isa/target_sse2.o  $(MISA77_DIR)/src/experimental/isa/etarget_sse2.o 
 ifeq ($(ARCH),x86_64)
-  $(MISA77_DIR)/src/isa/target_avx2.o $(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
+  OB += $(MISA77_DIR)/src/isa/target_avx2.o $(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
 endif
 
 endif
