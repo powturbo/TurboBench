@@ -2151,9 +2151,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       switch(lev) {
         case  0: return srlec(  in, inlen, out);
         case  8: return srlec8( (uint8_t  *)in, inlen, out, _ESC8);
-        case 16: return srlec16((uint16_t *)in, inlen, out, _ESC16);
-        case 32: return srlec32((uint32_t *)in, inlen, out, _ESC32);
-        case 64: return srlec64((uint64_t *)in, inlen, out, _ESC64);
+        case 16: return srlec16((uint8_t *)in, inlen, out, _ESC16);
+        case 32: return srlec32((uint8_t *)in, inlen, out, _ESC32);
+        case 64: return srlec64((uint8_t *)in, inlen, out, _ESC64);
       } break;
     case P_RLET:  return trlec(in, inlen, out);
       #endif
@@ -2925,9 +2925,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       switch(lev) {
         case  0: return  srled(  in, inlen, out, outlen);
         case  8: return  srled8( in, inlen, (uint8_t *)out, outlen, _ESC8);
-        case 16: return  srled16(in, inlen, (uint16_t *)out, outlen, _ESC16);
-        case 32: return  srled32(in, inlen, (uint32_t *)out, outlen, _ESC32);
-        case 64: return  srled64(in, inlen, (uint64_t *)out, outlen, _ESC64);
+        case 16: return  srled16(in, inlen, (uint8_t *)out, outlen, _ESC16);
+        case 32: return  srled32(in, inlen, (uint8_t *)out, outlen, _ESC32);
+        case 64: return  srled64(in, inlen, (uint8_t *)out, outlen, _ESC64);
       } break;
     case P_RLET: return trled(in, inlen, out, outlen);
       #endif
