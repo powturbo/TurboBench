@@ -559,7 +559,7 @@ CXXFLAGS+=-D_RECIPARITH
 OB+=EC/recip_arith_/reciparith.o
 endif
 
-ifneq ($(wildcard EC/sserangecoding/.),)
+ifneq ($(and $(wildcard EC/sserangecoding/.),$(filter x86_64,$(ARCH))),)
 EC/sserangecoding/sserangecoder.o: EC/sserangecoding/sserangecoder.cpp
 	$(CXX) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes EC/sserangecoding/sserangecoder.cpp -o EC/sserangecoding/sserangecoder.o 
 
