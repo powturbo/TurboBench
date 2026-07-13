@@ -248,7 +248,7 @@ SNAPPY_C=0
 LZHAM=0
 endif
 
-CFLAGS+=-w -Wall $(DEBUG) $(OPT) -fpermissive -Wimplicit-function-declaration
+CFLAGS+=-w -Wall $(DEBUG) -fpermissive -Wimplicit-function-declaration
 
 ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
 LDFLAGS+=-lrt -lpthread
@@ -783,7 +783,15 @@ endif
 #-------------------- Encoding ------------------------
 ifeq ($(TURBORLE), 1)
 CXXFLAGS+=-D_TURBORLE
-OB+=Turbo-Run-Length-Encoding/trlec.o Turbo-Run-Length-Encoding/trled.o
+
+TRLEDIR = Turbo-Run-Length-Encoding
+BUILD_TRLE = $(CC) -O3 $(TRLE_FLAGS) $< -c -o $@
+
+$(TRLEDIR)/%.o: TRLE_FLAGS = $(_AVX2) -w -fstrict-aliasing -falign-loops=32 $(DEBUG)
+$(TRLEDIR)/%.o: $(TRLEDIR)/%.c ; $(BUILD_TRLE)
+
+OB+=$(TRLEDIR)/trlec.o $(TRLEDIR)/trled.o
+
 endif
 
 ifeq ($(MRLE),1)
