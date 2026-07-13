@@ -429,7 +429,7 @@ ifneq ($(wildcard misa77/.),)
 CXXFLAGS+=-D_MISA77
 MISA77_DIR = misa77
 MISA77_INC = -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src
-MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp) $(wildcard $(MISA77_DIR)/src/experimental/*.cpp) $(wildcard $(MISA77_DIR)/src/experimental/isa/*.cpp)
+MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp) $(wildcard $(MISA77_DIR)/src/experimental/*.cpp) 
 MISA77_OBJS := $(patsubst %.cpp, %.o, $(MISA77_SRCS))
 MISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 $(MISA77_INC) $(MISA77_FLAGS) $< -c -o $@
 $(MISA77_DIR)/src/%_sse2.o: CXXFLAGS += $(_SSE)
@@ -440,8 +440,8 @@ $(MISA77_DIR)/src/experimental/isa/%.o: $(MISA77_DIR)/src/experimental/%.cpp
 	$(MISA77_BUILD)
 
 OB += $(MISA77_OBJS) 
-#OB += $(MISA77_DIR)/src/isa/target_sse2.o  $(MISA77_DIR)/src/experimental/isa/etarget_sse2.o 
 ifeq ($(ARCH),x86_64)
+  OB += $(MISA77_DIR)/src/isa/target_sse2.o  $(MISA77_DIR)/src/experimental/isa/etarget_sse2.o 
   OB += $(MISA77_DIR)/src/isa/target_avx2.o $(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
 endif
 
