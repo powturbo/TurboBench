@@ -429,20 +429,20 @@ ifneq ($(wildcard misa77/.),)
 CXXFLAGS+=-D_MISA77
 MISA77_DIR = misa77
 MISA77_INC = -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src
-MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp) $(wildcard $(MISA77_DIR)/src/experimental/*.cpp)
+MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp) $(wildcard $(MISA77_DIR)/src/experimental/*.cpp) $(wildcard $(MISA77_DIR)/src/experimental/isa/*.cpp)
 MISA77_OBJS := $(patsubst %.cpp, %.o, $(MISA77_SRCS))
 MISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 $(MISA77_INC) $(MISA77_FLAGS) $< -c -o $@
 $(MISA77_DIR)/src/%_sse2.o: CXXFLAGS += $(_SSE)
 $(MISA77_DIR)/src/%_avx2.o: CXXFLAGS += $(_AVX2)
 $(MISA77_DIR)/src/%.o: $(MISA77_DIR)/src/%.cpp
 	$(MISA77_BUILD)
-$(MISA77_DIR)/src/experimental/%.o: $(MISA77_DIR)/src/experimental/%.cpp
+$(MISA77_DIR)/src/experimental/isa/%.o: $(MISA77_DIR)/src/experimental/%.cpp
 	$(MISA77_BUILD)
 
-OB += $(MISA77_OBJS)
+OB += $(MISA77_OBJS) 
+#OB += $(MISA77_DIR)/src/isa/target_sse2.o  $(MISA77_DIR)/src/experimental/isa/etarget_sse2.o 
 ifeq ($(ARCH),x86_64)
-  OB += $(MISA77_DIR)/src/isa/target_sse2.o $(MISA77_DIR)/src/isa/target_avx2.o
-  OB += $(MISA77_DIR)/src/experimental/isa/etarget_sse2.o $(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
+  $(MISA77_DIR)/src/isa/target_avx2.o $(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
 endif
 
 endif
@@ -573,35 +573,28 @@ OB+=EC/subotin_/subotin.o
 endif
 
 ifneq ($(wildcard Turbo-Range-Coder/.),)
-#ifeq ($(ANS), 1)
 CFLAGS+=-D_ANS
 TRC=Turbo-Range-Coder/
 $(TRC)anscdf0.o: $(TRC)anscdf.c $(TRC)anscdf_.h
 	$(CC) -c -O3 $(CFLAGS) $(_SCALAR) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdf0.o  
 
 $(TRC)anscdfs.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) $(SSE) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfs.o  
+	$(CC) -c -O3 $(CFLAGS) $(_SSE) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfs.o  
 
 OB+=$(TRC)anscdfs.o 
 ifeq ($(ARCH), x86_64)
 $(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
 	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfx.o
-
 OB+=$(TRC)anscdfx.o 
-#$(TRC)anscdf0.o
-#endif
 endif
 
-
 CXXFLAGS+=-D_TURBORC
-#-D_ANS
 CFLAGS+=-D_BWT -ITurbo-Range-Coder/libsais/include
 ifdef LZTURBO
 CFLAGS+=-D_NCPUISA -D_NQUANT
 endif
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
   Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o 
-#Turbo-Range-Coder/anscdf0.o   
 LIBSAIS=1
 endif
 
