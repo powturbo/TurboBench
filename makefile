@@ -307,9 +307,9 @@ CXXFLAGS+=-D_ISA_L
 LDFLAGS+=isa-l_/Windows-x86_64/isa-l.a
 else ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/libisal.a),)
 CXXFLAGS+=-D_ISA_L
-CXXFLAGS+=-DHAVE_IGZIP
 LDFLAGS+=isa-l_/$(OS)-$(ARCH)/libisal.a
 #ISA-L library needs to be installed before uncommenting LDFLAGS: sudo apt-get instal isa-l
+#CXXFLAGS+=-DHAVE_IGZIP
 #LDFLAGS+=-lisa-l
 endif
 endif
