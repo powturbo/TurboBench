@@ -344,14 +344,14 @@ CXXFLAGS+=-D_LZLIB
 OB+=lzlib-1.13/lzlib.o lzlib_/bbexample.o
 endif
 
-#Build zlib-ng with CMD:= $(shell cd zlib-ng && ./configure && make && cd ..)
 ifneq ($(wildcard zlib-ng/.),)
-ifneq ($(wildcard zlib-ng/libz-ng.a),)
-CXXFLAGS+=-D_ZLIB_NG
-LDFLAGS+=zlib-ng/libz-ng.a
-else ifneq ($(wildcard zlib-ng_/$(OS)_$(ARCH)libz-ng.a),)
-CXXFLAGS+=-D_ZLIB_NG
-LDFLAGS+=zlib-ng_/$(ARCH)/libz-ng.a
+ifndef CROSS
+CXXFLAGS += -D_ZLIB_NG
+ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
+	cd zlib-ng && ./configure && $(MAKE)
+
+LDFLAGS += zlib-ng/libz-ng.a
 endif
 endif
 
@@ -382,11 +382,13 @@ DIVSORT=1
 endif
 endif
 
-#.PHONY: copy-miniz
-ifneq ($(wildcard miniz/miniz_export.h),)
-#ifneq ($(wildcard miniz/.),)
-#copy-miniz:
-#	cp miniz_/miniz_export.h miniz/miniz_export.h
+ifneq ($(wildcard miniz/.),)
+miniz/miniz_export.h: miniz_/miniz_export.h
+	cp miniz_/miniz_export.h miniz/miniz_export.h
+
+miniz/miniz.o: miniz/miniz.c miniz/miniz_export.h
+	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@
+	
 CXXFLAGS+=-D_MINIZ
 OB+=miniz/miniz.o miniz/miniz_tdef.o miniz/miniz_tinfl.o
 endif
@@ -854,8 +856,8 @@ endif
 # symbols are localized so they don't clash with the zstd TurboBench bundles.
 # The submodule has its own submodule (ext/fse), so init recursively:
 #   git submodule update --init --recursive pivco-huffman
-ifneq ($(and $(wildcard pivco-huffman/.),$(filter x86_64,$(ARCH))),)
-#ifneq ($(wildcard pivco-huffman/.),)
+#ifneq ($(and $(wildcard pivco-huffman/.),$(filter x86_64,$(ARCH))),)
+ifneq ($(wildcard pivco-huffman/.),)
 ifneq ($(OS),Windows)
 PIVCOHUFDIR=pivco-huffman
 CXXFLAGS+=-D_PIVCOHUF=1 -I$(PIVCOHUFDIR)/include
@@ -890,7 +892,7 @@ CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti
 
 OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugin.o
 
-turbobench: $(OB) turbobench.o
+turbobench: zlib-ng/libz-ng.a $(OB) turbobench.o 
 	$(CXX) $^ $(LDFLAGS) -o turbobench
 
 .c.o:
