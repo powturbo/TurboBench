@@ -112,7 +112,8 @@ SNAPPY_C=0
 LZHAM=0
 endif
 
-CFLsAGS+=-w -Wall $(DEBUG) -fpermissive -Wimplicit-function-declaration
+CFLAGS+=-w -Wall $(DDEBUG) -std=gnu99 -fpermissive -Wimplicit-function-declaration
+CXXFLAGS+=$(DDEBUG) -w -Wall -fpermissive  -fno-rtti
 
 ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
 LDFLAGS+=-lrt -lpthread
@@ -187,7 +188,10 @@ endif
 
 ifneq ($(wildcard lizard/.),)
 CFLAGS+=-Ilizard/lib
-OB+=lizard/lib/entropy/entropy_common.o lizard/lib/entropy/hist.o lizard/lib/lizard_compress.o lizard/lib/lizard_decompress.o lizard/lib/entropy/huf_decompress.o lizard/lib/entropy/huf_compress.o lizard/lib/entropy/fse_compress.o lizard/lib/entropy/fse_decompress.o
+LIZARD_SRCS := $(wildcard lizard/lib/*.c) $(wildcard lizard/lib/entropy/*.c) 
+LIZARD_SRCS := $(filter-out %/debug.c, $(LIZARD_SRCS))
+LIZARD_OBJS := $(LIZARD_SRCS:.c=.o)
+OB += $(LIZARD_OBJS)
 endif
 
 ifneq ($(wildcard lz4/.),)
@@ -207,15 +211,11 @@ endif
 
 ifneq ($(wildcard lzham/.),)
 CXXFLAGS+=-D_LZHAM -D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp
-OB+=lzham_codec_devel/lzhamcomp/lzham_lzbase.o lzham_codec_devel/lzhamcomp/lzham_lzcomp.o lzham_codec_devel/lzhamcomp/lzham_lzcomp_internal.o \
-	lzham_codec_devel/lzhamcomp/lzham_lzcomp_state.o lzham_codec_devel/lzhamcomp/lzham_match_accel.o lzham_codec_devel/lzhamcomp/lzham_pthreads_threading.o \
-	lzham_codec_devel/lzhamdecomp/lzham_assert.o lzham_codec_devel/lzhamdecomp/lzham_checksum.o lzham_codec_devel/lzhamdecomp/lzham_huffman_codes.o \
-	lzham_codec_devel/lzhamdecomp/lzham_lzdecomp.o lzham_codec_devel/lzhamdecomp/lzham_lzdecompbase.o lzham_codec_devel/lzhamdecomp/lzham_mem.o \
-	lzham_codec_devel/lzhamdecomp/lzham_platform.o lzham_codec_devel/lzhamdecomp/lzham_prefix_coding.o \
-	lzham_codec_devel/lzhamdecomp/lzham_symbol_codec.o lzham_codec_devel/lzhamdecomp/lzham_timer.o lzham_codec_devel/lzhamdecomp/lzham_vector.o \
-	lzham_codec_devel/lzhamlib/lzham_lib.o
+LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
+LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
+OB += $(LZHAM_SRCS:.cpp=.o)
 ifeq ($(OS), Windows)
-OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
+OB += lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
 endif
 
@@ -233,7 +233,15 @@ LZSSE/lzsse4/lzsse4.o: LZSSE/lzsse4/lzsse4.cpp
 	$(CXX) -O2 -msse4.1 -std=c++11  $< -c -o $@
 LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
 	$(CXX) -O2 -msse4.1 -std=c++11  $< -c -o $@
-OB+=LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o
+OB+= LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o
+endif
+
+ifneq ($(wildcard zopfli/.),)
+CXXFLAGS+=-D_ZOPFLI
+ZOPFLI_SRCS := $(wildcard zopfli/src/zopfli/*.c) 
+ZOPFLI_SRCS := $(filter-out %/zopfli_bin.c, $(ZOPFLI_SRCS))
+ZOPFLI_OBJS := $(ZOPFLI_SRCS:.c=.o)
+OB += $(ZOPFLI_OBJS)
 endif
 
 ifneq ($(wildcard zstd/.),)
@@ -256,11 +264,64 @@ ZD=zlib/
 OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
 endif
 
-ifneq ($(wildcard zopfli/.),)
-CXXFLAGS+=-D_ZOPFLI
-OB+=zopfli/src/zopfli/blocksplitter.o zopfli/src/zopfli/cache.o zopfli/src/zopfli/deflate.o zopfli/src/zopfli/gzip_container.o zopfli/src/zopfli/hash.o zopfli/src/zopfli/util.o zopfli/src/zopfli/lz77.o zopfli/src/zopfli/tree.o zopfli/src/zopfli/squeeze.o zopfli/src/zopfli/katajainen.o zopfli/src/zopfli/zlib_container.o zopfli/src/zopfli/zopfli_lib.o
-endif
 
+#NOT COMPLETE
+ifneq ($(wildcard openzl/.),)
+CXXFLAGS+=-D_OPENZL
+ZSTD_SRCS := $(wildcard codecs/*.c) \
+$(wildcard codecs/bitSplit/*.c) \
+$(wildcard codecs/bitpack/*.c) \
+$(wildcard codecs/bitunpack/*.c) \
+$(wildcard codecs/common/*.c) \
+$(wildcard codecs/concat/*.c) \
+$(wildcard codecs/constant/*.c) \
+$(wildcard codecs/conversion/*.c) \
+$(wildcard codecs/dedup/*.c) \
+$(wildcard codecs/delta/*.c) \
+$(wildcard codecs/dispatchN_byTag/*.c) \
+$(wildcard codecs/dispatch_by_tag/*.c) \
+$(wildcard codecs/dispatch_string/*.c) \
+$(wildcard codecs/divide_by/*.c) \
+$(wildcard codecs/entropy/*.c) \
+$(wildcard codecs/entropy/deprecated/*.c) \
+$(wildcard codecs/flatpack/*.c) \
+$(wildcard codecs/float_deconstruct/*.c) \
+$(wildcard codecs/interleave/*.c) \
+$(wildcard codecs/lz/*.c) \
+$(wildcard codecs/lz4/*.c) \
+$(wildcard codecs/merge_sorted/*.c) \
+$(wildcard codecs/mux_lengths/*.c) \
+$(wildcard codecs/parse_int/*.c) \
+$(wildcard codecs/partition/*.c) \
+$(wildcard codecs/prefix/*.c) \
+$(wildcard codecs/quantize/*.c) \
+$(wildcard codecs/range_pack/*.c) \
+$(wildcard codecs/rolz/*.c) \
+$(wildcard codecs/sentinel/*.c) \
+$(wildcard codecs/splitByStruct/*.c) \
+$(wildcard codecs/splitN/*.c) \
+$(wildcard codecs/tokenize/*.c) \
+$(wildcard codecs/transpose/*.c) \
+$(wildcard codecs/zigzag/*.c) \
+$(wildcard codecs/zstd/*.c) \
+$(wildcard common/*.c) \
+$(wildcard compress/*.c) \
+$(wildcard compress/graphs/*.c) \
+$(wildcard compress/graphs/sddl/*.c) \
+$(wildcard compress/graphs/sddl2/*.c) \
+$(wildcard compress/segmenters/*.c) \
+$(wildcard compress/selectors/*.c) \
+$(wildcard compress/selectors/ml/*.c) \
+$(wildcard decompress/*.c) \
+$(wildcard dict/*.c) \
+$(wildcard fse/common/*.c) \
+$(wildcard fse/compress/*.c) \
+$(wildcard fse/decompress/*.c) \
+$(wildcard shared/*.c) \
+$(wildcard shared/detail/*.c)
+OPENZL_OBJS := $(OPENZL_SRCS:.c=.o)
+OB += $(OPENZL_OBJS)  
+endif
 #------------------------------------ Notable codecs ---------------------------------------------------------------------------
 ifneq ($(wildcard c-blosc2/.),)
 CXXFLAGS+=-D_C_BLOSC2
@@ -278,25 +339,20 @@ endif
 
 ifneq ($(wildcard fast-lzma2/.),)
 CXXFLAGS+=-D_FLZMA2
-OB+=fast-lzma2/dict_buffer.o fast-lzma2/fl2_common.o fast-lzma2/fl2_compress.o fast-lzma2/fl2_decompress.o fast-lzma2/lzma2_dec.o fast-lzma2/lzma2_enc.o fast-lzma2/radix_bitpack.o fast-lzma2/radix_mf.o fast-lzma2/radix_struct.o \
-fast-lzma2/range_enc.o fast-lzma2/fl2_threading.o fast-lzma2/fl2_pool.o fast-lzma2/util.o
+FLZMA2_SRCS := $(wildcard fast-lzma2/*.c) 
+FLZMA2_SRCS := $(filter-out %/xxhash.c, $(FLZMA2_SRCS))
+FLZMA2_OBJS := $(FLZMA2_SRCS:.c=.o)
+OB += $(FLZMA2_OBJS)
+
 endif
 
 ifneq ($(wildcard glza/.),)
 CXXFLAGS+=-D_GLZA
-glza/GLZAmodel.o: glza/GLZAmodel.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-glza/GLZAcomp.o: glza/GLZAcomp.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-glza/GLZAencode.o: glza/GLZAencode.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-glza/GLZAcompress.o: glza/GLZAcompress.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-glza/GLZAformat.o: glza/GLZAformat.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-glza/GLZAdecode.o: glza/GLZAdecode.c
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-OB+=glza/GLZAcomp.o glza/GLZAformat.o glza/GLZAcompress.o glza/GLZAencode.o glza/GLZAdecode.o glza/GLZAmodel.o
+GLZA_OBJS := glza/GLZAmodel.o glza/GLZAcomp.o glza/GLZAencode.o glza/GLZAcompress.o glza/GLZAformat.o glza/GLZAdecode.o
+GLZA_BUILD = $(CC) -O2 $(CFLAGS) $< -c -o $@
+$(GLZA_DIR)/%.o: glza/%.c
+	$(GLZA_BUILD)
+OB += $(GLZA_OBJS) 
 endif
 
 ifneq ($(wildcard isa-l/.),)
@@ -841,8 +897,6 @@ OB+=pysap/pysapcompress/vpa105CsObjInt.o pysap/pysapcompress/vpa106cslzc.o pysap
 endif
 
 #--------------------------------------------------------------------
-CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall
-CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti
 
 OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugin.o
 
