@@ -8,14 +8,14 @@ on:
       - master
 jobs:
   linux:
-    runs-on: '${{ matrix.os }}'
+    runs-on: '\${{ matrix.os }}'
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm]
         compiler: ["gcc", "clang"]
     env:      
-      CC: ${{ matrix.compiler }}
+      CC: \${{ matrix.compiler }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -26,15 +26,44 @@ jobs:
       - run: ./turbobench -l1
       - run: ./turbobench turbobench
 
+  linux-riscv64:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: ["gcc", "clang"]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: 'true'
+      - name: Build and test on riscv64
+        uses: uraimo/run-on-arch-action@v3
+        with:
+          arch: riscv64
+          distro: ubuntu24.04
+          githubToken: \${{ github.token }}
+          install: |
+            apt-get update -y
+            apt-get install -y make git \${{ matrix.compiler }} util-linux
+          env: |
+            CC: \${{ matrix.compiler }}
+          run: |
+            git config --global --add safe.directory "$GITHUB_WORKSPACE"
+            git submodule update --init --recursive
+            make STATIC=1
+            lscpu || true
+            ./turbobench -l1
+            ./turbobench turbobench
+
   macos:
-    runs-on: '${{ matrix.os }}'
+    runs-on: '\${{ matrix.os }}'
     strategy:
       fail-fast: false
       matrix:
         os: [macos-latest]
         compiler: ["clang"]
     env:      
-      CC: ${{ matrix.compiler }}
+      CC: \${{ matrix.compiler }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -62,7 +91,7 @@ jobs:
       - run: git submodule update --init --recursive
       - run: make STATIC=1
       - run: ./turbobench -l1
-      - run: ./turbobench turbobench.exe
+      - run: ./turbobench turbobench.exe`;
 #      - run: wget -q https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz -O silesia.tar.gz
 #      - run: gunzip silesia.tar.gz
 #      - run: ./turbobench -J15 silesia.tar
