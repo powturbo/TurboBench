@@ -1,5 +1,5 @@
 /**
-    Copyright (C) powturbo 2016-2023
+    Copyright (C) powturbo 2016-2026
     GPL v3 License
 
     This program is free software; you can redistribute it and/or modify
@@ -21,8 +21,8 @@
     - twitter  : https://twitter.com/powturbo
     - email    : powturbo [_AT_] gmail [_DOT_] com
 **/
-
 // conf.h - config & common
+#pragma once
 #ifndef CONF_H_
 #define CONF_H_
 #if defined(_MSC_VER) && (_MSC_VER < 1600)
@@ -36,7 +36,9 @@ typedef unsigned long long uint64_t;
 #include <stdint.h>
 #endif
 #include <stddef.h>
+  #ifndef __STDC_WANT_IEC_60559_TYPES_EXT__
 #define __STDC_WANT_IEC_60559_TYPES_EXT__
+  #endif
 #include <float.h>
 #if defined(__clang__) && defined(__is_identifier)
   #if !__is_identifier(_Float16)
@@ -49,7 +51,7 @@ typedef unsigned long long uint64_t;
 //------------------------- Compiler ------------------------------------------
   #if defined(__GNUC__)
 #include <stdint.h>
-#define ALIGNED(t,v,n)  t v __attribute__ ((aligned (n)))
+#define ALIGNED(t,v,n)  t v __attribute__ ((aligned (n)))     //Compatible w. old compilers. Ex. static const ALIGNED(uint8_t, array[128],16)
 #define ALWAYS_INLINE   inline __attribute__((always_inline))
 #define NOINLINE        __attribute__((noinline))
 #define _PACKED         __attribute__ ((packed))
@@ -68,23 +70,24 @@ static ALWAYS_INLINE unsigned short bswap16(unsigned short x) { return __builtin
 #define popcnt32(_x_)   __builtin_popcount(_x_)
 #define popcnt64(_x_)   __builtin_popcountll(_x_)
 
+
     #if defined(__i386__) || defined(__x86_64__)
 //x,__bsr32:     1:0,2:1,3:1,4:2,5:2,6:2,7:2,8:3,9:3,10:3,11:3,12:3,13:3,14:3,15:3,16:4,17:4,18:4,19:4,20:4,21:4,22:4,23:4,24:4,25:4,26:4,27:4,28:4,29:4,30:4,31:4,32:5,...
 //x,  bsr32: 0:0,1:1,2:2,3:2,4:3,5:3,6:3,7:3,8:4,9:4,10:4,11:4,12:4,13:4,14:4,15:4,16:5,17:5,18:5,19:5,20:5,21:5,22:5,23:5,24:5,25:5,26:5,27:5,28:5,29:5,30:5,31:5,32:6,...
-static ALWAYS_INLINE int    __bsr32(               int x) {             asm("bsr  %1,%0" : "=r" (x) : "rm" (x) ); return x; }
-static ALWAYS_INLINE int      bsr32(               int x) { int b = -1; asm("bsrl %1,%0" : "+r" (b) : "rm" (x) ); return b + 1; }
-static ALWAYS_INLINE int      bsr64(uint64_t x          ) { return x?64 - __builtin_clzll(x):0; }
-static ALWAYS_INLINE int    __bsr64(uint64_t x          ) { return   63 - __builtin_clzll(x);   }
+static ALWAYS_INLINE int    __bsr32(     int x       ) {             __asm("bsr  %1,%0" : "=r" (x) : "rm" (x) ); return x; }
+static ALWAYS_INLINE int      bsr32(     int x       ) { int b = -1; __asm("bsrl %1,%0" : "+r" (b) : "rm" (x) ); return b + 1; }
+static ALWAYS_INLINE int      bsr64(uint64_t x       ) { return x?64 - __builtin_clzll(x):0; }
+static ALWAYS_INLINE int    __bsr64(uint64_t x       ) { return   63 - __builtin_clzll(x);   }
 
-static ALWAYS_INLINE unsigned rol32(unsigned x, int s) { asm ("roll %%cl,%0" :"=r" (x) :"0" (x),"c" (s)); return x; }
-static ALWAYS_INLINE unsigned ror32(unsigned x, int s) { asm ("rorl %%cl,%0" :"=r" (x) :"0" (x),"c" (s)); return x; }
-static ALWAYS_INLINE uint64_t rol64(uint64_t x, int s) { asm ("rolq %%cl,%0" :"=r" (x) :"0" (x),"c" (s)); return x; }
-static ALWAYS_INLINE uint64_t ror64(uint64_t x, int s) { asm ("rorq %%cl,%0" :"=r" (x) :"0" (x),"c" (s)); return x; }
+static ALWAYS_INLINE unsigned rol32(unsigned x, int s) { __asm ("roll %%cl,%0" :"=r" (x) :"0" (x),"c" (s)); return x; }
+static ALWAYS_INLINE unsigned ror32(unsigned x, int s) { __asm ("rorl %%cl,%0" :"=r" (x) :"0" (x),"c" (s)); return x; }
+static ALWAYS_INLINE uint64_t rol64(uint64_t x, int s) { __asm ("rolq %%cl,%0" :"=r" (x) :"0" (x),"c" (s)); return x; }
+static ALWAYS_INLINE uint64_t ror64(uint64_t x, int s) { __asm ("rorq %%cl,%0" :"=r" (x) :"0" (x),"c" (s)); return x; }
     #else
-static ALWAYS_INLINE int    __bsr32(unsigned x          ) { return   31 - __builtin_clz(  x); }
-static ALWAYS_INLINE int      bsr32(int x               ) { return x?32 - __builtin_clz(  x):0; }
-static ALWAYS_INLINE int      bsr64(uint64_t x) { return x?64 - __builtin_clzll(x):0; }
-static ALWAYS_INLINE int    __bsr64(uint64_t x          ) { return   63 - __builtin_clzll(x);   }
+static ALWAYS_INLINE int    __bsr32(unsigned x       ) { return   31 - __builtin_clz(  x); }
+static ALWAYS_INLINE int      bsr32(int x            ) { return x?32 - __builtin_clz(  x):0; }
+static ALWAYS_INLINE int      bsr64(uint64_t x       ) { return x?64 - __builtin_clzll(x):0; }
+static ALWAYS_INLINE int    __bsr64(uint64_t x       ) { return   63 - __builtin_clzll(x);   }
 
 static ALWAYS_INLINE unsigned rol32(unsigned x, int s) { return x << s | x >> (32 - s); }
 static ALWAYS_INLINE unsigned ror32(unsigned x, int s) { return x >> s | x << (32 - s); }
@@ -112,10 +115,11 @@ static ALWAYS_INLINE unsigned ror64(unsigned x, int s) { return x >> s | x << (6
 #define ALIGNED(t,v,n)  __declspec(align(n)) t v
 #define ALWAYS_INLINE   __forceinline
 #define NOINLINE        __declspec(noinline)
-#define _PACKED         __attribute__ ((packed))
+#define _PACKED         //__attribute__ ((packed))
 #define THREADLOCAL     __declspec(thread)
 #define likely(x)       (x)
 #define unlikely(x)     (x)
+#define __builtin_unreachable() __assume(0)
 
 static ALWAYS_INLINE int __bsr32(unsigned x) { unsigned long z=0; _BitScanReverse(&z, x); return z; }
 static ALWAYS_INLINE int bsr32(  unsigned x) { unsigned long z;   _BitScanReverse(&z, x); return x?z+1:0; }
@@ -157,6 +161,14 @@ static ALWAYS_INLINE int clz64(uint64_t x) { unsigned long z;   _BitScanReverse6
 #define strncasecmp  _strnicmp
 #define strtoull     _strtoui64
 static ALWAYS_INLINE double round(double num) { return (num > 0.0) ? floor(num + 0.5) : ceil(num - 0.5); }
+
+  #ifndef S_ISREG
+#define S_ISREG(st_mode) (((st_mode) & S_IFMT) == S_IFREG)
+  #endif
+  #ifndef S_ISDIR
+#define S_ISDIR(st_mode) (((st_mode) & S_IFMT) == S_IFDIR)
+  #endif
+
   #endif
 
 #define __bsr8(_x_)  __bsr32(_x_)
@@ -171,6 +183,10 @@ static ALWAYS_INLINE double round(double num) { return (num > 0.0) ? floor(num +
 #define popcnt8(x)   popcnt32(x)
 #define popcnt16(x)  popcnt32(x)
 
+static ALWAYS_INLINE uint8_t  rol8(uint8_t  x, int s) { return (x << s) | (x >> (-s & 7)); }
+static ALWAYS_INLINE uint8_t  ror8(uint8_t  x, int s) { return (x >> s) | (x << (-s & 7)); }
+static ALWAYS_INLINE uint16_t rol16(uint16_t x, int s) { return (x << s) | (x >> (-s & 15)); }
+static ALWAYS_INLINE uint16_t ror16(uint16_t x, int s) { return (x >> s) | (x << (-s & 15)); }
 //--------------- Unaligned memory access -------------------------------------
   #ifdef UA_MEMCPY
 #include <string.h>
@@ -194,7 +210,7 @@ static ALWAYS_INLINE void               stof16(      void *cp, _Float16         
 static ALWAYS_INLINE void               stof32(      void *cp, float              x) { memcpy(cp, &x, sizeof(x)); }
 static ALWAYS_INLINE void               stof64(      void *cp, double             x) { memcpy(cp, &x, sizeof(x)); }
 
-static ALWAYS_INLINE void               ltou32(unsigned           *x, const void *cp) { memcpy(x, cp, sizeof(*x)); } // ua read into ptr 
+static ALWAYS_INLINE void               ltou32(unsigned           *x, const void *cp) { memcpy(x, cp, sizeof(*x)); } // ua read into ptr
 static ALWAYS_INLINE void               ltou64(unsigned long long *x, const void *cp) { memcpy(x, cp, sizeof(*x)); }
 
   #elif defined(__i386__) || defined(__x86_64__) || \
@@ -203,7 +219,9 @@ static ALWAYS_INLINE void               ltou64(unsigned long long *x, const void
     defined(__ARM_FEATURE_UNALIGNED) || defined(__aarch64__) || defined(__arm__) ||\
     defined(__ARM_ARCH_4__) || defined(__ARM_ARCH_4T__) || \
     defined(__ARM_ARCH_5__) || defined(__ARM_ARCH_5T__) || defined(__ARM_ARCH_5TE__) || defined(__ARM_ARCH_5TEJ__) || \
-    defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6K__)  || defined(__ARM_ARCH_6T2__) || defined(__ARM_ARCH_6Z__)   || defined(__ARM_ARCH_6ZK__)
+    defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6K__)  || defined(__ARM_ARCH_6T2__) || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6ZK__) || \
+	defined(__loongarch_lp64) || defined(__aarch64__) ||\
+	defined(__riscv)
 #define ctou16(_cp_) (*(unsigned short *)(_cp_))
 #define ctou32(_cp_) (*(unsigned       *)(_cp_))
 #define ctof16(_cp_) (*(_Float16       *)(_cp_))
@@ -216,7 +234,7 @@ static ALWAYS_INLINE void               ltou64(unsigned long long *x, const void
 
 #define ltou32(_px_, _cp_) *(_px_) = *(unsigned *)(_cp_)
 
-    #if defined(__i386__) || defined(__x86_64__) || defined(__powerpc__) || defined(__s390__) || defined(_MSC_VER)
+    #if defined(__i386__) || defined(__x86_64__) || defined(__powerpc__) || defined(__s390__) || defined(_MSC_VER) || defined(__riscv) || defined(__loongarch_lp64)
 #define ctou64(_cp_)       (*(uint64_t *)(_cp_))
 #define ctof64(_cp_)       (*(double   *)(_cp_))
 
@@ -276,7 +294,8 @@ struct _PACKED doubleu   { double             d; };
     defined(__aarch64__) ||\
     defined(__mips64) ||\
     defined(__powerpc64__) || defined(__ppc64__) || defined(__PPC64__) ||\
-    defined(__s390x__)
+    defined(__s390x__) ||\
+	(defined(__riscv_xlen) && __riscv_xlen == 64) || defined(__loongarch_lp64)
 #define __WORDSIZE 64
   #else
 #define __WORDSIZE 32
@@ -284,15 +303,21 @@ struct _PACKED doubleu   { double             d; };
 #endif
 
 //---------------------misc ---------------------------------------------------
-#define BZMASK64(_b_)                    (~(~0ull << (_b_)))
-#define BZMASK32(_b_)                    (~(~0u   << (_b_)))
-#define BZMASK16(_b_)                    BZMASK32(_b_)
-#define BZMASK8( _b_)                    BZMASK32(_b_)
+#define BZMASK32(_b_)                    ((_b_) < 32 ? ~(~0u   << (_b_)) : ~0u)   // b <= 32
+#define BZMASK64(_b_)                    ((_b_) < 64 ? ~(~0ull << (_b_)) : ~0ull) // b <= 64
 
-#define BZHI64(_u_, _b_)                 ((_u_) & BZMASK64(_b_))  // b Constant
-#define BZHI32(_u_, _b_)                 ((_u_) & BZMASK32(_b_)) 
-#define BZHI16(_u_, _b_)                 BZHI32(_u_, _b_)
-#define BZHI8( _u_, _b_)                 BZHI32(_u_, _b_)
+#define _BZMASK64(_b_)                   (~(~0ull << (_b_))) // b < 32
+#define _BZMASK32(_b_)                   (~(~0u   << (_b_))) // b < 64
+#define _BZMASK8( _b_)                   _BZMASK32(_b_)
+#define _BZMASK16(_b_)                   _BZMASK32(_b_)
+
+#define BZMASK8( _b_)                    _BZMASK32(_b_)
+#define BZMASK16(_b_)                    _BZMASK32(_b_)
+
+#define BZHI64(_u_, _b_)                 ((_u_) &  BZMASK64(_b_))  // b Constant 
+#define BZHI32(_u_, _b_)                 ((_u_) &  BZMASK32(_b_))
+#define BZHI16(_u_, _b_)                 ((_u_) & _BZMASK32(_b_))
+#define BZHI8( _u_, _b_)                 ((_u_) & _BZMASK32(_b_))
 #define BEXTR32(x,start,len)             (((x) >> (start)) & ((1u << (len)) - 1)) //Bit field extract (with register)
 
     #ifdef __AVX2__
@@ -302,7 +327,7 @@ struct _PACKED doubleu   { double             d; };
 #include <x86intrin.h>
       #endif
 #define bzhi32(_u_, _b_)                 _bzhi_u32(_u_, _b_)  // b variable
-#define bextr32(x,start,len)             _bextr_u32(x,start,len)  
+#define bextr32(x,start,len)             _bextr_u32(x,start,len)
 
       #if !(defined(_M_X64) || defined(__amd64__)) && (defined(__i386__) || defined(_M_IX86))
 #define bzhi64(_u_, _b_)                 BZHI64(_u_, _b_)
@@ -310,7 +335,7 @@ struct _PACKED doubleu   { double             d; };
 #define bzhi64(_u_, _b_)                 _bzhi_u64(_u_, _b_)
       #endif
     #else
-#define bzhi64(_u_, _b_)                 BZHI64(_u_, _b_) 
+#define bzhi64(_u_, _b_)                 BZHI64(_u_, _b_)
 #define bzhi32(_u_, _b_)                 BZHI32(_u_, _b_)
 #define bextr32(x,start,len)             (((x) >> (start)) & ((1u << (len)) - 1)) //Bit field extract (with register)
     #endif
@@ -319,7 +344,8 @@ struct _PACKED doubleu   { double             d; };
 #define bzhi8( _u_, _b_)                 bzhi32(_u_, _b_)
 
 #define SIZE_ROUNDUP(_n_, _a_) (((size_t)(_n_) + (size_t)((_a_) - 1)) & ~(size_t)((_a_) - 1))
-#define ALIGN_DOWN(__ptr, __a) ((void *)((uintptr_t)(__ptr) & ~(uintptr_t)((__a) - 1)))
+#define ALIGN_DOWN(_ptr_, _a_) ((void *)((uintptr_t)(_ptr_) & ~(uintptr_t)((_a_) - 1)))
+#define PAD8(_x_) (((_x_)+8-1)>>3)
 
 #define T2_(_x_, _y_) _x_##_y_
 #define T2(_x_, _y_) T2_(_x_,_y_)
@@ -330,7 +356,9 @@ struct _PACKED doubleu   { double             d; };
 #define CACHE_LINE_SIZE     64
 #define PREFETCH_DISTANCE   (CACHE_LINE_SIZE*4)
 
+//#define CLAMP(n, lower, upper) max(lower, min(upper, n))
 #define CLAMP(_x_, _low_, _high_)  (((_x_) > (_high_)) ? (_high_) : (((_x_) < (_low_)) ? (_low_) : (_x_)))
+#define powof2(n) !((n)&((n)-1))
 
 //--- NDEBUG -------
 #include <stdio.h>
@@ -355,3 +383,46 @@ struct _PACKED doubleu   { double             d; };
 #define die(fmt,args...) do { fprintf(stderr, "%s:%s:%d:", __FILE__, __FUNCTION__, __LINE__); fprintf(stderr, fmt, ## args ); fflush(stderr); exit(-1); } while(0)
     #endif
   #endif
+  #if defined(_MSC_VER) && _MSC_VER < 1600
+#include "vs/stdint.h"
+  #else
+#include <stdint.h>
+  #endif
+
+#if 0
+  #ifdef __AVX2__
+#include <immintrin.h>
+  #elif defined(__AVX__)
+#include <immintrin.h>
+  #elif defined(__SSE4_1__)
+    #ifdef __powerpc64__
+#define __SSE__    1
+#define __SSE2__   1
+#define __SSE3__   1
+#define __SSSE3__  1
+#define __SSE4_1__ 1
+#define NO_WARN_X86_INTRINSICS 1
+    #endif
+#include <smmintrin.h>
+  #elif defined(__SSSE3__)
+#include <tmmintrin.h>
+  #elif defined(__SSE2__)
+#include <emmintrin.h>
+  #elif defined(__ARM_NEON)
+#include <arm_neon.h>
+#include "sse_aarch64.h"
+  #elif defined(__riscv_vector)
+#include <riscv_vector.h>
+#include "sse_riscv64.h"
+  #elif defined(__loongarch_lp64)
+#include <lsxintrin.h>
+#include "sse_loongarch64.h"
+  #endif
+  
+#include "sse_.h"
+#endif
+
+#pragma warning( disable : 4005)
+#pragma warning( disable : 4090)
+#pragma warning( disable : 4068)
+
