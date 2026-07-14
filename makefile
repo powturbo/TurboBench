@@ -543,7 +543,7 @@ ifneq ($(and $(wildcard Turbo-Range-Coder/.),$(filter x86_64,$(ARCH))),)
 CFLAGS+=-D_ANS
 TRC=Turbo-Range-Coder/
 $(TRC)anscdf0.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) $(_SCALAR) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdf0.o  
+	$(CC) -c -O3 $(CFLAGS) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdf0.o  
 
 $(TRC)anscdfs.o: $(TRC)anscdf.c $(TRC)anscdf_.h
 	$(CC) -c -O3 $(CFLAGS) $(_SSE) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfs.o  
@@ -554,7 +554,6 @@ $(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
 	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfx.o
 
 OB+=$(TRC)anscdfx.o 
-
 endif
 
 CXXFLAGS+=-D_TURBORC
@@ -857,6 +856,8 @@ endif
 #   git submodule update --init --recursive pivco-huffman
 ifneq ($(and $(wildcard pivco-huffman/.),$(filter x86_64,$(ARCH))),)
 #ifneq ($(wildcard pivco-huffman/.),)
+ifeq ($(OS),Windows)
+else
 PIVCOHUFDIR=pivco-huffman
 CXXFLAGS+=-D_PIVCOHUF=1 -I$(PIVCOHUFDIR)/include
 $(PIVCOHUFDIR)/build/libpivco_huffman_local.o:
@@ -881,6 +882,7 @@ $(PHAZDIR)/build/phaz_local.o:
 	cmake --build $(PIVCOHUFDIR)/build --target pivco_huffman_local -j
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
 OB+=$(PHAZDIR)/build/phaz_local.o
+endif
 endif
 endif
 #--------------------------------------------------------------------
