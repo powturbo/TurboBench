@@ -345,14 +345,17 @@ OB+=lzlib-1.13/lzlib.o lzlib_/bbexample.o
 endif
 
 ifneq ($(wildcard zlib-ng/.),)
-ifndef CROSS
 CXXFLAGS += -D_ZLIB_NG
 ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+ifdef CROSS
+CCC=$(CP)-gcc
+zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
+	export CC=$(CCC) && cd zlib-ng && ./configure && $(MAKE)
+else
 zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
 	cd zlib-ng && ./configure && $(MAKE)
-
-LDFLAGS += zlib-ng/libz-ng.a
 endif
+LDFLAGS += zlib-ng/libz-ng.a
 endif
 
 ifneq ($(wildcard lzo/.),)
