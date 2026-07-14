@@ -149,7 +149,7 @@ CFLAGS+=-D_LZTURBO
 include ../dev/x/lzturbo.mk
 endif
 
-#--------------------------------- codecs --------------------------------------------------------------------------------------------
+#------------------------------------------------------------------ codecs ---------------------------------------------------------------------------
 ifneq ($(wildcard brotli/.),)
 CXXFLAGS+=-D_BROTLI -Ibrotli/c/include 
 CFLAGS+=-Ibrotli/c/include 
@@ -299,17 +299,18 @@ glza/GLZAdecode.o: glza/GLZAdecode.c
 OB+=glza/GLZAcomp.o glza/GLZAformat.o glza/GLZAcompress.o glza/GLZAencode.o glza/GLZAdecode.o glza/GLZAmodel.o
 endif
 
-ifneq ($(wildcard isa-l_DEACTIVATE/.),)
-CXXFLAGS+=-D_ISA_L
+ifneq ($(wildcard isa-l/.),)
 ifeq ($(OS),Windows)
+CXXFLAGS+=-D_ISA_L
 # msys2 build: install nasm and type:
 # mingw32-make -f Makefile.unx  arch=mingw  host_cpu=x86_64  have_as_w_avx512= CC=gcc AS=yasm AR=ar STRIP=strip LDFLAGS=  CFLAGS_mingw=-m64
-LDFLAGS+=isa-l_/win64/isa-l.a
-else
-#ISA-L library needs to be installed before use
-CXXFLAGS+=-DHAVE_IGZIP -D_ISA_L
+LDFLAGS+=isa-l_/Windows-x86_64/isa-l.a
+else ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/libisal.a),)
+CXXFLAGS+=-D_ISA_L
+CXXFLAGS+=-DHAVE_IGZIP
+LDFLAGS+=isa-l_/$(OS)-$(ARCH)/libisal.a
+#ISA-L library needs to be installed before uncommenting LDFLAGS: sudo apt-get instal isa-l
 #LDFLAGS+=-lisa-l
-LDFLAGS+=isa-l_/linux/libisal.a
 endif
 endif
 
@@ -444,66 +445,44 @@ endif
 endif
 
 ifneq ($(wildcard zxc/.),)
+ifneq (,$(filter $(ARCH),x86_64 aarch64))
 CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
 CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE
-
-OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o $(ZXCDIR)/zxc_decompress_default.o $(ZXCDIR)/zxc_huffman_default.o $(ZXCDIR)/zxc_pstream.o
-
-#from lzbench 
 ZXCDIR = zxc/src/lib
-OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o  $(ZXCDIR)/zxc_seekable.o $(ZXCDIR)/zxc_decompress_default.o $(ZXCDIR)/zxc_pivco_tables.o 
 
-  ifneq (,$(filter x86_64% amd64% i%86%,$(ARCH)))
-    ifneq (,$(filter x86_64% amd64%,$(ARCH)))
-    OB += $(ZXCDIR)/zxc_compress_sse2.o $(ZXCDIR)/zxc_decompress_sse2.o
-    OB += $(ZXCDIR)/zxc_compress_avx2.o $(ZXCDIR)/zxc_decompress_avx2.o
-    OB += $(ZXCDIR)/zxc_compress_avx512.o $(ZXCDIR)/zxc_decompress_avx512.o
-    OB += $(ZXCDIR)/zxc_huffman_sse2.o $(ZXCDIR)/zxc_huffman_sse2.o
-    OB += $(ZXCDIR)/zxc_huffman_avx2.o $(ZXCDIR)/zxc_huffman_avx2.o
-    OB += $(ZXCDIR)/zxc_huffman_avx512.o $(ZXCDIR)/zxc_huffman_avx512.o
-    OB += $(ZXCDIR)/zxc_dict_sse2.o $(ZXCDIR)/zxc_dict_sse2.o
-    endif
-  else
-    ifneq (,$(filter arm% aarch64%,$(ARCH)))
-    OB += $(ZXCDIR)/zxc_compress_neon.o $(ZXCDIR)/zxc_decompress_neon.o
-    OB += $(ZXCDIR)/zxc_huffman_neon.o $(ZXCDIR)/zxc_huffman_neon.o
-    OB += $(ZXCDIR)/zxc_dict_neon.o $(ZXCDIR)/zxc_dict_neon.o
-        
-      ifneq (,$(filter arm64% aarch64%,$(ARCH)))
-      NEON_FLAGS = -DZXC_USE_NEON64
-      else
-      NEON_FLAGS = -march=armv7-a -mfloat-abi=softfp -mfpu=neon -DZXC_USE_NEON32
-      endif
-    endif  
-  endif
-
-CMD_BUILD_ZXC = $(CC) -O3 $(CFLAGS) -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
-
-$(ZXCDIR)/%.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+ZXC_BUILD = $(CC) -O3 $(CFLAGS) -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
+$(ZXCDIR)/%.o: $(ZXCDIR)/%.c ; $(ZXC_BUILD)
 
 $(ZXCDIR)/%_default.o: ZXC_FLAGS = -DZXC_FUNCTION_SUFFIX=_default
-$(ZXCDIR)/%_default.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+$(ZXCDIR)/%_default.o: $(ZXCDIR)/%.c ; $(ZXC_BUILD)
 
 $(ZXCDIR)/%_sse2.o: ZXC_FLAGS = -msse2 -DZXC_FUNCTION_SUFFIX=_sse2 -DZXC_USE_SSE2
-$(ZXCDIR)/%_sse2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+$(ZXCDIR)/%_sse2.o: $(ZXCDIR)/%.c ; $(ZXC_BUILD)
 
 $(ZXCDIR)/%_avx2.o: ZXC_FLAGS = -mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2
-$(ZXCDIR)/%_avx2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+$(ZXCDIR)/%_avx2.o: $(ZXCDIR)/%.c ; $(ZXC_BUILD)
 
 $(ZXCDIR)/%_avx512.o: ZXC_FLAGS = -mavx512f -mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512
-$(ZXCDIR)/%_avx512.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+$(ZXCDIR)/%_avx512.o: $(ZXCDIR)/%.c ; $(ZXC_BUILD)
 
-$(ZXCDIR)/%_default.o: ZXC_FLAGS = -DZXC_FUNCTION_SUFFIX=_default
-$(ZXCDIR)/%_default.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+$(ZXCDIR)/%_neon.o: ZXC_FLAGS = $(_SSE) -DZXC_FUNCTION_SUFFIX=_neon -DZXC_USE_NEON64
+$(ZXCDIR)/%_neon.o: $(ZXCDIR)/%.c ; $(ZXC_BUILD)
 
-$(ZXCDIR)/%_avx2.o: ZXC_FLAGS = -mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2
-$(ZXCDIR)/%_avx2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
-
-$(ZXCDIR)/%_avx512.o: ZXC_FLAGS = -mavx512f -mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512
-$(ZXCDIR)/%_avx512.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
-
-$(ZXCDIR)/%_neon.o: ZXC_FLAGS = $(NEON_FLAGS) -DZXC_FUNCTION_SUFFIX=_neon
-$(ZXCDIR)/%_neon.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o  $(ZXCDIR)/zxc_decompress_default.o $(ZXCDIR)/zxc_huffman_default.o $(ZXCDIR)/zxc_pivco_tables.o $(ZXCDIR)/zxc_seekable.o
+ifeq ($(ARCH),x86_64)
+  OB += $(ZXCDIR)/zxc_compress_sse2.o $(ZXCDIR)/zxc_decompress_sse2.o
+  OB += $(ZXCDIR)/zxc_compress_avx2.o $(ZXCDIR)/zxc_decompress_avx2.o
+  OB += $(ZXCDIR)/zxc_compress_avx512.o $(ZXCDIR)/zxc_decompress_avx512.o
+  OB += $(ZXCDIR)/zxc_huffman_sse2.o $(ZXCDIR)/zxc_huffman_sse2.o
+  OB += $(ZXCDIR)/zxc_huffman_avx2.o $(ZXCDIR)/zxc_huffman_avx2.o
+  OB += $(ZXCDIR)/zxc_huffman_avx512.o $(ZXCDIR)/zxc_huffman_avx512.o
+  OB += $(ZXCDIR)/zxc_dict_sse2.o $(ZXCDIR)/zxc_dict_sse2.o
+else ifeq ($(ARCH), aarch64)
+  OB += $(ZXCDIR)/zxc_compress_neon.o $(ZXCDIR)/zxc_decompress_neon.o
+  OB += $(ZXCDIR)/zxc_huffman_neon.o $(ZXCDIR)/zxc_huffman_neon.o
+  OB += $(ZXCDIR)/zxc_dict_neon.o $(ZXCDIR)/zxc_dict_neon.o
+endif
+endif
 endif
 
 #------------------------- Entropy coder -----------------------------------------
