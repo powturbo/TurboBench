@@ -180,12 +180,9 @@ endif
 ifneq ($(wildcard libdeflate/.),)
 CXXFLAGS+=-D_LIBDEFLATE
 CFLAGS+=-Ilibdeflate -Ilibdeflate/common
-#OB+=libdeflate/lib/adler32.o libdeflate/lib/crc32.o libdeflate/lib/arm/cpu_features.o libdeflate/lib/x86/cpu_features.o \
-#    libdeflate/lib/deflate_compress.o libdeflate/lib/deflate_decompress.o libdeflate/lib/gzip_compress.o libdeflate/lib/gzip_decompress.o libdeflate/lib/zlib_compress.o libdeflate/lib/zlib_decompress.o libdeflate/lib/utils.o
 LIBDEFLATE_SRCS := $(wildcard libdeflate/lib/*.c) libdeflate/lib/arm/cpu_features.c libdeflate/lib/x86/cpu_features.c 
 LIBDEFLATE_OBJS := $(LIBDEFLATE_SRCS:.c=.o)
 OB += $(LIBDEFLATE_OBJS)
-    
 endif
 
 ifneq ($(wildcard lizard/.),)
@@ -223,13 +220,9 @@ endif
 endif
 
 ifneq ($(wildcard lzma/.),)
-CXXFLAGS+=-D_LZMA
+CXXFLAGS+=-D_LZMA -D_7Z_TYPES_
 CFLAGS+=-D_7ZIP_ST
-CXXFLAGS+=-D_7Z_TYPES_
-OB+=lzma/C/Alloc.o lzma/C/CpuArch.o lzma/C/LzFind.o lzma/C/LzmaDec.o lzma/C/LzmaEnc.o lzma/C/LzmaLib.o
-#ifeq ($(OS),Windows_NT)
-OB+=lzma/C/Threads.o lzma/C/LzFindMt.o lzma/C/LzFindOpt.o
-#endif
+OB+=lzma/C/Alloc.o lzma/C/CpuArch.o lzma/C/LzFind.o lzma/C/LzmaDec.o lzma/C/LzmaEnc.o lzma/C/LzmaLib.o lzma/C/Threads.o lzma/C/LzFindMt.o lzma/C/LzFindOpt.o
 endif
 
 ifneq ($(and $(wildcard LZSSE/.),$(filter x86_64,$(ARCH))),)
@@ -272,8 +265,6 @@ endif
 ifneq ($(wildcard c-blosc2/.),)
 CXXFLAGS+=-D_C_BLOSC2
 CFLAGS+=-Ic-blosc2/blosc -Ic-blosc2/include -Ic-blosc2/include/blosc2 -DHAVE_ZSTD
-#OB+=c-blosc2/blosc/blosc2.o c-blosc2/blosc/blosclz.o c-blosc2/blosc/frame.o c-blosc2/blosc/sframe.o c-blosc2/blosc/schunk.o c-blosc2/blosc/blosc2-stdio.o c-blosc2/blosc/fastcopy.o c-blosc2/blosc/stune.o \
-#    c-blosc2/blosc/delta.o c-blosc2/blosc/shuffle.o c-blosc2/blosc/shuffle-generic.o c-blosc2/blosc/shuffle-sse2.o c-blosc2/blosc/timestamp.o c-blosc2/blosc/trunc-prec.o c-blosc2/blosc/bitshuffle-generic.o
 C_BLOSC2_SRCS := $(wildcard c-blosc2/blosc/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/.c)
 C_BLOSC2_OBJS := $(C_BLOSC2_SRCS:.c=.o)
 OB += $(C_BLOSC2_OBJS)  
@@ -289,29 +280,22 @@ ifneq ($(wildcard fast-lzma2/.),)
 CXXFLAGS+=-D_FLZMA2
 OB+=fast-lzma2/dict_buffer.o fast-lzma2/fl2_common.o fast-lzma2/fl2_compress.o fast-lzma2/fl2_decompress.o fast-lzma2/lzma2_dec.o fast-lzma2/lzma2_enc.o fast-lzma2/radix_bitpack.o fast-lzma2/radix_mf.o fast-lzma2/radix_struct.o \
 fast-lzma2/range_enc.o fast-lzma2/fl2_threading.o fast-lzma2/fl2_pool.o fast-lzma2/util.o
-#fast-lzma2/xxhash.o fast-lzma2/fl2_error_private.o
 endif
 
 ifneq ($(wildcard glza/.),)
 CXXFLAGS+=-D_GLZA
 glza/GLZAmodel.o: glza/GLZAmodel.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-
 glza/GLZAcomp.o: glza/GLZAcomp.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-
 glza/GLZAencode.o: glza/GLZAencode.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-
 glza/GLZAcompress.o: glza/GLZAcompress.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-
 glza/GLZAformat.o: glza/GLZAformat.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-
 glza/GLZAdecode.o: glza/GLZAdecode.c
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-
 OB+=glza/GLZAcomp.o glza/GLZAformat.o glza/GLZAcompress.o glza/GLZAencode.o glza/GLZAdecode.o glza/GLZAmodel.o
 endif
 
@@ -360,16 +344,9 @@ endif
 ifneq ($(wildcard lzo/.),)
 CXXFLAGS+=-D_LZO -Ilzo/include
 CFLAGS+=-Ilzo/include
-OB+= lzo/src/lzo1.o lzo/src/lzo1a.o lzo/src/lzo1a_99.o lzo/src/lzo1b_1.o lzo/src/lzo1b_2.o lzo/src/lzo1b_3.o lzo/src/lzo1b_4.o lzo/src/lzo1b_5.o \
-lzo/src/lzo1b_6.o lzo/src/lzo1b_7.o lzo/src/lzo1b_8.o lzo/src/lzo1b_9.o lzo/src/lzo1b_99.o lzo/src/lzo1b_9x.o lzo/src/lzo1b_cc.o \
-lzo/src/lzo1b_d1.o lzo/src/lzo1b_d2.o lzo/src/lzo1b_rr.o lzo/src/lzo1b_xx.o lzo/src/lzo1c_1.o lzo/src/lzo1c_2.o lzo/src/lzo1c_3.o \
-lzo/src/lzo1c_4.o lzo/src/lzo1c_5.o lzo/src/lzo1c_6.o lzo/src/lzo1c_7.o lzo/src/lzo1c_8.o lzo/src/lzo1c_9.o lzo/src/lzo1c_99.o \
-lzo/src/lzo1c_9x.o lzo/src/lzo1c_cc.o lzo/src/lzo1c_d1.o lzo/src/lzo1c_d2.o lzo/src/lzo1c_rr.o lzo/src/lzo1c_xx.o lzo/src/lzo1f_1.o \
-lzo/src/lzo1f_9x.o lzo/src/lzo1f_d1.o lzo/src/lzo1f_d2.o lzo/src/lzo1x_1.o lzo/src/lzo1x_1k.o lzo/src/lzo1x_1l.o lzo/src/lzo1x_1o.o \
-lzo/src/lzo1x_9x.o lzo/src/lzo1x_d1.o lzo/src/lzo1x_d2.o lzo/src/lzo1x_d3.o lzo/src/lzo1x_o.o lzo/src/lzo1y_1.o lzo/src/lzo1y_9x.o \
-lzo/src/lzo1y_d1.o lzo/src/lzo1y_d2.o lzo/src/lzo1y_d3.o lzo/src/lzo1y_o.o lzo/src/lzo1z_9x.o lzo/src/lzo1z_d1.o lzo/src/lzo1z_d2.o \
-lzo/src/lzo1z_d3.o lzo/src/lzo1_99.o lzo/src/lzo2a_9x.o lzo/src/lzo2a_d1.o lzo/src/lzo2a_d2.o lzo/src/lzo_crc.o lzo/src/lzo_init.o \
-lzo/src/lzo_ptr.o lzo/src/lzo_str.o lzo/src/lzo_util.o
+LZO_SRCS := $(wildcard lzo/src/*.c)
+LZO_OBJS := $(LZO_SRCS:.c=.o)
+OB += $(LZO_OBJS)
 endif
 
 ifneq ($(wildcard lzsa/.),)
@@ -414,8 +391,10 @@ ifeq ($(ARCH),x86_64)
   OB += $(MISA77_DIR)/src/isa/target_sse2.o  $(MISA77_DIR)/src/experimental/isa/etarget_sse2.o 
   OB += $(MISA77_DIR)/src/isa/target_avx2.o $(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
 endif
-
 endif
+
+# 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
+CXXFLAGS+=-D_OODLE
 
 ifneq ($(wildcard snappy/.),)
 # configure or copy directory "snappy_/*" to "snappy"
@@ -431,16 +410,9 @@ OB+=snappy-c/snappy.o snappy-c/util.o
 endif
 
 ifneq ($(wildcard gipfeli/.),)
-#ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
 CXXFLAGS+=-D_GIPFELI
 OB+=gipfeli/lz77.o gipfeli/entropy.o gipfeli/entropy_code_builder.o gipfeli/decompress.o gipfeli/gipfeli-internal.o
-#endif
 endif
-
-#ifdef OODLE
-CXXFLAGS+=-D_OODLE
-# oodle dll 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
-#endif
 
 ifneq ($(wildcard libslz/.),)
 CXXFLAGS+=-D_SLZ
@@ -461,6 +433,77 @@ CXXFLAGS+=-D_UNISHOX2
 OB+=Unishox2/unishox2.o turbobench_/unishox.o
 CXXFLAGS+=-D_UNISHOX3 -Imarisa-trie/include
 OB+=Unishox2/Unishox3_Alpha/unishox3.o
+endif
+
+ifneq ($(wildcard zpaq/.),)
+ifeq ($(OS),$(filter $(OS),Darwin))
+else
+CXXFLAGS+=-D_ZPAQ
+OB+=zpaq/libzpaq.o
+endif
+endif
+
+ifneq ($(wildcard zxc/.),)
+CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
+CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE
+
+OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o $(ZXCDIR)/zxc_decompress_default.o $(ZXCDIR)/zxc_huffman_default.o $(ZXCDIR)/zxc_pstream.o
+
+#from lzbench 
+ZXCDIR = zxc/src/lib
+OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o  $(ZXCDIR)/zxc_seekable.o $(ZXCDIR)/zxc_decompress_default.o $(ZXCDIR)/zxc_pivco_tables.o 
+
+  ifneq (,$(filter x86_64% amd64% i%86%,$(ARCH)))
+    ifneq (,$(filter x86_64% amd64%,$(ARCH)))
+    OB += $(ZXCDIR)/zxc_compress_sse2.o $(ZXCDIR)/zxc_decompress_sse2.o
+    OB += $(ZXCDIR)/zxc_compress_avx2.o $(ZXCDIR)/zxc_decompress_avx2.o
+    OB += $(ZXCDIR)/zxc_compress_avx512.o $(ZXCDIR)/zxc_decompress_avx512.o
+    OB += $(ZXCDIR)/zxc_huffman_sse2.o $(ZXCDIR)/zxc_huffman_sse2.o
+    OB += $(ZXCDIR)/zxc_huffman_avx2.o $(ZXCDIR)/zxc_huffman_avx2.o
+    OB += $(ZXCDIR)/zxc_huffman_avx512.o $(ZXCDIR)/zxc_huffman_avx512.o
+    OB += $(ZXCDIR)/zxc_dict_sse2.o $(ZXCDIR)/zxc_dict_sse2.o
+    endif
+  else
+    ifneq (,$(filter arm% aarch64%,$(ARCH)))
+    OB += $(ZXCDIR)/zxc_compress_neon.o $(ZXCDIR)/zxc_decompress_neon.o
+    OB += $(ZXCDIR)/zxc_huffman_neon.o $(ZXCDIR)/zxc_huffman_neon.o
+    OB += $(ZXCDIR)/zxc_dict_neon.o $(ZXCDIR)/zxc_dict_neon.o
+        
+      ifneq (,$(filter arm64% aarch64%,$(ARCH)))
+      NEON_FLAGS = -DZXC_USE_NEON64
+      else
+      NEON_FLAGS = -march=armv7-a -mfloat-abi=softfp -mfpu=neon -DZXC_USE_NEON32
+      endif
+    endif  
+  endif
+
+CMD_BUILD_ZXC = $(CC) -O3 $(CFLAGS) -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
+
+$(ZXCDIR)/%.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_default.o: ZXC_FLAGS = -DZXC_FUNCTION_SUFFIX=_default
+$(ZXCDIR)/%_default.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_sse2.o: ZXC_FLAGS = -msse2 -DZXC_FUNCTION_SUFFIX=_sse2 -DZXC_USE_SSE2
+$(ZXCDIR)/%_sse2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_avx2.o: ZXC_FLAGS = -mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2
+$(ZXCDIR)/%_avx2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_avx512.o: ZXC_FLAGS = -mavx512f -mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512
+$(ZXCDIR)/%_avx512.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_default.o: ZXC_FLAGS = -DZXC_FUNCTION_SUFFIX=_default
+$(ZXCDIR)/%_default.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_avx2.o: ZXC_FLAGS = -mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2
+$(ZXCDIR)/%_avx2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_avx512.o: ZXC_FLAGS = -mavx512f -mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512
+$(ZXCDIR)/%_avx512.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
+
+$(ZXCDIR)/%_neon.o: ZXC_FLAGS = $(NEON_FLAGS) -DZXC_FUNCTION_SUFFIX=_neon
+$(ZXCDIR)/%_neon.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
 endif
 
 #------------------------- Entropy coder -----------------------------------------
@@ -504,10 +547,8 @@ ifdef FREQTAB
 CXXFLAGS+=-D_FREQTAB
 
 ifdef FREQTABO
-FREQOPT=-march=skylake -fwhole-program -fpermissive -fstrict-aliasing -fomit-frame-pointer -I../Lib3 -I../Lib \
--fno-stack-protector -fno-stack-check -fno-check-new \
--fno-exceptions -fno-rtti -fno-operator-names \
--flto -ffat-lto-objects -Wl,-flto -fuse-linker-plugin -Wl,-O -Wl,--sort-common -Wl,--as-needed -ffunction-sections
+FREQOPT=-march=skylake -fwhole-program -fpermissive -fstrict-aliasing -fomit-frame-pointer -I../Lib3 -I../Lib -fno-stack-protector -fno-stack-check -fno-check-new -fno-exceptions \
+  -fno-rtti -fno-operator-names -flto -ffat-lto-objects -Wl,-flto -fuse-linker-plugin -Wl,-O -Wl,--sort-common -Wl,--as-needed -ffunction-sections
 
 EC/freqtab/src/c_mem.o: EC/freqtab/src/c_mem.cpp
 	$(CXX) $(FREQOPT) -O3 -std=c++11 $< -c -o $@
@@ -522,6 +563,45 @@ endif
 ifdef GANS
 CXXFLAGS+=-D_GANS
 OB+=EC/rans.o EC/head_cbloom.o
+endif
+
+# PivCo-Huffman (https://github.com/MarcinZukowski/pivco-huffman): SIMD tree-walk
+# Huffman, levels 1=PH, 2=PHA.  Submodule built via its own CMake; we link the
+# pre-localized object (libpivco_huffman_local.o) whose vendored FSE_*/HUF_*
+# symbols are localized so they don't clash with the zstd TurboBench bundles.
+# The submodule has its own submodule (ext/fse), so init recursively:
+#   git submodule update --init --recursive pivco-huffman
+#ifneq ($(and $(wildcard pivco-huffman/.),$(filter x86_64,$(ARCH))),)
+ifneq ($(wildcard pivco-huffman/.),)
+ifndef CROSS
+ifneq ($(OS),Windows)
+PIVCOHUFDIR=pivco-huffman
+CXXFLAGS+=-D_PIVCOHUF=1 -I$(PIVCOHUFDIR)/include
+$(PIVCOHUFDIR)/build/libpivco_huffman_local.o:
+	cmake -S $(PIVCOHUFDIR) -B $(PIVCOHUFDIR)/build -DCMAKE_BUILD_TYPE=Release
+	cmake --build $(PIVCOHUFDIR)/build --target pivco_huffman_local -j
+OB+=$(PIVCOHUFDIR)/build/libpivco_huffman_local.o
+
+# PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor;
+# level = zstd level).  Built from the pivco-huffman submodule's extras/phaz via
+# its own build.sh: it patches a *private* copy of zstd source (pointed at
+# TurboBench's own zstd/ submodule, same pinned SHA 5233c58e) and merges it +
+# pivco into one blob (phaz_local.o) that exports only phaz_compress /
+# phaz_decompress -- everything else (all of zstd, FSE/HUF, pivco) is localized,
+# so it coexists with the vanilla zstd TurboBench links.  Requires:
+#   git submodule update --init --recursive pivco-huffman zstd
+ifeq ($(PHAZ), 1)
+PIVCOHUFDIR=pivco-huffman
+PHAZDIR=$(PIVCOHUFDIR)/extras/phaz
+CXXFLAGS+=-D_PHAZ=1
+$(PHAZDIR)/build/phaz_local.o:
+	cmake -S $(PIVCOHUFDIR) -B $(PIVCOHUFDIR)/build -DCMAKE_BUILD_TYPE=Release
+	cmake --build $(PIVCOHUFDIR)/build --target pivco_huffman_local -j
+	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
+OB+=$(PHAZDIR)/build/phaz_local.o
+endif
+endif
+endif
 endif
 
 ifdef RECIPARITH
@@ -721,77 +801,6 @@ CXXFLAGS+=-D_YAPPY
 OB+=yappy/yappy.o
 endif
 
-ifneq ($(wildcard zpaq/.),)
-ifeq ($(OS),$(filter $(OS),Darwin))
-else
-CXXFLAGS+=-D_ZPAQ
-OB+=zpaq/libzpaq.o
-endif
-endif
-
-ifneq ($(wildcard zxc/.),)
-CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
-CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE
-
-OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o $(ZXCDIR)/zxc_decompress_default.o $(ZXCDIR)/zxc_huffman_default.o $(ZXCDIR)/zxc_pstream.o
-
-#from lzbench 
-ZXCDIR = zxc/src/lib
-OB+= $(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o  $(ZXCDIR)/zxc_seekable.o $(ZXCDIR)/zxc_decompress_default.o $(ZXCDIR)/zxc_pivco_tables.o 
-
-  ifneq (,$(filter x86_64% amd64% i%86%,$(ARCH)))
-    ifneq (,$(filter x86_64% amd64%,$(ARCH)))
-    OB += $(ZXCDIR)/zxc_compress_sse2.o $(ZXCDIR)/zxc_decompress_sse2.o
-    OB += $(ZXCDIR)/zxc_compress_avx2.o $(ZXCDIR)/zxc_decompress_avx2.o
-    OB += $(ZXCDIR)/zxc_compress_avx512.o $(ZXCDIR)/zxc_decompress_avx512.o
-    OB += $(ZXCDIR)/zxc_huffman_sse2.o $(ZXCDIR)/zxc_huffman_sse2.o
-    OB += $(ZXCDIR)/zxc_huffman_avx2.o $(ZXCDIR)/zxc_huffman_avx2.o
-    OB += $(ZXCDIR)/zxc_huffman_avx512.o $(ZXCDIR)/zxc_huffman_avx512.o
-    OB += $(ZXCDIR)/zxc_dict_sse2.o $(ZXCDIR)/zxc_dict_sse2.o
-    endif
-  else
-    ifneq (,$(filter arm% aarch64%,$(ARCH)))
-    OB += $(ZXCDIR)/zxc_compress_neon.o $(ZXCDIR)/zxc_decompress_neon.o
-    OB += $(ZXCDIR)/zxc_huffman_neon.o $(ZXCDIR)/zxc_huffman_neon.o
-    OB += $(ZXCDIR)/zxc_dict_neon.o $(ZXCDIR)/zxc_dict_neon.o
-        
-      ifneq (,$(filter arm64% aarch64%,$(ARCH)))
-      NEON_FLAGS = -DZXC_USE_NEON64
-      else
-      NEON_FLAGS = -march=armv7-a -mfloat-abi=softfp -mfpu=neon -DZXC_USE_NEON32
-      endif
-    endif  
-  endif
-
-CMD_BUILD_ZXC = $(CC) -O3 $(CFLAGS) -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
-
-$(ZXCDIR)/%.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
-
-$(ZXCDIR)/%_default.o: ZXC_FLAGS = -DZXC_FUNCTION_SUFFIX=_default
-$(ZXCDIR)/%_default.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
-
-$(ZXCDIR)/%_sse2.o: ZXC_FLAGS = -msse2 -DZXC_FUNCTION_SUFFIX=_sse2 -DZXC_USE_SSE2
-$(ZXCDIR)/%_sse2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
-
-$(ZXCDIR)/%_avx2.o: ZXC_FLAGS = -mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2
-$(ZXCDIR)/%_avx2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
-
-$(ZXCDIR)/%_avx512.o: ZXC_FLAGS = -mavx512f -mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512
-$(ZXCDIR)/%_avx512.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
-
-$(ZXCDIR)/%_default.o: ZXC_FLAGS = -DZXC_FUNCTION_SUFFIX=_default
-$(ZXCDIR)/%_default.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
-
-$(ZXCDIR)/%_avx2.o: ZXC_FLAGS = -mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2
-$(ZXCDIR)/%_avx2.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
-
-$(ZXCDIR)/%_avx512.o: ZXC_FLAGS = -mavx512f -mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512
-$(ZXCDIR)/%_avx512.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
-
-
-$(ZXCDIR)/%_neon.o: ZXC_FLAGS = $(NEON_FLAGS) -DZXC_FUNCTION_SUFFIX=_neon
-$(ZXCDIR)/%_neon.o: $(ZXCDIR)/%.c ; $(CMD_BUILD_ZXC)
-endif
 
 ifneq ($(wildcard CSC/.),)
 CXXFLAGS+=-D_CSC
@@ -852,44 +861,6 @@ CXXFLAGS+=-D_PYSAP
 OB+=pysap/pysapcompress/vpa105CsObjInt.o pysap/pysapcompress/vpa106cslzc.o pysap/pysapcompress/vpa107cslzh.o pysap/pysapcompress/vpa108csulzh.o
 endif
 
-# PivCo-Huffman (https://github.com/MarcinZukowski/pivco-huffman): SIMD tree-walk
-# Huffman, levels 1=PH, 2=PHA.  Submodule built via its own CMake; we link the
-# pre-localized object (libpivco_huffman_local.o) whose vendored FSE_*/HUF_*
-# symbols are localized so they don't clash with the zstd TurboBench bundles.
-# The submodule has its own submodule (ext/fse), so init recursively:
-#   git submodule update --init --recursive pivco-huffman
-#ifneq ($(and $(wildcard pivco-huffman/.),$(filter x86_64,$(ARCH))),)
-ifneq ($(wildcard pivco-huffman/.),)
-ifndef CROSS
-ifneq ($(OS),Windows)
-PIVCOHUFDIR=pivco-huffman
-CXXFLAGS+=-D_PIVCOHUF=1 -I$(PIVCOHUFDIR)/include
-$(PIVCOHUFDIR)/build/libpivco_huffman_local.o:
-	cmake -S $(PIVCOHUFDIR) -B $(PIVCOHUFDIR)/build -DCMAKE_BUILD_TYPE=Release
-	cmake --build $(PIVCOHUFDIR)/build --target pivco_huffman_local -j
-OB+=$(PIVCOHUFDIR)/build/libpivco_huffman_local.o
-
-# PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor;
-# level = zstd level).  Built from the pivco-huffman submodule's extras/phaz via
-# its own build.sh: it patches a *private* copy of zstd source (pointed at
-# TurboBench's own zstd/ submodule, same pinned SHA 5233c58e) and merges it +
-# pivco into one blob (phaz_local.o) that exports only phaz_compress /
-# phaz_decompress -- everything else (all of zstd, FSE/HUF, pivco) is localized,
-# so it coexists with the vanilla zstd TurboBench links.  Requires:
-#   git submodule update --init --recursive pivco-huffman zstd
-ifeq ($(PHAZ), 1)
-PIVCOHUFDIR=pivco-huffman
-PHAZDIR=$(PIVCOHUFDIR)/extras/phaz
-CXXFLAGS+=-D_PHAZ=1
-$(PHAZDIR)/build/phaz_local.o:
-	cmake -S $(PIVCOHUFDIR) -B $(PIVCOHUFDIR)/build -DCMAKE_BUILD_TYPE=Release
-	cmake --build $(PIVCOHUFDIR)/build --target pivco_huffman_local -j
-	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
-OB+=$(PHAZDIR)/build/phaz_local.o
-endif
-endif
-endif
-endif
 #--------------------------------------------------------------------
 CFLAGS+=$(DDEBUG) -w -std=gnu99 -fpermissive -Wall
 CXXFLAGS+=$(DDEBUG) -w -fpermissive -Wall -fno-rtti
