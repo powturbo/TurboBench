@@ -541,18 +541,20 @@ endif
 ifneq ($(and $(wildcard Turbo-Range-Coder/.),$(filter x86_64,$(ARCH))),)
 #ifneq ($(wildcard Turbo-Range-Coder/.),)
 CFLAGS+=-D_ANS
-TRC=Turbo-Range-Coder
-#$(TRC)/anscdf0.o: $(TRC)/anscdf.c $(TRC)/anscdf_.h
-#	$(CC) -c -O3 $(CFLAGS) $(_SCALAR) -falign-loops=32 $(TRC)/anscdf.c -o $(TRC)/anscdf0.o  
+TRC=Turbo-Range-Coder/
+$(TRC)anscdf0.o: $(TRC)anscdf.c $(TRC)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) $(_SCALAR) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdf0.o  
 
-$(TRC)/anscdfs.o: $(TRC)/anscdf.c $(TRC)/anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) $(_SSE) -falign-loops=32 $(TRC)/anscdf.c -o $(TRC)/anscdfs.o  
+$(TRC)anscdfs.o: $(TRC)anscdf.c $(TRC)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) $(_SSE) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfs.o  
 
-OB+=$(TRC)/anscdfs.o $(TRC)/anscdf.c 
+OB+=$(TRC)anscdfs.o 
 ifeq ($(ARCH), x86_64)
-$(TRC)/anscdfx.o: $(TRC)/anscdf.c $(TRC)/anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 -o $(TRC)/anscdfx.o
-OB+=$(TRC)/anscdfx.o 
+$(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfx.o
+
+OB+=$(TRC)anscdfx.o 
+
 endif
 
 CXXFLAGS+=-D_TURBORC
