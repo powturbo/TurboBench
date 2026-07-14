@@ -81,7 +81,7 @@ endif
 
 ifeq ($(ARCH),aarch64)
   _SSE=-march=armv8-a
-  CFLAGS+=$(_SSE)
+  CFLAGS=$(_SSE)
 else ifeq ($(ARCH),riscv64)
 #  CFLAGS=-march=rv64gcv -mabi=lp64d
   CFLAGS=-march=rv64gcv_zvbb -mabi=lp64d
@@ -308,7 +308,7 @@ LDFLAGS+=isa-l_/Windows-x86_64/isa-l.a
 else ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/libisal.a),)
 CXXFLAGS+=-D_ISA_L
 LDFLAGS+=isa-l_/$(OS)-$(ARCH)/libisal.a
-#ISA-L library needs to be installed before uncommenting LDFLAGS: sudo apt-get instal isa-l
+#Alternative: ISA-L library needs to be installed before: sudo apt-get instal isa-l, then uncomment the 2 lines below:
 #CXXFLAGS+=-DHAVE_IGZIP
 #LDFLAGS+=-lisa-l
 endif
