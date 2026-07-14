@@ -112,7 +112,7 @@ SNAPPY_C=0
 LZHAM=0
 endif
 
-CFLAGS+=-w -Wall $(DEBUG) -fpermissive -Wimplicit-function-declaration
+CFLsAGS+=-w -Wall $(DEBUG) -fpermissive -Wimplicit-function-declaration
 
 ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
 LDFLAGS+=-lrt -lpthread
@@ -141,8 +141,8 @@ CFLAGS+=-fopenmp -DLIBBSC_OPENMP_SUPPORT
 LDFLAGS+=-fopenmp
 endif
 
-all: copy-miniz  turbobench 
-
+all: turbobench 
+ 
 ifdef LZTURBO
 CXXFLAGS+=-D_LZTURBO
 CFLAGS+=-D_LZTURBO
@@ -153,24 +153,11 @@ endif
 ifneq ($(wildcard brotli/.),)
 CXXFLAGS+=-D_BROTLI -Ibrotli/c/include 
 CFLAGS+=-Ibrotli/c/include 
-#-Ibrotli/c/enc
-ifdef BROTLILIB  # Use the libraries created by the brotli own builds
-OB+=brotli/out/libbrotlicommon.so brotli/out/libbrotlidec.so brotli/out/libbrotlienc.so
-else
 OB+=brotli/c/common/constants.o brotli/c/common/context.o brotli/c/common/dictionary.o brotli/c/common/platform.o brotli/c/common/transform.o brotli/c/common/shared_dictionary.o brotli/c/dec/huffman.o brotli/c/dec/prefix.o\
     brotli/c/dec/state.o brotli/c/dec/static_init.o brotli/c/dec/bit_reader.o brotli/c/dec/decode.o \
     brotli/c/enc/backward_references.o brotli/c/enc/bit_cost.o brotli/c/enc/brotli_bit_stream.o brotli/c/enc/block_splitter.o brotli/c/enc/cluster.o brotli/c/enc/command.o brotli/c/enc/compound_dictionary.o brotli/c/enc/encode.o brotli/c/enc/encoder_dict.o brotli/c/enc/compress_fragment.o brotli/c/enc/compress_fragment_two_pass.o \
     brotli/c/enc/encoder_dict.o brotli/c/enc/entropy_encode.o brotli/c/enc/histogram.o brotli/c/enc/fast_log.o brotli/c/enc/literal_cost.o  brotli/c/enc/memory.o brotli/c/enc/metablock.o brotli/c/enc/utf8_util.o brotli/c/enc/backward_references_hq.o \
     brotli/c/enc/dictionary_hash.o brotli/c/enc/static_dict.o brotli/c/enc/static_init.o brotli/c/enc/static_dict_lut.o
-endif
-endif
-
-ifneq ($(wildcard libbsc/.),)
-CXXFLAGS+=-D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc
-OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/filters/detectors.o \
-	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o
-OB+=libbsc/libbsc/platform/platform.o libbsc/libbsc/bwt/libsais/libsais.o libbsc/libbsc/bwt/libsais/libsais.o
-LIBSAIS=1
 endif
 
 ifneq ($(wildcard bzip2/.),)
@@ -182,6 +169,14 @@ ifneq ($(wildcard bzip3/.),)
 CXXFLAGS+=-D_BZIP3
 CFLAGS+=-DVERSION=1 -Ibzip3/include -Wno-int-conversion
 OB+=bzip3/src/libbz3.o
+endif
+
+ifneq ($(wildcard libbsc/.),)
+CXXFLAGS+=-D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc
+OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/filters/detectors.o \
+	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o
+OB+=libbsc/libbsc/platform/platform.o libbsc/libbsc/bwt/libsais/libsais.o libbsc/libbsc/bwt/libsais/libsais.o
+LIBSAIS=1
 endif
 
 ifneq ($(wildcard libdeflate/.),)
@@ -226,11 +221,6 @@ OB+=lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
 endif
 
-ifneq ($(wildcard lzjody/.),)
-CXXFLAGS+=-D_LZJODY
-OB+=lzjody/lzjody.o lzjody/byteplane_xfrm.o
-endif
-
 ifneq ($(wildcard lzma/.),)
 CXXFLAGS+=-D_LZMA
 CFLAGS+=-D_7ZIP_ST
@@ -239,11 +229,6 @@ OB+=lzma/C/Alloc.o lzma/C/CpuArch.o lzma/C/LzFind.o lzma/C/LzmaDec.o lzma/C/Lzma
 #ifeq ($(OS),Windows_NT)
 OB+=lzma/C/Threads.o lzma/C/LzFindMt.o lzma/C/LzFindOpt.o
 #endif
-endif
-
-ifneq ($(wildcard lzoma_/.),)
-CXXFLAGS+=-D_LZOMA
-OB+=lzoma_/pack.o lzoma_/unpack.o lzoma_/divsufsort.o
 endif
 
 ifneq ($(and $(wildcard LZSSE/.),$(filter x86_64,$(ARCH))),)
@@ -259,16 +244,6 @@ endif
 
 ifneq ($(wildcard zstd/.),)
 CXXFLAGS+=-D_ZSTD -Izstd/lib -Izstd/lib/common
-ifeq ($(ZSTDLIB), 1)
-# compile zstd: "cd zstd" and then "make"
-#LDFLAGS+=-lzstd
-#LDFLAGS+=zstd/lib/libzstd.a
-LDFLAGS+=zstd-v1.5.4-win64/static/libzstd_static.lib
-#LDFLAGS+=zstd/lib/dll/libzstd.dll.a
-#LDFLAGS+=libzstd_static.lib
-else
-#CFLAGS+=-DZSTD_BUILD_STATIC -DZSTD_STATIC_LINKING_ONLY -DFSE_STATIC_LINKING_ONLY -DHUF_STATIC_LINKING_ONLY
-#CFLAGS+=-DZSTD_DISABLE_ASM
 CFLAGS+=-Izstd/lib -Izstd/lib/common
 ZT0=zstd/lib/common/
 ZTC=zstd/lib/compress/
@@ -278,20 +253,12 @@ OB+=$(ZT0)pool.o $(ZT0)xxhash.o $(ZT0)error_private.o $(ZT0)fse_decompress.o $(Z
 	$(ZTC)zstd_ldm.o $(ZTC)zstdmt_compress.o $(ZTC)zstd_opt.o $(ZTC)fse_compress.o $(ZTC)zstd_compress_superblock.o \
     $(ZTD)zstd_decompress.o $(ZTD)zstd_decompress_block.o $(ZTD)zstd_ddict.o $(ZTD)huf_decompress_amd64.o $(ZTC)huf_compress.o $(ZTD)huf_decompress.o  
 endif
-endif
 
 FSE := EC/fse
 ifneq ($(wildcard FSE/.),)
 CXXFLAGS+=-D_FSE
 OB+=$(LB)EC/fse/fse_compress_.o $(LB)EC/fse/fse_decompress_.o 
 endif
-
-#ifdef FSEHUF
-#CXXFLAGS+=-D_FSEHUF
-#OB+=$(LB)EC/fse/huf_compress_.o $(LB)EC/fse/huf_decompress_.o 
-#else
-#OB+=$(LB)zstd/lib/compress/huf_compress.o $(LB)zstd/lib/decompress/huf_decompress.o 
-#endif
 
 ifneq ($(wildcard zlib/.),)
 CXXFLAGS+=-D_ZLIB
@@ -348,7 +315,7 @@ glza/GLZAdecode.o: glza/GLZAdecode.c
 OB+=glza/GLZAcomp.o glza/GLZAformat.o glza/GLZAcompress.o glza/GLZAencode.o glza/GLZAdecode.o glza/GLZAmodel.o
 endif
 
-ifneq ($(wildcard isa-l_NOP/.),)
+ifneq ($(wildcard isa-l_DEACTIVATE/.),)
 CXXFLAGS+=-D_ISA_L
 ifeq ($(OS),Windows)
 # msys2 build: install nasm and type:
@@ -377,17 +344,15 @@ CXXFLAGS+=-D_LZLIB
 OB+=lzlib-1.13/lzlib.o lzlib_/bbexample.o
 endif
 
+#Build zlib-ng with CMD:= $(shell cd zlib-ng && ./configure && make && cd ..)
 ifneq ($(wildcard zlib-ng/.),)
-CMD:= $(shell cd zlib-ng && ./configure && make && cd ..)
+ifneq ($(wildcard zlib-ng/libz-ng.a),)
 CXXFLAGS+=-D_ZLIB_NG
 LDFLAGS+=zlib-ng/libz-ng.a
-#ifeq ($(OS),Windows)
-#OB+=msys-z-ng.dll
-#LDFLAGS+=zlib-ng_/win64/libz-ng.a
-#else
-#LDFLAGS+=-lz-ng
-#LDFLAGS+=zlib-ng_/linux/libz-ng.a
-#endif
+else ifneq ($(wildcard zlib-ng_/$(OS)_$(ARCH)libz-ng.a),)
+CXXFLAGS+=-D_ZLIB_NG
+LDFLAGS+=zlib-ng_/$(ARCH)/libz-ng.a
+endif
 endif
 
 ifneq ($(wildcard lzo/.),)
@@ -417,10 +382,11 @@ DIVSORT=1
 endif
 endif
 
-.PHONY: copy-miniz
-ifneq ($(wildcard miniz/.),)
-copy-miniz:
-	cp miniz_/miniz_export.h miniz/miniz_export.h
+#.PHONY: copy-miniz
+ifneq ($(wildcard miniz/miniz_export.h),)
+#ifneq ($(wildcard miniz/.),)
+#copy-miniz:
+#	cp miniz_/miniz_export.h miniz/miniz_export.h
 CXXFLAGS+=-D_MINIZ
 OB+=miniz/miniz.o miniz/miniz_tdef.o miniz/miniz_tinfl.o
 endif
@@ -429,7 +395,7 @@ ifneq ($(wildcard misa77/.),)
 CXXFLAGS+=-D_MISA77
 MISA77_DIR = misa77
 MISA77_INC = -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src
-MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp) $(wildcard $(MISA77_DIR)/src/experimental/*.cpp) 
+MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp) $(wildcard $(MISA77_DIR)/src/experimental/*.cpp)  $(MISA77_DIR)/src/isa/target_portable.o $(MISA77_DIR)/src/experimental/isa/etarget_portable.o
 MISA77_OBJS := $(patsubst %.cpp, %.o, $(MISA77_SRCS))
 MISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 $(MISA77_INC) $(MISA77_FLAGS) $< -c -o $@
 $(MISA77_DIR)/src/%_sse2.o: CXXFLAGS += $(_SSE)
@@ -572,30 +538,32 @@ CXXFLAGS+=-D_SUBOTIN
 OB+=EC/subotin_/subotin.o
 endif
 
-ifneq ($(wildcard Turbo-Range-Coder/.),)
+ifneq ($(and $(wildcard Turbo-Range-Coder/.),$(filter x86_64,$(ARCH))),)
+#ifneq ($(wildcard Turbo-Range-Coder/.),)
 CFLAGS+=-D_ANS
-TRC=Turbo-Range-Coder/
-$(TRC)anscdf0.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) $(_SCALAR) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdf0.o  
+TRC=Turbo-Range-Coder
+#$(TRC)/anscdf0.o: $(TRC)/anscdf.c $(TRC)/anscdf_.h
+#	$(CC) -c -O3 $(CFLAGS) $(_SCALAR) -falign-loops=32 $(TRC)/anscdf.c -o $(TRC)/anscdf0.o  
 
-$(TRC)anscdfs.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) $(_SSE) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfs.o  
+$(TRC)/anscdfs.o: $(TRC)/anscdf.c $(TRC)/anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) $(_SSE) -falign-loops=32 $(TRC)/anscdf.c -o $(TRC)/anscdfs.o  
 
-OB+=$(TRC)anscdfs.o 
+OB+=$(TRC)/anscdfs.o $(TRC)/anscdf.c 
 ifeq ($(ARCH), x86_64)
-$(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfx.o
-OB+=$(TRC)anscdfx.o 
+$(TRC)/anscdfx.o: $(TRC)/anscdf.c $(TRC)/anscdf_.h
+	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 -o $(TRC)/anscdfx.o
+OB+=$(TRC)/anscdfx.o 
 endif
 
 CXXFLAGS+=-D_TURBORC
 CFLAGS+=-D_BWT -ITurbo-Range-Coder/libsais/include
+OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
+  Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o 
+
+LIBSAIS=1
 ifdef LZTURBO
 CFLAGS+=-D_NCPUISA -D_NQUANT
 endif
-OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
-  Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o 
-LIBSAIS=1
 endif
 
 ifneq ($(wildcard EC/vecrc/.),)
@@ -655,6 +623,16 @@ OB+=density/src/buffers/buffer.o density/src/algorithms/algorithms.o density/src
 	density/src/algorithms/chameleon/core/chameleon_decode.o density/src/algorithms/chameleon/core/chameleon_encode.o \
 	density/src/algorithms/lion/core/lion_decode.o density/src/algorithms/lion/core/lion_encode.o density/src/algorithms/lion/forms/lion_form_model.o \
 	density/src/algorithms/cheetah/core/cheetah_decode.o density/src/algorithms/cheetah/core/cheetah_encode.o
+endif
+
+ifneq ($(wildcard lzjody/.),)
+CXXFLAGS+=-D_LZJODY
+OB+=lzjody/lzjody.o lzjody/byteplane_xfrm.o
+endif
+
+ifneq ($(wildcard lzoma_/.),)
+CXXFLAGS+=-D_LZOMA
+OB+=lzoma_/pack.o lzoma_/unpack.o lzoma_/divsufsort.o
 endif
 
 ifneq ($(wildcard xpack/.),)
@@ -875,7 +853,8 @@ endif
 # symbols are localized so they don't clash with the zstd TurboBench bundles.
 # The submodule has its own submodule (ext/fse), so init recursively:
 #   git submodule update --init --recursive pivco-huffman
-ifneq ($(wildcard pivco-huffman/.),)
+ifneq ($(and $(wildcard pivco-huffman/.),$(filter x86_64,$(ARCH))),)
+#ifneq ($(wildcard pivco-huffman/.),)
 PIVCOHUFDIR=pivco-huffman
 CXXFLAGS+=-D_PIVCOHUF=1 -I$(PIVCOHUFDIR)/include
 $(PIVCOHUFDIR)/build/libpivco_huffman_local.o:
