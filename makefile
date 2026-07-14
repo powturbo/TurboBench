@@ -856,8 +856,7 @@ endif
 #   git submodule update --init --recursive pivco-huffman
 ifneq ($(and $(wildcard pivco-huffman/.),$(filter x86_64,$(ARCH))),)
 #ifneq ($(wildcard pivco-huffman/.),)
-ifeq ($(OS),Windows)
-else
+ifneq ($(OS),Windows)
 PIVCOHUFDIR=pivco-huffman
 CXXFLAGS+=-D_PIVCOHUF=1 -I$(PIVCOHUFDIR)/include
 $(PIVCOHUFDIR)/build/libpivco_huffman_local.o:
