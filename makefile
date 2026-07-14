@@ -324,9 +324,9 @@ DIVSORT=1
 endif
 endif
 
-ifneq ($(wildcard lzlib-1.13/.),)
+ifneq ($(wildcard lzlib-1.16/.),)
 CXXFLAGS+=-D_LZLIB
-OB+=lzlib-1.13/lzlib.o lzlib_/bbexample.o
+OB+=lzlib-1.16/lzlib.o lzlib_/bbexample.o
 endif
 
 ifneq ($(wildcard zlib-ng/.),)
