@@ -61,7 +61,7 @@ else
 CC:=$(CP)-gcc
 CX=$(CC)
 endif
-
+CROSS=$(CC)
 endif
 
 ifneq (,$(or $(findstring aarch64,$(CC) $(ARCH)),$(findstring arm64,$(CC) $(ARCH))))
@@ -348,9 +348,8 @@ ifneq ($(wildcard zlib-ng/.),)
 CXXFLAGS += -D_ZLIB_NG
 ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS
-CCC=$(CP)-gcc
 zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
-	export CC=$(CCC) && cd zlib-ng && ./configure && $(MAKE)
+	export CC=$(CROSS) && cd zlib-ng && ./configure && $(MAKE)
 else
 zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
 	cd zlib-ng && ./configure && $(MAKE)
@@ -861,6 +860,7 @@ endif
 #   git submodule update --init --recursive pivco-huffman
 #ifneq ($(and $(wildcard pivco-huffman/.),$(filter x86_64,$(ARCH))),)
 ifneq ($(wildcard pivco-huffman/.),)
+ifndef CROSS
 ifneq ($(OS),Windows)
 PIVCOHUFDIR=pivco-huffman
 CXXFLAGS+=-D_PIVCOHUF=1 -I$(PIVCOHUFDIR)/include
@@ -886,6 +886,7 @@ $(PHAZDIR)/build/phaz_local.o:
 	cmake --build $(PIVCOHUFDIR)/build --target pivco_huffman_local -j
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
 OB+=$(PHAZDIR)/build/phaz_local.o
+endif
 endif
 endif
 endif
