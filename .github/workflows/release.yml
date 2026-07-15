@@ -71,8 +71,6 @@ jobs:
           msystem: MINGW64
           install: git make mingw-w64-x86_64-gcc
           update: true
-#      - name: Build (Windows)
-#        if: matrix.platform == 'windows'
         shell: msys2 {0}
         run: make
 
