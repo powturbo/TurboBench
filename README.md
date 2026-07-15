@@ -3,7 +3,7 @@
 
 <p align="center">
   <img
-    alt="TurboBench Logo" src="turbobench_/logo.jpg"
+    alt="TurboBench Logo" src="turbobench_/TurboBench.jpeg"
     width="160px"
   >
 </p>
