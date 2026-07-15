@@ -63,16 +63,14 @@ jobs:
       # ---------------- Windows (MSYS2) ----------------
       - name: Setup MSYS2 (Windows)
         if: matrix.platform == 'windows'
-        uses: msys2/setup-msys2@v2
+      - uses: actions/checkout@v6
         with:
-          msystem: ${{ matrix.msystem }}
+          submodules: 'true'
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: git make mingw-w64-x86_64-gcc
           update: true
-          cache: true
-          pacboy: >-
-            cc:p
-          install: >-
-            make
-            zip
 
       - name: Build (Windows)
         if: matrix.platform == 'windows'
