@@ -166,6 +166,30 @@ CFLAGS+=-DVERSION=1 -Ibzip3/include -Wno-int-conversion
 OB+=bzip3/src/libbz3.o
 endif
 
+ISAL_LIB :=
+ifneq ($(wildcard isa-l/.),)
+NASM ?= $(shell command -v nasm)
+ifeq ($(NASM),)  # nasm not installed
+  ISAL_LIB := isa-l_/$(OS)-$(ARCH)/isa-l.a    
+  ifneq ($(wildcard $(ISAL_LIB)),)
+    CXXFLAGS += -D_ISA_L
+    LDFLAGS += $(ISAL_LIB)
+  endif     
+else
+  CXXFLAGS += -D_ISA_L
+  ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+  ifdef CROSS
+isa-l/bin/isa-l.a: $(ISAL_SRCS)
+	export CC=$(CROSS) && cd isa-l && $(MAKE) -f Makefile.unx host_cpu=$(CHOST)
+  else
+isa-l/bin/isa-l.a: $(ISAL_SRCS)
+	cd isa-l && $(MAKE) -f Makefile.unx
+  endif
+  ISAL_LIB := isa-l/bin/isa-l.a 
+  LDFLAGS += $(ISAL_LIB)
+endif
+endif
+
 ifneq ($(wildcard libbsc/.),)
 CXXFLAGS+=-D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/filters/detectors.o \
@@ -230,6 +254,29 @@ LZSSE/lzsse4/lzsse4.o: LZSSE/lzsse4/lzsse4.cpp
 LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
 	$(CXX) -O2 -msse4.1 -std=c++11  $< -c -o $@
 OB+= LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o
+endif
+
+ZLIB_NG :=
+ifneq ($(wildcard zlib-ng/.),)
+CXXFLAGS += -D_ZLIB_NG
+ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+ifdef CROSS
+zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
+	export CC=$(CROSS) && cd zlib-ng && ./configure && $(MAKE)
+else
+zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
+	cd zlib-ng && ./configure && $(MAKE)
+endif
+ZLIB_NG = zlib-ng/libz-ng.a
+LDFLAGS += $(ZLIB_NG)
+endif
+
+ifneq ($(wildcard lzo/.),)
+CXXFLAGS+=-D_LZO -Ilzo/include
+CFLAGS+=-Ilzo/include
+LZO_SRCS := $(wildcard lzo/src/*.c)
+LZO_OBJS := $(LZO_SRCS:.c=.o)
+OB += $(LZO_OBJS)
 endif
 
 ifneq ($(wildcard zopfli/.),)
@@ -351,36 +398,6 @@ $(GLZA_DIR)/%.o: glza/%.c
 OB += $(GLZA_OBJS) 
 endif
 
-ifneq ($(wildcard isa-l/.),)
-#  ifeq ($(OS),Windows)
-#CXXFLAGS+=-D_ISA_L
-#LDFLAGS+=isa-l_/Windows-x86_64/isa-l.a
-# msys2 build: install nasm and type:
-# mingw32-make -f Makefile.unx  arch=mingw  host_cpu=x86_64  have_as_w_avx512= CC=gcc AS=yasm AR=ar STRIP=strip LDFLAGS=  CFLAGS_mingw=-m64
-#  else
-NASM ?= $(shell command -v nasm)
-ifeq ($(NASM),)  #nasm not installed
-  ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/isa-l.a),)
-CXXFLAGS+=-D_ISA_L
-LDFLAGS+=isa-l_/$(OS)-$(ARCH)/isa-l.a
-#Alternative: ISA-L library needs to be installed before: sudo apt-get instal isa-l, then uncomment the 2 lines below:
-#CXXFLAGS+=-DHAVE_IGZIP
-#LDFLAGS+=-lisa-l
-  endif     
-else
-  CXXFLAGS+=-D_ISA_L
-  ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-  ifdef CROSS
-isa-l/bin/isa-l.a: $(ISAL_SRCS)
-	export CC=$(CROSS) && cd isa-l && $(MAKE) -f Makefile.unx host_cpu=$(CHOST)
-  else
-isa-l/bin/isa-l.a: $(ISAL_SRCS)
-	cd isa-l && $(MAKE) -f Makefile.unx
-  endif
-LDFLAGS+= isa-l/bin/isa-l.a
-endif
-endif
-
 ifneq ($(wildcard lz4ultra/.),)
 CXXFLAGS+=-D_LZ4ULTRA -Ilz4ultra/src -Ilz4ultra/src/libdivsufsort/include
 OB+=lz4ultra/src/shrink_inmem.o lz4ultra/src/expand_inmem.o lz4ultra/src/shrink_block.o lz4ultra/src/expand_block.o lz4ultra/src/shrink_context.o lz4ultra/src/matchfinder.o lz4ultra/src/frame.o
@@ -394,27 +411,6 @@ endif
 ifneq ($(wildcard lzlib-1.16/.),)
 CXXFLAGS+=-D_LZLIB
 OB+=lzlib-1.16/lzlib.o lzlib_/bbexample.o
-endif
-
-ifneq ($(wildcard zlib-ng/.),)
-CXXFLAGS += -D_ZLIB_NG
-ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ifdef CROSS
-zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
-	export CC=$(CROSS) && cd zlib-ng && ./configure && $(MAKE)
-else
-zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
-	cd zlib-ng && ./configure && $(MAKE)
-endif
-LDFLAGS += zlib-ng/libz-ng.a
-endif
-
-ifneq ($(wildcard lzo/.),)
-CXXFLAGS+=-D_LZO -Ilzo/include
-CFLAGS+=-Ilzo/include
-LZO_SRCS := $(wildcard lzo/src/*.c)
-LZO_OBJS := $(LZO_SRCS:.c=.o)
-OB += $(LZO_OBJS)
 endif
 
 ifneq ($(wildcard lzsa/.),)
@@ -905,7 +901,11 @@ endif
 
 OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugin.o
 
-turbobench: zlib-ng/libz-ng.a isa-l/bin/isa-l.a $(OB) turbobench.o 
+plugin.o: plugin.cc $(ZLIB_NG) $(ISAL_LIB)
+	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
+
+
+turbobench: $(OB) turbobench.o plugin.o
 	$(CXX) $^ $(LDFLAGS) -o turbobench
 
 .c.o:
