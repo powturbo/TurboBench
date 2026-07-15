@@ -78,6 +78,13 @@ jobs:
         with:
           msystem: MINGW64
           install: git make mingw-w64-x86_64-gcc
+        with:
+          msystem: MINGW64
+          install: >-
+            make
+            zip
+            git make mingw-w64-x86_64-gcc
+            ${{ matrix.mingw_pkg }}
           update: true
 
       - name: Build (Windows)
