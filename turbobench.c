@@ -1371,7 +1371,7 @@ int main(int argc, char* argv[]) {
         if(optarg) printf (" with arg %s", optarg);  printf ("\n");
         break;
       case 'b': bsize    = argtoi(optarg,Mb); bsizex++; break;
-      case 'B': filenmax = argtol(optarg);    		 break;
+      case 'B': filenmax = argtol(optarg, 'G');    		 break;
       case 'd': coddicsize(argtoi(optarg,0));        break; 
       //case 'D': dict     = optarg;       		     break;
       case 'C': cmp      = atoi(optarg);      		 break;
