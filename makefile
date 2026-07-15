@@ -365,7 +365,7 @@ else
 ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS
 isa-l/bin/isa-l.a: $(ISAL_SRCS)
-	export CC=$(CROSS) && cd $(MAKE) -f Makefile.unx
+	export CC=$(CROSS) && cd isa-l && $(MAKE) -f Makefile.unx
 else
 isa-l/bin/isa-l.a: $(ISAL_SRCS)
 	cd isa-l && $(MAKE) -f Makefile.unx
