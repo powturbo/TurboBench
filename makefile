@@ -170,10 +170,9 @@ ISAL_LIB :=
 ifneq ($(wildcard isa-l/.),)
 NASM ?= $(shell command -v nasm)
 ifeq ($(NASM),)  # nasm not installed
-  ISAL_LIB := isa-l_/$(OS)-$(ARCH)/isa-l.a    
-  ifneq ($(wildcard $(ISAL_LIB)),)
+  ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/isa-l.a),)
     CXXFLAGS += -D_ISA_L
-    LDFLAGS += $(ISAL_LIB)
+    ISAL_LIB := isa-l_/$(OS)-$(ARCH)/isa-l.a    
   endif     
 else
   CXXFLAGS += -D_ISA_L
@@ -186,8 +185,8 @@ isa-l/bin/isa-l.a: $(ISAL_SRCS)
 	cd isa-l && $(MAKE) -f Makefile.unx
   endif
   ISAL_LIB := isa-l/bin/isa-l.a 
-  LDFLAGS += $(ISAL_LIB)
 endif
+LDFLAGS += $(ISAL_LIB)
 endif
 
 ifneq ($(wildcard kanzi-cpp/.),)
