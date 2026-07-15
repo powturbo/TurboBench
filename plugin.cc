@@ -586,7 +586,7 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 #include "kanzi-cpp/src/io/CompressedOutputStream.hpp"
 #include "kanzi-cpp/src/util/fixedbuf.hpp"
 // copy from lzbench
-int64_t kanzi_compress(char *inbuf, size_t insize, char *outbuf, size_t outsize, int threadnum, int lev) {
+int64_t kanzi_compress(unsigned char *inbuf, size_t insize, unsigned char *outbuf, size_t outsize, int threadnum, int lev) {
   std::string entropy;
   std::string transform;
   kanzi::uint szBlock;
