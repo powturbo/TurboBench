@@ -585,8 +585,8 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 #include "kanzi-cpp/src/io/CompressedInputStream.hpp"
 #include "kanzi-cpp/src/io/CompressedOutputStream.hpp"
 #include "kanzi-cpp/src/util/fixedbuf.hpp"
-// copy from lzbench
-int64_t kanzi_compress(unsigned char *inbuf, size_t insize, unsigned char *outbuf, size_t outsize, int threadnum, int lev) {
+// derived from lzbench
+int64_t kanzi_compress(char *inbuf, size_t insize, char *outbuf, size_t outsize, int threadnum, int lev) {
   std::string entropy;
   std::string transform;
   kanzi::uint szBlock;
@@ -620,7 +620,7 @@ int64_t kanzi_compress(unsigned char *inbuf, size_t insize, unsigned char *outbu
   return cos.getWritten();
 }
 
-int64_t kanzi_decompress(unsigned char *inbuf, size_t insize, unsigned char *outbuf, size_t outsize, int threadnum) {
+int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsize, int threadnum) {
   ifixedbuf buf(inbuf, insize);
   std::iostream is(&buf);
   kanzi::CompressedInputStream cis(is, threadnum);
@@ -1841,7 +1841,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _KANZI
     case P_KANZI: { char *q; int threadnum = 1; if(q=strchr(prm,'T'))  threadnum = atoi(q+(q[1]=='='?2:1)); 
-      return kanzi_compress(in, inlen, out, outsize, threadnum, lev);
+      return kanzi_compress((char *)in, inlen, (char *)out, outsize, threadnum, lev);
     }
       #endif
       
@@ -2685,7 +2685,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
      #if _KANZI
     case P_KANZI: { char *q; int threadnum = 1; if(q=strchr(prm,'T'))  threadnum = atoi(q+(q[1]=='='?2:1)); 
-      return kanzi_decompress(in, inlen, out, outlen, threadnum);
+      return kanzi_decompress((char *)in, inlen, (char *)out, outlen, threadnum);
     }
       #endif
 
