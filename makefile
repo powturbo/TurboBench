@@ -94,13 +94,7 @@ else ifeq ($(ARCH),loongarch64)
   _SSE=-mlsx
   CFLAGS=$(_SSE)
 else ifeq ($(ARCH),x86_64)
-# _SSE=-mssse3 
-# _SSE+=-mno-avx -mno-aes
-# _SSE=-march=corei7-avx -mtune=corei7-avx
-# _SSE=-march=ivybridge -mavx
   _SSE=-mavx -mpopcnt
-
-# _AVX2=-march=skylake-avx512 -mavx512vbmi -mavx512f -mavx512vl
   _AVX2=-march=haswell
 endif
 
