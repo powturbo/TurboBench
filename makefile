@@ -235,7 +235,6 @@ LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_cod
 LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
 OB += $(LZHAM_SRCS:.cpp=.o)
 ifeq ($(OS), Windows)
-CFLAGS+=-D_MSC_VER
 OB += lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
 endif
