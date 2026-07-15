@@ -106,12 +106,6 @@ ifeq ($(OS),Windows)
   LDFLAGS=-Wl,--stack,33554432
 endif
 
-ifneq ($(ARCH),x86_64)
-TURBORC=0
-SNAPPY_C=0
-LZHAM=0
-endif
-
 CFLAGS+=-w -Wall $(DDEBUG) -std=gnu99 -fpermissive -Wimplicit-function-declaration
 CXXFLAGS+=$(DDEBUG) -w -Wall -fpermissive  -fno-rtti
 
@@ -209,7 +203,7 @@ CXXFLAGS+=-D_LZFSE
 OB+=lzfse/src/lzfse_decode_base.o lzfse/src/lzfse_decode.o lzfse/src/lzfse_encode_base.o lzfse/src/lzfse_encode.o lzfse/src/lzfse_fse.o lzfse/src/lzvn_decode_base.o lzfse/src/lzvn_encode_base.o
 endif
 
-ifneq ($(wildcard lzham/.),)
+ifneq ($(wildcard lzham_codec_devel/.),)
 CXXFLAGS+=-D_LZHAM -D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
 LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
@@ -657,26 +651,20 @@ CXXFLAGS+=-D_SUBOTIN
 OB+=EC/subotin_/subotin.o
 endif
 
-ifneq ($(and $(wildcard Turbo-Range-Coder/.),$(filter x86_64,$(ARCH))),)
-#ifneq ($(wildcard Turbo-Range-Coder/.),)
-CFLAGS+=-D_ANS
+ifneq ($(wildcard Turbo-Range-Coder/.),)
+CXXFLAGS+=-D_TURBORC
+CFLAGS+=-D_ANS -D_BWT -ITurbo-Range-Coder/libsais/include 
 TRC=Turbo-Range-Coder/
-$(TRC)anscdf0.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdf0.o  
-
+#$(TRC)anscdf0.o: $(TRC)anscdf.c $(TRC)anscdf_.h
+#	$(CC) -c -O3 $(CFLAGS) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdf0.o  
 $(TRC)anscdfs.o: $(TRC)anscdf.c $(TRC)anscdf_.h
 	$(CC) -c -O3 $(CFLAGS) $(_SSE) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfs.o  
-
 OB+=$(TRC)anscdfs.o 
 ifeq ($(ARCH), x86_64)
 $(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-	$(CC) -c -O3 $(CFLAGS) -march=haswell -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfx.o
-
+	$(CC) -c -O3 $(CFLAGS) $(_AVX2) -falign-loops=32 $(TRC)anscdf.c -o $(TRC)anscdfx.o
 OB+=$(TRC)anscdfx.o 
 endif
-
-CXXFLAGS+=-D_TURBORC
-CFLAGS+=-D_BWT -ITurbo-Range-Coder/libsais/include
 OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
   Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o 
 
