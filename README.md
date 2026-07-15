@@ -167,7 +167,8 @@ Compressors with versions 16.08.2016 <br>
  - [glza](https://github.com/jrmuizel/GLZA)
  - [heatshrink](https://github.com/atomicobject/heatshrink) 
  - [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l) 
- - [bsc](https://github.com/IlyaGrebnov/libbsc) 
+ - [bsc](https://github.com/IlyaGrebnov/libbsc)
+ - [kanzi](https://github.com/flanglet/kanzi-cpp) :new: 2026/07
  - [Libdeflate](https://github.com/ebiggers/libdeflate) 
  - [LibLZF](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLz](https://github.com/mbitsnbites/liblzg) 
@@ -189,7 +190,7 @@ Compressors with versions 16.08.2016 <br>
  - [misa77](https://github.com/welcome-to-the-sunny-side/misa77) :new:2026.07
  - [ms-compress](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi Washigan](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188)
- - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux) 
+ - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64) 
  - [Quantile Compression](https://github.com/mwlon/quantile-compression)
  - [Pithy](https://github.com/johnezang/pithy) 
  - [Quicklz](https://github.com/robottwo/quicklz) 
