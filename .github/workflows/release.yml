@@ -28,10 +28,10 @@ jobs:
             os: ubuntu-24.04-arm
             platform: linux
             arch: aarch64
-          - name: macos-x86_64
-            os: macos-13
-            platform: macos
-            arch: x86_64
+#          - name: macos-x86_64
+#            os: macos-13
+#            platform: macos
+#            arch: x86_64
           - name: macos-aarch64
             os: macos-14
             platform: macos
@@ -42,12 +42,12 @@ jobs:
             arch: x86_64
             msystem: UCRT64
             mingw_pkg: mingw-w64-ucrt-x86_64-gcc
-          - name: windows-aarch64
-            os: windows-11-arm
-            platform: windows
-            arch: aarch64
-            msystem: CLANGARM64
-            mingw_pkg: mingw-w64-clang-aarch64-gcc-compat
+#          - name: windows-aarch64
+#            os: windows-11-arm
+#            platform: windows
+#            arch: aarch64
+#            msystem: CLANGARM64
+#            mingw_pkg: mingw-w64-clang-aarch64-gcc-compat
 
     steps:
       - name: Checkout repository
