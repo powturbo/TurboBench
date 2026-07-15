@@ -185,7 +185,7 @@ static tm_t   tminit()                      { tm_t t0,ts; tps = __builtin_readcy
     if(_tm_t < tm_tm) { if(tm_tm == DBL_MAX) { tm_rm = _tm_r; _tm_Rn = tm_TX/_tm_t; _tm_Rn = _tm_Rn<_tm_Rx?_tm_Rn:_tm_Rx; /*printf("repeats=%u,%u,%.4f ", _tm_Rn, _tm_Rx, _tm_t);*/ } \
 	  tm_tm = _tm_t; _tm_c++;\
     } else if(_tm_t > tm_tm*1.15) TMSLEEP;/*force sleep at 15% divergence*/\
-    if(tm_verbose>1) { printf("%*.*f %2d_%.2d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b", TM_MAN,TM_PRE, TMBS(_size_, tm_tm/tm_rm),_tm_R+1,_tm_c); fflush(stdout);  }\
+    if(tm_verbose) { printf("%*.*f %2d_%.2d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b", TM_MAN,TM_PRE, TMBS(_size_, tm_tm/tm_rm),_tm_R+1,_tm_c); fflush(stdout);  }\
     if((_tm_R & 7)==7) sleep(tm_slp); /*pause 20 secs after each 8 runs to avoid cpu throttling*/\
   }\
 }
