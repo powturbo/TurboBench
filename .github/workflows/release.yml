@@ -64,12 +64,12 @@ jobs:
 
       - name: Build (Linux)
         if: matrix.platform == 'linux'
-        run: make
+        run: make STATIC=1
 
       # ---------------- macOS ----------------
       - name: Build (macOS)
         if: matrix.platform == 'macos'
-        run: make
+        run: make STATIC=1
 
       # ---------------- Windows (MSYS2) ----------------
       - name: Setup MSYS2 (Windows)
@@ -83,7 +83,7 @@ jobs:
       - name: Build (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
-        run: make
+        run: make STATIC=1
 
       # ---------------- Package (Linux/macOS) ----------------
       - name: Package artifact (Linux/macOS)
