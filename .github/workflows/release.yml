@@ -69,7 +69,7 @@ jobs:
       # ---------------- macOS ----------------
       - name: Build (macOS)
         if: matrix.platform == 'macos'
-        run: make STATIC=1
+        run: make
 
       # ---------------- Windows (MSYS2) ----------------
       - name: Setup MSYS2 (Windows)
