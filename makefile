@@ -350,30 +350,34 @@ OB += $(GLZA_OBJS)
 endif
 
 ifneq ($(wildcard isa-l/.),)
+  ifeq ($(OS),Windows)
 CXXFLAGS+=-D_ISA_L
-ifeq ($(OS),Windows)
+LDFLAGS+=isa-l_/Windows-x86_64/isa-l.a
 # msys2 build: install nasm and type:
 # mingw32-make -f Makefile.unx  arch=mingw  host_cpu=x86_64  have_as_w_avx512= CC=gcc AS=yasm AR=ar STRIP=strip LDFLAGS=  CFLAGS_mingw=-m64
-LDFLAGS+=isa-l_/Windows-x86_64/isa-l.a
-else ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/libisal_DEACTIVATED.a),)
+  else
+NASM ?= $(shell command -v nasm)
+    ifeq ($(NASM),)  #nasm notistalled
+      ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/libisal.a),)
 CXXFLAGS+=-D_ISA_L
 LDFLAGS+=isa-l_/$(OS)-$(ARCH)/libisal.a
 #Alternative: ISA-L library needs to be installed before: sudo apt-get instal isa-l, then uncomment the 2 lines below:
 #CXXFLAGS+=-DHAVE_IGZIP
 #LDFLAGS+=-lisa-l
-else
-ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ifdef CROSS
+      endif
+    else
+  CXXFLAGS+=-D_ISA_L
+  ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+      ifdef CROSS
 isa-l/bin/isa-l.a: $(ISAL_SRCS)
 	export CC=$(CROSS) && cd isa-l && $(MAKE) -f Makefile.unx
-else
+      else
 isa-l/bin/isa-l.a: $(ISAL_SRCS)
 	cd isa-l && $(MAKE) -f Makefile.unx
-endif
-LDFLAGS += isa-l/bin/isa-l.a
-endif
-
-
+      endif
+      LDFLAGS += isa-l/bin/isa-l.a
+    endif
+  endif
 endif
 
 ifneq ($(wildcard lz4ultra/.),)
