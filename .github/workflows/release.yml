@@ -76,10 +76,7 @@ jobs:
         if: matrix.platform == 'windows'
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
-          install: git make mingw-w64-x86_64-gcc
-        with:
-          msystem: MINGW64
+           msystem: MINGW64
           install: >-
             make
             zip
