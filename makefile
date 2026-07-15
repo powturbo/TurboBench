@@ -385,7 +385,6 @@ FLZMA2_SRCS := $(wildcard fast-lzma2/*.c)
 FLZMA2_SRCS := $(filter-out %/xxhash.c, $(FLZMA2_SRCS))
 FLZMA2_OBJS := $(FLZMA2_SRCS:.c=.o)
 OB += $(FLZMA2_OBJS)
-
 endif
 
 ifneq ($(wildcard glza/.),)
@@ -427,10 +426,8 @@ endif
 ifneq ($(wildcard miniz/.),)
 miniz/miniz_export.h: miniz_/miniz_export.h
 	cp miniz_/miniz_export.h miniz/miniz_export.h
-
 miniz/miniz.o: miniz/miniz.c miniz/miniz_export.h
 	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@
-	
 CXXFLAGS+=-D_MINIZ
 OB+=miniz/miniz.o miniz/miniz_tdef.o miniz/miniz_tinfl.o
 endif
@@ -457,6 +454,7 @@ endif
 endif
 
 # 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
+# download corresponding library from https://github.com/WorkingRobot/OodleUE
 CXXFLAGS+=-D_OODLE
 
 ifneq ($(wildcard snappy/.),)
