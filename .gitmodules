@@ -94,3 +94,6 @@
 [submodule "misa77"]
 	path = misa77
 	url = https://github.com/welcome-to-the-sunny-side/misa77.git
+[submodule "kanzi-cpp"]
+	path = kanzi-cpp
+	url = https://github.com/flanglet/kanzi-cpp.git
