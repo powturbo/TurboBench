@@ -55,7 +55,7 @@ jobs:
         with:
           submodules: recursive
 
-      # ---------------- Linux ----------------
+      # ----------------- Linux ----------------
       - name: Install build tools (Linux)
         if: matrix.platform == 'linux'
         run: |
