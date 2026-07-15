@@ -190,7 +190,7 @@ Compressors with versions 16.08.2016 <br>
  - [misa77](https://github.com/welcome-to-the-sunny-side/misa77) :new:2026.07
  - [ms-compress](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi Washigan](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188)
- - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64) 
+ - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64) : [Oodle Library download](https://github.com/WorkingRobot/OodleUE)
  - [Quantile Compression](https://github.com/mwlon/quantile-compression)
  - [Pithy](https://github.com/johnezang/pithy) 
  - [Quicklz](https://github.com/robottwo/quicklz) 
