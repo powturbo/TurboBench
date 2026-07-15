@@ -1254,7 +1254,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
     plug->stkc = stackpeak(_stack);
     if(tm_Rep > 1) 
       TMSLEEP;
-																		        if(verbose && totinlen == filen) { double ratio = (double)plug->len*100.0/totinlen; printf("%12u   %5.1f   %8.2f   ", plug->len, ratio, TMBS(totinlen,plug->tc)); fflush(stdout); }
+																		  if(tm_verbose && totinlen == filen) { double ratio = (double)plug->len*100.0/totinlen; printf("%12u   %5.1f   %8.2f   ", plug->len, ratio, TMBS(totinlen,plug->tc)); fflush(stdout); }
     if(cmp) {
       unsigned char *cpz = _cpy; 
       if(fuzz & 2) { cpz = (_cpy+insizem) - len; 									/*printf("SEGFAULT Check");fflush(stdout); cpz[len-1] = cpz[len]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
@@ -1264,12 +1264,12 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
 	  unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm)/nb;
 	  td = ((double)tm_tm/((double)tm_rm*nb)); 
 	  plug->td  += td;		
-      plug->memd = mempeak() - peak;              						        if(verbose && totinlen == filen) printf("%8.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
+      plug->memd = mempeak() - peak;              						        if(tm_verbose && totinlen == filen) printf("%8.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
       plug->stkd = stackpeak(_stack);
       int e = memcheck(in, len, cpz, fuzz?3:cmp, finame);  
       plug->err = plug->err?plug->err:e;
       BEPOST;																	
-	} else 																        if(verbose && totinlen == filen) { printf("%8.2f   %-16s %s\n", 0.0, name, finame); }
+	} else 																        if(tm_verbose && totinlen == filen) { printf("%8.2f   %-16s %s\n", 0.0, name, finame); }
 	if(totinlen >= filen) break;
   }	                                                                         //printf("ILEN=%llu Olen=%llu c=%f d=%f\n", totinlen, plug->len, plug->tc, plug->td);  
   _vfree(out, outsize); 
