@@ -33,7 +33,7 @@ jobs:
 #            platform: macos
 #            arch: x86_64
           - name: macos-aarch64
-            os: macos-14
+            os: macos-26
             platform: macos
             arch: aarch64
           - name: windows-x86_64
@@ -69,15 +69,10 @@ jobs:
       # ---------------- macOS ----------------
       # Xcode Command Line Tools (clang, make) are preinstalled on
       # GitHub-hosted macOS runners, so no extra setup is required.
-      - name: Select Xcode 16.2
-        if: matrix.platform == 'macos'
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '16.2'
-
       - name: Build (macOS)
         if: matrix.platform == 'macos'
         run: make
+
       # ---------------- Windows (MSYS2) ----------------
       - name: Setup MSYS2 (Windows)
         if: matrix.platform == 'windows'
