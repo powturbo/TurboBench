@@ -28,8 +28,12 @@ jobs:
             os: ubuntu-24.04-arm
             platform: linux
             arch: aarch64
+#          - name: macos-x86_64
+#            os: macos-13
+#            platform: macos
+#            arch: x86_64
           - name: macos-aarch64
-            os: macos-latest
+            os: macos-26
             platform: macos
             arch: aarch64
           - name: windows-x86_64
@@ -37,10 +41,17 @@ jobs:
             platform: windows
             arch: x86_64
             msystem: UCRT64
+            mingw_pkg: mingw-w64-ucrt-x86_64-gcc
+ #         - name: windows-aarch64
+ #           os: windows-11-arm
+ #           platform: windows
+ #           arch: aarch64
+ #           msystem: CLANGARM64
+ #           mingw_pkg: mingw-w64-clang-aarch64-gcc-compat
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 
@@ -65,23 +76,13 @@ jobs:
         if: matrix.platform == 'windows'
         uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{ matrix.msystem }}
-          update: true
-          cache: true
-          pacboy: >-
-            cc:p
-          install: >-
-            make
-            zip
-
-      - name: Build (Windows)
-        if: matrix.platform == 'windows'
-      - uses: msys2/setup-msys2@v2
-        with:
           msystem: MINGW64
           install: git make mingw-w64-x86_64-gcc
           update: true
-#        shell: msys2 {0}
+
+      - name: Build (Windows)
+        if: matrix.platform == 'windows'
+        shell: msys2 {0}
         run: make
 
       # ---------------- Package (Linux/macOS) ----------------
@@ -93,6 +94,8 @@ jobs:
           DIST="dist/${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
           mkdir -p "$DIST"
 
+          # Copy the built executable.
+          # Adjust the name below if your Makefile outputs a different binary.
           if [ -f "${APP_NAME}" ]; then
             cp "${APP_NAME}" "$DIST/"
           else
@@ -128,7 +131,7 @@ jobs:
             "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ env.APP_NAME }}-${{ matrix.name }}
           path: |
