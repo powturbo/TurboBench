@@ -28,12 +28,8 @@ jobs:
             os: ubuntu-24.04-arm
             platform: linux
             arch: aarch64
-#          - name: macos-x86_64
-#            os: macos-13
-#            platform: macos
-#            arch: x86_64
           - name: macos-aarch64
-            os: macos-26
+            os: macos-latest
             platform: macos
             arch: aarch64
           - name: windows-x86_64
@@ -41,17 +37,10 @@ jobs:
             platform: windows
             arch: x86_64
             msystem: UCRT64
-            mingw_pkg: mingw-w64-ucrt-x86_64-gcc
- #         - name: windows-aarch64
- #           os: windows-11-arm
- #           platform: windows
- #           arch: aarch64
- #           msystem: CLANGARM64
- #           mingw_pkg: mingw-w64-clang-aarch64-gcc-compat
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -67,8 +56,6 @@ jobs:
         run: make
 
       # ---------------- macOS ----------------
-      # Xcode Command Line Tools (clang, make) are preinstalled on
-      # GitHub-hosted macOS runners, so no extra setup is required.
       - name: Build (macOS)
         if: matrix.platform == 'macos'
         run: make
@@ -80,10 +67,12 @@ jobs:
         with:
           msystem: ${{ matrix.msystem }}
           update: true
+          cache: true
+          pacboy: >-
+            cc:p
           install: >-
             make
             zip
-            ${{ matrix.mingw_pkg }}
 
       - name: Build (Windows)
         if: matrix.platform == 'windows'
@@ -99,8 +88,6 @@ jobs:
           DIST="dist/${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
           mkdir -p "$DIST"
 
-          # Copy the built executable.
-          # Adjust the name below if your Makefile outputs a different binary.
           if [ -f "${APP_NAME}" ]; then
             cp "${APP_NAME}" "$DIST/"
           else
@@ -136,7 +123,7 @@ jobs:
             "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.APP_NAME }}-${{ matrix.name }}
           path: |
