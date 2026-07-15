@@ -98,6 +98,10 @@ enum {
 #define _ISA_L 0
 #endif
  P_ISA_L,
+#ifndef _KANZI
+#define _KANZI 0
+#endif
+ P_KANZI,
 #ifndef _LIBBSC
 #define _LIBBSC 0
 #endif
@@ -574,6 +578,68 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
     #endif
   #endif
 
+  #if _KANZI
+#include "kanzi-cpp/src/types.hpp"
+#include "kanzi-cpp/src/InputStream.hpp"
+#include "kanzi-cpp/src/OutputStream.hpp"
+#include "kanzi-cpp/src/io/CompressedInputStream.hpp"
+#include "kanzi-cpp/src/io/CompressedOutputStream.hpp"
+#include "kanzi-cpp/src/util/fixedbuf.hpp"
+// copy from lzbench
+int64_t kanzi_compress(char *inbuf, size_t insize, char *outbuf, size_t outsize, int threadnum, int lev) {
+  std::string entropy;
+  std::string transform;
+  kanzi::uint szBlock;
+  switch (lev) {
+    case 0: transform = "NONE";                      entropy = "NONE";    szBlock =  4 * 1024 * 1024; break;
+    case 1: transform = "LZX";                       entropy = "NONE";    szBlock =  4 * 1024 * 1024; break;
+    case 2: transform = "DNA+LZ";                    entropy = "HUFFMAN"; szBlock =  4 * 1024 * 1024; break;
+    case 3: transform = "TEXT+UTF+PACK+MM+LZX";      entropy = "HUFFMAN"; szBlock =  4 * 1024 * 1024; break;
+    case 4: transform = "TEXT+UTF+EXE+PACK+MM+ROLZ"; entropy = "NONE";    szBlock =  4 * 1024 * 1024; break;
+    case 5: transform = "TEXT+UTF+BWT+RANK+ZRLT";    entropy = "ANS0";    szBlock =  4 * 1024 * 1024; break;
+    case 6: transform = "TEXT+UTF+BWT+SRT+ZRLT";     entropy = "FPAQ";    szBlock =  8 * 1024 * 1024; break;
+    case 7: transform = "LZP+TEXT+UTF+BWT+LZP";      entropy = "CM";      szBlock = 16 * 1024 * 1024; break;
+    case 8: transform = "EXE+RLT+TEXT+UTF+DNA";      entropy = "TPAQ";    szBlock = 16 * 1024 * 1024; break;
+    case 9: transform = "EXE+RLT+TEXT+UTF+DNA";      entropy = "TPAQX";   szBlock = 32 * 1024 * 1024; break;
+    default:  return -1;
+  }
+  ofixedbuf buf(outbuf, outsize);
+  std::iostream os(&buf);
+  kanzi::CompressedOutputStream cos(os, threadnum, entropy, transform, szBlock);
+  const size_t max_io_size = size_t(1) << 30;
+        size_t remaining = insize;
+          char *next = inbuf;
+
+  while (remaining > 0) {
+    const size_t chunk = std::min(remaining, max_io_size);
+     cos.write(next, static_cast<std::streamsize>(chunk));
+     next += chunk;
+     remaining -= chunk;
+  }
+  cos.close();
+  return cos.getWritten();
+}
+
+int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsize, int threadnum) {
+  ifixedbuf buf(inbuf, insize);
+  std::iostream is(&buf);
+  kanzi::CompressedInputStream cis(is, threadnum);
+  const size_t max_io_size = size_t(1) << 30;
+        size_t total = 0;
+
+  while (total < outsize) {
+    const size_t chunk = std::min(outsize - total, max_io_size);
+    cis.read(outbuf + total, static_cast<std::streamsize>(chunk));
+    const size_t decoded = static_cast<size_t>(cis.gcount());
+    total += decoded;
+    if (decoded != chunk)
+      break;
+  }
+  cis.close();
+  return total;
+}
+  #endif
+  
   #if _LIBLZG
 #include "liblzg/src/include/lzg.h"
   #endif
@@ -1202,6 +1268,7 @@ struct plugs plugs[] = {
   { P_GLZA,       "glza",        _GLZA,      "glza",                    "" },
   { P_HEATSHRINK, "heatshrink",  _HEATSHRINK,"heatshrink",              "" },
   { P_ISA_L,      "igzip",       _ISA_L,     "igzip",                   "0,1,2,3" },
+  { P_KANZI,      "kanzi",       _KANZI,     "kanzi",                   "0,1,2,3,4,5,6,7,8,9/T#" },
   { P_LIBBSC,     "bsc",         _LIBBSC,    "bsc",                     "0,3,4,5,6,7,8/p:e#"},
   { P_LIBBSCC,    "bscqlfc",     _LIBBSC,    "bsc",                     "1,2"},
   { P_LIBDEFLATE, "libdeflate",  _LIBDEFLATE,"libdeflate",              "1,2,3,4,5,6,7,8,9,12/dg"},
@@ -1772,6 +1839,12 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       return s.total_out;
       #endif
 
+      #if _KANZI
+    case P_KANZI: { char *q; int threadnum = 1; if(q=strchr(prm,'T'))  threadnum = atoi(q+(q[1]=='='?2:1)); 
+      return kanzi_compress(in, inlen, out, outsize, threadnum, lev);
+    }
+      #endif
+      
       #if _LIBLZF
     case P_LIBLZF:    return lzf_compress(in, inlen, out, outsize);
       #endif
@@ -2608,6 +2681,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         s.next_out = out; s.avail_out = outlen;
         if((rc = isal_inflate_stateless(&s)) != ISAL_DECOMP_OK) die("igzip error. rc=%d\n", rc);
       } break;
+      #endif
+
+     #if _KANZI
+    case P_KANZI: { char *q; int threadnum = 1; if(q=strchr(prm,'T'))  threadnum = atoi(q+(q[1]=='='?2:1)); 
+      return kanzi_decompress(in, inlen, out, outlen, threadnum);
+    }
       #endif
 
       #if _LIBLZF
