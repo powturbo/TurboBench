@@ -190,6 +190,14 @@ isa-l/bin/isa-l.a: $(ISAL_SRCS)
 endif
 endif
 
+ifneq ($(wildcard kanzi-cpp/.),)
+CXXFLAGS+=-D_KANZI
+KANZI_DIR = kanzi-cpp/src
+KANZI_SRCS := $(wildcard $(KANZI_DIR)/io/*.cpp) $(wildcard $(KANZI_DIR)/entropy/*.cpp) $(wildcard $(KANZI_DIR)/bitstream/*.cpp) $(wildcard $(KANZI_DIR)/*.cpp) $(wildcard $(KANZI_DIR)/transform/*.cpp)
+KANZI_OBJS := $(KANZI_SRCS:.cpp=.o)
+OB += $(KANZI_OBJS)
+endif
+
 ifneq ($(wildcard libbsc/.),)
 CXXFLAGS+=-D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc
 OB+=libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/filters/detectors.o \
