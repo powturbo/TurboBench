@@ -905,7 +905,7 @@ endif
 
 OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugin.o
 
-turbobench: $(OB) turbobench.o zlib-ng/libz-ng.a isa-l/bin/isa-l.a
+turbobench: zlib-ng/libz-ng.a isa-l/bin/isa-l.a $(OB) turbobench.o 
 	$(CXX) $^ $(LDFLAGS) -o turbobench
 
 .c.o:
