@@ -25,7 +25,7 @@ jobs:
             arch: aarch64
             executable: turbobench
             artifact: turbobench-linux-aarch64
-            cmake_args: ''
+#            cmake_args: ''
 #            cmake_args: '-DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++'
             
           # macOS x86_64
@@ -40,14 +40,14 @@ jobs:
             arch: aarch64
             executable: turbobench
             artifact: turbobench-macos-aarch64
-            cmake_args: ''
+ #           cmake_args: ''
             
           # Windows x86_64
           - os: windows-latest
             arch: x86_64
             executable: turbobench.exe
             artifact: turbobench-windows-x86_64.exe
-            cmake_args: ''
+  #          cmake_args: ''
 
     steps:
       - name: Checkout code
@@ -57,7 +57,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.arch == 'aarch64'
         run: sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
-      - name: Configure CMake
+#      - name: Configure CMake
 #        run: cmake -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.cmake_args }}
 
       - name: Build
