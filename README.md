@@ -1,5 +1,5 @@
 ## TurboBench:Compressor Benchmark
-[![Build ubuntu](https://github.com/powturbo/TurboBench/actions/workflows/build.yaml/badge.svg)](https://github.com/powturbo/TurboBench/actions/workflows/build.yaml)
+[![Build ubuntu](https://github.com/powturbo/TurboBench/actions/workflows/build.yaml/badge.svg)](https://github.com/powturbo/TurboBench/actions/workflows/build.yml)
 
 <p align="center">
   <img
