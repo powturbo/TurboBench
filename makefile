@@ -350,18 +350,30 @@ OB += $(GLZA_OBJS)
 endif
 
 ifneq ($(wildcard isa-l/.),)
-ifeq ($(OS),Windows)
 CXXFLAGS+=-D_ISA_L
+ifeq ($(OS),Windows)
 # msys2 build: install nasm and type:
 # mingw32-make -f Makefile.unx  arch=mingw  host_cpu=x86_64  have_as_w_avx512= CC=gcc AS=yasm AR=ar STRIP=strip LDFLAGS=  CFLAGS_mingw=-m64
 LDFLAGS+=isa-l_/Windows-x86_64/isa-l.a
-else ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/libisal.a),)
+else ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/libisal_DEACTIVATED.a),)
 CXXFLAGS+=-D_ISA_L
 LDFLAGS+=isa-l_/$(OS)-$(ARCH)/libisal.a
 #Alternative: ISA-L library needs to be installed before: sudo apt-get instal isa-l, then uncomment the 2 lines below:
 #CXXFLAGS+=-DHAVE_IGZIP
 #LDFLAGS+=-lisa-l
+else
+ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+ifdef CROSS
+isa-l/bin/isa-l.a: $(ISAL_SRCS)
+	export CC=$(CROSS) && cd $(MAKE) -f Makefile.unx
+else
+isa-l/bin/isa-l.a: $(ISAL_SRCS)
+	cd isa-l && $(MAKE) -f Makefile.unx
 endif
+LDFLAGS += isa-l/bin/isa-l.a
+endif
+
+
 endif
 
 ifneq ($(wildcard lz4ultra/.),)
@@ -888,7 +900,7 @@ endif
 
 OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugin.o
 
-turbobench: zlib-ng/libz-ng.a $(OB) turbobench.o 
+turbobench: zlib-ng/libz-ng.a isa-l/bin/isa-l.a $(OB) turbobench.o 
 	$(CXX) $^ $(LDFLAGS) -o turbobench
 
 .c.o:
