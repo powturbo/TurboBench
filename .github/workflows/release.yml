@@ -1,0 +1,171 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  APP_NAME: turbobench
+
+jobs:
+  build:
+    name: Build (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x86_64
+            os: ubuntu-latest
+            platform: linux
+            arch: x86_64
+          - name: linux-aarch64
+            os: ubuntu-24.04-arm
+            platform: linux
+            arch: aarch64
+          - name: macos-x86_64
+            os: macos-13
+            platform: macos
+            arch: x86_64
+          - name: macos-aarch64
+            os: macos-14
+            platform: macos
+            arch: aarch64
+          - name: windows-x86_64
+            os: windows-latest
+            platform: windows
+            arch: x86_64
+            msystem: UCRT64
+            mingw_pkg: mingw-w64-ucrt-x86_64-gcc
+          - name: windows-aarch64
+            os: windows-11-arm
+            platform: windows
+            arch: aarch64
+            msystem: CLANGARM64
+            mingw_pkg: mingw-w64-clang-aarch64-gcc-compat
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ---------------- Linux ----------------
+      - name: Install build tools (Linux)
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+
+      - name: Build (Linux)
+        if: matrix.platform == 'linux'
+        run: make
+
+      # ---------------- macOS ----------------
+      # Xcode Command Line Tools (clang, make) are preinstalled on
+      # GitHub-hosted macOS runners, so no extra setup is required.
+      - name: Build (macOS)
+        if: matrix.platform == 'macos'
+        run: make
+
+      # ---------------- Windows (MSYS2) ----------------
+      - name: Setup MSYS2 (Windows)
+        if: matrix.platform == 'windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          update: true
+          install: >-
+            make
+            zip
+            ${{ matrix.mingw_pkg }}
+
+      - name: Build (Windows)
+        if: matrix.platform == 'windows'
+        shell: msys2 {0}
+        run: make
+
+      # ---------------- Package (Linux/macOS) ----------------
+      - name: Package artifact (Linux/macOS)
+        if: matrix.platform != 'windows'
+        shell: bash
+        run: |
+          set -e
+          DIST="dist/${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
+          mkdir -p "$DIST"
+
+          # Copy the built executable.
+          # Adjust the name below if your Makefile outputs a different binary.
+          if [ -f "${APP_NAME}" ]; then
+            cp "${APP_NAME}" "$DIST/"
+          else
+            find . -maxdepth 1 -type f -perm -u+x -iname "${APP_NAME}*" -exec cp {} "$DIST/" \;
+          fi
+
+          [ -f README.md ] && cp README.md "$DIST/" || true
+          [ -f LICENSE ] && cp LICENSE "$DIST/" || true
+
+          tar -C dist -czf "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz" \
+            "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
+
+      # ---------------- Package (Windows) ----------------
+      - name: Package artifact (Windows)
+        if: matrix.platform == 'windows'
+        shell: msys2 {0}
+        run: |
+          set -e
+          DIST="dist/${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
+          mkdir -p "$DIST"
+
+          if [ -f "${APP_NAME}.exe" ]; then
+            cp "${APP_NAME}.exe" "$DIST/"
+          elif [ -f "${APP_NAME}" ]; then
+            cp "${APP_NAME}" "$DIST/${APP_NAME}.exe"
+          fi
+
+          [ -f README.md ] && cp README.md "$DIST/" || true
+          [ -f LICENSE ] && cp LICENSE "$DIST/" || true
+
+          cd dist
+          zip -r "../${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}.zip" \
+            "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_NAME }}-${{ matrix.name }}
+          path: |
+            ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
+            ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
+          if-no-files-found: ignore
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Flatten artifacts into a release folder
+        run: |
+          mkdir -p release
+          find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec cp {} release/ \;
+          ls -la release
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
