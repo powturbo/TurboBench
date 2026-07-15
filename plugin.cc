@@ -620,7 +620,7 @@ int64_t kanzi_compress(unsigned char *inbuf, size_t insize, unsigned char *outbu
   return cos.getWritten();
 }
 
-int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsize, int threadnum) {
+int64_t kanzi_decompress(unsigned char *inbuf, size_t insize, unsigned char *outbuf, size_t outsize, int threadnum) {
   ifixedbuf buf(inbuf, insize);
   std::iostream is(&buf);
   kanzi::CompressedInputStream cis(is, threadnum);
