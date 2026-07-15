@@ -23,8 +23,7 @@ jobs:
       - run: git submodule update --init --recursive
       - run: make STATIC=1
       - run: lscpu
-      - run: ./turbobench -l1
-      - run: ./turbobench turbobench
+      - run: ./turborc -e0 turborc -V1
 
   macos:
     runs-on: '${{ matrix.os }}'
@@ -42,8 +41,7 @@ jobs:
       - run: git submodule update --init --recursive
       - run: make
       - run: sysctl -n machdep.cpu.brand_string
-      - run: ./turbobench -l1
-      - run: ./turbobench turbobench
+      - run: ./turborc -e0 turborc -V1
 
   windows:
     runs-on: windows-latest
@@ -61,9 +59,5 @@ jobs:
           update: true
       - run: git submodule update --init --recursive
       - run: make STATIC=1
-      - run: ./turbobench -l1
-      - run: ./turbobench turbobench.exe
-#      - run: wget -q https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz -O silesia.tar.gz
-#      - run: gunzip silesia.tar.gz
-#      - run: ./turbobench -J15 silesia.tar
+      - run: ./turborc -e0 turborc -V1
 
