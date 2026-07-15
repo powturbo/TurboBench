@@ -71,7 +71,10 @@ jobs:
       # GitHub-hosted macOS runners, so no extra setup is required.
       - name: Build (macOS)
         if: matrix.platform == 'macos'
-        run: make
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.4.app
+          clang --version
+          make
 
       # ---------------- Windows (MSYS2) ----------------
       - name: Setup MSYS2 (Windows)
