@@ -123,6 +123,7 @@ jobs:
             cp "${APP_NAME}" "$DIST/${APP_NAME}.exe"
           fi
 
+          [ -f turbobench.ini ] && cp turbobench.ini "$DIST/" || true
           [ -f README.md ] && cp README.md "$DIST/" || true
           [ -f LICENSE ] && cp LICENSE "$DIST/" || true
 
