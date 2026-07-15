@@ -84,7 +84,6 @@ ifeq ($(ARCH),aarch64)
   _SSE=-march=armv8-a
   CFLAGS=$(_SSE)
 else ifeq ($(ARCH),riscv64)
-#  CFLAGS=-march=rv64gcv -mabi=lp64d
   CFLAGS=-march=rv64gcv_zvbb -mabi=lp64d
 else ifeq ($(ARCH),ppc64le)
   _SSE=-D__SSE4_1__
@@ -307,7 +306,6 @@ CXXFLAGS+=-D_ZLIB
 ZD=zlib/
 OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
 endif
-
 
 #NOT COMPLETE
 ifneq ($(wildcard openzl/.),)
