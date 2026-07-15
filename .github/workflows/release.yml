@@ -69,16 +69,15 @@ jobs:
       # ---------------- macOS ----------------
       # Xcode Command Line Tools (clang, make) are preinstalled on
       # GitHub-hosted macOS runners, so no extra setup is required.
-      - name: Select Latest Xcode (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          sudo xcode-select -s /Applications/Xcode_26.4.app
-          clang --version
+      - name: Select Xcode 26.4
+        if: matrix.platform == 'macos'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.4'
 
       - name: Build (macOS)
         if: matrix.platform == 'macos'
         run: make
-
       # ---------------- Windows (MSYS2) ----------------
       - name: Setup MSYS2 (Windows)
         if: matrix.platform == 'windows'
