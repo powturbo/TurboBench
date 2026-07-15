@@ -63,6 +63,7 @@ CX=$(CC)
 endif
 CROSS=$(CC)
 endif
+CHOST=$(CROSS)
 
 ifneq (,$(or $(findstring aarch64,$(CC) $(ARCH)),$(findstring arm64,$(CC) $(ARCH))))
   ARCH = aarch64
@@ -88,6 +89,7 @@ else ifeq ($(ARCH),riscv64)
 else ifeq ($(ARCH),ppc64le)
   _SSE=-D__SSE4_1__
   CFLAGS=-mcpu=power9 -mtune=power9 $(_SSE)
+  CHOST=powerpc64le
 else ifeq ($(ARCH),loongarch64)
   _SSE=-mlsx
   CFLAGS=$(_SSE)
@@ -370,7 +372,7 @@ else
   ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
   ifdef CROSS
 isa-l/bin/isa-l.a: $(ISAL_SRCS)
-	export CC=$(CROSS) && cd isa-l && $(MAKE) -f Makefile.unx
+	export CC=$(CROSS) && cd isa-l && $(MAKE) -f Makefile.unx host_cpu=$(CHOST)
   else
 isa-l/bin/isa-l.a: $(ISAL_SRCS)
 	cd isa-l && $(MAKE) -f Makefile.unx
@@ -903,7 +905,7 @@ endif
 
 OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugin.o
 
-turbobench: zlib-ng/libz-ng.a $(OB) turbobench.o 
+turbobench: $(OB) turbobench.o zlib-ng/libz-ng.a isa-l/bin/isa-l.a
 	$(CXX) $^ $(LDFLAGS) -o turbobench
 
 .c.o:
