@@ -84,13 +84,6 @@ jobs:
             git make mingw-w64-x86_64-gcc
           update: true
 
-          install: >-
-            make
-            zip
-            ${{ matrix.mingw_pkg }}
-
-
-
       - name: Build (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
