@@ -375,7 +375,7 @@ isa-l/bin/isa-l.a: $(ISAL_SRCS)
 isa-l/bin/isa-l.a: $(ISAL_SRCS)
 	cd isa-l && $(MAKE) -f Makefile.unx
       endif
-      LDFLAGS += isa-l/bin/isa-l.a
+      OB += isa-l/bin/isa-l.a
     endif
   endif
 endif
@@ -904,7 +904,7 @@ endif
 
 OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugin.o
 
-turbobench: zlib-ng/libz-ng.a isa-l/bin/isa-l.a $(OB) turbobench.o 
+turbobench: zlib-ng/libz-ng.a $(OB) turbobench.o 
 	$(CXX) $^ $(LDFLAGS) -o turbobench
 
 .c.o:
