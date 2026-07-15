@@ -5,6 +5,7 @@
  - The only benchmark program including **[LzTurbo](https://sites.google.com/site/powturbo/compression-benchmark)**
  - 100% in-memory benchmark, no I/O overhead
  - Include (>70) allmost all popular, latest or fastest compressors in one compiled package
+ - OS/Arch: Linux amd/intel, arm, RISC-V, PowerPC, s390x, Apple M1-M5 MacOs. Windows: MSYS2, Mingw, visual c++
  - Benchmarking **Entropy Coders**, **Lz77**, **Rolz**, **BWT** and **Context mixing** compressors
  - **Multiple** input files with **recursive** directories
  - Concatenate **multiple small files** into one multiblock file
@@ -144,6 +145,7 @@ Compressors with versions 16.08.2016 <br>
 - Linux amd/intel: GNU GCC (>=4.6)
 - Linux amd/intel: Clang (>=3.2)
 - Linux arm: aarch64
+- Linux risc-v: riscv64
 - MaxOS: XCode (>=9)
 - PowerPC ppc64le
 - IBM Z series s390x
@@ -265,5 +267,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 16 APR 2026
+Last update: 15 JUL 2026
 
