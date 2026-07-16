@@ -25,13 +25,13 @@
 #define E_ANS  0x1
 #define E_HUF  0x2
 
-struct plugs { 
+typedef struct plugs { 
   int   id; 
   char  *s;
   int   codec; 
   char  *name,*lev; 
   unsigned flag,blksize; 
-};
+} plugs_t;
 
   #ifdef __cplusplus
 extern "C" {
