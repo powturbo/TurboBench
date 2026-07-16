@@ -193,11 +193,13 @@ Compressors with versions 16.08.2016 <br>
  - [Lzoma](https://github.com/alef78/lzoma) 
  - [LZSSE](https://github.com/ConorStokes/LZSSE)
  - [LZSA](https://github.com/emmanuel-marty/lzsa)
+ - [Memlz](https://github.com/rrrlasse/memlz) :new:2026.07 
  - [Miniz](https://github.com/richgel999/miniz) 
  - [misa77](https://github.com/welcome-to-the-sunny-side/misa77) :new:2026.07
  - [ms-compress](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi Washigan](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188)
  - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64) : [Oodle Library download](https://github.com/WorkingRobot/OodleUE)
+ - [OpnZL](https://github.com/facebook/openzl)  :new:2026.07 
  - [Quantile Compression](https://github.com/mwlon/quantile-compression)
  - [Pithy](https://github.com/johnezang/pithy) 
  - [Quicklz](https://github.com/robottwo/quicklz) 
@@ -208,6 +210,7 @@ Compressors with versions 16.08.2016 <br>
  - [smaz](https://github.com/antirez/smaz)
  - [Snappy](https://github.com/google/snappy) 
  - [Snappy-c](https://github.com/andikleen/snappy-c) 
+ - [Tamp](https://github.com/BrianPugh/tamp) :new:2026.07
  - [Tornado](http://freearc.org) 
  - [Unishox](https://github.com/siara-cc/Unishox) 
  - [wfLZ](https://github.com/ShaneWF/wflz) 
@@ -239,7 +242,7 @@ Compressors with versions 16.08.2016 <br>
  - [Fast AC v2006](http://www.cipr.rpi.edu/research/SPIHT/)
  - [FQZ/PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
  - [PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
- - [sserangecoding](https://github.com/richgel999/sserangecoding) :new:2023.05
+ - [sserangecoding](https://github.com/richgel999/sserangecoding)
  
 ###### ABS: Asymmetric binary systems 
  - [Fpaqc:Asymmetric Binary Coder v07-12](http://www.mattmahoney.net/dc/)
@@ -266,7 +269,7 @@ Compressors with versions 16.08.2016 <br>
 
 #### Encoding:
  - [TurboRLE](https://github.com/powturbo/TurboRLE) Turbo Run Length Encoding
- - [tcobs](https://github.com/rokath/tcobs) short messages compression with COBS framing :new:2023.06
+ - [tcobs](https://github.com/rokath/tcobs) short messages compression with COBS framing
  - [TurboBase64](https://github.com/powturbo/TurboBase64) Turbo Base64 Encoding/Decoding 
  - [fastbase64](https://github.com/lemire/fastbase64) Base64 Encoding 
  - [base64](https://github.com/aklomp/base64) Fast Base64 stream encoder/decoder 
