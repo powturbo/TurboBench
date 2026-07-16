@@ -97,3 +97,9 @@
 [submodule "kanzi-cpp"]
 	path = kanzi-cpp
 	url = https://github.com/flanglet/kanzi-cpp.git
+[submodule "tamp"]
+	path = tamp
+	url = https://github.com/BrianPugh/tamp.git
+[submodule "openzl"]
+	path = openzl
+	url = https://github.com/facebook/openzl.git
