@@ -1,5 +1,5 @@
 /**
-    Copyright (C) powturbo 2013-2021
+    Copyright (C) powturbo 2013-2026
     GPL v2 License
   
     This program is free software; you can redistribute it and/or modify
@@ -29,9 +29,10 @@
 #define _WIN32
   #endif
 #define _FILE_OFFSET_BITS 64  
-#include <stdio.h>  
-#include <string.h>  
-#include <stdlib.h> 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include <inttypes.h> 
 #include <float.h> 
 #include <errno.h>
@@ -62,11 +63,15 @@
 #include <io.h> 
 #include <fcntl.h>
   #endif
-
+  
 #include <time.h>
 #include "conf.h"   
 #include "time_.h"
 #include "plugin.h" 
+
+#define RATIO(_clen_, _len_)  ((double)(_clen_)*100.0/(double)(_len_))
+#define FACTOR(_clen_, _len_) ((double)(_len_)/(double)(_clen_))
+#define SCORE(_clen_, _len_,_tc_,_td_) (_tc_ + 2.0 * _td_ + (double)_clen_/1000000.0)  
 
 double weissman(double ratio, double bandwith, double bandwithlo, double bandwithhi ) {
   return ratio * log10( 1 + bandwith/(bandwithlo*ratio) ) - (bandwithhi > 0?ratio * log10( 1 + bandwith/(bandwithhi*ratio) ):0.0);
@@ -288,7 +293,7 @@ struct plugg plugg[] =
 #define INVLEV -9999
 
 void plugsprt(void) {
-  struct plugs *gs;
+  plugs_t *gs;
 
     #if defined(_COMPRESS1) || defined(_COMPRESS2)
   struct plugg *pg; 
@@ -308,7 +313,7 @@ void plugsprt(void) {
 }
 
 void plugsprtv(FILE *f, int fmt) {
-  struct plugs *gs;
+  plugs_t *gs;
   char         *pv = "";
 
   switch(fmt) {
@@ -357,29 +362,29 @@ void plugsprtv(FILE *f, int fmt) {
 //------------------ plugin: process ----------------------------------
 #define PRM_SIZE 64
 #define TMS_SIZE 20
-struct plug { 
+typedef struct { 
   int       id,err,lev;
   unsigned  blksize;
   char      *s,prm[PRM_SIZE+1],tms[TMS_SIZE+1]; 
   unsigned long long len,memc,memd,stkc,stkd;
   double    tc,td,tck,tdk;
-};
+} plug_t;
 
 #define PLUGN 256
-struct plug plug[PLUGN+1],plugt[PLUGN+1];
+plug_t plug[PLUGN+1], plugt[PLUGN+1];
 int         seg_ans = 32*1024, seg_huf = 32*1024, seg_anx = 12*1024, seg_hufx=11*1024;
 static int  cmp = 2,trans;
 int         verbose=1;
 double      fac = 1.3;
 
-int plugins(struct plug *plug, struct plugs *gs, int *pk, unsigned bsize, unsigned bsizex, int lev, char *prm) { 
+int plugins(plug_t *plug, plugs_t *gs, int *pk, unsigned bsize, unsigned bsizex, int lev, char *prm) { 
   int i,k = *pk;
   for(i = 0; i < k; i++) 
     if(plug[i].id == gs->id && plug[i].lev == lev && !strcmp(plug[i].prm,prm))
       return -1;
   if(k >= PLUGN) 
     die("Too many codecs specified\n");
-  memset(&plug[k], 0, sizeof(struct plug)); 
+  memset(&plug[k], 0, sizeof(plug_t)); 
   plug[k].id  = gs->id; 
   plug[k].err = 0; 
   plug[k].s   = gs->s; 
@@ -395,7 +400,7 @@ int plugins(struct plug *plug, struct plugs *gs, int *pk, unsigned bsize, unsign
   return 0;
 }
 
-int plugreg(struct plug *plug, char *cmd, int k, unsigned bsize, unsigned bsizex) {
+int plugreg(plug_t *plug, char *cmd, int k, unsigned bsize, unsigned bsizex) {
   static char *cempty=""; 
   int ignore = 0;
 
@@ -436,7 +441,7 @@ int plugreg(struct plug *plug, char *cmd, int k, unsigned bsize, unsigned bsizex
         prm = cempty;
 
       int found = 0;
-      struct plugs *gs,*gfs=NULL;  
+      plugs_t *gs,*gfs=NULL;  
       if(!*name) 
         break;                              
       for(gs = plugs; gs->id >= 0; gs++)
@@ -469,6 +474,259 @@ int plugreg(struct plug *plug, char *cmd, int k, unsigned bsize, unsigned bsizex
   } 
   a:plug[k].id = -1;  
   return k;
+}
+#define MAX_PLUGS 30
+
+typedef enum { M_RATIO = 0, M_COMP = 1, M_DECOMP = 2 } metric_t;
+#define CHART_W        900
+#define BAR_H          26
+#define BAR_GAP        12
+#define LEFT_MARGIN    170
+#define RIGHT_MARGIN   150
+#define TOP_MARGIN     70
+#define BOTTOM_MARGIN  40
+
+#define SCATTER_W      820
+#define SCATTER_H      620
+#define SCATTER_MARGIN 80
+
+static void xml_escape(const char *in, char *out, size_t outsz) {
+  size_t o = 0;
+  for (; *in && o + 6 < outsz; in++) {
+    const char *rep = NULL;
+    switch (*in) {
+      case '&': rep = "&amp;"; break;
+      case '<': rep = "&lt;";  break;
+      case '>': rep = "&gt;";  break;
+       default:  out[o++] = *in; continue;
+    }
+    size_t l = strlen(rep);
+    memcpy(out + o, rep, l);
+    o += l;
+  }
+  out[o] = '\0';
+}
+
+static double max_metric(plug_t *a, int n, metric_t m, size_t len) {
+  double mx = 0; int i;
+  for (i = 0; i < n; i++) {
+    double v = (m == M_RATIO) ? a[i].len : (m == M_COMP) ? a[i].tc : a[i].td;
+    if (v > mx) mx = v;
+  }
+  if(m == M_RATIO) mx = RATIO(mx, len);
+  return mx <= 0 ? 1 : mx;
+} 
+
+static int cmp_ratio(const void *p1, const void *p2) { const plug_t *a = p1, *b = p2; return (b->len > a->len) - (b->len < a->len); }
+static int cmp_tc(   const void *p1, const void *p2) { const plug_t *a = p1, *b = p2; return (b->tc > a->tc) - (b->tc < a->tc); }
+static int cmp_td(   const void *p1, const void *p2) { const plug_t *a = p1, *b = p2; return (b->td > a->td) - (b->td < a->td); }
+
+static void svg_open(FILE *f, int w, int h, const char *title) {
+  char esc[256];
+  xml_escape(title, esc, sizeof(esc));
+  fprintf(f, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+  fprintf(f, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" "
+        "viewBox=\"0 0 %d %d\" font-family=\"Arial,Helvetica,sans-serif\">\n",        w, h, w, h);
+  fprintf(f, "<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#ffffff\"/>\n", w, h);
+  fprintf(f, "<text x=\"%d\" y=\"30\" font-size=\"20\" font-weight=\"bold\" "
+        "text-anchor=\"middle\" fill=\"#222\">%s</text>\n", w / 2, esc);
+}
+
+static void svg_close(FILE *f) { fprintf(f, "</svg>\n"); }
+
+static void svg_text(FILE *f, double x, double y, const char *anchor, int size, const char *color, const char *txt) {
+  char esc[256];
+  xml_escape(txt, esc, sizeof(esc));
+  fprintf(f, "<text x=\"%.2f\" y=\"%.2f\" text-anchor=\"%s\" font-size=\"%d\" fill=\"%s\">%s</text>\n",  x, y, anchor, size, color, esc);
+}
+
+static void svg_rect(FILE *f, double x, double y, double w, double h, const char *fill, double rx) {
+  fprintf(f, "<rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" fill=\"%s\"/>\n",  x, y, w, h, rx, fill);
+}
+
+static void svg_line(FILE *f, double x1, double y1, double x2, double y2, const char *color, double sw) {
+    fprintf(f, "<line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" stroke=\"%s\" stroke-width=\"%.2f\"/>\n", x1, y1, x2, y2, color, sw);
+}
+
+static void svg_circle(FILE *f, double cx, double cy, double r, const char *fill, const char *stroke) {
+  fprintf(f, "<circle cx=\"%.2f\" cy=\"%.2f\" r=\"%.2f\" fill=\"%s\" stroke=\"%s\" stroke-width=\"1.5\"/>\n", cx, cy, r, fill, stroke);
+}
+
+// 1) HORIZONTAL BAR CHART - single metric (ratio | compression | decomp)
+void chart_bar(const char *fname, char *name, plug_t *a, int n, metric_t metric, size_t len) {
+  char s[256];
+  if (n > MAX_PLUGS) n = MAX_PLUGS;
+  sprintf(s, "%s_%s", fname, name);
+  plug_t tmp[MAX_PLUGS];
+  memcpy(tmp, a, n * sizeof(plug_t));
+
+  int (*cmp)(const void *, const void *) = 
+  metric == M_RATIO ? cmp_ratio : metric == M_COMP ? cmp_tc : cmp_td;
+  qsort(tmp, n, sizeof(plug_t), cmp);
+
+  double mx = max_metric(tmp, n, metric, len);
+  int h = TOP_MARGIN + n * (BAR_H + BAR_GAP) + BOTTOM_MARGIN;
+
+  FILE *f = fopen(s, "w");
+  if (!f) { perror(s); return; }
+
+  char color[16];
+  if (metric == M_RATIO) {
+    snprintf(s, 80, "TurboBench: Ratio '%s'", fname);
+    strcpy(color, "#4C72B0");
+  } else if (metric == M_COMP) {
+    snprintf(s, 80, "TurboBench: C Speed '%s'", fname);
+    strcpy(color, "#2E86AB");
+  } else {
+    snprintf(s, 80, "TurboBench: D Speed '%s'", fname);
+    strcpy(color, "#E67E22");
+  }
+  svg_open(f, CHART_W, h, s);
+
+  double plot_w = CHART_W - LEFT_MARGIN - RIGHT_MARGIN;
+  svg_line(f, LEFT_MARGIN, TOP_MARGIN - 10, LEFT_MARGIN, h - BOTTOM_MARGIN + 5, "#333", 1.5);
+ 
+  int i;
+  for (i = 0; i < n; i++) {
+    double v = metric == M_RATIO ? RATIO(tmp[i].len,len): metric == M_COMP ? tmp[i].tc : tmp[i].td;
+    double y = TOP_MARGIN + i * (BAR_H + BAR_GAP);
+    double bw = (v / mx) * plot_w;
+    if(tmp[i].lev==INVLEV) sprintf(s, "%s", tmp[i].s); else sprintf(s, "%s,%d", tmp[i].s, tmp[i].lev);
+    svg_text(f, LEFT_MARGIN - 10, y + BAR_H * 0.7, "end", 13, "#222", s);
+    svg_rect(f, LEFT_MARGIN, y, bw, BAR_H, color, 4);
+    char lbl[64];
+    if (metric == M_RATIO)      snprintf(lbl, sizeof(lbl), "%.1f%%", v);
+    else if (metric == M_COMP)  snprintf(lbl, sizeof(lbl), "%.1f MB/s", v);
+    else                        snprintf(lbl, sizeof(lbl), "%.1f MB/s", v);
+    svg_text(f, LEFT_MARGIN + bw + 6, y + BAR_H * 0.7, "start", 12, "#111", lbl);
+  }
+  svg_close(f);
+  fclose(f);
+}
+
+// *** 2) GROUPED HORIZONTAL BAR CHART - compression + decompression speed
+void chart_grouped(const char *fname, char *name, plug_t *a, int n, size_t len) {
+  char s[256];
+  if (n > MAX_PLUGS) n = MAX_PLUGS;
+  sprintf(s, "%s_%s", fname, name);
+  plug_t tmp[MAX_PLUGS];
+  memcpy(tmp, a, n * sizeof(plug_t));
+  qsort(tmp, n, sizeof(plug_t), cmp_tc);
+
+  double mx_c = max_metric(tmp, n, M_COMP, len);   
+  double mx_d = max_metric(tmp, n, M_DECOMP, len);
+  double mx = mx_c > mx_d ? mx_c : mx_d;
+  double sub_h = BAR_H * 0.42;
+  double group_h = sub_h * 2 + 6;
+  int h = TOP_MARGIN + (int)(n * (group_h + BAR_GAP)) + BOTTOM_MARGIN;
+
+  FILE *f = fopen(s, "w");
+  if (!f) { perror(s); return; }
+  snprintf(s, 80, "TurboBench: C/D Speed '%s'", fname);
+  svg_open(f, CHART_W, h, s);
+  double plot_w = CHART_W - LEFT_MARGIN - RIGHT_MARGIN;
+  svg_line(f, LEFT_MARGIN, TOP_MARGIN - 10, LEFT_MARGIN, h - BOTTOM_MARGIN + 5, "#333", 1.5);
+
+  /* legend */
+  svg_rect(f, LEFT_MARGIN, 40, 14, 14, "#2E86AB", 2);
+  svg_text(f, LEFT_MARGIN + 20, 51, "start", 12, "#111", "MB/s");
+  svg_rect(f, LEFT_MARGIN + 240, 40, 14, 14, "#E67E22", 2);
+  svg_text(f, LEFT_MARGIN + 260, 51, "start", 12, "#111", "MB/s");
+
+  int i;
+  for (i = 0; i < n; i++) {
+    double y = TOP_MARGIN + i * (group_h + BAR_GAP);
+    if(tmp[i].lev==INVLEV) sprintf(s, "%s", tmp[i].s); else sprintf(s, "%s,%d", tmp[i].s, tmp[i].lev);
+    svg_text(f, LEFT_MARGIN - 10, y + group_h * 0.65, "end", 13, "#222", s);
+
+    double bw_c = (tmp[i].tc / mx) * plot_w;
+    svg_rect(f, LEFT_MARGIN, y, bw_c, sub_h, "#2E86AB", 3);
+    char lbl_c[64];
+    snprintf(lbl_c, sizeof(lbl_c), "%.1f C MB/s", tmp[i].tc);
+    svg_text(f, LEFT_MARGIN + bw_c + 6, y + sub_h * 0.75, "start", 11, "#111", lbl_c);
+
+    double bw_d = (tmp[i].td / mx) * plot_w;
+    svg_rect(f, LEFT_MARGIN, y + sub_h + 4, bw_d, sub_h, "#E67E22", 3);
+    char lbl_d[64];
+    snprintf(lbl_d, sizeof(lbl_d), "%.1f D MB/s", tmp[i].td);
+    svg_text(f, LEFT_MARGIN + bw_d + 6, y + sub_h + 4 + sub_h * 0.75, "start", 11, "#111", lbl_d);
+  }
+  svg_close(f);
+  fclose(f);
+}
+
+// *** 3) 2D SCATTER / DOT CHART - speed (x) vs ratio (y)
+void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xmetric, size_t len) {
+  char s[256];
+  if (n > MAX_PLUGS) n = MAX_PLUGS;
+  sprintf(s, "%s_%s", fname, name);
+  FILE *f = fopen(s, "w");
+  if (!f) { perror(s); return; }
+  strncpy(s,fname,30);  s[30]=0;
+  char color[16];
+  if (xmetric == M_COMP) {
+    snprintf(s, 80, "TurboBench: C Speed/Ratio %s", fname);
+    strcpy(color, "#2E86AB");
+  } else {
+    snprintf(s, 80, "TurboBench: D Speed/s-Ratio %s", fname);
+    strcpy(color, "#E67E22");
+  }
+  svg_open(f, SCATTER_W, SCATTER_H, s);
+
+  double mx_x = max_metric(a, n, xmetric, len) * 1.15;
+  double mx_y = 100.0; /* ratio range 0..100 */
+  double px0 = SCATTER_MARGIN, py0 = SCATTER_H - SCATTER_MARGIN;
+  double pw = SCATTER_W - 2 * SCATTER_MARGIN;
+  double ph = SCATTER_H - SCATTER_MARGIN - 50;
+  svg_line(f, px0, py0, px0 + pw, py0, "#333", 1.5);
+  svg_line(f, px0, py0, px0, py0 - ph, "#333", 1.5);
+
+  int gi;
+  for (gi = 0; gi <= 5; gi++) {
+    double gx = px0 + pw * gi / 5.0;
+    double vx = mx_x * gi / 5.0;
+    svg_line(f, gx, py0, gx, py0 - ph, "#eee", 1);
+    char t[32];
+    snprintf(t, sizeof(t), "%.0f", vx);
+    svg_text(f, gx, py0 + 18, "middle", 11, "#555", t);
+
+    double gy = py0 - ph * gi / 5.0;
+    double vy = mx_y * gi / 5.0;
+    svg_line(f, px0, gy, px0 + pw, gy, "#eee", 1);
+    char ty[32];
+    snprintf(ty, sizeof(ty), "%.0f%%", vy);
+    svg_text(f, px0 - 10, gy + 4, "end", 11, "#555", ty);
+  }
+  svg_text(f, px0 + pw / 2, SCATTER_H - 15, "middle", 13, "#222", xmetric == M_COMP ? "C MB/s" : "D MB/s");
+  fprintf(f,
+    "<text x=\"20\" y=\"%.2f\" font-size=\"13\" fill=\"#222\" "
+    "transform=\"rotate(-90 20 %.2f)\" text-anchor=\"middle\">Ratio%%</text>\n",  py0 - ph / 2, py0 - ph / 2);
+  int i;
+  for (i = 0; i < n; i++) {
+    double v = xmetric == M_COMP ? a[i].tc : a[i].td;
+    double cx = px0 + (v / mx_x) * pw;
+    double cy = py0 - (RATIO(a[i].len,len) / mx_y) * ph;
+
+    svg_circle(f, cx, cy, 6, color, "#333");
+    if(a[i].lev==INVLEV) sprintf(s, "%s", a[i].s); else sprintf(s, "%s,%d", a[i].s, a[i].lev);
+    svg_text(f, cx + 8, cy - 8, "start", 11, "#111", s);
+
+    char val[64] = {0};
+    //if (xmetric == M_COMP) snprintf(val, sizeof(val), "%.1f, %.1f%%", v, RATIO(a[i].len,len));
+    //else                   snprintf(val, sizeof(val), "%.1f, %.1f%%", v, RATIO(a[i].len,len));
+    svg_text(f, cx + 8, cy + 6, "start", 9, "#666", val);
+  }
+  svg_close(f);
+  fclose(f);
+}
+
+void chart(plug_t *a, int n, char *fname, size_t len) {
+  chart_bar(fname, "ratio.svg",              a, n, M_RATIO,  len);
+  chart_bar(fname,  "comp.svg",              a, n, M_COMP,   len);
+  chart_bar(fname,"decomp.svg",              a, n, M_DECOMP, len);
+  chart_grouped(fname,"grouped.svg",         a, n, len);
+  chart_scatter(fname, "scatter_comp.svg",   a, n, M_COMP,   len);
+  chart_scatter(fname, "scatter_decomp.svg", a, n, M_DECOMP, len);
 }
 
 //------------------ plugin: print/plot -----------------------------
@@ -603,11 +861,7 @@ void plugprttf(FILE *f, int fmt) {
   }
 }
 
-#define RATIO(_clen_, _len_)  ((double)_clen_*100.0/_len_)
-#define FACTOR(_clen_, _len_) ((double)_len_/(double)_clen_)
-#define SCORE(_clen_, _len_,_tc_,_td_) (_tc_ + 2.0 * _td_ + (double)_clen_/1000000.0)  
-
-void plugprt(struct plug *plug, unsigned long long totinlen, char *finame, int fmt, double *ptc, double *ptd, FILE *f) {
+void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, double *ptc, double *ptd, FILE *f) {
   double ratio  = RATIO(plug->len,totinlen),           //ratio  = FACTOR(plug->len,totinlen),
          tc     = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td), score = SCORE(plug->len,totinlen,plug->tc,plug->td);
   char   name[256]; 
@@ -752,7 +1006,7 @@ static inline double spdup(double td, long long len, int i, long long totinlen) 
   return (double)totinlen*100.0 / ((double)len + ((td+blknum*bw[i].rtt*1000.0))*(double)bw[i].bw ); 
 }
 
-void plugprtp(struct plug *plug, long long totinlen, char *finame, int fmt, int speedup, FILE *f) {
+void plugprtp(plug_t *plug, long long totinlen, char *finame, int fmt, int speedup, FILE *f) {
   int  i;
   char name[255]; 
   if(plug->lev != INVLEV) 
@@ -818,7 +1072,7 @@ void plugplotb(FILE *f, int fmt, int idiv) {
   fprintf(f, "<div id='myDiv%d' style='width: %dpx; height: %dpx;'></div><script>", idiv, divplot[divxy].x, divplot[divxy].y); 
 }
 
-void plugplot(struct plug *plug, unsigned long long totinlen, int fmt, int speedup, char *s, FILE *f) {
+void plugplot(plug_t *plug, unsigned long long totinlen, int fmt, int speedup, char *s, FILE *f) {
   int  i;
   char name[65];
   if(plug->lev != INVLEV)
@@ -849,7 +1103,7 @@ void plugplote(FILE *f, int fmt, char *s) {
     s, plugspeedup(speedup,1), xlog?"log":"", xlog?"type: 'log',\n":"", ylog?"type: 'log',\n":"");
 }
 
-int libcmp(const struct plug *e1, const struct plug *e2) {
+int libcmp(const plug_t *e1, const plug_t *e2) {
   if(e1->len < e2->len)
     return -1;
   else if(e1->len > e2->len)
@@ -861,7 +1115,7 @@ int libcmp(const struct plug *e1, const struct plug *e2) {
   return 0;
 }
 
-int libcmpn(const struct plug *e1, const struct plug *e2) {
+int libcmpn(const plug_t *e1, const plug_t *e2) {
   int c = strcmp(e1->s, e2->s);
   if(c < 0)
     return -1;
@@ -875,12 +1129,12 @@ int libcmpn(const struct plug *e1, const struct plug *e2) {
 }
 
 #define P_MCPY 1  // memcpy id
-void plugplotc(struct plug *plug, int k, long long totinlen, int fmt, int speedup, char *s, FILE *f) {
+void plugplotc(plug_t *plug, int k, long long totinlen, int fmt, int speedup, char *s, FILE *f) {
   int  i, n = 0;
   char name[65],txt[256];  
-  qsort(plug, k, sizeof(struct plug), (int(*)(const void*,const void*))libcmpn);
+  qsort(plug, k, sizeof(plug_t), (int(*)(const void*,const void*))libcmpn);
   
-  struct plug *g,*gs=plug,*p;
+  plug_t *g,*gs=plug,*p;
   for(txt[0] = name[0] = 0, g = plug; g < plug+k; g++) 
   if(g->id <= P_MCPY && !plotmcpy) 
     continue;
@@ -928,12 +1182,12 @@ void plugplotce(FILE *f, int fmt, char *s) {
     s, plugspeedup(speedup,0), xlog2?"log":"", xlog2?"type: 'log',\n":"", ylog2?"type: 'log',\n":"");
 }
 
-int plugprts(struct plug *plug, int k, char *finame, int xstdout, unsigned long long totlen, int fmt, char *t) { 
+int plugprts(plug_t *plug, int k, char *finame, int xstdout, unsigned long long totlen, int fmt, char *t) { 
   double ptc = 0.0, ptd = 0.0;
-  struct plug *g; 
+  plug_t *g; 
   if(!totlen) return 0; 														  					if(verbose>1) printf("'%s'\n", finame); 
 
-  qsort(plugt, k, sizeof(struct plug), (int(*)(const void*,const void*))libcmp);
+  qsort(plugt, k, sizeof(plug_t), (int(*)(const void*,const void*))libcmp);
   char s[257];
   sprintf(s, "%s.%s", finame, fmtext[fmt]);
   FILE *fo = xstdout>=0?stdout:fopen(s, "w");
@@ -1001,9 +1255,9 @@ int plugprts(struct plug *plug, int k, char *finame, int xstdout, unsigned long 
   fclose(fo);
 } 
 
-int plugread(struct plug *plug, char *finame, unsigned long long *totinlen) {
+int plugread(plug_t *plug, char *finame, unsigned long long *totinlen) {
   char   s[LSIZE+1], name[33];
-  struct plug *p = plug;
+  plug_t *p = plug;
   FILE   *fi = fopen(finame, "r"); 
   if(!fi) return -1;
 
@@ -1116,7 +1370,7 @@ int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned 
   #ifdef _LZTURBO
 #include "../dev/x/bebench.h"
   #else
-struct plug plugr[32]; int tid;
+plug_t plugr[32]; int tid;
 #define BEPRE
 #define BEINI
 #define BEPOST
@@ -1184,7 +1438,7 @@ int getpagesize() {
 
 size_t mininlen;
 
-unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long filenmax, size_t bsize, struct plug *plugr, int tid, int krep) { 
+unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filenmax, size_t bsize, plug_t *plugr, int tid, int krep) { 
   size_t outsize;   
   FILE   *fi = strcmp(finame,"stdin")?fopen(finame, "rb"):stdin; if(!fi) { perror(finame); return 0; /*die("open error '%s'\n", finame);*/ }
   char   *p; 
@@ -1494,7 +1748,7 @@ int main(int argc, char* argv[]) {
 																									if(verbose > 5) printf("Process files\n");fflush(stdout);
   unsigned long long totinlen = 0;  
   int       krep;
-  struct    plug *p;
+  plug_t   *p;
   char     *finame = "";
   tm_t      tmk0 = tminit();      
   for(p = plugt; p < plugt+k; p++) p->tc = p->td = DBL_MAX;
@@ -1502,7 +1756,7 @@ int main(int argc, char* argv[]) {
     if(tm_Repk > 1)
       printf("Benchmark: %d from %d\n", krep+1, tm_Repk);
     for(p = plug; p < plug+k; p++) {
-      struct plug *g = &plugt[p - plug];
+      plug_t *g = &plugt[p - plug];
       totinlen = 0; g->len = g->tck = g->tdk = g->memc = g->memd = g->stkc = g->stkd = 0;
       BEFILE;
       for(fno = optind; fno < argc; fno++) {
@@ -1561,15 +1815,15 @@ int main(int argc, char* argv[]) {
     char tms[20];
     time_t tm; 
     time(&tm);    
-	struct tm *ltm = localtime(&tm); 
-	sprintf(tms, "%.4d-%.2d-%.2d.%.2d:%.2d:%.2d", 1900 + ltm->tm_year, ltm->tm_mon+1, ltm->tm_mday, ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
+    struct tm *ltm = localtime(&tm); 
+    sprintf(tms, "%.4d-%.2d-%.2d.%.2d:%.2d:%.2d", 1900 + ltm->tm_year, ltm->tm_mon+1, ltm->tm_mday, ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
 	
-    struct plug *g;
+    plug_t *g;
     fprintf(fo, "dataset\tsize\tcsize\tdtime\tctime\tcodec\tlevel\tparam\tcmem\tdmem\tcstack\tdstack\ttime\n");
     for(p = plugt; p < plugt+k; p++) { 																
       for(g = plug; g < plug+gk; g++) { 
         if(g->id >= 0 && !strcmp(g->s, p->s) && g->lev == p->lev && !strcmp(g->prm, p->prm)) {
-		  int u = 0; 																//printf("$$$TLEN=%u D=%f %f ", (unsigned)p->len, p->td, g->td);
+	  int u = 0; 																//printf("$$$TLEN=%u D=%f %f ", (unsigned)p->len, p->td, g->td);
           if(g->len == p->len) {
             if(g->tc < p->tc || p->tc == DBL_MAX) p->tc = g->tc,u++;
             if(g->td < p->td || p->td == DBL_MAX) p->td = g->td,u++;
@@ -1586,17 +1840,23 @@ int main(int argc, char* argv[]) {
       } 
       fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", finame, totinlen, p->len, p->td, p->tc, p->s, p->lev, p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
     }
-    for(g = plug; g < plug+gk; g++) {
+     for(g = plug; g < plug+gk; g++) {
       if(g->id >= 0) {
         fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", finame, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, p->stkc, p->stkd, g->tms[0]?g->tms:tms);
       }
-	}
-	fclose(fo);
+    }
+    fclose(fo);
     printfile(s, 0, FMT_TEXT, rem);
+    plug_t plugv[30],*vp=plugv; int x = 0;
+    for(g = plug; g < plug+gk; g++)
+      if(g->id >= 0) { *vp = *g; vp->tc = TMBS(totinlen, vp->tc); vp->td = TMBS(totinlen, vp->td);  vp++; if(vp-plugv >= 30) break; }
+    chart(plugv, vp - plugv, finame, totinlen);
   }
+
     #ifdef _WIN32          // Finish! 
   Beep( 440, 100 );
     #else
   putchar('\a');
     #endif
+  
 }
