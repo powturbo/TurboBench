@@ -103,3 +103,6 @@
 [submodule "openzl"]
 	path = openzl
 	url = https://github.com/facebook/openzl.git
+[submodule "memlz"]
+	path = memlz
+	url = https://github.com/rrrlasse/memlz.git
