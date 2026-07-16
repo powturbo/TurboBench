@@ -21,6 +21,7 @@
  - **Text**, **html**, **csv**, **markdown** output
  - :sparkles: **Transfer speed sheet** for different connections or devices: GPRS,2G,3G,4G,DSL,Network,HDD,SSD,RAM
  - :+1: **Html plot:** **Speedup** + **Speed/Ratio**
+ - :new:2026.07 :+1: Automatic **SVG Bar/Scatter** Compression/Decompression/Ratio **Charts**
  - All in one executable, no hassless installing of additional packages, graphic libraries, python,...
  - :+1: build in peak memory usage reporting for compression and decompression in html output
 
