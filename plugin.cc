@@ -1,5 +1,5 @@
 /**
-    Copyright (C) powturbo 2013-2023
+    Copyright (C) powturbo 2013-2026
     GPL v2 License
 
     This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,7 @@ enum {
 #define _AOM 0
 #endif
  P_AOM,
+ 
 #ifndef _BPC
 #define _BPC 0
 #endif
@@ -53,6 +54,7 @@ enum {
 #ifndef _CHAMELEON
 #define _CHAMELEON 0
 #endif
+
  P_CHAMELEON,
 #ifndef _C_BLOSC2
 #define _C_BLOSC2 0
@@ -65,6 +67,7 @@ enum {
 #ifndef _DAALA
 #define _DAALA 0
 #endif
+
  P_DAALA,
 #ifndef _DENSITY
 #define _DENSITY 0
@@ -77,6 +80,7 @@ enum {
 #ifndef _FASTLZ
 #define _FASTLZ 0
 #endif
+
  P_FASTLZ,
 #ifndef _FLZMA2
 #define _FLZMA2 0
@@ -85,6 +89,7 @@ enum {
 #ifndef _GIPFELI
 #define _GIPFELI 0
 #endif
+
  P_GIPFELI,
 #ifndef _GLZA
 #define _GLZA 0
@@ -93,15 +98,18 @@ enum {
 #ifndef _HEATSHRINK
 #define _HEATSHRINK 0
 #endif
+
  P_HEATSHRINK,
 #ifndef _ISA_L
 #define _ISA_L 0
 #endif
+
  P_ISA_L,
 #ifndef _KANZI
 #define _KANZI 0
 #endif
  P_KANZI,
+ 
 #ifndef _LIBBSC
 #define _LIBBSC 0
 #endif
@@ -109,7 +117,6 @@ enum {
  P_LIBBSCC,   //QLFC
  P_ST,        //st 
  P_LIBBSCBWT, //bwt
-
 #ifndef _DIVBWT
 #define _DIVBWT 0
 #endif
@@ -118,7 +125,7 @@ enum {
 #ifndef _LIBDEFLATE
 #define _LIBDEFLATE 0
 #endif
- P_LIBDEFLATE,
+ P_LIBDEFLATE, 
 #ifndef _LIBLZF
 #define _LIBLZF 0
 #endif
@@ -126,16 +133,18 @@ enum {
 #ifndef _LIBLZG
 #define _LIBLZG 0
 #endif
-
  P_LIBLZG,
+ 
+#ifndef _MEMLZ
+#define _MEMLZ 0
+#endif
+ P_MEMLZ,
+ 
 #ifndef _SLZ
 #define _SLZ 0
 #endif
  P_SLZ,
-#ifndef _ZPAQ
-#define _ZPAQ 0
-#endif
- P_ZPAQ,
+ 
 #ifndef _LZ4
 #define _LZ4 0
 #endif
@@ -214,10 +223,32 @@ enum {
 #define _NAKA 0
 #endif
  P_NAKA,
+
+#ifndef _OPENZL
+#define _OPENZL 0
+#endif
+ P_OPENZL_U8,
+ P_OPENZL_I8,
+ P_OPENZL_U16,
+ P_OPENZL_I16,
+ P_OPENZL_U32,
+ P_OPENZL_I32,
+ P_OPENZL_U64,
+ P_OPENZL_I64,
+ P_OPENZL_SERIAL,
+ P_OPENZL_GENERIC,
+ P_OPENZL_ZSTD,
+ P_OPENZL_LZ4,
+ 
 #ifndef _PITHY
 #define _PITHY 0
 #endif
  P_PITHY,
+#ifndef _PYSAP
+#define _PYSAP 0
+#endif
+ P_PYSAP,
+ 
 #ifndef _QUICKLZ
 #define _QUICKLZ 0
 #endif
@@ -227,21 +258,24 @@ enum {
 #endif
  P_QCOMPRESS32,
  P_QCOMPRESS64,
+ 
 #ifndef _SHRINKER
 #define _SHRINKER 0
 #endif
  P_SHRINKER,
-#ifndef _PYSAP
-#define _PYSAP 0
+#ifndef _SKIM
+#define _SKIM 0
 #endif
- P_PYSAP,
+ P_SKIM,
+ 
 #ifndef _OODLE 
 #define _OODLE 0
 #endif
 #ifndef _OODLESRC 
 #define _OODLESRC 0
 #endif
- P_OODLE, 
+ P_OODLE,
+ 
 #ifndef _SHOCO
 #define _SHOCO 0
 #endif
@@ -262,16 +296,20 @@ enum {
 #define _SMALLZ4 0
 #endif
  P_SMALLZ4,
- 
+
+#ifndef _TAMP
+#define _TAMP 0
+#endif
+ P_TAMP,
 #ifndef _TCOBS
 #define _TCOBS 0
 #endif
  P_TCOBS,
-
 #ifndef _TORNADO
 #define _TORNADO 0
 #endif
  P_TORNADO,
+ 
 #ifndef _UNISHOX2
 #define _UNISHOX2 0
 #endif
@@ -280,10 +318,12 @@ enum {
 #define _UNISHOX3 0
 #endif
  P_UNISHOX3,
+ 
 #ifndef _WFLZ
 #define _WFLZ 0
 #endif
  P_WFLZ,
+ 
 #ifndef _YALZ77
 #define _YALZ77 0
 #endif
@@ -292,6 +332,7 @@ enum {
 #define _YAPPY 0
 #endif
  P_YAPPY,
+ 
 #ifndef _ZLIB
 #define _ZLIB 0
 #endif
@@ -310,6 +351,10 @@ enum {
 #define _ZOPFLI 0
 #endif
  P_ZOPFLI,
+#ifndef _ZPAQ
+#define _ZPAQ 0
+#endif
+ P_ZPAQ,
 #ifndef _ZSTD
 #define _ZSTD 0
 #endif
@@ -644,6 +689,10 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
 #include "liblzg/src/include/lzg.h"
   #endif
 
+  #if _MEMLZ
+#include "memlz/memlz.h"
+  #endif
+
   #if _ZPAQ
 #include "zpaq/libzpaq.h"
 void libzpaq::error(const char* msg) {
@@ -796,7 +845,7 @@ static fauto_decompress_i64 auto_decompress_i64_;
 static ffree_i32 free_i32_;
 static ffree_i64 free_i64_;
   #endif
-
+ 
   #if _SHRINKER
 #include "shrinker/Shrinker.h"
   #endif
@@ -807,6 +856,11 @@ static ffree_i64 free_i64_;
 
   #if _SNAPPY
 #include "snappy/snappy.h"
+  #endif
+
+  #if _TAMP
+#include "tamp/tamp/_c_src/tamp/compressor.h"
+#include "tamp/tamp/_c_src/tamp/decompressor.h"
   #endif
 
   #if _TCOBS
@@ -871,12 +925,123 @@ int vsrc_forwards(unsigned char * src, unsigned char * dst, size_t src_size);
 int vsrc_reverse(unsigned char * src, unsigned char * dst, size_t src_size);
   #endif
 
+  #ifdef _OPENZL  // Adapted from lzbench
+#include "openzl/include/openzl/openzl.h"
+#include "openzl/include/openzl/codecs/zl_segmenters.h"
+
+// The OpenZL format version used for the compression in lzbench
+#define OPENZL_FORMAT_VERSION 24
+#define WINDOWLOG_OPENZL 27
+typedef struct {
+  ZL_Compressor* cgraph;
+  ZL_CCtx* cctx;
+  ZL_DCtx* dctx;
+} openzl_params_s;
+
+static openzl_params_s *_openzl_init_base(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = (openzl_params_s*)malloc(sizeof(openzl_params_s));
+  params->cgraph = ZL_Compressor_create();  assert(params->cgraph);
+  params->cctx   = ZL_CCtx_create();        assert(params->cctx);
+  params->dctx   = ZL_DCtx_create();        assert(params->dctx);
+  ZL_Report report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_formatVersion, OPENZL_FORMAT_VERSION);
+  if(ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+  return params;
+}
+
+static openzl_params_s *_openzl_init_serial(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);  
+  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_LZ);// ZL_GRAPH_LZ: standard graph for LZ compression, offer performance similar to Zstd. Used for serial data (aka raw bytes).
+  if (ZL_isError(report)) printf("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+  return params;
+}
+
+template <typename TInteger>
+static openzl_params_s *_openzl_init_integer_t(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
+  ZL_GraphID graph = ZL_GRAPH_FIELD_LZ; // Build a graph to compress signed or unsigned integers (Little Endian). Adapted from OpenZL buildIntProfile() source code in cli/utils/compress_profiles.cpp .
+  if (std::is_signed<TInteger>::value) 
+    graph = ZL_Compressor_registerStaticGraph_fromNode1o(params->cgraph, ZL_NODE_ZIGZAG, graph);
+  
+  graph = ZL_Compressor_registerStaticGraph_fromNode1o(params->cgraph, ZL_Node_interpretAsLE(8*sizeof(TInteger)), graph);
+  graph = ZL_Compressor_buildNumFromSerialSegmenter(params->cgraph, sizeof(TInteger), 0, graph);
+
+  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, graph);
+  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+  return params;
+}
+
+template openzl_params_s *_openzl_init_integer_t<uint8_t >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<int8_t  >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<uint16_t>(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<int16_t >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<uint32_t>(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<int32_t >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<uint64_t>(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<int64_t >(size_t insize, size_t level, size_t windowLog);
+
+openzl_params_s *_openzl_init_generic(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
+  // ZL_GRAPH_COMPRESS_GENERIC: "default" generic compression suitable for any stream type. Used as a fallback if a compressor does not match the characteristics of the data. Currently corresponds to Zstd level 6.
+  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_COMPRESS_GENERIC);
+  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+  return params;
+}
+
+openzl_params_s *_openzl_init_zstd(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
+  // ZL_GRAPH_ZSTD: Zstd compression.
+  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_ZSTD);
+  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+   // Valid compression levels range from -99 (?) to -1 and from 1 to 22. Level 0 requests the default behaviour, which corresponds to level 6.
+  report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_compressionLevel, level);
+  if (ZL_isError(report)) {
+    printf("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+    abort();
+  }
+  return params;
+}
+
+static openzl_params_s *_openzl_init_lz4(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
+  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_LZ4); // ZL_GRAPH_LZ4: LZ4 compression.
+  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report)); 
+  report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_compressionLevel, level); // Valid compression levels range from -99 (?) to -1 and from 1 to 12. Level 0 requests the default behaviour, which corresponds to level 6.
+  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+  return params;
+}
+
+static void _openzl_deinit(openzl_params_s *params) {
+  if (!params) return;
+  if (params->dctx) ZL_DCtx_free(params->dctx);
+  if (params->cctx) ZL_CCtx_free(params->cctx);
+  if (params->cgraph) ZL_Compressor_free(params->cgraph);
+  free(params);
+}
+
+static int64_t _openzl_compress(char *inbuf, size_t insize, char *outbuf, size_t outsize, openzl_params_s *params) {
+  if(!params || !params->cctx || !params->cgraph) return 0;
+  ZL_Report report = ZL_CCtx_refCompressor(params->cctx, params->cgraph);
+  if (ZL_isError(report)) die("OpenZL compression error: %s\n", ZL_CCtx_getErrorContextString(params->cctx, report));
+  report = ZL_CCtx_compress(params->cctx, outbuf, outsize, inbuf, insize);
+  if(ZL_isError(report)) die("OpenZL compression error: %s\n", ZL_CCtx_getErrorContextString(params->cctx, report));
+  return (int64_t) ZL_validResult(report);
+}
+
+static int64_t _openzl_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsize, openzl_params_s *params) {
+  if(!params || !params->dctx) return 0;
+  ZL_Report report = ZL_DCtx_decompress(params->dctx, outbuf, outsize, inbuf, insize);
+  if (ZL_isError(report)) die("OpenZL decompression error: %s\n", ZL_DCtx_getErrorContextString(params->dctx, report));
+  return (int64_t) ZL_validResult(report);
+}
+  #endif
+
+
   #if __cplusplus
 extern "C" {
   #endif
 
-  #if _ZXC
-#include "zxc/include/zxc.h"
+  #if _SKIM
+#include "skim/skim.h"
   #endif
 
   #if _BZIP3
@@ -932,10 +1097,6 @@ static fOodleLZ_Compress                   OodleLZ_Compress_;
 static fOodleLZ_Decompress                 OodleLZ_Decompress_;
 static fOodleLZ_CompressOptions_GetDefault OodleLZ_CompressOptions_GetDefault_;
   #endif  
-  #if _SNAPPY_C
-#include "snappy-c/snappy.h"
-struct snappy_env env;
-  #endif
 
   #if _SMALLZ4
 #include "smallz4/smallz4.h"
@@ -944,6 +1105,11 @@ struct snappy_env env;
 
   #if _SMAZ
 #include "smaz/smaz.h"
+  #endif
+
+  #if _SNAPPY_C
+#include "snappy-c/snappy.h"
+struct snappy_env env;
   #endif
 
   #if _UNISHOX2
@@ -963,11 +1129,14 @@ int unishox2_decompressx(const char *in, int inlen, char *out, int lev);
 Z_EXTERN Z_EXPORT const char *zlibng_version(void);
 Z_EXTERN Z_EXPORT int32_t zng_compress2(uint8_t *dest, size_t *destLen, const uint8_t *source, size_t sourceLen, int32_t level);
 Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const uint8_t *source, size_t sourceLen);
-
   #endif
 
   #if _ZOPFLI
 #include "zopfli/src/zopfli/zopfli.h"
+  #endif
+
+  #if _ZXC
+#include "zxc/include/zxc.h"
   #endif
 
   #if __cplusplus
@@ -1252,110 +1421,145 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void
   
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
-  { P_C_BLOSC2,   "blosc",       _C_BLOSC2,  "Blosc",                   "0,1,2,3,4,5,6,7,8,9", 64*1024},
-  { P_BPC,        "bpc",         _BPC,       "bit plane compression",   "" },
-  { P_BRIEFLZ,    "brieflz",     _BRIEFLZ,   "BriefLz",                 "1,3,6,9" },
-  { P_BROTLI,     "brotli",      _BROTLI,    "Brotli",                  "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
-  { P_BZIP2,      "bzip2",       _BZIP2,     "Bzip2",                   "" },
-  { P_BZIP3,      "bzip3",       _BZIP3,     "Bzip3",                   "" },
-  { P_CHAMELEON,  "chameleon",   _CHAMELEON, "Chameleon",               "1,2" },
-  { P_CSC,        "csc",         _CSC,       "CSC",                     "1,2,3,4,5" },
-  { P_DENSITY,    "density",     _DENSITY,   "Density",                 "1,2,3" },
-  { P_DOBOZ,      "doboz",       _DOBOZ,     "Doboz",                   "" },  //crash on windows
-  { P_FASTLZ,     "fastlz",      _FASTLZ,    "FastLz",                  "1,2" },
-  { P_FLZMA2,     "flzma2",      _FLZMA2,    "Fast-lzma2",              "0,1,2,3,4,5,6,7,8,9,10,11/mt#" },
-  { P_GIPFELI,    "gipfeli",     _GIPFELI,   "Gipfeli",                 "" },
-  { P_GLZA,       "glza",        _GLZA,      "glza",                    "" },
-  { P_HEATSHRINK, "heatshrink",  _HEATSHRINK,"heatshrink",              "" },
-  { P_ISA_L,      "igzip",       _ISA_L,     "igzip",                   "0,1,2,3" },
-  { P_KANZI,      "kanzi",       _KANZI,     "kanzi",                   "0,1,2,3,4,5,6,7,8,9/T#" },
-  { P_LIBBSC,     "bsc",         _LIBBSC,    "bsc",                     "0,3,4,5,6,7,8/p:e#"},
-  { P_LIBBSCC,    "bscqlfc",     _LIBBSC,    "bsc",                     "1,2"},
-  { P_LIBDEFLATE, "libdeflate",  _LIBDEFLATE,"libdeflate",              "1,2,3,4,5,6,7,8,9,12/dg"},
-  { P_LIBLZF,     "lzf",         _LIBLZF,    "LibLZF",                  "" },
-  { P_LIBLZG,     "lzg",         _LIBLZG,    "LibLzg",                  "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
-  { P_LIZARD,     "lizard",      _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
-  { P_ZPAQ,       "zpaq",        _ZPAQ,      "Libzpaq",                 "0,1,2,3,4,5" },
-  { P_SLZ,        "slz",         _SLZ,       "libslz",                  "0,1,2,3,4,5,6,7,8,9" },
-  { P_LZ4,        "lz4",         _LZ4,       "Lz4",                     "0,1,2,3,4,5,6,7,8,9,10,11,12,16/MfsB#" },
-  { P_LZ4ULTRA,   "lz4ultra",    _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
-  { P_LZAV,       "lzav",        _LZAV,      "lzav", "" }, // https://github.com/avaneev/lza
-  { P_LZFSE,      "lzfse",       _LZFSE,     "lzfse",                   "" },  
-  { P_LZFSEA,     "lzfsea",      _LZFSEA,    "lzfsea",                  "" },
-  { P_LZJODY,     "lzjody",      _LZJODY,    "lzjody",                  "" },
-  { P_LZHAM,      "lzham",       _LZHAM,     "Lzham",                   "1,2,3,4/t#:fb#:x#" },
-  { P_LZLIB,      "lzlib",       _LZLIB,     "Lzlib",                   "1,2,3,4,5,6,7,8,9/d#:fb#" },
-  { P_LZMAT,      "lzmat",       _LZMAT,     "Lzmat",                   "" },
-  { P_LZMA,       "lzma",        _LZMA,      "Lzma",                    "0,1,2,3,4,5,6,7,8,9/d#:fb#:lp#:lc#:pb#:a#:mt#" },
-  { P_LZO1b,      "lzo1b",       _LZO,       "Lzo",                     "1,9,99,999" },
-  { P_LZO1c,      "lzo1c",       _LZO,       "Lzo",                     "1,9,99,999" },
-  { P_LZO1f,      "lzo1f",       _LZO,       "Lzo",                     "1,999" },
-  { P_LZO1x,      "lzo1x",       _LZO,       "Lzo",                     "1,11,12,15,999" },
-  { P_LZO1y,      "lzo1y",       _LZO,       "Lzo",                     "1,999" },
-  { P_LZO1z,      "lzo1z",       _LZO,       "Lzo",                     "999" },
-  { P_LZO2a,      "lzo2a",       _LZO,       "Lzo",                     "999" },
-  { P_LZOMA,      "lzoma",       _LZOMA,     "lzoma",                   "1,2,3,4,5,6,7,8,9" },
-  { P_LZSA,       "lzsa",        _LZSA,      "lzsa",                    "9/f#cr" },
-  { P_LZSSE2,     "lzsse2",      _LZSSE,     "lzsse",                   "1,2,3,4,5,6,7,8,9,12,16,17"},
-  { P_LZSSE4,     "lzsse4",      _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
-  { P_LZSSE8,     "lzsse8",      _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
-  { P_MINIZ,      "miniz",       _MINIZ,     "miniz zlib-replace",      "1,2,3,4,5,6,7,8,9" },
-  { P_MISA77,     "misa77",      _MISA77,    "misa77",                  "0,1,2,3" },
-  { P_MSCOMPRESS, "mscompress",  _MSCOMPRESS,"ms-compress",             "2,3,4" },
-  { P_NAKA,       "naka",        _NAKA,      "Nakamichi Washigan",      "" },
-  { P_PHAZ,       "phaz",        _PHAZ,      "PivCo-Huffman/zstd",      "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },  // level = zstd level
-  { P_PITHY,      "pithy",       _PITHY,     "Pithy",                   "0,1,2,3,4,5,6,7,8,9" },
-  { P_QUICKLZ,    "quicklz",     _QUICKLZ,   "Quicklz",                 "1,2,3" },
-  { P_QCOMPRESS32,"qcomp32",     _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
-  { P_QCOMPRESS64,"qcomp64",     _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
-  { P_PYSAP,      "sap",         _PYSAP,     "sap",                     "0,1,2" },
-  { P_SHRINKER,   "shrinker",    _SHRINKER,  "Shrinker",                "", 0, (1<<26) },
-  { P_SHOCO,      "shoco",       _SHOCO,     "Shoco",                   "" },
-  { P_SMAZ,       "smaz",        _SMAZ,      "smaz",                    "" },
-  { P_SNAPPY,     "snappy",      _SNAPPY,    "Snappy",                  ""  },
-  { P_SNAPPY_C,   "snappy_c",    _SNAPPY_C,  "Snappy-c",                "" },
-  { P_SMALLZ4,    "smallz4",     _SMALLZ4,   "SmalLz4",                 "6,7,8,9,10,11,12/z" },
-  { P_TCOBS,      "tcobs",       _TCOBS,     "tcobs",                   "" },
-  { P_TORNADO,    "tornado",     _TORNADO,   "Tornado",                 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
-  { P_UNISHOX2,   "unishox2",    _UNISHOX2,  "unishox2",                "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
-  { P_UNISHOX3,   "unishox3",    _UNISHOX3,  "unishox3",                "" },
-  { P_WFLZ,       "wflz",        _WFLZ,      "wfLZ",                    "1,2" },
-  { P_XPACK,      "xpack",       _XPACK,     "xpack",                   "1,2,3,4,5,6,7,8,9" },
-  { P_YALZ77,     "yalz77",      _YALZ77,    "Yalz77",                  "1,6,12" },
-  { P_YAPPY,      "yappy",       _YAPPY,     "Yappy",                   "" },//crash windows
-  { P_ZLIB,       "zlib",        _ZLIB,      "zlib",                    "1,2,3,4,5,6,7,8,9" },
-  { P_ZLIB_NG,    "zlib_ng",     _ZLIB_NG,   "zlib-ng",                 "1,2,3,4,5,6,7,8,9" },
-  { P_ZLING,      "zling",       _ZLING,     "Libzling",                "0,1,2,3,4" },
-  { P_ZOPFLI,     "zopfli",      _ZOPFLI,    "Zopfli",                  ""},
-  { P_ZSTD,       "zstd",        _ZSTD,      "ZSTD",                    "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13,-14,-15,-16,-17,-18,-19,-20,-21,-22/d#" },
-  { P_ZXC,        "zxc",         _ZXC,       "zxc",                     "1,2,3,4,5,6,7" },
-//------------------------------------------------------------------
-  { P_MCPY,         "imemcpy",     _MEMCPY,    "inline memcpy",           "" },
-  { P_LMCPY,        "memcpy",      _MEMCPY,    "library memcpy",          "" },
-  { P_AOM,          "AOM",         _AOM,       "AV1 Entropy coder",       ""},
-  { P_DAALA,        "Daala",       _DAALA,     "DAALA Entropy Coder",     ""},
-  { P_FPC,          "fpc",         _FPC,       "Fast Prefix Coder",       "0,8,9,10,11,12,16,32,48,63" },
-  { P_FREQTAB,      "freqtab",     _FREQTAB,   "FreqTable v2.Eugene shelwien", "" },
-  { P_FSC,          "fsc",         _FSC,       "Finite State Coder",      "", E_ANS },
-  { P_FSE,          "fse",         _FSE,       "Finite State Entropy",    "", E_ANS },
-  { P_FSEH,         "fsehuf",      _FSEHUF,    "Zstd Huffman Coding",     "", E_HUF },
-  { P_FPAQC,        "fpaqc",       _FPAQC,     "Asymmetric Binary Coder", "" },
-  { P_SHRC,         "fpaq0p_sh",   _SHRC,      "Bitwise RC",              "" },
-  { P_SHRCV,        "vecrc_sh",    _VECRC,     "Bitwise vector RC",       "" },
-  { P_FASTHF,       "FastHF",      _FASTHF,    "Fast HF",                 "" },
-  { P_FASTARI,      "FastAri",     _FASTARI,   "FastAri",                 "" },
-  { P_FASTAC,       "FastAC",      _FASTAC,    "Fast AC",                 "" },
-  { P_GANSR, 	    "rygrans",	   _GANS,      "Ryg rANS",                "", E_ANS },
-  { P_GANSW, 	    "rygranssse",  _GANS,      "Ryg rANS",                "", E_ANS },
-  { P_JAC,          "arith_static",_JAC,       "Range Coder/J.Bonfield",  "", E_ANS},
-  { P_FQZ0,         "fqz0",        _FQZ0,      "FQZ/PPMD Range Coder",    ""},
-  { P_MARLIN,       "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
-  { P_NIBRANS,      "nibrans",     _NIBRANS,   "nibrans",                 ""},
-  { P_OODLE,        "oodle",        _OODLE,     "Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
-  { P_PIVCOHUF,     "ph",          _PIVCOHUF,  "PivCo-Huffman",           "1,2" },  // 1=PH, 2=PHA (ANS-gated bitmaps)
-  { P_POLHF,        "polar",       _POLHF,     "Polar Codes",             "" },
-  { P_PPMDEC,       "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
+  { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                "0,1,2,3,4,5,6,7,8,9", 64*1024},
+  { P_BPC,           "bpc",           _BPC,       "bit plane compression",   "" },
+  { P_BRIEFLZ,       "brieflz",       _BRIEFLZ,   "BriefLz",                 "1,3,6,9" },
+  { P_BROTLI,        "brotli",        _BROTLI,    "Brotli",                  "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
+  { P_BZIP2,         "bzip2",         _BZIP2,     "Bzip2",                   "" },
+  { P_BZIP3,         "bzip3",         _BZIP3,     "Bzip3",                   "" },
+  
+  { P_CHAMELEON,     "chameleon",     _CHAMELEON, "Chameleon",               "1,2" },
+  { P_CSC,           "csc",           _CSC,       "CSC",                     "1,2,3,4,5" },
+  
+  { P_DENSITY,       "density",       _DENSITY,   "Density",                 "1,2,3" },
+  { P_DOBOZ,         "doboz",         _DOBOZ,     "Doboz",                   "" },  //crash on windows
+  
+  { P_FASTLZ,        "fastlz",        _FASTLZ,    "FastLz",                  "1,2" },
+  { P_FLZMA2,        "flzma2",        _FLZMA2,    "Fast-lzma2",              "0,1,2,3,4,5,6,7,8,9,10,11/mt#" },
+  
+  { P_GIPFELI,       "gipfeli",       _GIPFELI,   "Gipfeli",                 "" },
+  { P_GLZA,          "glza",          _GLZA,      "glza",                    "" },
+  
+  { P_HEATSHRINK,    "heatshrink",    _HEATSHRINK,"heatshrink",              "" },
+  
+  { P_ISA_L,         "igzip",         _ISA_L,     "igzip",                   "0,1,2,3" },
+  
+  { P_KANZI,         "kanzi",         _KANZI,     "kanzi",                   "0,1,2,3,4,5,6,7,8,9/T#" },
+  
+  { P_LIBBSC,        "bsc",           _LIBBSC,    "bsc",                     "0,3,4,5,6,7,8/p:e#"},
+  { P_LIBBSCC,       "bscqlfc",       _LIBBSC,    "bsc",                     "1,2"},
+  { P_LIBDEFLATE,    "libdeflate",    _LIBDEFLATE,"libdeflate",              "1,2,3,4,5,6,7,8,9,12/dg"},
+  { P_LIBLZF,        "lzf",           _LIBLZF,    "LibLZF",                  "" },
+  { P_LIBLZG,        "lzg",           _LIBLZG,    "LibLzg",                  "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
+  { P_LIZARD,        "lizard",        _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
+  { P_LZ4,           "lz4",           _LZ4,       "Lz4",                     "0,1,2,3,4,5,6,7,8,9,10,11,12,16/MfsB#" },
+  { P_LZ4ULTRA,      "lz4ultra",      _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
+  { P_LZAV,          "lzav",          _LZAV,      "lzav", "" }, // https://github.com/avaneev/lza
+  { P_LZFSE,         "lzfse",         _LZFSE,     "lzfse",                   "" },  
+  { P_LZFSEA,        "lzfsea",        _LZFSEA,    "lzfsea",                  "" },
+  { P_LZJODY,        "lzjody",        _LZJODY,    "lzjody",                  "" },
+  { P_LZHAM,         "lzham",         _LZHAM,     "Lzham",                   "1,2,3,4/t#:fb#:x#" },
+  { P_LZLIB,         "lzlib",         _LZLIB,     "Lzlib",                   "1,2,3,4,5,6,7,8,9/d#:fb#" },
+  { P_LZMAT,         "lzmat",         _LZMAT,     "Lzmat",                   "" },
+  { P_LZMA,          "lzma",          _LZMA,      "Lzma",                    "0,1,2,3,4,5,6,7,8,9/d#:fb#:lp#:lc#:pb#:a#:mt#" },
+  { P_LZO1b,         "lzo1b",         _LZO,       "Lzo",                     "1,9,99,999" },
+  { P_LZO1c,         "lzo1c",         _LZO,       "Lzo",                     "1,9,99,999" },
+  { P_LZO1f,         "lzo1f",         _LZO,       "Lzo",                     "1,999" },
+  { P_LZO1x,         "lzo1x",         _LZO,       "Lzo",                     "1,11,12,15,999" },
+  { P_LZO1y,         "lzo1y",         _LZO,       "Lzo",                     "1,999" },
+  { P_LZO1z,         "lzo1z",         _LZO,       "Lzo",                     "999" },
+  { P_LZO2a,         "lzo2a",         _LZO,       "Lzo",                     "999" },
+  { P_LZOMA,         "lzoma",         _LZOMA,     "lzoma",                   "1,2,3,4,5,6,7,8,9" },
+  { P_LZSA,          "lzsa",          _LZSA,      "lzsa",                    "9/f#cr" },
+  { P_LZSSE2,        "lzsse2",        _LZSSE,     "lzsse",                   "1,2,3,4,5,6,7,8,9,12,16,17"},
+  { P_LZSSE4,        "lzsse4",        _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
+  { P_LZSSE8,        "lzsse8",        _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
 
+  { P_MEMLZ,         "memlz",         _MEMLZ,     "memlz",                   "" },
+  { P_MINIZ,         "miniz",         _MINIZ,     "miniz zlib-replace",      "1,2,3,4,5,6,7,8,9" },
+  { P_MISA77,        "misa77",        _MISA77,    "misa77",                  "0,1,2,3" },
+  { P_MSCOMPRESS,    "mscompress",    _MSCOMPRESS,"ms-compress",             "2,3,4" },
+ 
+  { P_NAKA,          "naka",          _NAKA,      "Nakamichi Washigan",      "" },
+
+  { P_OPENZL_U8,     "openzl_u8",     _OPENZL,    "openzl u8",          "" },
+  { P_OPENZL_I8,     "openzl_i8",     _OPENZL,    "openzl i8",       "" },
+  { P_OPENZL_U16,    "openzl_u16",    _OPENZL,    "openzl u16",       "" },
+  { P_OPENZL_I16,    "openzl_i16",    _OPENZL,    "openzl i16",       "" },
+  { P_OPENZL_U32,    "openzl_u32",    _OPENZL,    "openzl u32",       "" },
+  { P_OPENZL_I32,    "openzl_i32",    _OPENZL,    "openzl i32",       "" },
+  { P_OPENZL_U64,    "openzl_u64",    _OPENZL,    "openzl u64",       "" },
+  { P_OPENZL_I64,    "openzl_i64",    _OPENZL,    "openzl i64",       "" },
+  { P_OPENZL_SERIAL, "openzl_serial", _OPENZL,    "openzl serial",    "" },
+  { P_OPENZL_GENERIC,"openzl_generic",_OPENZL,    "openzl generic",   "" },
+  { P_OPENZL_ZSTD,   "openzl_zstd",   _OPENZL,    "openzl zstd",      "-99,-90,-80,-70,-60,-50,-40,-30,-20,-10,-8,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,8,10,12,14,16,18,20,22" },
+  { P_OPENZL_LZ4,    "openzl_lz4",    _OPENZL,    "openzl lz4",       "-99,-90,-80,-70,-60,-50,-40,-30,-20,-10,-8,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8,9,10,11,12" }, 
+
+  { P_PHAZ,          "phaz",          _PHAZ,      "PivCo-Huffman/zstd",      "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },  // level = zstd level
+  { P_PITHY,         "pithy",         _PITHY,     "Pithy",                   "0,1,2,3,4,5,6,7,8,9" }, 
+  { P_PYSAP,         "sap",           _PYSAP,     "sap",                     "0,1,2" },
+  
+  { P_QUICKLZ,       "quicklz",       _QUICKLZ,   "Quicklz",                 "1,2,3" },
+  { P_QCOMPRESS32,   "qcomp32",       _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
+  { P_QCOMPRESS64,   "qcomp64",       _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
+  
+  { P_SKIM,          "skim",          _SKIM,      "skim",                    ""},
+  { P_SHRINKER,      "shrinker",      _SHRINKER,  "Shrinker",                "", 0, (1<<26) },
+  { P_SHOCO,         "shoco",         _SHOCO,     "Shoco",                   "" },
+  { P_SLZ,           "slz",           _SLZ,       "libslz",                  "0,1,2,3,4,5,6,7,8,9" },
+  { P_SMAZ,          "smaz",          _SMAZ,      "smaz",                    "" },
+  { P_SNAPPY,        "snappy",        _SNAPPY,    "Snappy",                  ""  },
+  { P_SNAPPY_C,      "snappy_c",      _SNAPPY_C,  "Snappy-c",                "" },
+  { P_SMALLZ4,       "smallz4",       _SMALLZ4,   "SmalLz4",                 "6,7,8,9,10,11,12/z" },
+  
+  { P_TAMP,          "tamp",          _TAMP,      "tamp",                    "8,9,10,11,12,13,14,15" },
+  { P_TCOBS,         "tcobs",         _TCOBS,     "tcobs",                   "" },
+  { P_TORNADO,       "tornado",       _TORNADO,   "Tornado",                 "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
+  
+  { P_UNISHOX2,      "unishox2",      _UNISHOX2,  "unishox2",                "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
+  { P_UNISHOX3,      "unishox3",      _UNISHOX3,  "unishox3",                "" },
+  
+  { P_WFLZ,          "wflz",          _WFLZ,      "wfLZ",                    "1,2" },
+  
+  { P_XPACK,         "xpack",         _XPACK,     "xpack",                   "1,2,3,4,5,6,7,8,9" },
+  
+  { P_YALZ77,        "yalz77",        _YALZ77,    "Yalz77",                  "1,6,12" },
+  { P_YAPPY,         "yappy",         _YAPPY,     "Yappy",                   "" },//crash windows
+  
+  { P_ZLIB,          "zlib",          _ZLIB,      "zlib",                    "1,2,3,4,5,6,7,8,9" },
+  { P_ZLIB_NG,       "zlib_ng",       _ZLIB_NG,   "zlib-ng",                 "1,2,3,4,5,6,7,8,9" },
+  { P_ZLING,         "zling",         _ZLING,     "Libzling",                "0,1,2,3,4" },
+  { P_ZOPFLI,        "zopfli",        _ZOPFLI,    "Zopfli",                  ""},
+  { P_ZSTD,          "zstd",          _ZSTD,      "ZSTD",                    "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13,-14,-15,-16,-17,-18,-19,-20,-21,-22/d#" },
+  { P_ZXC,           "zxc",           _ZXC,       "zxc",                     "1,2,3,4,5,6,7" },
+  { P_ZPAQ,          "zpaq",          _ZPAQ,      "Libzpaq",                 "0,1,2,3,4,5" },
+
+//------------------------------------------------------------------
+  { P_MCPY,          "imemcpy",     _MEMCPY,    "inline memcpy",           "" },
+  { P_LMCPY,         "memcpy",      _MEMCPY,    "library memcpy",          "" },
+  { P_AOM,           "AOM",         _AOM,       "AV1 Entropy coder",       ""},
+  { P_DAALA,         "Daala",       _DAALA,     "DAALA Entropy Coder",     ""},
+  { P_FPC,           "fpc",         _FPC,       "Fast Prefix Coder",       "0,8,9,10,11,12,16,32,48,63" },
+  { P_FREQTAB,       "freqtab",     _FREQTAB,   "FreqTable v2.Eugene shelwien", "" },
+  { P_FSC,           "fsc",         _FSC,       "Finite State Coder",      "", E_ANS },
+  { P_FSE,           "fse",         _FSE,       "Finite State Entropy",    "", E_ANS },
+  { P_FSEH,          "fsehuf",      _FSEHUF,    "Zstd Huffman Coding",     "", E_HUF },
+  { P_FPAQC,         "fpaqc",       _FPAQC,     "Asymmetric Binary Coder", "" },
+  { P_SHRC,          "fpaq0p_sh",   _SHRC,      "Bitwise RC",              "" },
+  { P_SHRCV,         "vecrc_sh",    _VECRC,     "Bitwise vector RC",       "" },
+  { P_FASTHF,        "FastHF",      _FASTHF,    "Fast HF",                 "" },
+  { P_FASTARI,       "FastAri",     _FASTARI,   "FastAri",                 "" },
+  { P_FASTAC,        "FastAC",      _FASTAC,    "Fast AC",                 "" },
+  { P_GANSR, 	     "rygrans",	   _GANS,      "Ryg rANS",                "", E_ANS },
+  { P_GANSW, 	     "rygranssse",  _GANS,      "Ryg rANS",                "", E_ANS },
+  { P_JAC,           "arith_static",_JAC,       "Range Coder/J.Bonfield",  "", E_ANS},
+  { P_FQZ0,          "fqz0",        _FQZ0,      "FQZ/PPMD Range Coder",    ""},
+  { P_MARLIN,        "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
+  { P_NIBRANS,       "nibrans",     _NIBRANS,   "nibrans",                 ""},
+  { P_OODLE,         "oodle",        _OODLE,     "Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
+  { P_PIVCOHUF,      "ph",          _PIVCOHUF,  "PivCo-Huffman",           "1,2" },  // 1=PH, 2=PHA (ANS-gated bitmaps)
+  { P_POLHF,         "polar",       _POLHF,     "Polar Codes",             "" },
+  { P_PPMDEC,        "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
   { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",             "" },
   { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",           "", E_ANS },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",              "" },
@@ -1363,6 +1567,7 @@ struct plugs plugs[] = {
   { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,20,56/e#s" }, 
   { P_ZLIBH,        "zlibh",       _ZLIB,      "zlib Huffmann",           "8,9,10,11,12,13,14,15,16,32" },
   { P_ZRLE,         "zlibrle",     _ZLIB,      "zlib rle",                "" },
+
   //---- Encoding ------
   { P_RLES,         "srle",        _TURBORLE,  "TurboRLE ESC",            "0,8,16,32,64" },
   { P_RLET,         "trle",        _TURBORLE,  "TurboRLE",                "" },
@@ -1375,7 +1580,8 @@ struct plugs plugs[] = {
   { P_HRLEMMTF,     "hrlemmtf",    _HRLE,      "Hypersonic-RLE rle8_mmtf128",           "128" },
   /*{ P_HRLEXMMTF,    "hrlexmmtf",   _HRLE,      "8 bit RLE",               "128,256" },
   { P_HRLEU,        "hrleu",       _HRLE,      "8 bit RLE",               "8/s:single)" },*/
- //----- Transform -----
+
+  //----- Transform -----
   { P_DIVBWT,       "divbwt",      _DIVBWT,    "bwt libdivsufsort","" },
   { P_LIBBSCBWT,    "bscbwt",      _LIBBSC,    "bwt libbsc",              "" },
   { P_ST,           "st",          _LIBBSC,    "st  libbsc",              "3,4,5,6,7,8" },
@@ -1435,15 +1641,29 @@ static ZSTD_DDict *ddictPtr;
 static char _workmem[1<<16],*workmem=_workmem;
 static int state_size,dstate_size;
 static size_t workmemsize;
+
 #if _ZXC
 static zxc_cctx *zxc_cctx_ptr = NULL;
 static zxc_dctx *zxc_dctx_ptr = NULL;
+#endif
+
+#if _SKIM
+  skim_encoder_t* skim_encoder;
+  skim_decoder_t* skim_decoder;
 #endif
 
 int codini(size_t insize, int codec, int lev, char *prm) {
   workmemsize = 0;
 
   switch(codec) {
+      #if _BRIEFLZ
+    case P_BRIEFLZ: workmemsize = blz_workmem_size_level(insize, lev); break;
+      #endif
+
+      #if _CHAMELEON
+    case P_CHAMELEON: workmemsize = sizeof(struct Chameleon); break;
+      #endif
+
       #if _C_BLOSC2
     case P_C_BLOSC2: blosc2_init(); blosc2_set_nthreads(1);break;
       #endif
@@ -1477,9 +1697,10 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_LZO1c: P_LZO1f: P_LZO1x: P_LZO1y: P_LZO1z: P_LZO2a: lzo_init(); workmemsize = LZO1X_MEM_COMPRESS; break;
       #endif
 
-      #if _CHAMELEON
-    case P_CHAMELEON: workmemsize = sizeof(struct Chameleon); break;
+      #if _MEMLZ
+    case P_MEMLZ: workmemsize = sizeof(memlz_state); break;
       #endif
+          
       #if _QCOMPRESS
     case P_QCOMPRESS32:
     case P_QCOMPRESS64:
@@ -1512,6 +1733,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #endif 
       break;
       #endif
+      
       #if _OODLE
     case P_OODLE: 
       char oodle[65];
@@ -1556,20 +1778,12 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       break;
       #endif
 
-      #if _BRIEFLZ
-    case P_BRIEFLZ: workmemsize = blz_workmem_size_level(insize, lev); break;
-      #endif
-
       #if _SNAPPY_C
     case P_SNAPPY_C: snappy_init_env(&env); break;
       #endif
 
-      #if _WFLZ
-    case P_WFLZ: workmemsize = wfLZ_GetWorkMemSize(); break;
-      #endif
-
-      #if _YAPPY
-    case P_YAPPY: YappyFillTables(); break;
+      #if _TAMP
+    case P_TAMP: workmemsize = 1 << lev; break;
       #endif
 
       #if _LIBBSC
@@ -1577,16 +1791,29 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_LIBBSC: case P_LIBBSCC: bsc_init(BSC_MODE); bsc_st_init(BSC_MODE); break;
       #endif
 
+      #if _SKIM
+    case P_SKIM:
+      skim_encoder = skim_encoder_create();
+      skim_decoder = skim_decoder_create();
+      break;
+      #endif
+
       #if _SLZ
-         slz_make_crc_table();
-         slz_prepare_dist_table();
+    case P_SLZ:
+      slz_make_crc_table();
+      slz_prepare_dist_table();
       #endif
 
       #if _SSERC
     case P_SSERC: if(!ssercini) sserangecoder::vrange_init(),ssercini++; break;
       #endif
-      #if _FSEHUF
-//    case P_FSEH: workmemsize = max(4096*sizeof(unsigned), workmemsize); break;
+      
+      #if _WFLZ
+    case P_WFLZ: workmemsize = wfLZ_GetWorkMemSize(); break;
+      #endif
+
+      #if _YAPPY
+    case P_YAPPY: YappyFillTables(); break;
       #endif
 
       #if _ZXC
@@ -1599,7 +1826,10 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #ifdef _LZTURBO
     #include "../dev/x/beplug0.h"
       #endif
-  }
+       #if _FSEHUF
+//    case P_FSEH: workmemsize = max(4096*sizeof(unsigned), workmemsize); break;
+      #endif
+ }
   if(!workmemsize) return 0;
   if(workmemsize > sizeof(_workmem) && !(workmem = (char *)malloc(workmemsize)) ) {
     fprintf(stderr, "Codini: malloc error. workmemsize=%d\n", workmemsize);
@@ -1643,17 +1873,26 @@ void codexit(int codec) {
       #endif
     free(workmem/*, workmemsize*/);
     workmem = _workmem;
+  } else {
+      #if _SNAPPY_C
+    if(codec == P_SNAPPY_C)
+      snappy_free_env(&env);
+      #endif
+
+      #if _SKIM
+    if(codec == P_SKIM) {
+      if(skim_encoder) skim_encoder_destroy(skim_encoder); skim_encoder = NULL;
+      if(skim_decoder) skim_decoder_destroy(skim_decoder); skim_decoder = NULL;
+    }  
+      #endif
+    
+      #if _ZXC
+    if(codec == P_ZXC) {
+      zxc_free_cctx(zxc_cctx_ptr); zxc_cctx_ptr = NULL;
+      zxc_free_dctx(zxc_dctx_ptr); zxc_dctx_ptr = NULL;
+    }
+      #endif
   }
-    #if _SNAPPY_C
-  if(codec == P_SNAPPY_C)
-    snappy_free_env(&env);
-    #endif
-    #if _ZXC
-  if(codec == P_ZXC) {
-    zxc_free_cctx(zxc_cctx_ptr); zxc_cctx_ptr = NULL;
-    zxc_free_dctx(zxc_dctx_ptr); zxc_dctx_ptr = NULL;
-  }
-    #endif
 }
 
 int brotlidic,brotlictx,brotlirep;
@@ -1959,6 +2198,14 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_LIBLZG: { lzg_encoder_config_t cfg; LZG_InitEncoderConfig(&cfg); cfg.fast = LZG_TRUE; cfg.level = lev; return LZG_Encode(in, inlen, out, outsize, &cfg); }
       #endif
 
+      #if _MEMLZ
+    case P_MEMLZ: memlz_reset((memlz_state*)workmem); return memlz_stream_compress(out, in, inlen, (memlz_state*)workmem);
+      #endif
+
+      #if _SKIM
+    case P_SKIM: 
+      #endif
+      
       #if _SLZ
     case P_SLZ: { if(lev > 7) lev = 7;
       unsigned blk = 16384 << lev;
@@ -2059,6 +2306,21 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_NAKA:    return NakaCompress( (char *)out, (char *)in, inlen);
        #endif
  
+      #if _OPENZL
+    case P_OPENZL_U8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outsize, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_I8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outsize, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_U16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint16_t>( inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outsize, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_I16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint16_t>( inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outsize, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_U32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint32_t>( inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outsize, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_I32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint32_t>( inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outsize, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_U64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint64_t>( inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outsize, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_I64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint64_t>( inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outsize, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_SERIAL: { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_serial( inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outsize, p); _openzl_deinit(p); return rc;} break; 
+    case P_OPENZL_GENERIC:{ char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_generic(inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outsize, p); _openzl_deinit(p); return rc;} break;
+    case P_OPENZL_ZSTD:   { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_zstd(   inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outsize, p); _openzl_deinit(p); return rc;} break;
+    case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_lz4(    inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outsize, p); _openzl_deinit(p); return rc;} break;
+      #endif
+
       #if _PITHY
     case P_PITHY: return pithy_Compress((const char *)in, inlen, (char *)out, outsize, lev);
       #endif
@@ -2099,7 +2361,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _SHOCO
-    case P_SHOCO:     return shoco_compress((const char *)in, inlen, (char *)out, outsize);
+    case P_SHOCO:    return shoco_compress((const char *)in, inlen, (char *)out, outsize);
       #endif
 
       #if _SMAZ
@@ -2107,7 +2369,11 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _SHRINKER
-    case P_SHRINKER:     return shrinker_compress((char *)in, (char *)out, inlen);
+    case P_SHRINKER: return shrinker_compress((char *)in, (char *)out, inlen);
+      #endif
+
+      #if _SKIM
+    case P_SKIM:  skim_encoder_reset(skim_encoder);  return skim_encoder_compress(skim_encoder, (const uint8_t*)in, inlen, (uint8_t*)out);
       #endif
 
       #if _SNAPPY
@@ -2120,6 +2386,20 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _SNAPPY_C
     case P_SNAPPY_C:   { size_t outlen=outsize; int rc = snappy_compress(&env, (const char *)in, inlen, (char *)out, &outlen); return outlen;}
+      #endif
+
+      #if _TAMP
+    case P_TAMP: { int64_t rc = 0;
+      TampConf conf = {
+         .window  = (uint16_t)lev, // Describes the size of the decompression buffer in bits. A 10-bit window represents a 1024-byte buffer. Must be in range [8, 15], representing [256, 32678] byte windows.
+         .literal = 8,
+         .use_custom_dictionary = false
+      };
+      TampCompressor compressor;
+      tamp_compressor_init(&compressor, &conf, (unsigned char *)workmem);
+      tamp_compressor_compress_and_flush(&compressor, (unsigned char*)out, outsize, (size_t *)&rc, (unsigned char *)in, inlen, NULL, false);
+      return rc;
+    } break;
       #endif
 
       #if _TCOBS
@@ -2756,6 +3036,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_ZPAQ: { zin = in; zin_ = in+inlen; zout = out; libzpaq::decompress(&zmemin, &zmemout); return zin - in; }
       #endif
 
+      #if _MEMLZ
+    case P_MEMLZ: memlz_reset((memlz_state*)workmem); return (int64_t)memlz_stream_decompress(out, in, (memlz_state*)workmem);
+      #endif
+
       #if _LZHAM
     case P_LZHAM: { lzham_decompress_params p; memset(&p, 0, sizeof(p)); p.m_struct_size = sizeof(p);
       p.m_dict_size_log2    = in[0];
@@ -2809,6 +3093,22 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #if _NAKA
     case P_NAKA:  return NakaDecompress((char *)out, (char *)in, inlen);
       #endif
+      
+      #if _OPENZL
+    case P_OPENZL_U8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress(in, inlen, out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_I8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog);int64_t rc = _openzl_decompress(in, inlen, out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_U16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress(in, inlen, out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_I16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog);int64_t rc = _openzl_decompress(in, inlen, out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_U32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress(in, inlen, out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_I32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress(in, inlen, out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_U64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress(in, inlen, out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_I64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog);int64_t rc = _openzl_decompress(in, inlen, out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_SERIAL: { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_serial( inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outlen, p); _openzl_deinit(p); return rc;} break; 
+    case P_OPENZL_GENERIC:{ char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_generic(inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outlen, p); _openzl_deinit(p); return rc;} break;
+    case P_OPENZL_ZSTD:   { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_zstd(   inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outlen, p); _openzl_deinit(p); return rc;} break;
+    case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_lz4(     inlen, lev, windowLog); int64_t rc = _openzl_compress(in, inlen, out, outlen, p); _openzl_deinit(p); return rc;} break;
+      #endif
+      
       #if _PITHY
     case P_PITHY: return pithy_Decompress((const char *)in, inlen, (char *)out, outlen);
       #endif
@@ -2888,6 +3188,14 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_SHRINKER:    shrinker_decompress(in, out, outlen); break;
       #endif
 
+      #if _SKIM
+    case P_SKIM: {
+      skim_decoder_reset(skim_decoder); 
+      size_t consumed = skim_decoder_decompress(skim_decoder, (const uint8_t*)in, inlen, (uint8_t*)out, outlen);
+      if(!consumed) return 0;
+      return skim_decoder_exact_output_length((const uint8_t*)in, inlen);
+      #endif
+
       #if _SNAPPY
         #if __cplusplus
     case P_SNAPPY: snappy::RawUncompress((char*)in, inlen, (char*)out);  break;
@@ -2900,6 +3208,17 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_SNAPPY_C: return snappy_uncompress((const char *)in, inlen, (char *)out);
       #endif
 
+      #if _TAMP
+    case P_TAMP: { int64_t rc = 0;
+      TampConf conf;
+      TampDecompressor decompressor;
+      size_t compressed_consumed_size;
+      tamp_decompressor_init(&decompressor, NULL, (unsigned char *)workmem, lev);
+      tamp_decompressor_decompress(&decompressor, (unsigned char *)out, outlen, (size_t *)&rc, (unsigned char *)in, inlen, NULL );
+      return rc;
+    } break;
+      #endif
+      
       #if _TCOBS
     case P_TCOBS:     return TCOBSDecode( out, outlen, in, inlen);
       #endif
