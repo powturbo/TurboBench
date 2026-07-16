@@ -1482,8 +1482,8 @@ struct plugs plugs[] = {
  
   { P_NAKA,          "naka",          _NAKA,      "Nakamichi Washigan",      "" },
 
-  { P_OPENZL_U8,     "openzl_u8",     _OPENZL,    "openzl u8",          "" },
-  { P_OPENZL_I8,     "openzl_i8",     _OPENZL,    "openzl i8",       "" },
+  { P_OPENZL_U8,     "openzl_u8",     _OPENZL,    "openzl u8",        "" },
+  { P_OPENZL_I8,     "openzl_i8",     _OPENZL,    "openzl i8",        "" },
   { P_OPENZL_U16,    "openzl_u16",    _OPENZL,    "openzl u16",       "" },
   { P_OPENZL_I16,    "openzl_i16",    _OPENZL,    "openzl i16",       "" },
   { P_OPENZL_U32,    "openzl_u32",    _OPENZL,    "openzl u32",       "" },
@@ -1550,14 +1550,14 @@ struct plugs plugs[] = {
   { P_FASTHF,        "FastHF",      _FASTHF,    "Fast HF",                 "" },
   { P_FASTARI,       "FastAri",     _FASTARI,   "FastAri",                 "" },
   { P_FASTAC,        "FastAC",      _FASTAC,    "Fast AC",                 "" },
-  { P_GANSR, 	     "rygrans",	   _GANS,      "Ryg rANS",                "", E_ANS },
+  { P_GANSR, 	     "rygrans",	    _GANS,      "Ryg rANS",                "", E_ANS },
   { P_GANSW, 	     "rygranssse",  _GANS,      "Ryg rANS",                "", E_ANS },
   { P_JAC,           "arith_static",_JAC,       "Range Coder/J.Bonfield",  "", E_ANS},
   { P_FQZ0,          "fqz0",        _FQZ0,      "FQZ/PPMD Range Coder",    ""},
   { P_MARLIN,        "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
   { P_NIBRANS,       "nibrans",     _NIBRANS,   "nibrans",                 ""},
-  { P_OODLE,         "oodle",        _OODLE,     "Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
-  { P_PIVCOHUF,      "ph",          _PIVCOHUF,  "PivCo-Huffman",           "1,2" },  // 1=PH, 2=PHA (ANS-gated bitmaps)
+  { P_OODLE,         "oodle",       _OODLE,     "Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
+  { P_PIVCOHUF,      "pivco",       _PIVCOHUF,  "PivCo-Huffman",           "1,2" },  // 1=PH, 2=PHA (ANS-gated bitmaps)
   { P_POLHF,         "polar",       _POLHF,     "Polar Codes",             "" },
   { P_PPMDEC,        "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
   { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",             "" },
@@ -2807,8 +2807,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _PIVCOHUF
     case P_PIVCOHUF: { size_t ol = outsize;   /* lev 1=PH, 2=PHA */
-                 if(pivcohuf_compress_ex(in, inlen, out, &ol, lev>=2) != PIVCOHUF_OK) return 0;
-                 return (unsigned)ol; }
+      if(pivcohuf_compress_ex(in, inlen, out, &ol, lev) != PIVCOHUF_OK) return 0;
+      return (unsigned)ol; 
+    }
       #endif
       #if _PHAZ
     case P_PHAZ: return (unsigned)phaz_compress(in, inlen, out, outsize, lev, 0);  /* lev = zstd level */
