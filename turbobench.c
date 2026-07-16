@@ -1284,7 +1284,7 @@ unsigned long long plugfile(struct plug *plug, char *finame, unsigned long long 
 }
 
 void usage(char *pgm) {
-  fprintf(stderr, "\nTurboBench Copyright (c) 2013-2023 Powturbo %s\n", __DATE__);
+  fprintf(stderr, "\nTurboBench Copyright (c) 2013-2026 Powturbo %s\n", __DATE__);
   fprintf(stderr, "Usage: %s [options] [file]\n", pgm);
   fprintf(stderr, " -eS      S = compressors/groups separated by '/' Parameter can be specified after ','\n");
   fprintf(stderr, " -b#s     # = blocksize (default filesize). max=1GB\n");
@@ -1296,13 +1296,12 @@ void usage(char *pgm) {
   fprintf(stderr, " -i#/-j#  # = Minimum  de/compression iterations per run (default=auto)\n");
   fprintf(stderr, " -I#/-J#  # = Number of de/compression runs (default=3)\n");
   fprintf(stderr, " -t#      # = min. time in seconds per run.(default=2sec)\n");
-  fprintf(stderr, " -S#      Sleep # min. after 2 min. processing mimizing CPU trottling\n");
-  fprintf(stderr, " -k#      Repeat all benchmarks # times (default=3). -k0 = test mode\n");
+  fprintf(stderr, " -S#      Sleep # min. after 2 min. processing mimizing CPU throttling\n");
   fprintf(stderr, " -K#t     Max. time limit for all benchmarks (default 24h)\n");
   fprintf(stderr, "          t = M:millisecond s:second m:minute h:hour. ex. 3h\n");
   fprintf(stderr, " -D       No process real-time priority setting\n");
   fprintf(stderr, "Check:\n");
-  fprintf(stderr, " -C#      #=0 compress only, #1=No check #=2 ignore errors, #=3 exit on error, #=4 crash on error\n");
+  fprintf(stderr, " -C#      #=0 compress only, #1=No check #=2 ignore errors, #=3 exit on error, #=4 abort on error\n");
   fprintf(stderr, " -f#      check reading/writing outside bounds: #=1 compress, #=2 decompress, #3:both\n");
   fprintf(stderr, "Output:\n");
   fprintf(stderr, " -v#      # = verbosity 0..3 (default 1)\n");
