@@ -4,7 +4,7 @@
 <p align="center">
   <img
     alt="TurboBench Logo" src="turbobench_/TurboBench.jpeg"
-    width="500px"
+    width="400px"
   >
 </p>
 
