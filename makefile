@@ -43,6 +43,7 @@ endif
 
 ifndef CROSS
 else
+
 ifeq ($(OS), Windows)
 CP=$(CROSS)-unknown-elf
 else
@@ -61,7 +62,7 @@ else
 CC:=$(CP)-gcc
 CX=$(CC)
 endif
-CROSS=$(CC)
+#CROSS:=$(CC)
 endif
 CHOST=$(CROSS)
 
@@ -172,7 +173,7 @@ else
   ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
   ifdef CROSS
 isa-l/bin/isa-l.a: $(ISAL_SRCS)
-	export CC=$(CROSS) && cd isa-l && $(MAKE) -f Makefile.unx host_cpu=$(CHOST)
+	export CC=$(CROSS)-linux-gnu-gcc && cd isa-l && $(MAKE) -f Makefile.unx host_cpu=$(CHOST)
   else
 isa-l/bin/isa-l.a: $(ISAL_SRCS)
 	cd isa-l && $(MAKE) -f Makefile.unx
@@ -256,19 +257,34 @@ LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
 OB+= LZSSE/lzsse2/lzsse2.o LZSSE/lzsse4/lzsse4.o LZSSE/lzsse8/lzsse8.o
 endif
 
-ZLIB_NG :=
+ifneq ($(wildcard memlz/.),)
+CXXFLAGS+=-D_MEMLZ
+endif
+
+ifneq ($(wildcard skim/.),)
+CXXFLAGS+=-D_MEMLZ
+LDFLAGS += skim/libskim.a
+endif
+ 
+ifneq ($(wildcard tamp/.),)
+CXXFLAGS+=-D_TAMP
+TAMP_DIR = tamp/tamp/_c_src/tamp
+OB += $(TAMP_DIR)/common.o $(TAMP_DIR)/compressor.o $(TAMP_DIR)/decompressor.o
+endif
+
+ZLIB_NG_LIB :=
 ifneq ($(wildcard zlib-ng/.),)
 CXXFLAGS += -D_ZLIB_NG
 ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS
 zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
-	export CC=$(CROSS) && cd zlib-ng && ./configure && $(MAKE)
+	export CC=$(CROSS)-linux-gnu-gcc && cd zlib-ng && ./configure && $(MAKE)
 else
 zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
 	cd zlib-ng && ./configure && $(MAKE)
 endif
-ZLIB_NG = zlib-ng/libz-ng.a
-LDFLAGS += $(ZLIB_NG)
+ZLIB_NG_LIB = zlib-ng/libz-ng.a
+LDFLAGS += $(ZLIB_NG_LIB)
 endif
 
 ifneq ($(wildcard lzo/.),)
@@ -307,9 +323,24 @@ ZD=zlib/
 OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
 endif
 
-#NOT COMPLETE
+OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
-CXXFLAGS+=-D_OPENZL
+CXXFLAGS += -D_OPENZL -Iopenzl/include
+OPENZL_SRCS := $(shell find openzl -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+ifdef CROSS
+openzl/libopenzl.a: $(OPENZL_SRCS)
+	export CC=$(CROSS)-linux-gnu-gcc && cd openzl && $(MAKE) lib
+else
+openzl/libopenzl.a: $(OPENZL_SRCS)
+	cd openzl && $(MAKE) lib
+endif
+OPENZL_LIB = openzl/libopenzl.a
+LDFLAGS += $(OPENZL_LIB)
+endif
+
+ifneq ($(wildcard openzl_compile/.),)
+CXXFLAGS+=-D_OPENZL -Izstd/lib -Ilz4/lib -Iopenzl/include -Iopenzl/src
+CFLAGS+=-Izstd/lib -Ilz4/lib -Iopenzl/include -Iopenzl/src
 ZSTD_SRCS := $(wildcard codecs/*.c) \
 $(wildcard codecs/bitSplit/*.c) \
 $(wildcard codecs/bitpack/*.c) \
@@ -898,7 +929,7 @@ endif
 
 OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugin.o
 
-plugin.o: plugin.cc $(ZLIB_NG) $(ISAL_LIB)
+plugin.o: plugin.cc $(ZLIB_NG_LIB) $(ISAL_LIB) $(OPENZL_LIB)
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
 
 
