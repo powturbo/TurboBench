@@ -106,6 +106,3 @@
 [submodule "memlz"]
 	path = memlz
 	url = https://github.com/rrrlasse/memlz.git
-[submodule "libslz"]
-	path = libslz
-	url = https://github.com/wtarreau/libslz.git
