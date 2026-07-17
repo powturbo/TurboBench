@@ -1557,7 +1557,7 @@ struct plugs plugs[] = {
   { P_MARLIN,        "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
   { P_NIBRANS,       "nibrans",     _NIBRANS,   "nibrans",                 ""},
   { P_OODLE,         "oodle",       _OODLE,     "Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
-  { P_PIVCOHUF,      "pivco",       _PIVCOHUF,  "PivCo-Huffman",           "1,2" },  // 1=PH, 2=PHA (ANS-gated bitmaps)
+  { P_PIVCOHUF,      "pivco",       _PIVCOHUF,  "PivCo-Huffman",           "0,1" },  // 0=PH, 1=PHA (ANS-gated bitmaps)
   { P_POLHF,         "polar",       _POLHF,     "Polar Codes",             "" },
   { P_PPMDEC,        "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
   { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",             "" },
@@ -2806,7 +2806,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _PIVCOHUF
-    case P_PIVCOHUF: { size_t ol = outsize;   /* lev 1=PH, 2=PHA */
+    case P_PIVCOHUF: { size_t ol = outsize;   /* lev 0=PH, 1=PHA */
       if(pivcohuf_compress_ex(in, inlen, out, &ol, lev) != PIVCOHUF_OK) return 0;
       return (unsigned)ol; 
     }
@@ -3607,8 +3607,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _PIVCOHUF
     case P_PIVCOHUF: { size_t ol = outlen;
-                 if(pivcohuf_decompress(in, inlen, out, &ol) != PIVCOHUF_OK) return 0;
-                 return (unsigned)ol; }
+      if(pivcohuf_decompress(in, inlen, out, &ol) != PIVCOHUF_OK) return 0;
+      return (unsigned)ol; 
+    }
       #endif
       #if _PHAZ
     case P_PHAZ: return (unsigned)phaz_decompress(in, inlen, out, outlen, 0);
