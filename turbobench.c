@@ -103,6 +103,11 @@ int memcheck(unsigned char *in, unsigned n, unsigned char *cpy, int cmp, char *f
   return 0;
 }
 //------------------------------- malloc ------------------------------------------------
+void vmemset(char *p, char c, size_t size) {
+  volatile char _c = c;
+  for(size_t i = 0; i < size; i++) ((char * volatile)p)[i] = _c;
+}
+
 #define USE_MMAP
   #if __WORDSIZE == 64
 #define MAP_BITS 30
@@ -1467,10 +1472,11 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     die("malloc error in size=%u\n", insizem);    
   
   unsigned char *_cpy = _in, *out = (unsigned char*)_valloc(outsize,2);  		if(!out) die("malloc error out size=%u\n", outsize);
-
+  vmemset(out, 0, outsize); 
   if((cmp || tid) && insizem && !(_cpy = _valloc(insizem*3,3)))
     die("malloc error cpy size=%u\n", insizem);
- 
+  vmemset(_cpy, 0, insizem*3); 
+
   codini(insize, plug->id, plug->lev, plug->prm);	
   size_t    inlen;																	
   long long totinlen = 0;
@@ -1537,20 +1543,21 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
   return totinlen;
 }
 
-static const char *compiler(void) {
-    #ifdef __clang__
-  return "Clang " xstr(__clang_major__) "." xstr(__clang_minor__) "." xstr(__clang_patchlevel__);
-    #elif defined __GNUC__
-  return "GCC " xstr(__GNUC__) "." xstr(__GNUC_MINOR__) "." xstr(__GNUC_PATCHLEVEL__);
-    #elif defined _MSC_VER
-  return "MSVC " xstr(_MSC_VER);
-    #else
-  return "unknown compiler";
-    #endif
-}
 
-void usage(char *pgm) {
-  fprintf(stderr, "\nTurboBench Copyright (c) 2013-2026 Powturbo %s [%]\n", __DATE__, compiler());
+void usage(char *pgm) { 
+  char s[50] = "Unkown Compiler";
+    #if defined(__clang__)
+  sprintf(s, "Clang %d.%d.%d",  __clang_major__, __clang_minor__, __clang_patchlevel__);
+    #elif defined(__GNUC__)
+  sprintf(s, "GCC %d.%d.%d", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
+    #elif defined(_MS_VER)
+  int build = 0;
+      #ifdef _MSC_FULL_VER
+  build = _MSC_FULL_VER % 100000;
+      #endif
+  snprintf(buffer, size, "%d.%02d.%05d", _MSC_VER / 100, minor = _MSC_VER % 100, build);
+    #endif
+  fprintf(stderr, "\nTurboBench Copyright (c) 2013-2026 Powturbo %s [%s]\n", __DATE__, s);
   fprintf(stderr, "Usage: %s [options] [file]\n", pgm);
   fprintf(stderr, " -eS      S = compressors/groups separated by '/' Parameter can be specified after ','\n");
   fprintf(stderr, " -b#s     # = blocksize (default filesize). max=1GB\n");
