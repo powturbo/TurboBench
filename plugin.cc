@@ -1954,7 +1954,6 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_PCODECI64:
     case P_PCODECU64:
     case P_PCODECF64: pco_ini(); break;  
-
       #endif
         
       #if _QCOMPRESS
@@ -3978,6 +3977,20 @@ char *codver(int codec, char *v, char *s) {
     case P_OPENZL_GENERIC:
     case P_OPENZL_ZSTD:
     case P_OPENZL_LZ4:   sprintf(s,"%d.%d.%d", ZL_LIBRARY_VERSION_MAJOR, ZL_LIBRARY_VERSION_MINOR, ZL_LIBRARY_VERSION_PATCH); break;
+      #endif
+
+      #if _PCODEC
+    case P_PCODECI8:
+    case P_PCODECU8:
+    case P_PCODECI16:
+    case P_PCODECU16:
+    case P_PCODECF16:
+    case P_PCODECI32:
+    case P_PCODECU32:
+    case P_PCODECF32:
+    case P_PCODECI64:
+    case P_PCODECU64:
+    case P_PCODECF64: returrn "1.0.2"; break;  
       #endif
 
       #if _PIVCOHUF
