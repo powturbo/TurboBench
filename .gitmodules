@@ -109,3 +109,6 @@
 [submodule "libslz"]
 	path = libslz
 	url = https://github.com/wtarreau/libslz.git
+[submodule "xz"]
+	path = xz
+	url = https://github.com/tukaani-project/xz.git
