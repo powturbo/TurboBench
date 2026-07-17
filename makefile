@@ -85,7 +85,9 @@ ifeq ($(ARCH),aarch64)
   _SSE=-march=armv8-a
   CFLAGS=$(_SSE)
 else ifeq ($(ARCH),riscv64)
-  CFLAGS=-march=rv64gcv_zvbb -mabi=lp64d
+#  CFLAGS=-march=rv64gc_zba_zbb_zbs
+  CFLAGS=-march=rv64gcv_zvbb 
+  CFLAGS+=-mabi=lp64d -mno-strict-align
 else ifeq ($(ARCH),ppc64le)
   _SSE=-D__SSE4_1__
   CFLAGS=-mcpu=power9 -mtune=power9 $(_SSE)
@@ -162,6 +164,7 @@ endif
 
 C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
+ifneq ($(OS), Windows)
 CXXFLAGS += -D_C_BLOSC2
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS
@@ -196,6 +199,7 @@ isa-l/bin/isa-l.a: $(ISAL_SRCS)
   ISAL_LIB := isa-l/bin/isa-l.a 
 endif
 LDFLAGS += $(ISAL_LIB)
+endif
 endif
 
 ifneq ($(wildcard glza/.),)
