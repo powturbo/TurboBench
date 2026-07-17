@@ -436,7 +436,7 @@ endif
 XZ_LIB :=
 ifneq ($(wildcard xz/.),)
 CXXFLAGS += -D_XZ
-XZ_SRCS := $(shell find xz -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+XZ_SRCS := $(shell find xz/src/liblzma -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS
 xz/liblzma.a: $(XZ_SRCS)
 	export CC=$(CROSS)-linux-gnu-gcc && cd xz && cmake . && $(MAKE)
@@ -956,7 +956,7 @@ endif
 
 OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugin.o
 
-plugin.o: plugin.cc $(ZLIB_NG_LIB) $(ISAL_LIB) $(OPENZL_LIB)
+plugin.o: plugin.cc $(ZLIB_NG_LIB) $(ISAL_LIB) $(OPENZL_LIB) $(XZ_LIB) 
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
 
 
