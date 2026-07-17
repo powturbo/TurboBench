@@ -423,6 +423,32 @@ FLZMA2_OBJS := $(FLZMA2_SRCS:.c=.o)
 OB += $(FLZMA2_OBJS)
 endif
 
+ifneq ($(wildcard xzz/.),)
+XZ_DIR = xz/src/liblzma
+CXXFLAGS+=-D_XZ
+CFLAGS+=-Ixz/src -Ixz/src/common  -I$(XZ_DIR) -I$(XZ_DIR)/check -I$(XZ_DIR)/common -I$(XZ_DIR)/delta -I$(XZ_DIR)/simple -I$(XZ_DIR)/api -I$(XZ_DIR)/common -I$(XZ_DIR)/lzma -I$(XZ_DIR)/lz -I$(XZ_DIR)/check -I$(XZ_DIR)/rangecoder -DHAVE_CHECK_CRC32 -DMYTHREAD_POSIX
+XZ_SRCS := $(wildcard $(XZ_DIR)/check/*.c) $(wildcard $(XZ_DIR)/common/*.c) $(wildcard $(XZ_DIR)/lz/*.c) $(wildcard $(XZ_DIR)/lzma/*.c) $(wildcard $(XZ_DIR)/rangecoder/*.c)
+XZ_OBJS := $(XZ_SRCS:.c=.o)
+OB += $(XZ_OBJS)
+#CFLAGS += $(addprefix -I$(XZ_DIR),. xz/src xz/src/common$(XZ_DIR)/delta $(XZ_DIR)/simple $(XZ_DIR)/api $(XZ_DIR)/common $(XZ_DIR)/lzma $(XZ_DIR)/lz $(XZ_DIR)/check $(XZ_DIR)/rangecoder)
+endif
+
+XZ_LIB :=
+ifneq ($(wildcard xz/.),)
+CXXFLAGS += -D_XZ
+XZ_SRCS := $(shell find xz -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+ifdef CROSS
+xz/liblzma.a: $(XZ_SRCS)
+	export CC=$(CROSS)-linux-gnu-gcc && cd xz && cmake . && $(MAKE)
+else
+xz/liblzma.a: $(XZ_SRCS)
+	cd xz && cmake . && $(MAKE)
+endif
+XZ_LIB = xz/liblzma.a
+LDFLAGS += $(XZ_LIB)
+endif
+
+
 ifneq ($(wildcard glza/.),)
 CXXFLAGS+=-D_GLZA
 GLZA_OBJS := glza/GLZAmodel.o glza/GLZAcomp.o glza/GLZAencode.o glza/GLZAcompress.o glza/GLZAformat.o glza/GLZAdecode.o
