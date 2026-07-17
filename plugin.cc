@@ -912,14 +912,14 @@ static ffree_i64 free_i64_;
   #endif
 
   #if _XZ
-#include "xz/src/liblzma/api/lzma.h"
+#include "xz/src/liblzma/api/lzma.h" //derived from lzbench
 int64_t _xz_compress(char *in, size_t insize, char *out, size_t outsize, int lev, int threadnum) {
   lzma_stream strm = LZMA_STREAM_INIT;
   lzma_ret ret;
   lzma_mt mt_options    = {0};
-  mt_options.preset     = (codec_options && lev >= 0 && lev <= 9)  ? (uint32_t)codec_options->level  : LZMA_PRESET_DEFAULT;
+  mt_options.preset     = (lev >= 0 && lev <= 9)  ? (uint32_t)lev  : LZMA_PRESET_DEFAULT;
   mt_options.check      = LZMA_CHECK_NONE; // Check type (CRC64 is default and common)  //mt_options.check = LZMA_CHECK_CRC32;
-  mt_options.threads    = codec_options->threads;
+  mt_options.threads    = threadnum;
   mt_options.block_size = 0;
   ret = lzma_stream_encoder_mt(&strm, &mt_options);
   if (ret != LZMA_OK) return -1;
@@ -2518,7 +2518,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       LzmaEncProps_Normalize(&p);
       SizeT psize = LZMA_PROPS_SIZE, outlen = outsize - LZMA_PROPS_SIZE;
       return LzmaEncode(out+LZMA_PROPS_SIZE, &outlen, in, inlen, &p, out, &psize, 0, NULL, &g_Alloc, &g_Alloc) == SZ_OK?outlen+LZMA_PROPS_SIZE:0;*/
-      return _xz_compress((char *)in, insize, (char *)out, outsize, lev, threadnum);
+      return _xz_compress((char *)in, inlen, (char *)out, outsize, lev, threadnum);
 
     }
       #endif
@@ -3368,7 +3368,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _XZ
     case P_XZ: { int threadnum = 1; char *q;
-      if(q=strstr(prm,"mt")) numThreads = atoi(q+(q[2]=='='?3:2));
+      if(q=strstr(prm,"mt")) threadnum = atoi(q+(q[2]=='='?3:2));
       return _xz_decompress((char *)in, inlen, (char *)out, outlen, threadnum);
     }
       #endif
