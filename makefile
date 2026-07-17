@@ -160,6 +160,14 @@ CFLAGS+=-DVERSION=1 -Ibzip3/include -Wno-int-conversion
 OB+=bzip3/src/libbz3.o
 endif
 
+ifneq ($(wildcard c-blosc2/.),)
+CXXFLAGS+=-D_C_BLOSC2
+CFLAGS+=-Ic-blosc2/blosc -Ic-blosc2/include -Ic-blosc2/include/blosc2 -DHAVE_ZSTD
+C_BLOSC2_SRCS := $(wildcard c-blosc2/blosc/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/.c)
+C_BLOSC2_OBJS := $(C_BLOSC2_SRCS:.c=.o)
+OB += $(C_BLOSC2_OBJS)  
+endif
+
 ISAL_LIB :=
 ifneq ($(wildcard isa-l/.),)
 NASM ?= $(shell command -v nasm)
@@ -181,6 +189,15 @@ isa-l/bin/isa-l.a: $(ISAL_SRCS)
   ISAL_LIB := isa-l/bin/isa-l.a 
 endif
 LDFLAGS += $(ISAL_LIB)
+endif
+
+ifneq ($(wildcard glza/.),)
+CXXFLAGS+=-D_GLZA
+GLZA_OBJS := glza/GLZAmodel.o glza/GLZAcomp.o glza/GLZAencode.o glza/GLZAcompress.o glza/GLZAformat.o glza/GLZAdecode.o
+GLZA_BUILD = $(CC) -O2 $(CFLAGS) $< -c -o $@
+$(GLZA_DIR)/%.o: glza/%.c
+	$(GLZA_BUILD)
+OB += $(GLZA_OBJS) 
 endif
 
 ifneq ($(wildcard kanzi-cpp/.),)
@@ -205,6 +222,11 @@ CFLAGS+=-Ilibdeflate -Ilibdeflate/common
 LIBDEFLATE_SRCS := $(wildcard libdeflate/lib/*.c) libdeflate/lib/arm/cpu_features.c libdeflate/lib/x86/cpu_features.c 
 LIBDEFLATE_OBJS := $(LIBDEFLATE_SRCS:.c=.o)
 OB += $(LIBDEFLATE_OBJS)
+endif
+
+ifneq ($(wildcard libslz/.),)
+CXXFLAGS+=-D_SLZ
+OB+=libslz/src/slz.o
 endif
 
 ifneq ($(wildcard lizard/.),)
@@ -240,10 +262,23 @@ OB += lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 endif
 endif
 
+ifneq ($(wildcard lzlib-1.16/.),)
+CXXFLAGS+=-D_LZLIB
+OB+=lzlib-1.16/lzlib.o lzlib_/bbexample.o
+endif
+
 ifneq ($(wildcard lzma/.),)
 CXXFLAGS+=-D_LZMA -D_7Z_TYPES_
 CFLAGS+=-D_7ZIP_ST
 OB+=lzma/C/Alloc.o lzma/C/CpuArch.o lzma/C/LzFind.o lzma/C/LzmaDec.o lzma/C/LzmaEnc.o lzma/C/LzmaLib.o lzma/C/Threads.o lzma/C/LzFindMt.o lzma/C/LzFindOpt.o
+endif
+
+ifneq ($(wildcard lzo/.),)
+CXXFLAGS+=-D_LZO -Ilzo/include
+CFLAGS+=-Ilzo/include
+LZO_SRCS := $(wildcard lzo/src/*.c)
+LZO_OBJS := $(LZO_SRCS:.c=.o)
+OB += $(LZO_OBJS)
 endif
 
 ifneq ($(and $(wildcard LZSSE/.),$(filter x86_64,$(ARCH))),)
@@ -259,230 +294,6 @@ endif
 
 ifneq ($(wildcard memlz/.),)
 CXXFLAGS+=-D_MEMLZ
-endif
-
-ifneq ($(wildcard skim/.),)
-CXXFLAGS+=-D_MEMLZ
-LDFLAGS += skim/libskim.a
-endif
-
-ifneq ($(wildcard libslz/.),)
-CXXFLAGS+=-D_SLZ
-OB+=libslz/src/slz.o
-endif
-
-ifneq ($(wildcard tamp/.),)
-CXXFLAGS+=-D_TAMP
-TAMP_DIR = tamp/tamp/_c_src/tamp
-OB += $(TAMP_DIR)/common.o $(TAMP_DIR)/compressor.o $(TAMP_DIR)/decompressor.o
-endif
-
-ZLIB_NG_LIB :=
-ifneq ($(wildcard zlib-ng/.),)
-CXXFLAGS += -D_ZLIB_NG
-ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ifdef CROSS
-zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cd zlib-ng && ./configure && $(MAKE)
-else
-zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
-	cd zlib-ng && ./configure && $(MAKE)
-endif
-ZLIB_NG_LIB = zlib-ng/libz-ng.a
-LDFLAGS += $(ZLIB_NG_LIB)
-endif
-
-ifneq ($(wildcard lzo/.),)
-CXXFLAGS+=-D_LZO -Ilzo/include
-CFLAGS+=-Ilzo/include
-LZO_SRCS := $(wildcard lzo/src/*.c)
-LZO_OBJS := $(LZO_SRCS:.c=.o)
-OB += $(LZO_OBJS)
-endif
-
-ifneq ($(wildcard zopfli/.),)
-CXXFLAGS+=-D_ZOPFLI
-ZOPFLI_SRCS := $(wildcard zopfli/src/zopfli/*.c) 
-ZOPFLI_SRCS := $(filter-out %/zopfli_bin.c, $(ZOPFLI_SRCS))
-ZOPFLI_OBJS := $(ZOPFLI_SRCS:.c=.o)
-OB += $(ZOPFLI_OBJS)
-endif
-
-ifneq ($(wildcard zstd/.),)
-CXXFLAGS+=-D_ZSTD -Izstd/lib -Izstd/lib/common
-CFLAGS+=-Izstd/lib -Izstd/lib/common
-ZSTD_SRCS := $(wildcard zstd/lib/common/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/*.c) $(wildcard zstd/lib/decompress/*.S)
-ZSTD_OBJS := $(ZSTD_SRCS:.c=.o)
-OB += $(ZSTD_OBJS)
-endif
-
-FSE := EC/fse
-ifneq ($(wildcard FSE/.),)
-CXXFLAGS+=-D_FSE
-OB+=$(LB)EC/fse/fse_compress_.o $(LB)EC/fse/fse_decompress_.o 
-endif
-
-ifneq ($(wildcard zlib/.),)
-CXXFLAGS+=-D_ZLIB
-ZD=zlib/
-OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
-endif
-
-OPENZL_LIB :=
-ifneq ($(wildcard openzl/.),)
-CXXFLAGS += -D_OPENZL -Iopenzl/include
-OPENZL_SRCS := $(shell find openzl -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ifdef CROSS
-openzl/libopenzl.a: $(OPENZL_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cd openzl && $(MAKE) lib
-else
-openzl/libopenzl.a: $(OPENZL_SRCS)
-	cd openzl && $(MAKE) lib
-endif
-OPENZL_LIB = openzl/libopenzl.a
-LDFLAGS += $(OPENZL_LIB)
-endif
-
-ifneq ($(wildcard openzl_compile/.),)
-CXXFLAGS+=-D_OPENZL -Izstd/lib -Ilz4/lib -Iopenzl/include -Iopenzl/src
-CFLAGS+=-Izstd/lib -Ilz4/lib -Iopenzl/include -Iopenzl/src
-ZSTD_SRCS := $(wildcard codecs/*.c) \
-$(wildcard codecs/bitSplit/*.c) \
-$(wildcard codecs/bitpack/*.c) \
-$(wildcard codecs/bitunpack/*.c) \
-$(wildcard codecs/common/*.c) \
-$(wildcard codecs/concat/*.c) \
-$(wildcard codecs/constant/*.c) \
-$(wildcard codecs/conversion/*.c) \
-$(wildcard codecs/dedup/*.c) \
-$(wildcard codecs/delta/*.c) \
-$(wildcard codecs/dispatchN_byTag/*.c) \
-$(wildcard codecs/dispatch_by_tag/*.c) \
-$(wildcard codecs/dispatch_string/*.c) \
-$(wildcard codecs/divide_by/*.c) \
-$(wildcard codecs/entropy/*.c) \
-$(wildcard codecs/entropy/deprecated/*.c) \
-$(wildcard codecs/flatpack/*.c) \
-$(wildcard codecs/float_deconstruct/*.c) \
-$(wildcard codecs/interleave/*.c) \
-$(wildcard codecs/lz/*.c) \
-$(wildcard codecs/lz4/*.c) \
-$(wildcard codecs/merge_sorted/*.c) \
-$(wildcard codecs/mux_lengths/*.c) \
-$(wildcard codecs/parse_int/*.c) \
-$(wildcard codecs/partition/*.c) \
-$(wildcard codecs/prefix/*.c) \
-$(wildcard codecs/quantize/*.c) \
-$(wildcard codecs/range_pack/*.c) \
-$(wildcard codecs/rolz/*.c) \
-$(wildcard codecs/sentinel/*.c) \
-$(wildcard codecs/splitByStruct/*.c) \
-$(wildcard codecs/splitN/*.c) \
-$(wildcard codecs/tokenize/*.c) \
-$(wildcard codecs/transpose/*.c) \
-$(wildcard codecs/zigzag/*.c) \
-$(wildcard codecs/zstd/*.c) \
-$(wildcard common/*.c) \
-$(wildcard compress/*.c) \
-$(wildcard compress/graphs/*.c) \
-$(wildcard compress/graphs/sddl/*.c) \
-$(wildcard compress/graphs/sddl2/*.c) \
-$(wildcard compress/segmenters/*.c) \
-$(wildcard compress/selectors/*.c) \
-$(wildcard compress/selectors/ml/*.c) \
-$(wildcard decompress/*.c) \
-$(wildcard dict/*.c) \
-$(wildcard fse/common/*.c) \
-$(wildcard fse/compress/*.c) \
-$(wildcard fse/decompress/*.c) \
-$(wildcard shared/*.c) \
-$(wildcard shared/detail/*.c)
-OPENZL_OBJS := $(OPENZL_SRCS:.c=.o)
-OB += $(OPENZL_OBJS)  
-endif
-#------------------------------------ Notable codecs ---------------------------------------------------------------------------
-ifneq ($(wildcard c-blosc2/.),)
-CXXFLAGS+=-D_C_BLOSC2
-CFLAGS+=-Ic-blosc2/blosc -Ic-blosc2/include -Ic-blosc2/include/blosc2 -DHAVE_ZSTD
-C_BLOSC2_SRCS := $(wildcard c-blosc2/blosc/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/.c)
-C_BLOSC2_OBJS := $(C_BLOSC2_SRCS:.c=.o)
-OB += $(C_BLOSC2_OBJS)  
-endif
-
-ifneq ($(wildcard brieflz/.),)
-CXXFLAGS+=-D_BRIEFLZ
-CFLAGS+=-Ibrieflz/include
-OB+=brieflz/src/brieflz.o brieflz/src/depack.o
-endif
-
-ifneq ($(wildcard fast-lzma2/.),)
-CXXFLAGS+=-D_FLZMA2
-FLZMA2_SRCS := $(wildcard fast-lzma2/*.c) 
-FLZMA2_SRCS := $(filter-out %/xxhash.c, $(FLZMA2_SRCS))
-FLZMA2_OBJS := $(FLZMA2_SRCS:.c=.o)
-OB += $(FLZMA2_OBJS)
-endif
-
-ifneq ($(wildcard xzz/.),)
-XZ_DIR = xz/src/liblzma
-CXXFLAGS+=-D_XZ
-CFLAGS+=-Ixz/src -Ixz/src/common  -I$(XZ_DIR) -I$(XZ_DIR)/check -I$(XZ_DIR)/common -I$(XZ_DIR)/delta -I$(XZ_DIR)/simple -I$(XZ_DIR)/api -I$(XZ_DIR)/common -I$(XZ_DIR)/lzma -I$(XZ_DIR)/lz -I$(XZ_DIR)/check -I$(XZ_DIR)/rangecoder -DHAVE_CHECK_CRC32 -DMYTHREAD_POSIX
-XZ_SRCS := $(wildcard $(XZ_DIR)/check/*.c) $(wildcard $(XZ_DIR)/common/*.c) $(wildcard $(XZ_DIR)/lz/*.c) $(wildcard $(XZ_DIR)/lzma/*.c) $(wildcard $(XZ_DIR)/rangecoder/*.c)
-XZ_OBJS := $(XZ_SRCS:.c=.o)
-OB += $(XZ_OBJS)
-#CFLAGS += $(addprefix -I$(XZ_DIR),. xz/src xz/src/common$(XZ_DIR)/delta $(XZ_DIR)/simple $(XZ_DIR)/api $(XZ_DIR)/common $(XZ_DIR)/lzma $(XZ_DIR)/lz $(XZ_DIR)/check $(XZ_DIR)/rangecoder)
-endif
-
-XZ_LIB :=
-ifneq ($(wildcard xz/.),)
-CXXFLAGS += -D_XZ
-XZ_SRCS := $(shell find xz/src/liblzma -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ifdef CROSS
-xz/liblzma.a: $(XZ_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cd xz && cmake . && $(MAKE)
-else
-xz/liblzma.a: $(XZ_SRCS)
-	cd xz && cmake . && $(MAKE)
-endif
-XZ_LIB = xz/liblzma.a
-LDFLAGS += $(XZ_LIB)
-endif
-
-
-ifneq ($(wildcard glza/.),)
-CXXFLAGS+=-D_GLZA
-GLZA_OBJS := glza/GLZAmodel.o glza/GLZAcomp.o glza/GLZAencode.o glza/GLZAcompress.o glza/GLZAformat.o glza/GLZAdecode.o
-GLZA_BUILD = $(CC) -O2 $(CFLAGS) $< -c -o $@
-$(GLZA_DIR)/%.o: glza/%.c
-	$(GLZA_BUILD)
-OB += $(GLZA_OBJS) 
-endif
-
-ifneq ($(wildcard lz4ultra/.),)
-CXXFLAGS+=-D_LZ4ULTRA -Ilz4ultra/src -Ilz4ultra/src/libdivsufsort/include
-OB+=lz4ultra/src/shrink_inmem.o lz4ultra/src/expand_inmem.o lz4ultra/src/shrink_block.o lz4ultra/src/expand_block.o lz4ultra/src/shrink_context.o lz4ultra/src/matchfinder.o lz4ultra/src/frame.o
-ifeq ($(DIVSORT), 1)
-else
-OB+=lz4ultra/src/libdivsufsort/lib/divsufsort.o lz4ultra/src/libdivsufsort/lib/sssort.o lz4ultra/src/libdivsufsort/lib/trsort.o
-DIVSORT=1
-endif
-endif
-
-ifneq ($(wildcard lzlib-1.16/.),)
-CXXFLAGS+=-D_LZLIB
-OB+=lzlib-1.16/lzlib.o lzlib_/bbexample.o
-endif
-
-ifneq ($(wildcard lzsa/.),)
-CXXFLAGS+=-D_LZSA
-CFLAGS+=-Ilzsa/src -Ilzsa/src/libdivsufsort/include
-OB+=lzsa/src/expand_block_v1.o lzsa/src/expand_block_v2.o lzsa/src/expand_context.o lzsa/src/expand_inmem.o lzsa/src/shrink_block_v1.o lzsa/src/shrink_block_v2.o lzsa/src/shrink_inmem.o lzsa/src/shrink_context.o \
-    lzsa/src/matchfinder.o lzsa/src/frame.o
-ifeq ($(DIVSORT), 1)
-else
-OB+=lzsa/src/libdivsufsort/lib/divsufsort.o lzsa/src/libdivsufsort/lib/sssort.o lzsa/src/libdivsufsort/lib/trsort.o
-DIVSORT=1
-endif
 endif
 
 ifneq ($(wildcard miniz/.),)
@@ -515,9 +326,29 @@ ifeq ($(ARCH),x86_64)
 endif
 endif
 
+OPENZL_LIB :=
+ifneq ($(wildcard openzl/.),)
+CXXFLAGS += -D_OPENZL -Iopenzl/include
+OPENZL_SRCS := $(shell find openzl -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+ifdef CROSS
+openzl/libopenzl.a: $(OPENZL_SRCS)
+	export CC=$(CROSS)-linux-gnu-gcc && cd openzl && $(MAKE) lib
+else
+openzl/libopenzl.a: $(OPENZL_SRCS)
+	cd openzl && $(MAKE) lib
+endif
+OPENZL_LIB = openzl/libopenzl.a
+LDFLAGS += $(OPENZL_LIB)
+endif
+
 # 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
 # download corresponding library from https://github.com/WorkingRobot/OodleUE
 CXXFLAGS+=-D_OODLE
+
+ifneq ($(wildcard skim/.),)
+CXXFLAGS+=-D_MEMLZ
+LDFLAGS += skim/libskim.a
+endif
 
 ifneq ($(wildcard snappy/.),)
 # configure or copy directory "snappy_/*" to "snappy"
@@ -527,31 +358,68 @@ OB+=snappy/snappy-sinksource.o snappy/snappy-stubs-internal.o snappy/snappy.o
 endif
 endif
 
-ifneq ($(wildcard snappy-c/.),)
-CXXFLAGS+=-D_SNAPPY_C
-OB+=snappy-c/snappy.o snappy-c/util.o
+ifneq ($(wildcard tamp/.),)
+CXXFLAGS+=-D_TAMP
+TAMP_DIR = tamp/tamp/_c_src/tamp
+OB += $(TAMP_DIR)/common.o $(TAMP_DIR)/compressor.o $(TAMP_DIR)/decompressor.o
 endif
 
-ifneq ($(wildcard gipfeli/.),)
-CXXFLAGS+=-D_GIPFELI
-OB+=gipfeli/lz77.o gipfeli/entropy.o gipfeli/entropy_code_builder.o gipfeli/decompress.o gipfeli/gipfeli-internal.o
+ZLIB_NG_LIB :=
+ifneq ($(wildcard zlib-ng/.),)
+CXXFLAGS += -D_ZLIB_NG
+ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+ifdef CROSS
+zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
+	export CC=$(CROSS)-linux-gnu-gcc && cd zlib-ng && ./configure && $(MAKE)
+else
+zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
+	cd zlib-ng && ./configure && $(MAKE)
+endif
+ZLIB_NG_LIB = zlib-ng/libz-ng.a
+LDFLAGS += $(ZLIB_NG_LIB)
 endif
 
-
-ifneq ($(wildcard tcobs/.),)
-CXXFLAGS+=-D_TCOBS -Drestrict=__restrict
-OB+=tcobs/v2/tcobsEncode.o tcobs/v2/tcobsDecode.o
+ifneq ($(wildcard zopfli/.),)
+CXXFLAGS+=-D_ZOPFLI
+ZOPFLI_SRCS := $(wildcard zopfli/src/zopfli/*.c) 
+ZOPFLI_SRCS := $(filter-out %/zopfli_bin.c, $(ZOPFLI_SRCS))
+ZOPFLI_OBJS := $(ZOPFLI_SRCS:.c=.o)
+OB += $(ZOPFLI_OBJS)
 endif
 
-ifdef SMALLZ4
-CXXFLAGS+=-DSMALLZ4
+ifneq ($(wildcard zstd/.),)
+CXXFLAGS+=-D_ZSTD -Izstd/lib -Izstd/lib/common
+CFLAGS+=-Izstd/lib -Izstd/lib/common
+ZSTD_SRCS := $(wildcard zstd/lib/common/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/*.c) $(wildcard zstd/lib/decompress/*.S)
+ZSTD_OBJS := $(ZSTD_SRCS:.c=.o)
+OB += $(ZSTD_OBJS)
 endif
 
-ifneq ($(wildcard Unishox2/.),)
-CXXFLAGS+=-D_UNISHOX2
-OB+=Unishox2/unishox2.o turbobench_/unishox.o
-CXXFLAGS+=-D_UNISHOX3 -Imarisa-trie/include
-OB+=Unishox2/Unishox3_Alpha/unishox3.o
+FSE := EC/fse
+ifneq ($(wildcard FSE/.),)
+CXXFLAGS+=-D_FSE
+OB+=$(LB)EC/fse/fse_compress_.o $(LB)EC/fse/fse_decompress_.o 
+endif
+
+XZ_LIB :=
+ifneq ($(wildcard xz/.),)
+CXXFLAGS += -D_XZ
+XZ_SRCS := $(shell find xz/src/liblzma -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+ifdef CROSS
+xz/liblzma.a: $(XZ_SRCS)
+	export CC=$(CROSS)-linux-gnu-gcc && cd xz && cmake . && $(MAKE)
+else
+xz/liblzma.a: $(XZ_SRCS)
+	cd xz && cmake . && $(MAKE)
+endif
+XZ_LIB = xz/liblzma.a
+LDFLAGS += $(XZ_LIB)
+endif
+
+ifneq ($(wildcard zlib/.),)
+CXXFLAGS+=-D_ZLIB
+ZD=zlib/
+OB+=$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o
 endif
 
 ifneq ($(wildcard zpaq/.),)
@@ -602,9 +470,79 @@ else ifeq ($(ARCH), aarch64)
 endif
 endif
 endif
+#------------------------------------ Notable codecs ---------------------------------------------------------------------------
+ifneq ($(wildcard brieflz/.),)
+CXXFLAGS+=-D_BRIEFLZ
+CFLAGS+=-Ibrieflz/include
+OB+=brieflz/src/brieflz.o brieflz/src/depack.o
+endif
 
+ifneq ($(wildcard fast-lzma2/.),)
+CXXFLAGS+=-D_FLZMA2
+FLZMA2_SRCS := $(wildcard fast-lzma2/*.c) 
+FLZMA2_SRCS := $(filter-out %/xxhash.c, $(FLZMA2_SRCS))
+FLZMA2_OBJS := $(FLZMA2_SRCS:.c=.o)
+OB += $(FLZMA2_OBJS)
+endif
+
+ifneq ($(wildcard xzz/.),)
+XZ_DIR = xz/src/liblzma
+CXXFLAGS+=-D_XZ
+CFLAGS+=-Ixz/src -Ixz/src/common  -I$(XZ_DIR) -I$(XZ_DIR)/check -I$(XZ_DIR)/common -I$(XZ_DIR)/delta -I$(XZ_DIR)/simple -I$(XZ_DIR)/api -I$(XZ_DIR)/common -I$(XZ_DIR)/lzma -I$(XZ_DIR)/lz -I$(XZ_DIR)/check -I$(XZ_DIR)/rangecoder -DHAVE_CHECK_CRC32 -DMYTHREAD_POSIX
+XZ_SRCS := $(wildcard $(XZ_DIR)/check/*.c) $(wildcard $(XZ_DIR)/common/*.c) $(wildcard $(XZ_DIR)/lz/*.c) $(wildcard $(XZ_DIR)/lzma/*.c) $(wildcard $(XZ_DIR)/rangecoder/*.c)
+XZ_OBJS := $(XZ_SRCS:.c=.o)
+OB += $(XZ_OBJS)
+#CFLAGS += $(addprefix -I$(XZ_DIR),. xz/src xz/src/common$(XZ_DIR)/delta $(XZ_DIR)/simple $(XZ_DIR)/api $(XZ_DIR)/common $(XZ_DIR)/lzma $(XZ_DIR)/lz $(XZ_DIR)/check $(XZ_DIR)/rangecoder)
+endif
+
+ifneq ($(wildcard lz4ultra/.),)
+CXXFLAGS+=-D_LZ4ULTRA -Ilz4ultra/src -Ilz4ultra/src/libdivsufsort/include
+OB+=lz4ultra/src/shrink_inmem.o lz4ultra/src/expand_inmem.o lz4ultra/src/shrink_block.o lz4ultra/src/expand_block.o lz4ultra/src/shrink_context.o lz4ultra/src/matchfinder.o lz4ultra/src/frame.o
+ifeq ($(DIVSORT), 1)
+else
+OB+=lz4ultra/src/libdivsufsort/lib/divsufsort.o lz4ultra/src/libdivsufsort/lib/sssort.o lz4ultra/src/libdivsufsort/lib/trsort.o
+DIVSORT=1
+endif
+endif
+
+ifneq ($(wildcard lzsa/.),)
+CXXFLAGS+=-D_LZSA
+CFLAGS+=-Ilzsa/src -Ilzsa/src/libdivsufsort/include
+OB+=lzsa/src/expand_block_v1.o lzsa/src/expand_block_v2.o lzsa/src/expand_context.o lzsa/src/expand_inmem.o lzsa/src/shrink_block_v1.o lzsa/src/shrink_block_v2.o lzsa/src/shrink_inmem.o lzsa/src/shrink_context.o \
+    lzsa/src/matchfinder.o lzsa/src/frame.o
+ifeq ($(DIVSORT), 1)
+else
+OB+=lzsa/src/libdivsufsort/lib/divsufsort.o lzsa/src/libdivsufsort/lib/sssort.o lzsa/src/libdivsufsort/lib/trsort.o
+DIVSORT=1
+endif
+endif
+
+ifneq ($(wildcard snappy-c/.),)
+CXXFLAGS+=-D_SNAPPY_C
+OB+=snappy-c/snappy.o snappy-c/util.o
+endif
+
+ifneq ($(wildcard gipfeli/.),)
+CXXFLAGS+=-D_GIPFELI
+OB+=gipfeli/lz77.o gipfeli/entropy.o gipfeli/entropy_code_builder.o gipfeli/decompress.o gipfeli/gipfeli-internal.o
+endif
+
+ifneq ($(wildcard tcobs/.),)
+CXXFLAGS+=-D_TCOBS -Drestrict=__restrict
+OB+=tcobs/v2/tcobsEncode.o tcobs/v2/tcobsDecode.o
+endif
+
+ifdef SMALLZ4
+CXXFLAGS+=-DSMALLZ4
+endif
+
+ifneq ($(wildcard Unishox2/.),)
+CXXFLAGS+=-D_UNISHOX2
+OB+=Unishox2/unishox2.o turbobench_/unishox.o
+CXXFLAGS+=-D_UNISHOX3 -Imarisa-trie/include
+OB+=Unishox2/Unishox3_Alpha/unishox3.o
+endif
 #------------------------- Entropy coder -----------------------------------------
-
 # First download or clone aomedia (git clone https://aomedia.googlesource.com/aom) into TurboBench directory
 # after cmake, put the generated "aom_config.h" into the aom directory
 # or copy aom_/aom_config.h to aom
