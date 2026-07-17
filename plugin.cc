@@ -1994,27 +1994,28 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _C_BLOSC2
-    case P_C_BLOSC2:
+    case P_C_BLOSC2: {
         #if _C_BLOSC2LZ
       return blosclz_compress(lev, in, inlen, out, outsize);
         #else
-      char *q; int threadnum = 1; if(q=strchr(prm,'T'))  threadnum = atoi(q+(q[1]=='='?2:1)); 
+      char *q; int threadnum = 1; if(q=strchr(prm,'T')) threadnum = atoi(q+(q[1]=='='?2:1)); 
       blosc2_set_nthreads(threadnum);
       return blosc1_compress(lev, strchr(prm,'s')?1:0/*doshuffle*/, (q=strchr(prm,'t'))?atoi(q+(q[1]=='='?2:1)):1/*typesize*/, inlen, in, out, outsize/*inlen+BLOSC_MAX_OVERHEAD*/);
         #endif
+    }
       #endif
 
       #if _BPC
-	  case P_BPC: {
-        unsigned char *ip, *op=out;
-        for(ip = in, in += inlen; ip < in; ) {
-          unsigned iplen = in - ip; iplen = iplen>_MAX_BYTES_PER_LINE?_MAX_BYTES_PER_LINE:iplen;
-          op += BPCompressor::compressLine((CACHELINE_DATA*)ip, 0);
-          ip += iplen;
-        }
-        return op - out;
+    case P_BPC: {
+      unsigned char *ip, *op=out;
+      for(ip = in, in += inlen; ip < in; ) {
+        unsigned iplen = in - ip; iplen = iplen>_MAX_BYTES_PER_LINE?_MAX_BYTES_PER_LINE:iplen;
+        op += BPCompressor::compressLine((CACHELINE_DATA*)ip, 0);
+        ip += iplen;
       }
-	  #endif
+      return op - out;
+    }
+      #endif
 	  
       #if _BRIEFLZ
     case P_BRIEFLZ: return blz_pack_level(in, out, inlen, workmem, lev);
@@ -3381,8 +3382,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _XZ
-    case P_XZ: { int threadnum = 1; char *q;
-      int threadnum = 1; if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) threadnum = atoi(q+(q[2]=='='?3:2)); 
+    case P_XZ: { int threadnum = 1; char *q = strchr(prm,'t'); if(!q) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) threadnum = atoi(q+(q[2]=='='?3:2)); 
       return _xz_decompress((char *)in, inlen, (char *)out, outlen, threadnum);
     }
       #endif
@@ -3422,7 +3422,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 	  
       #if _ZXC
     case P_ZXC: {
-      int threadnum = 1; if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) threadnum = atoi(q+(q[2]=='='?3:2)); 
+      char *q; int threadnum = 1; if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) threadnum = atoi(q+(q[2]=='='?3:2)); 
       zxc_decompress_opts_t opts = {.n_threads = threadnum, .checksum_enabled = 0};
       zxc_decompress_dctx(zxc_dctx_ptr, in, inlen, out, outlen, &opts);
       break;
