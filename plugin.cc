@@ -234,7 +234,21 @@ enum {
  P_OPENZL_GENERIC,
  P_OPENZL_ZSTD,
  P_OPENZL_LZ4,
- 
+
+#ifndef _PCODEC
+#define _PCODEC 0
+#endif
+ P_PCODECI8,
+ P_PCODECU8,
+ P_PCODECI16,
+ P_PCODECU16,
+ P_PCODECF16,
+ P_PCODECI32,
+ P_PCODECU32,
+ P_PCODECF32,
+ P_PCODECI64,
+ P_PCODECU64,
+ P_PCODECF64,
 #ifndef _PITHY
 #define _PITHY 0
 #endif
@@ -822,6 +836,130 @@ class Out: public libzpaq::Writer {
 
   #if _NAKA
 #include "nakamichi/nakamichi.h"
+  #endif
+
+  #if _PCODEC
+#include "pcodec_/cpcodec.h" // https://github.com/pcodec/pcodec --------------------------------------------
+  #if defined(_WIN32)
+#include <windows.h>
+#define __off64_t   _off64_t
+  #else
+#include <dlfcn.h> // dlopen
+  #endif
+  
+typedef enum PcoError(*fpco_compress  )(const void *nums,       size_t n,              unsigned char dtype, const struct PcoChunkConfig *config, void *dst, size_t dst_cap, size_t *n_written);
+typedef enum PcoError(*fpco_decompress)(const void *compressed, size_t compressed_len, unsigned char dtype,                                      void *dst, size_t dst_cap, size_t *n_written);
+static fpco_compress   pco_compress;
+static fpco_decompress pco_decompress;
+static int pco = 0;
+void pco_ini() {
+  if (pco)
+    return;
+  pco++;
+    #if _WIN32
+  HINSTANCE hdll;
+  if(hdll = LoadLibrary("cpcodec.dll")) {
+    if(!(pco_compress   = (fpco_simpler_compress)GetProcAddress(hdll, "pco_standalone_simple_compress_into")))  die("fpco_simpler_compress not found\n");
+    if(!(pco_decompress = (fpco_simple_decompress)GetProcAddress(hdll, "pco_simple_decompress"))) die("pco_simple_decompress not found\n");
+  }
+  else fprintf(stderr, "cpcodec.dll not found\n");
+    #elif !defined(_STATIC)
+  void* hdll = dlopen("./libcpcodec.so", RTLD_LAZY);
+  if (hdll) {
+    if (!(pco_compress   = (fpco_compress)dlsym(hdll,   "pco_standalone_simple_compress_into")))  die("fpco_simpler_compress not found\n");
+    if (!(pco_decompress = (fpco_decompress)dlsym(hdll, "pco_standalone_simple_decompress_into"))) die("pco_simple_decompress not found\n");
+  }
+  else fprintf(stderr, "#libcpcodec.so shared library not found. '%s'\n", dlerror());
+    #endif
+}
+#if 0
+unsigned pcocomp32(unsigned char* in, size_t inlen, unsigned char* out, int lev) {
+  pcocompini();
+  PcoFfiVec v = { 0 };
+  if (PcoSuccess != pco_simpler_compress_(in, inlen / 4, PCO_TYPE_U32, lev, &v))
+    return 0;
+  memcpy(out, v.ptr, v.len);
+  inlen = v.len;
+  pco_free_pcovec_(&v);
+  return inlen;
+}
+
+unsigned pcodecomp32(unsigned char* in, size_t inlen, unsigned char* out, unsigned outlen) {
+  pcocompini();
+  PcoFfiVec v = { 0 };
+  if (PcoSuccess != pco_simple_decompress_(in, inlen, PCO_TYPE_U32, &v))
+    return 0;
+  memcpy(out, v.ptr, outlen);
+  pco_free_pcovec_(&v);
+  return outlen;
+}
+
+unsigned pcocomp64(unsigned char* in, size_t inlen, unsigned char* out, int lev) {
+  pcocompini();
+  PcoFfiVec v = { 0 };
+  if (PcoSuccess != pco_simpler_compress_(in, inlen / 8, PCO_TYPE_U64, lev, &v))
+    return 0;
+  memcpy(out, v.ptr, v.len);
+  inlen = v.len;
+  pco_free_pcovec_(&v);
+  return inlen;
+}
+
+unsigned pcodecomp64(unsigned char* in, size_t inlen, unsigned char* out, unsigned outlen) {
+  pcocompini();
+  PcoFfiVec v = { 0 };
+  if (PcoSuccess != pco_simple_decompress_(in, inlen, PCO_TYPE_U64, &v))
+    return 0;
+  memcpy(out, v.ptr, outlen);
+  pco_free_pcovec_(&v);
+  return outlen;
+}
+unsigned pcozcomp32(unsigned char* in, size_t inlen, unsigned char* out, int lev, unsigned char* tmp) {
+  bitzenc(in, inlen, tmp, 4);
+  pcocompini();
+  PcoFfiVec v = { 0 };
+  if (PcoSuccess != pco_simpler_compress_(tmp, inlen / 4, PCO_TYPE_U32, lev, &v))
+    return 0;
+  memcpy(out, v.ptr, v.len);
+  inlen = v.len;
+  pco_free_pcovec_(&v);
+  return inlen;
+}
+
+unsigned pcozdecomp32(unsigned char* in, size_t inlen, unsigned char* out, unsigned outlen) {
+  pcocompini();
+  PcoFfiVec v = { 0 };
+  if (PcoSuccess != pco_simple_decompress_(in, inlen, PCO_TYPE_U32, &v))
+    return 0;
+  memcpy(out, v.ptr, outlen);
+  pco_free_pcovec_(&v);
+  bitzdec(out, outlen, 4);
+  return outlen;
+}
+
+unsigned pcozcomp64(unsigned char* in, size_t inlen, unsigned char* out, int lev, unsigned char* tmp) {
+  bitzenc(in, inlen, tmp, 8);
+  pcocompini();
+  PcoFfiVec v = { 0 };
+  if (PcoSuccess != pco_simpler_compress_(tmp, inlen / 8, PCO_TYPE_U64, lev, &v))
+    return 0;
+  memcpy(out, v.ptr, v.len);
+  inlen = v.len;
+  pco_free_pcovec_(&v);
+  return inlen;
+}
+
+unsigned pcozdecomp64(unsigned char* in, size_t inlen, unsigned char* out, unsigned outlen) {
+  pcocompini();
+  PcoFfiVec v = { 0 };
+  if (PcoSuccess != pco_simple_decompress_(in, inlen, PCO_TYPE_U64, &v))
+    return 0;
+  memcpy(out, v.ptr, outlen);
+  pco_free_pcovec_(&v);
+  bitzdec(out, outlen, 8);
+  return outlen;
+}
+#endif
   #endif
 
   #if _PITHY
@@ -1550,13 +1688,22 @@ struct plugs plugs[] = {
   { P_OPENZL_ZSTD,   "openzl_zstd",   _OPENZL,    "openzl zstd",      "-99,-90,-80,-70,-60,-50,-40,-30,-20,-10,-8,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,8,10,12,14,16,18,20,22" },
   { P_OPENZL_LZ4,    "openzl_lz4",    _OPENZL,    "openzl lz4",       "-99,-90,-80,-70,-60,-50,-40,-30,-20,-10,-8,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8,9,10,11,12" }, 
 
-  { P_PHAZ,          "phaz",          _PHAZ,      "PivCo-Huffman/zstd",      "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },  // level = zstd level
-  { P_PITHY,         "pithy",         _PITHY,     "Pithy",                   "0,1,2,3,4,5,6,7,8,9" }, 
-  { P_PYSAP,         "sap",           _PYSAP,     "sap",                     "0,1,2" },
+  { P_PCODECI8,      "pcodec_i8",     _PCODEC,    "pcodec_i8",        "0,1,2,3,4,5,6,7,8,9" },
+  { P_PCODECU8,      "pcodec_u8",     _PCODEC,    "pcodec_u8",        "0,1,2,3,4,5,6,7,8,9" },
+  { P_PCODECI16,     "pcodec_i16",    _PCODEC,    "pcodec_i16",       "0,1,2,3,4,5,6,7,8,9" },
+  { P_PCODECU16,     "pcodec_u16",    _PCODEC,    "pcodec_u16",       "0,1,2,3,4,5,6,7,8,9" },
+  { P_PCODECF16,     "pcodec_f16",    _PCODEC,    "pcodec_f16",       "0,1,2,3,4,5,6,7,8,9" },
+  { P_PCODECI32,     "pcodec_i32",    _PCODEC,    "pcodec_i32",       "0,1,2,3,4,5,6,7,8,9" },
+  { P_PCODECU32,     "pcodec_u32",    _PCODEC,    "pcodec_u32",       "0,1,2,3,4,5,6,7,8,9" },
+  { P_PCODECF32,     "pcodec_f32",    _PCODEC,    "pcodec_f32",       "0,1,2,3,4,5,6,7,8,9" },
+  { P_PCODECI64,     "pcodec_i64",    _PCODEC,    "pcodec_i64",       "0,1,2,3,4,5,6,7,8,9" },
+  { P_PCODECU64,     "pcodec_u64",    _PCODEC,    "pcodec_u64",       "0,1,2,3,4,5,6,7,8,9" },
+  { P_PCODECF64,     "pcodec_f64",    _PCODEC,    "pcodec_f64",         "0,1,2,3,4,5,6,7,8,9" },
+  { P_PHAZ,          "phaz",          _PHAZ,      "PivCo-Huffman/zstd", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },  // level = zstd level
+  { P_PITHY,         "pithy",         _PITHY,     "Pithy",              "0,1,2,3,4,5,6,7,8,9" }, 
+  { P_PYSAP,         "sap",           _PYSAP,     "sap",                "0,1,2" },
   
-  { P_QUICKLZ,       "quicklz",       _QUICKLZ,   "Quicklz",                 "1,2,3" },
-  { P_QCOMPRESS32,   "qcomp32",       _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
-  { P_QCOMPRESS64,   "qcomp64",       _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
+  { P_QUICKLZ,       "quicklz",       _QUICKLZ,   "Quicklz",            "1,2,3" },
   
   { P_SKIM,          "skim",          _SKIM,      "skim",                    ""},
   { P_SHRINKER,      "shrinker",      _SHRINKER,  "Shrinker",                "", "", 0, (1<<26) },
@@ -1757,40 +1904,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #if _MEMLZ
     case P_MEMLZ: workmemsize = sizeof(memlz_state); break;
       #endif
-          
-      #if _QCOMPRESS
-    case P_QCOMPRESS32:
-    case P_QCOMPRESS64:
-        #if _WIN32
-      { HINSTANCE hdll; int i;  
-        char *qcomp = "./q_compress_ffi.dll";
-        if(hdll = LoadLibrary(qcomp)) {
-          if(!(auto_compress_i32_   =   (fauto_compress_i32)GetProcAddress(hdll, "auto_compress_i32")))   die("auto_compress_i32 not found\n");
-          if(!(auto_compress_i64_   =   (fauto_compress_i64)GetProcAddress(hdll, "auto_compress_i64")))   die("auto_compress_i64 not found\n");
-          if(!(free_compressed_     =     (ffree_compressed)GetProcAddress(hdll, "free_compressed")))     die("free_compressed not found\n");
-          if(!(auto_decompress_i32_ = (fauto_decompress_i32)GetProcAddress(hdll, "auto_decompress_i32"))) die("auto_decompress_i32 not found\n");
-          if(!(auto_decompress_i64_ = (fauto_decompress_i64)GetProcAddress(hdll, "auto_decompress_i64"))) die("auto_decompress_i64 not found\n");
-          if(!(free_i32_            =            (ffree_i32)GetProcAddress(hdll, "free_i32")))            die("free_i32 not found\n");
-          if(!(free_i64_            =            (ffree_i64)GetProcAddress(hdll, "free_i64")))            die("free_i64 not found\n");
-        } else fprintf(stderr,"q_compress_ffi.dll not found\n");
-      } 
-        #else
-      { char *qcomp = "./libq_compress_ffi.so";
-        void *hdll = dlopen(qcomp, RTLD_LAZY);
-        if(hdll) { 
-          if(!(auto_compress_i32_   =   (fauto_compress_i32)dlsym(hdll, "auto_compress_i32")))   die("fauto_compress_i32 not found\n");
-          if(!(auto_compress_i64_   =   (fauto_compress_i64)dlsym(hdll, "auto_compress_i64")))   die("fauto_compress_i64 not found\n");
-          if(!(free_compressed_     =     (ffree_compressed)dlsym(hdll, "free_compressed")))     die("ffree_compressed not found\n");
-          if(!(auto_decompress_i32_ = (fauto_decompress_i32)dlsym(hdll, "auto_decompress_i32"))) die("auto_decompress_i32 not found\n");
-          if(!(auto_decompress_i64_ = (fauto_decompress_i64)dlsym(hdll, "auto_decompress_i64"))) die("auto_decompress_i64 not found\n");
-          if(!(free_i32_            =            (ffree_i32)dlsym(hdll, "free_i32")))            die("free_i32 not found\n");
-          if(!(free_i64_            =            (ffree_i64)dlsym(hdll, "free_i64")))            die("free_i64 not found\n");
-        } else fprintf(stderr,"qcompress shared library '%s' not found.'%s'\n", qcomp, dlerror());   
-      }
-      #endif 
-      break;
-      #endif
-      
+
       #if _OODLE
     case P_OODLE: 
       char oodle[65];
@@ -1827,6 +1941,54 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #endif 
       break;
       #endif
+      
+      #if _PCODEC
+    case P_PCODECI8:
+    case P_PCODECU8:
+    case P_PCODECI16:
+    case P_PCODECU16:
+    case P_PCODECF16:
+    case P_PCODECI32:
+    case P_PCODECU32:
+    case P_PCODECF32:
+    case P_PCODECI64:
+    case P_PCODECU64:
+    case P_PCODECF64: pco_ini(); break;  
+
+      #endif
+        
+      #if _QCOMPRESS
+    case P_QCOMPRESS32:
+    case P_QCOMPRESS64:
+        #if _WIN32
+      { HINSTANCE hdll; int i;  
+        char *qcomp = "./q_compress_ffi.dll";
+        if(hdll = LoadLibrary(qcomp)) {
+          if(!(auto_compress_i32_   =   (fauto_compress_i32)GetProcAddress(hdll, "auto_compress_i32")))   die("auto_compress_i32 not found\n");
+          if(!(auto_compress_i64_   =   (fauto_compress_i64)GetProcAddress(hdll, "auto_compress_i64")))   die("auto_compress_i64 not found\n");
+          if(!(free_compressed_     =     (ffree_compressed)GetProcAddress(hdll, "free_compressed")))     die("free_compressed not found\n");
+          if(!(auto_decompress_i32_ = (fauto_decompress_i32)GetProcAddress(hdll, "auto_decompress_i32"))) die("auto_decompress_i32 not found\n");
+          if(!(auto_decompress_i64_ = (fauto_decompress_i64)GetProcAddress(hdll, "auto_decompress_i64"))) die("auto_decompress_i64 not found\n");
+          if(!(free_i32_            =            (ffree_i32)GetProcAddress(hdll, "free_i32")))            die("free_i32 not found\n");
+          if(!(free_i64_            =            (ffree_i64)GetProcAddress(hdll, "free_i64")))            die("free_i64 not found\n");
+        } else fprintf(stderr,"q_compress_ffi.dll not found\n");
+      } 
+        #else
+      { char *qcomp = "./libq_compress_ffi.so";
+        void *hdll = dlopen(qcomp, RTLD_LAZY);
+        if(hdll) { 
+          if(!(auto_compress_i32_   =   (fauto_compress_i32)dlsym(hdll, "auto_compress_i32")))   die("fauto_compress_i32 not found\n");
+          if(!(auto_compress_i64_   =   (fauto_compress_i64)dlsym(hdll, "auto_compress_i64")))   die("fauto_compress_i64 not found\n");
+          if(!(free_compressed_     =     (ffree_compressed)dlsym(hdll, "free_compressed")))     die("ffree_compressed not found\n");
+          if(!(auto_decompress_i32_ = (fauto_decompress_i32)dlsym(hdll, "auto_decompress_i32"))) die("auto_decompress_i32 not found\n");
+          if(!(auto_decompress_i64_ = (fauto_decompress_i64)dlsym(hdll, "auto_decompress_i64"))) die("auto_decompress_i64 not found\n");
+          if(!(free_i32_            =            (ffree_i32)dlsym(hdll, "free_i32")))            die("free_i32 not found\n");
+          if(!(free_i64_            =            (ffree_i64)dlsym(hdll, "free_i64")))            die("free_i64 not found\n");
+        } else fprintf(stderr,"qcompress shared library '%s' not found.'%s'\n", qcomp, dlerror());   
+      }
+      #endif 
+      break;
+      #endif     
 
       #if _QUICKLZ
     case P_QUICKLZ:
@@ -2259,27 +2421,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_MEMLZ: memlz_reset((memlz_state*)workmem); return memlz_stream_compress(out, in, inlen, (memlz_state*)workmem);
       #endif
 
-      #if _SKIM
-    case P_SKIM: 
-      #endif
-      
-      #if _SLZ
-    case P_SLZ: { if(lev > 7) lev = 7;
-      unsigned blk = 16384 << lev;
-      struct slz_stream strm;
-            if(strchr(prm,'d')) slz_init(&strm, !!lev, SLZ_FMT_DEFLATE);
-       else if(strchr(prm,'g')) slz_init(&strm, !!lev, SLZ_FMT_GZIP);
-       else                     slz_init(&strm, !!lev, SLZ_FMT_ZLIB);
-      unsigned char *ip, *op=out;
-      for(ip = in, in += inlen; ip < in; ) {
-        unsigned iplen = in - ip; iplen = iplen>blk?blk:iplen;
-        op += slz_encode(&strm, op, ip, iplen, in-ip > blk);
-        ip += iplen;
-      }
-      op += slz_finish(&strm, op);
-      return op - out;
-    }
-      #endif
       #if _LZMAT
     case P_LZMAT:   { MP_U32 outs=outsize; int rc = lzmat_encode(out, &outs, in, inlen); return rc == LZMAT_STATUS_OK ? outs : 0; }
       #endif
@@ -2378,23 +2519,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_lz4(                inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;} break;
       #endif
 
-      #if _PITHY
-    case P_PITHY: return pithy_Compress((const char *)in, inlen, (char *)out, outsize, lev);
-      #endif
-
-      #if _QUICKLZ
-    case P_QUICKLZ: { memset(workmem,0,workmemsize); return lev<=1?qlz_compress1((char *)in, (char *)out, inlen, workmem):(lev<=2?qlz_compress2((char *)in, (char *)out, inlen, workmem):qlz_compress3((char *)in, (char *)out, inlen, workmem)); }
-      #endif
-
-      #if _QCOMPRESS
-    case P_QCOMPRESS32: {
-      FfiVec v = auto_compress_i32_((int *)in, inlen/4, lev); memcpy(out, v.ptr, v.len); free_compressed_(v); return v.len;
-    } break;
-    case P_QCOMPRESS64: {
-      FfiVec v = auto_compress_i64_((long long *)in, inlen/8, lev); memcpy(out, v.ptr, v.len); free_compressed_(v); return v.len;
-    } break;
-      #endif
-
       #if _OODLE
     case P_OODLE: {
       int nodll = strchr(prm,'c')?1:0, level = abs(lev), comp = level/10; level = (level>99?level-100:level)%10; if(lev<0) level = -level;    
@@ -2411,12 +2535,65 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
       #endif
 
+      #if _PCODEC
+    case P_PCODECI8:  if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_I8,  &config, out, outsize, &w); return w; } break;
+    case P_PCODECU8:  if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_U8,  &config, out, outsize, &w); return w; } break;
+    case P_PCODECI16: if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/2, PCO_TYPE_I16, &config, out, outsize, &w); return w; } break;
+    case P_PCODECU16: if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/2, PCO_TYPE_U16, &config, out, outsize, &w); return w; } break;
+    case P_PCODECF16: if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/2, PCO_TYPE_F16, &config, out, outsize, &w); return w; } break;
+    case P_PCODECI32: if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/4, PCO_TYPE_I32, &config, out, outsize, &w); return w; } break;
+    case P_PCODECU32: if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/4, PCO_TYPE_U32, &config, out, outsize, &w); return w; } break;
+    case P_PCODECF32: if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/4, PCO_TYPE_F32, &config, out, outsize, &w); return w; } break;
+    case P_PCODECI64: if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/8, PCO_TYPE_I64, &config, out, outsize, &w); return w; } break;
+    case P_PCODECU64: if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/8, PCO_TYPE_U64, &config, out, outsize, &w); return w; } break;
+    case P_PCODECF64: if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/8, PCO_TYPE_F64, &config, out, outsize, &w); return w; } break;
+      #endif
+
+      #if _PITHY
+    case P_PITHY: return pithy_Compress((const char *)in, inlen, (char *)out, outsize, lev);
+      #endif
+
       #if _PYSAP
     case P_PYSAP: { CsObjectInt c; SAP_INT bytes_read, bytes_written; int rc = c.CsInitCompr((SAP_BYTE *)out, inlen, lev); out += CS_HEAD_SIZE; outsize -= CS_HEAD_SIZE;
         c.CsCompr(inlen, in, inlen, out, outsize, lev, &bytes_read, &bytes_written); return bytes_written+CS_HEAD_SIZE;
       }
       #endif
 
+      #if _QUICKLZ
+    case P_QUICKLZ: { memset(workmem,0,workmemsize); return lev<=1?qlz_compress1((char *)in, (char *)out, inlen, workmem):(lev<=2?qlz_compress2((char *)in, (char *)out, inlen, workmem):qlz_compress3((char *)in, (char *)out, inlen, workmem)); }
+      #endif
+
+      #if _QCOMPRESS
+    case P_QCOMPRESS32: {
+      FfiVec v = auto_compress_i32_((int *)in, inlen/4, lev); memcpy(out, v.ptr, v.len); free_compressed_(v); return v.len;
+    } break;
+    case P_QCOMPRESS64: {
+      FfiVec v = auto_compress_i64_((long long *)in, inlen/8, lev); memcpy(out, v.ptr, v.len); free_compressed_(v); return v.len;
+    } break;
+      #endif
+
+      #if _SKIM
+    case P_SKIM: 
+      #endif
+      
+      #if _SLZ
+    case P_SLZ: { if(lev > 7) lev = 7;
+      unsigned blk = 16384 << lev;
+      struct slz_stream strm;
+            if(strchr(prm,'d')) slz_init(&strm, !!lev, SLZ_FMT_DEFLATE);
+       else if(strchr(prm,'g')) slz_init(&strm, !!lev, SLZ_FMT_GZIP);
+       else                     slz_init(&strm, !!lev, SLZ_FMT_ZLIB);
+      unsigned char *ip, *op=out;
+      for(ip = in, in += inlen; ip < in; ) {
+        unsigned iplen = in - ip; iplen = iplen>blk?blk:iplen;
+        op += slz_encode(&strm, op, ip, iplen, in-ip > blk);
+        ip += iplen;
+      }
+      op += slz_finish(&strm, op);
+      return op - out;
+    }
+      #endif
+      
       #if _SHOCO
     case P_SHOCO:    return shoco_compress((const char *)in, inlen, (char *)out, outsize);
       #endif
@@ -2921,16 +3098,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_BCM: return bcmdecompress(in, inlen, out, outlen);
       #endif
 
-      #if _C_BLOSC2
-    case P_C_BLOSC2: return blosc1_decompress(in, out, outlen);
-      #endif
-
-      #if _C_BLOSC2LZ
-    case P_C_BLOSC2LZ: return blosclz_decompress(in, inlen, out, outlen);
-      #endif
-
       #if _BPC
-	  case P_BPC: {
+    case P_BPC: {
       #endif
       
       #if _BRIEFLZ
@@ -2967,6 +3136,14 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       }
       #endif
 
+      #if _C_BLOSC2
+    case P_C_BLOSC2: return blosc1_decompress(in, out, outlen);
+      #endif
+
+      #if _C_BLOSC2LZ
+    case P_C_BLOSC2LZ: return blosclz_decompress(in, inlen, out, outlen);
+      #endif
+
       #if _CHAMELEON
     case P_CHAMELEON:  { Chameleon_Reset((Chameleon *)workmem); lev<2?Chameleon_Decode((Chameleon *)workmem, out, outlen, in):Chameleon2_Decode((Chameleon *)workmem, out, outlen, in); return inlen; }
       #endif
@@ -2993,12 +3170,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_DENSITY: { density_processing_result rs = density_decompress((uint8_t *)in, inlen, (uint8_t*)out, outlen/*+DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE*/);  return rs.state?0:rs.bytesWritten; }
       #endif
 
-      #if _FASTARI
-    case P_FASTARI:  { size_t outsize = outlen; return fa_decompress((const unsigned char *)in, out, inlen, &outsize, workmem)?0:inlen; }
-      #endif
-
       #if _DOBOZ
     case P_DOBOZ:   { doboz::Decompressor d; return d.decompress(in, inlen, out, outlen) == doboz::RESULT_OK ? outlen : -1; }
+      #endif
+
+      #if _FASTARI
+    case P_FASTARI:  { size_t outsize = outlen; return fa_decompress((const unsigned char *)in, out, inlen, &outsize, workmem)?0:inlen; }
       #endif
 
       #if _FASTLZ
@@ -3059,6 +3236,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       }
       #endif
 
+      #if _LIBLZG
+    case P_LIBLZG: LZG_Decode(in, inlen, out, outlen); break;
+      #endif
+
       #if _LIBLZF
     case P_LIBLZF: lzf_decompress(in, inlen, out, outlen); break;
       #endif
@@ -3113,10 +3294,6 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 	  return rc; }
       #endif
 
-      #if _LIBLZG
-    case P_LIBLZG: LZG_Decode(in, inlen, out, outlen); break;
-      #endif
-
       #if _MEMLZ
     case P_MEMLZ: memlz_reset((memlz_state*)workmem); return (int64_t)memlz_stream_decompress(out, in, (memlz_state*)workmem);
       #endif
@@ -3159,57 +3336,6 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_LZOMA:   lzomaunpack(in, inlen, out, outlen);break;
       #endif
 
-      #if _MINIZ
-    case P_MINIZ: { uLongf outsize = outlen; int rc = mz_uncompress(out, &outsize, in, inlen); } break;
-      #endif
-
-      #if _MISA77
-    case P_MISA77: return misa77::decompress(in, inlen, out, outlen); 
-      #endif
-      
-      #if _NAKA
-    case P_NAKA:  return NakaDecompress((char *)out, (char *)in, inlen);
-      #endif
-      
-      #if _OPENZL
-    case P_OPENZL_U8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_I8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_U16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_I16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_U32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_I32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_U64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_I64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_SERIAL: { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_serial(              inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;} 
-    case P_OPENZL_GENERIC:{ char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_generic(             inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;} 
-    case P_OPENZL_ZSTD:   { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_zstd(                inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_lz4(                 inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-      #endif
-      
-      #if _PITHY
-    case P_PITHY: return pithy_Decompress((const char *)in, inlen, (char *)out, outlen);
-      #endif
-
-      #if _QUICKLZ
-    case P_QUICKLZ: { lev= (in[0]>>2)&3; outlen = lev<=1?qlz_decompress1((char*)in, out, workmem):(lev<=2?qlz_decompress2((char*)in, out, workmem):qlz_decompress3((char*)in, out, workmem)); } break;
-      #endif
-
-      #if _QCOMPRESS
-    case P_QCOMPRESS32: { FfiVec v = auto_decompress_i32_(in, inlen); memcpy(out, v.ptr, outlen); free_i32_(v); return outlen;}
-    case P_QCOMPRESS64: { FfiVec v = auto_decompress_i64_(in, inlen); memcpy(out, v.ptr, outlen); free_i64_(v); return outlen;}
-      #endif
-
-      #if _PYSAP
-    case P_PYSAP: { CsObjectInt d; SAP_INT bytes_read, bytes_written;
-        d.CsInitDecompr((SAP_BYTE *)in); in += CS_HEAD_SIZE; d.CsDecompr( (SAP_BYTE *)in, inlen-CS_HEAD_SIZE, (SAP_BYTE *)out, outlen, lev, &bytes_read, &bytes_written );
-        return inlen-CS_HEAD_SIZE;
-      }
-      #endif
-
-      #if _ZLING
-    case P_ZLING: zling_decompress(in, inlen, out, outlen); break;
-      #endif
-
       #if _LZSA
     case P_LZSA:  {
       unsigned nFlags = 0; int nFormatVersion=1;
@@ -3237,6 +3363,18 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
      case P_MSCOMPRESS: { size_t _outlen = outlen; return ms_decompress((MSCompFormat)lev, in, inlen, out, &_outlen)==MSCOMP_OK?inlen:0; }
       #endif
 
+      #if _MINIZ
+    case P_MINIZ: { uLongf outsize = outlen; int rc = mz_uncompress(out, &outsize, in, inlen); } break;
+      #endif
+
+      #if _MISA77
+    case P_MISA77: return misa77::decompress(in, inlen, out, outlen); 
+      #endif
+      
+      #if _NAKA
+    case P_NAKA:  return NakaDecompress((char *)out, (char *)in, inlen);
+      #endif
+      
       #if _OODLE
     case P_OODLE: { 
       int nodll = strchr(prm,'d')?1:0;  
@@ -3253,21 +3391,53 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     }
       #endif
 
-      #if _SMALLZ4
-    case P_SMALLZ4:
-      if(!strchr(prm,'z')) { gip = in; giend = in+inlen; gop = out; unlz4(getbyte,sendbytes,NULL); break; }
+      #if _OPENZL
+    case P_OPENZL_U8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_I8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_U16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_I16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_U32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_I32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_U64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_I64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_SERIAL: { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_serial(              inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;} 
+    case P_OPENZL_GENERIC:{ char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_generic(             inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;} 
+    case P_OPENZL_ZSTD:   { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_zstd(                inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_lz4(                 inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
       #endif
 
-      #if _SHOCO
-    case P_SHOCO:     shoco_decompress((const char *)in, inlen, (char *)out, outlen); return inlen;
+      #if _PCODEC
+    case P_PCODECI8:  if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_I8,  out, outlen, &w); return w; } break;
+    case P_PCODECU8:  if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_U8,  out, outlen, &w); return w; } break;
+    case P_PCODECI16: if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_I16, out, outlen, &w); return w; } break;
+    case P_PCODECU16: if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_U16, out, outlen, &w); return w; } break;
+    case P_PCODECF16: if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_F16, out, outlen, &w); return w; } break;
+    case P_PCODECI32: if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_I32, out, outlen, &w); return w; } break;
+    case P_PCODECU32: if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_U32, out, outlen, &w); return w; } break;
+    case P_PCODECF32: if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_F32, out, outlen, &w); return w; } break;
+    case P_PCODECI64: if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_I64, out, outlen, &w); return w; } break;
+    case P_PCODECU64: if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_U64, out, outlen, &w); return w; } break;
+    case P_PCODECF64: if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_F64, out, outlen, &w); return w; } break;
       #endif
 
-      #if _SMAZ
-    case P_SMAZ:       smaz_decompress((const char *)in, inlen, (char *)out, outlen); return inlen;
+      #if _PITHY
+    case P_PITHY: return pithy_Decompress((const char *)in, inlen, (char *)out, outlen);
       #endif
 
-      #if _SHRINKER
-    case P_SHRINKER:    shrinker_decompress(in, out, outlen); break;
+      #if _PYSAP
+    case P_PYSAP: { CsObjectInt d; SAP_INT bytes_read, bytes_written;
+        d.CsInitDecompr((SAP_BYTE *)in); in += CS_HEAD_SIZE; d.CsDecompr( (SAP_BYTE *)in, inlen-CS_HEAD_SIZE, (SAP_BYTE *)out, outlen, lev, &bytes_read, &bytes_written );
+        return inlen-CS_HEAD_SIZE;
+      }
+      #endif
+
+      #if _QUICKLZ
+    case P_QUICKLZ: { lev= (in[0]>>2)&3; outlen = lev<=1?qlz_decompress1((char*)in, out, workmem):(lev<=2?qlz_decompress2((char*)in, out, workmem):qlz_decompress3((char*)in, out, workmem)); } break;
+      #endif
+
+      #if _QCOMPRESS
+    case P_QCOMPRESS32: { FfiVec v = auto_decompress_i32_(in, inlen); memcpy(out, v.ptr, outlen); free_i32_(v); return outlen;}
+    case P_QCOMPRESS64: { FfiVec v = auto_decompress_i64_(in, inlen); memcpy(out, v.ptr, outlen); free_i64_(v); return outlen;}
       #endif
 
       #if _SKIM
@@ -3276,6 +3446,42 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       size_t consumed = skim_decoder_decompress(skim_decoder, (const uint8_t*)in, inlen, (uint8_t*)out, outlen);
       if(!consumed) return 0;
       return skim_decoder_exact_output_length((const uint8_t*)in, inlen);
+      #endif
+
+      #if _SLZ
+    case P_SLZ: {
+      struct slz_stream strm;
+      int fmt=15;
+            if(prm && *prm == 'd') fmt=-15;
+       else if(prm && *prm == 'g') fmt=15|32;
+       z_stream z;
+       memset(&z, 0, sizeof(z));
+       z.next_in   = in;
+       z.avail_in  = inlen;
+       z.next_out  = out;
+       z.avail_out = outlen;
+       if(inflateInit2(&z, fmt) == Z_OK) {
+         if(inflate(&z, Z_SYNC_FLUSH) == Z_STREAM_END)
+           inflateEnd(&z);
+       }
+    } break;
+      #endif
+
+      #if _SMALLZ4
+    case P_SMALLZ4:
+      if(!strchr(prm,'z')) { gip = in; giend = in+inlen; gop = out; unlz4(getbyte,sendbytes,NULL); break; }
+      #endif
+
+      #if _SMAZ
+    case P_SMAZ:       smaz_decompress((const char *)in, inlen, (char *)out, outlen); return inlen;
+      #endif
+
+      #if _SHOCO
+    case P_SHOCO:     shoco_decompress((const char *)in, inlen, (char *)out, outlen); return inlen;
+      #endif
+
+      #if _SHRINKER
+    case P_SHRINKER:    shrinker_decompress(in, out, outlen); break;
       #endif
 
       #if _SNAPPY
@@ -3343,34 +3549,15 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       }
       #endif
 
-      #if _YAPPY
-    case P_YAPPY:    return YappyUnCompress(in, in+inlen, out)-out;
-      #endif
-
-      #if _SLZ
-    case P_SLZ: {
-      struct slz_stream strm;
-      int fmt=15;
-            if(prm && *prm == 'd') fmt=-15;
-       else if(prm && *prm == 'g') fmt=15|32;
-       z_stream z;
-       memset(&z, 0, sizeof(z));
-       z.next_in   = in;
-       z.avail_in  = inlen;
-       z.next_out  = out;
-       z.avail_out = outlen;
-       if(inflateInit2(&z, fmt) == Z_OK) {
-         if(inflate(&z, Z_SYNC_FLUSH) == Z_STREAM_END)
-           inflateEnd(&z);
-       }
-    } break;
-      #endif
-
       #if _XZ
     case P_XZ: { int threadnum = 1; char *q;
       if(q=strstr(prm,"mt")) threadnum = atoi(q+(q[2]=='='?3:2));
       return _xz_decompress((char *)in, inlen, (char *)out, outlen, threadnum);
     }
+      #endif
+
+      #if _YAPPY
+    case P_YAPPY:    return YappyUnCompress(in, in+inlen, out)-out;
       #endif
 
       #if _ZLIB
@@ -3384,6 +3571,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #if _ZLIB_NG
     case P_ZOPFLI:
     case P_ZLIB_NG: { size_t outsize = outlen; int rc = zng_uncompress(out, &outsize, in, inlen); } break;
+      #endif
+
+      #if _ZLING
+    case P_ZLING: zling_decompress(in, inlen, out, outlen); break;
       #endif
 
       #if _ZSTD
@@ -3824,4 +4015,4 @@ char *codver(int codec, char *v, char *s) {
   }
   return s;
 }
-
+ 
