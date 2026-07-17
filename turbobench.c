@@ -1538,7 +1538,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
 }
 
 static const char *compiler(void) {
-    #if defined __clang__
+    #ifdef __clang__
   return "Clang " xstr(__clang_major__) "." xstr(__clang_minor__) "." xstr(__clang_patchlevel__);
     #elif defined __GNUC__
   return "GCC " xstr(__GNUC__) "." xstr(__GNUC_MINOR__) "." xstr(__GNUC_PATCHLEVEL__);
