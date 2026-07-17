@@ -3635,7 +3635,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 char *codver(int codec, char *v, char *s) {
   switch(codec) { 
       #if _BZIP2
-    case P_BZIP2: return BZ2_bzlibVersion();
+    case P_BZIP2: return (char *)BZ2_bzlibVersion();
       #endif
       #if _BZIP3
     case P_BZIP3: return "1.5.3"; //{ char *p = bz3_version(); strcpy(s, p?p:""); break; }
