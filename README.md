@@ -221,6 +221,7 @@ Compressors with versions 16.08.2016 <br>
  - [zlib-ng](https://github.com/Dead2/zlib-ng)
  - [zlib cloudflare](https://github.com/cloudflare/zlib)
  - [xpack](https://github.com/ebiggers/xpack) 
+ - [xz](https://github.com/tukaani-project/xz) :new:2026.05
  - [zopfli](https://code.google.com/p/zopfli) 
  - [zstd](https://github.com/facebook/zstd)
  - [zpaq](https://github.com/zpaq/zpaq)
