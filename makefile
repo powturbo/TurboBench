@@ -265,7 +265,12 @@ ifneq ($(wildcard skim/.),)
 CXXFLAGS+=-D_MEMLZ
 LDFLAGS += skim/libskim.a
 endif
- 
+
+ifneq ($(wildcard libslz/.),)
+CXXFLAGS+=-D_SLZ
+OB+=libslz/src/slz.o
+endif
+
 ifneq ($(wildcard tamp/.),)
 CXXFLAGS+=-D_TAMP
 TAMP_DIR = tamp/tamp/_c_src/tamp
@@ -506,10 +511,6 @@ CXXFLAGS+=-D_GIPFELI
 OB+=gipfeli/lz77.o gipfeli/entropy.o gipfeli/entropy_code_builder.o gipfeli/decompress.o gipfeli/gipfeli-internal.o
 endif
 
-ifneq ($(wildcard libslz/.),)
-CXXFLAGS+=-D_SLZ
-OB+=libslz/src/slz.o
-endif
 
 ifneq ($(wildcard tcobs/.),)
 CXXFLAGS+=-D_TCOBS -Drestrict=__restrict
