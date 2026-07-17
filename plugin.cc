@@ -2045,8 +2045,11 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _LIBBSC
     #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'T')?0:LIBBSC_FEATURE_MULTITHREADING)
-    case P_LIBBSC: { int ec = (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1; ec = ec==0?3:(ec>3?3:ec);  return bsc_compress(      in, out, inlen,strchr(prm,'p')?0:15,strchr(prm,'p')?0:128, lev<3?1:lev, ec, BSC_MODE);}
-    case P_LIBBSCC:return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
+    case P_LIBBSC: { int ec = (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1; ec = ec==0?3:(ec>3?3:ec);  
+      return bsc_compress(      in, out, inlen,strchr(prm,'p')?0:15,strchr(prm,'p')?0:128, lev<3?1:lev, ec, BSC_MODE);
+      //int bsc_compress_mt(const unsigned char * input, unsigned char * output, int n, int lzpHashSize, int lzpMinLen, int blockSorter, int coder, int features, int threads);
+    }
+    case P_LIBBSCC: return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
     case P_LIBBSCBWT: { int bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, 0); *(unsigned *)out = bwtidx; return inlen+4; }
     case P_ST: { memcpy(out+4,in, inlen); *(unsigned *)(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
       #endif
@@ -2075,6 +2078,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         unsigned iplen = (in+inlen) - ip; iplen = min(iplen, BZIP3_SIZE);
         op+=4; memcpy(op, ip, iplen);
         int rc = bz3_encode_block(st, op, iplen);
+        //BZIP3_API int bz3_compress_mt(u32 block_size, const u8 * const in, u8 * out, size_t in_size, size_t * out_size, int threads);
         if(rc == -1) die("bzip3 encode failed");
         ctou32(op-4) = rc; op += rc;
         ip += iplen;        
@@ -2238,8 +2242,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _FLZMA2
-    case P_FLZMA2: { unsigned nbThreads = 1; char *q; 
-      if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) nbThreads = atoi(q+(q[2]=='='?3:2)); 
+    case P_FLZMA2: { unsigned nbThreads = 1; char *q; if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) nbThreads = atoi(q+(q[2]=='='?3:2)); 
       return FL2_compressMt(out, outsize, in, inlen, lev, nbThreads); }
       #endif
       #if _LZMA
@@ -2567,11 +2570,13 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _ZSTD
     case P_ZSTD: { 
+      int threadnum = 1; char *q; if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(q) threadnum = atoi(q+(q[2]=='='?3:2)); 
       ZSTD_CStream *z = ZSTD_createCStream(); if(!z) return -1;
       if(dsize) {
-        unsigned windowLog = bsr32(dsize)-powof2(dsize); 
+        unsigned windowLog = bsr32(dsize) - powof2(dsize); 
         ZSTD_CCtx_setParameter(z, ZSTD_c_enableLongDistanceMatching, 1); 
         ZSTD_CCtx_setParameter(z, ZSTD_c_windowLog, windowLog);
+        ZSTD_CCtx_setParameter(cctx, ZSTD_c_nbWorkers, threadnum);
       }
       ZSTD_initCStream(z, lev);
       ZSTD_inBuffer  ip = { in, (size_t)inlen,   0 };
@@ -3759,6 +3764,9 @@ char *codver(int codec, char *v, char *s) {
     case P_DENSITY: sprintf(s,"%d.%d.%d", density_version_major(), density_version_minor(), density_version_revision()); break;
       #endif
 
+      #if _FLZMA2
+    case P_FLZMA2 : strcpy(s, "1.0.1 MT"); break;
+      #endif
       #if _FASTLZ
     case P_FASTLZ: return FASTLZ_VERSION_STRING;
       #endif
@@ -3851,7 +3859,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
       
       #if _ZSTD
-    case P_ZSTD:    sprintf(s,"%d.%d.%d", ZSTD_VERSION_MAJOR, ZSTD_VERSION_MINOR, ZSTD_VERSION_RELEASE); break;
+    case P_ZSTD:    sprintf(s,"%d.%d.%d MT", ZSTD_VERSION_MAJOR, ZSTD_VERSION_MINOR, ZSTD_VERSION_RELEASE); break;
       #endif
 
       #if _ZXC
