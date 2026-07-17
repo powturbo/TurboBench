@@ -633,6 +633,8 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 #include "kanzi-cpp/src/io/CompressedInputStream.hpp"
 #include "kanzi-cpp/src/io/CompressedOutputStream.hpp"
 #include "kanzi-cpp/src/util/fixedbuf.hpp"
+#include "kanzi-cpp/src/api/Decompressor.hpp"
+
 // derived from lzbench
 int64_t kanzi_compress(char *inbuf, size_t insize, char *outbuf, size_t outsize, int threadnum, int lev) {
   std::string entropy;
@@ -1430,7 +1432,7 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void
   
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
-  { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                "0,1,2,3,4,5,6,7,8,9", 64*1024},
+  { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                "0,1,2,3,4,5,6,7,8,9", "", 64*1024},
   { P_BPC,           "bpc",           _BPC,       "bit plane compression",   "" },
   { P_BRIEFLZ,       "brieflz",       _BRIEFLZ,   "BriefLz",                 "1,3,6,9" },
   { P_BROTLI,        "brotli",        _BROTLI,    "Brotli",                  "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
@@ -1513,7 +1515,7 @@ struct plugs plugs[] = {
   { P_QCOMPRESS64,   "qcomp64",       _QCOMPRESS, "quantile compression",    "1,2,3,4,5,6,7,8,9" },
   
   { P_SKIM,          "skim",          _SKIM,      "skim",                    ""},
-  { P_SHRINKER,      "shrinker",      _SHRINKER,  "Shrinker",                "", 0, (1<<26) },
+  { P_SHRINKER,      "shrinker",      _SHRINKER,  "Shrinker",                "", "", 0, (1<<26) },
   { P_SHOCO,         "shoco",         _SHOCO,     "Shoco",                   "" },
   { P_SLZ,           "slz",           _SLZ,       "libslz",                  "0,1,2,3,4,5,6,7,8,9" },
   { P_SMAZ,          "smaz",          _SMAZ,      "smaz",                    "" },
@@ -1550,18 +1552,18 @@ struct plugs plugs[] = {
   { P_DAALA,         "Daala",       _DAALA,     "DAALA Entropy Coder",     ""},
   { P_FPC,           "fpc",         _FPC,       "Fast Prefix Coder",       "0,8,9,10,11,12,16,32,48,63" },
   { P_FREQTAB,       "freqtab",     _FREQTAB,   "FreqTable v2.Eugene shelwien", "" },
-  { P_FSC,           "fsc",         _FSC,       "Finite State Coder",      "", E_ANS },
-  { P_FSE,           "fse",         _FSE,       "Finite State Entropy",    "", E_ANS },
-  { P_FSEH,          "fsehuf",      _FSEHUF,    "Zstd Huffman Coding",     "", E_HUF },
+  { P_FSC,           "fsc",         _FSC,       "Finite State Coder",      "", "", E_ANS },
+  { P_FSE,           "fse",         _FSE,       "Finite State Entropy",    "", "", E_ANS },
+  { P_FSEH,          "fsehuf",      _FSEHUF,    "Zstd Huffman Coding",     "", "", E_HUF },
   { P_FPAQC,         "fpaqc",       _FPAQC,     "Asymmetric Binary Coder", "" },
   { P_SHRC,          "fpaq0p_sh",   _SHRC,      "Bitwise RC",              "" },
   { P_SHRCV,         "vecrc_sh",    _VECRC,     "Bitwise vector RC",       "" },
   { P_FASTHF,        "FastHF",      _FASTHF,    "Fast HF",                 "" },
   { P_FASTARI,       "FastAri",     _FASTARI,   "FastAri",                 "" },
   { P_FASTAC,        "FastAC",      _FASTAC,    "Fast AC",                 "" },
-  { P_GANSR, 	     "rygrans",	    _GANS,      "Ryg rANS",                "", E_ANS },
-  { P_GANSW, 	     "rygranssse",  _GANS,      "Ryg rANS",                "", E_ANS },
-  { P_JAC,           "arith_static",_JAC,       "Range Coder/J.Bonfield",  "", E_ANS},
+  { P_GANSR, 	     "rygrans",	    _GANS,      "Ryg rANS",                "", "", E_ANS },
+  { P_GANSW, 	     "rygranssse",  _GANS,      "Ryg rANS",                "", "", E_ANS },
+  { P_JAC,           "arith_static",_JAC,       "Range Coder/J.Bonfield",  "", "", E_ANS},
   { P_FQZ0,          "fqz0",        _FQZ0,      "FQZ/PPMD Range Coder",    ""},
   { P_MARLIN,        "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
   { P_NIBRANS,       "nibrans",     _NIBRANS,   "nibrans",                 ""},
@@ -1570,7 +1572,7 @@ struct plugs plugs[] = {
   { P_POLHF,         "polar",       _POLHF,     "Polar Codes",             "" },
   { P_PPMDEC,        "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
   { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",             "" },
-  { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",           "", E_ANS },
+  { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",           "", "", E_ANS },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",              "" },
   { P_TORNADOHF,    "tornado_huff",_TORNADO,   "Tornado Huf",             "" },
   { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,20,56/e#s" }, 
@@ -3632,7 +3634,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
 char *codver(int codec, char *v, char *s) {
   switch(codec) { 
-
+      #if _BZIP2
+    case P_BZIP2: return BZ2_bzlibVersion();
+      #endif
+      #if _BZIP3
+    case P_BZIP3: return "1.5.3"; //{ char *p = bz3_version(); strcpy(s, p?p:""); break; }
+      #endif
       #if _BRIEFLZ
     case P_BRIEFLZ:  sprintf(s,"%d.%d.%d", BLZ_VER_MAJOR, BLZ_VER_MINOR, BLZ_VER_PATCH); break;
       #endif
@@ -3648,12 +3655,20 @@ char *codver(int codec, char *v, char *s) {
     case P_DENSITY: sprintf(s,"%d.%d.%d", density_version_major(), density_version_minor(), density_version_revision()); break;
       #endif
 
+      #if _FASTLZ
+    case P_FASTLZ: return FASTLZ_VERSION_STRING;
+      #endif
+   
       #if _HEATSHRINK
     case P_HEATSHRINK: sprintf(s,"%d.%d.%d", HEATSHRINK_VERSION_MAJOR, HEATSHRINK_VERSION_MINOR, HEATSHRINK_VERSION_PATCH); break;
       #endif
 
       #if _ISA_L
     case P_ISA_L:  sprintf(s,"%d.%d.%d", ISAL_MAJOR_VERSION, ISAL_MINOR_VERSION, ISAL_PATCH_VERSION); break;
+      #endif
+
+      #if _KANZI
+    case P_KANZI:  sprintf(s,"%d.%d.%d", KANZI_DECOMP_VERSION_MAJOR, KANZI_DECOMP_VERSION_MINOR, KANZI_DECOMP_VERSION_PATCH); break;
       #endif
 
       #if _LIBBSC
@@ -3676,6 +3691,21 @@ char *codver(int codec, char *v, char *s) {
       #endif
       #if _LZMA
     case P_LZMA:  strcpy(s, MY_VERSION_NUMBERS); break;
+      #endif
+
+      #if _OPENZL
+    case P_OPENZL_U8:
+    case P_OPENZL_I8:
+    case P_OPENZL_U16:
+    case P_OPENZL_I16:
+    case P_OPENZL_U32:
+    case P_OPENZL_I32:
+    case P_OPENZL_U64:
+    case P_OPENZL_I64:
+    case P_OPENZL_SERIAL:
+    case P_OPENZL_GENERIC:
+    case P_OPENZL_ZSTD:
+    case P_OPENZL_LZ4:   sprintf(s,"%d.%d.%d", ZL_LIBRARY_VERSION_MAJOR, ZL_LIBRARY_VERSION_MINOR, ZL_LIBRARY_VERSION_PATCH); break;
       #endif
 
       #if _PIVCOHUF
