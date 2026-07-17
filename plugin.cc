@@ -3990,7 +3990,7 @@ char *codver(int codec, char *v, char *s) {
     case P_PCODECF32:
     case P_PCODECI64:
     case P_PCODECU64:
-    case P_PCODECF64: returrn "1.0.2"; break;  
+    case P_PCODECF64: return "1.0.2"; break;  
       #endif
 
       #if _PIVCOHUF
