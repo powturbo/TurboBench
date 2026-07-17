@@ -13,7 +13,7 @@
  - 100% in-memory benchmark, no I/O overhead
  - Include (>100) allmost all popular, latest or fastest compressors in one compiled package
  - OS/Arch: Linux amd/intel, arm, RISC-V, PowerPC, s390x, Apple M1-M5 MacOs. Windows: MSYS2, Mingw, visual c++
- - Benchmarking **Entropy Coders**, **Lz77**, **Rolz**, **BWT** and **Context mixing** compressors
+ - Benchmarking **Entropy Coders**, **Lz77**, **Rolz**, **BWT** and **Context mixing** compressors 
  - **Multiple** input files with **recursive** directories
  - Concatenate **multiple small files** into one multiblock file
  - Avoid **cache szenario** and **cpu throttling** found in other benchmarks
