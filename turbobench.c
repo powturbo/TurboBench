@@ -1537,8 +1537,20 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
   return totinlen;
 }
 
+static const char *compiler(void) {
+    #if defined __clang__
+  return "Clang " xstr(__clang_major__) "." xstr(__clang_minor__) "." xstr(__clang_patchlevel__);
+    #elif defined __GNUC__
+  return "GCC " xstr(__GNUC__) "." xstr(__GNUC_MINOR__) "." xstr(__GNUC_PATCHLEVEL__);
+    #elif defined _MSC_VER
+  return "MSVC " xstr(_MSC_VER);
+    #else
+  return "unknown compiler";
+    #endif
+}
+
 void usage(char *pgm) {
-  fprintf(stderr, "\nTurboBench Copyright (c) 2013-2026 Powturbo %s\n", __DATE__);
+  fprintf(stderr, "\nTurboBench Copyright (c) 2013-2026 Powturbo %s [%]\n", __DATE__, compiler());
   fprintf(stderr, "Usage: %s [options] [file]\n", pgm);
   fprintf(stderr, " -eS      S = compressors/groups separated by '/' Parameter can be specified after ','\n");
   fprintf(stderr, " -b#s     # = blocksize (default filesize). max=1GB\n");
