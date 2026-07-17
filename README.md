@@ -11,7 +11,7 @@
  - High performance precision, zero overhead. One might call it the **compression lie detector**
  - The only benchmark program including **[LzTurbo](https://sites.google.com/site/powturbo/compression-benchmark)**
  - 100% in-memory benchmark, no I/O overhead
- - Include (>70) allmost all popular, latest or fastest compressors in one compiled package
+ - Include (>100) allmost all popular, latest or fastest compressors in one compiled package
  - OS/Arch: Linux amd/intel, arm, RISC-V, PowerPC, s390x, Apple M1-M5 MacOs. Windows: MSYS2, Mingw, visual c++
  - Benchmarking **Entropy Coders**, **Lz77**, **Rolz**, **BWT** and **Context mixing** compressors
  - **Multiple** input files with **recursive** directories
@@ -27,7 +27,7 @@
 
 ### Release:
   - Build or Download turbobench from [releases](https://github.com/powturbo/TurboBench/releases)
-  + List all plugins: "./turbobench -l2"<br />
+  + List all plugins + version: "./turbobench -l2"<br />
   + List all compiled codecs: "./turbobench -l1"<br />
   + type "./turbobench -h" for help
 
