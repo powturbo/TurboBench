@@ -262,11 +262,6 @@ enum {
 #define _QUICKLZ 0
 #endif
  P_QUICKLZ,
-#ifndef _QCOMPRESS
-#define _QCOMPRESS 0
-#endif
- P_QCOMPRESS32,
- P_QCOMPRESS64,
  
 #ifndef _SHRINKER
 #define _SHRINKER 0
@@ -858,108 +853,20 @@ void pco_ini() {
   pco++;
     #if _WIN32
   HINSTANCE hdll;
-  if(hdll = LoadLibrary("cpcodec.dll")) {
-    if(!(pco_compress   = (fpco_simpler_compress)GetProcAddress(hdll, "pco_standalone_simple_compress_into")))  die("fpco_simpler_compress not found\n");
-    if(!(pco_decompress = (fpco_simple_decompress)GetProcAddress(hdll, "pco_simple_decompress"))) die("pco_simple_decompress not found\n");
+  if(hdll = LoadLibrary("libcpcodec.dll")) {
+    if(!(pco_compress   = (fpco_compress  )GetProcAddress(hdll, "pco_standalone_simple_compress_into")))   die("fpco_simpler_compress not found\n");
+    if(!(pco_decompress = (fpco_decompress)GetProcAddress(hdll, "pco_standalone_simple_decompress_into"))) die("pco_simple_decompress not found\n");
   }
-  else fprintf(stderr, "cpcodec.dll not found\n");
+  else fprintf(stderr, "libcpcodec.dll not found\n");
     #elif !defined(_STATIC)
   void* hdll = dlopen("./libcpcodec.so", RTLD_LAZY);
   if (hdll) {
-    if (!(pco_compress   = (fpco_compress)dlsym(hdll,   "pco_standalone_simple_compress_into")))  die("fpco_simpler_compress not found\n");
+    if (!(pco_compress   = (fpco_compress  )dlsym(hdll, "pco_standalone_simple_compress_into"  ))) die("fpco_simpler_compress not found\n");
     if (!(pco_decompress = (fpco_decompress)dlsym(hdll, "pco_standalone_simple_decompress_into"))) die("pco_simple_decompress not found\n");
   }
-  else fprintf(stderr, "#libcpcodec.so shared library not found. '%s'\n", dlerror());
+  else fprintf(stderr, "libcpcodec.so shared library not found. '%s'\n", dlerror());
     #endif
 }
-#if 0
-unsigned pcocomp32(unsigned char* in, size_t inlen, unsigned char* out, int lev) {
-  pcocompini();
-  PcoFfiVec v = { 0 };
-  if (PcoSuccess != pco_simpler_compress_(in, inlen / 4, PCO_TYPE_U32, lev, &v))
-    return 0;
-  memcpy(out, v.ptr, v.len);
-  inlen = v.len;
-  pco_free_pcovec_(&v);
-  return inlen;
-}
-
-unsigned pcodecomp32(unsigned char* in, size_t inlen, unsigned char* out, unsigned outlen) {
-  pcocompini();
-  PcoFfiVec v = { 0 };
-  if (PcoSuccess != pco_simple_decompress_(in, inlen, PCO_TYPE_U32, &v))
-    return 0;
-  memcpy(out, v.ptr, outlen);
-  pco_free_pcovec_(&v);
-  return outlen;
-}
-
-unsigned pcocomp64(unsigned char* in, size_t inlen, unsigned char* out, int lev) {
-  pcocompini();
-  PcoFfiVec v = { 0 };
-  if (PcoSuccess != pco_simpler_compress_(in, inlen / 8, PCO_TYPE_U64, lev, &v))
-    return 0;
-  memcpy(out, v.ptr, v.len);
-  inlen = v.len;
-  pco_free_pcovec_(&v);
-  return inlen;
-}
-
-unsigned pcodecomp64(unsigned char* in, size_t inlen, unsigned char* out, unsigned outlen) {
-  pcocompini();
-  PcoFfiVec v = { 0 };
-  if (PcoSuccess != pco_simple_decompress_(in, inlen, PCO_TYPE_U64, &v))
-    return 0;
-  memcpy(out, v.ptr, outlen);
-  pco_free_pcovec_(&v);
-  return outlen;
-}
-unsigned pcozcomp32(unsigned char* in, size_t inlen, unsigned char* out, int lev, unsigned char* tmp) {
-  bitzenc(in, inlen, tmp, 4);
-  pcocompini();
-  PcoFfiVec v = { 0 };
-  if (PcoSuccess != pco_simpler_compress_(tmp, inlen / 4, PCO_TYPE_U32, lev, &v))
-    return 0;
-  memcpy(out, v.ptr, v.len);
-  inlen = v.len;
-  pco_free_pcovec_(&v);
-  return inlen;
-}
-
-unsigned pcozdecomp32(unsigned char* in, size_t inlen, unsigned char* out, unsigned outlen) {
-  pcocompini();
-  PcoFfiVec v = { 0 };
-  if (PcoSuccess != pco_simple_decompress_(in, inlen, PCO_TYPE_U32, &v))
-    return 0;
-  memcpy(out, v.ptr, outlen);
-  pco_free_pcovec_(&v);
-  bitzdec(out, outlen, 4);
-  return outlen;
-}
-
-unsigned pcozcomp64(unsigned char* in, size_t inlen, unsigned char* out, int lev, unsigned char* tmp) {
-  bitzenc(in, inlen, tmp, 8);
-  pcocompini();
-  PcoFfiVec v = { 0 };
-  if (PcoSuccess != pco_simpler_compress_(tmp, inlen / 8, PCO_TYPE_U64, lev, &v))
-    return 0;
-  memcpy(out, v.ptr, v.len);
-  inlen = v.len;
-  pco_free_pcovec_(&v);
-  return inlen;
-}
-
-unsigned pcozdecomp64(unsigned char* in, size_t inlen, unsigned char* out, unsigned outlen) {
-  pcocompini();
-  PcoFfiVec v = { 0 };
-  if (PcoSuccess != pco_simple_decompress_(in, inlen, PCO_TYPE_U64, &v))
-    return 0;
-  memcpy(out, v.ptr, outlen);
-  pco_free_pcovec_(&v);
-  bitzdec(out, outlen, 8);
-  return outlen;
-}
-#endif
   #endif
 
   #if _PITHY
@@ -980,24 +887,6 @@ unsigned pcozdecomp64(unsigned char* in, size_t inlen, unsigned char* out, unsig
 #undef min
   #endif
 
-  #if _QCOMPRESS
-#include "q_compress/q_compress.h"
-typedef FfiVec (*fauto_compress_i32)(int *nums, unsigned len, unsigned level);
-typedef FfiVec (*fauto_compress_i64)(long long *nums, unsigned len, unsigned level);
-typedef void   (*ffree_compressed)(FfiVec ffi_vec);
-typedef FfiVec (*fauto_decompress_i32)( unsigned char *compressed, unsigned len );
-typedef void   (*ffree_i32)(FfiVec c_vec);
-typedef FfiVec (*fauto_decompress_i64)( unsigned char *compressed, unsigned len );
-typedef void   (*ffree_i64)(FfiVec c_vec);
-static fauto_compress_i32   auto_compress_i32_;
-static fauto_compress_i64   auto_compress_i64_;
-static ffree_compressed     free_compressed_;
-static fauto_decompress_i32 auto_decompress_i32_;
-static fauto_decompress_i64 auto_decompress_i64_;
-static ffree_i32 free_i32_;
-static ffree_i64 free_i64_;
-  #endif
- 
   #if _SHRINKER
 #include "shrinker/Shrinker.h"
   #endif
@@ -1122,13 +1011,12 @@ int vsrc_reverse(unsigned char * src, unsigned char * dst, size_t src_size);
 #include "openzl/include/openzl/openzl.h"
 #include "openzl/include/openzl/codecs/zl_segmenters.h"
 
-// The OpenZL format version used for the compression in lzbench
 #define OPENZL_FORMAT_VERSION 24
-#define WINDOWLOG_OPENZL 27
+#define WINDOWLOG_OPENZL      27
 typedef struct {
   ZL_Compressor* cgraph;
-  ZL_CCtx* cctx;
-  ZL_DCtx* dctx;
+  ZL_CCtx *cctx;
+  ZL_DCtx *dctx;
 } openzl_params_s;
 
 static openzl_params_s *_openzl_init_base(size_t insize, size_t level, size_t windowLog) {
@@ -1181,9 +1069,8 @@ openzl_params_s *_openzl_init_generic(size_t insize, size_t level, size_t window
 }
 
 openzl_params_s *_openzl_init_zstd(size_t insize, size_t level, size_t windowLog) {
-  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
-  // ZL_GRAPH_ZSTD: Zstd compression.
-  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_ZSTD);
+  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);  
+  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_ZSTD); // ZL_GRAPH_ZSTD: Zstd compression.
   if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
    // Valid compression levels range from -99 (?) to -1 and from 1 to 22. Level 0 requests the default behaviour, which corresponds to level 6.
   report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_compressionLevel, level);
@@ -1227,7 +1114,7 @@ static int64_t _openzl_decompress(char *inbuf, size_t insize, char *outbuf, size
   return (int64_t) ZL_validResult(report);
 }
   #endif
-
+//=============================================================================================================================
 
   #if __cplusplus
 extern "C" {
@@ -1335,7 +1222,7 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
   #if __cplusplus
 }
   #endif
-  //------------------------------------ Encoding -----------------------------------
+// ======================================== Encoding =====================================================
   #if _GANS
 #include "EC/rans.h"
   #endif
@@ -1956,39 +1843,6 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_PCODECF64: pco_ini(); break;  
       #endif
         
-      #if _QCOMPRESS
-    case P_QCOMPRESS32:
-    case P_QCOMPRESS64:
-        #if _WIN32
-      { HINSTANCE hdll; int i;  
-        char *qcomp = "./q_compress_ffi.dll";
-        if(hdll = LoadLibrary(qcomp)) {
-          if(!(auto_compress_i32_   =   (fauto_compress_i32)GetProcAddress(hdll, "auto_compress_i32")))   die("auto_compress_i32 not found\n");
-          if(!(auto_compress_i64_   =   (fauto_compress_i64)GetProcAddress(hdll, "auto_compress_i64")))   die("auto_compress_i64 not found\n");
-          if(!(free_compressed_     =     (ffree_compressed)GetProcAddress(hdll, "free_compressed")))     die("free_compressed not found\n");
-          if(!(auto_decompress_i32_ = (fauto_decompress_i32)GetProcAddress(hdll, "auto_decompress_i32"))) die("auto_decompress_i32 not found\n");
-          if(!(auto_decompress_i64_ = (fauto_decompress_i64)GetProcAddress(hdll, "auto_decompress_i64"))) die("auto_decompress_i64 not found\n");
-          if(!(free_i32_            =            (ffree_i32)GetProcAddress(hdll, "free_i32")))            die("free_i32 not found\n");
-          if(!(free_i64_            =            (ffree_i64)GetProcAddress(hdll, "free_i64")))            die("free_i64 not found\n");
-        } else fprintf(stderr,"q_compress_ffi.dll not found\n");
-      } 
-        #else
-      { char *qcomp = "./libq_compress_ffi.so";
-        void *hdll = dlopen(qcomp, RTLD_LAZY);
-        if(hdll) { 
-          if(!(auto_compress_i32_   =   (fauto_compress_i32)dlsym(hdll, "auto_compress_i32")))   die("fauto_compress_i32 not found\n");
-          if(!(auto_compress_i64_   =   (fauto_compress_i64)dlsym(hdll, "auto_compress_i64")))   die("fauto_compress_i64 not found\n");
-          if(!(free_compressed_     =     (ffree_compressed)dlsym(hdll, "free_compressed")))     die("ffree_compressed not found\n");
-          if(!(auto_decompress_i32_ = (fauto_decompress_i32)dlsym(hdll, "auto_decompress_i32"))) die("auto_decompress_i32 not found\n");
-          if(!(auto_decompress_i64_ = (fauto_decompress_i64)dlsym(hdll, "auto_decompress_i64"))) die("auto_decompress_i64 not found\n");
-          if(!(free_i32_            =            (ffree_i32)dlsym(hdll, "free_i32")))            die("free_i32 not found\n");
-          if(!(free_i64_            =            (ffree_i64)dlsym(hdll, "free_i64")))            die("free_i64 not found\n");
-        } else fprintf(stderr,"qcompress shared library '%s' not found.'%s'\n", qcomp, dlerror());   
-      }
-      #endif 
-      break;
-      #endif     
-
       #if _QUICKLZ
     case P_QUICKLZ:
       state_size  = max(qlz_get_setting1(1), max(qlz_get_setting2(1), qlz_get_setting3(1))); workmemsize = max(state_size, workmemsize);
@@ -2560,15 +2414,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _QUICKLZ
     case P_QUICKLZ: { memset(workmem,0,workmemsize); return lev<=1?qlz_compress1((char *)in, (char *)out, inlen, workmem):(lev<=2?qlz_compress2((char *)in, (char *)out, inlen, workmem):qlz_compress3((char *)in, (char *)out, inlen, workmem)); }
-      #endif
-
-      #if _QCOMPRESS
-    case P_QCOMPRESS32: {
-      FfiVec v = auto_compress_i32_((int *)in, inlen/4, lev); memcpy(out, v.ptr, v.len); free_compressed_(v); return v.len;
-    } break;
-    case P_QCOMPRESS64: {
-      FfiVec v = auto_compress_i64_((long long *)in, inlen/8, lev); memcpy(out, v.ptr, v.len); free_compressed_(v); return v.len;
-    } break;
       #endif
 
       #if _SKIM
@@ -3432,11 +3277,6 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _QUICKLZ
     case P_QUICKLZ: { lev= (in[0]>>2)&3; outlen = lev<=1?qlz_decompress1((char*)in, out, workmem):(lev<=2?qlz_decompress2((char*)in, out, workmem):qlz_decompress3((char*)in, out, workmem)); } break;
-      #endif
-
-      #if _QCOMPRESS
-    case P_QCOMPRESS32: { FfiVec v = auto_decompress_i32_(in, inlen); memcpy(out, v.ptr, outlen); free_i32_(v); return outlen;}
-    case P_QCOMPRESS64: { FfiVec v = auto_decompress_i64_(in, inlen); memcpy(out, v.ptr, outlen); free_i64_(v); return outlen;}
       #endif
 
       #if _SKIM
