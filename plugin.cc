@@ -366,6 +366,10 @@ enum {
 #define _FSEHUF 0
 #endif 
  P_FSEH,
+#ifndef _XZ
+#define _XZ 0
+#endif
+ P_XZ,
 #ifndef _ZXC
 #define _ZXC 0
 #endif
@@ -905,6 +909,50 @@ static ffree_i64 free_i64_;
 
   #if _YAPPY
 #include "yappy/yappy.hpp"
+  #endif
+
+  #if _XZ
+#include "xz/src/liblzma/api/lzma.h"
+int64_t _xz_compress(char *in, size_t insize, char *out, size_t outsize, int lev, int threadnum) {
+  lzma_stream strm = LZMA_STREAM_INIT;
+  lzma_ret ret;
+  lzma_mt mt_options    = {0};
+  mt_options.preset     = (codec_options && lev >= 0 && lev <= 9)  ? (uint32_t)codec_options->level  : LZMA_PRESET_DEFAULT;
+  mt_options.check      = LZMA_CHECK_NONE; // Check type (CRC64 is default and common)  //mt_options.check = LZMA_CHECK_CRC32;
+  mt_options.threads    = codec_options->threads;
+  mt_options.block_size = 0;
+  ret = lzma_stream_encoder_mt(&strm, &mt_options);
+  if (ret != LZMA_OK) return -1;
+  strm.next_in = (const uint8_t *)in;
+  strm.avail_in = insize;
+  strm.next_out = (uint8_t *)out;
+  strm.avail_out = outsize;
+  ret = lzma_code(&strm, LZMA_FINISH);
+  if (ret != LZMA_STREAM_END) { lzma_end(&strm);  return -2;  }
+  size_t compressed_size = strm.total_out;
+  lzma_end(&strm);
+  return (int64_t)compressed_size;
+}
+
+int64_t _xz_decompress(char *in, size_t insize, char *out, size_t outsize, int threadnum) {
+  lzma_stream strm = LZMA_STREAM_INIT;
+  lzma_ret ret;
+  lzma_mt mt_options = {0};
+  mt_options.threads = threadnum;
+  mt_options.memlimit_stop = UINT64_MAX;
+  mt_options.flags = LZMA_CONCATENATED | LZMA_IGNORE_CHECK;
+
+  ret = lzma_stream_decoder_mt(&strm, &mt_options);
+  if (ret != LZMA_OK) { lzma_end(&strm); return -1; }
+  strm.next_in = (const uint8_t *)in;
+  strm.avail_in = insize;
+  strm.next_out = (uint8_t *)out;
+  strm.avail_out = outsize;
+  ret = lzma_code(&strm, LZMA_FINISH);  if (ret != LZMA_STREAM_END) { lzma_end(&strm); return -2;  }
+  size_t decompressed_size = strm.total_out;
+  lzma_end(&strm);
+  return (int64_t)decompressed_size;
+}
   #endif
 
   #if _ZLIBLIB
@@ -1529,9 +1577,11 @@ struct plugs plugs[] = {
   { P_WFLZ,          "wflz",          _WFLZ,      "wfLZ",                    "1,2" },
   
   { P_XPACK,         "xpack",         _XPACK,     "xpack",                   "1,2,3,4,5,6,7,8,9" },
+  { P_XZ,            "xz",            _XZ,        "xz",                      "0,1,2,3,4,5,6,7,8,9/d#:fb#:lp#:lc#:pb#:a#:mt#" },
   
   { P_YALZ77,        "yalz77",        _YALZ77,    "Yalz77",                  "1,6,12" },
   { P_YAPPY,         "yappy",         _YAPPY,     "Yappy",                   "" },//crash windows
+
   
   { P_ZLIB,          "zlib",          _ZLIB,      "zlib",                    "1,2,3,4,5,6,7,8,9" },
   { P_ZLIB_NG,       "zlib_ng",       _ZLIB_NG,   "zlib-ng",                 "1,2,3,4,5,6,7,8,9" },
@@ -2446,6 +2496,33 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       }
       #endif
 
+      #if _XZ
+        #if __x86_64__
+           #define DICSIZE (1<<30)
+        #else
+           #define DICSIZE (1<<27)
+        #endif
+    case P_XZ: { int threadnum = 1; char *q;
+      if(q=strstr(prm,"mt")) threadnum = atoi(q+(q[2]=='='?3:2));
+      /*CLzmaEncProps p; LzmaEncProps_Init(&p); p.level = lev; p.numThreads = 1; char *q;
+      if(q=strstr(prm,"lc")) p.lc         = atoi(q+(q[2]=='='?3:2));
+      if(q=strstr(prm,"lp")) p.lp         = atoi(q+(q[2]=='='?3:2));
+      if(q=strstr(prm,"pb")) p.pb         = atoi(q+(q[2]=='='?3:2));
+      if(q=strstr(prm,"fb")) p.fb         = atoi(q+(q[2]=='='?3:2));else if(q=strstr(prm,"nice=")) p.fb = atoi(q+5);
+      if(q=strstr(prm,"mc")) p.mc         = atoi(q+(q[2]=='='?3:2));
+      if(q=strstr(prm,"mt")) p.numThreads = atoi(q+(q[2]=='='?3:2));
+      if(q=strchr(prm,'a'))  p.algo       = atoi(q+(q[1]=='='?2:1));
+      if(q=strstr(prm,"mf=bt")) p.btMode  = 1, p.numHashBytes = atoi(q+5);
+      if(q=strstr(prm,"mf=hc")) p.btMode  = 0, p.numHashBytes = atoi(q+5);
+      if(dsize) p.dictSize = dsize; if(p.dictSize>inlen) p.dictSize=inlen; if(p.dictSize>DICSIZE) p.dictSize=DICSIZE; //printf("dsize=%u, %d,%d,%d:%d, %d,%d, %d,%d\n ", p.dictSize, p.lc,p.lp,p.pb,p.fb, p.mc,p.algo, p.btMode,p.numHashBytes);
+      LzmaEncProps_Normalize(&p);
+      SizeT psize = LZMA_PROPS_SIZE, outlen = outsize - LZMA_PROPS_SIZE;
+      return LzmaEncode(out+LZMA_PROPS_SIZE, &outlen, in, inlen, &p, out, &psize, 0, NULL, &g_Alloc, &g_Alloc) == SZ_OK?outlen+LZMA_PROPS_SIZE:0;*/
+      return _xz_compress((char *)in, insize, (char *)out, outsize, lev, threadnum);
+
+    }
+      #endif
+
       #if _YALZ77
     case P_YALZ77: { lz77::compress_t c(lev, lz77::DEFAULT_BLOCKSIZE); std::string os = c.feed(in,in+inlen); memcpy(out, os.c_str(), os.size()); return os.size(); }
       #endif
@@ -2855,6 +2932,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #if _BPC
 	  case P_BPC: {
       #endif
+      
       #if _BRIEFLZ
     case P_BRIEFLZ:     return blz_depack(in, out, outlen);
       #endif
@@ -2866,21 +2944,6 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     BrotliDecoderResult rc = BrotliDecoderDecompressStream(s, &available_in, (const uint8_t **)&next_in, &available_out, (uint8_t **)&next_out, &total_out);
         BrotliDecoderDestroyInstance(s);
         return rc?total_out:0;
-      }
-      #endif
-
-      #if _LIBBSC
-    case P_LIBBSC:     return bsc_decompress(in, inlen, out, outlen, BSC_MODE);
-    case P_LIBBSCC:    return bsc_coder_decompress(in, out, lev, BSC_MODE);
-      #endif
- 
-      #if _LIBDEFLATE
-    case P_LIBDEFLATE:  { size_t rc; struct libdeflate_decompressor *dd = libdeflate_alloc_decompressor();
-            if(prm && *prm=='d') outlen = libdeflate_deflate_decompress(dd, in, inlen,out, outlen, &rc);
-       else if(prm && *prm=='g') outlen = libdeflate_gzip_decompress(   dd, in, inlen,out, outlen, &rc);
-       else                      outlen = libdeflate_zlib_decompress(   dd, in, inlen,out, outlen, &rc);
-       libdeflate_free_decompressor(dd);
-       return outlen;
       }
       #endif
 
@@ -2942,6 +3005,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_FASTLZ: fastlz_decompress(in, inlen, out, outlen); break;
       #endif
 
+      #if _FLZMA2
+    case P_FLZMA2: { return FL2_decompress(out, outlen,  in, inlen); }
+      #endif
+
       #if _GIPFELI
     case P_GIPFELI: {
         util::compression::Compressor *c = util::compression::NewGipfeliCompressor();
@@ -2977,26 +3044,27 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     }
       #endif
 
+      #if _LIBBSC
+    case P_LIBBSC:     return bsc_decompress(in, inlen, out, outlen, BSC_MODE);
+    case P_LIBBSCC:    return bsc_coder_decompress(in, out, lev, BSC_MODE);
+      #endif
+ 
+      #if _LIBDEFLATE
+    case P_LIBDEFLATE:  { size_t rc; struct libdeflate_decompressor *dd = libdeflate_alloc_decompressor();
+            if(prm && *prm=='d') outlen = libdeflate_deflate_decompress(dd, in, inlen,out, outlen, &rc);
+       else if(prm && *prm=='g') outlen = libdeflate_gzip_decompress(   dd, in, inlen,out, outlen, &rc);
+       else                      outlen = libdeflate_zlib_decompress(   dd, in, inlen,out, outlen, &rc);
+       libdeflate_free_decompressor(dd);
+       return outlen;
+      }
+      #endif
+
       #if _LIBLZF
     case P_LIBLZF: lzf_decompress(in, inlen, out, outlen); break;
       #endif
 
-      #if _SMALLZ4
-    case P_SMALLZ4:
-      if(!strchr(prm,'z')) { gip = in; giend = in+inlen; gop = out; unlz4(getbyte,sendbytes,NULL); break; }
-      #endif
-
-      #if _LZ4ULTRA
-    case P_LZ4ULTRA:                                                                //if(strchr(prm,'z')) LZ4_decompress_safe((const char *)in, (char *)out, inlen, outlen);
-      if(!strchr(prm,'z')) {
-        unsigned nFlags = 0;
-        if(strchr(prm,'c')) nFlags |= LZ4ULTRA_FLAG_FAVOR_RATIO;
-        if(strchr(prm,'r')) nFlags |= LZ4ULTRA_FLAG_RAW_BLOCK;
-        if(strchr(prm,'i')) nFlags |= LZ4ULTRA_FLAG_INDEP_BLOCKS;
-        if(strchr(prm,'l')) nFlags |= LZ4ULTRA_FLAG_LEGACY_FRAMES;
-        lz4ultra_decompress_inmem(in, out, inlen, outlen, nFlags);//lz4ultra_expand_block(in, inlen, out, 0, outlen);
-        break;
-      } // else fall throught to decompression with lz4
+      #if _LIZARD
+    case P_LIZARD: return Lizard_decompress_safe((const char *)in, (char *)out, inlen, outlen);
       #endif
 
       #if _LZ4
@@ -3010,8 +3078,17 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       }
       #endif
 
-      #if _LIZARD
-    case P_LIZARD: return Lizard_decompress_safe((const char *)in, (char *)out, inlen, outlen);
+      #if _LZ4ULTRA
+    case P_LZ4ULTRA:                                                                //if(strchr(prm,'z')) LZ4_decompress_safe((const char *)in, (char *)out, inlen, outlen);
+      if(!strchr(prm,'z')) {
+        unsigned nFlags = 0;
+        if(strchr(prm,'c')) nFlags |= LZ4ULTRA_FLAG_FAVOR_RATIO;
+        if(strchr(prm,'r')) nFlags |= LZ4ULTRA_FLAG_RAW_BLOCK;
+        if(strchr(prm,'i')) nFlags |= LZ4ULTRA_FLAG_INDEP_BLOCKS;
+        if(strchr(prm,'l')) nFlags |= LZ4ULTRA_FLAG_LEGACY_FRAMES;
+        lz4ultra_decompress_inmem(in, out, inlen, outlen, nFlags);//lz4ultra_expand_block(in, inlen, out, 0, outlen);
+        break;
+      } // else fall throught to decompression with lz4
       #endif
 
       #if _LZAV
@@ -3040,10 +3117,6 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_LIBLZG: LZG_Decode(in, inlen, out, outlen); break;
       #endif
 
-      #if _ZPAQ
-    case P_ZPAQ: { zin = in; zin_ = in+inlen; zout = out; libzpaq::decompress(&zmemin, &zmemout); return zin - in; }
-      #endif
-
       #if _MEMLZ
     case P_MEMLZ: memlz_reset((memlz_state*)workmem); return (int64_t)memlz_stream_decompress(out, in, (memlz_state*)workmem);
       #endif
@@ -3059,10 +3132,6 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _LZLIB
     case P_LZLIB: { long out_len = outlen; bbdecompress( in, outlen, out, &out_len ); } break;
-      #endif
-
-      #if _FLZMA2
-    case P_FLZMA2: { return FL2_decompress(out, outlen,  in, inlen); }
       #endif
 
       #if _LZMA
@@ -3184,6 +3253,11 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     }
       #endif
 
+      #if _SMALLZ4
+    case P_SMALLZ4:
+      if(!strchr(prm,'z')) { gip = in; giend = in+inlen; gop = out; unlz4(getbyte,sendbytes,NULL); break; }
+      #endif
+
       #if _SHOCO
     case P_SHOCO:     shoco_decompress((const char *)in, inlen, (char *)out, outlen); return inlen;
       #endif
@@ -3292,6 +3366,13 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     } break;
       #endif
 
+      #if _XZ
+    case P_XZ: { int threadnum = 1; char *q;
+      if(q=strstr(prm,"mt")) numThreads = atoi(q+(q[2]=='='?3:2));
+      return _xz_decompress((char *)in, inlen, (char *)out, outlen, threadnum);
+    }
+      #endif
+
       #if _ZLIB
     //case P_ISA_L: case P_LIBDEFLATE:
         #if _ZLIB_NG == 0
@@ -3317,12 +3398,16 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       break;
       #endif
 	  
-	  #if _ZXC
+      #if _ZXC
     case P_ZXC: {
 	  zxc_decompress_opts_t opts = {.n_threads = 1, .checksum_enabled = 0};
 	  zxc_decompress_dctx(zxc_dctx_ptr, in, inlen, out, outlen, &opts);
 	  break;
     }
+      #endif
+
+      #if _ZPAQ
+    case P_ZPAQ: { zin = in; zin_ = in+inlen; zout = out; libzpaq::decompress(&zmemin, &zmemout); return zin - in; }
       #endif
 
       //------------ Encoding -----------------------------------------------------------------------
@@ -3716,6 +3801,10 @@ char *codver(int codec, char *v, char *s) {
     case P_SNAPPY:  sprintf(s,"%d.%d.%d", SNAPPY_MAJOR, SNAPPY_MINOR, SNAPPY_PATCHLEVEL); break;
       #endif
       
+      #if _TAMP
+    case P_TAMP:  return "2.3.0"; break;
+      #endif
+
       #if _ZLIB
     case P_ZLIB:  strcpy(s,zlib_version); break;
       #endif
