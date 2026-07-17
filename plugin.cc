@@ -546,12 +546,14 @@ enum {
   #if _BROTLI
 #include "brotli/c/include/brotli/encode.h"
 #include "brotli/c/include/brotli/decode.h"
+#include "brotli/c/common/version.h"
   #endif
 
   #if _LZMA
 #include "lzma/C/Alloc.h"
 #include "lzma/C/LzmaEnc.h"
 #include "lzma/C/LzmaDec.h"
+#include "lzma/C/7zVersion.h"
   #endif
 
   #if _CSC
@@ -619,6 +621,7 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
     #ifdef HAVE_IGZIP
 #include <isa-l.h>
     #else
+#include "isa-l/include/isal_api.h"
 #include "isa-l/include/igzip_lib.h"
     #endif
   #endif
@@ -689,6 +692,15 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
 #include "liblzg/src/include/lzg.h"
   #endif
 
+  #if _LZLIB
+#include "lzlib-1.16/lzlib.h"
+  #endif
+
+  #if _LIZARD
+#include "lizard/lib/lizard_compress.h"    //v2.0
+#include "lizard/lib/lizard_decompress.h"
+  #endif
+
   #if _MEMLZ
 #include "memlz/memlz.h"
   #endif
@@ -715,6 +727,7 @@ class Out: public libzpaq::Writer {
 } zmemout;
   #endif
 
+
   #if _LZ4
 #include "lz4/lib/lz4.h"
 #include "lz4/lib/lz4hc.h"
@@ -725,10 +738,6 @@ class Out: public libzpaq::Writer {
 #include "lzav/lzav.h"  
   #endif
 
-  #if _LIZARD
-#include "lizard/lib/lizard_compress.h"    //v2.0
-#include "lizard/lib/lizard_decompress.h"
-  #endif
 
   #if _LZFSEA
 #include <compression.h>
@@ -3622,24 +3631,17 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 }
 
 char *codver(int codec, char *v, char *s) {
-  switch(codec) {
-      #if _C_BLOSC2
-    return BLOSC2_VERSION_STRING;
-      #endif
+  switch(codec) { 
+
       #if _BRIEFLZ
-    case P_BRIEFLZ: sprintf(s,"%d.%d.%d", BLZ_VER_MAJOR, BLZ_VER_MINOR, BLZ_VER_PATCH); break;
+    case P_BRIEFLZ:  sprintf(s,"%d.%d.%d", BLZ_VER_MAJOR, BLZ_VER_MINOR, BLZ_VER_PATCH); break;
+      #endif
+      #if _BROTLI
+    case P_BROTLI:   sprintf(s,"%d.%d.%d", BROTLI_VERSION_MAJOR, BROTLI_VERSION_MINOR, BROTLI_VERSION_PATCH); break;
       #endif
 
-      #if _LZ4
-    case P_LZ4:     sprintf(s,"%d.%d.%d", LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE); break;
-      #endif
-
-      #if _LIZARD
-    case P_LIZARD:     sprintf(s,"%d.%d.%d", LIZARD_VERSION_MAJOR, LIZARD_VERSION_MINOR, LIZARD_VERSION_RELEASE); break;
-      #endif
-
-      #if _ZSTD
-    case P_ZSTD:    sprintf(s,"%d.%d.%d", ZSTD_VERSION_MAJOR, ZSTD_VERSION_MINOR, ZSTD_VERSION_RELEASE); break;
+      #if _C_BLOSC2
+    case P_C_BLOSC2: strcpy(s, BLOSC2_VERSION_STRING);
       #endif
 
       #if _DENSITY
@@ -3650,16 +3652,58 @@ char *codver(int codec, char *v, char *s) {
     case P_HEATSHRINK: sprintf(s,"%d.%d.%d", HEATSHRINK_VERSION_MAJOR, HEATSHRINK_VERSION_MINOR, HEATSHRINK_VERSION_PATCH); break;
       #endif
 
+      #if _ISA_L
+    case P_ISA_L:  sprintf(s,"%d.%d.%d", ISAL_MAJOR_VERSION, ISAL_MINOR_VERSION, ISAL_PATCH_VERSION); break;
+      #endif
+
+      #if _LIBBSC
+    case P_LIBBSC:  strcpy(s, LIBBSC_VERSION_STRING); break;
+      #endif
+      #if _LIBDEFLATE
+    case P_LIBDEFLATE:  strcpy(s, LIBDEFLATE_VERSION_STRING); break;
+      #endif
+      #if _LIZARD
+    case P_LIZARD:     sprintf(s,"%d.%d.%d", LIZARD_VERSION_MAJOR, LIZARD_VERSION_MINOR, LIZARD_VERSION_RELEASE); break;
+      #endif
+      #if _LZ4
+    case P_LZ4:     sprintf(s,"%d.%d.%d", LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE); break;
+      #endif
+      #if _LZLIB
+    case P_LZLIB:  sprintf(s,"%d", LZ_API_VERSION); break;
+      #endif
+      #if _LZAV
+    case P_LZAV:  strcpy(s, LZAV_VER_STR); break;
+      #endif
+      #if _LZMA
+    case P_LZMA:  strcpy(s, MY_VERSION_NUMBERS); break;
+      #endif
+
+      #if _PIVCOHUF
+    case P_PIVCOHUF:  sprintf(s,"%d.%d", PIVCOHUF_VERSION_MAJOR, PIVCOHUF_VERSION_MINOR); break;
+      #endif
+      
+      #if _PHAZ
+    case P_PHAZ:      sprintf(s,"%d.%d", PIVCOHUF_VERSION_MAJOR, PIVCOHUF_VERSION_MINOR); break;
+      #endif
+
       #if _SNAPPY
     case P_SNAPPY:  sprintf(s,"%d.%d.%d", SNAPPY_MAJOR, SNAPPY_MINOR, SNAPPY_PATCHLEVEL); break;
       #endif
+      
       #if _ZLIB
-    case P_ZLIB:
-      sprintf(s,zlib_version); break;
+    case P_ZLIB:  strcpy(s,zlib_version); break;
       #endif
+      
       #if _ZLIB_NG
-    case P_ZLIB_NG:
-      sprintf(s,zlibng_version()); break;
+    case P_ZLIB_NG:  strcpy(s,zlibng_version()); break;
+      #endif
+      
+      #if _ZSTD
+    case P_ZSTD:    sprintf(s,"%d.%d.%d", ZSTD_VERSION_MAJOR, ZSTD_VERSION_MINOR, ZSTD_VERSION_RELEASE); break;
+      #endif
+
+      #if _ZXC
+    case P_ZXC:    strcpy(s,ZXC_LIB_VERSION_STR); break;
       #endif
     default:        strcpy(s,v);
   }
