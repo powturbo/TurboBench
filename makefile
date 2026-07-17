@@ -356,6 +356,10 @@ endif
 # download corresponding library from https://github.com/WorkingRobot/OodleUE
 CXXFLAGS+=-D_OODLE
 
+ifneq ($(wildcard pcodec_/.),)
+  CXXFLAGS += -D_PCODEC
+endif
+
 ifneq ($(wildcard skim/.),)
 CXXFLAGS+=-D_MEMLZ
 LDFLAGS += skim/libskim.a
