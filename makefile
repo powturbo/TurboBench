@@ -160,12 +160,27 @@ CFLAGS+=-DVERSION=1 -Ibzip3/include -Wno-int-conversion
 OB+=bzip3/src/libbz3.o
 endif
 
-ifneq ($(wildcard c-blosc2/.),)
+ifneq ($(wildcard c-blosc2xxx/.),)
 CXXFLAGS+=-D_C_BLOSC2
 CFLAGS+=-Ic-blosc2/blosc -Ic-blosc2/include -Ic-blosc2/include/blosc2 -DHAVE_ZSTD
 C_BLOSC2_SRCS := $(wildcard c-blosc2/blosc/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/.c)
 C_BLOSC2_OBJS := $(C_BLOSC2_SRCS:.c=.o)
 OB += $(C_BLOSC2_OBJS)  
+endif
+
+C_BLOSC2_LIB :=
+ifneq ($(wildcard c-blosc2/.),)
+CXXFLAGS += -D_C_BLOSC2
+C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+ifdef CROSS
+c-blosc2/blosc/libblosc2.a: $(C_BLOSC2_SRCS)
+	export CC=$(CROSS)-linux-gnu-gcc && cd c-blosc2 && cmake ./ && $(MAKE)
+else
+c-blosc2/blosc/libblosc2.a: $(C_BLOSC2_SRCS)
+	(cd c-blosc2 && cmake . && $(MAKE))
+endif
+C_BLOSC2_LIB = c-blosc2/blosc/libblosc2.a
+LDFLAGS += $(C_BLOSC2_LIB)
 endif
 
 ISAL_LIB :=
@@ -894,7 +909,7 @@ endif
 
 OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugin.o
 
-plugin.o: plugin.cc $(ZLIB_NG_LIB) $(ISAL_LIB) $(OPENZL_LIB) $(XZ_LIB) 
+plugin.o: plugin.cc $(C_BLOSC2_LIB) $(ISAL_LIB) $(OPENZL_LIB) $(ZLIB_NG_LIB) $(XZ_LIB) 
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
 
 
