@@ -140,11 +140,6 @@ enum {
 #endif
  P_MEMLZ,
  
-#ifndef _SLZ
-#define _SLZ 0
-#endif
- P_SLZ,
- 
 #ifndef _LZ4
 #define _LZ4 0
 #endif
@@ -267,6 +262,10 @@ enum {
 #define _SKIM 0
 #endif
  P_SKIM,
+#ifndef _SLZ
+#define _SLZ 0
+#endif
+ P_SLZ,
  
 #ifndef _OODLE 
 #define _OODLE 0
@@ -908,18 +907,15 @@ static ffree_i64 free_i64_;
 #include "yappy/yappy.hpp"
   #endif
 
-  #if _ZLIB || _SLZ
-     #if _ZLIBLIB
+  #if _ZLIBLIB
 #include <zlib.h>
 //     #elif defined(ZLIB_NG)          // zlib-ng.a compatible mode : "./configure --zlib-compat" (see zlib-ng/INSTALL)
 //#include "zlib/zlib.h"
-     #elif defined(ZLIB_INTEL)
+  #elif defined(ZLIB_INTEL)
 #include "zlib_intel/zlib.h"
-     #else
+  #else
 #include "zlib/zlib.h"
-     #endif
   #endif
-
 
   #if _ZLING
 #include "libzling/src/libzling.h"
