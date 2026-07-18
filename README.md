@@ -114,7 +114,6 @@ Compressors with versions 16.08.2016 <br>
 
         ./turbobench -elzma,9mt2:d29:a1:fb273:mf=bt4:mc999:lc8:lp0:pb2 file
 
-
 ##### - Codecs:
 
   + individual codec test (output to screen & file.tbb)<br />
@@ -131,6 +130,8 @@ Compressors with versions 16.08.2016 <br>
 
         ./turbobench -p2 -S2 file.tbb
 
+##### - Bar/Scatter charts
+   + SVG files automatically generated after each benchmark
    
 ### Compile:
 
@@ -138,20 +139,12 @@ Compressors with versions 16.08.2016 <br>
         cd TurboBench
   		make
 
-###### Turbobench mini: compile (only popular codecs)
-
-		make NCODEC2=1
-
-###### Turbobench incl. Entropy Coder codecs
-
-        make EC=1
-
 ### Environment:
 
 ###### OS/Compiler (32 + 64 bits):
 - Windows: [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) makefile 
-- Linux amd/intel: GNU GCC (>=4.6)
-- Linux amd/intel: Clang (>=3.2)
+- Linux amd/intel/risc-v: GNU GCC (>=4.6)
+- Linux amd/intel/risc-v: Clang (>=3.2)
 - Linux arm: aarch64
 - Linux risc-v: riscv64
 - MaxOS: XCode (>=9)
@@ -280,5 +273,5 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 17 JUL 2026
+Last update: 18 JUL 2026
 
