@@ -115,3 +115,6 @@
 [submodule "c-blosc2"]
 	path = c-blosc2
 	url = https://github.com/Blosc/c-blosc2.git
+[submodule "GLZA"]
+	path = GLZA
+	url = https://github.com/kidq330/GLZA
