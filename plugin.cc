@@ -210,6 +210,7 @@ enum {
 #define _MISA77 0
 #endif
  P_MISA77,
+ P_MISA77U,
 #ifndef _MSCOMPRESS
 #define _MSCOMPRESS 0
 #endif
@@ -1579,6 +1580,7 @@ struct plugs plugs[] = {
   { P_MEMLZ,         "memlz",         _MEMLZ,     "memlz",                   "" },
   { P_MINIZ,         "miniz",         _MINIZ,     "miniz",                   "1,2,3,4,5,6,7,8,9" },
   { P_MISA77,        "misa77",        _MISA77,    "misa77",                  "0,1,2,3" },
+  { P_MISA77U,       "misa77_unsafe", _MISA77,    "misa77 unsafe",           "0,1,2,3" },
   { P_MSCOMPRESS,    "mscompress",    _MSCOMPRESS,"ms-compress",             "2,3,4" },
  
   { P_NAKA,          "naka",          _NAKA,      "Nakamichi Washigan",      "" },
@@ -2376,6 +2378,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _MISA77
     case P_MISA77:
+    case P_MISA77U:
       switch (lev) {
         case 2:
         case 3:  return misa77::experimental::adaptive_compress(in, inlen, out, outsize, lev - 2);
@@ -3229,7 +3232,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _MISA77
-    case P_MISA77: return misa77::decompress(in, inlen, out, outlen); 
+    case P_MISA77:  return misa77::decompress(in, inlen, out, outlen, misa77::dconfig(true)); 
+    case P_MISA77U: return misa77::decompress(in, inlen, out, outlen); 
       #endif
       
       #if _NAKA
@@ -3842,6 +3846,10 @@ char *codver(int codec, char *v, char *s) {
 
       #if _MINIZ
     case P_MINIZ : return "v11.3.2"; break;
+      #endif
+
+      #if _MISA77
+    case P_MISA77:     sprintf(s,"v%d.%d.%d", MISA77_VERSION_MAJOR, MISA77_VERSION_MINOR, MISA77_VERSION_PATCH); break;
       #endif
 
       #if _OPENZL
