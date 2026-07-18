@@ -172,7 +172,7 @@ Compressors with versions 16.08.2016 <br>
  - [Doboz](https://bitbucket.org/attila_afra) 
  - [FastLz](http://fastlz.org) 
  - [Fast-lzma](https://github.com/conor42/fast-lzma2) 
- - [glza](https://github.com/jrmuizel/GLZA)
+ - [glza](https://github.com/kidq330/GLZA)
  - [heatshrink](https://github.com/atomicobject/heatshrink) 
  - [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l) 
  - [bsc](https://github.com/IlyaGrebnov/libbsc)
