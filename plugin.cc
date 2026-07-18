@@ -1418,6 +1418,27 @@ const MarlinDictionary * Marlin_estimate_best_dictionary(const MarlinDictionary 
 
   #if _PIVCOHUF
 #include "pivcohuf_file.h"
+/*static size_t pivcoenc(char *in, size_t n, char *out, int csize, int lev) {
+  char *ip = in, *op = out, *in_ = in+n, *out_ = out+n;
+  size_t olen, ilen;
+  for(; ip < in_; ip += ilen, op += olen) {
+    ilen  = (in_ - ip); ilen = ilen > csize ? csize : ilen;    olen = ilen;  
+    if(pivcohuf_compress_ex(ip, ilen, op, &olen, lev) != PIVCOHUF_OK) { op = out_; break; }  //{ op[-1] = 0xff; memcpy(op, ip, ilen); olen = ilen; }
+    if(op+olen >= out_) { op = out_; break; }
+  }
+  return op - out;
+}
+
+static size_t pivcodec(char *in, size_t n, char *out, int csize) {
+  char *ip = in, *op = out, *out_ = out+n;
+  size_t olen, ilen; 
+  for(; op < out_; ip += ilen, op += olen) {                                                 
+    olen = (out_ - op); olen = olen > csize ? csize: olen;
+    ilen = olen; 
+    if(pivcohuf_decompress(ip, olen, op, &ilen) != PIVCOHUF_OK) return 0; 
+  }
+  return ip - in;
+}*/
   #endif
 
   #if _PHAZ
@@ -1648,7 +1669,7 @@ struct plugs plugs[] = {
   { P_MARLIN,        "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
   { P_NIBRANS,       "nibrans",     _NIBRANS,   "nibrans",                 ""},
   { P_OODLE,         "oodle",       _OODLE,     "Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
-  { P_PIVCOHUF,      "pivco",       _PIVCOHUF,  "PivCo-Huffman",           "0,1" },  // 0=PH, 1=PHA (ANS-gated bitmaps)
+  { P_PIVCOHUF,      "pivco",       _PIVCOHUF,  "PivCo-Huffman",           "0,1","", E_HUF },  // 0=PH, 1=PHA (ANS-gated bitmaps)
   { P_POLHF,         "polar",       _POLHF,     "Polar Codes",             "" },
   { P_PPMDEC,        "ppmdec",      _PPMDEC,    "PPMD Range Coder",        ""},
   { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",             "" },
@@ -2576,7 +2597,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         unsigned windowLog = bsr32(dsize) - powof2(dsize); 
         ZSTD_CCtx_setParameter(z, ZSTD_c_enableLongDistanceMatching, 1); 
         ZSTD_CCtx_setParameter(z, ZSTD_c_windowLog, windowLog);
-        ZSTD_CCtx_setParameter(cctx, ZSTD_c_nbWorkers, threadnum);
+        ZSTD_CCtx_setParameter(z, ZSTD_c_nbWorkers, threadnum);
       }
       ZSTD_initCStream(z, lev);
       ZSTD_inBuffer  ip = { in, (size_t)inlen,   0 };
@@ -2908,11 +2929,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _PIVCOHUF
-    case P_PIVCOHUF: { size_t ol = outsize;   /* lev 0=PH, 1=PHA */
-      if(pivcohuf_compress_ex(in, inlen, out, &ol, lev) != PIVCOHUF_OK) return 0;
-      return (unsigned)ol; 
-    }
+    case P_PIVCOHUF: //return pivcoenc((char *)in, inlen, (char *)out, 1<<15, lev); 
+      { size_t olen = outsize; if(pivcohuf_compress_ex(in, inlen, out, &olen, lev) != PIVCOHUF_OK) return 0; return (unsigned)olen; }
       #endif
+      
       #if _PHAZ
     case P_PHAZ: return (unsigned)phaz_compress(in, inlen, out, outsize, lev, 0);  /* lev = zstd level */
       #endif
@@ -3726,10 +3746,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _PIVCOHUF
-    case P_PIVCOHUF: { size_t ol = outlen;
-      if(pivcohuf_decompress(in, inlen, out, &ol) != PIVCOHUF_OK) return 0;
-      return (unsigned)ol; 
-    }
+    case P_PIVCOHUF: //if(inlen >= outlen) { memcpy(out, in, outlen); return outlen; }  pivcodec((char *)in, outlen, (char *)out, 1 << 15); 
+         { size_t ilen = outlen; if(pivcohuf_decompress(in, inlen, out, &ilen) != PIVCOHUF_OK) return 0;  return inlen;  }
       #endif
       #if _PHAZ
     case P_PHAZ: return (unsigned)phaz_decompress(in, inlen, out, outlen, 0);
