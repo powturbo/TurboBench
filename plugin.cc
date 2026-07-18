@@ -1580,7 +1580,7 @@ struct plugs plugs[] = {
   { P_MEMLZ,         "memlz",         _MEMLZ,     "memlz",                   "" },
   { P_MINIZ,         "miniz",         _MINIZ,     "miniz",                   "1,2,3,4,5,6,7,8,9" },
   { P_MISA77,        "misa77",        _MISA77,    "misa77",                  "0,1,2,3" },
-  { P_MISA77U,       "misa77_unsafe", _MISA77,    "misa77 unsafe",           "0,1,2,3" },
+  { P_MISA77U,       "misa77u",       _MISA77,    "misa77 unsafe",           "0,1,2,3" },
   { P_MSCOMPRESS,    "mscompress",    _MSCOMPRESS,"ms-compress",             "2,3,4" },
  
   { P_NAKA,          "naka",          _NAKA,      "Nakamichi Washigan",      "" },
