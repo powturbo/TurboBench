@@ -621,8 +621,8 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
   #endif
 
   #if _GLZA
-#include "glza/GLZAcomp.h"
-#include "glza/GLZAdecode.h"
+#include "GLZA/GLZAcomp.h"
+#include "GLZA/GLZAdecode.h"
   #endif
 
   #if _HEATSHRINK
