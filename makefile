@@ -138,7 +138,6 @@ all: turbobench
  
 ifdef LZTURBO
 CXXFLAGS+=-D_LZTURBO
-CFLAGS+=-D_LZTURBO
 include ../dev/x/lzturbo.mk
 endif
 
@@ -915,7 +914,7 @@ endif
 
 #--------------------------------------------------------------------
 
-OB+=$(ICL) $(HUF) $(ANS) $(LZ) plugin.o
+OB+=$(ICL) $(HUF) $(ANX) $(LZ) plugin.o
 
 plugin.o: plugin.cc $(C_BLOSC2_LIB) $(ISAL_LIB) $(OPENZL_LIB) $(ZLIB_NG_LIB) $(XZ_LIB) 
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
