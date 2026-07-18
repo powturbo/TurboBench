@@ -3849,7 +3849,8 @@ char *codver(int codec, char *v, char *s) {
       #endif
 
       #if _MISA77
-    case P_MISA77:     sprintf(s,"v%d.%d.%d", MISA77_VERSION_MAJOR, MISA77_VERSION_MINOR, MISA77_VERSION_PATCH); break;
+    case P_MISA77:     
+    case P_MISA77U:    sprintf(s,"v%d.%d.%d", MISA77_VERSION_MAJOR, MISA77_VERSION_MINOR, MISA77_VERSION_PATCH); break;
       #endif
 
       #if _OPENZL
