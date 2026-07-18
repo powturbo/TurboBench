@@ -1424,7 +1424,6 @@ void bebuild(char **files, int argc, int recurse, char *foname, unsigned long lo
   }																			printf("Number of files=%d, Number of files processed=%d, avglen=%d\n", argc, st_fnum, (int)(st_blklen/st_fnum));
   fclose(fo);
 }
-
 #endif
 
 #define INOVD 4*1024
