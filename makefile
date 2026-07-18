@@ -202,11 +202,11 @@ LDFLAGS += $(ISAL_LIB)
 endif
 endif
 
-ifneq ($(wildcard glza/.),)
+ifneq ($(wildcard GLZA/.),)
 CXXFLAGS+=-D_GLZA
-GLZA_OBJS := glza/GLZAmodel.o glza/GLZAcomp.o glza/GLZAencode.o glza/GLZAcompress.o glza/GLZAformat.o glza/GLZAdecode.o
+GLZA_OBJS := GLZA/GLZAmodel.o GLZA/GLZAcomp.o GLZA/GLZAencode.o GLZA/GLZAcompress.o GLZA/GLZAformat.o GLZA/GLZAdecode.o
 GLZA_BUILD = $(CC) -O2 $(CFLAGS) $< -c -o $@
-$(GLZA_DIR)/%.o: glza/%.c
+$(GLZA_DIR)/%.o: GLZA/%.c
 	$(GLZA_BUILD)
 OB += $(GLZA_OBJS) 
 endif
