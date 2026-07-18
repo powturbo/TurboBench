@@ -2929,8 +2929,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _PIVCOHUF
-    case P_PIVCOHUF: //return pivcoenc((char *)in, inlen, (char *)out, 1<<15, lev); 
-      { size_t olen = outsize; if(pivcohuf_compress_ex(in, inlen, out, &olen, lev) != PIVCOHUF_OK) return 0; return (unsigned)olen; }
+    case P_PIVCOHUF: { size_t olen = outsize; if(pivcohuf_compress_ex(in, inlen, out, &olen, lev) != PIVCOHUF_OK) return 0; return (unsigned)olen; }
       #endif
       
       #if _PHAZ
@@ -3746,8 +3745,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _PIVCOHUF
-    case P_PIVCOHUF: //if(inlen >= outlen) { memcpy(out, in, outlen); return outlen; }  pivcodec((char *)in, outlen, (char *)out, 1 << 15); 
-         { size_t ilen = outlen; if(pivcohuf_decompress(in, inlen, out, &ilen) != PIVCOHUF_OK) return 0;  return inlen;  }
+    case P_PIVCOHUF: { size_t ilen = outlen; if(pivcohuf_decompress(in, inlen, out, &ilen) != PIVCOHUF_OK) return 0;  return inlen;  }
       #endif
       #if _PHAZ
     case P_PHAZ: return (unsigned)phaz_decompress(in, inlen, out, outlen, 0);
