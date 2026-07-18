@@ -3763,52 +3763,52 @@ char *codver(int codec, char *v, char *s) {
     case P_BZIP2: return (char *)BZ2_bzlibVersion();
       #endif
       #if _BZIP3
-    case P_BZIP3: return "1.5.3"; //{ char *p = bz3_version(); strcpy(s, p?p:""); break; }
+    case P_BZIP3: return "v1.5.3"; //{ char *p = bz3_version(); strcpy(s, p?p:""); break; }
       #endif
       #if _BRIEFLZ
-    case P_BRIEFLZ:  sprintf(s,"%d.%d.%d", BLZ_VER_MAJOR, BLZ_VER_MINOR, BLZ_VER_PATCH); break;
+    case P_BRIEFLZ:  sprintf(s,"v%d.%d.%d", BLZ_VER_MAJOR, BLZ_VER_MINOR, BLZ_VER_PATCH); break;
       #endif
       #if _BROTLI
-    case P_BROTLI:   sprintf(s,"%d.%d.%d", BROTLI_VERSION_MAJOR, BROTLI_VERSION_MINOR, BROTLI_VERSION_PATCH); break;
+    case P_BROTLI:   sprintf(s,"v%d.%d.%d", BROTLI_VERSION_MAJOR, BROTLI_VERSION_MINOR, BROTLI_VERSION_PATCH); break;
       #endif
 
       #if _C_BLOSC2
-    case P_C_BLOSC2: sprintf(s, "%s MT", BLOSC2_VERSION_STRING);
+    case P_C_BLOSC2: sprintf(s, "v%s MT", BLOSC2_VERSION_STRING);
       #endif
 
       #if _DENSITY
-    case P_DENSITY: sprintf(s,"%d.%d.%d", density_version_major(), density_version_minor(), density_version_revision()); break;
+    case P_DENSITY: sprintf(s,"v%d.%d.%d", density_version_major(), density_version_minor(), density_version_revision()); break;
       #endif
 
       #if _FLZMA2
-    case P_FLZMA2 : strcpy(s, "1.0.1 MT"); break;
+    case P_FLZMA2 : strcpy(s, "v1.0.1 MT"); break;
       #endif
       #if _FASTLZ
     case P_FASTLZ: return FASTLZ_VERSION_STRING;
       #endif
    
       #if _GLZA
-    case P_GLZA:  return "0.12"; break;
+    case P_GLZA:  return "v0.12"; break;
       #endif
 
       #if _LZFSE
-    case P_LZFSE:  sprintf(s, "2017.03.07", LIBBSC_VERSION_STRING); break;
+    case P_LZFSE:  sprintf(s, "v2017.03.07", LIBBSC_VERSION_STRING); break;
       #endif
 
       #if _LZHAM
-    case P_LZHAM:  sprintf(s, "2015.11.22 MT", LIBBSC_VERSION_STRING); break;
+    case P_LZHAM:  sprintf(s, "v2015.11.22 MT", LIBBSC_VERSION_STRING); break;
       #endif
 
       #if _HEATSHRINK
-    case P_HEATSHRINK: sprintf(s,"%d.%d.%d", HEATSHRINK_VERSION_MAJOR, HEATSHRINK_VERSION_MINOR, HEATSHRINK_VERSION_PATCH); break;
+    case P_HEATSHRINK: sprintf(s,"v%d.%d.%d", HEATSHRINK_VERSION_MAJOR, HEATSHRINK_VERSION_MINOR, HEATSHRINK_VERSION_PATCH); break;
       #endif
 
       #if _ISA_L
-    case P_ISA_L:  sprintf(s,"%d.%d.%d", ISAL_MAJOR_VERSION, ISAL_MINOR_VERSION, ISAL_PATCH_VERSION); break;
+    case P_ISA_L:  sprintf(s,"v%d.%d.%d", ISAL_MAJOR_VERSION, ISAL_MINOR_VERSION, ISAL_PATCH_VERSION); break;
       #endif
 
       #if _KANZI
-    case P_KANZI:  sprintf(s,"%d.%d.%d MT", KANZI_DECOMP_VERSION_MAJOR, KANZI_DECOMP_VERSION_MINOR, KANZI_DECOMP_VERSION_PATCH); break;
+    case P_KANZI:  sprintf(s,"v%d.%d.%d MT", KANZI_DECOMP_VERSION_MAJOR, KANZI_DECOMP_VERSION_MINOR, KANZI_DECOMP_VERSION_PATCH); break;
       #endif
 
       #if _LIBBSC
@@ -3818,30 +3818,30 @@ char *codver(int codec, char *v, char *s) {
     case P_LIBDEFLATE:  strcpy(s, LIBDEFLATE_VERSION_STRING); break;
       #endif
       #if _LIZARD
-    case P_LIZARD:     sprintf(s,"%d.%d.%d", LIZARD_VERSION_MAJOR, LIZARD_VERSION_MINOR, LIZARD_VERSION_RELEASE); break;
+    case P_LIZARD:     sprintf(s,"v%d.%d.%d", LIZARD_VERSION_MAJOR, LIZARD_VERSION_MINOR, LIZARD_VERSION_RELEASE); break;
       #endif
       #if _LZ4
-    case P_LZ4:     sprintf(s,"%d.%d.%d", LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE); break;
+    case P_LZ4:     sprintf(s,"v%d.%d.%d", LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE); break;
       #endif
       #if _LZLIB
-    case P_LZLIB:  sprintf(s,"%d", LZ_API_VERSION); break;
+    case P_LZLIB:  sprintf(s,"v%d", LZ_API_VERSION); break;
       #endif
       #if _LZAV
     case P_LZAV:  strcpy(s, LZAV_VER_STR); break;
       #endif
       #if _LZMA
-    case P_LZMA:  sprintf(s, "%s MT", MY_VERSION_NUMBERS); break;
+    case P_LZMA:  sprintf(s, "v%s MT", MY_VERSION_NUMBERS); break;
       #endif
       #if _LZO
-    case P_LZO : strcpy(s, "2.10"); break;
+     case P_LZO1b:case P_LZO1c: case P_LZO1f: case P_LZO1x: case P_LZO1y: case P_LZO1z: case P_LZO2a: strcpy(s, "v2.10 2017.03.01"); break;
       #endif
 
       #if _LZSSE
-    case P_LZSSE:  return "2018.10.24"; break;
+    case P_LZSSE2: case P_LZSSE4: case P_LZSSE8: return "v2018.10.24"; break;
       #endif
 
       #if _MINIZ
-    case P_MINIZ : return MZ_VERSION; break;
+    case P_MINIZ : return "v11.3.2"; break;
       #endif
 
       #if _OPENZL
@@ -3856,7 +3856,7 @@ char *codver(int codec, char *v, char *s) {
     case P_OPENZL_SERIAL:
     case P_OPENZL_GENERIC:
     case P_OPENZL_ZSTD:
-    case P_OPENZL_LZ4:   sprintf(s,"%d.%d.%d", ZL_LIBRARY_VERSION_MAJOR, ZL_LIBRARY_VERSION_MINOR, ZL_LIBRARY_VERSION_PATCH); break;
+    case P_OPENZL_LZ4:   sprintf(s,"v%d.%d.%d", ZL_LIBRARY_VERSION_MAJOR, ZL_LIBRARY_VERSION_MINOR, ZL_LIBRARY_VERSION_PATCH); break;
       #endif
 
       #if _PCODEC
@@ -3870,23 +3870,23 @@ char *codver(int codec, char *v, char *s) {
     case P_PCODECF32:
     case P_PCODECI64:
     case P_PCODECU64:
-    case P_PCODECF64: return "1.0.2"; break;  
+    case P_PCODECF64: return "v1.0.2"; break;  
       #endif
 
       #if _PIVCOHUF
-    case P_PIVCOHUF:  sprintf(s,"%d.%d", PIVCOHUF_VERSION_MAJOR, PIVCOHUF_VERSION_MINOR); break;
+    case P_PIVCOHUF:  sprintf(s,"v%d.%d", PIVCOHUF_VERSION_MAJOR, PIVCOHUF_VERSION_MINOR); break;
       #endif
       
       #if _PHAZ
-    case P_PHAZ:      sprintf(s,"%d.%d", PIVCOHUF_VERSION_MAJOR, PIVCOHUF_VERSION_MINOR); break;
+    case P_PHAZ:      sprintf(s,"v%d.%d", PIVCOHUF_VERSION_MAJOR, PIVCOHUF_VERSION_MINOR); break;
       #endif
 
       #if _SNAPPY
-    case P_SNAPPY:  sprintf(s,"%d.%d.%d", SNAPPY_MAJOR, SNAPPY_MINOR, SNAPPY_PATCHLEVEL); break;
+    case P_SNAPPY:  sprintf(s,"v%d.%d.%d", SNAPPY_MAJOR, SNAPPY_MINOR, SNAPPY_PATCHLEVEL); break;
       #endif
       
       #if _TAMP
-    case P_TAMP:  return "2.3.0"; break;
+    case P_TAMP:  return "v2.3.0"; break;
       #endif
 
       #if _ZLIB
@@ -3898,11 +3898,11 @@ char *codver(int codec, char *v, char *s) {
       #endif
       
       #if _ZSTD
-    case P_ZSTD:    sprintf(s,"%d.%d.%d MT", ZSTD_VERSION_MAJOR, ZSTD_VERSION_MINOR, ZSTD_VERSION_RELEASE); break;
+    case P_ZSTD:    sprintf(s,"v%d.%d.%d MT", ZSTD_VERSION_MAJOR, ZSTD_VERSION_MINOR, ZSTD_VERSION_RELEASE); break;
       #endif
 
       #if _ZXC
-    case P_ZXC:  sprintf(s, "%s MT", ZXC_LIB_VERSION_STR); break;
+    case P_ZXC:  sprintf(s, "v%s MT", ZXC_LIB_VERSION_STR); break;
       #endif
     default:        strcpy(s,v);
   }
