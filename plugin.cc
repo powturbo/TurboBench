@@ -1577,7 +1577,7 @@ struct plugs plugs[] = {
   { P_LZSSE8,        "lzsse8",        _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
 
   { P_MEMLZ,         "memlz",         _MEMLZ,     "memlz",                   "" },
-  { P_MINIZ,         "miniz",         _MINIZ,     "miniz zlib-replace",      "1,2,3,4,5,6,7,8,9" },
+  { P_MINIZ,         "miniz",         _MINIZ,     "miniz",                   "1,2,3,4,5,6,7,8,9" },
   { P_MISA77,        "misa77",        _MISA77,    "misa77",                  "0,1,2,3" },
   { P_MSCOMPRESS,    "mscompress",    _MSCOMPRESS,"ms-compress",             "2,3,4" },
  
@@ -3787,6 +3787,18 @@ char *codver(int codec, char *v, char *s) {
     case P_FASTLZ: return FASTLZ_VERSION_STRING;
       #endif
    
+      #if _GLZA
+    case P_GLZA:  return "0.12"; break;
+      #endif
+
+      #if _LZFSE
+    case P_LZFSE:  sprintf(s, "2017.03.07", LIBBSC_VERSION_STRING); break;
+      #endif
+
+      #if _LZHAM
+    case P_LZHAM:  sprintf(s, "2015.11.22 MT", LIBBSC_VERSION_STRING); break;
+      #endif
+
       #if _HEATSHRINK
     case P_HEATSHRINK: sprintf(s,"%d.%d.%d", HEATSHRINK_VERSION_MAJOR, HEATSHRINK_VERSION_MINOR, HEATSHRINK_VERSION_PATCH); break;
       #endif
@@ -3819,6 +3831,17 @@ char *codver(int codec, char *v, char *s) {
       #endif
       #if _LZMA
     case P_LZMA:  sprintf(s, "%s MT", MY_VERSION_NUMBERS); break;
+      #endif
+      #if _LZO
+    case P_LZO : strcpy(s, "2.10"); break;
+      #endif
+
+      #if _LZSSE
+    case P_LZSSE:  return "2018.10.24"; break;
+      #endif
+
+      #if _MINIZ
+    case P_MINIZ : return MZ_VERSION; break;
       #endif
 
       #if _OPENZL
