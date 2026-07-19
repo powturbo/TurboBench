@@ -176,7 +176,6 @@ LDFLAGS += $(C_BLOSC2_LIB)
 endif
 endif
 
-
 ISAL_LIB :=
 ifneq ($(wildcard isa-l/.),)
 NASM ?= $(shell command -v nasm)
@@ -332,9 +331,10 @@ OB += $(MISA77_OBJS)
 ifeq ($(ARCH),x86_64)
   OB += $(MISA77_DIR)/src/isa/target_sse2.o  $(MISA77_DIR)/src/experimental/isa/etarget_sse2.o 
   OB += $(MISA77_DIR)/src/isa/target_avx2.o $(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
-else if ($(ARCH),aarch64)
+else 
+    if ($(ARCH),aarch64)
   OB += $(MISA77_DIR)/src/isa/target_neon.o
-endif
+    endif
 endif
 
 OPENZL_LIB :=
