@@ -126,7 +126,6 @@ CFLAGS+=-DNMEMSIZE
 else ifeq ($(OS),$(filter $(OS),Darwin FreeBSD GNU/kFreeBSD Linux NetBSD SunOS))
 LDFLAGS += -ldl
 endif
-endif
 
 ifdef OPENMP
 CFLAGS+=-fopenmp -DLIBBSC_OPENMP_SUPPORT
