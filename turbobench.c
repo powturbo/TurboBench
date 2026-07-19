@@ -1514,8 +1514,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     plug->tc  += tc; 
 	plug->memc = mempeak() - peak;
     plug->stkc = stackpeak(_stack);
-    if(tm_Rep > 1) 
-      TMSLEEP;
+    //if(tm_Rep > 1) TMSLEEP;
 																		  if(tm_verbose && totinlen == filen) { double ratio = (double)plug->len*100.0/totinlen; printf("%12u   %5.1f   %8.2f   ", plug->len, ratio, TMBS(totinlen,plug->tc)); fflush(stdout); }
     if(cmp) {
       unsigned char *cpz = _cpy; 
