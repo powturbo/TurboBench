@@ -61,7 +61,8 @@ jobs:
           update: true
       - run: git submodule update --init --recursive
       - run: make STATIC=1
-        env: MSYS: winsymlinks:nativestrict
+        env: 
+          MSYS: winsymlinks:nativestrict
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -V0
 
