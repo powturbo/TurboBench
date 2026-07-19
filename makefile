@@ -168,10 +168,10 @@ CXXFLAGS += -D_C_BLOSC2
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS
 c-blosc2/blosc/libblosc2.a: $(C_BLOSC2_SRCS)
-	(export CC=$(CROSS)-linux-gnu-gcc && cd c-blosc2 && cmake . && $(MAKE))
+	(export CC=$(CROSS)-linux-gnu-gcc && cd c-blosc2 && cmake . -DBLOSC_ZSTD_SOURCE_DIR=../zstd && $(MAKE))
 else
 c-blosc2/blosc/libblosc2.a: $(C_BLOSC2_SRCS)
-	(cd c-blosc2 && cmake . && $(MAKE))
+	(cd c-blosc2 && cmake . -DBLOSC_ZSTD_SOURCE_DIR=../zstd && $(MAKE))
 endif
 C_BLOSC2_LIB = c-blosc2/blosc/libblosc2.a
 LDFLAGS += $(C_BLOSC2_LIB)
