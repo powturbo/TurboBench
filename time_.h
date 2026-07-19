@@ -21,54 +21,6 @@
     - twitter  : https://twitter.com/powturbo
     - email    : powturbo [_AT_] gmail [_DOT_] com
 **/
-#ifdef _WIN32
-#include <windows.h>
-static int temperature(void) { // Windows: Using WMI via command line to get ACPI Thermal Zone Temperature
-  FILE *fp = _popen("wmic /namespace:\\\\root\\wmi PATH MSAcpi_ThermalZoneTemperature get CurrentTemperature 2>nul", "r");
-  if (!fp) return -1;  
-  char buffer[128];
-  int temp = -1;
-  fgets(buffer, sizeof(buffer), fp); // skip header
-  if(fgets(buffer, sizeof(buffer), fp)) {
-    int raw_temp;
-    if (sscanf(buffer, "%d", &raw_temp) == 1) 
-      temp = (raw_temp / 10) - 273; // WMI returns temperature in tenths of degrees Kelvin
-  }
-  _pclose(fp);
-  return temp;
-}
-#elif __APPLE__
-/* macOS: Using powermetrics or sysctl. Note: Apple Silicon and Intel differ heavily.
-   Accessing accurate CPU temps programmatically on macOS usually requires IOKit and 
-   sometimes root privileges. This uses a generic thermal level approximation via sysctl. */
-static int temperature(void) {
-  FILE *fp = popen("sysctl -n machdep.xcpm.cpu_thermal_level 2>/dev/null", "r");
-  if (!fp) return -1;
-    
-  char buffer[128];
-  int temp = -1;
-  if(fgets(buffer, sizeof(buffer), fp) != NULL)
-     temp = atoi(buffer);   // Note: this represents a thermal level score, not strictly Celsius on all Macs.
-  pclose(fp);
-  return temp;
-}
-#elif __linux__
-/* Linux: Reading directly from the sysfs thermal zone */
-static int temperature(void) {
-  FILE *fp = fopen("/sys/class/thermal/thermal_zone0/temp", "r");
-  if (!fp) return -1;
-  int temp = -1;
-  if (fscanf(fp, "%d", &temp) == 1)
-    temp /= 1000;    // Convert millidegrees Celsius to degrees Celsius
-  fclose(fp);
-  return temp;
-}
-#else
-int temperature(void) { /* Fallback for unsupported platforms */
-  return -1; 
-}
-#endif
-
 //      time_.h : parameter free high precision time/benchmark functions
 #define _POSIX_C_SOURCE 200809L // clocktime
 #include <stdio.h>
@@ -219,8 +171,8 @@ static tm_t   tminit()                      { tm_t t0,ts; tps = __builtin_readcy
 #define TM_BACK(_n_) { for(int i=0; i < (_n_); i++) printf("\b");fflush(stdout); }
 
 // benchmark loop
-#define TMBEG(_tm_Reps_) { unsigned _tm_r,_tm_c = 0,_tm_R,_tm_Rx = _tm_Reps_,_tm_Rn = _tm_Reps_; double _tm_t; int itemper = temperature();\
-  for(tm_rm = tm_rep, tm_tm = DBL_MAX, _tm_R = 0; _tm_R < _tm_Rn; _tm_R++) { tm_t _tm_t0 = tminit(); int temper = temperature(); /*for each run*/\
+#define TMBEG(_tm_Reps_) { unsigned _tm_r,_tm_c = 0,_tm_R,_tm_Rx = _tm_Reps_,_tm_Rn = _tm_Reps_; double _tm_t;\
+  for(tm_rm = tm_rep, tm_tm = DBL_MAX, _tm_R = 0; _tm_R < _tm_Rn; _tm_R++) { tm_t _tm_t0 = tminit(); /*for each run*/\
     for(_tm_r = 0;_tm_r < tm_rm;) { /*repeat tm_rm times */
 
 #define TMEND(_size_) ;\
@@ -232,9 +184,9 @@ static tm_t   tminit()                      { tm_t t0,ts; tps = __builtin_readcy
     /*set min time, recalculate repeats tm_rm based on tm_tx, recalculate number of runs based on tm_TX*/\
     if(_tm_t < tm_tm) { if(tm_tm == DBL_MAX) { tm_rm = _tm_r; _tm_Rn = tm_TX/_tm_t; _tm_Rn = _tm_Rn<_tm_Rx?_tm_Rn:_tm_Rx; /*printf("repeats=%u,%u,%.4f ", _tm_Rn, _tm_Rx, _tm_t);*/ } \
 	  tm_tm = _tm_t; _tm_c++;\
-    } else { temper = temperature(); if(_tm_t > tm_tm*1.15 || (temper != itemper && temper > itemp+5)) TMSLEEP;/*force sleep at 15% divergence*/\
-    if(tm_verbose) { printf("%*.*f %2d_%.2d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b", TM_MAN,TM_PRE, TMBS(_size_, tm_tm/tm_rm),_tm_R+1,temper/*_tm_c*/); fflush(stdout);  }\
-    /*if((_tm_R & 7)==7) sleep(tm_slp);*/ /*pause 20 secs after each 8 runs to avoid cpu throttling*/\
+    } else if(_tm_t > tm_tm*1.15) TMSLEEP;/*force sleep at 15% divergence*/\
+    if(tm_verbose) { printf("%*.*f %2d_%.2d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b", TM_MAN,TM_PRE, TMBS(_size_, tm_tm/tm_rm),_tm_R+1,_tm_c); fflush(stdout);  }\
+    if((_tm_R & 7)==7) sleep(tm_slp); /*pause 20 secs after each 8 runs to avoid cpu throttling*/\
   }\
 }
 
@@ -328,5 +280,3 @@ static uint64_t argtot(char *s) {
 }
 
 static void memrcpy(unsigned char *out, unsigned char *in, unsigned n) { int i; for(i = 0; i < n; i++) out[i] = ~in[i]; }
-
-
