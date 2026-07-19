@@ -1620,6 +1620,9 @@ void printfile(char *finame, int xstdout, int fmt, char *rem) {
   #ifdef __MINGW32__
 extern int _CRT_glob = 1;
   #endif
+  
+#include "temperature.c"
+
 
 int main(int argc, char* argv[]) { 
   int xstdout=-1,xstdin=-1;
