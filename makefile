@@ -163,7 +163,7 @@ endif
 
 C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
-ifneq ($(OS), Windows)
+#ifneq ($(OS), Windows)
 CXXFLAGS += -D_C_BLOSC2
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS
@@ -176,6 +176,7 @@ endif
 C_BLOSC2_LIB = c-blosc2/blosc/libblosc2.a
 LDFLAGS += $(C_BLOSC2_LIB)
 endif
+
 
 ISAL_LIB :=
 ifneq ($(wildcard isa-l/.),)
@@ -198,7 +199,6 @@ isa-l/bin/isa-l.a: $(ISAL_SRCS)
   ISAL_LIB := isa-l/bin/isa-l.a 
 endif
 LDFLAGS += $(ISAL_LIB)
-endif
 endif
 
 ifneq ($(wildcard GLZA/.),)
@@ -333,10 +333,10 @@ OB += $(MISA77_OBJS)
 ifeq ($(ARCH),x86_64)
   OB += $(MISA77_DIR)/src/isa/target_sse2.o  $(MISA77_DIR)/src/experimental/isa/etarget_sse2.o 
   OB += $(MISA77_DIR)/src/isa/target_avx2.o $(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
-else if ($(ARCH),aarch64)
+else 
+if ($(ARCH),aarch64)
   OB += $(MISA77_DIR)/src/isa/target_neon.o
 endif
-
 endif
 
 OPENZL_LIB :=
@@ -907,14 +907,13 @@ CXXFLAGS+=-D_PYSAP
 OB+=pysap/pysapcompress/vpa105CsObjInt.o pysap/pysapcompress/vpa106cslzc.o pysap/pysapcompress/vpa107cslzh.o pysap/pysapcompress/vpa108csulzh.o
 endif
 
-ifneq ($(wildcard c-blosc2_NOP/.),)
-CXXFLAGS+=-D_C_BLOSC2
-CFLAGS+=-Ic-blosc2/blosc -Ic-blosc2/include -Ic-blosc2/include/blosc2 -DHAVE_ZSTD
-C_BLOSC2_SRCS := $(wildcard c-blosc2/blosc/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/.c)
-C_BLOSC2_OBJS := $(C_BLOSC2_SRCS:.c=.o)
-OB += $(C_BLOSC2_OBJS)  
-endif
-
+#ifneq ($(wildcard c-blosc2_NOP/.),)
+#CXXFLAGS+=-D_C_BLOSC2
+#CFLAGS+=-Ic-blosc2/blosc -Ic-blosc2/include -Ic-blosc2/include/blosc2 -DHAVE_ZSTD
+#C_BLOSC2_SRCS := $(wildcard c-blosc2/blosc/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/.c)
+#C_BLOSC2_OBJS := $(C_BLOSC2_SRCS:.c=.o)
+#OB += $(C_BLOSC2_OBJS)  
+#endif
 #--------------------------------------------------------------------
 
 OB+=$(ICL) $(HUF) $(ANX) $(LZ) plugin.o
