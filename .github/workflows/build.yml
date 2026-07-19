@@ -23,6 +23,7 @@ jobs:
       - run: git submodule update --init --recursive
       - run: make STATIC=1
       - run: lscpu
+      - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0
 
   macos:
@@ -41,6 +42,7 @@ jobs:
       - run: git submodule update --init --recursive
       - run: make
       - run: sysctl -n machdep.cpu.brand_string
+      - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0
 
   windows:
@@ -59,5 +61,6 @@ jobs:
           update: true
       - run: git submodule update --init --recursive
       - run: make STATIC=1
+      - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -V0
 
