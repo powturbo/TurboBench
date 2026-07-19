@@ -71,7 +71,7 @@
 
 #define RATIO(_clen_, _len_)  ((double)(_clen_)*100.0/(double)(_len_))
 #define FACTOR(_clen_, _len_) ((double)(_len_)/(double)(_clen_))
-#define SCORE(_clen_, _len_,_tc_,_td_) (_tc_ + 2.0 * _td_ + (double)_clen_/1000000.0)  
+#define SCORE(_clen_, _len_,_tc_,_td_) (_tc_ + 10.0 * _td_ + (double)_clen_/1000000.0)  
 
 double weissman(double ratio, double bandwith, double bandwithlo, double bandwithhi ) {
   return ratio * log10( 1 + bandwith/(bandwithlo*ratio) ) - (bandwithhi > 0?ratio * log10( 1 + bandwith/(bandwithhi*ratio) ):0.0);
@@ -480,7 +480,7 @@ int plugreg(plug_t *plug, char *cmd, int k, unsigned bsize, unsigned bsizex) {
   a:plug[k].id = -1;  
   return k;
 }
-#define MAX_PLUGS 30
+#define SVG_PLUGMAX 30
 
 typedef enum { M_RATIO = 0, M_COMP = 1, M_DECOMP = 2 } metric_t;
 #define CHART_W        900
@@ -560,9 +560,9 @@ static void svg_circle(FILE *f, double cx, double cy, double r, const char *fill
 // 1) HORIZONTAL BAR CHART - single metric (ratio | compression | decomp)
 void chart_bar(const char *fname, char *name, plug_t *a, int n, metric_t metric, size_t len) {
   char s[256];
-  if (n > MAX_PLUGS) n = MAX_PLUGS;
+  if (n > SVG_PLUGMAX) n = SVG_PLUGMAX;
   sprintf(s, "%s_%s", fname, name);
-  plug_t tmp[MAX_PLUGS];
+  plug_t tmp[SVG_PLUGMAX];
   memcpy(tmp, a, n * sizeof(plug_t));
 
   int (*cmp)(const void *, const void *) = 
@@ -612,9 +612,9 @@ void chart_bar(const char *fname, char *name, plug_t *a, int n, metric_t metric,
 // *** 2) GROUPED HORIZONTAL BAR CHART - compression + decompression speed
 void chart_grouped(const char *fname, char *name, plug_t *a, int n, size_t len) {
   char s[256];
-  if (n > MAX_PLUGS) n = MAX_PLUGS;
+  if (n > SVG_PLUGMAX) n = SVG_PLUGMAX;
   sprintf(s, "%s_%s", fname, name);
-  plug_t tmp[MAX_PLUGS];
+  plug_t tmp[SVG_PLUGMAX];
   memcpy(tmp, a, n * sizeof(plug_t));
   qsort(tmp, n, sizeof(plug_t), cmp_tc);
 
@@ -663,7 +663,7 @@ void chart_grouped(const char *fname, char *name, plug_t *a, int n, size_t len) 
 // *** 3) 2D SCATTER / DOT CHART - speed (x) vs ratio (y)
 void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xmetric, size_t len) {
   char s[256];
-  if (n > MAX_PLUGS) n = MAX_PLUGS;
+  if (n > SVG_PLUGMAX) n = SVG_PLUGMAX;
   sprintf(s, "%s_%s", fname, name);
   FILE *f = fopen(s, "w");
   if (!f) { perror(s); return; }
@@ -726,6 +726,8 @@ void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xme
 }
 
 void chart(plug_t *a, int n, char *fname, size_t len) {
+  //printf("generate charts for %d codecs\n", n); fflush(stdout);
+
   chart_bar(fname, "ratio.svg",              a, n, M_RATIO,  len);
   chart_bar(fname,  "comp.svg",              a, n, M_COMP,   len);
   chart_bar(fname,"decomp.svg",              a, n, M_DECOMP, len);
@@ -1334,7 +1336,7 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
 	      if(mcpy) { memcpy(op+bs, ip, iplen); oplen = iplen; }
 	      else if(oplen <= 0) { op = _out; goto end; }
 	    }
-        if(bs == 2 && oplen >= (1<<16)) { printf("Output larger than input! Use option '-P'\n"); exit(-1); }
+        if(bs == 2 && oplen >= (1<<16)) die("Output larger than input! Use option '-P'\n");
         if(mode || bsize < inlen) { bs==2?(ctou16(op) = oplen):(ctou32(op) = oplen); } op += oplen+bs; ip += iplen; 
         if(op > _out+outsize) 
 	      die("Overflow error %llu, %u in lib=%d\n", outsize, (int)(op - _out), id);                                                      
@@ -1400,7 +1402,7 @@ void bebuild(char **files, int argc, int recurse, char *foname, unsigned long lo
     char *finame = files[fno]; 
     if(finame[0]=='-') continue;
     FILE *fi = fopen(finame, "rb"); 
-    if(!fi) { perror(finame); die("open error '%s'", finame); exit(0); }	if(verbose>1) fprintf(stdout,"'%s'\n", finame); fflush(stdout); 
+    if(!fi) { perror(finame); die("open error '%s'", finame); }	if(verbose>1) fprintf(stdout,"'%s'\n", finame); fflush(stdout); 
     if((inlen = fread(in, 1, insize, fi))) {			
       if(ftell(fo) + 4 + inlen > filenmax) 
         inlen = filenmax - (st_flen+4);	
@@ -1686,7 +1688,6 @@ int main(int argc, char* argv[]) {
 	  case 'h':
       default: 
         usage(argv[0]);
-        exit(0); 
     }
   }																					if(verbose > 5) printf("START2\n");fflush(stdout);
   if(xplug) { 
@@ -1706,7 +1707,7 @@ int main(int argc, char* argv[]) {
     argvx = argv;
 																					if(verbose > 5) printf("START3\n");fflush(stdout);
   if(fmt) {
-    if(argc <= optind) { printf("no input file specified"); exit(0); }
+    if(argc <= optind) die("no input file specified");
     for(fno = optind; fno < argc; fno++)
       printfile(argvx[fno], xstdout, fmt, rem);
     exit(0);
@@ -1758,7 +1759,7 @@ int main(int argc, char* argv[]) {
   }																									if(verbose > 5) printf("plugreg\n");fflush(stdout);
   
   unsigned k = plugreg(plug, s, 0, bsize, bsizex);
-  if(k > 1 && argc == 1 && !strcmp(argvx[0],"stdin")) { printf("multiple codecs not allowed when reading from stdin"); exit(0); }
+  if(k > 1 && argc == 1 && !strcmp(argvx[0],"stdin")) die("multiple codecs not allowed when reading from stdin");
 
   if(beb) { bebuild(&argvx[optind], argc-optind, recurse, beb, filenmax, delim); exit(0); } 
   BEINI;
@@ -1828,9 +1829,9 @@ int main(int argc, char* argv[]) {
   int       gk = plugread(plug, s, &_totinlen);
   if(_totinlen != totinlen) 
     gk = 0;        
-   FILE *fo = fopen(s, "w");
+  FILE *fo = fopen(s, "w");
   if(fo) {
-    char tms[20];
+    char tms[30];
     time_t tm; 
     time(&tm);    
     struct tm *ltm = localtime(&tm); 
@@ -1865,9 +1866,9 @@ int main(int argc, char* argv[]) {
     }
     fclose(fo);
     printfile(s, 0, FMT_TEXT, rem);
-    plug_t plugv[30],*vp=plugv; int x = 0;
+    plug_t plugv[SVG_PLUGMAX],*vp=plugv; int x = 0;
     for(g = plug; g < plug+gk; g++)
-      if(g->id >= 0) { *vp = *g; vp->tc = TMBS(totinlen, vp->tc); vp->td = TMBS(totinlen, vp->td);  vp++; if(vp-plugv >= 30) break; }
+      if(g->id >= 0) { *vp = *g; vp->tc = TMBS(totinlen, vp->tc); vp->td = TMBS(totinlen, vp->td);  vp++; if(vp-plugv >= SVG_PLUGMAX) break; }     
     chart(plugv, vp - plugv, finame, totinlen);
   }
 
