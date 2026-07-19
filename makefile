@@ -123,8 +123,7 @@ endif
 
 ifdef NMEMSIZE
 CFLAGS+=-DNMEMSIZE
-else
-ifeq ($(OS),$(filter $(OS),Darwin FreeBSD GNU/kFreeBSD Linux NetBSD SunOS))
+else ifeq ($(OS),$(filter $(OS),Darwin FreeBSD GNU/kFreeBSD Linux NetBSD SunOS))
 LDFLAGS += -ldl
 endif
 endif
@@ -163,7 +162,7 @@ endif
 
 C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
-#ifneq ($(OS), Windows)
+ifneq ($(OS), Windows)  # not working under windows
 CXXFLAGS += -D_C_BLOSC2
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS
@@ -175,6 +174,7 @@ c-blosc2/blosc/libblosc2.a: $(C_BLOSC2_SRCS)
 endif
 C_BLOSC2_LIB = c-blosc2/blosc/libblosc2.a
 LDFLAGS += $(C_BLOSC2_LIB)
+endif
 endif
 
 
