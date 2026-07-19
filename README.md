@@ -8,23 +8,42 @@
   >
 </p>
 
- - High performance precision, zero overhead. One might call it the **compression lie detector**
- - The only benchmark program including **[LzTurbo](https://sites.google.com/site/powturbo/compression-benchmark)**
- - 100% in-memory benchmark, no I/O overhead
- - Include (>100) allmost all popular, latest or fastest compressors in one compiled package
- - OS/Arch: Linux amd/intel, arm, RISC-V, PowerPC, s390x, Apple M1-M5 MacOs. Windows: MSYS2, Mingw, visual c++
- - Benchmarking **Entropy Coders**, **Lz77**, **Rolz**, **BWT** and **Context mixing** compressors 
- - **Multiple** input files with **recursive** directories
- - Concatenate **multiple small files** into one multiblock file
- - Avoid **cache szenario** and **cpu throttling** found in other benchmarks
- - Automatic **sort**, update and merge of result files
- - **Text**, **html**, **csv**, **markdown** output
- - :sparkles: **Transfer speed sheet** for different connections or devices: GPRS,2G,3G,4G,DSL,Network,HDD,SSD,RAM
- - :+1: **Html plot:** **Speedup** + **Speed/Ratio**
- - :new:2026.07 :+1: Automatic **SVG Bar/Scatter** Compression/Decompression/Ratio **Charts**
- - All in one executable, no hassless installing of additional packages, graphic libraries, python,...
- - :+1: build in peak memory usage reporting for compression and decompression in html output
+# TurboBench: The Ultimate Data Compression Benchmark
 
+**>100 Codecs in One Powerful Executable** — *The Compression Lie Detector*
+
+Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttling? **TurboBench** delivers **high-precision, zero-overhead results** you can actually trust.
+
+## Why TurboBench Stands Out
+
+- **The only benchmark** that includes **LzTurbo** alongside **100+** popular, latest, and fastest compressors (LZ77, Rolz, BWT, Context Mixing, Entropy Coders, and more).
+- **100% in-memory** testing — no disk I/O to skew your results.
+- Supports **multiple files**, recursive directories, and smart concatenation of small files into multiblock tests.
+- Built to avoid common pitfalls like cache scenarios and throttling found in other tools.
+- Automatic sorting, updating, and merging of result files.
+
+## Broad Platform Support
+
+**Linux** (amd/intel, ARM, RISC-V, PowerPC, s390x), **macOS** (Apple M1–M5), and **Windows** (MSYS2, MinGW, Visual C++).
+
+## Rich, Ready-to-Use Outputs
+
+- Text, HTML, CSV, Markdown.
+- :sparkles: **Transfer speed sheets** for real-world scenarios: GPRS, 2G/3G/4G/5G, DSL, Network, HDD, SSD, RAM.
+- :+1: **HTML plots**: Speedup + Speed/Ratio.
+- :new:2026.07 :+1: **Automatic SVG Bar & Scatter Charts** (2026.07) for Compression, Decompression, and Ratio.
+- Built-in **peak memory usage** reporting (compression + decompression) in HTML output.
+
+**All-in-one executable** — no Python, no extra graphic libraries, no hassle. Just download, run, and benchmark.
+
+**Perfect for developers, researchers, and performance enthusiasts** who demand accurate, apples-to-apples comparisons.
+
+---
+
+**Try it now:**  
+[https://github.com/powturbo/TurboBench](https://github.com/powturbo/TurboBench)
+
+**TurboBench** — Precision you can rely on. The gold standard for compression benchmarking. 🚀
 ### Release:
   - Build or Download turbobench from [releases](https://github.com/powturbo/TurboBench/releases)
   + List all plugins + version: "./turbobench -l2"<br />
