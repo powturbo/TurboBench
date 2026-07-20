@@ -2004,9 +2004,10 @@ static unsigned char getbyte() { return *gip++; }
   #endif
 
 unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outsize, int codec, int lev, char *prm) { unsigned outlen; unsigned char *oend=out+outsize; //printf("#(%d), inlen=%d,outsize=%d\n", codec, inlen, outsize);fflush(stdout);
-  unsigned dsize = dicsize; char *q;
-  if(q = strchr(prm,'d')) dsize = argtoi(q+(q[1]=='='?2:1),0);
-
+  char     *q        = strchr(prm,'d');
+  unsigned dsize     = q?argtoi(q+(q[1]=='='?2:1),0):dicsize; 
+  int      threadnum = q = strchr(prm,'t')?atoi(q+(q[2]=='='?3:2)):1;
+  
   switch(codec) {
       #if _BALZ
     case P_BALZ: return balzcompress(in, inlen, out,lev);
@@ -2021,9 +2022,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         #if _C_BLOSC2LZ
       return blosclz_compress(lev, in, inlen, out, outsize);
         #else
-      char *q; int threadnum = 1; if(q=strchr(prm,'T')) threadnum = atoi(q+(q[1]=='='?2:1)); 
       blosc2_set_nthreads(threadnum);
-      return blosc1_compress(lev, strchr(prm,'s')?1:0/*doshuffle*/, (q=strchr(prm,'t'))?atoi(q+(q[1]=='='?2:1)):1/*typesize*/, inlen, in, out, outsize/*inlen+BLOSC_MAX_OVERHEAD*/);
+      return blosc1_compress(lev, strchr(prm,'s')?1:0/*doshuffle*/, (q=strchr(prm,'T'))?atoi(q+(q[1]=='='?2:1)):1/*typesize*/, inlen, in, out, outsize/*inlen+BLOSC_MAX_OVERHEAD*/);
         #endif
     }
       #endif
@@ -2067,7 +2067,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _LIBBSC
-    #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'T')?0:LIBBSC_FEATURE_MULTITHREADING)
+    #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING)
     case P_LIBBSC: { int ec = (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1; ec = ec==0?3:(ec>3?3:ec);  
       return bsc_compress(      in, out, inlen,strchr(prm,'p')?0:15,strchr(prm,'p')?0:128, lev<3?1:lev, ec, BSC_MODE);
       //int bsc_compress_mt(const unsigned char * input, unsigned char * output, int n, int lzpHashSize, int lzpMinLen, int blockSorter, int coder, int features, int threads);
@@ -2181,9 +2181,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _KANZI
-    case P_KANZI: { char *q; int threadnum = 1; if(q=strchr(prm,'T'))  threadnum = atoi(q+(q[1]=='='?2:1)); 
-      return kanzi_compress((char *)in, inlen, (char *)out, outsize, threadnum, lev);
-    }
+    case P_KANZI: return kanzi_compress((char *)in, inlen, (char *)out, outsize, threadnum, lev);
       #endif
       
       #if _LIBLZF
@@ -2244,8 +2242,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
                                p.m_level                             = (lzham_compress_level)lev;
                                p.m_compress_flags                   |= LZHAM_COMP_FLAG_FORCE_SINGLE_THREADED_PARSING;
                                p.m_compress_flags                   |= strchr(prm,'x')?LZHAM_COMP_FLAG_EXTREME_PARSING:0;
-        if(!(q=strchr(prm,'t'))) q = strchr(prm,'T');                      
-                        if(q)  p.m_max_helper_threads                = atoi(q+(q[1]=='='?2:1));
+                               p.m_max_helper_threads                = threadnum; 
         if(q=strstr(prm,"fb")) p.m_fast_bytes                        = atoi(q+(q[2]=='='?3:2));
         if(q=strchr(prm,'x'))  { unsigned x = atoi(q+(q[1]=='='?2:1)); p.m_extreme_parsing_max_best_arrivals = x<4?4:x; }
                                p.m_table_update_rate                 = LZHAM_DEFAULT_TABLE_UPDATE_RATE;
@@ -2265,8 +2262,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _FLZMA2
-    case P_FLZMA2: { unsigned nbThreads = 1; char *q; if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) nbThreads = atoi(q+(q[2]=='='?3:2)); 
-      return FL2_compressMt(out, outsize, in, inlen, lev, nbThreads); }
+    case P_FLZMA2: return FL2_compressMt(out, outsize, in, inlen, lev, threadnum);
       #endif
       #if _LZMA
         #if __x86_64__
@@ -2280,7 +2276,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       if(q=strstr(prm,"pb")) p.pb         = atoi(q+(q[2]=='='?3:2));
       if(q=strstr(prm,"fb")) p.fb         = atoi(q+(q[2]=='='?3:2));else if(q=strstr(prm,"nice=")) p.fb = atoi(q+5);
       if(q=strstr(prm,"mc")) p.mc         = atoi(q+(q[2]=='='?3:2));
-      if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) p.numThreads = atoi(q+(q[2]=='='?3:2));
+                             p.numThreads = threadnum;
       if(q=strchr(prm,'a'))  p.algo       = atoi(q+(q[1]=='='?2:1));
       if(q=strstr(prm,"mf=bt")) p.btMode  = 1, p.numHashBytes = atoi(q+5);
       if(q=strstr(prm,"mf=hc")) p.btMode  = 0, p.numHashBytes = atoi(q+5);
@@ -2556,10 +2552,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         #else
            #define DICSIZE (1<<27)
         #endif
-    case P_XZ: { int threadnum = 1; char *q;
-      if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) threadnum = atoi(q+(q[2]=='='?3:2));
-      return _xz_compress((char *)in, inlen, (char *)out, outsize, lev, threadnum);
-    }
+    case P_XZ: return _xz_compress((char *)in, inlen, (char *)out, outsize, lev, threadnum);
       #endif
 
       #if _YALZ77
@@ -2593,9 +2586,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _ZSTD
-    case P_ZSTD: { 
-      int threadnum = 1; char *q; if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(q) threadnum = atoi(q+(q[2]=='='?3:2)); 
-      ZSTD_CStream *z = ZSTD_createCStream(); if(!z) return -1;
+    case P_ZSTD: { ZSTD_CStream *z = ZSTD_createCStream(); if(!z) return -1;
       if(dsize) {
         unsigned windowLog = bsr32(dsize) - powof2(dsize); 
         ZSTD_CCtx_setParameter(z, ZSTD_c_enableLongDistanceMatching, 1); 
@@ -2613,9 +2604,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
 	  #if _ZXC
-    case P_ZXC: {
-      int threadnum = 1; if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) threadnum = atoi(q+(q[2]=='='?3:2)); 
-      zxc_compress_opts_t opts = {.n_threads = threadnum, .level = lev, .checksum_enabled = 0};
+    case P_ZXC: { zxc_compress_opts_t opts = {.n_threads = threadnum, .level = lev, .checksum_enabled = 0};
       return zxc_compress_cctx(zxc_cctx_ptr, in, inlen, out, outsize, &opts);
     }
       #endif
@@ -2947,7 +2936,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
   return 0;
 } 
 
-unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen, int codec, int lev, char *prm) { 
+unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen, int codec, int lev, char *prm) {
+  char *q;
+  int  threadnum = q = strchr(prm,'t')?atoi(q+(q[2]=='='?3:2)):1;
+
   switch(codec) {
       #if _AOM
     case P_AOM:     aomdec(in, inlen, out, outlen); return outlen;
@@ -3079,10 +3071,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
      #if _KANZI
-    case P_KANZI: { char *q; 
-      int threadnum = 1; if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) threadnum = atoi(q+(q[2]=='='?3:2)); 
-      return kanzi_decompress((char *)in, inlen, (char *)out, outlen, threadnum);
-    }
+    case P_KANZI: return kanzi_decompress((char *)in, inlen, (char *)out, outlen, threadnum);
       #endif
 
       #if _LIBBSC
@@ -3410,9 +3399,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _XZ
-    case P_XZ: { int threadnum = 1; char *q = strchr(prm,'t'); if(!q) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) threadnum = atoi(q+(q[2]=='='?3:2)); 
-      return _xz_decompress((char *)in, inlen, (char *)out, outlen, threadnum);
-    }
+    case P_XZ: return _xz_decompress((char *)in, inlen, (char *)out, outlen, threadnum);
       #endif
 
       #if _YAPPY
@@ -3449,12 +3436,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 	  
       #if _ZXC
-    case P_ZXC: {
-      char *q; int threadnum = 1; if(!(q=strchr(prm,'t'))) q = strchr(prm,'T'); if(!q) q=strstr(prm,"mt"); if(q) threadnum = atoi(q+(q[2]=='='?3:2)); 
-      zxc_decompress_opts_t opts = {.n_threads = threadnum, .checksum_enabled = 0};
-      zxc_decompress_dctx(zxc_dctx_ptr, in, inlen, out, outlen, &opts);
-      break;
-    }
+    case P_ZXC: { zxc_decompress_opts_t opts = {.n_threads = threadnum, .checksum_enabled = 0};  zxc_decompress_dctx(zxc_dctx_ptr, in, inlen, out, outlen, &opts); } break;
       #endif
 
       #if _ZPAQ
