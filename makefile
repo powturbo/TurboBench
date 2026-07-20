@@ -101,7 +101,7 @@ else ifeq ($(ARCH),x86_64)
 endif
 
 ifeq ($(OS),Windows)
-  LDFLAGS=-Wl,--stack,33554432
+  LDFLAGS=-Wl,--stack,33554432 -lpowrprof
 endif
 
 CFLAGS+=-w -Wall $(DDEBUG) -std=gnu99 -fpermissive -Wimplicit-function-declaration
