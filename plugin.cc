@@ -2226,7 +2226,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _LZAV
 	case P_LZAV: 
-          return (lev == 1)?lzav_compress_default(inbuf, outbuf, insize, outsize):lzav_compress_hi(inbuf, outbuf, insize, outsize);
+          return (lev == 1)?lzav_compress_default((char *)in, (char *)out, inlen, outsize):lzav_compress_hi((char *)in, (char *)out, inlen, outsize);
       #endif
 
       #if _LZFSE
