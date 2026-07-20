@@ -7,7 +7,7 @@
 # Cross compile: export CROSS to aarch64 riscv64 loongarch64 or powerpc64le. Ex.:
 # export CROSS=aarch64
 # Testing with qemu
-# qemu-aarch64 -L /usr/aarch64-linux-gnu ./icapp ZIPF
+# qemu-aarch64 -L /usr/aarch64-linux-gnu ./turbobench .l2
 #LZTURBO=1
 
 CC ?= gcc
@@ -162,17 +162,17 @@ endif
 C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
 ifneq ($(OS), Windows)  # not working under windows
-CXXFLAGS += -D_C_BLOSC2
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ifdef CROSS
-c-blosc2/blosc/libblosc2.a: $(C_BLOSC2_SRCS)
-	(export CC=$(CROSS)-linux-gnu-gcc && cd c-blosc2 && cmake . -DBLOSC_ZSTD_SOURCE_DIR=../zstd && $(MAKE))
+ifdef CROSS # no cross compile
+#c-blosc2/blosc/libblosc2.a: $(C_BLOSC2_SRCS)
+#	(export CC=$(CROSS)-linux-gnu-gcc && cd c-blosc2 && cmake . -DBLOSC_ZSTD_SOURCE_DIR=../zstd && $(MAKE))
 else
+CXXFLAGS += -D_C_BLOSC2
 c-blosc2/blosc/libblosc2.a: $(C_BLOSC2_SRCS)
 	(cd c-blosc2 && cmake . -DBLOSC_ZSTD_SOURCE_DIR=../zstd && $(MAKE))
-endif
 C_BLOSC2_LIB = c-blosc2/blosc/libblosc2.a
 LDFLAGS += $(C_BLOSC2_LIB)
+endif
 endif
 endif
 
@@ -331,24 +331,24 @@ OB += $(MISA77_OBJS)
 ifeq ($(ARCH),x86_64)
   OB += $(MISA77_DIR)/src/isa/target_sse2.o  $(MISA77_DIR)/src/experimental/isa/etarget_sse2.o 
   OB += $(MISA77_DIR)/src/isa/target_avx2.o $(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
-else if ($(ARCH),aarch64)
+else ifeq ($(ARCH),aarch64)
   OB += $(MISA77_DIR)/src/isa/target_neon.o
-    endif
+endif
 endif
 
 OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
-CXXFLAGS += -D_OPENZL -Iopenzl/include
 OPENZL_SRCS := $(shell find openzl -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ifdef CROSS
-openzl/libopenzl.a: $(OPENZL_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cd openzl && $(MAKE) lib
+ifdef CROSS #not working
+#openzl/libopenzl.a: $(OPENZL_SRCS)
+#	export CC=$(CROSS)-linux-gnu-gcc && cd openzl && $(MAKE) lib
 else
+CXXFLAGS += -D_OPENZL -Iopenzl/include
 openzl/libopenzl.a: $(OPENZL_SRCS)
 	cd openzl && $(MAKE) lib
-endif
 OPENZL_LIB = openzl/libopenzl.a
 LDFLAGS += $(OPENZL_LIB)
+endif
 endif
 
 # 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
@@ -447,7 +447,7 @@ endif
 ifneq ($(wildcard zxc/.),)
 ifneq (,$(filter $(ARCH),x86_64 aarch64))
 CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
-CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE
+CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE -fPIC 
 ZXCDIR = zxc/src/lib
 
 ZXC_BUILD = $(CC) -O3 $(CFLAGS) -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
