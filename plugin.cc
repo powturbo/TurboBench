@@ -2006,7 +2006,7 @@ static unsigned char getbyte() { return *gip++; }
 unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outsize, int codec, int lev, char *prm) { unsigned outlen; unsigned char *oend=out+outsize; //printf("#(%d), inlen=%d,outsize=%d\n", codec, inlen, outsize);fflush(stdout);
   char     *q        = strchr(prm,'d');
   unsigned dsize     = q?argtoi(q+(q[1]=='='?2:1),0):dicsize; 
-  int      threadnum = q = strchr(prm,'t')?atoi(q+(q[2]=='='?3:2)):1;
+  int      threadnum = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;
   
   switch(codec) {
       #if _BALZ
@@ -2938,7 +2938,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
 unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen, int codec, int lev, char *prm) {
   char *q;
-  int  threadnum = q = strchr(prm,'t')?atoi(q+(q[2]=='='?3:2)):1;
+  int  threadnum = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;
 
   switch(codec) {
       #if _AOM
