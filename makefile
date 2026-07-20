@@ -672,6 +672,7 @@ OB+=EC/subotin_/subotin.o
 endif
 
 ifneq ($(wildcard Turbo-Range-Coder/.),)
+ifneq ($(ARCH),loongarch64)
 CXXFLAGS+=-D_TURBORC
 CFLAGS+=-D_ANS -D_BWT -ITurbo-Range-Coder/libsais/include 
 TRC=Turbo-Range-Coder/
@@ -691,6 +692,7 @@ OB+=Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o
 LIBSAIS=1
 ifdef LZTURBO
 CFLAGS+=-D_NCPUISA -D_NQUANT
+endif
 endif
 endif
 
@@ -713,6 +715,7 @@ endif
 #OB+=polar/polar.o fpaqc/fpaqc.o
 #-------------------- Encoding ------------------------
 ifneq ($(wildcard Turbo-Run-Length-Encoding/.),)
+ifneq ($(ARCH),loongarch64)
 CXXFLAGS+=-D_TURBORLE
 
 TRLEDIR = Turbo-Run-Length-Encoding
@@ -725,6 +728,7 @@ OB+=$(TRLEDIR)/trlec.o $(TRLEDIR)/trled.o
 
 CXXFLAGS+=-D_MRLE
 OB+=Turbo-Run-Length-Encoding/ext/mrle.o
+endif
 endif
 
 ifneq ($(wildcard hypersonic-rle-kit/.),)
