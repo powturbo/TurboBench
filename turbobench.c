@@ -751,13 +751,13 @@ void chart(plug_t *a, int n, char *fname, size_t len) {
 #define BOLDE  CRESET
   #endif
 
-struct bandw {
+typedef struct {
   unsigned long long bw;
   unsigned           rtt; 
   char               *s;
-};
+} bandwidth;
 
-static struct bandw bw[] = {
+bandwidth_t bandwidth[] = {
   {    7*KB, 500, "GPRS 56"  },//56kbps
   {   57*KB, 150, "2G 456"   },
   {  125*KB,  40, "3G 1M"    },
@@ -765,6 +765,8 @@ static struct bandw bw[] = {
   {  500*KB,  20, "4G 4M"    },
   { 3750*KB,   5, "WIFI 30M" },
   {12500*KB,   5, "CAB 100M" },
+  {37500*KB,  10, "5G 300M"  },//5G sub-6GHz avg ~300Mbps
+
   {   40*MB,   0, "USB2 40MB"},
   {  125*MB,   0, "ETH 1000" },
   {  200*MB,   0, "HDD 200MB"},
@@ -772,7 +774,9 @@ static struct bandw bw[] = {
   {   1u*GB,   0, "SSD 1GB"  },
   {   2u*GB,   0, "SSD 2GB"  },
   { 4ull*GB,   0, "4GB/s"    },
-  { 8ull*GB,   0, "8GB/s"    }
+  { 8ull*GB,   0, "8GB/s"    },
+  {14ull*GB,   0, "SSD 14GB/s"},//PCIe 5.0 NVMe (e.g. Crucial T705)
+  
 };
 #define BWSIZE (sizeof(bw)/sizeof(struct bandw))
 
