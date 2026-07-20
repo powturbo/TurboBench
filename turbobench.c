@@ -1509,7 +1509,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     unsigned *_stack = stackini();   
 
 	size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm)/nb;
-	tc = ((double)tm_tm/((double)tm_rm*nb));
+	tc = tm_tmin(nb); 
 	plug->len += outlen; 
     plug->tc  += tc; 
 	plug->memc = mempeak() - peak;
@@ -1523,7 +1523,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
       size_t   peak    = mempeakinit();
       unsigned *_stack = stackini();   
 	  unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm)/nb;
-	  td = ((double)tm_tm/((double)tm_rm*nb)); 
+	  td = tm_tmin(nb); 
 	  plug->td  += td;		
       plug->memd = mempeak() - peak;              						        if(tm_verbose && totinlen == filen) printf("%8.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
       plug->stkd = stackpeak(_stack);
