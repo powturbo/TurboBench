@@ -642,7 +642,7 @@ LDFLAGS+=-lm
 #   git submodule update --init --recursive pivco-huffman zstd
 #ifeq ($(PHAZ), 1)
 #PIVCOHUFDIR=pivco-huffman
-ifdef _PHAZ  # build failed with undefined reference to `log2'
+#ifdef _PHAZ  # build failed with undefined reference to `log2'
 PHAZDIR=$(PIVCOHUFDIR)/extras/phaz
 CXXFLAGS+=-D_PHAZ=1
 $(PHAZDIR)/build/phaz_local.o:
@@ -651,7 +651,7 @@ $(PHAZDIR)/build/phaz_local.o:
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
 OB+=$(PHAZDIR)/build/phaz_local.o
 #endif
-endif
+#endif
 endif
 endif
 
