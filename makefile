@@ -630,6 +630,7 @@ $(PIVCOHUFDIR)/build/libpivco_huffman_local.o:
 	cmake -S $(PIVCOHUFDIR) -B $(PIVCOHUFDIR)/build -DCMAKE_BUILD_TYPE=Release
 	cmake --build $(PIVCOHUFDIR)/build --target pivco_huffman_local -j
 OB+=$(PIVCOHUFDIR)/build/libpivco_huffman_local.o
+LDFLAGS+=-lm
 
 # PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor;
 # level = zstd level).  Built from the pivco-huffman submodule's extras/phaz via
@@ -641,14 +642,15 @@ OB+=$(PIVCOHUFDIR)/build/libpivco_huffman_local.o
 #   git submodule update --init --recursive pivco-huffman zstd
 #ifeq ($(PHAZ), 1)
 #PIVCOHUFDIR=pivco-huffman
+ifdef _PHAZ  # build failed with undefined reference to `log2'
 PHAZDIR=$(PIVCOHUFDIR)/extras/phaz
 CXXFLAGS+=-D_PHAZ=1
 $(PHAZDIR)/build/phaz_local.o:
-	cmake -S $(PIVCOHUFDIR) -B $(PIVCOHUFDIR)/build -DCMAKE_BUILD_TYPE=Release
+	cmake -S $(PIVCOHUFDIR) -B $(PIVCOHUFDIR)/build -DCMAKE_BUILD_TYPE=Release LDFLAGS=-lm
 	cmake --build $(PIVCOHUFDIR)/build --target pivco_huffman_local -j
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
 OB+=$(PHAZDIR)/build/phaz_local.o
-#endif
+endif
 endif
 endif
 endif
