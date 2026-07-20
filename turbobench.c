@@ -1653,7 +1653,8 @@ int main(int argc, char* argv[]) {
       case 'g': merge++;		 			 		 break;
       case 'G': plotmcpy++;	 			 		 	 break;
 
-      case 'I': if((tm_Rep  = atoi(optarg))<=0) tm_rep=tm_Rep=1; break;
+      case 'i': 
+      case 'I': { char *q = strchr(optarg,','); if((tm_Rep  = atoi(optarg))<=0) tm_rep=tm_Rep=1; if(q && (tm_Rep2 = atoi(q+1))<=0) tm_rep=tm_Rep2=1;}  break;
       case 'J': if((tm_Rep2 = atoi(optarg))<=0) tm_rep=tm_Rep2=1; break;
       case 'L': tm_slp   = atoi(optarg);      		 break;
  	  case 't': tm_tx    = atoi(optarg); 		 	break;
@@ -1721,27 +1722,28 @@ int main(int argc, char* argv[]) {
   if(!scmd) scmd = "FAST";																if(verbose > 5) printf("%s\n", scmd);fflush(stdout);
   for(s[0] = 0;;) {
     char *q; 
-	int i=0;
+    int i=0;
     if(!*scmd) break;
     if(q = strchr(scmd,'/')) *q = '\0';
-	FILE *fi = fopen("turbobench.ini", "r");
-	if(fi) {
-	  char ss[LSIZE+1];
-	  while(fgets(ss, LSIZE, fi)) {
+      FILE *fi = fopen("turbobench.ini", "r");
+      if(fi) {
+	char ss[LSIZE+1];
+	while(fgets(ss, LSIZE, fi)) {
         char *t = ss,*u;  																	
         while(isspace(*t)) t++; u = t; while(isalnum(*u) || ispunct(*u)) u++; *u = 0; 
         if(!strcmp(scmd, t)) {  
-		  for(t=++u;isspace(*t);t++); u = t; while(isalnum(*u) || ispunct(*u)) u++; *u = 0;
+	  for(t = ++u; isspace(*t); t++); 
+	  u = t; while(isalnum(*u) || ispunct(*u)) u++; *u = 0;
           strcat(s, "/ON/"); 
           strcat(s, t);
           strcat(s, "/OFF/"); 
-		  i = 1;
+	  i = 1;
           break;
         }
-	  }
-	  fclose(fi);
-	}
-	if(!i)
+      }
+      fclose(fi);
+    }
+    if(!i)
       for(i = 0; i < PLUGGSIZE; i++) 
         if(!strcmp(scmd, plugg[i].id)) { 
           strcat(s, "/ON/"); 
@@ -1754,7 +1756,7 @@ int main(int argc, char* argv[]) {
       strcat(s,"/"); 
     }
     scmd = q?(q+1):(char*)"";
-  }																									if(verbose > 5) printf("plugreg\n");fflush(stdout);
+  }																	if(verbose > 5) printf("plugreg\n");fflush(stdout);
   
   unsigned k = plugreg(plug, s, 0, bsize, bsizex);
   if(k > 1 && argc == 1 && !strcmp(argvx[0],"stdin")) die("multiple codecs not allowed when reading from stdin");
