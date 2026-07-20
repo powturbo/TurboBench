@@ -1554,7 +1554,7 @@ struct plugs plugs[] = {
   { P_LIBLZF,        "lzf",           _LIBLZF,    "LibLZF",                  "" },
   { P_LIBLZG,        "lzg",           _LIBLZG,    "LibLzg",                  "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
   { P_LIZARD,        "lizard",        _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
-  { P_LZ4,           "lz4",           _LZ4,       "Lz4",                     "0,1,2,3,4,5,6,7,8,9,10,11,12,16/MfsB#" },
+  { P_LZ4,           "lz4",           _LZ4,       "Lz4",                     "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
   { P_LZ4ULTRA,      "lz4ultra",      _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
   { P_LZAV,          "lzav",          _LZAV,      "lzav", "" }, // https://github.com/avaneev/lza
   { P_LZFSE,         "lzfse",         _LZFSE,     "lzfse",                   "" },  
@@ -1595,8 +1595,8 @@ struct plugs plugs[] = {
   { P_OPENZL_I64,    "openzl_i64",    _OPENZL,    "openzl i64",       "" },
   { P_OPENZL_SERIAL, "openzl_serial", _OPENZL,    "openzl serial",    "" },
   { P_OPENZL_GENERIC,"openzl_generic",_OPENZL,    "openzl generic",   "" },
-  { P_OPENZL_ZSTD,   "openzl_zstd",   _OPENZL,    "openzl zstd",      "-99,-90,-80,-70,-60,-50,-40,-30,-20,-10,-8,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,8,10,12,14,16,18,20,22" },
-  { P_OPENZL_LZ4,    "openzl_lz4",    _OPENZL,    "openzl lz4",       "-99,-90,-80,-70,-60,-50,-40,-30,-20,-10,-8,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,8,9,10,11,12" }, 
+  { P_OPENZL_ZSTD,   "openzl_zstd",   _OPENZL,    "openzl zstd",      "1,2,3,4,5,6,8,10,12,14,16,18,20,22,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99" },
+  { P_OPENZL_LZ4,    "openzl_lz4",    _OPENZL,    "openzl lz4",       "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99" }, 
 
   { P_PCODECI8,      "pcodec_i8",     _PCODEC,    "pcodec_i8",        "0,1,2,3,4,5,6,7,8,9" },
   { P_PCODECU8,      "pcodec_u8",     _PCODEC,    "pcodec_u8",        "0,1,2,3,4,5,6,7,8,9" },
@@ -1644,7 +1644,7 @@ struct plugs plugs[] = {
   { P_ZLIB_NG,       "zlib_ng",       _ZLIB_NG,   "zlib-ng",                 "1,2,3,4,5,6,7,8,9" },
   { P_ZLING,         "zling",         _ZLING,     "Libzling",                "0,1,2,3,4" },
   { P_ZOPFLI,        "zopfli",        _ZOPFLI,    "zopfli",                  ""},
-  { P_ZSTD,          "zstd",          _ZSTD,      "zstd",                    "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-11,-12,-13,-14,-15,-16,-17,-18,-19,-20,-21,-22/d#" },
+  { P_ZSTD,          "zstd",          _ZSTD,      "zstd",                    "1,2,3,4,5,6,8,10,12,14,16,18,20,22,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/d#" },
   { P_ZXC,           "zxc",           _ZXC,       "zxc",                     "1,2,3,4,5,6,7" },
   { P_ZPAQ,          "zpaq",          _ZPAQ,      "libzpaq",                 "0,1,2,3,4,5" },
 
