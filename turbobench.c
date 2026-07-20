@@ -755,9 +755,9 @@ typedef struct {
   unsigned long long bw;
   unsigned           rtt; 
   char               *s;
-} bandwidth;
+} bandwidth_t;
 
-bandwidth_t bandwidth[] = {
+bandwidth_t bw[] = {
   {    7*KB, 500, "GPRS 56"  },//56kbps
   {   57*KB, 150, "2G 456"   },
   {  125*KB,  40, "3G 1M"    },
@@ -777,7 +777,7 @@ bandwidth_t bandwidth[] = {
   { 8ull*GB,   0, "8GB/s"    },
   {14ull*GB,   0, "SSD 14GB/s"}//PCIe 5.0 NVMe (e.g. Crucial T705) 
 };
-#define BWSIZE (sizeof(bw)/sizeof(struct bandw))
+#define BWSIZE (sizeof(bw)/sizeof(bandwidth_t)
 
 void plugprth(FILE *f, int fmt, char *t) {
   char *plot  = "<script src=https://cdn.plot.ly/plotly-latest.min.js></script>";
