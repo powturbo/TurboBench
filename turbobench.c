@@ -775,8 +775,7 @@ bandwidth_t bandwidth[] = {
   {   2u*GB,   0, "SSD 2GB"  },
   { 4ull*GB,   0, "4GB/s"    },
   { 8ull*GB,   0, "8GB/s"    },
-  {14ull*GB,   0, "SSD 14GB/s"},//PCIe 5.0 NVMe (e.g. Crucial T705)
-  
+  {14ull*GB,   0, "SSD 14GB/s"}//PCIe 5.0 NVMe (e.g. Crucial T705) 
 };
 #define BWSIZE (sizeof(bw)/sizeof(struct bandw))
 
