@@ -1008,7 +1008,7 @@ int vsrc_forwards(unsigned char * src, unsigned char * dst, size_t src_size);
 int vsrc_reverse(unsigned char * src, unsigned char * dst, size_t src_size);
   #endif
 
-  #ifdef _OPENZL  // Adapted from lzbench
+  #if _OPENZL  // Adapted from lzbench
 #include "openzl/include/openzl/openzl.h"
 #include "openzl/include/openzl/codecs/zl_segmenters.h"
 
