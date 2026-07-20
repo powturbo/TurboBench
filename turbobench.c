@@ -1394,7 +1394,7 @@ int delim;
 void bebuild(char **files, int argc, int recurse, char *foname, unsigned long long filenmax, int lim) {  
   FILE     *fo = fopen(foname, "wb"); if(!fo) { perror(foname); die("creat error '%s'", foname); }
   unsigned fno, insize = 100*MB, inlen; 
-  char *in = malloc(insize),*finame; 
+  char *in = malloc(insize),*finame; vmemset(in, 0, insize);
   unsigned st_fnum = 0; 
   unsigned long long st_flen = 0, st_blklen = 0;
 
@@ -1469,15 +1469,13 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
   size_t insizem  = (fuzz&3)?SIZE_ROUNDUP(insize, pagesize):(insize+INOVD);
 
   outsize = insize*fac + 10*Mb; 
-  unsigned char *_in = NULL;
-  if(insizem && !(_in = _valloc(insizem*2,1)))   // insizem * 2 because of sad
-    die("malloc error in size=%u\n", insizem);    
-  
-  unsigned char *_cpy = _in, *out = (unsigned char*)_valloc(outsize,2);  		if(!out) die("malloc error out size=%u\n", outsize);
+  unsigned char *_in = NULL, *_cpy = _in, *out;
+  if(insizem && !(_in = _valloc(insizem,1)))                     die("malloc error in size=%u\n", insizem);
+  vmemset(_in, 0, insize);
+  if(!(out = (unsigned char*)_valloc(outsize,2)))                die("malloc error out size=%u\n", outsize);
   vmemset(out, 0, outsize); 
-  if((cmp || tid) && insizem && !(_cpy = _valloc(insizem*3,3)))
-    die("malloc error cpy size=%u\n", insizem);
-  vmemset(_cpy, 0, insizem*3); 
+  if((cmp || tid) && insizem && !(_cpy = _valloc(insizem*3,3)))  die("malloc error cpy size=%u\n", insizem);
+  if(_cpy) vmemset(_cpy, 0, insizem*3); 
 
   codini(insize, plug->id, plug->lev, plug->prm);	
   size_t    inlen;																	
