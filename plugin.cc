@@ -1556,7 +1556,7 @@ struct plugs plugs[] = {
   { P_LIZARD,        "lizard",        _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
   { P_LZ4,           "lz4",           _LZ4,       "Lz4",                     "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
   { P_LZ4ULTRA,      "lz4ultra",      _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
-  { P_LZAV,          "lzav",          _LZAV,      "lzav", "" }, // https://github.com/avaneev/lza
+  { P_LZAV,          "lzav",          _LZAV,      "lzav", "1,2" }, // https://github.com/avaneev/lzav
   { P_LZFSE,         "lzfse",         _LZFSE,     "lzfse",                   "" },  
   { P_LZFSEA,        "lzfsea",        _LZFSEA,    "lzfsea",                  "" },
   { P_LZJODY,        "lzjody",        _LZJODY,    "lzjody",                  "" },
@@ -2225,7 +2225,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _LZAV
-	case P_LZAV: return lzav_compress_default(in, out, inlen, outsize);
+	case P_LZAV: 
+          return (lev == 1)?lzav_compress_default(inbuf, outbuf, insize, outsize):lzav_compress_hi(inbuf, outbuf, insize, outsize);
       #endif
 
       #if _LZFSE
@@ -2374,7 +2375,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _MISA77
     case P_MISA77:
-    case P_MISA77U:
+    case P_MISA77U: 
       switch (lev) {
         case 2:
         case 3:  return misa77::experimental::adaptive_compress(in, inlen, out, outsize, lev - 2);
