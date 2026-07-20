@@ -787,6 +787,7 @@ void chart_grouped(const char *fname, char *name, plug_t *a, int n, size_t len) 
   fclose(f);
 }
 
+#if 0
 // *** 3) 2D SCATTER / DOT CHART - speed (x) vs ratio (y)
 void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xmetric, size_t len) {
   char s[256];
@@ -851,7 +852,97 @@ void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xme
   svg_close(f);
   fclose(f);
 }
+#else
+#define LEGEND_W       180   /* extra canvas width reserved for the legend */
+#define LEGEND_SWATCH   10   /* diameter of the color swatch */
+#define LEGEND_LINEH    16   /* vertical spacing between legend entries */
 
+static const char *palette[] = {
+  "#2E86AB", "#E67E22", "#27AE60", "#C0392B", "#8E44AD",
+  "#16A085", "#D35400", "#2C3E50", "#F1C40F", "#7F8C8D",
+  "#3498DB", "#E74C3C", "#1ABC9C", "#9B59B6", "#F39C12",
+  "#34495E"
+};
+#define PALETTE_N (int)(sizeof(palette)/sizeof(palette[0]))
+
+void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xmetric, size_t len) {
+  char s[256];
+  if (n > SVG_PLUGMAX) n = SVG_PLUGMAX;
+  sprintf(s, "%s_%s", fname, name);
+  FILE *f = fopen(s, "w");
+  if (!f) { perror(s); return; }
+
+  int svg_w = SCATTER_W + LEGEND_W;   /* widen the canvas to fit the legend */
+
+  strncpy(s, fname, 30); s[30] = 0;
+  if (xmetric == M_COMP)
+    snprintf(s, 80, "TurboBench: C Speed/Ratio %s", fname);
+  else
+    snprintf(s, 80, "TurboBench: D Speed/s-Ratio %s", fname);
+
+  svg_open(f, svg_w, SCATTER_H, s);
+
+  double mx_x = max_metric(a, n, xmetric, len) * 1.15;
+  double mx_y = 100.0; /* ratio range 0..100 */
+  double px0 = SCATTER_MARGIN, py0 = SCATTER_H - SCATTER_MARGIN;
+  double pw = SCATTER_W - 2 * SCATTER_MARGIN;   /* plot area unchanged; legend lives in the extra width */
+  double ph = SCATTER_H - SCATTER_MARGIN - 50;
+
+  svg_line(f, px0, py0, px0 + pw, py0, "#333", 1.5);
+  svg_line(f, px0, py0, px0, py0 - ph, "#333", 1.5);
+
+  int gi;
+  for (gi = 0; gi <= 5; gi++) {
+    double gx = px0 + pw * gi / 5.0;
+    double vx = mx_x * gi / 5.0;
+    svg_line(f, gx, py0, gx, py0 - ph, "#eee", 1);
+    char t[32];
+    snprintf(t, sizeof(t), "%.0f", vx);
+    svg_text(f, gx, py0 + 18, "middle", 11, "#555", t);
+
+    double gy = py0 - ph * gi / 5.0;
+    double vy = mx_y * gi / 5.0;
+    svg_line(f, px0, gy, px0 + pw, gy, "#eee", 1);
+    char ty[32];
+    snprintf(ty, sizeof(ty), "%.0f%%", vy);
+    svg_text(f, px0 - 10, gy + 4, "end", 11, "#555", ty);
+  }
+
+  svg_text(f, px0 + pw / 2, SCATTER_H - 15, "middle", 13, "#222",
+           xmetric == M_COMP ? "C MB/s" : "D MB/s");
+  fprintf(f,
+    "<text x=\"20\" y=\"%.2f\" font-size=\"13\" fill=\"#222\" "
+    "transform=\"rotate(-90 20 %.2f)\" text-anchor=\"middle\">Ratio%%</text>\n",
+    py0 - ph / 2, py0 - ph / 2);
+
+  /* --- legend column, to the right of the plot --- */
+  double legend_x = SCATTER_W + 20;
+  double legend_y = SCATTER_MARGIN;
+  svg_text(f, legend_x, legend_y - 12, "start", 13, "#222", "Legend");
+
+  int i;
+  for (i = 0; i < n; i++) {
+    double v = xmetric == M_COMP ? a[i].tc : a[i].td;
+    double cx = px0 + (v / mx_x) * pw;
+    double cy = py0 - (RATIO(a[i].len, len) / mx_y) * ph;
+    const char *color = palette[i % PALETTE_N];
+
+    /* plot the dot with its own color, no inline text */
+    svg_circle(f, cx, cy, 6, color, "#333");
+
+    if (a[i].lev == INVLEV) sprintf(s, "%s", a[i].s);
+    else                    sprintf(s, "%s,%d", a[i].s, a[i].lev);
+
+    /* matching legend row: swatch + label */
+    double ly = legend_y + i * LEGEND_LINEH;
+    svg_circle(f, legend_x + LEGEND_SWATCH / 2, ly - 4, LEGEND_SWATCH / 2, color, "#333");
+    svg_text(f, legend_x + LEGEND_SWATCH + 8, ly, "start", 11, "#111", s);
+  }
+
+  svg_close(f);
+  fclose(f);
+}
+#endif
 void chart(plug_t *a, int n, char *fname, size_t len) {
   //printf("generate charts for %d codecs\n", n); fflush(stdout);
 
