@@ -39,6 +39,7 @@
 #include <math.h>
 #include <sys/types.h>
 #include <ctype.h>
+
   #ifndef _WIN32
 #include <sys/resource.h>
   #endif
@@ -264,6 +265,132 @@ size_t stackpeak(unsigned *_sp) {
 }
 #endif
 
+//----------------------------------------------------------------------------------------------------------------
+#include <sys/stat.h>
+#include <dirent.h>
+
+#ifndef _WIN32
+#include <limits.h>
+#include <unistd.h>
+#else
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+#endif
+
+#define RDIR_DEPTH 128
+
+typedef struct {
+  DIR *dirs[RDIR_DEPTH];
+  DIR **pos;
+  char prefix[PATH_MAX];
+} rdirstack_t;
+
+typedef struct {
+  char        **list;
+  rdirstack_t *stack;
+} rdir_t;
+
+rdir_t *rdiropen(char **paths) {
+  if (!paths) return NULL;  
+  rdir_t *rdir = (rdir_t *)calloc(1, sizeof(rdir_t));       if (!rdir) return NULL;  
+  rdir->list = paths;
+  rdir->stack = (rdirstack_t *)malloc(sizeof(rdirstack_t)); if (!rdir->stack) { free(rdir);  return NULL;  }
+  return rdir;
+}
+
+void rdirclose(rdir_t *rdir) {
+  if(!rdir) return;
+  if(rdir->stack) {
+    if (rdir->stack->pos) { /* Close any open directories left in the stack */
+      while (rdir->stack->pos >= rdir->stack->dirs) {
+        if (*(rdir->stack->pos))
+          closedir(*(rdir->stack->pos));
+        if (rdir->stack->pos == rdir->stack->dirs) break;
+        rdir->stack->pos--;
+      }
+    }
+    free(rdir->stack);
+  }
+  free(rdir);
+}
+
+// rdir_next: Retrieve the next file name in the sequence. Returns 0 on success, -1 when exhausted.
+int rdirnext(rdir_t *rdir, char *name, struct stat *st_arg) {
+  if (!rdir || !rdir->stack || !name || !st_arg) return -1;  
+  rdirstack_t *stk = rdir->stack;
+  while (1) {
+    if(stk->pos) {
+      DIR *dircur = *(stk->pos);
+      if (!dircur) {
+        if (stk->pos == stk->dirs) stk->pos = NULL;
+        else stk->pos--;
+        continue;
+      }  
+      struct dirent *ent = readdir(dircur);
+      if(!ent) {
+        closedir(dircur); // Reached end of current directory: close and pop
+        if (stk->pos == stk->dirs) stk->pos = NULL;
+        else stk->pos--;
+               
+        char *last_slash = strrchr(stk->prefix, '/'); // Truncate the prefix to the parent directory
+          #ifdef _WIN32
+        char *last_backslash = strrchr(stk->prefix, '\\');
+        if(last_backslash && (!last_slash || last_backslash > last_slash)) last_slash = last_backslash;
+          #endif
+        if(last_slash && last_slash != stk->prefix) *last_slash = '\0';       // Normal truncation to parent
+        else if(last_slash == stk->prefix)          *(last_slash + 1) = '\0'; // Keep root '/'
+        else                                        stk->prefix[0] = '\0';    // Clear completely for relative roots
+        continue;
+      }
+            
+      if(strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
+      size_t plen = strlen(stk->prefix);
+      if (plen > 0 && (stk->prefix[plen - 1] == '/' 
+        #ifdef _WIN32
+                || stk->prefix[plen - 1] == '\\'
+        #endif
+      )) {
+        snprintf(name, PATH_MAX, "%s%s", stk->prefix, ent->d_name);
+      } else if (plen > 0) snprintf(name, PATH_MAX, "%s/%s", stk->prefix, ent->d_name);
+      else strncpy(name, ent->d_name, PATH_MAX);
+      name[PATH_MAX - 1] = '\0';
+            
+      if(stat(name, st_arg) == 0) {
+        if(S_ISDIR(st_arg->st_mode) && (stk->pos - stk->dirs) < (RDIR_DEPTH - 1)) {
+          DIR *new_dir = opendir(name);
+          if(new_dir) {
+            stk->pos++;
+            *(stk->pos) = new_dir;
+            strncpy(stk->prefix, name, PATH_MAX - 1);
+            stk->prefix[PATH_MAX - 1] = '\0';
+          }
+        }
+        return 0; /* Successfully yielded an entry */
+      }    
+    } else {
+      if(!rdir->list || !*(rdir->list)) return -1; // finished          
+      char *current_path = *(rdir->list);
+      rdir->list++;   
+      strncpy(name, current_path, PATH_MAX);
+      name[PATH_MAX - 1] = '\0';      
+      if(stat(name, st_arg) == 0) {
+        if(S_ISDIR(st_arg->st_mode)) {
+          DIR *dir = opendir(name);
+          if(dir) {
+            stk->pos = stk->dirs;
+            *(stk->pos) = dir;
+            strncpy(stk->prefix, name, PATH_MAX - 1);
+            stk->prefix[PATH_MAX - 1] = '\0';
+          }
+        }
+        return 0; 
+      }
+    }
+  }
+  return -1;
+}
+
 //--------------------------------------- TurboBench ------------------------------------------------------------------
 enum { 
   FMT_TEXT=1, 
@@ -285,13 +412,12 @@ struct plugg {
   char id[17],*s,*desc; 
 };
 
-struct plugg plugg[] = 
-{
-  { "FASTEST",   "lzturbo,10,11,12,19,20,21,22,29/lz4,0,1/lizard,10/chameleon,1,2/density,1,3/memcpy", 						"Fastest de-/compression. HDD/SSD/RAM speed" },
+struct plugg plugg[] = {
+  { "FASTEST",   "lzturbo,10,11,12,19,20,21,22,29/lz4,1/lizard,10/chameleon,1,2/memcpy", 						"Fastest de-/compression. HDD/SSD/RAM speed" },
   { "FAST",      "lzturbo,10,10a,11,12,20,20a,21,22,30,30a,31,32/zlib,1,6,9/brotli,0,1,4,5/lz4,1/zstd,1,5,9/memcpy","lz4,lzturbo,zlib class" },
   { "EFFICIENT", "lzturbo,21,22,30,30a,31,32/brotli,4,5/zlib,5,6/zstd,5,9/zling,4/memcpy",							"Compression speed > 'zlib 6' class" },
-  { "MAX",       "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lizard,19,29,39,49/lzlib,9/zstd,22/memcpy",						"Best compression (slow)" },
-  { "OPTIMAL",   "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lizard,49/lzlib,19,29,39,49/zstd,22/zopfli/memcpy", 				"Optimal compression (slow)" },
+  { "MAX",       "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lizard,19,29,39,49/lzlib,9/zstd,22/memcpy",					"Best compression (slow)" },
+  { "OPTIMAL",   "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lizard,49/lzlib,19,29,39,49/zstd,22/zopfli/memcpy", 			"Optimal compression (slow)" },
   { "BWT",       "bsc_st,4,5/bsc,2/bcm/bzip2/memcpy/", 																		"ST & BWT" },
   { "ECODER",    "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/memcpy/", "Entropy coder" },
 };
@@ -777,7 +903,7 @@ bandwidth_t bw[] = {
   { 8ull*GB,   0, "8GB/s"    },
   {14ull*GB,   0, "SSD 14GB/s"}//PCIe 5.0 NVMe (e.g. Crucial T705) 
 };
-#define BWSIZE (sizeof(bw)/sizeof(bandwidth_t)
+#define BWSIZE (sizeof(bw)/sizeof(bandwidth_t))
 
 void plugprth(FILE *f, int fmt, char *t) {
   char *plot  = "<script src=https://cdn.plot.ly/plotly-latest.min.js></script>";
@@ -1378,9 +1504,6 @@ int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned 
   return ip - _in;
 }
 
-  #ifdef _LZTURBO
-#include "../dev/x/bebench.h"
-  #else
 plug_t plugr[32]; int tid;
 #define BEPRE
 #define BEINI
@@ -1395,14 +1518,35 @@ int delim;
 #define FLENMAX Gb
 
 void bebuild(char **files, int argc, int recurse, char *foname, unsigned long long filenmax, int lim) {  
-  FILE     *fo = fopen(foname, "wb"); if(!fo) { perror(foname); die("creat error '%s'", foname); }
-  unsigned fno, insize = 100*MB, inlen; 
-  char *in = malloc(insize),*finame; vmemset(in, 0, insize);
-  unsigned st_fnum = 0; 
+  FILE               *fo = fopen(foname, "wb"); if(!fo) { perror(foname); die("creat error '%s'", foname); }
+  unsigned           st_fnum = 0, fno, insize = 100*MB, inlen; 
+  char               *in = malloc(insize),*finame; vmemset(in, 0, insize);
   unsigned long long st_flen = 0, st_blklen = 0;
 
-  if(!filenmax) filenmax = FLENMAX;        									fprintf(stdout,"number of files=%d. Max. file length=%llu\n", argc, filenmax); fflush(stdout);
-  for(fno = 0; fno < argc; fno++) { 
+  if(!filenmax) filenmax = FLENMAX;        								fprintf(stdout,"number of files=%d. Max. file length=%llu\n", argc, filenmax); fflush(stdout);
+  if(recurse) {
+    struct recur *recur = rdiropen(files);
+    if(recur) { 
+      char finame[PATH_LENMAX+1]; finame[0] = 0; struct stat st;
+      while(!rdirnext(recur, finame, &st)) { 
+        unsigned char *p = finame;													
+        if(strlen(p) > 3 && (!strncasecmp(&p[strlen(p)-3], ".7z", 3) || !strncasecmp(&p[strlen(p)-3], ".gz", 3) || !strncasecmp(&p[strlen(p)-4], ".zip", 4) )  ) continue; 
+          #ifndef _WIN32
+        if(S_ISLNK(st.st_mode)) fprintf(stderr,"warning link '%s' broken\n", finame);else
+          #endif
+        if(S_ISREG(st.st_mode)  /*st.st_mode & S_IFREG*/) {  								 										     
+          FILE *fi = fopen(finame, "rb"); if(!fi) { perror(finame); die("open error '%s'", finame); } 	              fprintf(stdout,"'%s'\n", finame); fflush(stdout);  	
+          if((inlen = fread(in, 1, insize, fi)) > 0/*16*1024 && inlen < 128*1024*/) {   
+            if(st_flen + 4 + inlen > filenmax) inlen = filenmax - (st_flen+4);
+            fwrite(&inlen, 1, 4,    fo);					                                              st_fnum++; st_flen += inlen+4;
+            fwrite(in,     1, inlen,fo);					                                              if(st_flen >= filenmax) break;		
+          } 
+          fclose(fi);
+        }        
+      }
+      rdirclose(recur);
+    }
+  } else for(fno = 0; fno < argc; fno++) { 
     char *finame = files[fno]; 
     if(finame[0]=='-') continue;
     FILE *fi = fopen(finame, "rb"); 
@@ -1430,7 +1574,6 @@ void bebuild(char **files, int argc, int recurse, char *foname, unsigned long lo
   }																			printf("Number of files=%d, Number of files processed=%d, avglen=%d\n", argc, st_fnum, (int)(st_blklen/st_fnum));
   fclose(fo);
 }
-#endif
 
 #define INOVD 4*1024
 
@@ -1591,10 +1734,10 @@ void usage(char *pgm) {
   fprintf(stderr, " -G       plot memcpy\n");
   fprintf(stderr, " -w       Plot Speedup linear x-axis (default log)\n");
   fprintf(stderr, " -z       Plot Ratio/Speed logarithmic x-axis (default linear)\n");
-  fprintf(stderr, "Multiblock:\n");
-  fprintf(stderr, " -Moutput concatenate all input files to multiple blocks file output\n");\
-  fprintf(stderr, " -m       process multiple blocks per file.\n");
-  fprintf(stderr, " -N       block character delimiter (ex. -N9 for newline, 1 block/line)\n");
+  fprintf(stderr, "Multiblock (join) Add -r for recurise:\n");
+  fprintf(stderr, " -Moutput Step 1: Concatenate all input files into a single output file organized into multiple blocks\n");
+  fprintf(stderr, " -m       Step 2: Process each block independently from the merged file created in Step 1\n");  
+  fprintf(stderr, " -N       text files character delimiter (ex. -N9 for newline, 1 block/line)\n");
   BEUSAGE;
   fprintf(stderr, "ex. ./turbobench enwik9 -eFAST/bzip2/lzma,5,9\n");
   fprintf(stderr, "ex. ./turbobench enwik9 -eFAST/OPTIMAL/bsc,0:e2 -i0\n");
@@ -1645,49 +1788,47 @@ int main(int argc, char* argv[]) {
         if(optarg) printf (" with arg %s", optarg);  printf ("\n");
         break;
       case 'b': bsize    = argtoi(optarg,Mb); bsizex++; break;
-      case 'B': filenmax = argtol(optarg, 'G');    		 break;
+      case 'B': filenmax = argtol(optarg, 'G');      break;
       case 'd': coddicsize(argtoi(optarg,0));        break; 
-      //case 'D': dict     = optarg;       		     break;
-      case 'C': cmp      = atoi(optarg);      		 break;
-      case 'D': rprio    = 0;		 			 	 break;
-      case 'e': scmd     = optarg;            		 break;
-      case 'F': fac      = strtod(optarg, NULL); 	 break;
-      case 'f': fuzz     = atoi(optarg);       		 break;
-      case 'g': merge++;		 			 		 break;
-      case 'G': plotmcpy++;	 			 		 	 break;
+      //case 'D': dict     = optarg;                 break;
+      case 'C': cmp      = atoi(optarg);      	     break;
+      case 'D': rprio    = 0;		 	     break;
+      case 'e': scmd     = optarg;            	     break;
+      case 'F': fac      = strtod(optarg, NULL);     break;
+      case 'f': fuzz     = atoi(optarg);       	     break;
+      case 'g': merge++;		 		     break;
+      case 'G': plotmcpy++;	 		     break;
 
       case 'i': 
       case 'I': { char *q = strchr(optarg,','); if((tm_Rep  = atoi(optarg))<=0) tm_rep=tm_Rep=1; if(q && (tm_Rep2 = atoi(q+1))<=0) tm_rep=tm_Rep2=1;}  break;
       case 'J': if((tm_Rep2 = atoi(optarg))<=0) tm_rep=tm_Rep2=1; break;
-      case 'L': tm_slp   = atoi(optarg);      		 break;
- 	  case 't': tm_tx    = atoi(optarg); 		 	break;
- 	  case 'T': tm_TX    = atoi(optarg); 		 	break;
-      case 'r': rem      = optarg;		      		 break;
+      case 'L': tm_slp   = atoi(optarg);      	     break;
+      case 't': tm_tx    = atoi(optarg); 	     break;
+      case 'T': tm_TX    = atoi(optarg); 	     break;
+      case 'r': rem      = optarg;		     break;
       case 'S': speedup  = atoi(optarg); if(speedup < 0 || speedup > SP_TRANSFER) speedup=SP_TRANSFER; break;
 
       case 'l': xplug    = atoi(optarg);             break;
-      case 'm': mode++; 		 			 		 break;
-      case 'N': delim    = atoi(optarg);	 		 break;
-      case 'o': xstdout++; 							 break;
+      case 'm': mode++; 		 		     break;
+      case 'N': delim    = atoi(optarg);	 	     break;
+      case 'o': xstdout++; 			     break;
       case 'p': fmt      = atoi(optarg);             break;
-      case 'P': mcpy++;       		 			     break;	  
+      case 'P': mcpy++;       		 	     break;	  
       case 'Q': divxy    = atoi(optarg); 
                 if(divxy>3) divxy=3;                 break;
-        #ifdef _LZTURBO
-      case 'R': recurse++;       		 			 break;
-        #endif
-      case 's': mininlen = argtoi(optarg,1);    	 break;
-      case 'v': verbose  = atoi(optarg);       		 break;
+      case 'R': recurse++;       		     break;
+      case 's': mininlen = argtoi(optarg,1);    	     break;
+      case 'v': verbose  = atoi(optarg);       	     break;
       case 'V': tm_verbose = atoi(optarg);           break;
       case 'Y': seg_ans  = argtoi(optarg,1);         break;
       case 'Z': seg_huf  = argtoi(optarg,1);         break;  
-      case 'w': xlog     =  xlog?0:1; 				 break;
+      case 'w': xlog     =  xlog?0:1; 		     break;
       case 'x': ylog     =  ylog?0:1;                break;
       case 'y': xlog2    = xlog2?0:1;                break;
       case 'z': ylog2    = ylog2?0:1;                break;
-      case 'M': beb      = optarg; 		 			 break; 
+      case 'M': beb      = optarg; 		     break; 
       BEOPT;
-	  case 'h':
+      case 'h':
       default: 
         usage(argv[0]);
     }
