@@ -24,7 +24,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 
 ## Broad Platform Support
 
-**Linux** (amd/intel, ARM, RISC-V, PowerPC, s390x), **macOS** (Apple M1–M5), and **Windows** (MSYS2, MinGW, Visual C++).
+**Linux** (amd/intel, ARM, RISC-V, PowerPC, s390x, loongson), **macOS** (Apple M1–M5), and **Windows** (MSYS2, MinGW, Visual C++).
 
 ## Rich, Ready-to-Use Outputs
 
