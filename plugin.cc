@@ -2276,7 +2276,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       if(q=strstr(prm,"pb")) p.pb         = atoi(q+(q[2]=='='?3:2));
       if(q=strstr(prm,"fb")) p.fb         = atoi(q+(q[2]=='='?3:2));else if(q=strstr(prm,"nice=")) p.fb = atoi(q+5);
       if(q=strstr(prm,"mc")) p.mc         = atoi(q+(q[2]=='='?3:2));
-                             p.numThreads = threadnum;
+                             p.numThreads = (q=strstr(prm,"mt"))?atoi(q+(q[2]=='='?3:2)):threadnum;
       if(q=strchr(prm,'a'))  p.algo       = atoi(q+(q[1]=='='?2:1));
       if(q=strstr(prm,"mf=bt")) p.btMode  = 1, p.numHashBytes = atoi(q+5);
       if(q=strstr(prm,"mf=hc")) p.btMode  = 0, p.numHashBytes = atoi(q+5);
@@ -2552,7 +2552,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         #else
            #define DICSIZE (1<<27)
         #endif
-    case P_XZ: return _xz_compress((char *)in, inlen, (char *)out, outsize, lev, threadnum);
+    case P_XZ: if(q=strstr(prm,"mt")) threadnum = atoi(q+(q[2]=='='?3:2)); return _xz_compress((char *)in, inlen, (char *)out, outsize, lev, threadnum);
       #endif
 
       #if _YALZ77
@@ -3399,7 +3399,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _XZ
-    case P_XZ: return _xz_decompress((char *)in, inlen, (char *)out, outlen, threadnum);
+    case P_XZ: if(q=strstr(prm,"mt")) threadnum = atoi(q+(q[2]=='='?3:2)); return _xz_decompress((char *)in, inlen, (char *)out, outlen, threadnum);
       #endif
 
       #if _YAPPY
