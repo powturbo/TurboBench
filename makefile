@@ -176,10 +176,10 @@ ifdef CROSS # no cross compile
 #	(export CC=$(CROSS)-linux-gnu-gcc && cd c-blosc2 && cmake . -DBLOSC_ZSTD_SOURCE_DIR=../zstd && $(MAKE))
 else
 CXXFLAGS += -D_C_BLOSC2
-$(BUILDIR)/c-blosc2/blosc/libblosc2.a: $(C_BLOSC2_SRCS)
+C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
+$(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
 	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd
 	cmake --build $(BUILDIR)/c-blosc2
-C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
 LDFLAGS += $(C_BLOSC2_LIB)
 endif
 endif
@@ -242,7 +242,7 @@ OB += $(LIBDEFLATE_OBJS)
 endif
 
 ifneq ($(wildcard libslz/.),)
-CXXFLAGS+=-D_SLZ
+CXXFLAGS+=-D_LIBSLZ
 OB+=$(call obj,libslz/src/slz.o)
 endif
 
@@ -360,10 +360,15 @@ ifdef CROSS #not working
 else
 CXXFLAGS += -D_OPENZL -Iopenzl/include
 OPENZL_LIB = $(BUILDIR)/openzl/libopenzl.a
+ifeq ($(OS), Windows)
+$(OPENZL_LIB): $(OPENZL_SRCS)
+	cd openzl && $(MAKE) lib
+#	mkdir -p openzl && $(MAKE) -C $(BUILDIR)/openzl lib
+else
 $(OPENZL_LIB): $(OPENZL_SRCS)
 	cmake -S openzl -B $(BUILDIR)/openzl
 	cmake --build $(BUILDIR)/openzl --config Release
-#	mkdir -p openzl && $(MAKE) -C $(BUILDIR)/openzl lib
+endif
 LDFLAGS += $(OPENZL_LIB)
 endif
 endif
