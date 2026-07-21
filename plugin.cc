@@ -1522,13 +1522,13 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void
   
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
-  { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                "0,1,2,3,4,5,6,7,8,9", "", 64*1024},
   { P_BPC,           "bpc",           _BPC,       "bit plane compression",   "" },
   { P_BRIEFLZ,       "brieflz",       _BRIEFLZ,   "BriefLz",                 "1,3,6,9" },
   { P_BROTLI,        "brotli",        _BROTLI,    "Brotli",                  "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
   { P_BZIP2,         "bzip2",         _BZIP2,     "Bzip2",                   "" },
   { P_BZIP3,         "bzip3",         _BZIP3,     "Bzip3",                   "" },
   
+  { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                "0,1,2,3,4,5,6,7,8,9", "", 64*1024},
   { P_CHAMELEON,     "chameleon",     _CHAMELEON, "Chameleon",               "1,2" },
   { P_CSC,           "csc",           _CSC,       "CSC",                     "1,2,3,4,5" },
   
