@@ -142,7 +142,7 @@ CXXFLAGS+=-D_LZTURBO
 include ../dev/x/lzturbo.mk
 endif
 
-#------------------------------------------------------------------ codecs ---------------------------------------------------------------------------
+# ***************************************************************** codecs *****************************************************************************
 ifneq ($(wildcard brotli/.),)
 CXXFLAGS+=-D_BROTLI -Ibrotli/c/include 
 CFLAGS+=-Ibrotli/c/include 
@@ -163,7 +163,7 @@ endif
 
 C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
-ifneq ($(OS), Windows)  # not working under windows
+#ifneq ($(OS), Windows)  # not working under windows
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS # no cross compile
 #c-blosc2/blosc/libblosc2.a: $(C_BLOSC2_SRCS)
@@ -176,7 +176,7 @@ $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
 	cmake --build $(BUILDIR)/c-blosc2
 LDFLAGS += $(C_BLOSC2_LIB)
 endif
-endif
+#endif
 endif
 
 ISAL_LIB :=
