@@ -190,16 +190,16 @@ ifeq ($(NASM),)  # nasm not installed
 else
   CXXFLAGS += -D_ISA_L
   ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+  ISAL_LIB := isa-l/bin/isa-l.a 
   ifdef CROSS
-isa-l/bin/isa-l.a: $(ISAL_SRCS)
+$(ISAL_LIB): $(ISAL_SRCS)
 	export CC=$(CROSS)-linux-gnu-gcc && cd isa-l && $(MAKE) -f Makefile.unx host_cpu=$(CHOST)
   else
-isa-l/bin/isa-l.a: $(ISAL_SRCS)
+$(ISAL_LIB): $(ISAL_SRCS)
 	mkdir -p $(BUILDIR)/isa-l
 	mkdir -p isa-l/bin
 	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILDIR)/isa-l)
   endif
-  ISAL_LIB := isa-l/bin/isa-l.a 
 endif
 LDFLAGS += $(ISAL_LIB)
 endif
@@ -262,7 +262,8 @@ CXXFLAGS+=-D_LZFSE
 OB+=$(call obj,lzfse/src/lzfse_decode_base.o lzfse/src/lzfse_decode.o lzfse/src/lzfse_encode_base.o lzfse/src/lzfse_encode.o lzfse/src/lzfse_fse.o lzfse/src/lzvn_decode_base.o lzfse/src/lzvn_encode_base.o)
 endif
 
-ifneq ($(and $(wildcard lzham_codec_devel/.),$(filter x86_64,$(ARCH))),)
+#ifneq ($(and $(wildcard lzham_codec_devel/.),$(filter x86_64,$(ARCH))),)
+ifneq ($(wildcard lzham_codec_devel/.),)
 CXXFLAGS+=-D_LZHAM -D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
 LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
@@ -315,10 +316,8 @@ endif
 ifneq ($(wildcard misa77/.),)
 CXXFLAGS+=-D_MISA77
 MISA77_DIR = misa77
-MISA77_INC = -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src
 MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp) $(wildcard $(MISA77_DIR)/src/experimental/*.cpp)  $(MISA77_DIR)/src/isa/target_portable.o $(MISA77_DIR)/src/experimental/isa/etarget_portable.o
-MISA77_OBJS := $(call obj,$(MISA77_SRCS))
-MISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 $(MISA77_INC) $(MISA77_FLAGS) $< -c -o $@
+MMISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src $(MISA77_FLAGS) $< -c -o $@
 $(BUILDIR)/$(MISA77_DIR)/src/%_sse2.o: CXXFLAGS += $(_SSE)
 $(BUILDIR)/$(MISA77_DIR)/src/%_avx2.o: CXXFLAGS += $(_AVX2)
 $(BUILDIR)/$(MISA77_DIR)/src/%.o: $(MISA77_DIR)/src/%.cpp
@@ -328,7 +327,7 @@ $(BUILDIR)/$(MISA77_DIR)/src/experimental/isa/%.o: $(MISA77_DIR)/src/experimenta
 	@mkdir -p $(dir $@)
 	$(MISA77_BUILD)
 
-OB += $(MISA77_OBJS) 
+OB += $(call obj,$(MISA77_SRCS))
 ifeq ($(ARCH),x86_64)
   OB += $(BUILDIR)/$(MISA77_DIR)/src/isa/target_sse2.o  $(BUILDIR)/$(MISA77_DIR)/src/experimental/isa/etarget_sse2.o 
   OB += $(BUILDIR)/$(MISA77_DIR)/src/isa/target_avx2.o $(BUILDIR)/$(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
@@ -391,16 +390,16 @@ ZLIB_NG_LIB :=
 ifneq ($(wildcard zlib-ng/.),)
 CXXFLAGS += -D_ZLIB_NG
 ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+ZLIB_NG_LIB = $(BUILDIR)/zlib-ng/libz-ng.a
 ifdef CROSS
-$(BUILDIR)/zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
+$(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
 	export CC=$(CROSS)-linux-gnu-gcc && cd zlib-ng && ./configure && $(MAKE)
 else
-$(BUILDIR)/zlib-ng/libz-ng.a: $(ZLIB_NG_SRCS)
+$(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
 	cmake -S zlib-ng -B $(BUILDIR)/zlib-ng
 	cmake --build $(BUILDIR)/zlib-ng --config Release
 	cp $(BUILDIR)/zlib-ng/zconf-ng.h zlib-ng_
 endif
-ZLIB_NG_LIB = $(BUILDIR)/zlib-ng/libz-ng.a
 LDFLAGS += $(ZLIB_NG_LIB)
 endif
 
