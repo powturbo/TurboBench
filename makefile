@@ -463,55 +463,31 @@ endif
 
 ifneq ($(wildcard zxc/.),)
 #ifneq (,$(filter $(ARCH),x86_64 aarch64))
-CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
-CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE -fPIC 
+CXXFLAGS += -D_ZXC -DZXC_STATIC_DEFINE
+CFLAGS += -Izxc/src/lib/vendors -DZXC_STATIC_DEFINE -fPIC 
 ZXCDIR = zxc/src/lib
-
 ZXC_BUILD = $(CC) -O3 $(CFLAGS) -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
-$(BUILDIR)/$(ZXCDIR)/%.o: $(ZXCDIR)/%.c
-	@mkdir -p $(dir $@)
-	$(ZXC_BUILD)
 
-$(BUILDIR)/$(ZXCDIR)/%_default.o: ZXC_FLAGS = -DZXC_FUNCTION_SUFFIX=_default
-$(BUILDIR)/$(ZXCDIR)/%_default.o: $(ZXCDIR)/%.c
-	@mkdir -p $(dir $@)
-	$(ZXC_BUILD)
+define ZXC_RULE
+$$(BUILDIR)/$$(ZXCDIR)/%$(1).o: ZXC_FLAGS = $(2)
+$$(BUILDIR)/$$(ZXCDIR)/%$(1).o: $$(ZXCDIR)/%.c
+	@mkdir -p $$(dir $$@)
+	$$(ZXC_BUILD)
+endef
+$(eval $(call ZXC_RULE,,))
+$(eval $(call ZXC_RULE,_default,-DZXC_FUNCTION_SUFFIX=_default))
+$(eval $(call ZXC_RULE,_sse2,-msse2 -DZXC_FUNCTION_SUFFIX=_sse2 -DZXC_USE_SSE2))
+$(eval $(call ZXC_RULE,_avx2,-mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2))
+$(eval $(call ZXC_RULE,_avx512,-mavx512f -mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512))
+$(eval $(call ZXC_RULE,_neon,$(_SSE) -DZXC_FUNCTION_SUFFIX=_neon -DZXC_USE_NEON64))
+ZXC_OBJS = common driver dispatch compress_default decompress_default huffman_default pivco_tables seekable
 
-$(BUILDIR)/$(ZXCDIR)/%_sse2.o: ZXC_FLAGS = -msse2 -DZXC_FUNCTION_SUFFIX=_sse2 -DZXC_USE_SSE2
-$(BUILDIR)/$(ZXCDIR)/%_sse2.o: $(ZXCDIR)/%.c
-	@mkdir -p $(dir $@)
-	$(ZXC_BUILD)
-
-$(BUILDIR)/$(ZXCDIR)/%_avx2.o: ZXC_FLAGS = -mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2
-$(BUILDIR)/$(ZXCDIR)/%_avx2.o: $(ZXCDIR)/%.c
-	@mkdir -p $(dir $@)
-	$(ZXC_BUILD)
-
-$(BUILDIR)/$(ZXCDIR)/%_avx512.o: ZXC_FLAGS = -mavx512f -mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512
-$(BUILDIR)/$(ZXCDIR)/%_avx512.o: $(ZXCDIR)/%.c
-	@mkdir -p $(dir $@)
-	$(ZXC_BUILD)
-
-$(BUILDIR)/$(ZXCDIR)/%_neon.o: ZXC_FLAGS = $(_SSE) -DZXC_FUNCTION_SUFFIX=_neon -DZXC_USE_NEON64
-$(BUILDIR)/$(ZXCDIR)/%_neon.o: $(ZXCDIR)/%.c
-	@mkdir -p $(dir $@)
-	$(ZXC_BUILD)
-
-OB+= $(call obj,$(ZXCDIR)/zxc_common.o $(ZXCDIR)/zxc_driver.o $(ZXCDIR)/zxc_dispatch.o $(ZXCDIR)/zxc_compress_default.o  $(ZXCDIR)/zxc_decompress_default.o $(ZXCDIR)/zxc_huffman_default.o $(ZXCDIR)/zxc_pivco_tables.o $(ZXCDIR)/zxc_seekable.o)
 ifeq ($(ARCH),x86_64)
-  OB += $(call obj,$(ZXCDIR)/zxc_compress_sse2.o $(ZXCDIR)/zxc_decompress_sse2.o)
-  OB += $(call obj,$(ZXCDIR)/zxc_compress_avx2.o $(ZXCDIR)/zxc_decompress_avx2.o)
-  OB += $(call obj,$(ZXCDIR)/zxc_compress_avx512.o $(ZXCDIR)/zxc_decompress_avx512.o)
-  OB += $(call obj,$(ZXCDIR)/zxc_huffman_sse2.o $(ZXCDIR)/zxc_huffman_sse2.o)
-  OB += $(call obj,$(ZXCDIR)/zxc_huffman_avx2.o $(ZXCDIR)/zxc_huffman_avx2.o)
-  OB += $(call obj,$(ZXCDIR)/zxc_huffman_avx512.o $(ZXCDIR)/zxc_huffman_avx512.o)
-  OB += $(call obj,$(ZXCDIR)/zxc_dict_sse2.o $(ZXCDIR)/zxc_dict_sse2.o)
-else ifeq ($(ARCH), aarch64)
-  OB += $(call obj,$(ZXCDIR)/zxc_compress_neon.o $(ZXCDIR)/zxc_decompress_neon.o)
-  OB += $(call obj,$(ZXCDIR)/zxc_huffman_neon.o $(ZXCDIR)/zxc_huffman_neon.o)
-  OB += $(call obj,$(ZXCDIR)/zxc_dict_neon.o $(ZXCDIR)/zxc_dict_neon.o)
+  ZXC_OBJS += $(foreach e,sse2 avx2 avx512,compress_$(e) decompress_$(e) huffman_$(e)) dict_sse2
+else ifeq ($(ARCH),aarch64)
+  ZXC_OBJS += $(foreach e,neon,compress_$(e) decompress_$(e) huffman_$(e) dict_$(e))
 endif
-#endif
+OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))#endif
 endif
 #------------------------------------ Notable codecs ---------------------------------------------------------------------------
 ifneq ($(wildcard brieflz/.),)
