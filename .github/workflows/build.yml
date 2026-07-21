@@ -72,8 +72,9 @@ jobs:
       - run: git submodule update --init --recursive
       - name: Patch c-blosc2 merge_static_libs.cmake for Windows/MSYS2
         shell: bash
-          run: sed -i 's/CREATE ${_tmp}/CREATE ${_out_name_we}.merged${_out_ext}/' c-blosc2/cmake/merge_static_libs.cmake
-    	       sed -i '/COMMAND "${AR}" -M/a \        WORKING_DIRECTORY "${_out_dir}"' c-blosc2/cmake/merge_static_libs.cmake
+          run: | 
+            sed -i 's/CREATE ${_tmp}/CREATE ${_out_name_we}.merged${_out_ext}/' c-blosc2/cmake/merge_static_libs.cmake
+	    sed -i '/COMMAND "${AR}" -M/a \        WORKING_DIRECTORY "${_out_dir}"' c-blosc2/cmake/merge_static_libs.cmake
       - run: make STATIC=1
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -V0
