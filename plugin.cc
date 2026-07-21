@@ -3808,8 +3808,8 @@ char *codver(int codec, char *v, char *s) {
     case P_LIBSLZ:  return "v1.2.2";
       #endif
  
-      #if _LIBZPAQ
-    case P_LIBZPAQ:  return "7.12 2016.04.19";
+      #if _ZPAQ
+    case P_ZPAQ:  return "7.12 2016.04.19";
       #endif
  
       #if _LIZARD
