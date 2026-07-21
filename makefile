@@ -26,12 +26,7 @@ DIRINC ?= $(PREFIX)/include
 DIRLIB ?= $(PREFIX)/lib
 SRC ?= lib/
 
-#------- Build directory (mirrors the source directory tree) --------------
 BUILDIR := build
-
-# obj: converts a list of source-file paths (or already-.o object names) into
-# the corresponding object paths under $(BUILDIR), preserving the relative
-# directory structure of the source tree.
 obj = $(addprefix $(BUILDIR)/,$(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(patsubst %.cpp,%.o,$(patsubst %.S,%.o,$(1))))))
 
 #------- OS/ARCH -------------------
