@@ -272,10 +272,10 @@ enum {
 #define _SKIM 0
 #endif
  P_SKIM,
-#ifndef _SLZ
-#define _SLZ 0
+#ifndef _LIBSLZ
+#define _LIBSLZ 0
 #endif
- P_SLZ,
+ P_LIBSLZ,
  
 #ifndef _OODLE 
 #define _OODLE 0
@@ -1145,7 +1145,7 @@ extern "C" {
 #include "liblzf/lzf.h"
   #endif
 
-  #if _SLZ
+  #if _LIBSLZ
 #include "libslz/src/slz.h"
   #endif
 
@@ -1617,7 +1617,7 @@ struct plugs plugs[] = {
   { P_SKIM,          "skim",          _SKIM,      "skim",                    ""},
   { P_SHRINKER,      "shrinker",      _SHRINKER,  "Shrinker",                "", "", 0, (1<<26) },
   { P_SHOCO,         "shoco",         _SHOCO,     "Shoco",                   "" },
-  { P_SLZ,           "slz",           _SLZ,       "libslz",                  "0,1,2,3,4,5,6,7,8,9" },
+  { P_LIBSLZ,           "slz",           _LIBSLZ,       "libslz",                  "0,1,2,3,4,5,6,7,8,9" },
   { P_SMAZ,          "smaz",          _SMAZ,      "smaz",                    "" },
   { P_SNAPPY,        "snappy",        _SNAPPY,    "Snappy",                  ""  },
   { P_SNAPPY_C,      "snappy_c",      _SNAPPY_C,  "Snappy-c",                "" },
@@ -1892,8 +1892,8 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       break;
       #endif
 
-      #if _SLZ
-    case P_SLZ:
+      #if _LIBSLZ
+    case P_LIBSLZ:
       slz_make_crc_table();
       slz_prepare_dist_table();
       #endif
@@ -2449,8 +2449,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_SKIM: 
       #endif
       
-      #if _SLZ
-    case P_SLZ: { if(lev > 7) lev = 7;
+      #if _LIBSLZ
+    case P_LIBSLZ: { if(lev > 7) lev = 7;
       unsigned blk = 16384 << lev;
       struct slz_stream strm;
             if(strchr(prm,'d')) slz_init(&strm, !!lev, SLZ_FMT_DEFLATE);
@@ -3297,8 +3297,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       return skim_decoder_exact_output_length((const uint8_t*)in, inlen);
       #endif
 
-      #if _SLZ
-    case P_SLZ: {
+      #if _LIBSLZ
+    case P_LIBSLZ: {
       struct slz_stream strm;
       int fmt=15;
             if(prm && *prm == 'd') fmt=-15;
