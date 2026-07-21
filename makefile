@@ -355,15 +355,15 @@ ifdef CROSS #not working
 else
 CXXFLAGS += -D_OPENZL -Iopenzl/include
 ifeq ($(OS), Windows)
+OPENZL_LIB = openzl/libopenzl.a
 $(OPENZL_LIB): $(OPENZL_SRCS)
 	cd openzl && $(MAKE) lib
 #	mkdir -p openzl && $(MAKE) -C $(BUILDIR)/openzl lib
-OPENZL_LIB = openzl/libopenzl.a
 else
+OPENZL_LIB = $(BUILDIR)/openzl/libopenzl.a
 $(OPENZL_LIB): $(OPENZL_SRCS)
 	cmake -S openzl -B $(BUILDIR)/openzl
 	cmake --build $(BUILDIR)/openzl --config Release
-OPENZL_LIB = $(BUILDIR)/openzl/libopenzl.a
 endif
 LDFLAGS += $(OPENZL_LIB)
 endif
