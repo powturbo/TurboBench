@@ -647,7 +647,7 @@ OB+=$(BUILDIR)/$(PIVCODIR)/libpivco_huffman_local.o
 #   git submodule update --init --recursive pivco-huffman zstd
 #ifeq ($(PHAZ), 1) # disabled, log2 missing  
 PHAZDIR=$(PIVCODIR)/extras/phaz
-CXXFLAGS+=-D_PHAZ=1
+CXXFLAGS+=-D_PHAZ
 $(PHAZDIR)/build/phaz_local.o:
 	cmake -S $(PIVCODIR) -B $(PIVCODIR)/build -DCMAKE_BUILD_TYPE=Release
 	cmake --build $(PIVCODIR)/build --target pivco_huffman_local -j
