@@ -7,7 +7,8 @@
 # Cross compile: export CROSS to aarch64 riscv64 loongarch64 or powerpc64le. Ex.:
 # export CROSS=aarch64
 # Testing with qemu
-# qemu-aarch64 -L /usr/aarch64-linux-gnu ./turbobench .l2
+# qemu-aarch64 -L /usr/aarch64-linux-gnu ./turbobench -l2
+# qemu-riscv64 -L /usr/riscv64-linux-gnu ./turbobench -l2
 #LZTURBO=1
 
 CC ?= gcc
@@ -182,6 +183,7 @@ endif
 ISAL_LIB :=
 ifneq ($(wildcard isa-l/.),)
 NASM ?= $(shell command -v nasm)
+ifndef CROSS
 ifeq ($(NASM),)  # nasm not installed
   ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/isa-l.a),)
     CXXFLAGS += -D_ISA_L
@@ -191,17 +193,13 @@ else
   CXXFLAGS += -D_ISA_L
   ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
   ISAL_LIB := isa-l/bin/isa-l.a 
-  ifdef CROSS
-$(ISAL_LIB): $(ISAL_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cd isa-l && $(MAKE) -f Makefile.unx host_cpu=$(CHOST)
-  else
 $(ISAL_LIB): $(ISAL_SRCS)
 	mkdir -p $(BUILDIR)/isa-l
 	mkdir -p isa-l/bin
 	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILDIR)/isa-l)
-  endif
-endif
 LDFLAGS += $(ISAL_LIB)
+endif
+endif
 endif
 
 ifneq ($(wildcard GLZA/.),)
@@ -397,7 +395,9 @@ ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -
 ZLIB_NG_LIB = $(BUILDIR)/zlib-ng/libz-ng.a
 ifdef CROSS
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cd zlib-ng && ./configure && $(MAKE)
+	export CC=$(CROSS)-linux-gnu-gcc && cmake -S zlib-ng -B $(BUILDIR)/zlib-ng -DBUILD_TESTING=OFF 
+	cmake --build $(BUILDIR)/zlib-ng --config Release
+	cp $(BUILDIR)/zlib-ng/zconf-ng.h zlib-ng_
 else
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
 	cmake -S zlib-ng -B $(BUILDIR)/zlib-ng
@@ -435,14 +435,14 @@ XZ_LIB :=
 ifneq ($(wildcard xz/.),)
 CXXFLAGS += -D_XZ
 XZ_SRCS := $(shell find xz/src/liblzma -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+XZ_LIB = $(BUILDIR)/xz/liblzma.a
 ifdef CROSS
-$(BUILDIR)/xz/liblzma.a: $(XZ_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cd xz && cmake ../build && $(MAKE) 
+$(XZ_LIB): $(XZ_SRCS)
+	export CC=$(CROSS)-linux-gnu-gcc && cmake -S xz -B $(BUILDIR)/xz && $(MAKE) -C $(BUILDIR)/xz
 else
-$(BUILDIR)/xz/liblzma.a: $(XZ_SRCS)
+$(XZ_LIB): $(XZ_SRCS)
 	cmake -S xz -B $(BUILDIR)/xz && $(MAKE) -C $(BUILDIR)/xz
 endif
-XZ_LIB = $(BUILDIR)/xz/liblzma.a
 LDFLAGS += $(XZ_LIB)
 endif
 
@@ -461,7 +461,7 @@ endif
 endif
 
 ifneq ($(wildcard zxc/.),)
-#ifneq (,$(filter $(ARCH),x86_64 aarch64))
+ifneq (,$(filter $(ARCH),x86_64 aarch64))
 CXXFLAGS += -D_ZXC -DZXC_STATIC_DEFINE
 CFLAGS += -Izxc/src/lib/vendors -DZXC_STATIC_DEFINE -fPIC 
 ZXCDIR = zxc/src/lib
@@ -487,7 +487,7 @@ else ifeq ($(ARCH),aarch64)
   ZXC_OBJS += $(foreach e,neon,compress_$(e) decompress_$(e) huffman_$(e) dict_$(e))
 endif
 OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))
-#endif
+endif
 endif
 #------------------------------------ Notable codecs ---------------------------------------------------------------------------
 ifneq ($(wildcard brieflz/.),)
