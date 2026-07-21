@@ -272,7 +272,7 @@ OB += $(call obj,$(LZHAM_SRCS))
 ifeq ($(OS), Windows)
 OB += $(call obj,lzham_codec_devel/lzhamcomp/lzham_win32_threading.o)
 else
-OB += += lz/lzham/lzhamcomp/lzham_pthreads_threading.o
+#OB += $(call obj,lzham/lzhamcomp/lzham_pthreads_threading.o)
 CXXFLAGS+=-DTHREAD_MODEL_POSIX
 endif
 endif
