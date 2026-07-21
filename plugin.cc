@@ -1203,8 +1203,7 @@ int unishox2_decompressx(const char *in, int inlen, char *out, int lev);
   #endif
 
   #if _ZLIB_NG
-#include "zlib-ng/zconf-ng.h"
-//#include "zlib-ng_/zlib-ng.h" 
+#include "zlib-ng_/zconf-ng.h"
 #define Z_EXTERN
 #define Z_EXPORT   
 Z_EXTERN Z_EXPORT const char *zlibng_version(void);
@@ -3750,7 +3749,7 @@ char *codver(int codec, char *v, char *s) {
     case P_BZIP2: return (char *)BZ2_bzlibVersion();
       #endif
       #if _BZIP3
-    case P_BZIP3: return "v1.5.3"; //{ char *p = bz3_version(); strcpy(s, p?p:""); break; }
+    case P_BZIP3: return "v1.5.3";
       #endif
       #if _BRIEFLZ
     case P_BRIEFLZ:  sprintf(s,"v%d.%d.%d", BLZ_VER_MAJOR, BLZ_VER_MINOR, BLZ_VER_PATCH); break;
@@ -3768,14 +3767,14 @@ char *codver(int codec, char *v, char *s) {
       #endif
 
       #if _FLZMA2
-    case P_FLZMA2 : strcpy(s, "v1.0.1 MT"); break;
+    case P_FLZMA2 : strcpy(s, "v1.0.1 MT");
       #endif
       #if _FASTLZ
     case P_FASTLZ: return FASTLZ_VERSION_STRING;
       #endif
    
       #if _GLZA
-    case P_GLZA:  return "v0.12"; break;
+    case P_GLZA:  return "v0.12";
       #endif
 
       #if _LZFSE
@@ -3804,6 +3803,15 @@ char *codver(int codec, char *v, char *s) {
       #if _LIBDEFLATE
     case P_LIBDEFLATE:  strcpy(s, LIBDEFLATE_VERSION_STRING); break;
       #endif
+    
+      #if _LIBSLZ
+    case P_LIBSLZ:  return "v1.2.2";
+      #endif
+ 
+      #if _LIBZPAQ
+    case P_LIBZPAQ:  return "7.12 2016.04.19";
+      #endif
+ 
       #if _LIZARD
     case P_LIZARD:     sprintf(s,"v%d.%d.%d", LIZARD_VERSION_MAJOR, LIZARD_VERSION_MINOR, LIZARD_VERSION_RELEASE); break;
       #endif
@@ -3819,6 +3827,9 @@ char *codver(int codec, char *v, char *s) {
       #if _LZMA
     case P_LZMA:  sprintf(s, "v%s MT", MY_VERSION_NUMBERS); break;
       #endif
+      #if _LZSA
+    case P_LZSA : return "v1.4.1"; // file lzsa.c
+      #endif
       #if _LZO
      case P_LZO1b:case P_LZO1c: case P_LZO1f: case P_LZO1x: case P_LZO1y: case P_LZO1z: case P_LZO2a: strcpy(s, "v2.10 2017.03.01"); break;
       #endif
@@ -3828,7 +3839,11 @@ char *codver(int codec, char *v, char *s) {
       #endif
 
       #if _MINIZ
-    case P_MINIZ : return "v11.3.2"; break;
+    case P_MINIZ : return "v11.3.2";
+      #endif
+
+      #if _MEMLZ
+    case P_MEMLZ : return "v2025.12.10"; 
       #endif
 
       #if _MISA77
@@ -3879,6 +3894,10 @@ char *codver(int codec, char *v, char *s) {
       
       #if _TAMP
     case P_TAMP:  return "v2.3.0"; break;
+      #endif
+
+      #if _XZ
+    case P_XZ:  sprintf(s,"v%d.%d", LZMA_VERSION_MAJOR, LZMA_VERSION_MINOR, LZMA_VERSION_PATCH); break;
       #endif
 
       #if _ZLIB
