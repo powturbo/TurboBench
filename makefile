@@ -638,7 +638,7 @@ OB+=$(PIVCOHUFDIR)/build/libpivco_huffman_local.o
 # phaz_decompress -- everything else (all of zstd, FSE/HUF, pivco) is localized,
 # so it coexists with the vanilla zstd TurboBench links.  Requires:
 #   git submodule update --init --recursive pivco-huffman zstd
-#ifeq ($(PHAZ), 1)
+ifeq ($(PHAZ), 1) # disabled, log2 missing  
 #PIVCOHUFDIR=pivco-huffman
 PHAZDIR=$(PIVCOHUFDIR)/extras/phaz
 CXXFLAGS+=-D_PHAZ=1
@@ -647,7 +647,7 @@ $(PHAZDIR)/build/phaz_local.o:
 	cmake --build $(PIVCOHUFDIR)/build --target pivco_huffman_local -j
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
 OB+=$(PHAZDIR)/build/phaz_local.o
-#endif
+endif
 endif
 LDFLAGS+=-lm
 endif
