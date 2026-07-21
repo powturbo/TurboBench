@@ -1089,10 +1089,13 @@ void plugprttf(FILE *f, int fmt) {
   }
 }
 
+double tc_smin, td_smin; // show only if greater than
+
 void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, double *ptc, double *ptd, FILE *f) {
   double ratio  = RATIO(plug->len,totinlen),           //ratio  = FACTOR(plug->len,totinlen),
          tc     = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td), score = SCORE(plug->len,totinlen,plug->tc,plug->td);
-  char   name[256]; 
+  char   name[256];
+  if(tc < tc_smin) return;  if(td < td_smin) return;  
   if(plug->lev != INVLEV) 
     sprintf(name, "%s%s %d%s", plug->err?"?":"", plug->s, plug->lev, plug->prm);
   else
@@ -1802,7 +1805,7 @@ void usage(char *pgm) {
   fprintf(stderr, " -s#s     # = min. buffer size to duplicate & test small files (ex. -s50)\n");
   fprintf(stderr, "          s = modifier s:K,M,G=(1000, 1.000.000, 1.000.000.000) s:k,m,h=(1024,1Mb,1Gb). (default m) ex. 64k or 64K\n");
   fprintf(stderr, "Benchmark:\n");
-  fprintf(stderr, " -i#/-j#  # = Minimum  de/compression iterations per run (default=auto)\n");
+  fprintf(stderr, " -iX,Y    Minimum de/compression iterations per run (default=auto)\n");
   fprintf(stderr, " -I#/-J#  # = Number of de/compression runs (default=3)\n");
   fprintf(stderr, " -t#      # = min. time in seconds per run.(default=2sec)\n");
   fprintf(stderr, " -S#      Sleep # min. after 2 min. processing mimizing CPU throttling\n");
@@ -1814,7 +1817,8 @@ void usage(char *pgm) {
   fprintf(stderr, " -f#      check reading/writing outside bounds: #=1 compress, #=2 decompress, #3:both\n");
   fprintf(stderr, "Output:\n");
   fprintf(stderr, " -v#      # = verbosity 0..3 (default 1)\n");
-  fprintf(stderr, " -rstr    str = Remark/Comment string\n");
+  fprintf(stderr, " -rX,Y    Show/Reveal only when compression/decompression speed > X/Y MB/s\n");
+  fprintf(stderr, " -kstr    str = Remark/Comment string\n");
   fprintf(stderr, " -l#      # = 1 : print all groups/plugins, # = 2 : print all codecs\n");
   fprintf(stderr, " -S#      Plot transfer speed: #=1 Comp        speedup #=2 Decomp speedup #=3 Comp        'MB/s' #=4 Decomp 'MB/s'\n");
   fprintf(stderr, "                               #=4 Comp+Decomp speedup                    #=5 Comp+Decomp 'MB/s'\n");
@@ -1872,7 +1876,7 @@ int main(int argc, char* argv[]) {
       { "help", 	0, 0, 'h'},
       { 0, 		    0, 0, 0}
     }; 
-    if((c = getopt_long(argc, argv, "0:1:2:3:4:5:6:7:8:9:A:b:B:C:d:De:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oO:Pp:Q:rRs:S:t:T:Uv:V:W:w:X:x:Y:y:Z:z:", long_options, &option_index)) == -1) break;
+    if((c = getopt_long(argc, argv, "0:1:2:3:4:5:6:7:8:9:A:b:B:C:d:De:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oO:Pp:Q:r:Rs:S:t:T:Uv:V:W:w:X:x:Y:y:Z:z:", long_options, &option_index)) == -1) break;
     switch(c) { 
       case 0:
         printf("Option %s", long_options[option_index].name);
@@ -1896,7 +1900,7 @@ int main(int argc, char* argv[]) {
       case 'L': tm_slp   = atoi(optarg);      	     break;
       case 't': tm_tx    = atoi(optarg); 	     break;
       case 'T': tm_TX    = atoi(optarg); 	     break;
-      case 'r': rem      = optarg;		     break;
+      case 'k': rem      = optarg;		     break;
       case 'S': speedup  = atoi(optarg); if(speedup < 0 || speedup > SP_TRANSFER) speedup=SP_TRANSFER; break;
 
       case 'l': xplug    = atoi(optarg);             break;
@@ -1907,6 +1911,7 @@ int main(int argc, char* argv[]) {
       case 'P': mcpy++;       		 	     break;	  
       case 'Q': divxy    = atoi(optarg); 
                 if(divxy>3) divxy=3;                 break;
+      case 'r' :{ char *q = strchr(optarg,','); if((tc_smin = atoi(optarg)) <=0) tc_smin=1000; if(q && (td_smin = atoi(q+1))<=0) td_smin = 100; printf("minc=%.1f,mind=%.1f\n", tc_smin,td_smin); } 
       case 'R': recurse++;       		     break;
       case 's': mininlen = argtoi(optarg,1);    	     break;
       case 'v': verbose  = atoi(optarg);       	     break;
