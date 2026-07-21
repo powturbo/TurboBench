@@ -45,7 +45,7 @@ jobs:
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0
 
-windows:
+  windows:
     runs-on: windows-latest
     defaults:
       run:
@@ -57,17 +57,14 @@ windows:
           git config --global core.autocrlf false
           git config --global core.eol lf
         shell: bash
-
       - uses: actions/checkout@v4
         with:
           submodules: 'true'
-
       - uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
           install: git make cmake rsync mingw-w64-x86_64-gcc
           update: true
-          
       - run: git submodule update --init --recursive
       - run: make STATIC=1
       - run: ./turbobench -l2
