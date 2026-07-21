@@ -181,7 +181,7 @@ endif
 endif
 
 ISAL_LIB :=
-ifneq ($(wildcard isa-l/.),)
+ifneq ($(wildcard isa-lxx/.),)
 NASM ?= $(shell command -v nasm)
 ifndef CROSS
 ifeq ($(NASM),)  # nasm not installed
@@ -190,9 +190,9 @@ ifeq ($(NASM),)  # nasm not installed
     ISAL_LIB := isa-l_/$(OS)-$(ARCH)/isa-l.a    
   endif     
 else
-  CXXFLAGS += -D_ISA_L
-  ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-  ISAL_LIB := isa-l/bin/isa-l.a 
+CXXFLAGS += -D_ISA_L
+ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+ISAL_LIB := isa-l/bin/isa-l.a 
 $(ISAL_LIB): $(ISAL_SRCS)
 	mkdir -p $(BUILDIR)/isa-l
 	mkdir -p isa-l/bin
@@ -201,6 +201,29 @@ LDFLAGS += $(ISAL_LIB)
 endif
 endif
 endif
+
+ISAL_LIB :=
+ifneq ($(wildcard isa-l/.),)
+ifndef CROSS
+NASM ?= $(shell command -v nasm)
+ifeq ($(NASM),)  # nasm not installed
+  ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/isa-l.a),)
+    CXXFLAGS += -D_ISA_L
+    ISAL_LIB := isa-l_/$(OS)-$(ARCH)/isa-l.a    
+  endif     
+else
+CXXFLAGS += -D_ISA_L
+ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+ISAL_LIB := isa-l/bin/isa-l.a 
+$(ISAL_LIB): $(ISAL_SRCS)
+	mkdir -p $(BUILDIR)/isa-l
+	mkdir -p isa-l/bin
+	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILDIR)/isa-l)
+endif
+LDFLAGS += $(ISAL_LIB)
+endif
+endif
+
 
 ifneq ($(wildcard GLZA/.),)
 CXXFLAGS+=-D_GLZA
@@ -626,8 +649,9 @@ endif
 ifneq ($(wildcard pivco-huffman/.),)
 ifndef CROSS
 PIVCODIR = pivco-huffman
+PIVCO_SRCS := $(shell find $(PIVCODIR) -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 CXXFLAGS+=-D_PIVCOHUF -I$(PIVCODIR)/include
-$(BUILDIR)/$(PIVCODIR)/libpivco_huffman_local.o:
+$(BUILDIR)/$(PIVCODIR)/libpivco_huffman_local.o: $(PIVCO_SRCS)
 	cmake -S $(PIVCODIR) -B $(BUILDIR)/$(PIVCODIR) -DCMAKE_BUILD_TYPE=Release
 	cmake --build $(BUILDIR)/$(PIVCODIR) --target pivco_huffman_local -j
 OB+=$(BUILDIR)/$(PIVCODIR)/libpivco_huffman_local.o
@@ -639,7 +663,7 @@ OB+=$(BUILDIR)/$(PIVCODIR)/libpivco_huffman_local.o
 #   git submodule update --init --recursive pivco-huffman zstd
 PHAZDIR=$(PIVCODIR)/extras/phaz
 CXXFLAGS+=-D_PHAZ
-$(PHAZDIR)/build/phaz_local.o:
+$(PHAZDIR)/build/phaz_local.o: $(PIVCO_SRCS)
 	cmake -S $(PIVCODIR) -B $(PIVCODIR)/build -DCMAKE_BUILD_TYPE=Release
 	cmake --build $(PIVCODIR)/build --target pivco_huffman_local -j
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
