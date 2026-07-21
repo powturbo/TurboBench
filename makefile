@@ -341,6 +341,28 @@ else ifeq ($(ARCH),aarch64)
 endif
 endif
 
+ifneq ($(wildcard misa77/.),)
+CXXFLAGS += -D_MISA77
+M_DIR := misa77
+M_SRC := $(M_DIR)/src
+M_OBJ := $(BUILDIR)/$(M_DIR)/src
+MISA77_SRCS := $(wildcard $(M_SRC)/*.cpp $(M_SRC)/experimental/*.cpp)
+MISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 -I$(M_DIR)/include -I$(M_SRC) $(MISA77_FLAGS) $< -c -o $@
+$(M_OBJ)/%_sse2.o: CXXFLAGS += $(_SSE)
+$(M_OBJ)/%.o: $(M_SRC)/%.cpp
+	@mkdir -p $(dir $@)
+	$(MISA77_BUILD)
+$(M_OBJ)/experimental/isa/%.o: $(M_SRC)/experimental/%.cpp
+	@mkdir -p $(dir $@)
+	$(MISA77_BUILD)
+OB += $(call obj,$(MISA77_SRCS)) $(M_OBJ)/isa/target_portable.o $(M_OBJ)/experimental/isa/etarget_portable.o
+ifeq ($(ARCH),x86_64)
+  OB += $(M_OBJ)/isa/target_sse2.o $(M_OBJ)/experimental/isa/etarget_sse2.o $(M_OBJ)/isa/target_avx2.o $(M_OBJ)/experimental/isa/etarget_avx2.o
+else ifeq ($(ARCH),aarch64)
+  OB += $(M_OBJ)/isa/target_neon.o
+endif
+endif
+
 OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
 OPENZL_SRCS := $(shell find openzl -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
