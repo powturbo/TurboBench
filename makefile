@@ -272,7 +272,6 @@ OB += $(call obj,$(LZHAM_SRCS))
 ifeq ($(OS), Windows)
 OB += $(call obj,lzham_codec_devel/lzhamcomp/lzham_win32_threading.o)
 else
-#OB += $(call obj,lzham/lzhamcomp/lzham_pthreads_threading.o)
 CXXFLAGS+=-DTHREAD_MODEL_POSIX
 endif
 endif
@@ -319,12 +318,15 @@ OB+=$(BUILDIR)/miniz/miniz.o $(call obj,miniz/miniz_tdef.o miniz/miniz_tinfl.o)
 endif
 
 ifneq ($(wildcard misa77/.),)
-CXXFLAGS+=-D_MISA77
-MISA77_DIR = misa77
-MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp) $(wildcard $(MISA77_DIR)/src/experimental/*.cpp)  $(MISA77_DIR)/src/isa/target_portable.o $(MISA77_DIR)/src/experimental/isa/etarget_portable.o
-MMISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src $(MISA77_FLAGS) $< -c -o $@
+CXXFLAGS += -D_MISA77
+MISA77_DIR  := misa77
+MISA77_INC  := -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src
+MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp $(MISA77_DIR)/src/experimental/*.cpp)
+MISA77_OBJS := $(MISA77_DIR)/src/isa/target_portable.o $(MISA77_DIR)/src/experimental/isa/etarget_portable.o
+MISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 $(MISA77_INC) $(MISA77_FLAGS) $< -c -o $@
 $(BUILDIR)/$(MISA77_DIR)/src/%_sse2.o: CXXFLAGS += $(_SSE)
 $(BUILDIR)/$(MISA77_DIR)/src/%_avx2.o: CXXFLAGS += $(_AVX2)
+
 $(BUILDIR)/$(MISA77_DIR)/src/%.o: $(MISA77_DIR)/src/%.cpp
 	@mkdir -p $(dir $@)
 	$(MISA77_BUILD)
@@ -332,35 +334,10 @@ $(BUILDIR)/$(MISA77_DIR)/src/experimental/isa/%.o: $(MISA77_DIR)/src/experimenta
 	@mkdir -p $(dir $@)
 	$(MISA77_BUILD)
 
-OB += $(call obj,$(MISA77_SRCS))
-ifeq ($(ARCH),x86_64)
-  OB += $(BUILDIR)/$(MISA77_DIR)/src/isa/target_sse2.o  $(BUILDIR)/$(MISA77_DIR)/src/experimental/isa/etarget_sse2.o 
-  OB += $(BUILDIR)/$(MISA77_DIR)/src/isa/target_avx2.o $(BUILDIR)/$(MISA77_DIR)/src/experimental/isa/etarget_avx2.o
-else ifeq ($(ARCH),aarch64)
-  OB += $(BUILDIR)/$(MISA77_DIR)/src/isa/target_neon.o
-endif
-endif
-
-ifneq ($(wildcard misa77/.),)
-CXXFLAGS += -D_MISA77
-M_DIR := misa77
-M_SRC := $(M_DIR)/src
-M_OBJ := $(BUILDIR)/$(M_DIR)/src
-MISA77_SRCS := $(wildcard $(M_SRC)/*.cpp $(M_SRC)/experimental/*.cpp)
-MISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 -I$(M_DIR)/include -I$(M_SRC) $(MISA77_FLAGS) $< -c -o $@
-$(M_OBJ)/%_sse2.o: CXXFLAGS += $(_SSE)
-$(M_OBJ)/%.o: $(M_SRC)/%.cpp
-	@mkdir -p $(dir $@)
-	$(MISA77_BUILD)
-$(M_OBJ)/experimental/isa/%.o: $(M_SRC)/experimental/%.cpp
-	@mkdir -p $(dir $@)
-	$(MISA77_BUILD)
-OB += $(call obj,$(MISA77_SRCS)) $(M_OBJ)/isa/target_portable.o $(M_OBJ)/experimental/isa/etarget_portable.o
-ifeq ($(ARCH),x86_64)
-  OB += $(M_OBJ)/isa/target_sse2.o $(M_OBJ)/experimental/isa/etarget_sse2.o $(M_OBJ)/isa/target_avx2.o $(M_OBJ)/experimental/isa/etarget_avx2.o
-else ifeq ($(ARCH),aarch64)
-  OB += $(M_OBJ)/isa/target_neon.o
-endif
+OB += $(call obj,$(MISA77_SRCS) $(MISA77_OBJS))
+MISA77_ARCH_OBJS.x86_64  := isa/target_sse2.o isa/target_avx2.o experimental/isa/etarget_sse2.o experimental/isa/etarget_avx2.o
+MISA77_ARCH_OBJS.aarch64 := isa/target_neon.o
+OB += $(addprefix $(BUILDIR)/$(MISA77_DIR)/src/,$(MISA77_ARCH_OBJS.$(ARCH)))
 endif
 
 OPENZL_LIB :=
