@@ -487,7 +487,8 @@ ifeq ($(ARCH),x86_64)
 else ifeq ($(ARCH),aarch64)
   ZXC_OBJS += $(foreach e,neon,compress_$(e) decompress_$(e) huffman_$(e) dict_$(e))
 endif
-OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))#endif
+OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))
+#endif
 endif
 #------------------------------------ Notable codecs ---------------------------------------------------------------------------
 ifneq ($(wildcard brieflz/.),)
