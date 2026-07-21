@@ -147,8 +147,7 @@ ifneq ($(wildcard brotli/.),)
 CXXFLAGS+=-D_BROTLI -Ibrotli/c/include 
 CFLAGS+=-Ibrotli/c/include 
 BROTLI_SRCS := $(wildcard brotli/c/common/*.c) $(wildcard brotli/c/dec/*.c) $(wildcard brotli/*.c) $(wildcard brotli/c/enc/*.c)
-BROTLI_OBJS := $(call obj,$(BROTLI_SRCS))
-OB += $(BROTLI_OBJS)
+OB += $(call obj,$(BROTLI_SRCS))
 endif
 
 ifneq ($(wildcard bzip2/.),)
@@ -216,8 +215,7 @@ ifneq ($(wildcard kanzi-cpp/.),)
 CXXFLAGS+=-D_KANZI
 KANZI_DIR = kanzi-cpp/src
 KANZI_SRCS := $(wildcard $(KANZI_DIR)/io/*.cpp) $(wildcard $(KANZI_DIR)/entropy/*.cpp) $(wildcard $(KANZI_DIR)/bitstream/*.cpp) $(wildcard $(KANZI_DIR)/*.cpp) $(wildcard $(KANZI_DIR)/transform/*.cpp)
-KANZI_OBJS := $(call obj,$(KANZI_SRCS))
-OB += $(KANZI_OBJS)
+OB += $(call obj,$(KANZI_SRCS))
 endif
 
 ifneq ($(wildcard libbsc/.),)
@@ -232,8 +230,7 @@ ifneq ($(wildcard libdeflate/.),)
 CXXFLAGS+=-D_LIBDEFLATE
 CFLAGS+=-Ilibdeflate -Ilibdeflate/common
 LIBDEFLATE_SRCS := $(wildcard libdeflate/lib/*.c) libdeflate/lib/arm/cpu_features.c libdeflate/lib/x86/cpu_features.c 
-LIBDEFLATE_OBJS := $(call obj,$(LIBDEFLATE_SRCS))
-OB += $(LIBDEFLATE_OBJS)
+OB += $(call obj,$(LIBDEFLATE_SRCS))
 endif
 
 ifneq ($(wildcard libslz/.),)
@@ -245,8 +242,7 @@ ifneq ($(wildcard lizard/.),)
 CFLAGS+=-Ilizard/lib
 LIZARD_SRCS := $(wildcard lizard/lib/*.c) $(wildcard lizard/lib/entropy/*.c) 
 LIZARD_SRCS := $(filter-out %/debug.c, $(LIZARD_SRCS))
-LIZARD_OBJS := $(call obj,$(LIZARD_SRCS))
-OB += $(LIZARD_OBJS)
+OB += $(call obj,$(LIZARD_SRCS))
 endif
 
 ifneq ($(wildcard lz4/.),)
@@ -289,8 +285,7 @@ ifneq ($(wildcard lzo/.),)
 CXXFLAGS+=-D_LZO -Ilzo/include
 CFLAGS+=-Ilzo/include
 LZO_SRCS := $(wildcard lzo/src/*.c)
-LZO_OBJS := $(call obj,$(LZO_SRCS))
-OB += $(LZO_OBJS)
+OB += $(call obj,$(LZO_SRCS))
 endif
 
 ifneq ($(and $(wildcard LZSSE/.),$(filter x86_64,$(ARCH))),)
@@ -417,8 +412,7 @@ ifneq ($(wildcard zopfli/.),)
 CXXFLAGS+=-D_ZOPFLI
 ZOPFLI_SRCS := $(wildcard zopfli/src/zopfli/*.c) 
 ZOPFLI_SRCS := $(filter-out %/zopfli_bin.c, $(ZOPFLI_SRCS))
-ZOPFLI_OBJS := $(call obj,$(ZOPFLI_SRCS))
-OB += $(ZOPFLI_OBJS)
+OB += $(call obj,$(ZOPFLI_SRCS))
 endif
 
 ifneq ($(wildcard zstd/.),)
@@ -468,7 +462,7 @@ endif
 endif
 
 ifneq ($(wildcard zxc/.),)
-ifneq (,$(filter $(ARCH),x86_64 aarch64))
+#ifneq (,$(filter $(ARCH),x86_64 aarch64))
 CXXFLAGS+=-D_ZXC -DZXC_STATIC_DEFINE
 CFLAGS+=-Izxc/src/lib/vendors -DZXC_STATIC_DEFINE -fPIC 
 ZXCDIR = zxc/src/lib
@@ -517,7 +511,7 @@ else ifeq ($(ARCH), aarch64)
   OB += $(call obj,$(ZXCDIR)/zxc_huffman_neon.o $(ZXCDIR)/zxc_huffman_neon.o)
   OB += $(call obj,$(ZXCDIR)/zxc_dict_neon.o $(ZXCDIR)/zxc_dict_neon.o)
 endif
-endif
+#endif
 endif
 #------------------------------------ Notable codecs ---------------------------------------------------------------------------
 ifneq ($(wildcard brieflz/.),)
