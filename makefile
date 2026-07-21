@@ -195,7 +195,9 @@ isa-l/bin/isa-l.a: $(ISAL_SRCS)
 	export CC=$(CROSS)-linux-gnu-gcc && cd isa-l && $(MAKE) -f Makefile.unx host_cpu=$(CHOST)
   else
 isa-l/bin/isa-l.a: $(ISAL_SRCS)
-	cd isa-l && $(MAKE) -f Makefile.unx
+	mkdir -p $(BUILDIR)/isa-l
+	mkdir -p isa-l/bin
+	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILDIR)/isa-l)
   endif
   ISAL_LIB := isa-l/bin/isa-l.a 
 endif
