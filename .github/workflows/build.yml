@@ -21,8 +21,9 @@ jobs:
         with:
           submodules: 'true'     
       - run: git submodule update --init --recursive
-      - run: make STATIC=1
-      - run: lscpu
+      - name: Install NASM
+        run: sudo apt-get update && sudo apt-get install -y nasm
+      - run: make STATIC=1      - run: lscpu
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0
 
@@ -39,8 +40,10 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: 'true'
-      - run: git submodule update --init --recursive
-      - run: make
+      - run: git submodule update --init --recursive      
+      - name: Install NASM
+        run: brew install nasm        
+      - run: make      
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0
