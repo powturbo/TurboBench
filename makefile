@@ -649,12 +649,13 @@ endif
 ifneq ($(wildcard pivco-huffman/.),)
 ifndef CROSS
 PIVCODIR = pivco-huffman
-PIVCO_SRCS := $(shell find $(PIVCODIR) -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+PIVCO_SRCS := $(shell find $(PIVCODIR)/src -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 CXXFLAGS+=-D_PIVCOHUF -I$(PIVCODIR)/include
-$(BUILDIR)/$(PIVCODIR)/libpivco_huffman_local.o: $(PIVCO_SRCS)
+PIVCO_LIB = $(BUILDIR)/$(PIVCODIR)/libpivco_huffman_local.o
+$(PIVCO_LIB): $(PIVCO_SRCS)
 	cmake -S $(PIVCODIR) -B $(BUILDIR)/$(PIVCODIR) -DCMAKE_BUILD_TYPE=Release
 	cmake --build $(BUILDIR)/$(PIVCODIR) --target pivco_huffman_local -j
-OB+=$(BUILDIR)/$(PIVCODIR)/libpivco_huffman_local.o
+OB+= $(PIVCO_LIB)
 
 # PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor;
 # level = zstd level).  Built from the pivco-huffman submodule's extras/phaz via its own build.sh: it patches a *private* copy of zstd source (pointed at
