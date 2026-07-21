@@ -2167,7 +2167,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       static unsigned bs_default[] = { ISAL_DEF_LVL0_DEFAULT,     ISAL_DEF_LVL1_DEFAULT,     ISAL_DEF_LVL2_DEFAULT,     ISAL_DEF_LVL3_DEFAULT };
       static unsigned bs_xlarge[]  = { ISAL_DEF_LVL0_EXTRA_LARGE, ISAL_DEF_LVL1_EXTRA_LARGE, ISAL_DEF_LVL2_EXTRA_LARGE, ISAL_DEF_LVL3_EXTRA_LARGE };
       s.level_buf_size = strchr(prm,'x')?bs_xlarge[lev]:bs_default[lev];
-      if(lev && !(s.level_buf = malloc(s.level_buf_size))) die("igzip:malloc error\n");
+      if(lev && !(s.level_buf = (uint8_t *)malloc(s.level_buf_size))) die("igzip:malloc error\n");
       s.next_in       = in;  s.avail_in  = inlen;
       s.next_out      = out; s.avail_out = outsize;
       s.level         = lev;
