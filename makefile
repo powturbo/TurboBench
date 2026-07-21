@@ -629,12 +629,12 @@ endif
 #ifneq ($(and $(wildcard pivco-huffman/.),$(filter x86_64,$(ARCH))),)
 ifneq ($(wildcard pivco-huffman/.),)
 ifndef CROSS
-#PIVCOHUFDIR=pivco-huffman
-CXXFLAGS+=-D_PIVCOHUF -Ipivco-huffman/include
-$(BUILDIR)/pivco-huffman/libpivco_huffman_local.o:
-	cmake -S pivco-huffman -B $(BUILDIR)/pivco-huffman -DCMAKE_BUILD_TYPE=Release
-	cmake --build $(BUILDIR)/pivco-huffman --target pivco_huffman_local -j
-OB+=$(BUILDIR)/pivco-huffman/libpivco_huffman_local.o
+PIVCODIR = pivco-huffman
+CXXFLAGS+=-D_PIVCOHUF -I$(PIVCODIR)/include
+$(BUILDIR)/$(PIVCODIR)/libpivco_huffman_local.o:
+	cmake -S $(PIVCODIR) -B $(BUILDIR)/$(PIVCODIR) -DCMAKE_BUILD_TYPE=Release
+	cmake --build $(BUILDIR)/$(PIVCODIR) --target pivco_huffman_local -j
+OB+=$(BUILDIR)/$(PIVCODIR)/libpivco_huffman_local.o
 
 # PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor;
 # level = zstd level).  Built from the pivco-huffman submodule's extras/phaz via
@@ -645,17 +645,16 @@ OB+=$(BUILDIR)/pivco-huffman/libpivco_huffman_local.o
 # so it coexists with the vanilla zstd TurboBench links.  Requires:
 #   git submodule update --init --recursive pivco-huffman zstd
 ifeq ($(PHAZ), 1) # disabled, log2 missing  
-#PIVCOHUFDIR=pivco-huffman
-PHAZDIR=$(PIVCOHUFDIR)/extras/phaz
+PHAZDIR=$(PIVCODIR)/extras/phaz
 CXXFLAGS+=-D_PHAZ=1
 $(PHAZDIR)/build/phaz_local.o:
-	cmake -S $(PIVCOHUFDIR) -B $(PIVCOHUFDIR)/build -DCMAKE_BUILD_TYPE=Release
-	cmake --build $(PIVCOHUFDIR)/build --target pivco_huffman_local -j
+	cmake -S $(PIVCODIR) -B $(PIVCODIR)/build -DCMAKE_BUILD_TYPE=Release
+	cmake --build $(PIVCODIR)/build --target pivco_huffman_local -j
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
-OB+=$(PHAZDIR)/build/phaz_local.o
-endif
+OB += $(PHAZDIR)/build/phaz_local.o
 endif
 LDFLAGS+=-lm
+endif
 endif
 
 ifdef RECIPARITH
