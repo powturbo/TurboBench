@@ -172,7 +172,7 @@ else
 CXXFLAGS += -D_C_BLOSC2
 C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
 $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
-	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd
+	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF
 	cmake --build $(BUILDIR)/c-blosc2
 LDFLAGS += $(C_BLOSC2_LIB)
 endif
@@ -289,17 +289,11 @@ OB += $(call obj,$(LZO_SRCS))
 endif
 
 ifneq ($(and $(wildcard LZSSE/.),$(filter x86_64,$(ARCH))),)
-CXXFLAGS+=-D_LZSSE
-$(BUILDIR)/LZSSE/lzsse2/lzsse2.o: LZSSE/lzsse2/lzsse2.cpp
+CXXFLAGS += -D_LZSSE
+OB += $(addprefix $(BUILDIR)/LZSSE/, lzsse2/lzsse2.o lzsse4/lzsse4.o lzsse8/lzsse8.o)
+$(BUILDIR)/LZSSE/%.o: LZSSE/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -O2 -msse4.1 -std=c++11 $< -c -o $@
-$(BUILDIR)/LZSSE/lzsse4/lzsse4.o: LZSSE/lzsse4/lzsse4.cpp
-	@mkdir -p $(dir $@)
-	$(CXX) -O2 -msse4.1 -std=c++11  $< -c -o $@
-$(BUILDIR)/LZSSE/lzsse8/lzsse8.o: LZSSE/lzsse8/lzsse8.cpp
-	@mkdir -p $(dir $@)
-	$(CXX) -O2 -msse4.1 -std=c++11  $< -c -o $@
-OB+= $(BUILDIR)/LZSSE/lzsse2/lzsse2.o $(BUILDIR)/LZSSE/lzsse4/lzsse4.o $(BUILDIR)/LZSSE/lzsse8/lzsse8.o
 endif
 
 ifneq ($(wildcard memlz/.),)
