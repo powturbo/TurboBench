@@ -1540,7 +1540,7 @@ struct plugs plugs[] = {
   { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                "0,1,2,3,4,5,6,7,8,9", "", 64*1024},
   { P_CHAMELEON,     "chameleon",     _CHAMELEON, "Chameleon",               "1,2" },
   { P_CSC,           "csc",           _CSC,       "CSC",                     "1,2,3,4,5" },
-  { P_CLICKHOUSE,    "lz4_CH",        _CLICKHOUSE,"lz4 Clickhouse",          "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
+  { P_CLICKHOUSE,    "lz4_ch",        _CLICKHOUSE,"lz4 Clickhouse",          "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
   
   { P_DENSITY,       "density",       _DENSITY,   "Density",                 "1,2,3" },
   { P_DOBOZ,         "doboz",         _DOBOZ,     "Doboz",                   "" },  //crash on windows
@@ -3028,7 +3028,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _CLICKHOUSE
-    case P__CLICKHOUSE: return LZ4::decompress((const char *)in, (char * const)out, inlen, outlen, NULL/*PerformanceStatistics & statistics*/);
+    case P_CLICKHOUSE: return LZ4::decompress((const char *)in, (char * const)out, inlen, outlen);//, 0/*PerformanceStatistics & statistics*/);
       #endif
      
      #if _CRUSH
