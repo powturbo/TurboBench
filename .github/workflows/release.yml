@@ -72,6 +72,11 @@ jobs:
         run: make
 
       # ---------------- Windows (MSYS2) ----------------
+      - name: Set git to use LF
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+        shell: bash
       - name: Setup MSYS2 (Windows)
         if: matrix.platform == 'windows'
         uses: msys2/setup-msys2@v2
