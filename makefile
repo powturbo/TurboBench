@@ -181,7 +181,7 @@ endif
 endif
 
 ifneq ($(wildcard Clickhouse/.),)
-CXXFLAGS+=-D_CLICKHOUSE -IClickhouse/src -IClickhouse/base/pcg_random
+CXXFLAGS+=-D_CLICKHOUSE -IClickhouse/src -IClickhouse/base/pcg_random -IContrib/abseil-cpp
 OB+=$(call obj,Clickhouse/src/Compression/LZ4_decompress_faster.o)
 endif
 
@@ -667,6 +667,7 @@ OB+= $(PIVCO_LIB)
 # TurboBench's own zstd/ submodule, same pinned SHA 5233c58e) and merges it + pivco into one blob (phaz_local.o) that exports only phaz_compress /
 # phaz_decompress -- everything else (all of zstd, FSE/HUF, pivco) is localized, so it coexists with the vanilla zstd TurboBench links.  Requires:
 #   git submodule update --init --recursive pivco-huffman zstd
+ifneq ($(OS), Windows)
 PHAZDIR=$(PIVCODIR)/extras/phaz
 CXXFLAGS+=-D_PHAZ
 $(PHAZDIR)/build/phaz_local.o: $(PIVCO_SRCS)
@@ -674,6 +675,7 @@ $(PHAZDIR)/build/phaz_local.o: $(PIVCO_SRCS)
 	cmake --build $(PIVCODIR)/build --target pivco_huffman_local -j
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
 OB += $(PHAZDIR)/build/phaz_local.o
+endif
 LDFLAGS+=-lm
 endif
 endif
