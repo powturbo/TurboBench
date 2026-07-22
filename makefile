@@ -264,7 +264,8 @@ endif
 
 ifneq ($(wildcard libslz/.),)
 CXXFLAGS+=-D_LIBSLZ
-OB+=$(call obj,libslz/src/slz.o)
+LIBSLZ_SRCS := libslz/src/slz.c libslz/src/uslz.c libslz/src/slz_common.c
+OB+=$(call obj,$(LIBSLZ_SRCS))
 endif
 
 ifneq ($(wildcard lizard/.),)
