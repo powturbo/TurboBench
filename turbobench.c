@@ -613,11 +613,11 @@ int plugreg(plug_t *plug, char *cmd, int k, unsigned bsize, unsigned bsizex) {
 #define M_PI 3.14159265358979323846
 #endif
 typedef enum { M_RATIO = 0, M_COMP = 1, M_DECOMP = 2 } metric_t;
-#define CHART_W        900
+#define CHART_W        990 //900
 #define BAR_H          26
 #define BAR_GAP        12
-#define LEFT_MARGIN    170
-#define RIGHT_MARGIN   150
+#define LEFT_MARGIN    150 //170
+#define RIGHT_MARGIN   130 //150
 #define TOP_MARGIN     70
 #define BOTTOM_MARGIN  40
 
@@ -704,10 +704,10 @@ void chart_bar(const char *fname, char *name, plug_t *a, int n, metric_t metric,
     snprintf(s, 80, "TurboBench: Ratio '%s'", fname);
     strcpy(color, "#4C72B0");
   } else if (metric == M_COMP) {
-    snprintf(s, 80, "TurboBench: C Speed '%s'", fname);
+    snprintf(s, 80, "TurboBench: C Speed MB/s '%s'", fname);
     strcpy(color, "#2E86AB");
   } else {
-    snprintf(s, 80, "TurboBench: D Speed '%s'", fname);
+    snprintf(s, 80, "TurboBench: D Speed MB/s '%s'", fname);
     strcpy(color, "#E67E22");
   }
   svg_open(f, CHART_W, h, s);
@@ -725,8 +725,8 @@ void chart_bar(const char *fname, char *name, plug_t *a, int n, metric_t metric,
     svg_rect(f, LEFT_MARGIN, y, bw, BAR_H, color, 4);
     char lbl[64];
     if (metric == M_RATIO)      snprintf(lbl, sizeof(lbl), "%.1f%%", v);
-    else if (metric == M_COMP)  snprintf(lbl, sizeof(lbl), "%.1f MB/s", v);
-    else                        snprintf(lbl, sizeof(lbl), "%.1f MB/s", v);
+    else if (metric == M_COMP)  snprintf(lbl, sizeof(lbl), "%.1f", v);
+    else                        snprintf(lbl, sizeof(lbl), "%.1f", v);
     svg_text(f, LEFT_MARGIN + bw + 6, y + BAR_H * 0.7, "start", 12, "#111", lbl);
   }
   svg_close(f);
@@ -771,13 +771,13 @@ void chart_grouped(const char *fname, char *name, plug_t *a, int n, size_t len) 
     double bw_c = (tmp[i].tc / mx) * plot_w;
     svg_rect(f, LEFT_MARGIN, y, bw_c, sub_h, "#2E86AB", 3);
     char lbl_c[64];
-    snprintf(lbl_c, sizeof(lbl_c), "%.1f C MB/s", tmp[i].tc);
+    snprintf(lbl_c, sizeof(lbl_c), "%.1f", tmp[i].tc);
     svg_text(f, LEFT_MARGIN + bw_c + 6, y + sub_h * 0.75, "start", 11, "#111", lbl_c);
 
     double bw_d = (tmp[i].td / mx) * plot_w;
     svg_rect(f, LEFT_MARGIN, y + sub_h + 4, bw_d, sub_h, "#E67E22", 3);
     char lbl_d[64];
-    snprintf(lbl_d, sizeof(lbl_d), "%.1f D MB/s", tmp[i].td);
+    snprintf(lbl_d, sizeof(lbl_d), "%.1f", tmp[i].td);
     svg_text(f, LEFT_MARGIN + bw_d + 6, y + sub_h + 4 + sub_h * 0.75, "start", 11, "#111", lbl_d);
   }
   svg_close(f);
