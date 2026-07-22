@@ -3823,7 +3823,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
     
       #if _LIBSLZ
-    case P_LIBSLZ:  return "v1.2.2";
+    case P_LIBSLZ:  return "v1.3.0";
       #endif
  
       #if _ZPAQ
