@@ -180,6 +180,11 @@ endif
 endif
 endif
 
+ifneq ($(wildcard Clickhouse/.),)
+CXXFLAGS+=-D_CLICKHOUSE
+OB+=$(call obj,Clickhouse/src/LZ4_decompress_faster.o)
+endif
+
 ISAL_LIB :=
 ifneq ($(wildcard isa-lxx/.),)
 NASM ?= $(shell command -v nasm)
