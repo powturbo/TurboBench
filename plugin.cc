@@ -64,6 +64,11 @@ enum {
 #define _CSC 0
 #endif
  P_CSC,
+#ifndef _CLICKHOUSE
+#define _CLICKHOUSE 0
+#endif
+ P_CLICKHOUSE,
+ 
 #ifndef _DAALA
 #define _DAALA 0
 #endif
@@ -526,30 +531,12 @@ enum {
 #include "EC/aom_/aom.h"
   #endif
 
-  #if _C_BLOSC2
-    #ifdef C_C_BLOSC2LZ
-#include "c-blosc2/blosclz.h"
-    #else
-#include "c-blosc2/include/blosc2.h"
-    #endif
-  #endif
-
   #if _BPC
 #include "BitPlaneComp/src/BPCompressor.hh"
   #endif
 
   #if _BRIEFLZ
 #include "brieflz/include/brieflz.h"
-  #endif
-
-  #if _LIBBSC
-#include "libbsc/libbsc/libbsc.h"
-#include "libbsc/libbsc/st/st.h"
-#include "libbsc/libbsc/lzp/lzp.h"
-  #endif
-
-  #if _LIBDEFLATE
-#include "libdeflate/libdeflate.h"
   #endif
 
   #if _BZIP2
@@ -562,13 +549,18 @@ enum {
 #include "brotli/c/common/version.h"
   #endif
 
-  #if _LZMA
-#include "lzma/C/Alloc.h"
-#include "lzma/C/LzmaEnc.h"
-#include "lzma/C/LzmaDec.h"
-#include "lzma/C/7zVersion.h"
+  #if _C_BLOSC2
+    #ifdef C_C_BLOSC2LZ
+#include "c-blosc2/blosclz.h"
+    #else
+#include "c-blosc2/include/blosc2.h"
+    #endif
   #endif
 
+  #if _CLICKHOUSE
+#include "Clickhouse/src/Compression/LZ4_decompress_faster.h"  
+  #endif
+  
   #if _CSC
 #define __7Z_TYPES_H  
 #include "CSC/src/libcsc/csc_enc.h"
@@ -703,6 +695,16 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
 }
   #endif
   
+  #if _LIBBSC
+#include "libbsc/libbsc/libbsc.h"
+#include "libbsc/libbsc/st/st.h"
+#include "libbsc/libbsc/lzp/lzp.h"
+  #endif
+
+  #if _LIBDEFLATE
+#include "libdeflate/libdeflate.h"
+  #endif
+
   #if _LIBLZG
 #include "liblzg/src/include/lzg.h"
   #endif
@@ -714,6 +716,13 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
   #if _LIZARD
 #include "lizard/lib/lizard_compress.h"    //v2.0
 #include "lizard/lib/lizard_decompress.h"
+  #endif
+
+  #if _LZMA
+#include "lzma/C/Alloc.h"
+#include "lzma/C/LzmaEnc.h"
+#include "lzma/C/LzmaDec.h"
+#include "lzma/C/7zVersion.h"
   #endif
 
   #if _MEMLZ
@@ -1531,6 +1540,7 @@ struct plugs plugs[] = {
   { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                "0,1,2,3,4,5,6,7,8,9", "", 64*1024},
   { P_CHAMELEON,     "chameleon",     _CHAMELEON, "Chameleon",               "1,2" },
   { P_CSC,           "csc",           _CSC,       "CSC",                     "1,2,3,4,5" },
+  { P_CLICKHOUSE,    "lz4_CH",        _CLICKHOUSE,"lz4 Clickhouse",          "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
   
   { P_DENSITY,       "density",       _DENSITY,   "Density",                 "1,2,3" },
   { P_DOBOZ,         "doboz",         _DOBOZ,     "Doboz",                   "" },  //crash on windows
@@ -2114,6 +2124,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_CHAMELEON:  { Chameleon_Reset((Chameleon *)workmem); return lev<2?Chameleon_Encode((Chameleon *)workmem,out,in, inlen):Chameleon2_Encode((Chameleon *)workmem,out,in, inlen); }
       #endif
 
+  
       #if _CSC
     case P_CSC: {
         CSCProps prop; CSCEncProps_Init(&prop, dsize?bsr32(dsize)-powof2(dsize):(1<<29), lev); CSCEnc_WriteProperties(&prop, (uint8_t*)out, 0);
@@ -2210,6 +2221,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _LZ4
+        #if _CLICKHOUSE
+    case P_CLICKHOUSE:
+        #endif
     case P_LZ4:
       if(strchr(prm,'M')) { return !lev?LZ4_compress_fast((char *)in, (char *)out, inlen, outsize, 4):(lev<9?LZ4_compress_default((char *)in, (char *)out, inlen, outsize):LZ4_compress_HC((char *)in, (char *)out, inlen, outsize, lev)); }
       else { char *q;
@@ -3013,6 +3027,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       }
       #endif
 
+      #if _CLICKHOUSE
+    case P__CLICKHOUSE: return LZ4::decompress((const char *)in, (char * const)out, inlen, outlen, NULL/*PerformanceStatistics & statistics*/);
+      #endif
+     
      #if _CRUSH
     case P_CRUSH: crush_decompress(in, out, outlen); break;
       #endif
