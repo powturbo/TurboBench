@@ -654,35 +654,49 @@ CXXFLAGS+=-D_GANS
 OB+=$(call obj,EC/rans.o EC/head_cbloom.o)
 endif
 
-# PivCo-Huffman (https://github.com/MarcinZukowski/pivco-huffman): SIMD tree-walk Huffman, levels 1=PH, 2=PHA.  Submodule built via its own CMake; we link the
-# pre-localized object (libpivco_huffman_local.o) whose vendored FSE_*/HUF_* symbols are localized so they don't clash with the zstd TurboBench bundles.
-# The submodule has its own submodule (ext/fse), so init recursively:  git submodule update --init --recursive pivco-huffman
 ifneq ($(wildcard pivco-huffman/.),)
 ifndef CROSS
-PIVCODIR = pivco-huffman
-PIVCO_SRCS := $(shell find $(PIVCODIR)/src -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-CXXFLAGS+=-D_PIVCOHUF -I$(PIVCODIR)/include
-PIVCO_LIB = $(BUILDIR)/$(PIVCODIR)/libpivco_huffman_local.o
-$(PIVCO_LIB): $(PIVCO_SRCS)
-	cmake -S $(PIVCODIR) -B $(BUILDIR)/$(PIVCODIR) -DCMAKE_BUILD_TYPE=Release
-	cmake --build $(BUILDIR)/$(PIVCODIR) --target pivco_huffman_local -j
-OB+= $(PIVCO_LIB)
+PIVCODIR   = pivco-huffman
+PIVCO_BDIR = $(BUILDIR)/$(PIVCODIR)
+PIVCO_SRCS := $(shell find $(PIVCODIR)/src -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.cc' \))
+PIVCO_CMAKE_FILES := $(shell find $(PIVCODIR) -maxdepth 2 -name 'CMakeLists.txt')
+CXXFLAGS  += -D_PIVCOHUF -I$(PIVCODIR)/include
+PIVCO_LIB   = $(PIVCO_BDIR)/libpivco_huffman_local.o
+PIVCO_STAMP = $(PIVCO_BDIR)/.pivco_stamp
+
+$(PIVCO_BDIR):
+	@mkdir -p $@
+$(PIVCO_BDIR)/CMakeCache.txt: $(PIVCO_CMAKE_FILES) | $(PIVCO_BDIR)
+	cmake -S $(PIVCODIR) -B $(PIVCO_BDIR) -DCMAKE_BUILD_TYPE=Release
+$(PIVCO_STAMP): $(PIVCO_SRCS) $(PIVCO_BDIR)/CMakeCache.txt
+	cmake --build $(PIVCO_BDIR) --target pivco_huffman_local -j
+	@touch $@
+$(PIVCO_LIB): $(PIVCO_STAMP)
+	@touch $@
+OB += $(PIVCO_LIB)
 
 # PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor;
-# level = zstd level).  Built from the pivco-huffman submodule's extras/phaz via its own build.sh: it patches a *private* copy of zstd source (pointed at
-# TurboBench's own zstd/ submodule, same pinned SHA 5233c58e) and merges it + pivco into one blob (phaz_local.o) that exports only phaz_compress /
-# phaz_decompress -- everything else (all of zstd, FSE/HUF, pivco) is localized, so it coexists with the vanilla zstd TurboBench links.  Requires:
+# level = zstd level). Built from the pivco-huffman submodule's extras/phaz via
+# its own build.sh: patches a private zstd copy (TurboBench's pinned zstd/ SHA
+# 5233c58e) and merges it + pivco into phaz_local.o exporting only
+# phaz_compress / phaz_decompress. Requires:
 #   git submodule update --init --recursive pivco-huffman zstd
 ifneq ($(OS), Windows)
-PHAZDIR=$(PIVCODIR)/extras/phaz
-CXXFLAGS+=-D_PHAZ
-$(PHAZDIR)/build/phaz_local.o: $(PIVCO_SRCS)
+PHAZDIR       = $(PIVCODIR)/extras/phaz
+PHAZ_STAMP    = $(PHAZDIR)/build/.phaz_stamp
+PHAZ_LIB      = $(PHAZDIR)/build/phaz_local.o
+CXXFLAGS     += -D_PHAZ
+$(PHAZ_STAMP): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
 	cmake -S $(PIVCODIR) -B $(PIVCODIR)/build -DCMAKE_BUILD_TYPE=Release
 	cmake --build $(PIVCODIR)/build --target pivco_huffman_local -j
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
-OB += $(PHAZDIR)/build/phaz_local.o
+	@mkdir -p $(@D)
+	@touch $@
+$(PHAZ_LIB): $(PHAZ_STAMP)
+	@touch $@
+OB += $(PHAZ_LIB)
 endif
-LDFLAGS+=-lm
+LDFLAGS += -lm
 endif
 endif
 
