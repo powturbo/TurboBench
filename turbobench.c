@@ -607,7 +607,7 @@ int plugreg(plug_t *plug, char *cmd, int k, unsigned bsize, unsigned bsizex) {
   a:plug[k].id = -1;  
   return k;
 }
-
+//***********************************************************************************************************************************************************
 #define SVG_PLUGMAX 30
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -736,7 +736,7 @@ void chart_bar(const char *fname, char *name, plug_t *a, int n, metric_t metric,
 // *** 2) GROUPED HORIZONTAL BAR CHART - compression + decompression speed
 void chart_grouped(const char *fname, char *name, plug_t *a, int n, size_t len) {
   char s[256];
-  if (n > SVG_PLUGMAX) n = SVG_PLUGMAX;
+  if(n > SVG_PLUGMAX) n = SVG_PLUGMAX;
   sprintf(s, "%s_%s", fname, name);
   plug_t tmp[SVG_PLUGMAX];
   memcpy(tmp, a, n * sizeof(plug_t));
