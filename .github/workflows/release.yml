@@ -72,11 +72,13 @@ jobs:
         run: make
 
       # ---------------- Windows (MSYS2) ----------------
+      # FIX: Disable automatic CRLF conversion before checkout
       - name: Set git to use LF
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
         shell: bash
+
       - name: Setup MSYS2 (Windows)
         if: matrix.platform == 'windows'
         uses: msys2/setup-msys2@v2
@@ -85,6 +87,10 @@ jobs:
           install: git zip make cmake rsync mingw-w64-x86_64-gcc
           update: true
 
+      - name: Build (Windows)
+        if: matrix.platform == 'windows'
+        shell: msys2 {0}
+        run: make STATIC=1
       - name: Build (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
