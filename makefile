@@ -167,19 +167,19 @@ ifneq ($(wildcard c-blosc2/.),)
 ifneq ($(OS), Windows)  # not compiling for windows
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS
-C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
-$(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc
-	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF -DBUILD_SHARED=OFF
-	cmake --build $(BUILDIR)/c-blosc2
+#$(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
+#	export CC=$(CROSS)-linux-gnu-gcc
+#	export CXX=$(CROSS)-linux-gnu-g++
+#	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF -DBUILD_SHARED=OFF -DCMAKE_C_COMPILER=$(CROSS)-linux-gnu-gcc -DCMAKE_CXX_COMPILER=$(CROSS)-linux-gnu-g++
+#	cmake --build $(BUILDIR)/c-blosc2
 else
-CXXFLAGS += -D_C_BLOSC2
+CXXFLAGS+=-D_C_BLOSC2
 C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
 $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
 	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF -DBUILD_SHARED=OFF
 	cmake --build $(BUILDIR)/c-blosc2
-LDFLAGS += $(C_BLOSC2_LIB)
 endif
+LDFLAGS += $(C_BLOSC2_LIB)
 endif
 endif
 
@@ -373,11 +373,12 @@ OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
 OPENZL_SRCS := $(shell find openzl -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS
-OPENZL_LIB = $(BUILDIR)/openzl/libopenzl.a
-$(OPENZL_LIB): $(OPENZL_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc
-	cmake -S openzl -B $(BUILDIR)/openzl
-	cmake --build $(BUILDIR)/openzl --config Release
+#OPENZL_LIB = $(BUILDIR)/openzl/libopenzl.a
+#$(OPENZL_LIB): $(OPENZL_SRCS)
+#	export CC=$(CROSS)-linux-gnu-gcc
+#	export CXX=$(CROSS)-linux-gnu-g++
+#	cmake -S openzl -B $(BUILDIR)/openzl -DCMAKE_C_COMPILER=$(CROSS)-linux-gnu-gcc -DCMAKE_CXX_COMPILER=$(CROSS)-linux-gnu-g++
+#	cmake --build $(BUILDIR)/openzl --config Release 
 else
 CXXFLAGS += -D_OPENZL -Iopenzl/include
 ifeq ($(OS), Windows)
@@ -390,8 +391,8 @@ $(OPENZL_LIB): $(OPENZL_SRCS)
 	cmake -S openzl -B $(BUILDIR)/openzl
 	cmake --build $(BUILDIR)/openzl --config Release
 endif
-LDFLAGS += $(OPENZL_LIB)
 endif
+LDFLAGS += $(OPENZL_LIB)
 endif
 
 # 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
