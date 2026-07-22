@@ -607,8 +607,11 @@ int plugreg(plug_t *plug, char *cmd, int k, unsigned bsize, unsigned bsizex) {
   a:plug[k].id = -1;  
   return k;
 }
-#define SVG_PLUGMAX 30
 
+#define SVG_PLUGMAX 30
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 typedef enum { M_RATIO = 0, M_COMP = 1, M_DECOMP = 2 } metric_t;
 #define CHART_W        900
 #define BAR_H          26
@@ -617,10 +620,6 @@ typedef enum { M_RATIO = 0, M_COMP = 1, M_DECOMP = 2 } metric_t;
 #define RIGHT_MARGIN   150
 #define TOP_MARGIN     70
 #define BOTTOM_MARGIN  40
-
-#define SCATTER_W      820
-#define SCATTER_H      620
-#define SCATTER_MARGIN 80
 
 static void xml_escape(const char *in, char *out, size_t outsz) {
   size_t o = 0;
@@ -638,7 +637,6 @@ static void xml_escape(const char *in, char *out, size_t outsz) {
   }
   out[o] = '\0';
 }
-
 static double max_metric(plug_t *a, int n, metric_t m, size_t len) {
   double mx = 0; int i;
   for (i = 0; i < n; i++) {
@@ -647,8 +645,7 @@ static double max_metric(plug_t *a, int n, metric_t m, size_t len) {
   }
   if(m == M_RATIO) mx = RATIO(mx, len);
   return mx <= 0 ? 1 : mx;
-} 
-
+}
 static int cmp_ratio(const void *p1, const void *p2) { const plug_t *a = p1, *b = p2; return (b->len > a->len) - (b->len < a->len); }
 static int cmp_tc(   const void *p1, const void *p2) { const plug_t *a = p1, *b = p2; return (b->tc > a->tc) - (b->tc < a->tc); }
 static int cmp_td(   const void *p1, const void *p2) { const plug_t *a = p1, *b = p2; return (b->td > a->td) - (b->td < a->td); }
@@ -657,31 +654,31 @@ static void svg_open(FILE *f, int w, int h, const char *title) {
   char esc[256];
   xml_escape(title, esc, sizeof(esc));
   fprintf(f, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-  fprintf(f, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" "
-        "viewBox=\"0 0 %d %d\" font-family=\"Arial,Helvetica,sans-serif\">\n",        w, h, w, h);
+  fprintf(f, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%d\" height=\"%d\" viewBox=\"0 0 %d %d\" font-family=\"Arial,Helvetica,sans-serif\">\n", w, h, w, h);
   fprintf(f, "<rect x=\"0\" y=\"0\" width=\"%d\" height=\"%d\" fill=\"#ffffff\"/>\n", w, h);
-  fprintf(f, "<text x=\"%d\" y=\"30\" font-size=\"20\" font-weight=\"bold\" "
-        "text-anchor=\"middle\" fill=\"#222\">%s</text>\n", w / 2, esc);
+  fprintf(f, "<text x=\"%d\" y=\"30\" font-size=\"20\" font-weight=\"bold\" text-anchor=\"middle\" fill=\"#222\">%s</text>\n", w / 2, esc);
 }
-
 static void svg_close(FILE *f) { fprintf(f, "</svg>\n"); }
 
 static void svg_text(FILE *f, double x, double y, const char *anchor, int size, const char *color, const char *txt) {
   char esc[256];
   xml_escape(txt, esc, sizeof(esc));
-  fprintf(f, "<text x=\"%.2f\" y=\"%.2f\" text-anchor=\"%s\" font-size=\"%d\" fill=\"%s\">%s</text>\n",  x, y, anchor, size, color, esc);
+  fprintf(f, "<text x=\"%.2f\" y=\"%.2f\" text-anchor=\"%s\" font-size=\"%d\" fill=\"%s\">%s</text>\n", x, y, anchor, size, color, esc);
 }
-
 static void svg_rect(FILE *f, double x, double y, double w, double h, const char *fill, double rx) {
-  fprintf(f, "<rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" fill=\"%s\"/>\n",  x, y, w, h, rx, fill);
+  fprintf(f, "<rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" rx=\"%.1f\" fill=\"%s\"/>\n", x, y, w, h, rx, fill);
 }
-
 static void svg_line(FILE *f, double x1, double y1, double x2, double y2, const char *color, double sw) {
-    fprintf(f, "<line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" stroke=\"%s\" stroke-width=\"%.2f\"/>\n", x1, y1, x2, y2, color, sw);
+  fprintf(f, "<line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" stroke=\"%s\" stroke-width=\"%.2f\"/>\n", x1, y1, x2, y2, color, sw);
 }
-
 static void svg_circle(FILE *f, double cx, double cy, double r, const char *fill, const char *stroke) {
   fprintf(f, "<circle cx=\"%.2f\" cy=\"%.2f\" r=\"%.2f\" fill=\"%s\" stroke=\"%s\" stroke-width=\"1.5\"/>\n", cx, cy, r, fill, stroke);
+}
+typedef enum { SHAPE_CIRCLE=0, SHAPE_SQUARE, SHAPE_TRIANGLE_UP, SHAPE_TRIANGLE_DOWN, SHAPE_DIAMOND, SHAPE_CROSS, SHAPE_XMARK, SHAPE_STAR, SHAPE_PENTAGON, SHAPE_HEXAGON, SHAPE_COUNT } shape_t;
+static void svg_poly_begin(FILE *f) { fprintf(f, "<polygon points=\""); }
+static void svg_poly_pt(FILE *f, double x, double y) { fprintf(f, "%.2f,%.2f ", x, y); }
+static void svg_poly_end(FILE *f, const char *fill, const char *stroke) {
+  fprintf(f, "\" fill=\"%s\" stroke=\"%s\" stroke-width=\"1.5\"/>\n", fill, stroke);
 }
 
 // 1) HORIZONTAL BAR CHART - single metric (ratio | compression | decomp)
@@ -787,33 +784,79 @@ void chart_grouped(const char *fname, char *name, plug_t *a, int n, size_t len) 
   fclose(f);
 }
 
-#if 0
-// *** 3) 2D SCATTER / DOT CHART - speed (x) vs ratio (y)
+static void svg_marker(FILE *f, int shape, double cx, double cy, double r, const char *fill, const char *stroke) {
+  int k;
+  switch (shape % SHAPE_COUNT) {
+    case SHAPE_CIRCLE       : svg_circle(f, cx, cy, r, fill, stroke); break;
+    case SHAPE_SQUARE       : fprintf(f, "<rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" fill=\"%s\" stroke=\"%s\" stroke-width=\"1.5\"/>\n", cx - r, cy - r, r * 2, r * 2, fill, stroke); break;
+    case SHAPE_TRIANGLE_UP  : svg_poly_begin(f); svg_poly_pt(f, cx, cy - r); svg_poly_pt(f, cx - r, cy + r); svg_poly_pt(f, cx + r, cy + r); svg_poly_end(f, fill, stroke);  break;
+    case SHAPE_TRIANGLE_DOWN: svg_poly_begin(f); svg_poly_pt(f, cx, cy + r); svg_poly_pt(f, cx - r, cy - r); svg_poly_pt(f, cx + r, cy - r); svg_poly_end(f, fill, stroke);  break;
+    case SHAPE_DIAMOND      : svg_poly_begin(f); svg_poly_pt(f, cx, cy - r); svg_poly_pt(f, cx + r, cy);     svg_poly_pt(f, cx, cy + r);     svg_poly_pt(f, cx - r, cy); svg_poly_end(f, fill, stroke);  break;
+    case SHAPE_CROSS        : { double t = r * 0.4;  svg_poly_begin(f);
+      svg_poly_pt(f, cx - t, cy - r); svg_poly_pt(f, cx + t, cy - r); svg_poly_pt(f, cx + t, cy - t); svg_poly_pt(f, cx + r, cy - t);  svg_poly_pt(f, cx + r, cy + t); svg_poly_pt(f, cx + t, cy + t);
+      svg_poly_pt(f, cx + t, cy + r); svg_poly_pt(f, cx - t, cy + r); svg_poly_pt(f, cx - t, cy + t); svg_poly_pt(f, cx - r, cy + t);  svg_poly_pt(f, cx - r, cy - t); svg_poly_pt(f, cx - t, cy - t);
+      svg_poly_end(f, fill, stroke);
+      break;
+    }
+    case SHAPE_XMARK        : {  double t = r * 0.35;  svg_poly_begin(f);
+      svg_poly_pt(f, cx - r, cy - r + t); svg_poly_pt(f, cx - r + t, cy - r); svg_poly_pt(f, cx, cy - t); svg_poly_pt(f, cx + r - t, cy - r); svg_poly_pt(f, cx + r, cy - r + t); svg_poly_pt(f, cx + t, cy);
+      svg_poly_pt(f, cx + r, cy + r - t); svg_poly_pt(f, cx + r - t, cy + r); svg_poly_pt(f, cx, cy + t); svg_poly_pt(f, cx - r + t, cy + r); svg_poly_pt(f, cx - r, cy + r - t); svg_poly_pt(f, cx - t, cy);
+      svg_poly_end(f, fill, stroke);
+      break;
+    }
+    case SHAPE_STAR         :  svg_poly_begin(f);
+      for (k = 0; k < 10; k++) {
+        double ang = -M_PI / 2 + k * M_PI / 5.0;
+        double rad = (k % 2 == 0) ? r : r * 0.45;
+        svg_poly_pt(f, cx + rad * cos(ang), cy + rad * sin(ang));
+      }
+      svg_poly_end(f, fill, stroke);
+      break;
+    case SHAPE_PENTAGON:  svg_poly_begin(f);
+      for (k = 0; k < 5; k++) {  double ang = -M_PI / 2 + k * 2 * M_PI / 5.0;  svg_poly_pt(f, cx + r * cos(ang), cy + r * sin(ang));  }
+      svg_poly_end(f, fill, stroke);
+      break;
+    case SHAPE_HEXAGON:   svg_poly_begin(f);
+      for (k = 0; k < 6; k++) {
+        double ang = k * M_PI / 3.0;
+        svg_poly_pt(f, cx + r * cos(ang), cy + r * sin(ang));
+      }
+      svg_poly_end(f, fill, stroke);
+      break;
+    default:
+      svg_circle(f, cx, cy, r, fill, stroke);
+  }
+}
+
+#define LEGEND_W        180
+#define LEGEND_SWATCH   10
+#define LEGEND_LINEH    16
+static const char *palette[] = { "#2E86AB", "#E67E22", "#27AE60", "#C0392B", "#8E44AD", "#16A085", "#D35400", "#2C3E50", "#F1C40F", "#7F8C8D", "#3498DB", "#E74C3C", "#1ABC9C", "#9B59B6", "#F39C12", "#34495E" };
+#define PALETTE_N (int)(sizeof(palette)/sizeof(palette[0]))
+
+#define SCATTER_W      900 // 620 //
+#define SCATTER_H      680 // 756 //
+#define SCATTER_MARGIN  50 //  //  
 void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xmetric, size_t len) {
   char s[256];
   if (n > SVG_PLUGMAX) n = SVG_PLUGMAX;
   sprintf(s, "%s_%s", fname, name);
   FILE *f = fopen(s, "w");
   if (!f) { perror(s); return; }
-  strncpy(s,fname,30);  s[30]=0;
-  char color[16];
-  if (xmetric == M_COMP) {
+  int svg_w = SCATTER_W + LEGEND_W;
+  strncpy(s, fname, 30); s[30] = 0;
+  if (xmetric == M_COMP)
     snprintf(s, 80, "TurboBench: C Speed/Ratio %s", fname);
-    strcpy(color, "#2E86AB");
-  } else {
-    snprintf(s, 80, "TurboBench: D Speed/s-Ratio %s", fname);
-    strcpy(color, "#E67E22");
-  }
-  svg_open(f, SCATTER_W, SCATTER_H, s);
-
+  else
+    snprintf(s, 80, "TurboBench: D Speed/Ratio %s", fname);
+  svg_open(f, svg_w, SCATTER_H, s);
   double mx_x = max_metric(a, n, xmetric, len) * 1.15;
-  double mx_y = 100.0; /* ratio range 0..100 */
+  double mx_y = 100.0;
   double px0 = SCATTER_MARGIN, py0 = SCATTER_H - SCATTER_MARGIN;
   double pw = SCATTER_W - 2 * SCATTER_MARGIN;
   double ph = SCATTER_H - SCATTER_MARGIN - 50;
   svg_line(f, px0, py0, px0 + pw, py0, "#333", 1.5);
   svg_line(f, px0, py0, px0, py0 - ph, "#333", 1.5);
-
   int gi;
   for (gi = 0; gi <= 5; gi++) {
     double gx = px0 + pw * gi / 5.0;
@@ -822,7 +865,6 @@ void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xme
     char t[32];
     snprintf(t, sizeof(t), "%.0f", vx);
     svg_text(f, gx, py0 + 18, "middle", 11, "#555", t);
-
     double gy = py0 - ph * gi / 5.0;
     double vy = mx_y * gi / 5.0;
     svg_line(f, px0, gy, px0 + pw, gy, "#eee", 1);
@@ -831,121 +873,27 @@ void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xme
     svg_text(f, px0 - 10, gy + 4, "end", 11, "#555", ty);
   }
   svg_text(f, px0 + pw / 2, SCATTER_H - 15, "middle", 13, "#222", xmetric == M_COMP ? "C MB/s" : "D MB/s");
-  fprintf(f,
-    "<text x=\"20\" y=\"%.2f\" font-size=\"13\" fill=\"#222\" "
-    "transform=\"rotate(-90 20 %.2f)\" text-anchor=\"middle\">Ratio%%</text>\n",  py0 - ph / 2, py0 - ph / 2);
-  int i;
-  for (i = 0; i < n; i++) {
-    double v = xmetric == M_COMP ? a[i].tc : a[i].td;
-    double cx = px0 + (v / mx_x) * pw;
-    double cy = py0 - (RATIO(a[i].len,len) / mx_y) * ph;
-
-    svg_circle(f, cx, cy, 6, color, "#333");
-    if(a[i].lev==INVLEV) sprintf(s, "%s", a[i].s); else sprintf(s, "%s,%d", a[i].s, a[i].lev);
-    svg_text(f, cx + 8, cy - 8, "start", 11, "#111", s);
-
-    char val[64] = {0};
-    //if (xmetric == M_COMP) snprintf(val, sizeof(val), "%.1f, %.1f%%", v, RATIO(a[i].len,len));
-    //else                   snprintf(val, sizeof(val), "%.1f, %.1f%%", v, RATIO(a[i].len,len));
-    svg_text(f, cx + 8, cy + 6, "start", 9, "#666", val);
-  }
-  svg_close(f);
-  fclose(f);
-}
-#else
-#define LEGEND_W       180   /* extra canvas width reserved for the legend */
-#define LEGEND_SWATCH   10   /* diameter of the color swatch */
-#define LEGEND_LINEH    16   /* vertical spacing between legend entries */
-
-static const char *palette[] = {
-  "#2E86AB", "#E67E22", "#27AE60", "#C0392B", "#8E44AD",
-  "#16A085", "#D35400", "#2C3E50", "#F1C40F", "#7F8C8D",
-  "#3498DB", "#E74C3C", "#1ABC9C", "#9B59B6", "#F39C12",
-  "#34495E"
-};
-#define PALETTE_N (int)(sizeof(palette)/sizeof(palette[0]))
-
-void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xmetric, size_t len) {
-  char s[256];
-  if (n > SVG_PLUGMAX) n = SVG_PLUGMAX;
-  sprintf(s, "%s_%s", fname, name);
-  FILE *f = fopen(s, "w");
-  if (!f) { perror(s); return; }
-
-  int svg_w = SCATTER_W + LEGEND_W;   /* widen the canvas to fit the legend */
-
-  strncpy(s, fname, 30); s[30] = 0;
-  if (xmetric == M_COMP)
-    snprintf(s, 80, "TurboBench: C Speed/Ratio %s", fname);
-  else
-    snprintf(s, 80, "TurboBench: D Speed/s-Ratio %s", fname);
-
-  svg_open(f, svg_w, SCATTER_H, s);
-
-  double mx_x = max_metric(a, n, xmetric, len) * 1.15;
-  double mx_y = 100.0; /* ratio range 0..100 */
-  double px0 = SCATTER_MARGIN, py0 = SCATTER_H - SCATTER_MARGIN;
-  double pw = SCATTER_W - 2 * SCATTER_MARGIN;   /* plot area unchanged; legend lives in the extra width */
-  double ph = SCATTER_H - SCATTER_MARGIN - 50;
-
-  svg_line(f, px0, py0, px0 + pw, py0, "#333", 1.5);
-  svg_line(f, px0, py0, px0, py0 - ph, "#333", 1.5);
-
-  int gi;
-  for (gi = 0; gi <= 5; gi++) {
-    double gx = px0 + pw * gi / 5.0;
-    double vx = mx_x * gi / 5.0;
-    svg_line(f, gx, py0, gx, py0 - ph, "#eee", 1);
-    char t[32];
-    snprintf(t, sizeof(t), "%.0f", vx);
-    svg_text(f, gx, py0 + 18, "middle", 11, "#555", t);
-
-    double gy = py0 - ph * gi / 5.0;
-    double vy = mx_y * gi / 5.0;
-    svg_line(f, px0, gy, px0 + pw, gy, "#eee", 1);
-    char ty[32];
-    snprintf(ty, sizeof(ty), "%.0f%%", vy);
-    svg_text(f, px0 - 10, gy + 4, "end", 11, "#555", ty);
-  }
-
-  svg_text(f, px0 + pw / 2, SCATTER_H - 15, "middle", 13, "#222",
-           xmetric == M_COMP ? "C MB/s" : "D MB/s");
-  fprintf(f,
-    "<text x=\"20\" y=\"%.2f\" font-size=\"13\" fill=\"#222\" "
-    "transform=\"rotate(-90 20 %.2f)\" text-anchor=\"middle\">Ratio%%</text>\n",
-    py0 - ph / 2, py0 - ph / 2);
-
-  /* --- legend column, to the right of the plot --- */
-  double legend_x = SCATTER_W + 20;
-  double legend_y = SCATTER_MARGIN;
+  fprintf(f, "<text x=\"20\" y=\"%.2f\" font-size=\"13\" fill=\"#222\" transform=\"rotate(-90 20 %.2f)\" text-anchor=\"middle\">Ratio%%</text>\n", py0 - ph / 2, py0 - ph / 2);
+  double legend_x = SCATTER_W + 20, legend_y = SCATTER_MARGIN;
   svg_text(f, legend_x, legend_y - 12, "start", 13, "#222", "Legend");
-
-  int i;
-  for (i = 0; i < n; i++) {
-    double v = xmetric == M_COMP ? a[i].tc : a[i].td;
-    double cx = px0 + (v / mx_x) * pw;
-    double cy = py0 - (RATIO(a[i].len, len) / mx_y) * ph;
+  for(int i = 0; i < n; i++) {
+    double      v = xmetric == M_COMP ? a[i].tc : a[i].td,
+               cx = px0 + (v / mx_x) * pw,
+               cy = py0 - (RATIO(a[i].len, len) / mx_y) * ph;
     const char *color = palette[i % PALETTE_N];
-
-    /* plot the dot with its own color, no inline text */
-    svg_circle(f, cx, cy, 6, color, "#333");
-
+    int        shape = i % SHAPE_COUNT;
+    svg_marker(f, shape, cx, cy, 6, color, "#333");
     if (a[i].lev == INVLEV) sprintf(s, "%s", a[i].s);
     else                    sprintf(s, "%s,%d", a[i].s, a[i].lev);
-
-    /* matching legend row: swatch + label */
     double ly = legend_y + i * LEGEND_LINEH;
-    svg_circle(f, legend_x + LEGEND_SWATCH / 2, ly - 4, LEGEND_SWATCH / 2, color, "#333");
+    svg_marker(f, shape, legend_x + LEGEND_SWATCH / 2, ly - 4, LEGEND_SWATCH / 2, color, "#333");
     svg_text(f, legend_x + LEGEND_SWATCH + 8, ly, "start", 11, "#111", s);
   }
-
   svg_close(f);
   fclose(f);
 }
-#endif
-void chart(plug_t *a, int n, char *fname, size_t len) {
-  //printf("generate charts for %d codecs\n", n); fflush(stdout);
 
+void chart(plug_t *a, int n, char *fname, size_t len) {
   chart_bar(fname, "ratio.svg",              a, n, M_RATIO,  len);
   chart_bar(fname,  "comp.svg",              a, n, M_COMP,   len);
   chart_bar(fname,"decomp.svg",              a, n, M_DECOMP, len);
