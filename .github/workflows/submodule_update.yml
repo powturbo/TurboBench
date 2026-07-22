@@ -1,0 +1,61 @@
+name: Update Submodules and Tag
+
+on:
+  schedule:
+    # Run daily at midnight
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-and-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.TURBOBENCH }}
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Update submodules to latest remote commit
+        run: git submodule update --remote --recursive
+
+      - name: Check for submodule changes
+        id: check_changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Changes found in submodules."
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "No changes found."
+          fi
+
+      - name: Commit, Tag, and Push
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Add and commit the submodule changes
+          git add .
+          git commit -m "chore: auto-update submodules"
+          
+          # Generate the tag name
+          TAG_NAME="v$(date +'%Y.%m.%d')"
+          
+          # Check if tag already exists (in case of manual re-runs on the same day)
+          if git ls-remote --tags origin "refs/tags/$TAG_NAME" | grep -q "$TAG_NAME"; then
+            TAG_NAME="${TAG_NAME}.${{ github.run_number }}"
+          fi
+          
+          git tag "$TAG_NAME"
+          
+          # Push the commit to the current branch
+          git push origin HEAD
+          
+          # Push the tag (this will trigger release.yml if using a PAT)
+          git push origin "$TAG_NAME"
