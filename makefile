@@ -180,8 +180,9 @@ endif
 endif
 endif
 
-ifneq ($(wildcard Clickhouse/.),)
-CXXFLAGS+=-D_CLICKHOUSE -IClickhouse/src -IClickhouse/base/pcg_random -IContrib/abseil-cpp
+ifneq ($(wildcard ClickhouseXXX/.),)
+CXXFLAGS+=-D_CLICKHOUSE -IClickhouse/src -IClickhouse
+#-IClickhouse/base/pcg_random -IContrib/abseil-cpp
 OB+=$(call obj,Clickhouse/src/Compression/LZ4_decompress_faster.o)
 endif
 
