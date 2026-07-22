@@ -70,8 +70,8 @@
 #include "time_.h"
 #include "plugin.h" 
 
-#define RATIO(_clen_, _len_)  ((double)(_clen_)*100.0/(double)(_len_))
-#define FACTOR(_clen_, _len_) ((double)(_len_)/(double)(_clen_))
+#define RATIO(_clen_, _len_)           ((double)(_clen_)*100.0/(double)(_len_))
+#define FACTOR(_clen_, _len_)          ((double)(_len_)/(double)(_clen_))
 #define SCORE(_clen_, _len_,_tc_,_td_) (_tc_ + 10.0 * _td_ + (double)_clen_/1000000.0)  
 
 double weissman(double ratio, double bandwith, double bandwithlo, double bandwithhi ) {
@@ -83,10 +83,10 @@ int strpref(const char *const *str, int n, char sep1, char sep2) {
   int i, j=0;
   for(;;j++)
     for(i = 0; i < n; i++)
- 	  if(!str[i][j] || str[i][j] != str[0][j]) {
-	    while (j > 0 && str[0][j-1] != sep1 && str[0][j-1] != sep2) j--;
-	    return j;
-	  }
+      if(!str[i][j] || str[i][j] != str[0][j]) {
+	while (j > 0 && str[0][j-1] != sep1 && str[0][j-1] != sep2) j--;
+	return j;
+      }
   return 0;
 }
 
@@ -1746,46 +1746,46 @@ void usage(char *pgm) {
     #endif
   fprintf(stderr, "\nTurboBench Copyright (c) 2013-2026 Powturbo %s [%s]\n", __DATE__, s);
   fprintf(stderr, "Usage: %s [options] [file]\n", pgm);
-  fprintf(stderr, " -eS      S = compressors/groups separated by '/' Parameter can be specified after ','\n");
-  fprintf(stderr, " -b#s     # = blocksize (default filesize). max=1GB\n");
-  fprintf(stderr, " -d#      # = log2 dictionary size: 15-30 (default blocksize).Only brotli,lzham,lzlib,lzma,zstd\n");
-  fprintf(stderr, " -B#s     # = max. benchmark filesize (default 1GB) ex. -B4G\n");
+  fprintf(stderr, " -eS      S = compressors/groups separated by '/' levels can be specified after ','. Ex. -ezlib,1/FAST\n");
+  fprintf(stderr, " -b#s     # = blocksize {filesize}. max=1GB\n");
+  fprintf(stderr, " -d#      # = log2 dictionary size: 15-30 {blocksize}.Only brotli,lzham,lzlib,lzma,zstd\n");
+  fprintf(stderr, " -B#s     # = max. benchmark filesize {1GB} ex. -B4G\n");
   fprintf(stderr, " -s#s     # = min. buffer size to duplicate & test small files (ex. -s50)\n");
-  fprintf(stderr, "          s = modifier s:K,M,G=(1000, 1.000.000, 1.000.000.000) s:k,m,h=(1024,1Mb,1Gb). (default m) ex. 64k or 64K\n");
+  fprintf(stderr, "          s = modifier s:K,M,G=(1000, 1.000.000, 1.000.000.000) s:k,m,h=(1024,1Mb,1Gb). {m} ex. 64k or 64K\n");
   fprintf(stderr, "Benchmark:\n");
-  fprintf(stderr, " -iX,Y    Minimum de/compression iterations per run (default=auto)\n");
-  fprintf(stderr, " -I#/-J#  # = Number of de/compression runs (default=3)\n");
-  fprintf(stderr, " -t#      # = min. time in seconds per run.(default=2sec)\n");
+  fprintf(stderr, " -iX,Y    Decompression/Compression iterations {3}\n");
+  fprintf(stderr, " -I#/-J#  # = Number of de/compression iterations {3}\n");
+  fprintf(stderr, " -t#      # = min. time in seconds per iterations.{1}\n");
   fprintf(stderr, " -S#      Sleep # min. after 2 min. processing mimizing CPU throttling\n");
-  fprintf(stderr, " -K#t     Max. time limit for all benchmarks (default 24h)\n");
+  fprintf(stderr, " -K#t     Max. time limit for all benchmarks {24h}\n");
   fprintf(stderr, "          t = M:millisecond s:second m:minute h:hour. ex. 3h\n");
   fprintf(stderr, " -D       No process real-time priority setting\n");
   fprintf(stderr, "Check:\n");
   fprintf(stderr, " -C#      #=0 compress only, #1=No check #=2 ignore errors, #=3 exit on error, #=4 abort on error\n");
   fprintf(stderr, " -f#      check reading/writing outside bounds: #=1 compress, #=2 decompress, #3:both\n");
   fprintf(stderr, "Output:\n");
-  fprintf(stderr, " -v#      # = verbosity 0..3 (default 1)\n");
+  fprintf(stderr, " -v#      # = verbosity 0..3 {1}\n");
   fprintf(stderr, " -rX,Y    Show/Reveal only when compression/decompression speed > X/Y MB/s\n");
   fprintf(stderr, " -kstr    str = Remark/Comment string\n");
   fprintf(stderr, " -l#      # = 1 : print all groups/plugins, # = 2 : print all codecs\n");
   fprintf(stderr, " -S#      Plot transfer speed: #=1 Comp        speedup #=2 Decomp speedup #=3 Comp        'MB/s' #=4 Decomp 'MB/s'\n");
   fprintf(stderr, "                               #=4 Comp+Decomp speedup                    #=5 Comp+Decomp 'MB/s'\n");
   fprintf(stderr, " -p#      #='print format' 1=text 2=html 3=htm 4=markdown 5/6:vBulletin 7:csv(comma) 8=tsv(tab)\n");
-  fprintf(stderr, " -Q#      # Plot window 0:1920x1080, 1:1600x900, 2:1280x720, 3:800x600 (default=1)\n");
+  fprintf(stderr, " -Q#      # Plot window 0:1920x1080, 1:1600x900, 2:1280x720, 3:800x600 {1}\n");
   fprintf(stderr, " -g       -g:no merge w/ old result 'file.tbb', -gg:process w/o output (use for fuzzing)\n");
   fprintf(stderr, " -o       print on standard output\n");
   fprintf(stderr, " -G       plot memcpy\n");
-  fprintf(stderr, " -w       Plot Speedup linear x-axis (default log)\n");
-  fprintf(stderr, " -z       Plot Ratio/Speed logarithmic x-axis (default linear)\n");
-  fprintf(stderr, "Multiblock (join) Add -r for recurise:\n");
+  fprintf(stderr, " -w       Plot Speedup linear x-axis {log}\n");
+  fprintf(stderr, " -z       Plot Ratio/Speed logarithmic x-axis {linear}\n");
+  fprintf(stderr, "Multiblock/Join. Add -r for recurise:\n");
   fprintf(stderr, " -Moutput Step 1: Concatenate all input files into a single output file organized into multiple blocks\n");
   fprintf(stderr, " -m       Step 2: Process each block independently from the merged file created in Step 1\n");  
   fprintf(stderr, " -N       text files character delimiter (ex. -N9 for newline, 1 block/line)\n");
   BEUSAGE;
   fprintf(stderr, "ex. ./turbobench enwik9 -eFAST/bzip2/lzma,5,9\n");
   fprintf(stderr, "ex. ./turbobench enwik9 -eFAST/OPTIMAL/bsc,0:e2 -i0\n");
-  fprintf(stderr, "ex. ./turbobench eECODER -R\"entropy coder test\"\n");
-  fprintf(stderr, "ex. ./turbobench enwik9 -elzma,9:fb273:lc2:lp2\n");
+  fprintf(stderr, "ex. ./turbobench eECODER -k\"entropy coder test\"\n");
+  fprintf(stderr, "ex. ./turbobench enwik9 -elzma,9:fb273:lc2:lp2:t2\n");
   exit(0);
 } 
 
