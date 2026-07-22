@@ -166,9 +166,12 @@ C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
 ifneq ($(OS), Windows)  # not compiling for windows
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ifdef CROSS # no cross compile
-#c-blosc2/blosc/libblosc2.a: $(C_BLOSC2_SRCS)
-#	(export CC=$(CROSS)-linux-gnu-gcc && cd c-blosc2 && cmake . -DBLOSC_ZSTD_SOURCE_DIR=../zstd && $(MAKE))
+ifdef CROSS
+C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
+$(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
+	export CC=$(CROSS)-linux-gnu-gcc
+	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF -DBUILD_SHARED=OFF
+	cmake --build $(BUILDIR)/c-blosc2
 else
 CXXFLAGS += -D_C_BLOSC2
 C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
@@ -181,8 +184,7 @@ endif
 endif
 
 ifneq ($(wildcard ClickhouseXXX/.),)
-CXXFLAGS+=-D_CLICKHOUSE -IClickhouse/src -IClickhouse
-#-IClickhouse/base/pcg_random -IContrib/abseil-cpp
+CXXFLAGS+=-D_CLICKHOUSE -IClickhouse/src -IClickhouse	#-IClickhouse/base/pcg_random -IContrib/abseil-cpp
 OB+=$(call obj,Clickhouse/src/Compression/LZ4_decompress_faster.o)
 endif
 
@@ -212,7 +214,7 @@ ISAL_LIB :=
 ifneq ($(wildcard isa-l/.),)
 ifndef CROSS
 NASM ?= $(shell command -v nasm)
-ifeq ($(NASM),)  # nasm not installed
+ifeq ($(NASM),)
   ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/isa-l.a),)
     CXXFLAGS += -D_ISA_L
     ISAL_LIB := isa-l_/$(OS)-$(ARCH)/isa-l.a    
@@ -229,7 +231,6 @@ endif
 LDFLAGS += $(ISAL_LIB)
 endif
 endif
-
 
 ifneq ($(wildcard GLZA/.),)
 CXXFLAGS+=-D_GLZA
@@ -371,16 +372,18 @@ endif
 OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
 OPENZL_SRCS := $(shell find openzl -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ifdef CROSS #not working
-#openzl/libopenzl.a: $(OPENZL_SRCS)
-#	export CC=$(CROSS)-linux-gnu-gcc && cd openzl && $(MAKE) lib
+ifdef CROSS
+OPENZL_LIB = $(BUILDIR)/openzl/libopenzl.a
+$(OPENZL_LIB): $(OPENZL_SRCS)
+	export CC=$(CROSS)-linux-gnu-gcc
+	cmake -S openzl -B $(BUILDIR)/openzl
+	cmake --build $(BUILDIR)/openzl --config Release
 else
 CXXFLAGS += -D_OPENZL -Iopenzl/include
 ifeq ($(OS), Windows)
 OPENZL_LIB = openzl/libopenzl.a
 $(OPENZL_LIB): $(OPENZL_SRCS)
 	cd openzl && $(MAKE) lib
-#	mkdir -p openzl && $(MAKE) -C $(BUILDIR)/openzl lib
 else
 OPENZL_LIB = $(BUILDIR)/openzl/libopenzl.a
 $(OPENZL_LIB): $(OPENZL_SRCS)
