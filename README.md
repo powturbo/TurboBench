@@ -310,7 +310,7 @@ Compressors with versions 16.08.2016 <br>
 * `k, m, h` = 1024, 1MB, 1GB (default is `m`, e.g., `64k` or `64K`)
 
 ### Benchmark Options
-* `-iX,Y` : Decompression/Compression iterations {`3`}. Ex. -i15,15
+* `-iX,Y` : Decompression/Compression iterations {`3`}. e.g. -i15,15
 * `-t#` : `#` = min time in seconds per iteration {`1`}
 * `-S#` : Sleep `#` min after 2 min processing (minimizing CPU throttling)
 * `-K#t` : Max time limit for all benchmarks {`24h`}. `t` = `M`:millisecond, `s`:second, `m`:minute, `h`:hour. (e.g., `3h`)
