@@ -1753,7 +1753,7 @@ void usage(char *pgm) {
   fprintf(stderr, " -s#s     # = min. buffer size to duplicate & test small files (ex. -s50)\n");
   fprintf(stderr, "          s = modifier s:K,M,G=(1000, 1.000.000, 1.000.000.000) s:k,m,h=(1024,1Mb,1Gb). {m} ex. 64k or 64K\n");
   fprintf(stderr, "Benchmark:\n");
-  fprintf(stderr, " -iX,Y    Decompression/Compression iterations {3}\n");
+  fprintf(stderr, " -iX,Y    Decompression/Compression iterations {3}. Ex. -i15,15\n");
 //  fprintf(stderr, " -I#/-J#  # = Number of de/compression iterations {3}\n");
   fprintf(stderr, " -t#      # = min. time in seconds per iterations.{1}\n");
   fprintf(stderr, " -S#      Sleep # min. after 2 min. processing mimizing CPU throttling\n");
