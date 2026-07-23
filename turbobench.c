@@ -1754,7 +1754,7 @@ void usage(char *pgm) {
   fprintf(stderr, "          s = modifier s:K,M,G=(1000, 1.000.000, 1.000.000.000) s:k,m,h=(1024,1Mb,1Gb). {m} ex. 64k or 64K\n");
   fprintf(stderr, "Benchmark:\n");
   fprintf(stderr, " -iX,Y    Decompression/Compression iterations {3}\n");
-  fprintf(stderr, " -I#/-J#  # = Number of de/compression iterations {3}\n");
+//  fprintf(stderr, " -I#/-J#  # = Number of de/compression iterations {3}\n");
   fprintf(stderr, " -t#      # = min. time in seconds per iterations.{1}\n");
   fprintf(stderr, " -S#      Sleep # min. after 2 min. processing mimizing CPU throttling\n");
   fprintf(stderr, " -K#t     Max. time limit for all benchmarks {24h}\n");
