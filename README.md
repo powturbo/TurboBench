@@ -295,7 +295,7 @@ Compressors with versions 16.08.2016 <br>
 # TurboBench Manual
 
 ## Usage
-`turbobench [options] [file]`
+`turbobench [options] [file(s)]`
 
 ### General Options
 * `-eS` : `S` = compressors/groups separated by `/`. Levels can be specified after `,`. (e.g., `-ezlib,1/FAST`)
@@ -314,6 +314,7 @@ Compressors with versions 16.08.2016 <br>
 * `-S#` : Sleep `#` min after 2 min processing (minimizing CPU throttling)
 * `-K#t` : Max time limit for all benchmarks {`24h`}. `t` = `M`:millisecond, `s`:second, `m`:minute, `h`:hour. (e.g., `3h`)
 * `-D` : No process real-time priority setting
+* `-r` : process directories recursively
 
 ### Check Options
 * `-C#` : `#=0` compress only, `#=1` No check, `#=2` ignore errors, `#=3` exit on error, `#=4` abort on error
