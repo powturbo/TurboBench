@@ -1752,6 +1752,7 @@ void usage(char *pgm) {
   fprintf(stderr, " -B#s     # = max. benchmark filesize {1GB} ex. -B4G\n");
   fprintf(stderr, " -s#s     # = min. buffer size to duplicate & test small files (ex. -s50)\n");
   fprintf(stderr, "          s = modifier s:K,M,G=(1000, 1.000.000, 1.000.000.000) s:k,m,h=(1024,1Mb,1Gb). {m} ex. 64k or 64K\n");
+  fprintf(stderr, " -r       process directories recursively\n");
   fprintf(stderr, "Benchmark:\n");
   fprintf(stderr, " -iX,Y    Decompression/Compression iterations {3}. Ex. -i15,15\n");
 //  fprintf(stderr, " -I#/-J#  # = Number of de/compression iterations {3}\n");
@@ -1777,7 +1778,7 @@ void usage(char *pgm) {
   fprintf(stderr, " -G       plot memcpy\n");
   fprintf(stderr, " -w       Plot Speedup linear x-axis {log}\n");
   fprintf(stderr, " -z       Plot Ratio/Speed logarithmic x-axis {linear}\n");
-  fprintf(stderr, "Multiblock/Join. Add -r for recurise:\n");
+  fprintf(stderr, "Multiblock/Join\n");
   fprintf(stderr, " -Moutput Step 1: Concatenate all input files into a single output file organized into multiple blocks\n");
   fprintf(stderr, " -m       Step 2: Process each block independently from the merged file created in Step 1\n");  
   fprintf(stderr, " -N       text files character delimiter (ex. -N9 for newline, 1 block/line)\n");
