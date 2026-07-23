@@ -1813,7 +1813,7 @@ int main(int argc, char* argv[]) {
   int                recurse  = 0, xplug = 0,tm_Repk=1,plot=-1,fmt=0,fno,merge=0,rprio=1;
   unsigned           bsize    = 1u<<30, bsizex=0;
   unsigned long long filenmax = 0;
-  char               *scmd = NULL,*trans=NULL,*beb=NULL,*rem="",s[2049];
+  char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049];
   char               *_argvx[1], **argvx=_argvx;
 
   int c, digit_optind = 0;												if(verbose > 5) printf("START1\n");fflush(stdout);
@@ -1837,6 +1837,7 @@ int main(int argc, char* argv[]) {
       case 'C': cmp      = atoi(optarg);      	     break;
       case 'D': rprio    = 0;		 	     break;
       case 'e': scmd     = optarg;            	     break;
+//    case 'E': xcmd     = optarg;                   break;
       case 'F': fac      = strtod(optarg, NULL);     break;
       case 'f': fuzz     = atoi(optarg);       	     break;
       case 'g': merge++;		 		     break;
