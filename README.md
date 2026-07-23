@@ -340,8 +340,7 @@ Compressors with versions 16.08.2016 <br>
 * `-z` : Plot Ratio/Speed logarithmic x-axis {`linear`}
 
 ### Multiblock/Join
-*(Add `-r` for recursive)*
-* `-Moutput` : Step 1: Concatenate all input files into a single output file organized into multiple blocks
+* `-Moutput` : *(`-r` for recursive)* Step 1: Concatenate all input files into a single output file organized into multiple blocks 
 * `-m` : Step 2: Process each block independently from the merged file created in Step 1
 * `-N` : Text files character delimiter (e.g., `-N9` for newline, 1 block/line)
 
