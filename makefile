@@ -422,6 +422,27 @@ TAMP_DIR = tamp/tamp/_c_src/tamp
 OB += $(call obj,$(TAMP_DIR)/common.o $(TAMP_DIR)/compressor.o $(TAMP_DIR)/decompressor.o)
 endif
 
+XZ_LIB :=
+ifneq ($(wildcard xz/.),)
+CXXFLAGS += -D_XZ
+XZ_SRCS := $(shell find xz/src/liblzma -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+XZ_LIB = $(BUILDIR)/xz/liblzma.a
+ifdef CROSS
+$(XZ_LIB): $(XZ_SRCS)
+	export CC=$(CROSS)-linux-gnu-gcc && cmake -S xz -B $(BUILDIR)/xz && $(MAKE) -C $(BUILDIR)/xz
+else
+$(XZ_LIB): $(XZ_SRCS)
+	cmake -S xz -B $(BUILDIR)/xz && $(MAKE) -C $(BUILDIR)/xz
+endif
+LDFLAGS += $(XZ_LIB)
+endif
+
+ifneq ($(wildcard zlib/.),)
+CXXFLAGS+=-D_ZLIB
+ZD=zlib/
+OB+=$(call obj,$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o)
+endif
+
 ZLIB_NG_LIB :=
 ifneq ($(wildcard zlib-ng/.),)
 CXXFLAGS += -D_ZLIB_NG
@@ -457,33 +478,6 @@ ZSTD_C_SRCS := $(filter %.c,$(ZSTD_SRCS))
 ZSTD_S_SRCS := $(filter %.S,$(ZSTD_SRCS))
 ZSTD_OBJS := $(call obj,$(ZSTD_C_SRCS)) $(ZSTD_S_SRCS)
 OB += $(ZSTD_OBJS)
-endif
-
-FSE := EC/fse
-ifneq ($(wildcard FSE/.),)
-CXXFLAGS+=-D_FSE
-OB+=$(call obj,$(LB)EC/fse/fse_compress_.o $(LB)EC/fse/fse_decompress_.o)
-endif
-
-XZ_LIB :=
-ifneq ($(wildcard xz/.),)
-CXXFLAGS += -D_XZ
-XZ_SRCS := $(shell find xz/src/liblzma -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-XZ_LIB = $(BUILDIR)/xz/liblzma.a
-ifdef CROSS
-$(XZ_LIB): $(XZ_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cmake -S xz -B $(BUILDIR)/xz && $(MAKE) -C $(BUILDIR)/xz
-else
-$(XZ_LIB): $(XZ_SRCS)
-	cmake -S xz -B $(BUILDIR)/xz && $(MAKE) -C $(BUILDIR)/xz
-endif
-LDFLAGS += $(XZ_LIB)
-endif
-
-ifneq ($(wildcard zlib/.),)
-CXXFLAGS+=-D_ZLIB
-ZD=zlib/
-OB+=$(call obj,$(ZD)adler32.o $(ZD)crc32.o $(ZD)compress.o $(ZD)deflate.o $(ZD)infback.o $(ZD)inffast.o $(ZD)inflate.o $(ZD)inftrees.o $(ZD)trees.o $(ZD)uncompr.o $(ZD)zutil.o)
 endif
 
 ifneq ($(wildcard zpaq/.),)
@@ -523,7 +517,8 @@ endif
 OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))
 endif
 endif
-#------------------------------------ Notable codecs ---------------------------------------------------------------------------
+
+#------------------------------------ Manual Download ---------------------------------------------------------------------------
 ifneq ($(wildcard brieflz/.),)
 CXXFLAGS+=-D_BRIEFLZ
 CFLAGS+=-Ibrieflz/include
@@ -536,15 +531,6 @@ FLZMA2_SRCS := $(wildcard fast-lzma2/*.c)
 FLZMA2_SRCS := $(filter-out %/xxhash.c, $(FLZMA2_SRCS))
 FLZMA2_OBJS := $(call obj,$(FLZMA2_SRCS))
 OB += $(FLZMA2_OBJS)
-endif
-
-ifneq ($(wildcard xzz/.),)
-XZ_DIR = xz/src/liblzma
-CXXFLAGS+=-D_XZ
-CFLAGS+=-Ixz/src -Ixz/src/common  -I$(XZ_DIR) -I$(XZ_DIR)/check -I$(XZ_DIR)/common -I$(XZ_DIR)/delta -I$(XZ_DIR)/simple -I$(XZ_DIR)/api -I$(XZ_DIR)/common -I$(XZ_DIR)/lzma -I$(XZ_DIR)/lz -I$(XZ_DIR)/check -I$(XZ_DIR)/rangecoder -DHAVE_CHECK_CRC32 -DMYTHREAD_POSIX
-XZ_SRCS := $(wildcard $(XZ_DIR)/check/*.c) $(wildcard $(XZ_DIR)/common/*.c) $(wildcard $(XZ_DIR)/lz/*.c) $(wildcard $(XZ_DIR)/lzma/*.c) $(wildcard $(XZ_DIR)/rangecoder/*.c)
-XZ_OBJS := $(call obj,$(XZ_SRCS))
-OB += $(XZ_OBJS)
 endif
 
 ifneq ($(wildcard lz4ultra/.),)
@@ -620,6 +606,12 @@ CXXFLAGS+=-D_FASTHF
 OB+=$(call obj,EC/fasthf/binary_codec.o)
 endif
 
+FSE := EC/fse
+ifneq ($(wildcard FSE/.),)
+CXXFLAGS+=-D_FSE
+OB+=$(call obj,$(LB)EC/fse/fse_compress_.o $(LB)EC/fse/fse_decompress_.o)
+endif
+
 ifneq ($(wildcard EC/fpaq0p/.),)
 CXXFLAGS+=-D_FPAQ0P
 OB+=$(call obj,EC/fpaq0p/fpaq0p_sh.o)
@@ -657,43 +649,29 @@ endif
 ifneq ($(wildcard pivco-huffman/.),)
 ifndef CROSS
 PIVCODIR   = pivco-huffman
+CXXFLAGS  += -D_PIVCOHUF -I$(PIVCODIR)/include
 PIVCO_BDIR = $(BUILDIR)/$(PIVCODIR)
 PIVCO_SRCS := $(shell find $(PIVCODIR)/src -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.cc' \))
 PIVCO_CMAKE_FILES := $(shell find $(PIVCODIR) -maxdepth 2 -name 'CMakeLists.txt')
-CXXFLAGS  += -D_PIVCOHUF -I$(PIVCODIR)/include
 PIVCO_LIB   = $(PIVCO_BDIR)/libpivco_huffman_local.o
-PIVCO_STAMP = $(PIVCO_BDIR)/.pivco_stamp
-
-$(PIVCO_BDIR):
-	@mkdir -p $@
-$(PIVCO_BDIR)/CMakeCache.txt: $(PIVCO_CMAKE_FILES) | $(PIVCO_BDIR)
+$(PIVCO_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
+	mkdir -p $(PIVCO_BDIR)
 	cmake -S $(PIVCODIR) -B $(PIVCO_BDIR) -DCMAKE_BUILD_TYPE=Release
-$(PIVCO_STAMP): $(PIVCO_SRCS) $(PIVCO_BDIR)/CMakeCache.txt
 	cmake --build $(PIVCO_BDIR) --target pivco_huffman_local -j
-	@touch $@
-$(PIVCO_LIB): $(PIVCO_STAMP)
-	@touch $@
 OB += $(PIVCO_LIB)
-
-# PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor;
-# level = zstd level). Built from the pivco-huffman submodule's extras/phaz via
-# its own build.sh: patches a private zstd copy (TurboBench's pinned zstd/ SHA
-# 5233c58e) and merges it + pivco into phaz_local.o exporting only
-# phaz_compress / phaz_decompress. Requires:
-#   git submodule update --init --recursive pivco-huffman zstd
+# PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor; level = zstd level). Built from the pivco-huffman submodule's extras/phaz via
+# its own build.sh: patches a private zstd copy (TurboBench's pinned zstd/ SHA 5233c58e) and merges it + pivco into phaz_local.o exporting only
+# phaz_compress / phaz_decompress. Requires: git submodule update --init --recursive pivco-huffman zstd
 ifneq ($(OS), Windows)
-PHAZDIR       = $(PIVCODIR)/extras/phaz
-PHAZ_STAMP    = $(PHAZDIR)/build/.phaz_stamp
-PHAZ_LIB      = $(PHAZDIR)/build/phaz_local.o
 CXXFLAGS     += -D_PHAZ
-$(PHAZ_STAMP): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
-	cmake -S $(PIVCODIR) -B $(PIVCODIR)/build -DCMAKE_BUILD_TYPE=Release
-	cmake --build $(PIVCODIR)/build --target pivco_huffman_local -j
-	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZDIR)/tools/build.sh
-	@mkdir -p $(@D)
-	@touch $@
-$(PHAZ_LIB): $(PHAZ_STAMP)
-	@touch $@
+PHAZ_DIR      = $(PIVCODIR)/extras/phaz
+PHAZ_BDIR     = $(PIVCODIR)/build
+PHAZ_LIB      = $(PHAZ_DIR)/build/phaz_local.o
+$(PHAZ_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
+	@mkdir -p $(PHAZ_BDIR)
+	cmake -S $(PIVCODIR) -B $(PHAZ_BDIR) -DCMAKE_BUILD_TYPE=Release
+	cmake --build $(PHAZ_BDIR) --target pivco_huffman_local -j
+	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZ_DIR)/tools/build.sh
 OB += $(PHAZ_LIB)
 endif
 LDFLAGS += -lm
