@@ -298,11 +298,12 @@ Compressors with versions 16.08.2016 <br>
 `turbobench [options] [file(s)]`
 
 ### General Options
-* `-eS` : `S` = compressors/groups separated by `/`. Levels can be specified after `,`. (e.g., `-ezlib,1/FAST`)
+* `-eS`  : `S` = compressors/groups separated by `/`. Levels can be specified after `,`. (e.g., `-ezlib,1/FAST`)
 * `-b#s` : `#` = blocksize {`filesize`}. max=1GB.
-* `-d#` : `#` = log2 dictionary size: 15-30 {`blocksize`}. (Only brotli, lzham, lzlib, lzma, zstd)
+* `-d#`  : `#` = log2 dictionary size: 15-30 {`blocksize`}. (Only brotli, lzham, lzlib, lzma, zstd)
 * `-B#s` : `#` = max benchmark filesize {`1GB`} (e.g., `-B4G`)
 * `-s#s` : `#` = min buffer size to duplicate & test small files (e.g., `-s50`)
+* `-r`   : process directories recursively
 
 **Size Modifiers (`s`):**
 * `K, M, G` = 1,000, 1,000,000, 1,000,000,000
@@ -314,7 +315,6 @@ Compressors with versions 16.08.2016 <br>
 * `-S#` : Sleep `#` min after 2 min processing (minimizing CPU throttling)
 * `-K#t` : Max time limit for all benchmarks {`24h`}. `t` = `M`:millisecond, `s`:second, `m`:minute, `h`:hour. (e.g., `3h`)
 * `-D` : No process real-time priority setting
-* `-r` : process directories recursively
 
 ### Check Options
 * `-C#` : `#=0` compress only, `#=1` No check, `#=2` ignore errors, `#=3` exit on error, `#=4` abort on error
