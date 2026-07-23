@@ -292,5 +292,69 @@ Compressors with versions 16.08.2016 <br>
  - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
  - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
 
-Last update: 20 JUL 2026
+# TurboBench Manual
+
+## Usage
+`turbobench [options] [file]`
+
+### General Options
+* `-eS` : `S` = compressors/groups separated by `/`. Levels can be specified after `,`. (e.g., `-ezlib,1/FAST`)
+* `-b#s` : `#` = blocksize {`filesize`}. max=1GB.
+* `-d#` : `#` = log2 dictionary size: 15-30 {`blocksize`}. (Only brotli, lzham, lzlib, lzma, zstd)
+* `-B#s` : `#` = max benchmark filesize {`1GB`} (e.g., `-B4G`)
+* `-s#s` : `#` = min buffer size to duplicate & test small files (e.g., `-s50`)
+
+**Size Modifiers (`s`):**
+* `K, M, G` = 1,000, 1,000,000, 1,000,000,000
+* `k, m, h` = 1024, 1MB, 1GB (default is `m`, e.g., `64k` or `64K`)
+
+### Benchmark Options
+* `-iX,Y` : Decompression/Compression iterations {`3`}
+* `-I#` / `-J#` : `#` = Number of de/compression iterations {`3`}
+* `-t#` : `#` = min time in seconds per iteration {`1`}
+* `-S#` : Sleep `#` min after 2 min processing (minimizing CPU throttling)
+* `-K#t` : Max time limit for all benchmarks {`24h`}. `t` = `M`:millisecond, `s`:second, `m`:minute, `h`:hour. (e.g., `3h`)
+* `-D` : No process real-time priority setting
+
+### Check Options
+* `-C#` : `#=0` compress only, `#=1` No check, `#=2` ignore errors, `#=3` exit on error, `#=4` abort on error
+* `-f#` : check reading/writing outside bounds: `#=1` compress, `#=2` decompress, `#=3` both
+
+### Output & Plotting Options
+* `-v#` : `#` = verbosity 0..3 {`1`}
+* `-rX,Y` : Show/Reveal only when compression/decompression speed > `X/Y` MB/s
+* `-kstr` : `str` = Remark/Comment string
+* `-l#` : `#=1` print all groups/plugins, `#=2` print all codecs
+* `-S#` : Plot transfer speed: 
+  * `#=1` Comp speedup
+  * `#=2` Decomp speedup
+  * `#=3` Comp 'MB/s'
+  * `#=4` Decomp 'MB/s' 
+  * `#=4` Comp+Decomp speedup
+  * `#=5` Comp+Decomp 'MB/s'
+* `-p#` : `#` = print format (`1`=text, `2`=html, `3`=htm, `4`=markdown, `5/6`=vBulletin, `7`=csv, `8`=tsv)
+* `-Q#` : `#` = Plot window size (`0`: 1920x1080, `1`: 1600x900, `2`: 1280x720, `3`: 800x600) {`1`}
+* `-g` : `-g` = no merge w/ old result 'file.tbb', `-gg` = process w/o output (use for fuzzing)
+* `-o` : Print on standard output
+* `-G` : Plot memcpy
+* `-w` : Plot Speedup linear x-axis {`log`}
+* `-z` : Plot Ratio/Speed logarithmic x-axis {`linear`}
+
+### Multiblock/Join
+*(Add `-r` for recursive)*
+* `-Moutput` : Step 1: Concatenate all input files into a single output file organized into multiple blocks
+* `-m` : Step 2: Process each block independently from the merged file created in Step 1
+* `-N` : Text files character delimiter (e.g., `-N9` for newline, 1 block/line)
+
+### Predefined Groups: (see turbobench.ini file)
+
+### Examples
+```bash
+./turbobench enwik9 -eFAST/bzip2/lzma,5,9
+./turbobench enwik9 -eFAST/OPTIMAL/bsc,0:e2 -i0
+./turbobench eECODER -k"entropy coder test"
+./turbobench enwik9 -elzma,9:fb273:lc2:lp2:t2
+```
+
+Last update: 23 JUL 2026
 
