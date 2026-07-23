@@ -555,6 +555,46 @@ enum {
     #else
 #include "c-blosc2/include/blosc2.h"
     #endif
+    
+#include "c-blosc2/include/blosc2.h"
+#include "c-blosc2/include/blosc2/filters-registry.h"
+
+#define ICC_LZ4  1
+#define ICC_ZSTD 2
+
+unsigned blosccomp(unsigned char *in, size_t inlen, unsigned char *out, unsigned outsize, unsigned codid, int codlev, unsigned esize, int filter0, int filter1, int filter2) {
+  unsigned clevel   = codid==ICC_ZSTD?((codlev+1)/2):codlev;
+  unsigned compcode = codid==ICC_LZ4?(clevel>9?BLOSC_LZ4HC:BLOSC_LZ4):BLOSC_ZSTD;
+  blosc2_schunk schunk;
+  schunk.typesize   = esize?esize:1;
+  blosc2_cparams cp = BLOSC2_CPARAMS_DEFAULTS;
+		cp.typesize = esize?esize:1;
+	    cp.compcode = compcode;                                                        //BLOSC_LZ4HC, BLOSC_LZ4, BLOSC_ZSTD, BLOSC_LZ4, BLOSC_BLOSCLZ
+		cp.clevel   = clevel<1?1:(clevel<9?clevel:9);                                  //blocksize=[1,32768[2,65536][3,131072][4,262144][5,262144][6,524288][7,524288][8,524288][9,1048576]
+		cp.nthreads = 1;
+		cp.schunk   = &schunk;
+		cp.filters[BLOSC2_MAX_FILTERS - 1] = filter0; //BLOSC_NOFILTER, BLOSC_SHUFFLE, BLOSC_BITSHUFFLE
+		cp.filters[BLOSC2_MAX_FILTERS - 2] = filter1; //BLOSC_DELTA, BLOSC_FILTER_BYTEDELTA
+		cp.filters[BLOSC2_MAX_FILTERS - 3] = filter2; //BLOSC_TRUNC_PREC
+        //cp.filters_meta[BLOSC2_MAX_FILTERS - 1] = 0;  // 0 means typesize when using schunks
+
+  blosc2_context *ctx = blosc2_create_cctx(cp);
+  int rc = blosc2_compress_ctx(ctx, in, (int)inlen, out, (int)outsize);
+  blosc2_free_ctx(ctx);
+  if(rc>inlen) { memcpy(out,in,inlen); rc = inlen; }
+  return rc;
+}
+
+unsigned bloscdecomp(unsigned char *in, size_t inlen, unsigned char *out, unsigned outlen, unsigned esize) {
+  blosc2_schunk schunk;
+  schunk.typesize     = esize?esize:1;
+  blosc2_dparams   dp = BLOSC2_DPARAMS_DEFAULTS;
+                   dp.schunk = &schunk;
+  blosc2_context *ctx = blosc2_create_dctx(dp);
+  int rc = blosc2_decompress_ctx(ctx, in, inlen, out, outlen);
+  blosc2_free_ctx(ctx);
+  return rc;
+}   
   #endif
 
   #if _CLICKHOUSE
@@ -2027,13 +2067,17 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _C_BLOSC2
-    case P_C_BLOSC2: {
-        #if _C_BLOSC2LZ
-      return blosclz_compress(lev, in, inlen, out, outsize);
-        #else
+    case P_C_BLOSC2: { char *q;
+      //  #if _C_BLOSC2LZ
+      //return blosclz_compress(lev, in, inlen, out, outsize);
+      //  #else
       blosc2_set_nthreads(threadnum);
-      return blosc1_compress(lev, strchr(prm,'s')?1:0/*doshuffle*/, (q=strchr(prm,'T'))?atoi(q+(q[1]=='='?2:1)):1/*typesize*/, inlen, in, out, outsize/*inlen+BLOSC_MAX_OVERHEAD*/);
-        #endif
+      int codid = ICC_ZSTD;
+      if((q=strchr(prm,'E')) && strcasecmp(q+(q[1]=='='?2:1), "lz4")) codid = ICC_LZ4;
+      int filter0 = strchr(prm,'B')?BLOSC_BITSHUFFLE : strchr(prm,'S')?BLOSC_SHUFFLE : strchr(prm,'D')?BLOSC_FILTER_BYTEDELTA : 0;
+      int filter1 = strchr(prm,'d')?BLOSC_DELTA : strchr(prm,'b')?BLOSC_FILTER_BYTEDELTA : strchr(prm,'s')?BLOSC_SHUFFLE:0;
+      return blosccomp(in, inlen, out, outsize, codid, lev, (q=strchr(prm,'u'))?atoi(q+(q[1]=='='?2:1)):1/*typesize*/, filter0, filter1, 0);
+      //#endif
     }
       #endif
 
@@ -3006,7 +3050,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _C_BLOSC2
-    case P_C_BLOSC2: return blosc1_decompress(in, out, outlen);
+    case P_C_BLOSC2: //return blosc1_decompress(in, out, outlen);
+      char *q; return bloscdecomp(in, inlen, out, outlen, (q=strchr(prm,'U'))?atoi(q+(q[1]=='='?2:1)):1/*typesize*/);
       #endif
 
       #if _C_BLOSC2LZ
