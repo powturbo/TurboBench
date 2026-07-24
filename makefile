@@ -315,7 +315,8 @@ endif
 ifneq ($(wildcard lzma/.),)
 CXXFLAGS+=-D_LZMA -D_7Z_TYPES_
 CFLAGS+=-D_7ZIP_ST
-OB+=$(call obj,lzma/C/Alloc.o lzma/C/CpuArch.o lzma/C/LzFind.o lzma/C/LzmaDec.o lzma/C/LzmaEnc.o lzma/C/LzmaLib.o lzma/C/Threads.o lzma/C/LzFindMt.o lzma/C/LzFindOpt.o)
+LZMA_SRCS := lzma/C/Alloc.c lzma/C/CpuArch.c lzma/C/LzFind.c lzma/C/LzmaDec.c lzma/C/LzmaEnc.c lzma/C/LzmaLib.c lzma/C/Threads.c lzma/C/LzFindMt.c lzma/C/LzFindOpt.c
+OB += $(call obj,$(LZMA_SRCS))
 endif
 
 ifneq ($(wildcard lzo/.),)
@@ -701,28 +702,41 @@ endif
 ifneq ($(wildcard Turbo-Range-Coder/.),)
 ifneq ($(ARCH),loongarch64)
 CXXFLAGS+=-D_TURBORC
-CFLAGS+=-D_ANS -D_BWT -ITurbo-Range-Coder/libsais/include 
-TRC=Turbo-Range-Coder/
-#$(BUILDIR)/$(TRC)anscdf0.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-#	@mkdir -p $(dir $@)
-#	$(CC) -c -O3 $(CFLAGS) -falign-loops=32 $(TRC)anscdf.c -o $@
-$(BUILDIR)/$(TRC)anscdfs.o: $(TRC)anscdf.c $(TRC)anscdf_.h
+TRC_DIR  := Turbo-Range-Coder
+TRC_BDIR := $(BUILDIR)/$(TRC_DIR)
+CFLAGS+=-D_ANS -D_BWT -I$(TRC_DIR)/libsais/include 
+TRC_SRCS := $(wildcard $(TRC_DIR)/*.c)
+TRC_SRCS := $(filter-out %/turborc.c, $(TRC_SRCS))
+TRC_OBJS := $(call obj,$(TRC_SRCS))
+$(TRC_BDIR)/anscdfs.o: $(TRC_DIR)/anscdf.c $(TRC_DIR)/anscdf_.h
 	@mkdir -p $(dir $@)
-	$(CC) -c -O3 $(CFLAGS) $(_SSE) -falign-loops=32 $(TRC)anscdf.c -o $@
-OB+=$(BUILDIR)/$(TRC)anscdfs.o 
-ifeq ($(ARCH), x86_64)
-$(BUILDIR)/$(TRC)anscdfx.o: $(TRC)anscdf.c $(TRC)anscdf_.h
-	@mkdir -p $(dir $@)
-	$(CC) -c -O3 $(CFLAGS) $(_AVX2) -falign-loops=32 $(TRC)anscdf.c -o $@
-OB+=$(BUILDIR)/$(TRC)anscdfx.o 
-endif
-OB+=$(call obj,Turbo-Range-Coder/rc_ss.o Turbo-Range-Coder/rc_s.o Turbo-Range-Coder/rccdf.o Turbo-Range-Coder/rcutil.o Turbo-Range-Coder/bec_b.o Turbo-Range-Coder/rccm_s.o Turbo-Range-Coder/rccm_ss.o \
-  Turbo-Range-Coder/rcqlfc_s.o Turbo-Range-Coder/rcqlfc_ss.o Turbo-Range-Coder/rcqlfc_sf.o Turbo-Range-Coder/rcbwt.o Turbo-Range-Coder/libsais/src/libsais16.o)
+	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $(TRC_DIR)/anscdf.c -o $(TRC_BDIR)/anscdfs.o
+	
+OB+=$(TRC_BDIR)/anscdfs.o $(TRC_BDIR)/cpu.o $(TRC_BDIR)/rc_ss.o $(TRC_BDIR)/rc_s.o $(TRC_BDIR)/rccdf.o $(TRC_BDIR)/rcutil.o $(TRC_BDIR)/bec_b.o $(TRC_BDIR)/rccm_s.o $(TRC_BDIR)/rccm_ss.o \
+  $(TRC_BDIR)/rcqlfc_s.o $(TRC_BDIR)/rcqlfc_ss.o $(TRC_BDIR)/rcqlfc_sf.o $(TRC_BDIR)/rcbwt.o $(TRC_BDIR)/libsais/src/libsais16.o
 
-LIBSAIS=1
-ifdef LZTURBO
-CFLAGS+=-D_NCPUISA -D_NQUANT
+ifeq ($(ARCH), x86_64)
+$(TRC_BDIR)/anscdfx.o: $(TRC_DIR)/anscdf.c $(TRC_DIR)/anscdf_.h
+	@mkdir -p $(dir $@)
+	$(CC) -O3 $(CFLAGS) $(_AVX2) -falign-loops=32 -w -c $(TRC_DIR)/anscdf.c -o $(TRC_BDIR)/anscdfx.o
+OB+=$(TRC_BDIR)/anscdfx.o	
 endif
+
+CFLAGS+=-D_NCPUISA
+
+ifdef LZTURBO
+CFLAGS+=-D_NQUANT
+else
+$(TRC_BDIR)/transpose.o: $(TRC_DIR)/transpose.c
+	$(CX) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $(TRC_DIR)/transpose.c -o $(TRC_BDIR)/transpose.o
+OB+=$(TRC_BDIR)/transpose.o $(TRC_BDIR)/transpose_.o
+ifeq ($(ARCH), x86_64)
+$(TRC_BDIR)/transpose256.o: $(TRC_DIR)/transpose.c
+	$(CX) -O3 $(CFLAGS) $(_AVX2) -w -c $(TRC_DIR)/transpose.c -o $(TRC_BDIR)/transpose256.o
+OB += $(TRC_BDIR)/transpose256.o
+endif
+endif
+
 endif
 endif
 
