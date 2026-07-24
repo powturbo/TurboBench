@@ -988,7 +988,7 @@ void plugprtth(FILE *f, int fmt) {
 
   switch(fmt) {
     case FMT_TEXT:
-      fprintf(f,"      C Size  ratio%%     C MB/s     D MB/s   SCORE      Name            File\n");
+      fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s    SCORE   Name            File\n");
       break;
     case FMT_VBULLETIN:
       fprintf(f,"[table]C Size|ratio%|C MB/s|D MB/s|Name|File (MB=1.000.0000)\n");
@@ -1042,7 +1042,8 @@ double tc_smin, td_smin; // show only if greater than
 void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, double *ptc, double *ptd, FILE *f) {
   double ratio  = RATIO(plug->len,totinlen),           //ratio  = FACTOR(plug->len,totinlen),
          tc     = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td), score = SCORE(plug->len,totinlen,plug->tc,plug->td);
-  char   name[256];
+  char   name[256], sratio[16]; 
+  strratio(ratio, sratio);
   if(tc < tc_smin) return;  if(td < td_smin) return;
   if(plug->lev != INVLEV)
     sprintf(name, "%s%s %d%s", plug->err?"?":"", plug->s, plug->lev, plug->prm);
@@ -1057,18 +1058,18 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
       if(f == stdout) {
           #ifdef _WIN32
         HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-        fprintf(f, "%12"PRId64"   %5.1f   ", plug->len, ratio);
+        fprintf(f, "%12"PRId64" %s", plug->len, sratio);
         #define BBOLD 2 //2=green, 15=white
         if(c) SetConsoleTextAttribute(h, BBOLD);
-        fprintf(f, "%8.2f   ", tc);
+        fprintf(f, "%9.2f ", tc);
         if(c) SetConsoleTextAttribute(h, 7);
 
         if(d) SetConsoleTextAttribute(h, BBOLD);
-        fprintf(f, "%8.2f   ", td);
+        fprintf(f, "%9.2f ", td);
         if(d) SetConsoleTextAttribute(h, 7);
 
         if(n) SetConsoleTextAttribute(h, BBOLD);
-        fprintf(f, "%8.2f   ", score);
+        fprintf(f, "%8.2f ", score);
         if(n) SetConsoleTextAttribute(h, 7);
 
         if(n) SetConsoleTextAttribute(h, BBOLD);
@@ -1077,47 +1078,37 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         fprintf(f, "%s\n", finame);
         #undef BBOLD
           #else
-        fprintf(f, "%12"PRId64"   %5.1f   %s%8.2f%s   %s%8.2f%s   %s%8.2f%s   %s%-16s%s%s\n",
-          plug->len, ratio, c?BOLDB:"", tc, c?BOLDE:"",  d?BOLDB:"", td, d?BOLDE:"", n?BOLDB:"", score, n?BOLDE:"", n?BOLDB:"", name, n?BOLDE:"", finame);
+        fprintf(f, "%12"PRId64" %s%s%9.2f%s %s%9.2f%s %s%8.2f%s   %s%-16s%s%s\n",
+          plug->len, sratio, c?BOLDB:"", tc, c?BOLDE:"",  d?BOLDB:"", td, d?BOLDE:"", n?BOLDB:"", score, n?BOLDE:"", n?BOLDB:"", name, n?BOLDE:"", finame);
           #endif
       }
       else
-        fprintf(f,"%12"PRId64"   %5.1f   %8.2f   %8.2f   %8.2f   %-32s %s\n", plug->len, ratio, tc, td, score, name, finame);
+        fprintf(f,"%12"PRId64" %s   %9.2f   %9.2f %8.2f   %-32s %s\n", plug->len, sratio, tc, td, score, name, finame);
       break;
     case FMT_VBULLETIN:
-      fprintf(f, "%12"PRId64"|%5.1f|%s%8.2f%s|%s%8.2f%s|%s%-16s%s|%s\n",
-        plug->len, ratio, c?"[B]":"", tc, c?"[/B]":"",  d?"[B]":"", td, d?"[/B]":"", n?"[B]":"", name, n?"[/B]":"", finame);
+      fprintf(f, "%12"PRId64"|%s|%s%9.2f%s|%s%9.2f%s|%s%-16s%s|%s\n",
+        plug->len, sratio, c?"[B]":"", tc, c?"[/B]":"",  d?"[B]":"", td, d?"[/B]":"", n?"[B]":"", name, n?"[/B]":"", finame);
       break;
     case FMT_VBULLETIN2:
-      fprintf(f, "%12"PRId64"   %5.1f   %s%8.2f%s   %s%8.2f%s   %s%-16s%s%s\n",
-        plug->len, ratio, c?"[B]":"", tc, c?"[/B]":"",  d?"[B]":"", td, d?"[/B]":"", n?"[B]":"", name, n?"[/B]":"", finame);
+      fprintf(f, "%12"PRId64" %s   %s%9.2f%s   %s%9.2f%s %s%-16s%s%s\n",
+        plug->len, sratio, c?"[B]":"", tc, c?"[/B]":"",  d?"[B]":"", td, d?"[/B]":"", n?"[B]":"", name, n?"[/B]":"", finame);
       break;
     case FMT_HTMLT:
-      fprintf(f, "%12"PRId64"   %5.1f   %s%8.2f%s   %s%8.2f%s   %s%-16s%s%s\n",
-        plug->len, ratio, c?"<b>":"", tc, c?"</b>":"",  d?"<b>":"", td, d?"</b>":"", n?"<b>":"", name, n?"</b>":"", finame);
+      fprintf(f, "%12"PRId64" %s   %s%9.2f%s   %s%9.2f%s %s%-16s%s%s\n",
+        plug->len, sratio, c?"<b>":"", tc, c?"</b>":"",  d?"<b>":"", td, d?"</b>":"", n?"<b>":"", name, n?"</b>":"", finame);
       break;
     case FMT_HTML:
-      fprintf(f, "<tr><td align=\"right\">%11"PRId64"</td><td align=\"right\">%5.1f</td><td align=\"right\">%s%8.2f%s</td><td align=\"right\">%s%8.2f%s</td><td>%s%-16s%s</td><td align=\"right\">%"PRId64"</td><td align=\"right\">%"PRId64"</td><td>%s</td></tr>\n",
-        plug->len, ratio, c?"<b>":"", tc, c?"</b>":"",  d?"<b>":"", td, d?"</b>":"", n?"<b>":"", name, n?"</b>":"",
+      fprintf(f, "<tr><td align=\"right\">%11"PRId64"</td><td align=\"right\">%s</td><td align=\"right\">%s%9.2f%s</td><td align=\"right\">%s%9.2f%s</td><td>%s%-16s%s</td><td align=\"right\">%"PRId64"</td><td align=\"right\">%"PRId64"</td><td>%s</td></tr>\n",
+        plug->len, sratio, c?"<b>":"", tc, c?"</b>":"",  d?"<b>":"", td, d?"</b>":"", n?"<b>":"", name, n?"</b>":"",
 //        SIZE_ROUNDUP(plug->memc, Kb)/Kb, SIZE_ROUNDUP(plug->memd,Kb)/Kb,
         plug->memc, plug->memd,
         finame);
       break;
     case FMT_MARKDOWN:
-      fprintf(f, "|%"PRId64"|%5.1f|%s%.2f%s|%s%.2f%s|%s%s%s|%s|\n",
-        plug->len, ratio, c?"**":"",  tc, c?"**":"",    d?"**":"",  td, d?"**":"",   n?"**":"",  name, n?"**":"",   finame);
-      break;
-    case FMT_CSV:
-      fprintf(f, "%12"PRId64",%11"PRId64",%5.1f,%8.2f,%8.2f,%-16s,%s\n",
-        totinlen, plug->len, ratio, tc, td, name, finame);
-      break;
-    case FMT_TSV:
-      fprintf(f,"%12"PRId64"\t%11"PRId64"\t%5.1f\t%8.2f\t%8.2f\t%-16s\t%s\n",
-        totinlen, plug->len, ratio, tc, td, name, finame);
-      break;
-    case FMT_SQUASH:
-      fprintf(f,"%12"PRId64",%11"PRId64",%5.1f,%8.2f,%8.2f,%-16s,%s\n",
-        finame, name, name, plug->len,        tc, tc, td, td);
+      fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%s%s%s|%s|\n", plug->len, sratio, c?"**":"",  tc, c?"**":"",    d?"**":"",  td, d?"**":"",   n?"**":"",  name, n?"**":"",   finame);  break;
+    case FMT_CSV:    fprintf(f,"%12"PRId64",%11"PRId64",%s,%9.2f,%9.2f,%-16s,%s\n",       totinlen, plug->len, sratio, tc, td, name, finame);  break;
+    case FMT_TSV:    fprintf(f,"%12"PRId64"\t%11"PRId64"\t%s\t%9.2f\t%9.2f\t%-16s\t%s\n", totinlen, plug->len, sratio, tc, td, name, finame);  break;
+    //case FMT_SQUASH: fprintf(f,"%12"PRId64",%11"PRId64",%5.1f,%9.2f,%9.2f,%-16s,%s\n",    finame, name, name, plug->len,        tc, tc, td, td);
       break;
   }
 }
@@ -1486,15 +1477,15 @@ int plugread(plug_t *plug, char *finame, unsigned long long *totinlen) {
 
 static int mcpy = 0, mode, tincx, fuzz;
 
-unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t outsize, unsigned bsize, int id, int lev, char *prm) {
+unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t outsize, unsigned bsize, int id, int lev, char *prm, char *name, char *fname) {
   unsigned char *op,*oe = _out + outsize;
   codstart(bsize, id, lev, prm, 0);
   TMBEG(tm_Rep);
     mempeakinit();
     unsigned char *in,*ip;
-    for(op = _out, in = _in; in < _in+_inlen; ) {
+    for(op = _out, in = _in; in < _in+_inlen; ) { 
       unsigned inlen, bs;
-      if(mode) {                                                        blknum++;
+      if(mode) {                                                         blknum++;
         inlen      = ctou32(in); in += 4;
         ctou32(op) = inlen; op += 4; //vbput32(op, inlen);
         if(in+inlen>_in+_inlen) inlen = (_in+_inlen)-in;
@@ -1514,9 +1505,10 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
           die("Overflow error %llu, %u in lib=%d\n", outsize, (int)(op - _out), id);
       }
     }
-  TMEND(_inlen);
+  size_t olen = op - _out;
+  TMENDC(_inlen, olen, name, fname, 0);
   end: codend(_inlen, id, lev, prm, 0);
-  return op - _out;;
+  return op - _out;
 }
 
 int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm) {
@@ -1631,13 +1623,13 @@ int getpagesize() {
 }
   #endif
 
-size_t mininlen;
+size_t mininlen; 
 
 unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filenmax, size_t bsize, plug_t *plugr, int tid, int krep) {
   size_t outsize;
   FILE   *fi = strcmp(finame,"stdin")?fopen(finame, "rb"):stdin; if(!fi) { perror(finame); return 0; /*die("open error '%s'\n", finame);*/ }
   char   *p;
-  if((p = strrchr(finame, '\\')) || (p = strrchr(finame, '/'))) finame = p+1;                   if(verbose>1) printf("'%s'\n", finame);
+  if((p = strrchr(finame, '\\')) || (p = strrchr(finame, '/'))) finame = p+1;              if(verbose>1) printf("'%s'\n", finame);
   p = finame;
 
   char name[65];
@@ -1645,14 +1637,14 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     sprintf(name, "%s %d%s", plug->s, plug->lev, plug->prm);
   else
     sprintf(name, "%s%s",    plug->s,            plug->prm);
-
+  
   long long filen;
   if(finame) {
     fseeko(fi, 0, SEEK_END); filen = ftello(fi); fseeko(fi , 0 , SEEK_SET); if(filenmax && filen > filenmax) filen = filenmax;
   } else
     filen = filenmax?filenmax:Gb;
                                                                                                 //printf("filelenmax=%llu filen=%llu bsize=%u ", filenmax, (unsigned long long)filen, (unsigned)bsize);
-  size_t insize   = filen>bsize?bsize:filen;                                                    if(filen < mininlen) insize = mininlen;
+  size_t insize   = filen>bsize?bsize:filen;                                                   if(filen < mininlen) insize = mininlen;
   size_t pagesize = getpagesize();
   size_t insizem  = (fuzz&3)?SIZE_ROUNDUP(insize, pagesize):(insize+INOVD);
 
@@ -1694,14 +1686,14 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     size_t   peak    = mempeakinit();
     unsigned *_stack = stackini();
 
-    size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm)/nb;
+    size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame)/nb;
     tc = tm_tmin(nb);
     plug->len += outlen;
     plug->tc  += tc;
     plug->memc = mempeak() - peak;
     plug->stkc = stackpeak(_stack);
     //if(tm_Rep > 1) TMSLEEP;
-                                                                          if(tm_verbose && totinlen == filen) { double ratio = (double)plug->len*100.0/totinlen; printf("%12u   %5.1f   %8.2f   ", plug->len, ratio, TMBS(totinlen,plug->tc)); fflush(stdout); }
+                                                                                //if(tm_verbose && totinlen == filen) { double ratio = (double)plug->len*100.0/totinlen; printf("%12u   %5.1f   %9.2f   ", plug->len, ratio, TMBS(totinlen,plug->tc)); fflush(stdout); }
     if(cmp) {
       unsigned char *cpz = _cpy;
       if(fuzz & 2) { cpz = (_cpy+insizem) - len;                                    /*printf("SEGFAULT Check");fflush(stdout); cpz[len-1] = cpz[len]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
@@ -1711,12 +1703,12 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
       unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm)/nb;
       td = tm_tmin(nb);
       plug->td  += td;
-      plug->memd = mempeak() - peak;                                            if(tm_verbose && totinlen == filen) printf("%8.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
+      plug->memd = mempeak() - peak;                                            //if(tm_verbose && totinlen == filen) printf("%9.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
       plug->stkd = stackpeak(_stack);
       int e = memcheck(in, len, cpz, fuzz?3:cmp, finame);
       plug->err = plug->err?plug->err:e;
       BEPOST;
-    } else                                                                      if(tm_verbose && totinlen == filen) { printf("%8.2f   %-16s %s\n", 0.0, name, finame); }
+    } //else                                                                      if(tm_verbose && totinlen == filen) { printf("%9.2f   %-16s %s\n", 0.0, name, finame); }
     if(totinlen >= filen) break;
   }                                                                          //printf("ILEN=%llu Olen=%llu c=%f d=%f\n", totinlen, plug->len, plug->tc, plug->td);
   _vfree(out, outsize);
@@ -1725,6 +1717,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     _vfree(_cpy, insizem);
   codexit(plug->id);
   fclose(fi);
+  if(verbose) { printf("\n"); fflush(stdout); }
   //if(verbose && filen > insize) plugprt(plug, totinlen, finame, FMT_TEXT, &ptc, &ptd,stdout);
   //if(memused()) printf("Mem allocated not freed null\n");
   return totinlen;
