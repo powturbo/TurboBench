@@ -568,14 +568,14 @@ unsigned blosccomp(unsigned char *in, size_t inlen, unsigned char *out, unsigned
   blosc2_schunk schunk;
   schunk.typesize   = esize?esize:1;
   blosc2_cparams cp = BLOSC2_CPARAMS_DEFAULTS;
-		cp.typesize = esize?esize:1;
-	    cp.compcode = compcode;                                                        //BLOSC_LZ4HC, BLOSC_LZ4, BLOSC_ZSTD, BLOSC_LZ4, BLOSC_BLOSCLZ
-		cp.clevel   = clevel<1?1:(clevel<9?clevel:9);                                  //blocksize=[1,32768[2,65536][3,131072][4,262144][5,262144][6,524288][7,524288][8,524288][9,1048576]
-		cp.nthreads = 1;
-		cp.schunk   = &schunk;
-		cp.filters[BLOSC2_MAX_FILTERS - 1] = filter0; //BLOSC_NOFILTER, BLOSC_SHUFFLE, BLOSC_BITSHUFFLE
-		cp.filters[BLOSC2_MAX_FILTERS - 2] = filter1; //BLOSC_DELTA, BLOSC_FILTER_BYTEDELTA
-		cp.filters[BLOSC2_MAX_FILTERS - 3] = filter2; //BLOSC_TRUNC_PREC
+        cp.typesize = esize?esize:1;
+        cp.compcode = compcode;                                                        //BLOSC_LZ4HC, BLOSC_LZ4, BLOSC_ZSTD, BLOSC_LZ4, BLOSC_BLOSCLZ
+        cp.clevel   = clevel<1?1:(clevel<9?clevel:9);                                  //blocksize=[1,32768[2,65536][3,131072][4,262144][5,262144][6,524288][7,524288][8,524288][9,1048576]
+        cp.nthreads = 1;
+        cp.schunk   = &schunk;
+        cp.filters[BLOSC2_MAX_FILTERS - 1] = filter0; //BLOSC_NOFILTER, BLOSC_SHUFFLE, BLOSC_BITSHUFFLE
+        cp.filters[BLOSC2_MAX_FILTERS - 2] = filter1; //BLOSC_DELTA, BLOSC_FILTER_BYTEDELTA
+        cp.filters[BLOSC2_MAX_FILTERS - 3] = filter2; //BLOSC_TRUNC_PREC
         //cp.filters_meta[BLOSC2_MAX_FILTERS - 1] = 0;  // 0 means typesize when using schunks
 
   blosc2_context *ctx = blosc2_create_cctx(cp);
@@ -965,6 +965,7 @@ void pco_ini() {
   #if _TURBORC
 #include "Turbo-Range-Coder/include/turborc.h"
 #include "Turbo-Range-Coder/include/anscdf.h"
+#include "Turbo-Range-Coder/include_/transpose.h"
 //#include "Turbo-Range-Coder/rcutil.h"
   #endif
 
@@ -1308,8 +1309,8 @@ unsigned ssercdec(unsigned char *in, unsigned inlen, unsigned char *out, unsigne
   sserangecoder::uint32_vec scaled_cum_prob(a+1);
   
   unsigned cum = 0,i;
-  for(i = 0; i < a; i++) scaled_cum_prob[i] = ctou16(ip), ip+=2;	
-  scaled_cum_prob[a] = (1<<SSE_BITS); 	
+  for(i = 0; i < a; i++) scaled_cum_prob[i] = ctou16(ip), ip+=2;    
+  scaled_cum_prob[a] = (1<<SSE_BITS);   
   sserangecoder::uint32_vec dec_table(a);
   sserangecoder::vrange_init_table(a, scaled_cum_prob, dec_table);
   if(!sserangecoder::vrange_decode(ip, (in+inlen) - ip, out, outlen, &dec_table[0])) return -1;  //for(int i=0; i < 100; i++)  printf("%c", out[i]);
@@ -1577,7 +1578,7 @@ struct plugs plugs[] = {
   { P_BZIP2,         "bzip2",         _BZIP2,     "Bzip2",                   "" },
   { P_BZIP3,         "bzip3",         _BZIP3,     "Bzip3",                   "" },
   
-  { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                "0,1,2,3,4,5,6,7,8,9", "", 64*1024},
+  { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                "0,1,2,3,4,5,6,7,8,9,100/SBDsd", "", 64*1024},
   { P_CHAMELEON,     "chameleon",     _CHAMELEON, "Chameleon",               "1,2" },
   { P_CSC,           "csc",           _CSC,       "CSC",                     "1,2,3,4,5" },
   { P_CLICKHOUSE,    "lz4_ch",        _CLICKHOUSE,"lz4 Clickhouse",          "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
@@ -1713,8 +1714,8 @@ struct plugs plugs[] = {
   { P_FASTHF,        "FastHF",      _FASTHF,    "Fast HF",                 "" },
   { P_FASTARI,       "FastAri",     _FASTARI,   "FastAri",                 "" },
   { P_FASTAC,        "FastAC",      _FASTAC,    "Fast AC",                 "" },
-  { P_GANSR, 	     "rygrans",	    _GANS,      "Ryg rANS",                "", "", E_ANS },
-  { P_GANSW, 	     "rygranssse",  _GANS,      "Ryg rANS",                "", "", E_ANS },
+  { P_GANSR,         "rygrans",     _GANS,      "Ryg rANS",                "", "", E_ANS },
+  { P_GANSW,         "rygranssse",  _GANS,      "Ryg rANS",                "", "", E_ANS },
   { P_JAC,           "arith_static",_JAC,       "Range Coder/J.Bonfield",  "", "", E_ANS},
   { P_FQZ0,          "fqz0",        _FQZ0,      "FQZ/PPMD Range Coder",    ""},
   { P_MARLIN,        "Marlin",      _MARLIN,    "Marlin Entropy coder",    ""},
@@ -1727,7 +1728,7 @@ struct plugs plugs[] = {
   { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",           "", "", E_ANS },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",              "" },
   { P_TORNADOHF,    "tornado_huff",_TORNADO,   "Tornado Huf",             "" },
-  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,20,56/e#s" }, 
+  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,20,56,100,101/e#s" }, 
   { P_ZLIBH,        "zlibh",       _ZLIB,      "zlib Huffmann",           "8,9,10,11,12,13,14,15,16,32" },
   { P_ZRLE,         "zlibrle",     _ZLIB,      "zlib rle",                "" },
 
@@ -1931,7 +1932,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #endif
 
       #if _LIBBSC
-    #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING)	  
+    #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING)      
     case P_LIBBSC: case P_LIBBSCC: bsc_init(BSC_MODE); bsc_st_init(BSC_MODE); break;
       #endif
 
@@ -2076,8 +2077,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       if((q=strchr(prm,'E')) && strcasecmp(q+(q[1]=='='?2:1), "lz4")) codid = ICC_LZ4;
       int filter0 = strchr(prm,'B')?BLOSC_BITSHUFFLE : strchr(prm,'S')?BLOSC_SHUFFLE : strchr(prm,'D')?BLOSC_FILTER_BYTEDELTA : 0;
       int filter1 = strchr(prm,'d')?BLOSC_DELTA : strchr(prm,'b')?BLOSC_FILTER_BYTEDELTA : strchr(prm,'s')?BLOSC_SHUFFLE:0;
-      return blosccomp(in, inlen, out, outsize, codid, lev, (q=strchr(prm,'u'))?atoi(q+(q[1]=='='?2:1)):1/*typesize*/, filter0, filter1, 0);
-      //#endif
+      int typesize = (q=strchr(prm,'u'))?atoi(q+(q[1]=='='?2:1)):1;
+      if(lev == 100) return (filter0 & BLOSC_BITSHUFFLE) ? blosc2_bitshuffle(typesize, inlen, in, out) : blosc2_shuffle(typesize, inlen, in, out);
+      return blosccomp(in, inlen, out, outsize, codid, lev, typesize, filter0, filter1, 0);
     }
       #endif
 
@@ -2092,19 +2094,19 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       return op - out;
     }
       #endif
-	  
+      
       #if _BRIEFLZ
     case P_BRIEFLZ: return blz_pack_level(in, out, inlen, workmem, lev);
       #endif
 
       #if _BROTLI
     case P_BROTLI: { 
-	  unsigned lgwin = BROTLI_DEFAULT_WINDOW, mode = BROTLI_DEFAULT_MODE; size_t esize = outsize;
+      unsigned lgwin = BROTLI_DEFAULT_WINDOW, mode = BROTLI_DEFAULT_MODE; size_t esize = outsize;
       if(q = strchr(prm,'w'))              lgwin = atoi(q+(q[1]=='='?2:1));     // window specified by local parameter w
       else if(dsize)                       lgwin = bsr32(dsize)-powof2(dsize);  // window specified by global option -d
       else if(lev < 10 || strchr(prm,'W')) lgwin = BROTLI_DEFAULT_WINDOW;       // set default=24 for lev<10
       else                               { lgwin = bsr32(inlen)-powof2(inlen); lgwin = min(lgwin,BROTLI_LARGE_MAX_WINDOW_BITS); }// set large window brotli
-      if(q = strchr(prm,'m')) mode = atoi(q+(q[1]=='='?2:1));	   	  
+      if(q = strchr(prm,'m')) mode = atoi(q+(q[1]=='='?2:1));         
                                                                             // Only for modified brotli by powturbo -------------------------------------
                                                                             brotlidic = brotlictx = brotlirep = 0;
                                                                             if(strchr(prm,'V'))      brotlidic = 1; // Disable builtin dictionary
@@ -2113,7 +2115,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
                                                                             if(strchr(prm,'x'))      brotlictx = 1; // disable order-2 lit context
                                                                             if(strchr(prm,'X'))      brotlictx = 2; // disable all lit contexts
                                                                             //-----------------------------------------------------------------------
-                                                                           //printf("BROTLI lev=%d lgwin=%d mode=%d l=%d,%d \n", lev, lgwin, mode, inlen, outsize);																			
+                                                                           //printf("BROTLI lev=%d lgwin=%d mode=%d l=%d,%d \n", lev, lgwin, mode, inlen, outsize);                                                                         
       int rc = BrotliEncoderCompress(lev, lgwin, (BrotliEncoderMode)mode, (size_t)inlen, (uint8_t*)in, &esize, (uint8_t*)out); // printf("rc=%d ", rc);
       return rc?esize:0;
     }
@@ -2282,7 +2284,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _LZAV
-	case P_LZAV: 
+    case P_LZAV: 
           return (lev == 1)?lzav_compress_default((char *)in, (char *)out, inlen, outsize):lzav_compress_hi((char *)in, (char *)out, inlen, outsize);
       #endif
 
@@ -2661,7 +2663,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
       #endif
 
-	  #if _ZXC
+      #if _ZXC
     case P_ZXC: { zxc_compress_opts_t opts = {.n_threads = threadnum, .level = lev, .checksum_enabled = 0};
       return zxc_compress_cctx(zxc_cctx_ptr, in, inlen, out, outsize, &opts);
     }
@@ -2701,7 +2703,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         case 64 : return rle64_sym_compress(in, inlen, out, outsize);
       }
       break;
-	  
+      
     case P_HRLESH: return rle8_sh_compress(in, inlen, out, outsize);
     case P_HRLEMMTF:
       switch(lev) {
@@ -2848,7 +2850,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_FSEH:    { size_t o = HUF_compress(out, outsize, in, inlen); if(o == 1) { out[0] = in[0]; return 1; } if(!o || o >= inlen) { memcpy(out, in, inlen); o = inlen; } return o;    }
       #endif
 
-	  #if _GANS
+      #if _GANS
         #ifdef __x86_64__
     case P_GANSR:   return ransrcompress(in, inlen, out);
     case P_GANSW:   return ranswcompress(in, inlen, out);
@@ -2878,7 +2880,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _JAC
     case P_JAC:  { unsigned outlen; arith_compress_O0(in, inlen, &outlen, out); return outlen; }
       #endif
-	  
+      
       #if _PPMDEC
     case P_PPMDEC:  return ppmdenc(in, inlen, out);
       #endif
@@ -2923,19 +2925,21 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         case  2: return rccsenc(   in, inlen, out); 
         case  3: return rcc2senc(  in, inlen, out);
         case  4: return rcxsenc(   in, inlen, out);
-    case  5: return rcx2senc(   in, inlen, out);
-    case  6: return z==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
-    case  7: return z==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
-    case  8: rcc2senc32(in,inlen,out);
-    case  9: return rcmsenc(    in, inlen, out);
-    case 10: return rcm2senc(   in, inlen, out);
-    case 11: return rcmrsenc(   in, inlen, out);
-    case 12: return rcmrrsenc(  in, inlen, out);
+        case  5: return rcx2senc(   in, inlen, out);
+        case  6: return z==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
+        case  7: return z==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
+        case  8: rcc2senc32(in,inlen,out);
+        case  9: return rcmsenc(    in, inlen, out);
+        case 10: return rcm2senc(   in, inlen, out);
+        case 11: return rcmrsenc(   in, inlen, out);
+        case 12: return rcmrrsenc(  in, inlen, out);
         case 13: return z==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
-    case 14: return z==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
-    case 17: return rcu3senc(   in, inlen, out);
+        case 14: return z==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
+        case 17: return rcu3senc(   in, inlen, out);
         case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
         case 56: return anscdfenc(    in, inlen, out);
+        case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpenc( in, inlen, out, esize?esize:4); return inlen; }  
+        case 101: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tp4enc(in, inlen, out, esize?esize:4); return inlen; }       
     default: return 0;
     //case 21: return utf8enc( in, inlen, out, bwtflag(1)|BWT_COPY|BWT_RATIO);
     //case 90: return lzpenc( in, inlen, out, 1, 0);
@@ -3050,8 +3054,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _C_BLOSC2
-    case P_C_BLOSC2: //return blosc1_decompress(in, out, outlen);
-      char *q; return bloscdecomp(in, inlen, out, outlen, (q=strchr(prm,'U'))?atoi(q+(q[1]=='='?2:1)):1/*typesize*/);
+    case P_C_BLOSC2: { //return blosc1_decompress(in, out, outlen);
+      int filter0 = strchr(prm,'B')?BLOSC_BITSHUFFLE : strchr(prm,'S')?BLOSC_SHUFFLE : strchr(prm,'D')?BLOSC_FILTER_BYTEDELTA : 0;
+      int typesize = (q=strchr(prm,'u'))?atoi(q+(q[1]=='='?2:1)):1;
+      if(lev == 100) return (filter0 & BLOSC_BITSHUFFLE) ? blosc2_bitunshuffle(typesize, inlen, in, out) : blosc2_unshuffle(typesize, inlen, in, out);
+      char *q; return bloscdecomp(in, inlen, out, outlen, typesize);
+    }
       #endif
 
       #if _C_BLOSC2LZ
@@ -3189,7 +3197,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _LZAV
-	case P_LZAV: return lzav_decompress(in, out, inlen, outlen);
+    case P_LZAV: return lzav_decompress(in, out, inlen, outlen);
       #endif
 
       #if _LZFSE
@@ -3202,12 +3210,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _LZJODY
     case P_LZJODY : {  
-	  unsigned options = *in & 0xc0, l = in[1],rc; l |= ((*in & 0x1f) << 8);
-	  if(l > (LZJODY_BSIZE + 4)) die("lzjody decompression header error\n" );
+      unsigned options = *in & 0xc0, l = in[1],rc; l |= ((*in & 0x1f) << 8);
+      if(l > (LZJODY_BSIZE + 4)) die("lzjody decompression header error\n" );
       if (options & O_NOCOMPRESS) { memcpy(out, in, outlen); return inlen; }
-	  rc = lzjody_decompress(in+2, out, inlen-2, 0);
-	  if(rc > LZJODY_BSIZE) die("lzjody decompression error.rc=%d\n", rc ); 
-	  return rc; }
+      rc = lzjody_decompress(in+2, out, inlen-2, 0);
+      if(rc > LZJODY_BSIZE) die("lzjody decompression error.rc=%d\n", rc ); 
+      return rc; }
       #endif
 
       #if _MEMLZ
@@ -3497,7 +3505,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
                 } else ZSTD_decompress( out, outlen, in, inlen);
       break;
       #endif
-	  
+      
       #if _ZXC
     case P_ZXC: { zxc_decompress_opts_t opts = {.n_threads = threadnum, .checksum_enabled = 0};  zxc_decompress_dctx(zxc_dctx_ptr, in, inlen, out, outlen, &opts); } break;
       #endif
@@ -3709,12 +3717,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_SHRC:    rcshd(in, out, outlen); break;
       #endif
 
-	  #if _GANS
+      #if _GANS
         #ifdef __x86_64__
     case P_GANSR:   ransrdecompress(in, outlen, out); return outlen;
     case P_GANSW:   ranswdecompress(in, outlen, out); return outlen;
         #endif
-	  #endif
+      #endif
 
       #if _SSERC
     case P_SSERC: return ssercdec(in, inlen, out, outlen);
@@ -3753,6 +3761,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         case 17 : return rcu3sdec( in, outlen, out);        
         case 20 : return rcbwtdec( in, outlen, out, bwtlev, 0);
         case 56 : return anscdfdec(in, outlen, out);
+        case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpdec( in, outlen, out, esize?esize:4); return inlen; }  
+        case 101: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tp4dec(in, outlen, out, esize?esize:4); return inlen; }       
         default: return 0;
         //case 21 : if(inlen==outlen) memcpy(out,in,outlen); else utf8dec( in, outlen, out); return outlen;
         //case 90 : if(inlen==outlen) memcpy(out,in,outlen); else lzpdec(  in, outlen, out, 1, 0); return outlen;
