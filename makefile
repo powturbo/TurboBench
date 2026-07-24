@@ -18,6 +18,9 @@ CX ?= clang
 #CX ?= gcc
 #CC = clang
 
+BUILDIR ?= build
+obj = $(addprefix $(BUILDIR)/,$(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(patsubst %.cpp,%.o,$(patsubst %.S,%.o,$(1))))))
+
 #DEBUG=-DDEBUG -g
 DEBUG=-DNDEBUG
 JAVA_HOME ?= /usr/lib/jvm/java-8-openjdk-amd64
@@ -27,8 +30,6 @@ DIRINC ?= $(PREFIX)/include
 DIRLIB ?= $(PREFIX)/lib
 SRC ?= lib/
 
-BUILDIR := build
-obj = $(addprefix $(BUILDIR)/,$(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(patsubst %.cpp,%.o,$(patsubst %.S,%.o,$(1))))))
 
 #------- OS/ARCH -------------------
 ifneq (,$(filter Windows%,$(OS)))
