@@ -3740,7 +3740,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_TURBORC: { //unsigned prm1 = 5,prm2 = 6; char *q; //if(q=strchr(prm,'r')) { prm1 = atoi(q+(q[1]=='='?2:1)); prm2 = prm1%10; prm1 = prm1/10; if(prm1>9)prm1=9;if(!prm1) prm1=1; if(prm2>9)prm2=9;if(!prm2) prm2=1; }
       unsigned bwtlev = 9,z=0;
       char *q;
-      if(inlen >= outlen) { memcpy(out,in, outlen); return inlen; }
+      if(inlen >= outlen && lev < 100) { memcpy(out,in, outlen); return inlen; }
       if(q=strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1)); 
       if(q=strchr(prm,'s')) z = 2;
       switch(lev) {
