@@ -218,8 +218,25 @@ void throttling() { return 1; }
 void sleep_cool(int sec) { int s = 4; while(throttling() && s < sec) { sleep(8); s += 8; } }
 
 //---------------------------------------- bench ----------------------------------------------------------------------
-#define TM_BACK(_n_) { for(int i=0; i < (_n_); i++) printf("\b"); fflush(stdout); }
-#define tm_tmin(nb) ((double)tm_min/((double)tm_rm*(nb)));
+static char *strratio(double r, char *s) {
+  if(r>0.1)       sprintf(s, "%6.2f%%   ", r);
+  else if(r>0.01) sprintf(s, "%7.3f%%  ",  r);
+  else            sprintf(s, "%8.4f%% ",   r);
+  return s;
+}
+
+static void pr(size_t l, size_t n) {
+  double r = (double)l*100.0/n;
+  char s[16];
+  printf("%12llu %s", l, strratio(r,s));
+  fflush(stdout);
+}
+
+#define TM_BACK(_n_) { int _n = _n_; for(int i=0; i < (_n_); i++) printf("\b"); fflush(stdout); }
+#define tm_tmin(nb)  ((double)tm_min/((double)tm_rm*(nb)));
+#define TM_PRINT(_size_,_len_,_tc_,_td_,_name_,_fname_,_mode_) { char s[16]; double r = (double)(_len_)*100.0/(_size_);\
+  printf("%12llu %s %*.*f                     %-16s%s", _len_, strratio(r, s), TM_FWIDTH,TM_FPRE, TMBS(_size_, _tc_), _name_, _fname_); TM_BACK((_mode_?22:32)+strlen(_fname_) ); fflush(stdout);\
+}
 
 /* - 1st iteration: break the loop after tm_tx=1 sec, calculate a new repeats 'tm_rm' to avoid calling time() after each function call.\
      set min time, recalculate repeats tm_rm based on tm_tx, recalculate number of runs based on tm_TX
@@ -229,14 +246,28 @@ void sleep_cool(int sec) { int s = 4; while(throttling() && s < sec) { sleep(8);
   for(tm_rm = tm_rep, tm_min = DBL_MAX, _tm_R = 0; _tm_R < _tm_Rn; _tm_R++) { tm_t _tm_t0 = tminit();\
     for(_tm_r = 0; _tm_r < tm_rm;) {
 
-#define TMEND(_size_) ;\
-      _tm_r++; if(tm_min == DBL_MAX && (_tm_d = tmdiff(_tm_t0, tmtime())) > tm_tx) { tm_rm = _tm_r; _tm_Rn = tm_TX/_tm_d; _tm_Rn = _tm_Rn<_tm_Rx?_tm_Rn:_tm_Rx; }\
+#define TMENDC(_size_,_len_,_name_,_fname_, _mode_)  _tm_r++; \
+      if(tm_min == DBL_MAX && (_tm_d = tmdiff(_tm_t0, tmtime())) > tm_tx) { \
+        tm_rm = _tm_r; _tm_Rn = tm_TX/_tm_d; _tm_Rn = _tm_Rn<_tm_Rx?_tm_Rn:_tm_Rx; if(tm_verbose > 1) TM_PRINT(_size_,_len_,(_tm_d/tm_rm), 0.1, _name_, _fname_, _mode_);\
+      }\
     }\
     if((_tm_d = tmdiff(_tm_t0, tmtime())) < tm_min) { tm_min = _tm_d; _tm_c++; _tm_i = 0; } /*else if(_tm_d > tm_min*1.30) sleep_cool(8);*/\
-    if(tm_verbose>1)    { printf("%*.*f %2d_%.2d\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b", TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm),_tm_R+1,_tm_c); fflush(stdout); }\
-    else if(tm_verbose) { printf("%*.*f         ",                               TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm));               fflush(stdout); }\
+    if(tm_verbose>1)    { printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%*.*f%3d.%.2d", TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm),_tm_R+1,_tm_c>99?99:_tm_c); fflush(stdout); }\
+    else if(tm_verbose) { printf("%*.*f         ",                              TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm));               fflush(stdout); }\
     if(++_tm_i >= 16 || _tm_d >= 60) break; if((_tm_R & 7)==7) sleep_cool(tm_slp);\
   }\
+  if(tm_verbose>1) { printf("\b\b\b\b\b\b                "); fflush(stdout); }\
+}
+
+#define TMEND(_size_) _tm_r++;\ 
+      if(tm_min == DBL_MAX && (_tm_d = tmdiff(_tm_t0, tmtime())) > tm_tx) { tm_rm = _tm_r; _tm_Rn = tm_TX/_tm_d; _tm_Rn = _tm_Rn<_tm_Rx?_tm_Rn:_tm_Rx; }\
+    }\
+    if((_tm_d = tmdiff(_tm_t0, tmtime())) < tm_min) { tm_min = _tm_d; _tm_c++; _tm_i = 0; } /*else if(_tm_d > tm_min*1.30) sleep_cool(8);*/\
+    if(tm_verbose>1)    { printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%*.*f%3d.%.2d", TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm),_tm_R+1,_tm_c>99?99:_tm_c); fflush(stdout); }\
+    else if(tm_verbose) { printf("%*.*f         ",                              TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm));               fflush(stdout); }\
+    if(++_tm_i >= 16 || _tm_d >= 60) break; if((_tm_R & 7)==7) sleep_cool(tm_slp);\
+  }\
+  if(tm_verbose>1) { printf("\b\b\b\b\b\b      \b\b\b\b"); fflush(stdout); }\
 }
 
 #define TM(_name_, _efunc_, _size_, _len_, _dfunc_) do {\
@@ -261,17 +292,9 @@ void sleep_cool(int sec) { int s = 4; while(throttling() && s < sec) { sleep(8);
   if(tm_verbose) { printf("%s ", _name_?_name_:#_efunc_); fflush(stdout); }\
 } while(0)
 
-static void pr(size_t l, size_t n) {
-  double r = (double)l*100.0/n;
-  if(r>0.1)       printf("%11llu %6.2f%%   ", l, r);
-  else if(r>0.01) printf("%11llu %7.3f%%  ",  l, r);
-  else            printf("%11llu %8.4f%% ",   l, r); fflush(stdout);
-}
-
 static unsigned tm_rep = 1u<<30, tm_Rep = 3, tm_Rep2 = 3, tm_rm, tm_RepMin = 1, tm_slp = 24, tm_verbose = 2, itempr;
 static tm_t tm_0, tm_T;
 static double tm_min, tm_tx = 1.0*TM_M, tm_TX = 60.0*TM_M;
-
 static void tm_init(int _tm_Rep, int _tm_verbose) { tm_verbose = _tm_verbose; if(_tm_Rep) tm_Rep = _tm_Rep; /*itemper = temperature();*/ }
 
 //----------------------------------------------------------------------------------------------------------------------------------
