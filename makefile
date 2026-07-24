@@ -722,8 +722,6 @@ $(TRC_BDIR)/anscdfx.o: $(TRC_DIR)/anscdf.c $(TRC_DIR)/anscdf_.h
 OB+=$(TRC_BDIR)/anscdfx.o	
 endif
 
-CFLAGS+=-D_NCPUISA
-
 ifdef LZTURBO
 CFLAGS+=-D_NQUANT
 else
