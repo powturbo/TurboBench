@@ -211,7 +211,7 @@ Compressors with versions 16.08.2016 <br>
  - [misa77](https://github.com/welcome-to-the-sunny-side/misa77) :new:2026.07
  - [ms-compress](https://github.com/coderforlife/ms-compress) 
  - [Nakamichi Washigan](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188)
- - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64) : [Oodle Library download](https://github.com/WorkingRobot/OodleUE)
+ - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
  - [OpnZL](https://github.com/facebook/openzl)  :new:2026.07 
  - [Pcodec](https://github.com/pcodec/pcodec) :new:2026.07
  - [Pithy](https://github.com/johnezang/pithy) 
