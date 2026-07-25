@@ -42,7 +42,7 @@ jobs:
           
           # Add and commit the submodule changes
           git add .
-          git commit -m "chore: auto-update submodules"
+          git commit -m "$(date +'%Y.%m.%d')"
           
           # Generate the tag name
           TAG_NAME="v$(date +'%Y.%m.%d')"
