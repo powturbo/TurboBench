@@ -382,7 +382,7 @@ ifdef CROSS
 #	cmake -S openzl -B $(BUILDIR)/openzl -DCMAKE_C_COMPILER=$(CROSS)-linux-gnu-gcc -DCMAKE_CXX_COMPILER=$(CROSS)-linux-gnu-g++
 #	cmake --build $(BUILDIR)/openzl --config Release 
 else
-CXXFLAGS += -D_OPENZL -Iopenzl/include
+CXXFLAGS += -D_OPENZL -Iopenzl/include -Iopenzl/src
 ifeq ($(OS), Windows)
 OPENZL_LIB = openzl/libopenzl.a
 $(OPENZL_LIB): $(OPENZL_SRCS)
