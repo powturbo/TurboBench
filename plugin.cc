@@ -240,6 +240,7 @@ enum {
  P_OPENZL_GENERIC,
  P_OPENZL_ZSTD,
  P_OPENZL_LZ4,
+ P_OPENZL_TP,
 
 #ifndef _PCODEC
 #define _PCODEC 0
@@ -1061,7 +1062,10 @@ int vsrc_reverse(unsigned char * src, unsigned char * dst, size_t src_size);
   #if _OPENZL  // Adapted from lzbench
 #include "openzl/include/openzl/openzl.h"
 #include "openzl/include/openzl/codecs/zl_segmenters.h"
-
+#include "openzl/include/openzl/openzl.h"
+#include "openzl/src/openzl/codecs/transpose/decode_transpose_kernel.h"
+#include "openzl/src/openzl/codecs/transpose/encode_transpose_kernel.h"
+#include "openzl/src/openzl/shared/portability.h"
 #define OPENZL_FORMAT_VERSION 24
 #define WINDOWLOG_OPENZL      27
 typedef struct {
@@ -1647,6 +1651,7 @@ struct plugs plugs[] = {
   { P_OPENZL_GENERIC,"openzl_generic",_OPENZL,    "openzl generic",   "" },
   { P_OPENZL_ZSTD,   "openzl_zstd",   _OPENZL,    "openzl zstd",      "1,2,3,4,5,6,8,10,12,14,16,18,20,22,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99" },
   { P_OPENZL_LZ4,    "openzl_lz4",    _OPENZL,    "openzl lz4",       "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99" }, 
+  { P_OPENZL_TP,     "openzl_tp",     _OPENZL,    "openzl transpose", "2,4,8" },
 
   { P_PCODECI8,      "pcodec_i8",     _PCODEC,    "pcodec_i8",        "0,1,2,3,4,5,6,7,8,9" },
   { P_PCODECU8,      "pcodec_u8",     _PCODEC,    "pcodec_u8",        "0,1,2,3,4,5,6,7,8,9" },
@@ -2459,6 +2464,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_OPENZL_GENERIC:{ char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_generic(            inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;} break;
     case P_OPENZL_ZSTD:   { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_zstd(               inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;} break;
     case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_lz4(                inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;} break;
+    case P_OPENZL_TP :    ZS_transposeEncode(out, in, inlen / lev, lev);  return inlen;  
       #endif
 
       #if _OODLE
@@ -2480,6 +2486,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _PCODEC
     case P_PCODECI8:  if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_I8,  &config, out, outsize, &w); return w; } break;
     case P_PCODECU8:  if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_U8,  &config, out, outsize, &w); return w; } break;
+    
     case P_PCODECI16: if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/2, PCO_TYPE_I16, &config, out, outsize, &w); return w; } break;
     case P_PCODECU16: if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/2, PCO_TYPE_U16, &config, out, outsize, &w); return w; } break;
     case P_PCODECF16: if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/2, PCO_TYPE_F16, &config, out, outsize, &w); return w; } break;
@@ -3329,7 +3336,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_OPENZL_GENERIC:{ char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_generic(             inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;} 
     case P_OPENZL_ZSTD:   { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_zstd(                inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
     case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_lz4(                 inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-      #endif
+    case P_OPENZL_TP :    ZS_transposeDecode(out, in, inlen / lev, lev);  return inlen;
+       #endif
 
       #if _PCODEC
     case P_PCODECI8:  if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_I8,  out, outlen, &w); return w; } break;
