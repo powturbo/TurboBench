@@ -10,7 +10,7 @@
 
 # TurboBench: The Ultimate Data Compression Benchmark
 
-**>100 Codecs in One Powerful Executable** — *The Compression Lie Detector*
+**100+ Codecs. The Powerhouse in a Single Executable** — *The Compression Lie Detector*
 
 Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttling? **TurboBench** delivers **high-precision, zero-overhead results** you can actually trust.
 
@@ -21,6 +21,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - Supports **multiple files**, recursive directories, and smart concatenation of small files into multiblock tests.
 - Built to avoid common pitfalls like cache scenarios and throttling found in other tools.
 - Automatic sorting, updating, and merging of result files.
+- A **nightly github release** is created automatically whenever submodules change.
 
 ## Broad Platform Support
 
@@ -31,7 +32,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - Text, HTML, CSV, Markdown.
 - :sparkles: **Transfer speed sheets** for real-world scenarios: GPRS, 2G/3G/4G/5G, DSL, Network, HDD, SSD, RAM.
 - :+1: **HTML plots**: Speedup + Speed/Ratio.
-- :new:2026.07 :+1: **Automatic SVG Bar & Scatter Charts** (2026.07) for Compression, Decompression, and Ratio.
+- :new:2026.07 :+1: **Automatic SVG Bar & Scatter Charts** for Compression, Decompression, and Ratio.
 - Built-in **peak memory usage** reporting (compression + decompression) in HTML output.
 
 **All-in-one executable** — no Python, no extra graphic libraries, no hassle. Just download, run, and benchmark.
@@ -355,5 +356,5 @@ Compressors with versions 16.08.2016 <br>
 ./turbobench enwik9 -elzma,9:fb273:lc2:lp2:t2
 ```
 
-Last update: 23 JUL 2026
+Last update: 28 JUL 2026
 
