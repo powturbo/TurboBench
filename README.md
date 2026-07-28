@@ -35,7 +35,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - :new:2026.07 :+1: **Automatic SVG Bar & Scatter Charts** for Compression, Decompression, and Ratio.
 - Built-in **peak memory usage** reporting (compression + decompression) in HTML output.
 
-**All-in-one executable** — no Python, no extra graphic libraries, no hassle. Just download, run, and benchmark.
+**All-in-one executable** — no Python, no extra graphic libraries, zero dependencies, zero installers, zero configuration, no hassle. Just download, run, and benchmark.
 
 **Perfect for developers, researchers, and performance enthusiasts** who demand accurate, apples-to-apples comparisons.
 
