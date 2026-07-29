@@ -43,11 +43,14 @@
   #ifndef _WIN32
 #include <sys/resource.h>
   #endif
-#ifdef __APPLE__
+  
+  #ifdef __APPLE__
 #include <sys/malloc.h>
-#else
+#define malloc_usable_size(p) malloc_size(p)  
+  #else
 #include <malloc.h>
-#endif
+  #endif
+
   #ifdef _MSC_VER
 #include "vs/getopt.h"
   #else
@@ -183,7 +186,10 @@ void mem_sub(size_t size) {
     mem_used -= size;
 }
 
+#define _POSIX_C_SOURCE 200809L
+#define _DARWIN_C_SOURCE
 #include <dlfcn.h>
+
 static ALIGNED(char, mem_heap[1<<20],32);
 static char *mem_heapp = mem_heap;
 
