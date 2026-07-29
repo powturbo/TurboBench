@@ -304,33 +304,27 @@ size_t stackpeak(stack_paint_t paint) {
 
 #elif defined(__linux__)
 #include <pthread.h>
-
-typedef unsigned *stack_paint_t;
-
+typedef unsigned* stack_paint_t;
 static unsigned *g_stack_lo;   /* lowest usable address                */
 static unsigned *g_stack_hi;   /* one-past the highest usable address  */
 
-unsigned *stackini(void) {
+NOINLINE unsigned *stackini(void) {
   pthread_attr_t attr;
   void           *addr;
   size_t         size;
-
   if(pthread_getattr_np(pthread_self(), &attr)) return NULL;
   if(pthread_attr_getstack(&attr, &addr, &size)) {
     pthread_attr_destroy(&attr);
     return NULL;
   }
   pthread_attr_destroy(&attr);
-
   g_stack_lo = (unsigned *)addr;
   g_stack_hi = (unsigned *)((unsigned char *)addr + size);
-
-  volatile unsigned guard;  // Never paint above our own current position - that would clobber live data / return addresses that are still in use.
+  volatile unsigned guard;  
   unsigned          *from = (unsigned *)&guard;
   if(from > g_stack_hi) from = g_stack_hi;
-  // Walk DOWN one word at a time so the kernel can transparently extend the stack mapping as each new page is first touched never jump straight to a far address in a single store.
-  volatile unsigned *sp = from - 1;
-  while(sp >= g_stack_lo) *sp-- = STACK_MAGIC;
+  volatile unsigned *sp = from;
+  while(sp > g_stack_lo) *--sp = STACK_MAGIC;
   return g_stack_lo;
 }
 
@@ -343,6 +337,7 @@ size_t stackpeak(unsigned *base) {
 #else
 #define stackini() 0
 #define stackpeak(base) 0
+typedef unsigned *stack_paint_t;
 #endif
 
 
