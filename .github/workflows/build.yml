@@ -69,7 +69,7 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
-          install: git make cmake rsync mingw-w64-x86_64-gcc
+          install: git cat make cmake rsync mingw-w64-x86_64-gcc
           update: true
       - run: git submodule update --init --recursive
 #      - name: Patch c-blosc2 merge_static_libs.cmake for Windows/MSYS2
@@ -80,5 +80,5 @@ jobs:
       - run: make STATIC=1
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -V0
-      - run: type *.tbb
+      - run: cat *.tbb
 
