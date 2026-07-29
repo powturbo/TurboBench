@@ -340,7 +340,6 @@ size_t stackpeak(unsigned *base) {
 typedef unsigned *stack_paint_t;
 #endif
 
-
 //----------------------------------------------------------------------------------------------------------------
 #include <sys/stat.h>
 #include <dirent.h>
