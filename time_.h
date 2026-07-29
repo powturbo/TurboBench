@@ -235,7 +235,7 @@ static void pr(size_t l, size_t n) {
 #define TM_BACK(_n_) { int _n = _n_; for(int i=0; i < (_n_); i++) printf("\b"); fflush(stdout); }
 #define tm_tmin(nb)  ((double)tm_min/((double)tm_rm*(nb)));
 #define TM_PRINT(_size_,_len_,_tc_,_td_,_name_,_fname_,_mode_) { char s[16]; double r = (double)(_len_)*100.0/(_size_);\
-  printf("%12llu %s %*.*f                     %-16s%s", _len_, strratio(r, s), TM_FWIDTH,TM_FPRE, TMBS(_size_, _tc_), _name_, _fname_); TM_BACK((_mode_?22:32)+strlen(_fname_) ); fflush(stdout);\
+  printf("%12llu %s %*.*f                     %-16s%s", _len_, strratio(r, s), TM_FWIDTH,TM_FPRE, TMBS(_size_, _tc_), _name_, _fname_); TM_BACK((_mode_?23:33)+strlen(_fname_) ); fflush(stdout);\
 }
 
 /* - 1st iteration: break the loop after tm_tx=1 sec, calculate a new repeats 'tm_rm' to avoid calling time() after each function call.\
@@ -252,7 +252,7 @@ static void pr(size_t l, size_t n) {
       }\
     }\
     if((_tm_d = tmdiff(_tm_t0, tmtime())) < tm_min) { tm_min = _tm_d; _tm_c++; _tm_i = 0; } /*else if(_tm_d > tm_min*1.30) sleep_cool(8);*/\
-    if(tm_verbose>1)    { printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%*.*f%3d.%.2d", TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm),_tm_R+1,_tm_c>99?99:_tm_c); fflush(stdout); }\
+    if(tm_verbose>1)    { printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b%*.*f%3d-%1d", TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm), (_tm_R+1)>9?9:(_tm_R+1), _tm_c>99?99:_tm_c); fflush(stdout); }\
     else if(tm_verbose) { printf("%*.*f         ",                              TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm));               fflush(stdout); }\
     if(++_tm_i >= 16 || _tm_d >= 60) break; if((_tm_R & 7)==7) sleep_cool(tm_slp);\
   }\
@@ -263,11 +263,11 @@ static void pr(size_t l, size_t n) {
       if(tm_min == DBL_MAX && (_tm_d = tmdiff(_tm_t0, tmtime())) > tm_tx) { tm_rm = _tm_r; _tm_Rn = tm_TX/_tm_d; _tm_Rn = _tm_Rn<_tm_Rx?_tm_Rn:_tm_Rx; }\
     }\
     if((_tm_d = tmdiff(_tm_t0, tmtime())) < tm_min) { tm_min = _tm_d; _tm_c++; _tm_i = 0; } /*else if(_tm_d > tm_min*1.30) sleep_cool(8);*/\
-    if(tm_verbose>1)    { printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b%*.*f%3d.%.2d", TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm),_tm_R+1,_tm_c>99?99:_tm_c); fflush(stdout); }\
+    if(tm_verbose>1)    { printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b%*.*f%3d-%1d", TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm), (_tm_R+1)>9?9:(_tm_R+1),_tm_c>99?99:_tm_c); fflush(stdout); }\
     else if(tm_verbose) { printf("%*.*f         ",                              TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm));               fflush(stdout); }\
     if(++_tm_i >= 16 || _tm_d >= 60) break; if((_tm_R & 7)==7) sleep_cool(tm_slp);\
   }\
-  if(tm_verbose>1) { printf("\b\b\b\b\b\b      \b\b\b\b"); fflush(stdout); }\
+  if(tm_verbose>1) { printf("\b\b\b\b\b      \b\b\b\b"); fflush(stdout); }\
 }
 
 #define TM(_name_, _efunc_, _size_, _len_, _dfunc_) do {\
