@@ -249,19 +249,42 @@ void free(void *p) {
 }
 
 #define STACK_MAGIC  0x79a53fb6
-static const size_t STACK_SIZE = ((1024*1024*7)/sizeof(unsigned));
+#define STACK_SIZE   ((1024 * 1024 * 7) / sizeof(unsigned))
+
+#include <pthread.h>
+static unsigned *g_stack_lo;   /* lowest usable address                */
+static unsigned *g_stack_hi;   /* one-past the highest usable address  */
 
 unsigned *stackini(void) {
-  unsigned _sp[STACK_SIZE],*sp = _sp;
-  while(sp < &_sp[STACK_SIZE]) *sp++ = STACK_MAGIC;
-  return _sp;
+  pthread_attr_t attr;
+  void           *addr;
+  size_t         size;
+
+  if (pthread_getattr_np(pthread_self(), &attr) != 0) return NULL;
+   if (pthread_attr_getstack(&attr, &addr, &size) != 0) {
+     pthread_attr_destroy(&attr);
+     return NULL;
+  }
+  pthread_attr_destroy(&attr);
+
+  g_stack_lo = (unsigned *)addr;
+  g_stack_hi = (unsigned *)((unsigned char *)addr + size);
+
+  // Never paint above our own current position - that would clobber live data / return addresses that are still in use.   
+  volatile unsigned guard;
+  unsigned *from = (unsigned *)&guard;
+  if(from > g_stack_hi) from = g_stack_hi;
+  // Walk DOWN one word at a time so the kernel can transparently extend the stack mapping as each new page is first touched never jump straight to a far address in a single store.  
+  volatile unsigned *sp = from - 1;
+  while (sp >= g_stack_lo) *sp-- = STACK_MAGIC;
+  return g_stack_lo;
 }
 
-size_t stackpeak(unsigned *_sp) {
-  unsigned *sp = _sp;
-  if(!_sp) return 0;
-  while(sp < &_sp[STACK_SIZE] && *sp == STACK_MAGIC) sp++;
-  return (sp - _sp)*sizeof(unsigned);
+size_t stackpeak(unsigned *base) {
+  unsigned *p = base;
+  if(!base || !g_stack_hi) return 0;
+  while (p < g_stack_hi && *p == STACK_MAGIC) p++;
+  return (size_t)(g_stack_hi - p) * sizeof(unsigned);
 }
 #endif
 
@@ -1684,7 +1707,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
       }
     }
     size_t   peak    = mempeakinit();
-    unsigned *_stack = stackini();
+    unsigned *_stack = stackini();  if(!_stack) die("&STACK NULL");
 
     size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame)/nb;
     tc = tm_tmin(nb);
