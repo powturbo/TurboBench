@@ -206,9 +206,11 @@ static __attribute__((constructor)) void mem_init(void) {
   mem_realloc  = dlsym(RTLD_NEXT, "realloc");
   mem_free     = dlsym(RTLD_NEXT, "free"   );
   mem_calloc   = dlsym(RTLD_NEXT, "calloc" );
-  mem_memalign = dlsym(RTLD_NEXT, "memalign");
   mem_posix_memalign = dlsym(RTLD_NEXT, "posix_memalign");
 
+    #ifndef __APPLE__
+  mem_memalign = dlsym(RTLD_NEXT, "memalign");
+    #endif
   if(!mem_malloc || !mem_calloc || !mem_realloc || !mem_free)
     die("malloc not found. mem_malloc:%d mem_calloc:%d mem_realloc:%d mem_free:%d\n", mem_malloc?1:0, mem_calloc?1:0, mem_realloc?1:0, mem_free?1:0);
 }
@@ -255,7 +257,7 @@ int posix_memalign(void **ret, size_t nmemb, size_t size) {
   size_t _size = nmemb*size;
 
   mem_add(_size);
-  void *p = (*mem_memalign)(nmemb, size);
+  void *p = (*posix_memalign)(nmemb, size);
   if(p)
     mem_add(malloc_usable_size(p));
   *ret = p;
