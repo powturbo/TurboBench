@@ -257,7 +257,7 @@ int posix_memalign(void **ret, size_t nmemb, size_t size) {
   size_t _size = nmemb*size;
 
   mem_add(_size);
-  void *p = (*posix_memalign)(nmemb, size);
+  void *p = (*posix_memalign)(nmemb, nmemb, size);
   if(p)
     mem_add(malloc_usable_size(p));
   *ret = p;
