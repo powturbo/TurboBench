@@ -49,7 +49,7 @@ jobs:
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0
-      - run: cat turbobench.tbb
+      - run: cat turbobench.exe.tbb
 
   windows:
     runs-on: windows-latest
