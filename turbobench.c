@@ -210,7 +210,7 @@ static __attribute__((constructor)) void mem_init(void) {
   mem_posix_memalign = dlsym(RTLD_NEXT, "posix_memalign");
 
   if(!mem_malloc || !mem_calloc || !mem_realloc || !mem_free || !mem_memalign)
-    die("malloc not found\n");
+    die("malloc not found. mem_malloc:%d mem_calloc:%d mem_realloc:%d mem_free:%d mem_memalign:%d\n", mem_malloc?1:0, mem_calloc?1:0, mem_realloc?1:0, mem_free?1:0, mem_memalign?1:0);
 }
 
 void *malloc(size_t size) {
