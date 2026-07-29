@@ -248,9 +248,28 @@ void free(void *p) {
   (*mem_free)(p);
 }
 
-#define STACK_MAGIC  0x79a53fb6
-#define STACK_SIZE   ((1024 * 1024 * 7) / sizeof(unsigned))
+#define STACK_MAGIC  0x79a53fb6u
 
+#if 0
+#ifndef STACK_PAINT_WORDS
+#define STACK_PAINT_WORDS  ((1024 * 1024) / sizeof(unsigned))   /* 1 MiB */
+#endif
+NOINLINE unsigned *stackini(void) {
+  volatile unsigned marker = 0;
+  unsigned *p = (unsigned *)(uintptr_t)&marker;
+  for (size_t i = 0; i < STACK_PAINT_WORDS; i++) *--p = STACK_MAGIC;
+  return p;
+}
+
+size_t stackpeak(unsigned *bottom) {
+  if (!bottom) return 0;
+  unsigned *p = bottom;
+  const unsigned *limit = bottom + STACK_PAINT_WORDS;
+  while (p < limit && *p == STACK_MAGIC) ++p;
+  size_t used_words = (size_t)(p - bottom);   if(!used_words) die("stack 0");
+  return used_words * sizeof(unsigned);
+}
+#else
 #include <pthread.h>
 static unsigned *g_stack_lo;   /* lowest usable address                */
 static unsigned *g_stack_hi;   /* one-past the highest usable address  */
@@ -260,23 +279,22 @@ unsigned *stackini(void) {
   void           *addr;
   size_t         size;
 
-  if (pthread_getattr_np(pthread_self(), &attr) != 0) return NULL;
-   if (pthread_attr_getstack(&attr, &addr, &size) != 0) {
-     pthread_attr_destroy(&attr);
-     return NULL;
+  if(pthread_getattr_np(pthread_self(), &attr)) return NULL;
+  if(pthread_attr_getstack(&attr, &addr, &size)) {
+    pthread_attr_destroy(&attr);
+    return NULL;
   }
   pthread_attr_destroy(&attr);
 
   g_stack_lo = (unsigned *)addr;
   g_stack_hi = (unsigned *)((unsigned char *)addr + size);
 
-  // Never paint above our own current position - that would clobber live data / return addresses that are still in use.   
-  volatile unsigned guard;
-  unsigned *from = (unsigned *)&guard;
+  volatile unsigned guard;  // Never paint above our own current position - that would clobber live data / return addresses that are still in use.
+  unsigned          *from = (unsigned *)&guard;
   if(from > g_stack_hi) from = g_stack_hi;
-  // Walk DOWN one word at a time so the kernel can transparently extend the stack mapping as each new page is first touched never jump straight to a far address in a single store.  
+  // Walk DOWN one word at a time so the kernel can transparently extend the stack mapping as each new page is first touched never jump straight to a far address in a single store.
   volatile unsigned *sp = from - 1;
-  while (sp >= g_stack_lo) *sp-- = STACK_MAGIC;
+  while(sp >= g_stack_lo) *sp-- = STACK_MAGIC;
   return g_stack_lo;
 }
 
@@ -286,6 +304,7 @@ size_t stackpeak(unsigned *base) {
   while (p < g_stack_hi && *p == STACK_MAGIC) p++;
   return (size_t)(g_stack_hi - p) * sizeof(unsigned);
 }
+#endif
 #endif
 
 //----------------------------------------------------------------------------------------------------------------
@@ -1065,7 +1084,7 @@ double tc_smin, td_smin; // show only if greater than
 void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, double *ptc, double *ptd, FILE *f) {
   double ratio  = RATIO(plug->len,totinlen),           //ratio  = FACTOR(plug->len,totinlen),
          tc     = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td), score = SCORE(plug->len,totinlen,plug->tc,plug->td);
-  char   name[256], sratio[16]; 
+  char   name[256], sratio[16];
   strratio(ratio, sratio);
   if(tc < tc_smin) return;  if(td < td_smin) return;
   if(plug->lev != INVLEV)
@@ -1506,7 +1525,7 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
   TMBEG(tm_Rep);
     mempeakinit();
     unsigned char *in,*ip;
-    for(op = _out, in = _in; in < _in+_inlen; ) { 
+    for(op = _out, in = _in; in < _in+_inlen; ) {
       unsigned inlen, bs;
       if(mode) {                                                         blknum++;
         inlen      = ctou32(in); in += 4;
@@ -1646,7 +1665,7 @@ int getpagesize() {
 }
   #endif
 
-size_t mininlen; 
+size_t mininlen;
 
 unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filenmax, size_t bsize, plug_t *plugr, int tid, int krep) {
   size_t outsize;
@@ -1660,7 +1679,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     sprintf(name, "%s %d%s", plug->s, plug->lev, plug->prm);
   else
     sprintf(name, "%s%s",    plug->s,            plug->prm);
-  
+
   long long filen;
   if(finame) {
     fseeko(fi, 0, SEEK_END); filen = ftello(fi); fseeko(fi , 0 , SEEK_SET); if(filenmax && filen > filenmax) filen = filenmax;
@@ -1707,7 +1726,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
       }
     }
     size_t   peak    = mempeakinit();
-    unsigned *_stack = stackini();  if(!_stack) die("&STACK NULL");
+    unsigned *_stack = stackini();
 
     size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame)/nb;
     tc = tm_tmin(nb);
@@ -1715,8 +1734,6 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     plug->tc  += tc;
     plug->memc = mempeak() - peak;
     plug->stkc = stackpeak(_stack);
-    //if(tm_Rep > 1) TMSLEEP;
-                                                                                //if(tm_verbose && totinlen == filen) { double ratio = (double)plug->len*100.0/totinlen; printf("%12u   %5.1f   %9.2f   ", plug->len, ratio, TMBS(totinlen,plug->tc)); fflush(stdout); }
     if(cmp) {
       unsigned char *cpz = _cpy;
       if(fuzz & 2) { cpz = (_cpy+insizem) - len;                                    /*printf("SEGFAULT Check");fflush(stdout); cpz[len-1] = cpz[len]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
@@ -1931,19 +1948,19 @@ int main(int argc, char* argv[]) {
     int i=0;
     if(!*scmd) break;
     if(q = strchr(scmd,'/')) *q = '\0';
-      FILE *fi = fopen("turbobench.ini", "r");
-      if(fi) {
-    char ss[LSIZE+1];
-    while(fgets(ss, LSIZE, fi)) {
+    FILE *fi = fopen("turbobench.ini", "r");
+    if(fi) {
+      char ss[LSIZE+1];
+      while(fgets(ss, LSIZE, fi)) {
         char *t = ss,*u;
         while(isspace(*t)) t++; u = t; while(isalnum(*u) || ispunct(*u)) u++; *u = 0;
         if(!strcmp(scmd, t)) {
-      for(t = ++u; isspace(*t); t++);
-      u = t; while(isalnum(*u) || ispunct(*u)) u++; *u = 0;
+          for(t = ++u; isspace(*t); t++);
+          u = t; while(isalnum(*u) || ispunct(*u)) u++; *u = 0;
           strcat(s, "/ON/");
           strcat(s, t);
           strcat(s, "/OFF/");
-      i = 1;
+          i = 1;
           break;
         }
       }
