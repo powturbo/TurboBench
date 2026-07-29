@@ -144,20 +144,28 @@ void _vfree(void *p, size_t size) {
 #define mempeakinit() 0
 #define mempeak() 0
   #elif defined(_WIN32)
+//  #include <windows.h>
 #include <psapi.h>
-// link: Psapi.lib (or just Kernel32.lib on Win7+)
-size_t mempeak(void) {
+#pragma comment(lib, "psapi.lib")
+
+static inline size_t mempeak(void) {
   PROCESS_MEMORY_COUNTERS_EX pmc;
   GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-  return pmc.PeakWorkingSetSize;   // peak physical RAM used
-    // pmc.PeakPagefileUsage       -> peak committed virtual memory (private bytes)
+  return (size_t)pmc.PeakWorkingSetSize;   // or PeakPagefileUsage for committed peak
 }
 
-size_t memused(void) {
+static inline size_t memused(void) {
   PROCESS_MEMORY_COUNTERS_EX pmc;
   GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-  return pmc.WorkingSetSize;       // current physical RAM used
-}  
+  return (size_t)pmc.WorkingSetSize;
+}
+  
+static inline size_t mempeakinit(void) {
+  // Windows doesn't let you reset PeakWorkingSetSize mid-run except via SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1) to force a trim,
+  // which effectively "restarts" the peak counter from the current usage.
+  SetProcessWorkingSetSize(GetCurrentProcess(), (SIZE_T)-1, (SIZE_T)-1);
+  return mempeak();
+}
   #else
 static size_t mem_peak, mem_used;
 size_t mempeak() { return mem_peak; }
