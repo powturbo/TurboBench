@@ -247,30 +247,45 @@ void free(void *p) {
    mem_sub(malloc_usable_size(p));
   (*mem_free)(p);
 }
+#endif
 
 #define STACK_MAGIC  0x79a53fb6u
 
-#if 0
-#ifndef STACK_PAINT_WORDS
-#define STACK_PAINT_WORDS  ((1024 * 1024) / sizeof(unsigned))   /* 1 MiB */
+#ifdef _WIN32
+#ifndef STACK_PAINT_BYTES
+#define STACK_PAINT_BYTES  (128 * 1024)
 #endif
-NOINLINE unsigned *stackini(void) {
+#define STACK_PAINT_WORDS  (STACK_PAINT_BYTES / sizeof(unsigned))
+
+typedef struct { unsigned *low, *high; } stack_paint_t;
+
+NOINLINE stack_paint_t stackini(void) {
   volatile unsigned marker = 0;
-  unsigned *p = (unsigned *)(uintptr_t)&marker;
+  volatile unsigned *p     = (volatile unsigned *)(uintptr_t)&marker;
+  unsigned          *high  = (unsigned *)(uintptr_t)p;
+
   for (size_t i = 0; i < STACK_PAINT_WORDS; i++) *--p = STACK_MAGIC;
-  return p;
+  stack_paint_t r = { .low  = (unsigned *)(uintptr_t)p, .high = high };
+  return r;
 }
 
-size_t stackpeak(unsigned *bottom) {
-  if (!bottom) return 0;
-  unsigned *p = bottom;
-  const unsigned *limit = bottom + STACK_PAINT_WORDS;
-  while (p < limit && *p == STACK_MAGIC) ++p;
-  size_t used_words = (size_t)(p - bottom);   if(!used_words) die("stack 0");
-  return used_words * sizeof(unsigned);
+size_t stackpeak(stack_paint_t paint) {
+  if(!paint.low || !paint.high || paint.high <= paint.low)
+    return 0;
+
+  volatile unsigned *p   = (volatile unsigned *)paint.low;
+  volatile unsigned *end = (volatile unsigned *)paint.high;
+
+  while (p < end && *p == STACK_MAGIC)
+    ++p;
+  return (size_t)((char *)end - (char *)p);
 }
+
 #else
 #include <pthread.h>
+
+typedef unsigned *stack_paint_t;
+
 static unsigned *g_stack_lo;   /* lowest usable address                */
 static unsigned *g_stack_hi;   /* one-past the highest usable address  */
 
@@ -305,7 +320,7 @@ size_t stackpeak(unsigned *base) {
   return (size_t)(g_stack_hi - p) * sizeof(unsigned);
 }
 #endif
-#endif
+
 
 //----------------------------------------------------------------------------------------------------------------
 #include <sys/stat.h>
@@ -1726,7 +1741,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
       }
     }
     size_t   peak    = mempeakinit();
-    unsigned *_stack = stackini();
+    stack_paint_t _stack = stackini();
 
     size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame)/nb;
     tc = tm_tmin(nb);
@@ -1739,7 +1754,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
       if(fuzz & 2) { cpz = (_cpy+insizem) - len;                                    /*printf("SEGFAULT Check");fflush(stdout); cpz[len-1] = cpz[len]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
       if(_cpy != _in) memrcpy(cpz, in, len);
       size_t   peak    = mempeakinit();
-      unsigned *_stack = stackini();
+      stack_paint_t _stack = stackini();
       unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm)/nb;
       td = tm_tmin(nb);
       plug->td  += td;
