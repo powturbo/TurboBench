@@ -140,11 +140,24 @@ void _vfree(void *p, size_t size) {
     #endif
 }
 
-  #if defined(NMEMSIZE) || defined(_WIN32)
+  #if defined(NMEMSIZE)
 #define mempeakinit() 0
 #define mempeak() 0
-//#define stackini() 0
-//#define stackpeak(a) 0
+  #elif defined(_WIN32)
+#include <psapi.h>
+// link: Psapi.lib (or just Kernel32.lib on Win7+)
+size_t mempeak(void) {
+  PROCESS_MEMORY_COUNTERS_EX pmc;
+  GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+  return pmc.PeakWorkingSetSize;   // peak physical RAM used
+    // pmc.PeakPagefileUsage       -> peak committed virtual memory (private bytes)
+}
+
+size_t memused(void) {
+  PROCESS_MEMORY_COUNTERS_EX pmc;
+  GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
+  return pmc.WorkingSetSize;       // current physical RAM used
+}  
   #else
 static size_t mem_peak, mem_used;
 size_t mempeak() { return mem_peak; }
@@ -281,7 +294,7 @@ size_t stackpeak(stack_paint_t paint) {
   return (size_t)((char *)end - (char *)p);
 }
 
-#else
+#elif defined(__linux__)
 #include <pthread.h>
 
 typedef unsigned *stack_paint_t;
@@ -319,6 +332,9 @@ size_t stackpeak(unsigned *base) {
   while (p < g_stack_hi && *p == STACK_MAGIC) p++;
   return (size_t)(g_stack_hi - p) * sizeof(unsigned);
 }
+#else
+#define stackini() 0
+#define stackpeak(base) 0
 #endif
 
 
