@@ -46,6 +46,7 @@
   
   #ifdef __APPLE__
 #include <sys/malloc.h>
+#include <malloc/malloc.h>
 #define malloc_usable_size(p) malloc_size(p)  
   #else
 #include <malloc.h>
@@ -1777,7 +1778,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
       unsigned char *cpz = _cpy;
       if(fuzz & 2) { cpz = (_cpy+insizem) - len;                                    /*printf("SEGFAULT Check");fflush(stdout); cpz[len-1] = cpz[len]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
       if(_cpy != _in) memrcpy(cpz, in, len);
-      size_t   peak    = mempeakinit();
+      size_t        peak   = mempeakinit();
       stack_paint_t _stack = stackini();
       unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm)/nb;
       td = tm_tmin(nb);
