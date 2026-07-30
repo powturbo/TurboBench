@@ -207,8 +207,9 @@ static __attribute__((constructor)) void mem_init(void) {
   mem_free     = dlsym(RTLD_NEXT, "free"   );
   mem_calloc   = dlsym(RTLD_NEXT, "calloc" );   
     #if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200112L) || defined(_POSIX_ADVISORY_INFO) && (_POSIX_ADVISORY_INFO >= 200112L) || defined(__APPLE__)
-  if(!(mem_posix_memalign = dlsym(RTLD_NEXT, "posix_memalign"))) die("mem_posix_memalign not found\n");
-    #else
+//  if(!(mem_posix_memalign = dlsym(RTLD_NEXT, "posix_memalign"))) die("mem_posix_memalign not found\n");
+    #endif
+    #ifndef __APPLE__
   mem_memalign = dlsym(RTLD_NEXT, "memalign");
     #endif    
   if(!mem_malloc || !mem_calloc || !mem_realloc || !mem_free)
