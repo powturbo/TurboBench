@@ -144,7 +144,7 @@ void _vfree(void *p, size_t size) {
     #endif
 }
 
-  #if defined(NMEMSIZE)
+  #ifdef NMEMSIZE
 #define mempeakinit() 0
 #define mempeak() 0
   #elif defined(_WIN32)
@@ -207,7 +207,7 @@ static __attribute__((constructor)) void mem_init(void) {
   mem_free     = dlsym(RTLD_NEXT, "free"   );
   mem_calloc   = dlsym(RTLD_NEXT, "calloc" );   
     #if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200112L) || defined(_POSIX_ADVISORY_INFO) && (_POSIX_ADVISORY_INFO >= 200112L) || defined(__APPLE__)
-//  if(!(mem_posix_memalign = dlsym(RTLD_NEXT, "posix_memalign"))) die("mem_posix_memalign not found\n");
+  if(!(mem_posix_memalign = dlsym(RTLD_NEXT, "posix_memalign"))) die("mem_posix_memalign not found\n");
     #endif
     #ifndef __APPLE__
   mem_memalign = dlsym(RTLD_NEXT, "memalign");
