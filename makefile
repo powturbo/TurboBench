@@ -352,10 +352,9 @@ endif
 ifneq ($(wildcard misa77/.),)
 CXXFLAGS += -D_MISA77
 MISA77_DIR  := misa77
-MISA77_INC  := -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src
 MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp)
 MISA77_OBJS := $(MISA77_DIR)/src/isa/target_portable.o
-MISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 $(MISA77_INC) $(MISA77_FLAGS) $< -c -o $@
+MISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src $< -c -o $@
 ifeq ($(ARCH),x86_64)
 MISA77_BASE := -march=x86-64
 MISA77_AVX2 := -mavx2
