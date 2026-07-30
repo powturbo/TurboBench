@@ -2125,10 +2125,10 @@ int main(int argc, char* argv[]) {
             if(g->tc < p->tc || p->tc == DBL_MAX) p->tc = g->tc,u++;
             if(g->td < p->td || p->td == DBL_MAX) p->td = g->td,u++;
 
-            if(g->memc != p->memc) { g->memc != p->memc; u++; }
-            if(g->memd != p->memd) { g->memd != p->memd; u++; }
-            if(g->stkc != p->stkc) { g->stkc != p->stkc; u++; }
-            if(g->stkd != p->stkd) { g->stkd != p->stkd; u++; }
+            if(g->memc != p->memc) { g->memc = p->memc; u++; }
+            if(g->memd != p->memd) { g->memd = p->memd; u++; }
+            if(g->stkc != p->stkc) { g->stkc = p->stkc; u++; }
+            if(g->stkd != p->stkd) { g->stkd = p->stkd; u++; }
             strcpy(p->tms, u?tms:g->tms);
           }                                                                         //printf("Id=%d len=%llu,%llu cd=%f,%f\n", g->id, totinlen, g->len, g->tc, g->td);
           g->id = -1;
