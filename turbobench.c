@@ -1068,12 +1068,17 @@ void plugprtf(FILE *f, int fmt) {
   }
 }
 
+static unsigned memout;
+
 void plugprtth(FILE *f, int fmt) {
   char *head =  "     C Size  ratio%     C MB/s     D MB/s   Name            File              (bold = pareto)";
 
   switch(fmt) {
     case FMT_TEXT:
-      fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s    SCORE   Name            File\n");
+      if(memout)
+        fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s    SCORE       C MEM     D MEM   C STACK   D STACK Name            File\n");
+      else
+        fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s    SCORE   Name            File\n");
       break;
     case FMT_VBULLETIN:
       fprintf(f,"[table]C Size|ratio%|C MB/s|D MB/s|Name|File (MB=1.000.0000)\n");
@@ -1163,8 +1168,10 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         fprintf(f, "%s\n", finame);
         #undef BBOLD
           #else
-        fprintf(f, "%12"PRId64" %s%s%9.2f%s %s%9.2f%s %s%8.2f%s   %s%-16s%s%s\n",
+        fprintf(f, "%12"PRId64" %s%s%9.2f%s %s%9.2f%s %s%8.2f%s   ",
           plug->len, sratio, c?BOLDB:"", tc, c?BOLDE:"",  d?BOLDB:"", td, d?BOLDE:"", n?BOLDB:"", score, n?BOLDE:"", n?BOLDB:"", name, n?BOLDE:"", finame);
+        if(memout) fprintf(f, "%9d %9d %9d %9d ", plug->memc, plug->memd, plug->stkc, plug->stkd);   
+        fprintf(f, "%s%-16s%s%s\n", n?BOLDB:"", name, n?BOLDE:"", finame);
           #endif
       }
       else
@@ -1309,6 +1316,7 @@ void plugprtp(plug_t *plug, long long totinlen, char *finame, int fmt, int speed
       fprintf(f, "|%s|\n", finame);
       break;
     default:
+      if(memout) fprintf(f, "%.10d %.10d %.10d %.10d ", plug->memc, plug->memd, plug->stkc, plug->stkd); 
       fprintf(f, "%s\n", finame);
       break;
   }
@@ -1844,8 +1852,9 @@ void usage(char *pgm, int bsize) {
   fprintf(stderr, " -f#      check reading/writing outside bounds: #=1 compress, #=2 decompress, #3:both\n");
   fprintf(stderr, "Output:\n");
   fprintf(stderr, " -v#      # = verbosity 0..3 {1}\n");
-  fprintf(stderr, " -rX,Y    Show/Reveal only when compression/decompression speed > X/Y MB/s\n");
+  fprintf(stderr, " -RX,Y    Show/Reveal only when compression/decompression speed > X/Y MB/s\n");
   fprintf(stderr, " -kstr    str = Remark/Comment string\n");
+  fprintf(stderr, " -U       print memory/stack usage\n");
   fprintf(stderr, " -l#      # = 1 : print all groups/plugins, # = 2 : print all codecs\n");
   fprintf(stderr, " -S#      Plot transfer speed: #=1 Comp        speedup #=2 Decomp speedup #=3 Comp        'MB/s' #=4 Decomp 'MB/s'\n");
   fprintf(stderr, "                               #=4 Comp+Decomp speedup                    #=5 Comp+Decomp 'MB/s'\n");
@@ -1911,9 +1920,9 @@ int main(int argc, char* argv[]) {
         break;
       case 'b': bsize    = argtoi(optarg,Mb); bsizex++; break;
       case 'B': filenmax = argtol(optarg, 'G');      break;
+      case 'C': cmp      = atoi(optarg);             break;
       case 'd': coddicsize(argtoi(optarg,0));        break;
       //case 'D': dict     = optarg;                 break;
-      case 'C': cmp      = atoi(optarg);             break;
       case 'D': rprio    = 0;                break;
       case 'e': scmd     = optarg;                   break;
 //    case 'E': xcmd     = optarg;                   break;
@@ -1925,13 +1934,11 @@ int main(int argc, char* argv[]) {
       case 'i':
       case 'I': { char *q = strchr(optarg,','); if((tm_Rep  = atoi(optarg))<=0) tm_rep=tm_Rep=1; if(q && (tm_Rep2 = atoi(q+1))<=0) tm_rep=tm_Rep2=1;}  break;
       case 'J': if((tm_Rep2 = atoi(optarg))<=0) tm_rep=tm_Rep2=1; break;
-      case 'L': tm_slp   = atoi(optarg);             break;
-      case 't': tm_tx    = atoi(optarg);         break;
-      case 'T': tm_TX    = atoi(optarg);         break;
       case 'k': rem      = optarg;           break;
-      case 'S': speedup  = atoi(optarg); if(speedup < 0 || speedup > SP_TRANSFER) speedup=SP_TRANSFER; break;
+      case 'L': tm_slp   = atoi(optarg);             break;
 
       case 'l': xplug    = atoi(optarg);             break;
+      case 'M': beb      = optarg;           break;
       case 'm': mode++;                      break;
       case 'N': delim    = atoi(optarg);             break;
       case 'o': xstdout++;               break;
@@ -1939,9 +1946,13 @@ int main(int argc, char* argv[]) {
       case 'P': mcpy++;                      break;
       case 'Q': divxy    = atoi(optarg);
                 if(divxy>3) divxy=3;                 break;
-      case 'r' :{ char *q = strchr(optarg,','); if((tc_smin = atoi(optarg)) <=0) tc_smin=1000; if(q && (td_smin = atoi(q+1))<=0) td_smin = 100; printf("minc=%.1f,mind=%.1f\n", tc_smin,td_smin); }
-      case 'R': recurse++;                   break;
+      case 'R' :{ char *q = strchr(optarg,','); if((tc_smin = atoi(optarg)) <=0) tc_smin=1000; if(q && (td_smin = atoi(q+1))<=0) td_smin = 100; printf("minc=%.1f,mind=%.1f\n", tc_smin,td_smin); }
+      case 'r': recurse++;                   break;
       case 's': mininlen = argtoi(optarg,1);             break;
+      case 'S': speedup  = atoi(optarg); if(speedup < 0 || speedup > SP_TRANSFER) speedup=SP_TRANSFER; break;
+      case 't': tm_tx    = atoi(optarg);         break;
+      case 'T': tm_TX    = atoi(optarg);         break;
+      case 'U': memout++; break;
       case 'v': verbose  = atoi(optarg);             break;
       case 'V': tm_verbose = atoi(optarg);           break;
       case 'Y': seg_ans  = argtoi(optarg,1);         break;
@@ -1950,7 +1961,6 @@ int main(int argc, char* argv[]) {
       case 'x': ylog     =  ylog?0:1;                break;
       case 'y': xlog2    = xlog2?0:1;                break;
       case 'z': ylog2    = ylog2?0:1;                break;
-      case 'M': beb      = optarg;           break;
       BEOPT;
       case 'h':
       default:
