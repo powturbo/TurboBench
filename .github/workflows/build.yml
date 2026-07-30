@@ -26,8 +26,7 @@ jobs:
       - run: make STATIC=1      
       - run: lscpu
       - run: ./turbobench -l2
-      - run: ./turbobench turbobench -V0
-      - run: cat turbobench.tbb
+      - run: ./turbobench turbobench -V0 -U
 
   macos:
     runs-on: '${{ matrix.os }}'
@@ -48,8 +47,7 @@ jobs:
       - run: make      
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l2
-      - run: ./turbobench turbobench -V0
-      - run: cat turbobench.tbb
+      - run: ./turbobench turbobench -V0 -U
 
   windows:
     runs-on: windows-latest
@@ -79,6 +77,5 @@ jobs:
 #          sed -i '/COMMAND "${AR}" -M/a \ WORKING_DIRECTORY "${_out_dir}"' c-blosc2/cmake/merge_static_libs.cmake
       - run: make STATIC=1
       - run: ./turbobench -l2
-      - run: ./turbobench turbobench.exe -V0
-      - run: type .\turbobench.exe.tbb
+      - run: ./turbobench turbobench.exe -U -V0
 
