@@ -148,7 +148,6 @@ void _vfree(void *p, size_t size) {
 #define mempeakinit() 0
 #define mempeak() 0
   #elif defined(_WIN32)
-//  #include <windows.h>
 #include <psapi.h>
 #pragma comment(lib, "psapi.lib")
 
@@ -2105,7 +2104,7 @@ int main(int argc, char* argv[]) {
   }
 
   long long _totinlen;
-  int       gk = plugread(plug, s, &_totinlen);
+  int       gk = plugread(plug, s, &_totinlen); 
   if(_totinlen != totinlen)
     gk = 0;
   FILE *fo = fopen(s, "w");
@@ -2119,23 +2118,22 @@ int main(int argc, char* argv[]) {
     plug_t *g;
     fprintf(fo, "dataset\tsize\tcsize\tdtime\tctime\tcodec\tlevel\tparam\tcmem\tdmem\tcstack\tdstack\ttime\n");
     for(p = plugt; p < plugt+k; p++) {
-      for(g = plug; g < plug+gk; g++) {
+      for(g = plug; g < plug+gk; g++)
         if(g->id >= 0 && !strcmp(g->s, p->s) && g->lev == p->lev && !strcmp(g->prm, p->prm)) {
-      int u = 0;                                                                //printf("$$$TLEN=%u D=%f %f ", (unsigned)p->len, p->td, g->td);
+          int u = 0;                                                                //printf("$$$TLEN=%u D=%f %f ", (unsigned)p->len, p->td, g->td);
           if(g->len == p->len) {
             if(g->tc < p->tc || p->tc == DBL_MAX) p->tc = g->tc,u++;
             if(g->td < p->td || p->td == DBL_MAX) p->td = g->td,u++;
 
-            if(g->memc != p->memc) u++;
-            if(g->memd != p->memd) u++;
-            if(g->stkc != p->stkc) u++;
-            if(g->stkd != p->stkd) u++;
+            if(g->memc != p->memc) { g->memc != p->memc; u++; }
+            if(g->memd != p->memd) { g->memd != p->memd; u++; }
+            if(g->stkc != p->stkc) { g->stkc != p->stkc; u++; }
+            if(g->stkd != p->stkd) { g->stkd != p->stkd; u++; }
             strcpy(p->tms, u?tms:g->tms);
           }                                                                         //printf("Id=%d len=%llu,%llu cd=%f,%f\n", g->id, totinlen, g->len, g->tc, g->td);
           g->id = -1;
           break;
         }
-      }
       fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
                  finame, totinlen, p->len,    p->td,p->tc,p->s,p->lev,p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
     }
