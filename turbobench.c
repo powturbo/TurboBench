@@ -287,19 +287,19 @@ void free(void *p) {
 #endif
 #define STACK_PAINT_WORDS  (STACK_PAINT_BYTES / sizeof(unsigned))
 
-typedef struct { unsigned *low, *high; } stack_paint_t;
+typedef struct { unsigned *low, *high; } memstack_t;
 
-NOINLINE stack_paint_t stackini(void) {
+NOINLINE memstack_t stackini(void) {
   volatile unsigned marker = 0;
   volatile unsigned *p     = (volatile unsigned *)(uintptr_t)&marker;
   unsigned          *high  = (unsigned *)(uintptr_t)p;
 
   for (size_t i = 0; i < STACK_PAINT_WORDS; i++) *--p = STACK_MAGIC;
-  stack_paint_t r = { .low  = (unsigned *)(uintptr_t)p, .high = high };
+  memstack_t r = { .low  = (unsigned *)(uintptr_t)p, .high = high };
   return r;
 }
 
-size_t stackpeak(stack_paint_t paint) {
+size_t stackpeak(memstack_t paint) {
   if(!paint.low || !paint.high || paint.high <= paint.low)
     return 0;
 
@@ -313,7 +313,7 @@ size_t stackpeak(stack_paint_t paint) {
 
 #elif defined(__linux__)
 #include <pthread.h>
-typedef unsigned* stack_paint_t;
+typedef unsigned* memstack_t;
 static unsigned *g_stack_lo;   /* lowest usable address                */
 static unsigned *g_stack_hi;   /* one-past the highest usable address  */
 
@@ -346,7 +346,7 @@ size_t stackpeak(unsigned *base) {
 #else
 #define stackini() 0
 #define stackpeak(base) 0
-typedef unsigned *stack_paint_t;
+typedef unsigned *memstack_t;
 #endif
 
 //----------------------------------------------------------------------------------------------------------------
@@ -1767,26 +1767,28 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
         memcpy(p, in, len);
       }
     }
-    size_t   peak    = mempeakinit();
-    stack_paint_t _stack = stackini();
-
+    size_t     peak   = mempeakinit();
+    memstack_t _stack = stackini();
     size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame)/nb;
-    tc = tm_tmin(nb);
+    tc         = tm_tmin(nb);
     plug->len += outlen;
     plug->tc  += tc;
     plug->memc = mempeak() - peak;
     plug->stkc = stackpeak(_stack);
+    
     if(cmp) {
       unsigned char *cpz = _cpy;
       if(fuzz & 2) { cpz = (_cpy+insizem) - len;                                    /*printf("SEGFAULT Check");fflush(stdout); cpz[len-1] = cpz[len]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
       if(_cpy != _in) memrcpy(cpz, in, len);
-      size_t        peak   = mempeakinit();
-      stack_paint_t _stack = stackini();
+      
+      size_t     peak   = mempeakinit();
+      memstack_t _stack = stackini();
       unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm)/nb;
-      td = tm_tmin(nb);
+      td         = tm_tmin(nb);
       plug->td  += td;
       plug->memd = mempeak() - peak;                                            //if(tm_verbose && totinlen == filen) printf("%9.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
       plug->stkd = stackpeak(_stack);
+      
       int e = memcheck(in, len, cpz, fuzz?3:cmp, finame);
       plug->err = plug->err?plug->err:e;
       BEPOST;
@@ -2122,7 +2124,8 @@ int main(int argc, char* argv[]) {
           break;
         }
       }
-      fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", finame, totinlen, p->len, p->td, p->tc, p->s, p->lev, p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
+      fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
+                 finame, totinlen, p->len,    p->td,p->tc,p->s,p->lev,p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
     }
      for(g = plug; g < plug+gk; g++) {
       if(g->id >= 0) {
