@@ -349,7 +349,7 @@ CXXFLAGS+=-D_MINIZ
 OB+=$(BUILDIR)/miniz/miniz.o $(call obj,miniz/miniz_tdef.o miniz/miniz_tinfl.o)
 endif
 
-ifneq ($(wildcard misa77XXXX/.),)
+ifneq ($(wildcard misa77/.),)
 CXXFLAGS += -D_MISA77
 MISA77_DIR  := misa77
 MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp)
@@ -373,15 +373,15 @@ MISA77_ARCH_OBJS.aarch64 := isa/target_neon.o
 OB += $(addprefix $(BUILDIR)/$(MISA77_DIR)/src/,$(MISA77_ARCH_OBJS.$(ARCH)))
 endif
 
-ifneq ($(wildcard misa77),)
+ifneq ($(wildcard misa77xx),)
 CXXFLAGS += -D_MISA77
 MISA77_SRC := misa77/src
 ifeq ($(ARCH),x86_64)
   $(BUILDIR)/$(MISA77_SRC)/%_sse2.o: CXXFLAGS += -march=x86-64
   $(BUILDIR)/$(MISA77_SRC)/%_avx2.o: CXXFLAGS += $(_AVX2)
-  MISA77_SIMD_OBJS := isa/target_sse2.o isa/target_avx2.o
+  MISA77_VOBJS := isa/target_sse2.o isa/target_avx2.o
 else ifeq ($(ARCH),aarch64)
-  MISA77_SIMD_OBJS := isa/target_neon.o
+  MISA77_VOBJS := isa/target_neon.o
 endif
 
 $(BUILDIR)/$(MISA77_SRC)/%.o: $(MISA77_SRC)/%.cpp
@@ -389,7 +389,7 @@ $(BUILDIR)/$(MISA77_SRC)/%.o: $(MISA77_SRC)/%.cpp
 	$(CXX) -O3 $(CXXFLAGS) -std=c++20 -Imisa77/include -I$(MISA77_SRC) -c $< -o $@
 
 MISA77_SRCS := $(wildcard $(MISA77_SRC)/*.cpp)
-OB += $(call obj,$(MISA77_SRCS) $(MISA77_SRC)/isa/target_portable.o) $(addprefix $(BUILDIR)/$(MISA77_SRC)/,$(MISA77_SIMD_OBJS))
+OB += $(call obj,$(MISA77_SRCS) $(MISA77_SRC)/isa/target_portable.o) $(addprefix $(BUILDIR)/$(MISA77_SRC)/,$(MISA77_VOBJS))
 endif
 
 OPENZL_LIB :=
