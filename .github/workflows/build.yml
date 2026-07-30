@@ -80,5 +80,6 @@ jobs:
       - run: make STATIC=1
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -V0
-      - run: type %GITHUB_WORKSPACE%\turbobench.exe.tbb
+      - run: type ./turbobench.exe.tbb
+      - run: type .\turbobench.exe.tbb
 
