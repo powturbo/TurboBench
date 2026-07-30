@@ -151,7 +151,7 @@ void _vfree(void *p, size_t size) {
 #include <psapi.h>
 #pragma comment(lib, "psapi.lib")
 
-static inline size_t mempeak(void) {
+/*static inline size_t mempeak(void) {
   PROCESS_MEMORY_COUNTERS_EX pmc;
   GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
   return (size_t)pmc.PeakWorkingSetSize;   // or PeakPagefileUsage for committed peak
@@ -168,7 +168,27 @@ static inline size_t mempeakinit(void) {
   // which effectively "restarts" the peak counter from the current usage.
   SetProcessWorkingSetSize(GetCurrentProcess(), (SIZE_T)-1, (SIZE_T)-1);
   return mempeak();
+}*/
+
+static size_t g_baseline_commit = 0;
+
+static inline size_t memused_commit(void) {
+PROCESS_MEMORY_COUNTERS_EX pmc;
+  pmc.cb = sizeof(pmc); 
+  if (!GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc))) return 0;
+  return (size_t)pmc.PrivateUsage;
 }
+
+static inline void mempeakinit(void) {
+  g_baseline_commit = memused_commit(); // Record baseline
+}
+
+static inline size_t mempeak(void) {
+  size_t current = memused_commit();
+  return (current > g_baseline_commit) ? (current - g_baseline_commit) : 0;
+}
+
+
   #else
 static size_t mem_peak, mem_used;
 size_t mempeak() { return mem_peak; }
@@ -1539,10 +1559,10 @@ int plugread(plug_t *plug, char *finame, unsigned long long *totinlen) {
     p->lev    = strtol(t, &t, 10);
     while(*t && isspace(*t)) t++;
     for(q = t; *q && *q != '\t'; q++);   *q++ = 0; strncpy(p->prm, t, PRM_SIZE); p->prm[PRM_SIZE]=0; t = q;
-    p->memc   = strtoull(t, &t, 10);
+    p->memc   = strtoull(  t, &t, 10);
     p->memd   = strtoull(++t, &t, 10);
     p->stkc   = strtoull(++t, &t, 10);
-    p->stkd   = strtoull(++t, &t, 10);
+    p->stkd   = strtoull(++t, &t, 10);   
 
     for(q = ++t; *q && *q != '\t'; q++); *q++ = 0; strncpy(p->tms, t, TMS_SIZE); p->tms[TMS_SIZE]=0; t = q;
     if(p->prm[0]=='?')
@@ -2057,13 +2077,13 @@ int main(int argc, char* argv[]) {
       totinlen = 0; g->len = g->tck = g->tdk = g->memc = g->memd = g->stkc = g->stkd = 0;
       BEFILE;
       for(fno = optind; fno < argc; fno++) {
-    finame = argvx[fno];                                                                            if(verbose > 1) printf("%s,%u\n", finame, filenmax);fflush(stdout);
-    p->len = p->tc = p->td = 0;
+        finame    = argvx[fno];                                                                            if(verbose > 1) printf("%s,%u\n", finame, filenmax);fflush(stdout);
+        p->len    = p->tc = p->td = 0;
         totinlen += plugfile(p, finame, filenmax, bsize, plugr, tid, krep);
-        g->len += p->len;
-        g->tck += p->tc;
-        g->tdk += p->td;
-        g->err = g->err?g->err:p->err;
+        g->len   += p->len;
+        g->tck   += p->tc;
+        g->tdk   += p->td;
+        g->err    = g->err?g->err:p->err;
         if(p->memc > g->memc) g->memc = p->memc;
         if(p->memd > g->memd) g->memd = p->memd;
         if(p->stkc > g->stkc) g->stkc = p->stkc;
@@ -2125,10 +2145,10 @@ int main(int argc, char* argv[]) {
             if(g->tc < p->tc || p->tc == DBL_MAX) p->tc = g->tc,u++;
             if(g->td < p->td || p->td == DBL_MAX) p->td = g->td,u++;
 
-            if(g->memc != p->memc) { g->memc = p->memc; u++; }
-            if(g->memd != p->memd) { g->memd = p->memd; u++; }
-            if(g->stkc != p->stkc) { g->stkc = p->stkc; u++; }
-            if(g->stkd != p->stkd) { g->stkd = p->stkd; u++; }
+            if(g->memc > p->memc) { p->memc = g->memc; u++; }
+            if(g->memd > p->memd) { p->memd = g->memd; u++; }
+            if(g->stkc > p->stkc) { p->stkc = g->stkc; u++; }
+            if(g->stkd > p->stkd) { p->stkd = g->stkd; u++; }
             strcpy(p->tms, u?tms:g->tms);
           }                                                                         //printf("Id=%d len=%llu,%llu cd=%f,%f\n", g->id, totinlen, g->len, g->tc, g->td);
           g->id = -1;
@@ -2137,9 +2157,10 @@ int main(int argc, char* argv[]) {
       fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
                  finame, totinlen, p->len,    p->td,p->tc,p->s,p->lev,p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
     }
-     for(g = plug; g < plug+gk; g++) {
+    for(g = plug; g < plug+gk; g++) {
       if(g->id >= 0) {
-        fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", finame, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, p->stkc, p->stkd, g->tms[0]?g->tms:tms);
+        fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
+                    finame, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms);
       }
     }
     fclose(fo);
