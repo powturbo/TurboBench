@@ -1161,6 +1161,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         if(n) SetConsoleTextAttribute(h, BBOLD);
         fprintf(f, "%8.2f ", score);
         if(n) SetConsoleTextAttribute(h, 7);
+        if(memout) fprintf(f, "%9d %9d %9d %9d ", plug->memc, plug->memd, plug->stkc, plug->stkd);   
 
         if(n) SetConsoleTextAttribute(h, BBOLD);
         fprintf(f, "%-16s", name);
