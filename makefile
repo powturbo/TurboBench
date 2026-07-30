@@ -124,7 +124,7 @@ endif
 
 # disable peak memory calculation
 ifeq ($(OS),$(filter $(OS),Darwin))
-#NMEMSIZE=1
+NMEMSIZE=1
 endif
 
 ifdef NMEMSIZE
@@ -373,7 +373,7 @@ MISA77_ARCH_OBJS.aarch64 := isa/target_neon.o
 OB += $(addprefix $(BUILDIR)/$(MISA77_DIR)/src/,$(MISA77_ARCH_OBJS.$(ARCH)))
 endif
 
-ifneq ($(wildcard misa77xx),)
+ifneq ($(wildcard misa77),)
 CXXFLAGS += -D_MISA77
 MISA77_SRC := misa77/src
 ifeq ($(ARCH),x86_64)
