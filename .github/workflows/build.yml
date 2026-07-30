@@ -80,5 +80,6 @@ jobs:
       - run: make STATIC=1
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -V0
-      - run: type turbobench.exe.tbb
+      - run: dir
+#      - run: type turbobench.exe.tbb
 
