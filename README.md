@@ -325,8 +325,9 @@ Compressors with versions 16.08.2016 <br>
 * `-v#` : `#` = verbosity 0..3 {`1`}
 * `-rX,Y` : Show/Reveal only when compression/decompression speed > `X/Y` MB/s
 * `-kstr` : `str` = Remark/Comment string
-* `-l#` : `#=1` print all groups/plugins, `#=2` print all codecs
-* `-S#` : Plot transfer speed: 
+* `-U     print memory/stack usage
+* `-l#`   `#=1` print all groups/plugins, `#=2` print all codecs
+* `-S#`   Plot transfer speed: 
   * `#=1` Comp speedup
   * `#=2` Decomp speedup
   * `#=3` Comp 'MB/s'
