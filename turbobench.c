@@ -151,43 +151,17 @@ void _vfree(void *p, size_t size) {
 #include <psapi.h>
 #pragma comment(lib, "psapi.lib")
 
-/*static inline size_t mempeak(void) {
-  PROCESS_MEMORY_COUNTERS_EX pmc;
-  GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-  return (size_t)pmc.PeakWorkingSetSize;   // or PeakPagefileUsage for committed peak
-}
-
-static inline size_t memused(void) {
-  PROCESS_MEMORY_COUNTERS_EX pmc;
-  GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc));
-  return (size_t)pmc.WorkingSetSize;
-}
-  
-static inline size_t mempeakinit(void) {
-  // Windows doesn't let you reset PeakWorkingSetSize mid-run except via SetProcessWorkingSetSize(GetCurrentProcess(), -1, -1) to force a trim,
-  // which effectively "restarts" the peak counter from the current usage.
-  SetProcessWorkingSetSize(GetCurrentProcess(), (SIZE_T)-1, (SIZE_T)-1);
-  return mempeak();
-}*/
-
 static size_t g_baseline_commit = 0;
 
 static inline size_t memused_commit(void) {
 PROCESS_MEMORY_COUNTERS_EX pmc;
   pmc.cb = sizeof(pmc); 
-  if (!GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc))) return 0;
+  if(!GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc))) return 0;
   return (size_t)pmc.PrivateUsage;
 }
 
-static inline void mempeakinit(void) {
-  g_baseline_commit = memused_commit(); // Record baseline
-}
-
-static inline size_t mempeak(void) {
-  size_t current = memused_commit();
-  return (current > g_baseline_commit) ? (current - g_baseline_commit) : 0;
-}
-
+static inline void mempeakinit(void) { g_baseline_commit = memused_commit(); } // Record baseline
+static inline size_t mempeak(void)   { size_t current = memused_commit(); return (current > g_baseline_commit) ? (current - g_baseline_commit) : 0; }
 
   #else
 static size_t mem_peak, mem_used;
@@ -1943,41 +1917,41 @@ int main(int argc, char* argv[]) {
       case 'C': cmp      = atoi(optarg);             break;
       case 'd': coddicsize(argtoi(optarg,0));        break;
       //case 'D': dict     = optarg;                 break;
-      case 'D': rprio    = 0;                break;
+      case 'D': rprio    = 0;                        break;
       case 'e': scmd     = optarg;                   break;
 //    case 'E': xcmd     = optarg;                   break;
       case 'F': fac      = strtod(optarg, NULL);     break;
       case 'f': fuzz     = atoi(optarg);             break;
-      case 'g': merge++;                     break;
-      case 'G': plotmcpy++;              break;
+      case 'g': merge++;                             break;
+      case 'G': plotmcpy++;                          break;
 
       case 'i':
       case 'I': { char *q = strchr(optarg,','); if((tm_Rep  = atoi(optarg))<=0) tm_rep=tm_Rep=1; if(q && (tm_Rep2 = atoi(q+1))<=0) tm_rep=tm_Rep2=1;}  break;
       case 'J': if((tm_Rep2 = atoi(optarg))<=0) tm_rep=tm_Rep2=1; break;
-      case 'k': rem      = optarg;           break;
+      case 'k': rem      = optarg;                   break;
       case 'L': tm_slp   = atoi(optarg);             break;
 
       case 'l': xplug    = atoi(optarg);             break;
-      case 'M': beb      = optarg;           break;
-      case 'm': mode++;                      break;
+      case 'M': beb      = optarg;                   break;
+      case 'm': mode++;                              break;
       case 'N': delim    = atoi(optarg);             break;
-      case 'o': xstdout++;               break;
+      case 'o': xstdout++;                           break;
       case 'p': fmt      = atoi(optarg);             break;
-      case 'P': mcpy++;                      break;
+      case 'P': mcpy++;                              break;
       case 'Q': divxy    = atoi(optarg);
                 if(divxy>3) divxy=3;                 break;
       case 'R' :{ char *q = strchr(optarg,','); if((tc_smin = atoi(optarg)) <=0) tc_smin=1000; if(q && (td_smin = atoi(q+1))<=0) td_smin = 100; printf("minc=%.1f,mind=%.1f\n", tc_smin,td_smin); }
-      case 'r': recurse++;                   break;
-      case 's': mininlen = argtoi(optarg,1);             break;
+      case 'r': recurse++;                           break;
+      case 's': mininlen = argtoi(optarg,1);         break;
       case 'S': speedup  = atoi(optarg); if(speedup < 0 || speedup > SP_TRANSFER) speedup=SP_TRANSFER; break;
-      case 't': tm_tx    = atoi(optarg);         break;
-      case 'T': tm_TX    = atoi(optarg);         break;
-      case 'U': memout++; break;
+      case 't': tm_tx    = atoi(optarg);             break;
+      case 'T': tm_TX    = atoi(optarg);             break;
+      case 'U': memout++;                            break;
       case 'v': verbose  = atoi(optarg);             break;
       case 'V': tm_verbose = atoi(optarg);           break;
       case 'Y': seg_ans  = argtoi(optarg,1);         break;
       case 'Z': seg_huf  = argtoi(optarg,1);         break;
-      case 'w': xlog     =  xlog?0:1;            break;
+      case 'w': xlog     =  xlog?0:1;                break;
       case 'x': ylog     =  ylog?0:1;                break;
       case 'y': xlog2    = xlog2?0:1;                break;
       case 'z': ylog2    = ylog2?0:1;                break;
@@ -2020,7 +1994,7 @@ int main(int argc, char* argv[]) {
   if(!scmd) scmd = "FAST";                                                              if(verbose > 5) printf("%s\n", scmd);fflush(stdout);
   for(s[0] = 0;;) {
     char *q;
-    int i=0;
+    int  i = 0;
     if(!*scmd) break;
     if(q = strchr(scmd,'/')) *q = '\0';
     FILE *fi = fopen("turbobench.ini", "r");
@@ -2061,7 +2035,6 @@ int main(int argc, char* argv[]) {
 
   if(beb) { bebuild(&argvx[optind], argc-optind, recurse, beb, filenmax, delim); exit(0); }
   BEINI;
-
                                                                                                     if(verbose > 5) printf("Process files\n");fflush(stdout);
   unsigned long long totinlen = 0;
   int       krep;
@@ -2078,7 +2051,7 @@ int main(int argc, char* argv[]) {
       BEFILE;
       for(fno = optind; fno < argc; fno++) {
         finame    = argvx[fno];                                                                            if(verbose > 1) printf("%s,%u\n", finame, filenmax);fflush(stdout);
-        p->len    = p->tc = p->td = 0;
+        p->len    = p->tc = p->td = p->memc = p->memd = p->stkc = p->stkd = 0;
         totinlen += plugfile(p, finame, filenmax, bsize, plugr, tid, krep);
         g->len   += p->len;
         g->tck   += p->tc;
@@ -2140,29 +2113,26 @@ int main(int argc, char* argv[]) {
     for(p = plugt; p < plugt+k; p++) {
       for(g = plug; g < plug+gk; g++)
         if(g->id >= 0 && !strcmp(g->s, p->s) && g->lev == p->lev && !strcmp(g->prm, p->prm)) {
-          int u = 0;                                                                //printf("$$$TLEN=%u D=%f %f ", (unsigned)p->len, p->td, g->td);
+          int u = 0;                                                             
           if(g->len == p->len) {
-            if(g->tc < p->tc || p->tc == DBL_MAX) p->tc = g->tc,u++;
-            if(g->td < p->td || p->td == DBL_MAX) p->td = g->td,u++;
+            if(g->tc < p->tc) { p->tc = g->tc; u++; }
+            if(g->td < p->td) { p->td = g->td; u++; }
 
             if(g->memc > p->memc) { p->memc = g->memc; u++; }
             if(g->memd > p->memd) { p->memd = g->memd; u++; }
             if(g->stkc > p->stkc) { p->stkc = g->stkc; u++; }
             if(g->stkd > p->stkd) { p->stkd = g->stkd; u++; }
             strcpy(p->tms, u?tms:g->tms);
-          }                                                                         //printf("Id=%d len=%llu,%llu cd=%f,%f\n", g->id, totinlen, g->len, g->tc, g->td);
+          }                                                                      
           g->id = -1;
           break;
         }
       fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
                  finame, totinlen, p->len,    p->td,p->tc,p->s,p->lev,p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
     }
-    for(g = plug; g < plug+gk; g++) {
-      if(g->id >= 0) {
-        fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
-                    finame, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms);
-      }
-    }
+    for(g = plug; g < plug+gk; g++)
+      if(g->id >= 0 && g->tc > 1e-10 && g->td > 1e-10 && !plug->err) fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
+                                 finame, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms);
     fclose(fo);
     printfile(s, 0, FMT_TEXT, rem);
     plug_t plugv[SVG_PLUGMAX],*vp=plugv; int x = 0;
