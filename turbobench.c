@@ -2029,7 +2029,12 @@ int main(int argc, char* argv[]) {
     if(!*scmd) break;
     if(q = strchr(scmd,'/')) *q = '\0';
     FILE *fi = fopen("turbobench.ini", "r");
-    if(!fi) { char sf[256]; snprintf(sf, 256, "%s/turbobench.ini", inidir); fi = fopen(sf, "r"); }
+    if(!fi) { 
+      char s[257], *p = argv[0]; 
+      int  l = strlen(p);
+      if(!memcmp(&p[l - 4], ".exe", 4)) l -= 4; strncpy(s, argv[0], l); s[l] = 0; strcat(s, ".ini");
+      fi = fopen(s, "r");                                                                               // printf("ini=%s %s\n", s, fi?"found":"not found");  
+    }
     if(fi) {
       char ss[LSIZE+1];
       while(fgets(ss, LSIZE, fi)) {
