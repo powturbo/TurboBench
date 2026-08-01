@@ -192,7 +192,7 @@ static void *(*mem_calloc)(size_t, size_t);
 static void *(*mem_realloc)(void*, size_t);
 static void  (*mem_free)(void *);
 static void *(*mem_memalign)(size_t, size_t);
-static int (*mem_posix_memalign)(void**, size_t, size_t);
+static int   (*mem_posix_memalign)(void**, size_t, size_t);
 
 static __attribute__((constructor)) void mem_init(void) {
   mem_malloc   = dlsym(RTLD_NEXT, "malloc" );
@@ -222,8 +222,8 @@ void *malloc(size_t size) {
   return p;
 }
 
-void *calloc(size_t nmemb, size_t size) {
-  size_t _size = nmemb*size;
+void *calloc(size_t alignment, size_t size) {
+  size_t _size = alignment*size;
   if(!mem_calloc) {
     void *p = mem_heapp;
     if((mem_heapp += _size) >= mem_heap+sizeof(mem_heap))
@@ -231,31 +231,28 @@ void *calloc(size_t nmemb, size_t size) {
     memset(p,0,_size);
     return p;
   }
-  void *p = (*mem_calloc)(nmemb, size);
+  void *p = (*mem_calloc)(alignment, size);
   if(p)
     mem_add(malloc_usable_size(p));
   return p;
 }
 
-void *memalign(size_t nmemb, size_t size) {
-  size_t _size = nmemb*size;
-
-  mem_add(_size);
-  void *p = (*mem_memalign)(nmemb, size);
+void *memalign(size_t alignment, size_t size) {
+  mem_add(alignment*size);
+  void *p = (*mem_memalign)(alignment, size);
   if(p)
     mem_add(malloc_usable_size(p));
   return p;
 }
 
-int posix_memalign(void **ret, size_t nmemb, size_t size) {
-  size_t _size = nmemb*size;
-
-  mem_add(_size);
-  void *p = (*posix_memalign)(nmemb, nmemb, size);
+int posix_memalign(void **memptr, size_t alignment, size_t size) {
+  mem_add(alignment * size);
+  void *p = NULL;
+  int rc = (*posix_memalign)(&p, alignment, size);
   if(p)
     mem_add(malloc_usable_size(p));
-  *ret = p;
-  return 0;
+  *memptr = p;
+  return rc;
 }
 
 void *realloc(void *p, size_t size) {
