@@ -55,27 +55,38 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      # FIX: Disable automatic CRLF conversion before checkout
       - name: Set git to use LF
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
         shell: bash
+
       - uses: actions/checkout@v4
         with:
           submodules: 'true'
+
       - uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
           install: git make cmake rsync mingw-w64-x86_64-gcc
           update: true
+
       - run: git submodule update --init --recursive
-#      - name: Patch c-blosc2 merge_static_libs.cmake for Windows/MSYS2
-#        shell: bash
-#        run: |
-#          sed -i 's/CREATE ${_tmp}/CREATE ${_out_name_we}.merged${_out_ext}/' c-blosc2/cmake/merge_static_libs.cmake
-#          sed -i '/COMMAND "${AR}" -M/a \ WORKING_DIRECTORY "${_out_dir}"' c-blosc2/cmake/merge_static_libs.cmake
+
+      # ---- FIX for ar.exe "Can't open temporary file" ----
+      - name: Fix temporary directory for MinGW ar.exe
+        run: |
+          # Create a reliable temp dir that both MSYS2 and Windows can see
+          mkdir -p /tmp
+          # Force every tool (including ar.exe) to use it
+          echo "TMPDIR=/tmp" >> $GITHUB_ENV
+          echo "TMP=/tmp"   >> $GITHUB_ENV
+          echo "TEMP=/tmp"  >> $GITHUB_ENV
+          # Also export for the current shell
+          export TMPDIR=/tmp TMP=/tmp TEMP=/tmp
+          echo "Using TMPDIR=$TMPDIR"
+
       - run: make
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
-
+      
