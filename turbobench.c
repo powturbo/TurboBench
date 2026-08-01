@@ -1592,7 +1592,7 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
           die("Overflow error %llu, %u in lib=%d\n", outsize, (int)(op - _out), id);
       }
     }
-  size_t olen = op - _out;
+    size_t olen = op - _out;
   TMENDC(_inlen, olen, name, fname, 0);
   end: codend(_inlen, id, lev, prm, 0);
   return op - _out;
