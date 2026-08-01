@@ -122,9 +122,9 @@ NMEMSIZE=1
 endif
 
 # disable peak memory calculation
-ifeq ($(OS),$(filter $(OS),Darwin))
+#ifeq ($(OS),$(filter $(OS),Darwin))
 #NMEMSIZE=1
-endif
+#endif
 
 ifdef NMEMSIZE
 CFLAGS+=-DNMEMSIZE
