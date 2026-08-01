@@ -532,7 +532,7 @@ ZXC_OBJS = common driver dispatch compress_default decompress_default dict_defau
 ifeq ($(ARCH),x86_64)
   ZXC_OBJS += $(foreach e,avx2 avx512,compress_$(e) decompress_$(e) huffman_$(e)) 
 else ifeq ($(ARCH),aarch64)
-  ZXC_OBJS += $(foreach e,neon,compress_$(e) decompress_$(e) huffman_$(e) dict_$(e))
+  ZXC_OBJS += $(foreach e,neon,compress_$(e) decompress_$(e) huffman_$(e)
 endif
 OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))
 endif
