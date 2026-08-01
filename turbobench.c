@@ -233,6 +233,7 @@ static __attribute__((constructor)) void mem_init(void) {
     #endif    
   if(!mem_malloc || !mem_calloc || !mem_realloc || !mem_free)
     die("malloc not found. mem_malloc:%d mem_calloc:%d mem_realloc:%d mem_free:%d\n", mem_malloc?1:0, mem_calloc?1:0, mem_realloc?1:0, mem_free?1:0);
+  printf("mem_init\n"); fflush(stdout);
 }
 
 void *malloc(size_t size) {
@@ -252,9 +253,9 @@ void *calloc(size_t alignment, size_t size) {
   size_t _size = alignment*size;
   if(!mem_calloc) {
     void *p = mem_heapp;
-    if((mem_heapp += _size) >= mem_heap+sizeof(mem_heap))
+    if((mem_heapp += _size) >= mem_heap + sizeof(mem_heap))
       die("calloc:initial memory overflow\n");
-    memset(p,0,_size);
+    memset(p, 0, _size);
     return p;
   }
   void *p = (*mem_calloc)(alignment, size);
@@ -273,11 +274,9 @@ void *memalign(size_t alignment, size_t size) {
 
 int posix_memalign(void **memptr, size_t alignment, size_t size) {
   mem_add(alignment * size);
-  void *p = NULL;
-  int rc = (*posix_memalign)(&p, alignment, size);
-  if(p)
+  int rc = (*posix_memalign)(memptr, alignment, size);
+  if(*memptr)
     mem_add(malloc_usable_size(p));
-  if(memptr) *memptr = p;
   return rc;
 }
 
@@ -289,9 +288,9 @@ void *realloc(void *p, size_t size) {
 }
 
 void free(void *p) {
-   if(!p || p >= (void*)mem_heap && p < (void*)mem_heapp)
-     return;
-   mem_sub(malloc_usable_size(p));
+  if(!p || p >= (void*)mem_heap && p < (void*)mem_heapp)
+    return;
+  mem_sub(malloc_usable_size(p));
   (*mem_free)(p);
 }
 #endif
@@ -1919,9 +1918,10 @@ int main(int argc, char* argv[]) {
   unsigned           bsize    = 1u<<30, bsizex=0;
   unsigned long long filenmax = 0;
   char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049];
-  char               *_argvx[1], **argvx=_argvx;
-
-  int c, digit_optind = 0;                                              if(verbose > 5) printf("START1\n");fflush(stdout);
+  char               *_argvx[1], **argvx=_argvx;                                          if(verbose > 5) printf("START1\n");fflush(stdout);
+  { char *p = malloc(20); if(p) free(p); }       
+  printf("start\n"); 
+  int c, digit_optind = 0;                                              
   for(;;) {
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
