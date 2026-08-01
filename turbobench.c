@@ -276,7 +276,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size) {
   mem_add(alignment * size);
   int rc = (*posix_memalign)(memptr, alignment, size);
   if(*memptr)
-    mem_add(malloc_usable_size(p));
+    mem_add(malloc_usable_size(*memptr));
   return rc;
 }
 
