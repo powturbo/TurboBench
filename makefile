@@ -178,7 +178,7 @@ CXXFLAGS+=-D_C_BLOSC2
 C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
 $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
 	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF -DBUILD_SHARED=OFF
-	cmake --build $(BUILDIR)/c-blosc2
+	cmake --build $(BUILDIR)/c-blosc2 --config Release -j1
 endif
 LDFLAGS += $(C_BLOSC2_LIB)
 #endif
