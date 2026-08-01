@@ -144,25 +144,51 @@ void _vfree(void *p, size_t size) {
     #endif
 }
 
-  #ifdef NMEMSIZE
+  #if defined(NMEMSIZE) 
 #define mempeakinit() 0
 #define mempeak() 0
   #elif defined(_WIN32)
+#include <windows.h>
 #include <psapi.h>
 #pragma comment(lib, "psapi.lib")
 
-static size_t g_baseline_commit = 0;
+static volatile size_t g_baseline   = 0;
+static volatile size_t g_peak       = 0;
+static volatile LONG   g_sampling   = 0;
+static HANDLE g_thread              = NULL;
 
 static inline size_t memused_commit(void) {
-PROCESS_MEMORY_COUNTERS_EX pmc;
-  pmc.cb = sizeof(pmc); 
-  if(!GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc))) return 0;
+  PROCESS_MEMORY_COUNTERS_EX pmc;
+  pmc.cb = sizeof(pmc);
+  if (!GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)))
+    return 0;
   return (size_t)pmc.PrivateUsage;
 }
 
-static inline size_t mempeakinit(void) { g_baseline_commit = memused_commit(); return g_baseline_commit; } // Record baseline
-static inline size_t mempeak(void)   { size_t current = memused_commit(); return (current > g_baseline_commit) ? (current - g_baseline_commit) : 0; }
+static DWORD WINAPI sampler_thread(LPVOID) {
+  while (InterlockedCompareExchange(&g_sampling, 1, 1)) {
+    size_t cur = memused_commit();
+    if (cur > g_peak) g_peak = cur;   // track running max
+      Sleep(0);                        // yield; use a small Sleep(1) if CPU matters
+  }
+  return 0;
+}
 
+static inline void mempeakinit(void) {
+  g_baseline = memused_commit();
+  g_peak     = g_baseline;
+  InterlockedExchange(&g_sampling, 1);
+  g_thread = CreateThread(NULL, 0, sampler_thread, NULL, 0, NULL);
+}
+
+static inline size_t mempeak(void) {
+  InterlockedExchange(&g_sampling, 0);
+  WaitForSingleObject(g_thread, INFINITE);
+  CloseHandle(g_thread);
+  size_t cur = memused_commit();
+  if (cur > g_peak) g_peak = cur;       // catch a final spike
+  return (g_peak > g_baseline) ? (g_peak - g_baseline) : 0;
+}
   #else
 static size_t mem_peak, mem_used;
 size_t mempeak() { return mem_peak; }
@@ -171,8 +197,7 @@ size_t memused() { return mem_used; }
 size_t mempeakinit() { mem_peak = mem_used = 0; return mem_peak; }
 
 void mem_add(size_t size) {
-  if((mem_used += size) > mem_peak)
-  { mem_peak = mem_used; }
+  if((mem_used += size) > mem_peak) mem_peak = mem_used;
 }
 
 void mem_sub(size_t size) {
@@ -251,7 +276,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size) {
   int rc = (*posix_memalign)(&p, alignment, size);
   if(p)
     mem_add(malloc_usable_size(p));
-  *memptr = p;
+  if(memptr) *memptr = p;
   return rc;
 }
 
