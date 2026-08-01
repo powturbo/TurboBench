@@ -223,7 +223,6 @@ static void *(*mem_realloc)(void*, size_t);
 static void  (*mem_free)(void *);
 static void *(*mem_memalign)(size_t, size_t);
 static int   (*mem_posix_memalign)(void**, size_t, size_t);
-
 static __attribute__((constructor)) void mem_init(void) {
   mem_malloc   = dlsym(RTLD_NEXT, "malloc" );
   mem_realloc  = dlsym(RTLD_NEXT, "realloc");
@@ -237,10 +236,9 @@ static __attribute__((constructor)) void mem_init(void) {
     #endif    
   if(!mem_malloc || !mem_calloc || !mem_realloc || !mem_free)
     die("malloc not found. mem_malloc:%d mem_calloc:%d mem_realloc:%d mem_free:%d\n", mem_malloc?1:0, mem_calloc?1:0, mem_realloc?1:0, mem_free?1:0);
-  printf("mem_init ok\n");
 }
 
-void *malloc(size_t size) { printf("[$"); fflush(stdout);
+void *malloc(size_t size) {
   if(!mem_malloc) {
     void *p = mem_heapp;
     if((mem_heapp += size) >= mem_heap+sizeof(mem_heap))
@@ -250,11 +248,10 @@ void *malloc(size_t size) { printf("[$"); fflush(stdout);
   void *p = (*mem_malloc)(size);
   if(p)
     mem_add(malloc_usable_size(p));
-  printf("]"); fflush(stdout);    
   return p;
 }
 
-void *calloc(size_t alignment, size_t size) { printf("[&"); fflush(stdout);
+void *calloc(size_t alignment, size_t size) {
   size_t _size = alignment*size;
   if(!mem_calloc) {
     void *p = mem_heapp;
@@ -266,11 +263,11 @@ void *calloc(size_t alignment, size_t size) { printf("[&"); fflush(stdout);
   void *p = (*mem_calloc)(alignment, size);
   if(p)
     mem_add(malloc_usable_size(p));
-    printf("]"); fflush(stdout);
   return p;
 }
 
 void *memalign(size_t alignment, size_t size) {
+  if(!memalign) die("memalign");
   mem_add(alignment*size);
   void *p = (*mem_memalign)(alignment, size);
   if(p)
@@ -278,29 +275,27 @@ void *memalign(size_t alignment, size_t size) {
   return p;
 }
 
-int posix_memalign(void **memptr, size_t alignment, size_t size) { printf("[="); fflush(stdout);
+int posix_memalign(void **memptr, size_t alignment, size_t size) {
+  if(!posix_memalign) die("posix_memalign");
   mem_add(alignment * size);
   int rc = (*posix_memalign)(memptr, alignment, size);
   if(*memptr)
     mem_add(malloc_usable_size(*memptr));
-    printf("]"); fflush(stdout);
   return rc;
 }
 
-void *realloc(void *p, size_t size) { printf("[+"); fflush(stdout);
+void *realloc(void *p, size_t size) {
   mem_sub(malloc_usable_size(p));
   if(p = (*mem_realloc)(p, size))
     mem_add(malloc_usable_size(p));
-printf("]"); fflush(stdout);    
   return p;
 }
 
-void free(void *p) { printf("[#"); fflush(stdout);
-  if(!p) // || p >= (void*)mem_heap && p < (void*)mem_heapp)
+void free(void *p) {
+  if(!p || p >= (void*)mem_heap && p < (void*)mem_heapp)
     return;
   mem_sub(malloc_usable_size(p));
   (*mem_free)(p);
-  printf("]"); fflush(stdout);
 }
 #endif
 
