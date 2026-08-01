@@ -165,7 +165,7 @@ endif
 
 C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
-ifneq ($(OS), Windows)  # not compiling for windows
+#ifneq ($(OS), Windows)  # not compiling for windows
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS
 #$(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
@@ -181,7 +181,7 @@ $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
 	cmake --build $(BUILDIR)/c-blosc2
 endif
 LDFLAGS += $(C_BLOSC2_LIB)
-endif
+#endif
 endif
 
 ifneq ($(wildcard ClickhouseXXX/.),)
