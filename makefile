@@ -165,7 +165,7 @@ endif
 
 C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
-#ifneq ($(OS), Windows)  # not compiling for windows
+ifneq ($(OS), Windows)  # not compiling for windows
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS
 #$(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
@@ -178,10 +178,10 @@ CXXFLAGS+=-D_C_BLOSC2
 C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
 $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
 	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF -DBUILD_SHARED=OFF
-	cmake --build $(BUILDIR)/c-blosc2 --config Release -j1
+	cmake --build $(BUILDIR)/c-blosc2
 endif
 LDFLAGS += $(C_BLOSC2_LIB)
-#endif
+endif
 endif
 
 ifneq ($(wildcard ClickhouseXXX/.),)
@@ -293,18 +293,11 @@ OB+=$(call obj,lzfse/src/lzfse_decode_base.o lzfse/src/lzfse_decode.o lzfse/src/
 endif
 
 #ifneq ($(and $(wildcard lzham_codec_devel/.),$(filter x86_64,$(ARCH))),)
-ifneq ($(wildcard lzham_codec_devel0/.),)
+ifneq ($(wildcard lzham_codec_devel/.),)
 ifneq ($(OS),$(filter $(OS),Darwin))
 CXXFLAGS+=-D_LZHAM -D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
 LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
-#LZHAM_SRCS := $(filter-out %/lzham_platform.cpp, $(LZHAM_SRCS))
-#LZHAM_SRCS := $(filter-out %/lzham_assert.cpp, $(LZHAM_SRCS))
-
-$(BUILDIR)/lzham_codec_devel/lzhamdecomp/lzham_platform.o: lzham_codec_devel/lzhamdecomp/lzham_platform.cpp
-	@mkdir -p $(dir $@)
-	$(CC) -O3 $(MARCH) $(CXXFLAGS) $< -c -o $@
-
 OB += $(call obj,$(LZHAM_SRCS))
 ifeq ($(OS), Windows)
 OB += $(call obj,lzham_codec_devel/lzhamcomp/lzham_win32_threading.o)
