@@ -160,7 +160,7 @@ PROCESS_MEMORY_COUNTERS_EX pmc;
   return (size_t)pmc.PrivateUsage;
 }
 
-static inline void mempeakinit(void) { g_baseline_commit = memused_commit(); } // Record baseline
+static inline size_t mempeakinit(void) { g_baseline_commit = memused_commit(); return g_baseline_commit; } // Record baseline
 static inline size_t mempeak(void)   { size_t current = memused_commit(); return (current > g_baseline_commit) ? (current - g_baseline_commit) : 0; }
 
   #else
