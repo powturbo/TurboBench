@@ -147,7 +147,8 @@ void _vfree(void *p, size_t size) {
   #if defined(NMEMSIZE) 
 #define mempeakinit() 0
 #define mempeak() 0
-  #elif defined(_WIN32)
+#define mem_init()
+  #elif 0 //defined(_WIN32)
 #include <windows.h>
 #include <psapi.h>
 #pragma comment(lib, "psapi.lib")
@@ -160,7 +161,7 @@ static HANDLE g_thread              = NULL;
 static inline size_t memused_commit(void) {
   PROCESS_MEMORY_COUNTERS_EX pmc;
   pmc.cb = sizeof(pmc);
-  if (!GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)))
+  if(!GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)))
     return 0;
   return (size_t)pmc.PrivateUsage;
 }
@@ -233,7 +234,6 @@ static __attribute__((constructor)) void mem_init(void) {
     #endif    
   if(!mem_malloc || !mem_calloc || !mem_realloc || !mem_free)
     die("malloc not found. mem_malloc:%d mem_calloc:%d mem_realloc:%d mem_free:%d\n", mem_malloc?1:0, mem_calloc?1:0, mem_realloc?1:0, mem_free?1:0);
-  printf("mem_init\n"); fflush(stdout);
 }
 
 void *malloc(size_t size) {
@@ -1919,8 +1919,9 @@ int main(int argc, char* argv[]) {
   unsigned long long filenmax = 0;
   char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049];
   char               *_argvx[1], **argvx=_argvx;                                          if(verbose > 5) printf("START1\n");fflush(stdout);
+  mem_init();
   { char *p = malloc(20); if(p) free(p); }       
-  printf("start\n"); 
+
   int c, digit_optind = 0;                                              
   for(;;) {
     int this_option_optind = optind ? optind : 1;
