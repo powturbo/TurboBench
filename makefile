@@ -298,10 +298,12 @@ ifneq ($(OS),$(filter $(OS),Darwin))
 CXXFLAGS+=-D_LZHAM -D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
 LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
+#LZHAM_SRCS := $(filter-out %/lzham_platform.cpp, $(LZHAM_SRCS))
+#LZHAM_SRCS := $(filter-out %/lzham_assert.cpp, $(LZHAM_SRCS))
 
 $(BUILDIR)/lzham_codec_devel/lzhamdecomp/lzham_platform.o: lzham_codec_devel/lzhamdecomp/lzham_platform.cpp
 	@mkdir -p $(dir $@)
-	$(CC) -O3 -D_MS_VER $(MARCH) $(CXXFLAGS) $< -c -o $@
+	clang -O3 -D_MSC_VER $(MARCH) $(CXXFLAGS) $< -c -o $@
 
 OB += $(call obj,$(LZHAM_SRCS))
 ifeq ($(OS), Windows)
