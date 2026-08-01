@@ -74,6 +74,9 @@
 #include "time_.h"
 #include "plugin.h"
 
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
 #define RATIO(_clen_, _len_)           ((double)(_clen_)*100.0/(double)(_len_))
 #define FACTOR(_clen_, _len_)          ((double)(_len_)/(double)(_clen_))
 #define SCORE(_clen_, _len_,_tc_,_td_) (_tc_ + 10.0 * _td_ + (double)_clen_/1000000.0)
@@ -513,14 +516,17 @@ struct plugg {
 };
 
 struct plugg plugg[] = {
-  { "FASTEST",   "lzturbo,10,11,12,19,20,21,22,29/lz4,1/lizard,10/chameleon,1,2/memcpy",                        "Fastest de-/compression. HDD/SSD/RAM speed" },
-  { "FAST",      "lzturbo,10,10a,11,12,20,20a,21,22,30,30a,31,32/zlib,1,6,9/brotli,0,1,4,5/lz4,1/zstd,1,5,9/memcpy","lz4,lzturbo,zlib class" },
-  { "EFFICIENT", "lzturbo,21,22,30,30a,31,32/brotli,4,5/zlib,5,6/zstd,5,9/zling,4/memcpy",                          "Compression speed > 'zlib 6' class" },
-  { "MAX",       "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lizard,19,29,39,49/lzlib,9/zstd,22/memcpy",                    "Best compression (slow)" },
-  { "OPTIMAL",   "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lizard,49/lzlib,19,29,39,49/zstd,22/zopfli/memcpy",            "Optimal compression (slow)" },
-  { "BWT",       "bsc_st,4,5/bsc,2/bcm/bzip2/memcpy/",                                                                      "ST & BWT" },
-  { "ECODER",    "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/memcpy/", "Entropy coder" },
+  { "TURBO",     "lzturbo,10,11,12,19,20,21,22,29/lz4,1/lizard,10/chameleon,1,2/zxc,3,4,5/misa77,0,1,2/zxc,3/memcpy", "Fastest de-/compression. HDD/SSD/RAM speed" },
+  { "FAST",      "lzturbo,10,10a,11,12,20,20a,21,22,30,30a,31,32/zlib,1,6,9/libdeflate,1,6,9/brotli,0,1,4,5/lz4,1,5,9/lzav/zstd,1,5,9/misa77,0,1,2,3,4/zlib_ng,1,6/igzip,1,2,3/zxc,3,4,5,6,7/memcpy", "lz4,lzturbo,zlib class" },
+  { "EFFICIENT", "lzturbo,21,22,30,30a,31,32/brotli,4,5/zlib,5,6/zstd,5,9/zling,4/memcpy", "Compression speed > 'zlib 6' class" },
+  { "MAX",       "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lizard,19,29,39,49/lzlib,9/libdeflate,12/zstd,22/memcpy""Best compression (slow)" },
+  { "OPTIMAL"    "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/libdeflate,12/lizard,49/lzlib,19,29,39,49/zstd,22/zopfli/memcpy", "Optimal compression (slow)" },
+  { "BWT"        "bsc_st,4,5/bsc,2/bcm/bzip2/bzip3/turborc,20e8,20e9/memcpy", "ST & BWT" },
+  { "ECODER"     "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/pivco,0,1/memcpy",  "Entropy coder" },
+  { "MEMCPY"     "imemcpy/memcpy", "memcpy" },
+  { "WEB"        "zlib,1,6,9/libdeflate,1,6,9,12/zlib_ng,1,6,9/igzip,0,1,2,3/zopfli/brotli,1,2,4,5,11/slz,1,6,9/zstd,1,9,15,22", "web/http compression"}
 };
+
 #define PLUGGSIZE (sizeof(plugg)/sizeof(plugg[0]))
 #define INVLEV -9999
 
@@ -1916,7 +1922,7 @@ int main(int argc, char* argv[]) {
   int xstdout=-1,xstdin=-1;
   int                recurse  = 0, xplug = 0,tm_Repk=1,plot=-1,fmt=0,fno,merge=0,rprio=1;
   unsigned           bsize    = 1u<<30, bsizex=0;
-  unsigned long long filenmax = 0;
+  unsigned long long filenmax = 0, *inidir = NULL;
   char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049];
   char               *_argvx[1], **argvx=_argvx;                                          if(verbose > 5) printf("START1\n");fflush(stdout);
   mem_init();
@@ -1930,7 +1936,7 @@ int main(int argc, char* argv[]) {
       { "help",     0, 0, 'h'},
       { 0,          0, 0, 0}
     };
-    if((c = getopt_long(argc, argv, "0:1:2:3:4:5:6:7:8:9:A:b:B:C:d:De:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oO:Pp:Q:r:Rs:S:t:T:Uv:V:W:w:X:x:Y:y:Z:z:", long_options, &option_index)) == -1) break;
+    if((c = getopt_long(argc, argv, "0:1:2:3:4:5:6:7:8:9:A:b:B:C:d:De:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:n:oO:Pp:Q:r:Rs:S:t:T:Uv:V:W:w:X:x:Y:y:Z:z:", long_options, &option_index)) == -1) break;
     switch(c) {
       case 0:
         printf("Option %s", long_options[option_index].name);
@@ -1959,6 +1965,7 @@ int main(int argc, char* argv[]) {
       case 'M': beb      = optarg;                   break;
       case 'm': mode++;                              break;
       case 'N': delim    = atoi(optarg);             break;
+      case 'n': inidir   = optarg;                   break;
       case 'o': xstdout++;                           break;
       case 'p': fmt      = atoi(optarg);             break;
       case 'P': mcpy++;                              break;
@@ -2015,18 +2022,19 @@ int main(int argc, char* argv[]) {
     setpriority(PRIO_PROCESS, 0, -19);
       #endif
   }
-  if(!scmd) scmd = "FAST";                                                              if(verbose > 5) printf("%s\n", scmd);fflush(stdout);
+  if(!scmd) scmd = "FAST";                                                          if(verbose > 5) printf("%s\n", scmd);fflush(stdout);
   for(s[0] = 0;;) {
     char *q;
     int  i = 0;
     if(!*scmd) break;
     if(q = strchr(scmd,'/')) *q = '\0';
     FILE *fi = fopen("turbobench.ini", "r");
+    if(!fi) { char sf[256]; snprintf(sf, 256, "%s/turbobench.ini", inidir); fi = fopen(sf, "r"); }
     if(fi) {
       char ss[LSIZE+1];
       while(fgets(ss, LSIZE, fi)) {
         char *t = ss,*u;
-        while(isspace(*t)) t++; u = t; while(isalnum(*u) || ispunct(*u)) u++; *u = 0;
+        while(isspace(*t)) t++; u = t; while(isalnum(*u) || ispunct(*u)) u++; *u = 0;  //printf("search:%s\n ", t);
         if(!strcmp(scmd, t)) {
           for(t = ++u; isspace(*t); t++);
           u = t; while(isalnum(*u) || ispunct(*u)) u++; *u = 0;
