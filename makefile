@@ -303,7 +303,7 @@ LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
 
 $(BUILDIR)/lzham_codec_devel/lzhamdecomp/lzham_platform.o: lzham_codec_devel/lzhamdecomp/lzham_platform.cpp
 	@mkdir -p $(dir $@)
-	clang -O3 -D_MSC_VER $(MARCH) $(CXXFLAGS) $< -c -o $@
+	$(CC) -O3 $(MARCH) $(CXXFLAGS) $< -c -o $@
 
 OB += $(call obj,$(LZHAM_SRCS))
 ifeq ($(OS), Windows)
