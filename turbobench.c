@@ -240,7 +240,7 @@ static __attribute__((constructor)) void mem_init(void) {
   printf("mem_init ok\n");
 }
 
-void *malloc(size_t size) {
+void *malloc(size_t size) { printf("[$"); fflush(stdout);
   if(!mem_malloc) {
     void *p = mem_heapp;
     if((mem_heapp += size) >= mem_heap+sizeof(mem_heap))
@@ -250,10 +250,11 @@ void *malloc(size_t size) {
   void *p = (*mem_malloc)(size);
   if(p)
     mem_add(malloc_usable_size(p));
+  printf("]"); fflush(stdout);    
   return p;
 }
 
-void *calloc(size_t alignment, size_t size) {
+void *calloc(size_t alignment, size_t size) { printf("[&"); fflush(stdout);
   size_t _size = alignment*size;
   if(!mem_calloc) {
     void *p = mem_heapp;
@@ -265,6 +266,7 @@ void *calloc(size_t alignment, size_t size) {
   void *p = (*mem_calloc)(alignment, size);
   if(p)
     mem_add(malloc_usable_size(p));
+    printf("]"); fflush(stdout);
   return p;
 }
 
@@ -276,26 +278,29 @@ void *memalign(size_t alignment, size_t size) {
   return p;
 }
 
-int posix_memalign(void **memptr, size_t alignment, size_t size) {
+int posix_memalign(void **memptr, size_t alignment, size_t size) { printf("[="); fflush(stdout);
   mem_add(alignment * size);
   int rc = (*posix_memalign)(memptr, alignment, size);
   if(*memptr)
     mem_add(malloc_usable_size(*memptr));
+    printf("]"); fflush(stdout);
   return rc;
 }
 
-void *realloc(void *p, size_t size) {
+void *realloc(void *p, size_t size) { printf("[+"); fflush(stdout);
   mem_sub(malloc_usable_size(p));
   if(p = (*mem_realloc)(p, size))
     mem_add(malloc_usable_size(p));
+printf("]"); fflush(stdout);    
   return p;
 }
 
-void free(void *p) {
-  if(!p || p >= (void*)mem_heap && p < (void*)mem_heapp)
+void free(void *p) { printf("[#"); fflush(stdout);
+  if(!p) // || p >= (void*)mem_heap && p < (void*)mem_heapp)
     return;
   mem_sub(malloc_usable_size(p));
   (*mem_free)(p);
+  printf("]"); fflush(stdout);
 }
 #endif
 
@@ -1926,8 +1931,6 @@ int main(int argc, char* argv[]) {
   unsigned long long filenmax = 0, *inidir = NULL;
   char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049];
   char               *_argvx[1], **argvx=_argvx;                                          if(verbose > 5) printf("START1\n");fflush(stdout);
-  mem_init();
-  //{ char *p = malloc(20); if(p) free(p); }       
 
   int c, digit_optind = 0;                                              
   for(;;) {
