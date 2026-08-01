@@ -123,7 +123,7 @@ endif
 
 # disable peak memory calculation
 ifeq ($(OS),$(filter $(OS),Darwin))
-NMEMSIZE=1
+#NMEMSIZE=1
 endif
 
 ifdef NMEMSIZE
