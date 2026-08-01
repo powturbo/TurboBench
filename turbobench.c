@@ -147,7 +147,7 @@ void _vfree(void *p, size_t size) {
     #endif
 }
 
-  #if defined(NMEMSIZE) 
+  #if defined(NMEMSIZE) || defined(_WIN32) 
 #define mempeakinit() 0
 #define mempeak() 0
 #define mem_init()
@@ -237,6 +237,7 @@ static __attribute__((constructor)) void mem_init(void) {
     #endif    
   if(!mem_malloc || !mem_calloc || !mem_realloc || !mem_free)
     die("malloc not found. mem_malloc:%d mem_calloc:%d mem_realloc:%d mem_free:%d\n", mem_malloc?1:0, mem_calloc?1:0, mem_realloc?1:0, mem_free?1:0);
+  printf("mem_init ok\n");
 }
 
 void *malloc(size_t size) {
@@ -687,13 +688,13 @@ int plugreg(plug_t *plug, char *cmd, int k, unsigned bsize, unsigned bsizex) {
           char s[33],*q;
           sprintf(s,"%d", lev);
           found++;
-          if(lev==INVLEV && gs->lev && !gs->lev[0] || gs->lev && (q=strstr(gs->lev, s)) && (q==gs->lev || *(q-1) == ',')) {
+          if(lev == INVLEV && gs->lev && !gs->lev[0] || gs->lev && (q=strstr(gs->lev, s)) && (q==gs->lev || *(q-1) == ',')) {
             found++;
             plugins(plug, gs, &k, bsize, bsizex, lev, prm);
           }
           break;
         }
-      if(found<2 && !ignore) {
+      if(found < 2 && !ignore) {
         if(!found)
           fprintf(stderr, "codec '%s' not found\n", name);
         else if(lev == INVLEV)
@@ -1926,7 +1927,7 @@ int main(int argc, char* argv[]) {
   char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049];
   char               *_argvx[1], **argvx=_argvx;                                          if(verbose > 5) printf("START1\n");fflush(stdout);
   mem_init();
-  { char *p = malloc(20); if(p) free(p); }       
+  //{ char *p = malloc(20); if(p) free(p); }       
 
   int c, digit_optind = 0;                                              
   for(;;) {
