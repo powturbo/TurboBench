@@ -174,11 +174,12 @@ static DWORD WINAPI sampler_thread(LPVOID) {
   return 0;
 }
 
-static inline void mempeakinit(void) {
+static inline size_t mempeakinit(void) {
   g_baseline = memused_commit();
   g_peak     = g_baseline;
   InterlockedExchange(&g_sampling, 1);
   g_thread = CreateThread(NULL, 0, sampler_thread, NULL, 0, NULL);
+  return g_baseline;
 }
 
 static inline size_t mempeak(void) {
