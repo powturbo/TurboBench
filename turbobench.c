@@ -1607,7 +1607,7 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
         if(in+inlen>_in+_inlen) inlen = (_in+_inlen)-in;
       } else inlen = _inlen;
 
-      for(ip = in, in += inlen; ip < in; ) {                                                //printf(".");fflush(stdout);
+      for(ip = in, in += inlen; ip < in; ) {                                                
         size_t iplen = in - ip; iplen = min(iplen, bsize);
         bs = (mode || bsize < inlen)?((min(bsize, iplen) < (1<<16))?2:4):0;
         size_t oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);
@@ -1759,7 +1759,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     fseeko(fi, 0, SEEK_END); filen = ftello(fi); fseeko(fi , 0 , SEEK_SET); if(filenmax && filen > filenmax) filen = filenmax;
   } else
     filen = filenmax?filenmax:Gb;
-                                                                                                //printf("filelenmax=%llu filen=%llu bsize=%u ", filenmax, (unsigned long long)filen, (unsigned)bsize);
+                                                                                              
   size_t insize   = filen>bsize?bsize:filen;                                                   if(filen < mininlen) insize = mininlen;
   size_t pagesize = getpagesize();
   size_t insizem  = (fuzz&3)?SIZE_ROUNDUP(insize, pagesize):(insize+INOVD);
@@ -1781,7 +1781,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
   plug->len = plug->tc = plug->td = 0;
                                                                                 blknum = 0;
 
-  while((inlen = fread(_in, 1, insize, fi)) > 0) {                              //printf("READ=%zu ", inlen);
+  while((inlen = fread(_in, 1, insize, fi)) > 0) {                              
     double        tc = 0.0, td = 0.0;
     unsigned char *in = _in;
     size_t        len = inlen;
@@ -1923,7 +1923,7 @@ int main(int argc, char* argv[]) {
   int xstdout=-1,xstdin=-1;
   int                recurse  = 0, xplug = 0,tm_Repk=1,plot=-1,fmt=0,fno,merge=0,rprio=1;
   unsigned           bsize    = 1u<<30, bsizex=0;
-  unsigned long long filenmax = 0, *inidir = NULL;
+  unsigned long long filenmax = 0;
   char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049];
   char               *_argvx[1], **argvx=_argvx;                                          if(verbose > 5) printf("START1\n");fflush(stdout);
 
@@ -1935,7 +1935,7 @@ int main(int argc, char* argv[]) {
       { "help",     0, 0, 'h'},
       { 0,          0, 0, 0}
     };
-    if((c = getopt_long(argc, argv, "0:1:2:3:4:5:6:7:8:9:A:b:B:C:d:De:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:n:oO:Pp:Q:r:Rs:S:t:T:Uv:V:W:w:X:x:Y:y:Z:z:", long_options, &option_index)) == -1) break;
+    if((c = getopt_long(argc, argv, "0:1:2:3:4:5:6:7:8:9:A:b:B:C:d:De:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oO:Pp:Q:r:Rs:S:t:T:Uv:V:W:w:X:x:Y:y:Z:z:", long_options, &option_index)) == -1) break;
     switch(c) {
       case 0:
         printf("Option %s", long_options[option_index].name);
@@ -1964,7 +1964,6 @@ int main(int argc, char* argv[]) {
       case 'M': beb      = optarg;                   break;
       case 'm': mode++;                              break;
       case 'N': delim    = atoi(optarg);             break;
-      case 'n': inidir   = optarg;                   break;
       case 'o': xstdout++;                           break;
       case 'p': fmt      = atoi(optarg);             break;
       case 'P': mcpy++;                              break;
