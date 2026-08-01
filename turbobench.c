@@ -1804,7 +1804,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     _vfree(_cpy, insizem);
   codexit(plug->id);
   fclose(fi);
-  if(verbose) { printf("\n"); fflush(stdout); }
+  if(tm_verbose) { printf("\n"); fflush(stdout); }
   //if(verbose && filen > insize) plugprt(plug, totinlen, finame, FMT_TEXT, &ptc, &ptd,stdout);
   //if(memused()) printf("Mem allocated not freed null\n");
   return totinlen;
