@@ -989,7 +989,7 @@ $(BUILDIR)/plugin.o: plugin.cc $(C_BLOSC2_LIB) $(ISAL_LIB) $(OPENZL_LIB) $(ZLIB_
 
 
 turbobench: $(OB) $(BUILDIR)/turbobench.o $(BUILDIR)/plugin.o
-	$(CXX) $^ $(LDFLAGS) -o $(BUILDIR)/turbobench
+	$(CXX) $^ $(LDFLAGS) -o turbobench
 
 $(BUILDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
