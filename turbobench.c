@@ -72,6 +72,7 @@
 #include <time.h>
 #include "conf.h"
 #include "time_.h"
+#include "cpu.h"
 #include "plugin.h"
 
 #define STRINGIFY(x) #x
@@ -80,6 +81,8 @@
 #define RATIO(_clen_, _len_)           ((double)(_clen_)*100.0/(double)(_len_))
 #define FACTOR(_clen_, _len_)          ((double)(_len_)/(double)(_clen_))
 #define SCORE(_clen_, _len_,_tc_,_td_) (_tc_ + 10.0 * _td_ + (double)_clen_/1000000.0)
+
+char _cpubrand[65];
 
 double weissman(double ratio, double bandwith, double bandwithlo, double bandwithhi ) {
   return ratio * log10( 1 + bandwith/(bandwithlo*ratio) ) - (bandwithhi > 0?ratio * log10( 1 + bandwith/(bandwithhi*ratio) ):0.0);
@@ -1051,16 +1054,23 @@ bandwidth_t bw[] = {
 };
 #define BWSIZE (sizeof(bw)/sizeof(bandwidth_t))
 
+char *tm2yyyymmdd(time_t t, char *buf, size_t bufsize) {
+  struct tm *tm = localtime(&t);   // use gmtime(&t) for UTC
+  if(!tm) { snprintf(buf, bufsize, "????.??.?? ??:??"); return; }
+  strftime(buf, bufsize, "%Y.%m.%d %H:%M", tm);
+  return buf;
+}
+
 void plugprth(FILE *f, int fmt, char *t) {
   char *plot  = "<script src=https://cdn.plot.ly/plotly-latest.min.js></script>";
   char *jquery = "<script src=\"http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js\"></script>";
   char *tstyle = "<link rel=\"stylesheet\" href=\"http://tablesorter.com/themes/blue/style.css\" type=\"text/css\" media=\"print, projection, screen\" />";
   char *table  = "<script type=\"text/javascript\" src=\"http://tablesorter.com/__jquery.tablesorter.min.js\"></script>";
   char *code   = "<script type=\"text/javascript\">$(function() {       $(\"#myTable\").tablesorter({sortList:[[0,0],[2,1]], widgets: ['zebra']});      $(\"#options\").tablesorter({sortList: [[0,0]], headers: { 3:{sorter: false}, 4:{sorter: false}}}); }); </script><script type=\"text/javascript\" src=\"http://tablesorter.com/__jquery.tablesorter.min.js\"></script><script type=\"text/javascript\">$(function() {       $(\"#myTable2\").tablesorter({sortList:[[0,0],[2,1]], widgets: ['zebra']});     $(\"#options\").tablesorter({sortList: [[0,0]], headers: { 3:{sorter: false}, 4:{sorter: false}}}); }); </script>";
-  char s[128];
+  char s[128+1], ts[64];  
   time_t tm;
-  time(&tm);
-  sprintf(s, "TurboBench: %s - %s", t, asctime(localtime(&tm)));
+  time(&tm); strcpy(ts,asctime(localtime(&tm))); ts[strlen(ts)-1] = 0;
+  snprintf(s, 128, "TurboBench:%s %s - %s", t, tm2yyyymmdd(tm, ts, 64), _cpubrand);
 
   switch(fmt) {
     case FMT_TEXT:
@@ -1853,7 +1863,7 @@ void usage(char *pgm, int bsize) {
       #endif
   snprintf(buffer, size, "%d.%02d.%05d", _MSC_VER / 100, minor = _MSC_VER % 100, build);
     #endif
-  fprintf(stderr, "\nTurboBench Copyright (c) 2013-2026 Powturbo %s [%s]\n", __DATE__, s);
+  fprintf(stderr, "\nTurboBench Copyright (c) 2013-2026 Powturbo %s [%s] | %s\n", __DATE__, s, _cpubrand);
   fprintf(stderr, "Usage: %s [options] [file]\n", pgm);
   fprintf(stderr, " -eS      S = compressors/groups separated by '/' levels can be specified after ','. Ex. -ezlib,1/FAST\n");
   fprintf(stderr, " -b#s     # = blocksize {%d}\n", bsize);
@@ -1897,6 +1907,7 @@ void usage(char *pgm, int bsize) {
   fprintf(stderr, "ex. ./turbobench enwik9 -eFAST/OPTIMAL/bsc,0:e2 -i0\n");
   fprintf(stderr, "ex. ./turbobench eECODER -k\"entropy coder test\"\n");
   fprintf(stderr, "ex. ./turbobench enwik9 -elzma,9:fb273:lc2:lp2:t2\n");
+  fprintf(stderr, "\n");
   exit(0);
 }
 
@@ -1926,7 +1937,9 @@ int main(int argc, char* argv[]) {
   unsigned long long filenmax = 0;
   char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049];
   char               *_argvx[1], **argvx=_argvx;                                          if(verbose > 5) printf("START1\n");fflush(stdout);
-
+  
+  cpubrand(_cpubrand, 64); 
+  
   int c, digit_optind = 0;                                              
   for(;;) {
     int this_option_optind = optind ? optind : 1;
