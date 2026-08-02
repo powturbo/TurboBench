@@ -20,8 +20,10 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - **100% in-memory** testing — no disk I/O to skew your results.
 - Supports **multiple files**, recursive directories, and smart concatenation of small files into multiblock tests.
 - Built to avoid common pitfalls like cache scenarios and throttling found in other tools.
+- Unlock peak performance — TurboBench reduces **throttling** by intelligently controlling the **CPU frequency**
 - Automatic sorting, updating, and merging of result files.
 - A **nightly github release** is created automatically whenever submodules change.
+
 
 ## Broad Platform Support
 
