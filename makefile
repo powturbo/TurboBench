@@ -205,7 +205,7 @@ ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name 
 ISAL_LIB := isa-l/bin/isa-l.a 
 $(ISAL_LIB): $(ISAL_SRCS)
 	mkdir -p $(BUILDIR)/isa-l
-	mkdir -p isa-l/bin
+	mkdir -p $(BUILDIR)/isa-l/bin
 	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILDIR)/isa-l)
 LDFLAGS += $(ISAL_LIB)
 endif
@@ -682,7 +682,7 @@ OB += $(PIVCO_LIB)
 # PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor; level = zstd level). Built from the pivco-huffman submodule's extras/phaz via
 # its own build.sh: patches a private zstd copy (TurboBench's pinned zstd/ SHA 5233c58e) and merges it + pivco into phaz_local.o exporting only
 # phaz_compress / phaz_decompress. Requires: git submodule update --init --recursive pivco-huffman zstd
-#ifneq ($(OS), Windows)
+ifneq ($(PHAZ), 0)
 CXXFLAGS     += -D_PHAZ
 PHAZ_DIR      = $(PIVCODIR)/extras/phaz
 PHAZ_BDIR     = $(PIVCODIR)/build
@@ -696,7 +696,7 @@ $(PHAZ_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
 OB += $(PHAZ_LIB)
 endif
 LDFLAGS += -lm
-#endif
+endif
 endif
 
 ifdef RECIPARITH
