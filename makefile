@@ -686,7 +686,6 @@ ifneq ($(PHAZ), 0)
 CXXFLAGS     += -D_PHAZ
 PHAZ_DIR      = $(PIVCODIR)/extras/phaz
 PHAZ_BDIR     = $(PIVCODIR)/build
-#PHAZ_BDIR     = $(BUILDIR)/$(PIVCODIR)
 PHAZ_LIB      = $(PHAZ_DIR)/build/phaz_local.o
 $(PHAZ_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
 	@mkdir -p $(PHAZ_BDIR)
@@ -724,9 +723,9 @@ CXXFLAGS += -D_TURBORC
 TRC_DIR  := Turbo-Range-Coder
 TRC_BDIR := $(BUILDIR)/$(TRC_DIR)
 CFLAGS   += -D_ANS -D_BWT -I$(TRC_DIR)/libsais/include 
-OB+=$(TRC_BDIR)/anscdfs.o $(TRC_BDIR)/cpu.o $(TRC_BDIR)/rc_ss.o $(TRC_BDIR)/rc_s.o $(TRC_BDIR)/rccdf.o $(TRC_BDIR)/rcutil.o $(TRC_BDIR)/bec_b.o $(TRC_BDIR)/rccm_s.o $(TRC_BDIR)/rccm_ss.o \
+OB+=$(TRC_BDIR)/anscdfs.o $(TRC_BDIR)/rc_ss.o $(TRC_BDIR)/rc_s.o $(TRC_BDIR)/rccdf.o $(TRC_BDIR)/rcutil.o $(TRC_BDIR)/bec_b.o $(TRC_BDIR)/rccm_s.o $(TRC_BDIR)/rccm_ss.o \
   $(TRC_BDIR)/rcqlfc_s.o $(TRC_BDIR)/rcqlfc_ss.o $(TRC_BDIR)/rcqlfc_sf.o $(TRC_BDIR)/rcbwt.o $(TRC_BDIR)/libsais/src/libsais16.o
-
+#$(TRC_BDIR)/cpu.o 
 $(TRC_BDIR)/anscdfs.o: $(TRC_DIR)/anscdf.c $(TRC_DIR)/anscdf_.h
 	@mkdir -p $(@D)
 	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
@@ -989,7 +988,7 @@ $(BUILDIR)/plugin.o: plugin.cc $(C_BLOSC2_LIB) $(ISAL_LIB) $(OPENZL_LIB) $(ZLIB_
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
 
 
-turbobench: $(OB) $(BUILDIR)/turbobench.o $(BUILDIR)/plugin.o
+turbobench: $(OB) $(BUILDIR)/turbobench.o $(BUILDIR)/plugin.o $(BUILDIR)/cpu.o
 	$(CXX) $^ $(LDFLAGS) -o turbobench
 
 $(BUILDIR)/%.o: %.c
