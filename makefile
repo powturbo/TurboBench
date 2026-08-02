@@ -165,9 +165,9 @@ endif
 
 C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
-ifneq ($(OS), Windows)  # not compiling for windows in CI
+ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ifdef CROSS_NOTWORKING  
+ifdef CROSS_NOTWORKING #ERROR IN C_BLOSC BUILD  
 CXXFLAGS+=-D_C_BLOSC2
 C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
 $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
