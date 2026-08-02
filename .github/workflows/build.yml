@@ -23,8 +23,11 @@ jobs:
       - run: git submodule update --init --recursive
       - name: Install NASM
         run: sudo apt-get update && sudo apt-get install -y nasm
+      - run: |
+          lscpu
+          which gcc g++ clang
+          ls -l $(which gcc)     
       - run: make STATIC=1      
-      - run: lscpu
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
 
