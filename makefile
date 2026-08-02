@@ -293,7 +293,6 @@ CXXFLAGS+=-D_LZFSE
 OB+=$(call obj,lzfse/src/lzfse_decode_base.o lzfse/src/lzfse_decode.o lzfse/src/lzfse_encode_base.o lzfse/src/lzfse_encode.o lzfse/src/lzfse_fse.o lzfse/src/lzvn_decode_base.o lzfse/src/lzvn_encode_base.o)
 endif
 
-#ifneq ($(and $(wildcard lzham_codec_devel/.),$(filter x86_64,$(ARCH))),)
 ifneq ($(wildcard lzham_codec_devel/.),)
 ifneq ($(OS),$(filter $(OS),Darwin))
 CXXFLAGS+=-D_LZHAM -D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp
@@ -474,7 +473,7 @@ ZLIB_NG_LIB = $(BUILDIR)/zlib-ng/libz-ng.a
 ifdef CROSS
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
 	export CC=$(CROSS)-linux-gnu-gcc && cmake -S zlib-ng -B $(BUILDIR)/zlib-ng -DBUILD_TESTING=OFF 
-	cmake --build $(BUILDIR)/zlib-ng --config Release
+	cmake -DWITH_NEON=OFF --build $(BUILDIR)/zlib-ng --config Release
 	cp $(BUILDIR)/zlib-ng/zconf-ng.h zlib-ng_
 else
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
