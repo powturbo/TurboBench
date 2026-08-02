@@ -70,15 +70,20 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
-          install: git make cmake rsync mingw-w64-x86_64-gcc
+          install: >-
+            git make cmake rsync
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-llvm
           update: true
       - run: git submodule update --init --recursive
-#      - name: Patch c-blosc2 merge_static_libs.cmake for Windows/MSYS2
-#        shell: bash
-#        run: |
-#          sed -i 's/CREATE ${_tmp}/CREATE ${_out_name_we}.merged${_out_ext}/' c-blosc2/cmake/merge_static_libs.cmake
-#          sed -i '/COMMAND "${AR}" -M/a \ WORKING_DIRECTORY "${_out_dir}"' c-blosc2/cmake/merge_static_libs.cmake
+      - name: Use llvm-ar (avoids MinGW ar temp-file issues)
+        run: |
+          echo "AR=llvm-ar"       >> $GITHUB_ENV
+          echo "CMAKE_AR=llvm-ar" >> $GITHUB_ENV
+          # also export for the current shell
+          export AR=llvm-ar
+          export CMAKE_AR=llvm-ar
+          which llvm-ar
       - run: make STATIC=1
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
-
