@@ -1056,7 +1056,7 @@ bandwidth_t bw[] = {
 
 char *tm2yyyymmdd(time_t t, char *buf, size_t bufsize) {
   struct tm *tm = localtime(&t);   // use gmtime(&t) for UTC
-  if(!tm) { snprintf(buf, bufsize, "????.??.?? ??:??"); return; }
+  if(!tm) { snprintf(buf, bufsize, "????.??.?? ??:??"); return buf; }
   strftime(buf, bufsize, "%Y.%m.%d %H:%M", tm);
   return buf;
 }
