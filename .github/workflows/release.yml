@@ -95,7 +95,7 @@ jobs:
       - name: Build (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
-        run: make STATIC=1
+        run: make STATIC=1 PHAZ=0
 
       # ---------------- Package (Linux/macOS) ----------------
       - name: Package artifact (Linux/macOS)
