@@ -186,7 +186,7 @@ char *cpubrand(char* brand, size_t max_len) {
   if(!fp) {
     strncpy(brand, "Unknown Linux CPU", max_len - 1);
     brand[max_len - 1] = '\0';
-    return;
+    return brand;
   }
   char line[256];
   brand[0] = '\0';
@@ -219,9 +219,10 @@ char *cpubrand(char* brand, size_t max_len) {
 }
     #endif
   #else
-void cpubrand(char* brand, size_t max_len) {
-    strncpy(brand, "Unsupported Architecture", max_len - 1);
-    brand[max_len - 1] = '\0';
+char *cpubrand(char* brand, size_t max_len) {
+  strncpy(brand, "Unkwoun Architecture", max_len - 1);
+  brand[max_len - 1] = '\0';
+  return brand;
 }
   #endif
 
