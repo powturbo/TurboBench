@@ -725,7 +725,6 @@ TRC_BDIR := $(BUILDIR)/$(TRC_DIR)
 CFLAGS   += -D_ANS -D_BWT -I$(TRC_DIR)/libsais/include 
 OB+=$(TRC_BDIR)/anscdfs.o $(TRC_BDIR)/rc_ss.o $(TRC_BDIR)/rc_s.o $(TRC_BDIR)/rccdf.o $(TRC_BDIR)/rcutil.o $(TRC_BDIR)/bec_b.o $(TRC_BDIR)/rccm_s.o $(TRC_BDIR)/rccm_ss.o \
   $(TRC_BDIR)/rcqlfc_s.o $(TRC_BDIR)/rcqlfc_ss.o $(TRC_BDIR)/rcqlfc_sf.o $(TRC_BDIR)/rcbwt.o $(TRC_BDIR)/libsais/src/libsais16.o
-#$(TRC_BDIR)/cpu.o 
 $(TRC_BDIR)/anscdfs.o: $(TRC_DIR)/anscdf.c $(TRC_DIR)/anscdf_.h
 	@mkdir -p $(@D)
 	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
