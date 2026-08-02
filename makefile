@@ -477,8 +477,8 @@ $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
 	cp $(BUILDIR)/zlib-ng/zconf-ng.h zlib-ng_
 else
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
-	cmake -S zlib-ng -B $(BUILDIR)/zlib-ng
-	cmake --build $(BUILDIR)/zlib-ng --config Release -DWITH_NEON=OFF
+	cmake -S zlib-ng -B $(BUILDIR)/zlib-ng -DWITH_NEON=OFF
+	cmake --build $(BUILDIR)/zlib-ng --config Release 
 	cp $(BUILDIR)/zlib-ng/zconf-ng.h zlib-ng_
 endif
 LDFLAGS += $(ZLIB_NG_LIB)
