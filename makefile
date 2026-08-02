@@ -472,12 +472,12 @@ ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -
 ZLIB_NG_LIB = $(BUILDIR)/zlib-ng/libz-ng.a
 ifdef CROSS
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cmake -S zlib-ng -B $(BUILDIR)/zlib-ng -DBUILD_TESTING=OFF 
-	cmake -DWITH_NEON=OFF --build $(BUILDIR)/zlib-ng --config Release
+	export CC=$(CROSS)-linux-gnu-gcc && cmake -S zlib-ng -B $(BUILDIR)/zlib-ng -DWITH_NEON=OFF -DBUILD_TESTING=OFF -DWITH_GTEST=OFF -DWITH_GZFILEOP=OFF 
+	cmake --build $(BUILDIR)/zlib-ng --config Release
 	cp $(BUILDIR)/zlib-ng/zconf-ng.h zlib-ng_
 else
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
-	cmake -S zlib-ng -B $(BUILDIR)/zlib-ng -DWITH_NEON=OFF
+	cmake -S zlib-ng -B $(BUILDIR)/zlib-ng -DWITH_NEON=OFF -DBUILD_TESTING=OFF -DWITH_GTEST=OFF -DWITH_GZFILEOP=OFF
 	cmake --build $(BUILDIR)/zlib-ng --config Release 
 	cp $(BUILDIR)/zlib-ng/zconf-ng.h zlib-ng_
 endif
@@ -682,20 +682,21 @@ OB += $(PIVCO_LIB)
 # PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor; level = zstd level). Built from the pivco-huffman submodule's extras/phaz via
 # its own build.sh: patches a private zstd copy (TurboBench's pinned zstd/ SHA 5233c58e) and merges it + pivco into phaz_local.o exporting only
 # phaz_compress / phaz_decompress. Requires: git submodule update --init --recursive pivco-huffman zstd
-ifneq ($(OS), Windows)
+#ifneq ($(OS), Windows)
 CXXFLAGS     += -D_PHAZ
 PHAZ_DIR      = $(PIVCODIR)/extras/phaz
 PHAZ_BDIR     = $(PIVCODIR)/build
+#PHAZ_BDIR     = $(BUILDIR)/$(PIVCODIR)
 PHAZ_LIB      = $(PHAZ_DIR)/build/phaz_local.o
 $(PHAZ_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
 	@mkdir -p $(PHAZ_BDIR)
 	cmake -S $(PIVCODIR) -B $(PHAZ_BDIR) -DCMAKE_BUILD_TYPE=Release
 	cmake --build $(PHAZ_BDIR) --target pivco_huffman_local -j
-	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) bash $(PHAZ_DIR)/tools/build.sh
+	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) PH=$(PIVCODIR) bash $(PHAZ_DIR)/tools/build.sh
 OB += $(PHAZ_LIB)
 endif
 LDFLAGS += -lm
-endif
+#endif
 endif
 
 ifdef RECIPARITH
