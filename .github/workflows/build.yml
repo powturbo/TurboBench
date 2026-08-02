@@ -25,8 +25,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y nasm
       - run: |
           lscpu
-          which gcc g++ clang
-          ls -l $(which gcc)     
+          gcc --version
+          clang --version || true     
       - run: make STATIC=1      
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
