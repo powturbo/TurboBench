@@ -274,10 +274,10 @@ enum {
 #define _SHRINKER 0
 #endif
  P_SHRINKER,
-#ifndef _SKIM
-#define _SKIM 0
+#ifndef _FIRETRAIL
+#define _FIRETRAIL 0
 #endif
- P_SKIM,
+ P_FIRETRAIL,
 #ifndef _LIBSLZ
 #define _LIBSLZ 0
 #endif
@@ -1174,9 +1174,11 @@ static int64_t _openzl_decompress(char *inbuf, size_t insize, char *outbuf, size
 extern "C" {
   #endif
 
-  #if _SKIM
-#include "skim/skim.h"
-  #endif
+  #if _FIRETRAIL
+#include "firetrail/firetrail.h"
+static firetrail_encoder_t *firetrail_encoder;
+static firetrail_decoder_t *firetrail_decoder;
+#endif 
 
   #if _BZIP3
 #include "bzip3/include/libbz3.h"
@@ -1669,7 +1671,7 @@ struct plugs plugs[] = {
   
   { P_QUICKLZ,       "quicklz",       _QUICKLZ,   "Quicklz",                  "1,2,3" },
   
-  { P_SKIM,          "skim",          _SKIM,      "skim",                     ""},
+  { P_FIRETRAIL,          "firetrail",          _FIRETRAIL,      "firetrail",                     ""},
   { P_SHRINKER,      "shrinker",      _SHRINKER,  "Shrinker",                 "", "", 0, (1<<26) },
   { P_SHOCO,         "shoco",         _SHOCO,     "Shoco",                    "" },
   { P_LIBSLZ,        "slz",           _LIBSLZ,    "libslz",                   "0,1,2,3,4,5,6,7,8,9" },
@@ -1815,11 +1817,6 @@ static zxc_cctx *zxc_cctx_ptr = NULL;
 static zxc_dctx *zxc_dctx_ptr = NULL;
 #endif
 
-#if _SKIM
-  skim_encoder_t* skim_encoder;
-  skim_decoder_t* skim_decoder;
-#endif
-
 int codini(size_t insize, int codec, int lev, char *prm) {
   workmemsize = 0;
 
@@ -1838,6 +1835,17 @@ int codini(size_t insize, int codec, int lev, char *prm) {
 
       #if _FASTARI
     case P_FASTARI: workmemsize = FA_WORKMEM; break;
+      #endif
+
+      #if _LIBBSC
+    #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING)      
+    case P_LIBBSC: case P_LIBBSCC: bsc_init(BSC_MODE); bsc_st_init(BSC_MODE); break;
+      #endif
+
+      #if _LIBSLZ
+    case P_LIBSLZ:
+      slz_make_crc_table();
+      slz_prepare_dist_table();
       #endif
 
       #if _LZFSE
@@ -1927,30 +1935,17 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       break;
       #endif
 
+      #if _FIRETRAIL
+    firetrail_encoder = firetrail_encoder_create();
+    firetrail_decoder = firetrail_decoder_create();
+      #endif
+
       #if _SNAPPY_C
     case P_SNAPPY_C: snappy_init_env(&env); break;
       #endif
 
       #if _TAMP
     case P_TAMP: workmemsize = 1 << lev; break;
-      #endif
-
-      #if _LIBBSC
-    #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING)      
-    case P_LIBBSC: case P_LIBBSCC: bsc_init(BSC_MODE); bsc_st_init(BSC_MODE); break;
-      #endif
-
-      #if _SKIM
-    case P_SKIM:
-      skim_encoder = skim_encoder_create();
-      skim_decoder = skim_decoder_create();
-      break;
-      #endif
-
-      #if _LIBSLZ
-    case P_LIBSLZ:
-      slz_make_crc_table();
-      slz_prepare_dist_table();
       #endif
 
       #if _SSERC
@@ -2028,10 +2023,10 @@ void codexit(int codec) {
       snappy_free_env(&env);
       #endif
 
-      #if _SKIM
-    if(codec == P_SKIM) {
-      if(skim_encoder) skim_encoder_destroy(skim_encoder); skim_encoder = NULL;
-      if(skim_decoder) skim_decoder_destroy(skim_decoder); skim_decoder = NULL;
+      #if _FIRETRAIL
+    if(codec == P_FIRETRAIL) {
+      if(firetrail_encoder) firetrail_encoder_destroy(firetrail_encoder); firetrail_encoder = NULL;
+      if(firetrail_decoder) firetrail_decoder_destroy(firetrail_decoder); firetrail_decoder = NULL;
     }  
       #endif
     
@@ -2506,10 +2501,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_QUICKLZ: { memset(workmem,0,workmemsize); return lev<=1?qlz_compress1((char *)in, (char *)out, inlen, workmem):(lev<=2?qlz_compress2((char *)in, (char *)out, inlen, workmem):qlz_compress3((char *)in, (char *)out, inlen, workmem)); }
       #endif
 
-      #if _SKIM
-    case P_SKIM: 
-      #endif
-      
       #if _LIBSLZ
     case P_LIBSLZ: { if(lev > 7) lev = 7;
       unsigned blk = 16384 << lev;
@@ -2540,10 +2531,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_SHRINKER: return shrinker_compress((char *)in, (char *)out, inlen);
       #endif
 
-      #if _SKIM
-    case P_SKIM:  skim_encoder_reset(skim_encoder);  return skim_encoder_compress(skim_encoder, (const uint8_t*)in, inlen, (uint8_t*)out);
+      #if _FIRETRAIL
+    case P_FIRETRAIL:  firetrail_encoder_reset(firetrail_encoder);  return firetrail_encoder_compress(firetrail_encoder, (const uint8_t*)in, inlen, (uint8_t*)out);
       #endif
-
+    
       #if _SNAPPY
         #if __cplusplus
     case P_SNAPPY:    { size_t outlen=outsize; snappy::RawCompress((char *)in, inlen, (char*)out, &outlen); return outlen;}
@@ -3362,12 +3353,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_QUICKLZ: { lev= (in[0]>>2)&3; outlen = lev<=1?qlz_decompress1((char*)in, out, workmem):(lev<=2?qlz_decompress2((char*)in, out, workmem):qlz_decompress3((char*)in, out, workmem)); } break;
       #endif
 
-      #if _SKIM
-    case P_SKIM: {
-      skim_decoder_reset(skim_decoder); 
-      size_t consumed = skim_decoder_decompress(skim_decoder, (const uint8_t*)in, inlen, (uint8_t*)out, outlen);
-      if(!consumed) return 0;
-      return skim_decoder_exact_output_length((const uint8_t*)in, inlen);
+      #if _FIRETRAIL
+    case P_FIRETRAIL: {
+      firetrail_decoder_reset(firetrail_decoder); 
+      size_t rc = firetrail_decoder_decompress(firetrail_decoder, (const uint8_t*)in, inlen, (uint8_t*)out, outlen);
+      if(!rc) return 0;
+      return firetrail_decoder_exact_output_length((const uint8_t*)in, inlen);
       #endif
 
       #if _LIBSLZ
