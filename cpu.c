@@ -1,3 +1,4 @@
+#include <string.h>
 #include "conf.h"
 #include "cpu.h"
 static unsigned _cpuisa;
