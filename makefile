@@ -425,9 +425,14 @@ ifneq ($(wildcard pcodec_/.),)
   CXXFLAGS += -D_PCODEC
 endif
 
-ifneq ($(wildcard skim/.),)
-CXXFLAGS+=-D_MEMLZ
-LDFLAGS += skim/libskim.a
+FIRETRAIL_LIB :=
+ifneq ($(wildcard firetrail/.),)
+CXXFLAGS+=-D_FIRETRAIL
+FIRETRAIL_LIB=firetrail/libfiretrail.a
+LDFLAGS += $(FIRETRAIL_LIB)
+$(FIRETRAIL_LIB): firetrail/src/root.zig 
+	cd firetrail && zig build-lib -O ReleaseFast -femit-bin=libfiretrail.a src/root.zig -lc
+OB+=$(FIRETRAIL_LIB)	
 endif
 
 ifneq ($(wildcard snappy/.),)
