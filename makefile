@@ -194,7 +194,7 @@ ISAL_LIB :=
 ifneq ($(wildcard isa-lxx/.),)
 NASM ?= $(shell command -v nasm)
 ifndef CROSS
-ifeq ($(NASM),)  # nasm not installed
+ifeq ($(NASM),)  # nasm not installed use prebuild libs
   ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/isa-l.a),)
     CXXFLAGS += -D_ISA_L
     ISAL_LIB := isa-l_/$(OS)-$(ARCH)/isa-l.a    
