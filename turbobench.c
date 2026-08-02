@@ -1873,10 +1873,9 @@ void usage(char *pgm, int bsize) {
   fprintf(stderr, "          s = modifier s:K,M,G=(1000, 1.000.000, 1.000.000.000) s:k,m,h=(1024,1Mb,1Gb). {m} ex. 64k or 64K\n");
   fprintf(stderr, " -r       process directories recursively\n");
   fprintf(stderr, "Benchmark:\n");
-  fprintf(stderr, " -iX,Y    Decompression/Compression iterations {3}. Ex. -i15,15\n");
-//  fprintf(stderr, " -I#/-J#  # = Number of de/compression iterations {3}\n");
+  fprintf(stderr, " -iX,Y    Decompression/Compression iterations {3,3}. e.g. -i15,15\n");
   fprintf(stderr, " -t#      # = min. time in seconds per iterations.{1}\n");
-  fprintf(stderr, " -S#      Sleep # min. after 2 min. processing mimizing CPU throttling\n");
+  fprintf(stderr, " -S#      Sleep # sec. after 2 min. processing mimizing CPU throttling {20}\n");
   fprintf(stderr, " -K#t     Max. time limit for all benchmarks {24h}\n");
   fprintf(stderr, "          t = M:millisecond s:second m:minute h:hour. ex. 3h\n");
   fprintf(stderr, " -D       No process real-time priority setting\n");
