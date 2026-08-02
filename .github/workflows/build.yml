@@ -73,17 +73,17 @@ jobs:
           install: >-
             git make cmake rsync
             mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-llvm
+#            mingw-w64-x86_64-llvm
           update: true
       - run: git submodule update --init --recursive
-      - name: Use llvm-ar (avoids MinGW ar temp-file issues)
-        run: |
-          echo "AR=llvm-ar"       >> $GITHUB_ENV
-          echo "CMAKE_AR=llvm-ar" >> $GITHUB_ENV
+#      - name: Use llvm-ar (avoids MinGW ar temp-file issues)
+#        run: |
+#          echo "AR=llvm-ar"       >> $GITHUB_ENV
+#          echo "CMAKE_AR=llvm-ar" >> $GITHUB_ENV
           # also export for the current shell
-          export AR=llvm-ar
-          export CMAKE_AR=llvm-ar
-          which llvm-ar
+#          export AR=llvm-ar
+#          export CMAKE_AR=llvm-ar
+#          which llvm-ar
       - run: make STATIC=1
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
