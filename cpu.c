@@ -179,7 +179,6 @@ char *cpubrand(char* brand, size_t max_len) {
   }
   return brand;
 }
-
   #elif defined(__linux__)
 char *cpubrand(char* brand, size_t max_len) {
   FILE* fp = fopen("/proc/cpuinfo", "r");
