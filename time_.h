@@ -252,8 +252,8 @@ static void pr(size_t l, size_t n) {
       }\
     }\
     if((_tm_d = tmdiff(_tm_t0, tmtime())) < tm_min) { tm_min = _tm_d; _tm_c++; _tm_i = 0; } /*else if(_tm_d > tm_min*1.30) sleep_cool(8);*/\
-    if(tm_verbose>1)    { printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b%*.*f%3d.%1d", TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm), (_tm_R+1)>9?9:(_tm_R+1), _tm_c>99?99:_tm_c); fflush(stdout); }\
-    else if(tm_verbose) { printf("%*.*f         ",                              TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm));               fflush(stdout); }\
+    if(tm_verbose>1)    { printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b%*.*f%3d.%1d", TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm), (_tm_R+1)>99?99:(_tm_R+1), _tm_c>9?9:_tm_c); fflush(stdout); }\
+    else if(tm_verbose) { printf("%*.*f         ",                           TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm)); fflush(stdout); }\
     if(++_tm_i >= 16 || _tm_d >= 60) break; if((_tm_R & 7)==7) sleep_cool(tm_slp);\
   }\
   if(tm_verbose>1) { printf("\b\b\b\b\b\b                "); fflush(stdout); }\
@@ -263,8 +263,8 @@ static void pr(size_t l, size_t n) {
       if(tm_min == DBL_MAX && (_tm_d = tmdiff(_tm_t0, tmtime())) > tm_tx) { tm_rm = _tm_r; _tm_Rn = tm_TX/_tm_d; _tm_Rn = _tm_Rn<_tm_Rx?_tm_Rn:_tm_Rx; }\
     }\
     if((_tm_d = tmdiff(_tm_t0, tmtime())) < tm_min) { tm_min = _tm_d; _tm_c++; _tm_i = 0; } /*else if(_tm_d > tm_min*1.30) sleep_cool(8);*/\
-    if(tm_verbose>1)    { printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b%*.*f%3d.%1d", TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm), (_tm_R+1)>9?9:(_tm_R+1),_tm_c>99?99:_tm_c); fflush(stdout); }\
-    else if(tm_verbose) { printf("%*.*f         ",                              TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm));               fflush(stdout); }\
+    if(tm_verbose>1)    { printf("\b\b\b\b\b\b\b\b\b\b\b\b\b\b%*.*f%3d.%1d", TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm), (_tm_R+1)>99?99:(_tm_R+1),_tm_c>9?9:_tm_c); fflush(stdout); }\
+    else if(tm_verbose) { printf("%*.*f         ",                           TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm)); fflush(stdout); }\
     if(++_tm_i >= 16 || _tm_d >= 60) break; if((_tm_R & 7)==7) sleep_cool(tm_slp);\
   }\
   if(tm_verbose>1) { printf("\b\b\b\b\b      \b\b\b\b"); fflush(stdout); }\
