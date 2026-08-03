@@ -423,9 +423,29 @@ endif
 # 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
 # download corresponding library from https://github.com/WorkingRobot/OodleUE
 CXXFLAGS+=-D_OODLE
-
 ifneq ($(wildcard pcodec_/.),)
-  CXXFLAGS += -D_PCODEC
+endif
+
+ifneq ($(wildcard pivco-huffman/.),)
+ifneq ($(wildcard OodleUE/.),)
+OODLE_DIR := OodleUE/Engine/Source/Runtime/OodleDataCompression/Sdks/2.9.16
+CXXFLAGS += -D_OODLE_EC -I$(OODLE_DIR)/src/oodle2/core -I$(OODLE_DIR)/src/oodle2/core/public -DOODLE_IMPORT_LIB
+#CFLAGS += -I$($(OODLE_DIR)/src/oodle2/core
+OODLE_SRCS := $(wildcard $(OODLE_DIR)src/oodle2/core/*.cpp) $(wildcard $(OODLE_DIR)src/oodle2/core/public/*.cpp) $(wildcard $(OODLE_DIR)src/oodle2/base/*.cpp) $(wildcard $(OODLE_DIR)include/*.cpp)
+ifeq ($(OS), Windows)
+OODLE_STATIC_LIB := $(OODLE_DIR)/lib/Win64/oo2core_win64.lib
+else ifeq ($(OS), Darwin)
+OODLE_STATIC_LIB := $(OODLE_DIR)/lib/Mac/liboo2coremac64.a
+else ifeq ($(ARCH), aarch64)
+OODLE_STATIC_LIB := $(OODLE_DIR)/lib/LinuxArm64/liboo2corelinuxarm64.a
+else ifeq ($(ARCH), x86_64)
+OODLE_STATIC_LIB := $(OODLE_DIR)/lib/Linux/liboo2corelinux64.a
+else
+OODLE_STATIC_LIB := pivco-huffman/ext/oodle/build-out/ar/liboodle-data-static.a
+endif 
+OB += $(call obj,$(LZHAM_SRCS)) pivco-huffman/extras/bench/bench_oodle_wrapper.o
+LDFLAGS+=$(OODLE_STATIC_LIB)
+endif
 endif
 
 FIRETRAIL_LIB :=
