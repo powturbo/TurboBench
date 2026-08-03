@@ -286,6 +286,11 @@ enum {
 #ifndef _OODLE 
 #define _OODLE 0
 #endif
+#ifndef _OODLE_EC 
+#define _OODLE_EC 0
+#endif
+ P_OODLE_HUF,
+ P_OODLE_ANS,
 #ifndef _OODLESRC 
 #define _OODLESRC 0
 #endif
@@ -1234,6 +1239,9 @@ static fOodleLZ_Decompress                 OodleLZ_Decompress_;
 static fOodleLZ_CompressOptions_GetDefault OodleLZ_CompressOptions_GetDefault_;
   #endif  
 
+  #if _OODLE_EC
+#include "pivco-huffman/extras/bench/bench_oodle_wrapper.h"  
+  #endif
   #if _SMALLZ4
 #include "smallz4/smallz4.h"
 #include "smallz4/smallz4cat.c"
@@ -1727,6 +1735,8 @@ struct plugs plugs[] = {
   { P_MARLIN,        "Marlin",      _MARLIN,    "Marlin Entropy coder",       ""},
   { P_NIBRANS,       "nibrans",     _NIBRANS,   "nibrans",                    ""},
   { P_OODLE,         "oodle",       _OODLE,     "Oodle 8:Kraken 9:Mermaid 11:Selkie 12:Hydra 13:Leviathan", "01,02,03,04,05,06,07,08,09,11,12,13,14,15,16,17,18,19,21,22,23,24,25,26,27,28,29,41,42,43,44,45,46,47,48,49,51,52,53,54,55,56,57,58,59,61,62,63,64,65,66,67,68,69,71,72,73,74,75,76,77,78,79,81,82,83,84,85,86,87,88,89,-81,-82,-83,91,92,93,94,95,96,97,98,99,-91,-92,-93,101,102,103,104,105,106,107,108,109,111,112,113,114,115,116,117,118,119,-111,-112,-113,121,122,123,124,125,126,127,128,129,131,132,133,134,135,136,137,138,139" },
+  { P_OODLE_HUF,     "oodle_huf",   _OODLE_EC,  "Oodle Huffman/tans",         "","", E_HUF },
+  { P_OODLE_ANS,     "oodle_ans",   _OODLE_EC,  "Oodle tans",                 "","", E_ANS },
   { P_PIVCOHUF,      "pivco",       _PIVCOHUF,  "PivCo-Huffman",              "0,1","", E_HUF },  // 0=PH, 1=PHA (ANS-gated bitmaps)
   { P_POLHF,         "polar",       _POLHF,     "Polar Codes",                "" },
   { P_PPMDEC,        "ppmdec",      _PPMDEC,    "PPMD Range Coder",           ""},
@@ -1913,7 +1923,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #endif 
       break;
       #endif
-      
+
       #if _PCODEC
     case P_PCODECI8:
     case P_PCODECU8:
@@ -2471,6 +2481,11 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     #endif
     }
       #endif
+
+      #if _OODLE_EC
+    case P_OODLE_HUF: {int  huff_type = 0;/*strchr(prm,'t')?3:6;*/ unsigned rc = oodle_huff_encode((const unsigned char *)in, inlen, out+1, outsize, &huff_type); out[0]=huff_type; return rc+1; } 
+    case P_OODLE_ANS: return oodle_tans_encode((const unsigned char *)in, inlen, out, outsize);
+      #endif     
 
       #if _PCODEC
     case P_PCODECI8:  if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_I8,  &config, out, outsize, &w); return w; } break;
@@ -3306,6 +3321,11 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       }
     #endif
     }
+      #endif
+
+      #if _OODLE_EC
+    case P_OODLE_HUF: { /*huff_type = strchr(prm,'t')?3:6;*/ return oodle_huff_decode((const unsigned char *)(in+1), inlen-1, out, outlen, in[0]); }
+    case P_OODLE_ANS: return oodle_tans_decode((const unsigned char *)in, inlen, out, outlen);
       #endif
 
       #if _OPENZL
