@@ -280,11 +280,18 @@ void *memalign(size_t alignment, size_t size) {
 }
 
 int posix_memalign(void **memptr, size_t alignment, size_t size) {
-  if(!posix_memalign) die("posix_memalign");
+  size_t _size = alignment*size;
+  if(!posix_memalign) {
+    void *p = mem_heapp;
+    if((mem_heapp += _size) >= mem_heap + sizeof(mem_heap))
+      die("posix_memalign:initial memory overflow\n");
+    memset(p, 0, _size);
+    *memptr = p;
+    return 0;
+  }
   mem_add(alignment * size);
-  int rc = (*posix_memalign)(memptr, alignment, size);
-  if(*memptr)
-    mem_add(malloc_usable_size(*memptr));
+  int rc = (*mem_posix_memalign)(memptr, alignment, size);
+  if(*memptr) mem_add(malloc_usable_size(*memptr));
   return rc;
 }
 
