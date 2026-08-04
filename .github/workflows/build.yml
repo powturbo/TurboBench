@@ -80,7 +80,7 @@ jobs:
 #        run: |
 #          echo "AR=llvm-ar"       >> $GITHUB_ENV
 #          echo "CMAKE_AR=llvm-ar" >> $GITHUB_ENV
-          # also export for the current shell
+        # also export for the current shell
 #          export AR=llvm-ar
 #          export CMAKE_AR=llvm-ar
 #          which llvm-ar
