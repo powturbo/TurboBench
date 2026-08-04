@@ -27,7 +27,7 @@ jobs:
           lscpu
           gcc --version
           clang --version || true     
-      - run: make STATIC=1      
+      - run: make      
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
 
@@ -47,7 +47,8 @@ jobs:
       - run: git submodule update --init --recursive      
       - name: Install NASM
         run: brew install nasm        
-      - run: make NMEMSIZE=1     
+      - run: make
+      #NMEMSIZE=1     
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
@@ -84,6 +85,7 @@ jobs:
 #          export AR=llvm-ar
 #          export CMAKE_AR=llvm-ar
 #          which llvm-ar
-      - run: make STATIC=1
+      - run: make 
+      #STATIC=1
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
