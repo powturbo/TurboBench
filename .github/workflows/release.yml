@@ -91,10 +91,6 @@ jobs:
       - name: Build (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
-        run: make STATIC=1
-      - name: Build (Windows)
-        if: matrix.platform == 'windows'
-        shell: msys2 {0}
         run: make STATIC=1 PHAZ=0
 
       # ---------------- Package (Linux/macOS) ----------------
