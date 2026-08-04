@@ -621,11 +621,13 @@ typedef struct {
 } plug_t;
 
 //****************************************************** Rank Aggregation ************************************************************
+#define MEDAL_CUP  "\xF0\x9F\x8F\x86"   /* 🏆 U+1F3C6 */
+#define MEDAL_KRONE  "\xF0\x9F\x91\x91"   /* 👑 U+1F451 */
 #define MEDAL_GOLD   "\xF0\x9F\xA5\x87"   /* 🥇 */
 #define MEDAL_SILVER "\xF0\x9F\xA5\x88"   /* 🥈 */
 #define MEDAL_BRONZE "\xF0\x9F\xA5\x89"   /* 🥉 */
 
-static char *medal[] = { "", MEDAL_GOLD, MEDAL_SILVER, MEDAL_BRONZE };
+static char *medal[] = { "", MEDAL_KRONE , MEDAL_GOLD, MEDAL_SILVER, MEDAL_BRONZE };
 
 #define RANK_RATIO   0x01
 #define RANK_COMP    0x02
@@ -1309,7 +1311,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         if(d) SetConsoleTextAttribute(h, 7);
 
         if(n) SetConsoleTextAttribute(h, BBOLD);
-        fprintf(f, "%3d %s", score, score<=3?medal[score]:"  ");
+        fprintf(f, "%3d %s", score, score<=4?medal[score]:"  ");
         if(n) SetConsoleTextAttribute(h, 7);
         if(memout) fprintf(f, "%9d %9d %9d %9d ", plug->memc, plug->memd, plug->stkc, plug->stkd);   
 
@@ -1320,7 +1322,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         #undef BBOLD
           #else
         fprintf(f, "%12"PRId64" %s%s%9.2f%s %s%9.2f%s %s%3d%s%s   ",
-          plug->len, sratio, c?BOLDB:"", tc, c?BOLDE:"",  d?BOLDB:"", td, d?BOLDE:"", n?BOLDB:"", score, score<=3?medal[score]:"  ", n?BOLDE:"", n?BOLDB:"", name, n?BOLDE:"");
+          plug->len, sratio, c?BOLDB:"", tc, c?BOLDE:"",  d?BOLDB:"", td, d?BOLDE:"", n?BOLDB:"", score, score<=4?medal[score]:"  ", n?BOLDE:"", n?BOLDB:"", name, n?BOLDE:"");
         if(memout) fprintf(f, "%9d %9d %9d %9d ", plug->memc, plug->memd, plug->stkc, plug->stkd);   
         fprintf(f, "%s%-16s%s%s\n", n?BOLDB:"", name, n?BOLDE:"", finame);
           #endif
