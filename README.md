@@ -324,9 +324,10 @@ Compressors with versions 16.08.2016 <br>
 * `-f#` : check reading/writing outside bounds: `#=1` compress, `#=2` decompress, `#=3` both
 
 ### Output & Plotting Options
-* `-v#` : `#` = verbosity 0..3 {`1`}
-* `-rX,Y` : Show/Reveal only when compression/decompression speed > `X/Y` MB/s
-* `-kstr` : `str` = Remark/Comment string
+* `-v#`   `#` = verbosity 0..3 {`1`}
+* `-rX,Y` Show/Reveal only when compression/decompression speed > `X/Y` MB/s
+* `-Kstr` Rank Aggregation: str = combination of R/C/D = Ratio/Comp./Decomp. {RCD}
+* `-kstr` `str` = Remark/Comment string
 * `-U     print memory/stack usage
 * `-l#`   `#=1` print all groups/plugins, `#=2` print all codecs
 * `-S#`   Plot transfer speed: 
@@ -359,5 +360,5 @@ Compressors with versions 16.08.2016 <br>
 ./turbobench enwik9 -elzma,9:fb273:lc2:lp2:t2
 ```
 
-Last update: 28 JUL 2026
+Last update: 4 AUG 2026
 
