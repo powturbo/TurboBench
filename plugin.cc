@@ -1279,6 +1279,7 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
   #endif
 
   #if _ZXC
+#define ZXC_STATIC_DEFINE
 #include "zxc/include/zxc.h"
   #endif
 
@@ -1822,11 +1823,6 @@ static char _workmem[1<<16],*workmem=_workmem;
 static int state_size,dstate_size;
 static size_t workmemsize;
 
-#if _ZXC
-static zxc_cctx *zxc_cctx_ptr = NULL;
-static zxc_dctx *zxc_dctx_ptr = NULL;
-#endif
-
 int codini(size_t insize, int codec, int lev, char *prm) {
   workmemsize = 0;
 
@@ -1970,13 +1966,6 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_YAPPY: YappyFillTables(); break;
       #endif
 
-      #if _ZXC
-    case P_ZXC:
-      zxc_cctx_ptr = zxc_create_cctx(NULL);
-      zxc_dctx_ptr = zxc_create_dctx();
-      break;
-      #endif
-
       #ifdef _LZTURBO
     #include "../dev/x/beplug0.h"
       #endif
@@ -2038,14 +2027,7 @@ void codexit(int codec) {
       if(firetrail_encoder) firetrail_encoder_destroy(firetrail_encoder); firetrail_encoder = NULL;
       if(firetrail_decoder) firetrail_decoder_destroy(firetrail_decoder); firetrail_decoder = NULL;
     }  
-      #endif
-    
-      #if _ZXC
-    if(codec == P_ZXC) {
-      zxc_free_cctx(zxc_cctx_ptr); zxc_cctx_ptr = NULL;
-      zxc_free_dctx(zxc_dctx_ptr); zxc_dctx_ptr = NULL;
-    }
-      #endif
+      #endif    
   }
 }
 
@@ -2671,8 +2653,23 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _ZXC
-    case P_ZXC: { zxc_compress_opts_t opts = {.n_threads = threadnum, .level = lev, .checksum_enabled = 0};
-      return zxc_compress_cctx(zxc_cctx_ptr, in, inlen, out, outsize, &opts);
+    /* ZXC block_size must be a power of 2 in [4KB, 2MB].
+     * Valid values:  4096  (4KB)    1 << 12
+     *                8192  (8KB)    1 << 13
+     *               16384  (16KB)   1 << 14
+     *               32768  (32KB)   1 << 15
+     *               65536  (64KB)   1 << 16
+     *              131072  (128KB)  1 << 17
+     *              262144  (256KB)  1 << 18
+     *              524288  (512KB)  1 << 19  (default)
+     *             1048576  (1MB)    1 << 20
+     *             2097152  (2MB)    1 << 21
+     * Set to 0 to use the default (512KB). */
+    case P_ZXC: { zxc_compress_opts_t opts = {0}; opts.level = lev; opts.n_threads = threadnum; if(q = strchr(prm,'B')) opts.block_size = 1 << atoi(q+(q[1] == '='?2:1)); 
+      zxc_cctx *zxc_cctx = zxc_create_cctx(&opts);
+      int64_t rc = zxc_compress_cctx(zxc_cctx, in, inlen, out, outsize, NULL);
+      zxc_free_cctx(zxc_cctx); 
+      return rc > 0?rc:0;
     }
       #endif
 
@@ -3520,7 +3517,13 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
       
       #if _ZXC
-    case P_ZXC: { zxc_decompress_opts_t opts = {.n_threads = threadnum, .checksum_enabled = 0};  zxc_decompress_dctx(zxc_dctx_ptr, in, inlen, out, outlen, &opts); } break;
+    case P_ZXC: {
+      zxc_decompress_opts_t opts = {0}; opts.n_threads = threadnum; 
+      zxc_dctx *zxc_dctx = zxc_create_dctx(); 
+      size_t rc = zxc_decompress_dctx(zxc_dctx, in, inlen, out, outlen, &opts); 
+      zxc_free_dctx(zxc_dctx); 
+      return rc;    
+    }
       #endif
 
       #if _ZPAQ
