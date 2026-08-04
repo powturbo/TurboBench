@@ -80,7 +80,8 @@
 
 #define RATIO(_clen_, _len_)           ((double)(_clen_)*100.0/(double)(_len_))
 #define FACTOR(_clen_, _len_)          ((double)(_len_)/(double)(_clen_))
-#define SCORE(_clen_, _len_,_tc_,_td_) (_tc_ + 10.0 * _td_ + (double)_clen_/1000000.0)
+//#define SCORE(_clen_, _len_) (plug->tc + 10.0 * plug->td + (double)_clen_/1000000.0)
+#define SCORE(_plug_, _len_)  _plug_->rank
 
 char _cpubrand[65];
 
@@ -94,7 +95,7 @@ int strpref(const char *const *str, int n, char sep1, char sep2) {
   for(;;j++)
     for(i = 0; i < n; i++)
       if(!str[i][j] || str[i][j] != str[0][j]) {
-    while (j > 0 && str[0][j-1] != sep1 && str[0][j-1] != sep2) j--;
+    while(j > 0 && str[0][j-1] != sep1 && str[0][j-1] != sep2) j--;
     return j;
       }
   return 0;
@@ -173,9 +174,9 @@ static inline size_t memused_commit(void) {
 }
 
 static DWORD WINAPI sampler_thread(LPVOID) {
-  while (InterlockedCompareExchange(&g_sampling, 1, 1)) {
+  while(InterlockedCompareExchange(&g_sampling, 1, 1)) {
     size_t cur = memused_commit();
-    if (cur > g_peak) g_peak = cur;   // track running max
+    if(cur > g_peak) g_peak = cur;   // track running max
       Sleep(0);                        // yield; use a small Sleep(1) if CPU matters
   }
   return 0;
@@ -194,7 +195,7 @@ static inline size_t mempeak(void) {
   WaitForSingleObject(g_thread, INFINITE);
   CloseHandle(g_thread);
   size_t cur = memused_commit();
-  if (cur > g_peak) g_peak = cur;       // catch a final spike
+  if(cur > g_peak) g_peak = cur;       // catch a final spike
   return (g_peak > g_baseline) ? (g_peak - g_baseline) : 0;
 }
   #else
@@ -317,7 +318,7 @@ NOINLINE memstack_t stackini(void) {
   volatile unsigned *p     = (volatile unsigned *)(uintptr_t)&marker;
   unsigned          *high  = (unsigned *)(uintptr_t)p;
 
-  for (size_t i = 0; i < STACK_PAINT_WORDS; i++) *--p = STACK_MAGIC;
+  for(size_t i = 0; i < STACK_PAINT_WORDS; i++) *--p = STACK_MAGIC;
   memstack_t r = { .low  = (unsigned *)(uintptr_t)p, .high = high };
   return r;
 }
@@ -329,7 +330,7 @@ size_t stackpeak(memstack_t paint) {
   volatile unsigned *p   = (volatile unsigned *)paint.low;
   volatile unsigned *end = (volatile unsigned *)paint.high;
 
-  while (p < end && *p == STACK_MAGIC)
+  while(p < end && *p == STACK_MAGIC)
     ++p;
   return (size_t)((char *)end - (char *)p);
 }
@@ -363,7 +364,7 @@ NOINLINE unsigned *stackini(void) {
 size_t stackpeak(unsigned *base) {
   unsigned *p = base;
   if(!base || !g_stack_hi) return 0;
-  while (p < g_stack_hi && *p == STACK_MAGIC) p++;
+  while(p < g_stack_hi && *p == STACK_MAGIC) p++;
   return (size_t)(g_stack_hi - p) * sizeof(unsigned);
 }
 #else
@@ -399,21 +400,21 @@ typedef struct {
 } rdir_t;
 
 rdir_t *rdiropen(char **paths) {
-  if (!paths) return NULL;
-  rdir_t *rdir = (rdir_t *)calloc(1, sizeof(rdir_t));       if (!rdir) return NULL;
+  if(!paths) return NULL;
+  rdir_t *rdir = (rdir_t *)calloc(1, sizeof(rdir_t));       if(!rdir) return NULL;
   rdir->list = paths;
-  rdir->stack = (rdirstack_t *)malloc(sizeof(rdirstack_t)); if (!rdir->stack) { free(rdir);  return NULL;  }
+  rdir->stack = (rdirstack_t *)malloc(sizeof(rdirstack_t)); if(!rdir->stack) { free(rdir);  return NULL;  }
   return rdir;
 }
 
 void rdirclose(rdir_t *rdir) {
   if(!rdir) return;
   if(rdir->stack) {
-    if (rdir->stack->pos) { /* Close any open directories left in the stack */
-      while (rdir->stack->pos >= rdir->stack->dirs) {
-        if (*(rdir->stack->pos))
+    if(rdir->stack->pos) { /* Close any open directories left in the stack */
+      while(rdir->stack->pos >= rdir->stack->dirs) {
+        if(*(rdir->stack->pos))
           closedir(*(rdir->stack->pos));
-        if (rdir->stack->pos == rdir->stack->dirs) break;
+        if(rdir->stack->pos == rdir->stack->dirs) break;
         rdir->stack->pos--;
       }
     }
@@ -424,20 +425,20 @@ void rdirclose(rdir_t *rdir) {
 
 // rdir_next: Retrieve the next file name in the sequence. Returns 0 on success, -1 when exhausted.
 int rdirnext(rdir_t *rdir, char *name, struct stat *st_arg) {
-  if (!rdir || !rdir->stack || !name || !st_arg) return -1;
+  if(!rdir || !rdir->stack || !name || !st_arg) return -1;
   rdirstack_t *stk = rdir->stack;
-  while (1) {
+  while(1) {
     if(stk->pos) {
       DIR *dircur = *(stk->pos);
-      if (!dircur) {
-        if (stk->pos == stk->dirs) stk->pos = NULL;
+      if(!dircur) {
+        if(stk->pos == stk->dirs) stk->pos = NULL;
         else stk->pos--;
         continue;
       }
       struct dirent *ent = readdir(dircur);
       if(!ent) {
         closedir(dircur); // Reached end of current directory: close and pop
-        if (stk->pos == stk->dirs) stk->pos = NULL;
+        if(stk->pos == stk->dirs) stk->pos = NULL;
         else stk->pos--;
 
         char *last_slash = strrchr(stk->prefix, '/'); // Truncate the prefix to the parent directory
@@ -453,13 +454,13 @@ int rdirnext(rdir_t *rdir, char *name, struct stat *st_arg) {
 
       if(strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) continue;
       size_t plen = strlen(stk->prefix);
-      if (plen > 0 && (stk->prefix[plen - 1] == '/'
+      if(plen > 0 && (stk->prefix[plen - 1] == '/'
         #ifdef _WIN32
                 || stk->prefix[plen - 1] == '\\'
         #endif
       )) {
         snprintf(name, PATH_MAX, "%s%s", stk->prefix, ent->d_name);
-      } else if (plen > 0) snprintf(name, PATH_MAX, "%s/%s", stk->prefix, ent->d_name);
+      } else if(plen > 0) snprintf(name, PATH_MAX, "%s/%s", stk->prefix, ent->d_name);
       else strncpy(name, ent->d_name, PATH_MAX);
       name[PATH_MAX - 1] = '\0';
 
@@ -520,11 +521,11 @@ struct plugg {
 };
 
 struct plugg plugg[] = {
-  { "TURBO",     "lzturbo,10,11,12,19,20,21,22,29/lz4,1/lizard,10/chameleon,1,2/zxc,3,4,5/misa77,0,1,2/zxc,3/memcpy", "Fastest de-/compression. HDD/SSD/RAM speed" },
-  { "FAST",      "lzturbo,10,10a,11,12,20,20a,21,22,30,30a,31,32/zlib,1,6,9/libdeflate,1,6,9/brotli,0,1,4,5/lz4,1,5,9/lzav/zstd,1,5,9/misa77,0,1,2,3,4/zlib_ng,1,6/igzip,1,2,3/zxc,3,4,5,6,7/memcpy", "lz4,lzturbo,zlib class" },
-  { "EFFICIENT", "lzturbo,21,22,30,30a,31,32/brotli,4,5/zlib,5,6/zstd,5,9/zling,4/memcpy", "Compression speed > 'zlib 6' class" },
-  { "MAX",       "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/lizard,19,29,39,49/lzlib,9/libdeflate,12/zstd,22/memcpy""Best compression (slow)" },
-  { "OPTIMAL"    "lzturbo,19,29,39,49/lzma,9/lzham,4/brotli,11/lz4,9/libdeflate,12/lizard,49/lzlib,19,29,39,49/zstd,22/zopfli/memcpy", "Optimal compression (slow)" },
+  { "TURBO",     "lzturbo,10,11,12,19/lz4,1/lizard,10/chameleon,1,2/zxc,3,4,5/misa77,0,1,2/zxc,3/memcpy", "Fastest de-/compression. HDD/SSD/RAM speed" },
+  { "FAST",      "lzturbo,10,10a,11,12/zlib,1,6,9/libdeflate,1,6,9/brotli,0,1,4,5/lz4,1,5,9/lzav/zstd,1,5,9/misa77,0,1,2,3,4/zlib_ng,1,6/igzip,1,2,3/zxc,3,4,5,6,7/memcpy", "lz4,lzturbo,zlib class" },
+  { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,5,6/zstd,5,9/zling,4/memcpy", "Compression speed > 'zlib 6' class" },
+  { "MAX",       "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,9/lizard,19,29,39,49/lzlib,9/libdeflate,12/zstd,22/memcpy""Best compression (slow)" },
+  { "OPTIMAL"    "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,9/libdeflate,12/lizard,49/lzlib,19,29,39,49/zstd,22/zopfli/memcpy", "Optimal compression (slow)" },
   { "BWT"        "bsc_st,4,5/bsc,2/bcm/bzip2/bzip3/turborc,20e8,20e9/memcpy", "ST & BWT" },
   { "ECODER"     "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/pivco,0,1/memcpy",  "Entropy coder" },
   { "MEMCPY"     "imemcpy/memcpy", "memcpy" },
@@ -606,11 +607,118 @@ void plugsprtv(FILE *f, int fmt) {
 #define TMS_SIZE 20
 typedef struct {
   int       id,err,lev;
-  unsigned  blksize;
+  unsigned  blksize, rank;
   char      *s,prm[PRM_SIZE+1],tms[TMS_SIZE+1];
   unsigned long long len,memc,memd,stkc,stkd;
   double    tc,td,tck,tdk;
 } plug_t;
+
+//****************************************************** Rank Aggregation ************************************************************
+#define MEDAL_GOLD   "\xF0\x9F\xA5\x87"   /* 🥇 */
+#define MEDAL_SILVER "\xF0\x9F\xA5\x88"   /* 🥈 */
+#define MEDAL_BRONZE "\xF0\x9F\xA5\x89"   /* 🥉 */
+
+static char *medal[] = { "", MEDAL_GOLD, MEDAL_SILVER, MEDAL_BRONZE };
+
+#define RANK_RATIO   0x01
+#define RANK_COMP    0x02
+#define RANK_DECOMP  0x04
+static unsigned rankmode = 0xf;
+
+/* Pairwise duel between candidates a and b, decided by majority vote over the 3 criteria (ratio: lower better, tc/td: higher better).
+ * Returns +1 if a wins, -1 if b wins, 0 on an exact 1-1-1 style tie (only possible when two criteria disagree and are compensated). */
+static int pairwise_winner(plug_t *plug, int a, int b) {
+  int a_wins = 0, b_wins = 0;
+  if(rankmode & RANK_RATIO)  { if(plug[a].len < plug[b].len) a_wins++; else if(plug[a].len > plug[b].len) b_wins++; }
+  if(rankmode & RANK_COMP)   { if(plug[a].tc  < plug[b].tc ) a_wins++; else if(plug[a].tc  > plug[b].tc ) b_wins++; }
+  if(rankmode & RANK_DECOMP) { if(plug[a].td  < plug[b].td ) a_wins++; else if(plug[a].td  > plug[b].td ) b_wins++; }
+  if(a_wins > b_wins) return  1;
+  if(b_wins > a_wins) return -1;
+  return 0;
+}
+
+/* Borda count per criterion: the best candidate gets (k-1) points, the worst gets 0; candidates tied on a criterion split the points they
+ * would occupy evenly. Scores from the 3 criteria are summed and used. ONLY to break Copeland ties. */
+static void borda_scores(plug_t *plug, int k, double *borda) {
+  int i, j;
+  for(i = 0; i < k; i++) borda[i] = 0.0;
+  if(rankmode & RANK_RATIO) for(i = 0; i < k; i++) {
+    int better = 0, equal = 0;
+    for(j = 0; j < k; j++) {
+      if(j == i) continue;
+      if(plug[j].len < plug[i].len) better++; else if(plug[j].len == plug[i].len) equal++;
+    }
+    borda[i] += (double)(k - 1 - better) - 0.5 * equal;
+  }
+  if(rankmode & RANK_COMP) for(i = 0; i < k; i++) {
+    int better = 0, equal = 0;
+    for(j = 0; j < k; j++) {
+      if(j == i) continue;
+      if(plug[j].tc < plug[i].tc) better++; else if(plug[j].tc == plug[i].tc) equal++;
+    }
+    borda[i] += (double)(k - 1 - better) - 0.5 * equal;
+  }
+  if(rankmode & RANK_DECOMP) for(i = 0; i < k; i++) {
+    int better = 0, equal = 0;
+    for(j = 0; j < k; j++) {
+      if(j == i) continue;
+      if(plug[j].td < plug[i].td) better++; else if(plug[j].td == plug[i].td) equal++;
+    }
+    borda[i] += (double)(k - 1 - better) - 0.5 * equal;
+  }
+}
+
+// qsort comparator context (single-threaded use, mirrors typical small-utility C style)
+static plug_t *g_plug;
+static double *g_copeland;
+static double *g_borda;
+
+static int final_cmp(const void *pa, const void *pb) {
+  int a = *(const int *)pa;
+  int b = *(const int *)pb;
+  if(g_copeland[a] != g_copeland[b]) return (g_copeland[a] < g_copeland[b]) ? 1 : -1;      /* desc */
+  if(g_borda[a]    != g_borda[b])    return (g_borda[a]    < g_borda[b])    ? 1 : -1;            /* desc */
+  if(rankmode & RANK_RATIO)  { if(g_plug[a].len != g_plug[b].len) return (g_plug[a].len > g_plug[b].len) ? 1 : -1; }      /* asc  */
+  if(rankmode & RANK_COMP)   { if(g_plug[a].tc != g_plug[b].tc)   return (g_plug[a].tc  > g_plug[b].tc)  ? 1 : -1; }       /* asc  */
+  if(rankmode & RANK_DECOMP) { if (g_plug[a].td != g_plug[b].td)  return (g_plug[a].td  > g_plug[b].td)  ? 1 : -1; }        /* asc  */
+  return (g_plug[a].id > g_plug[b].id) ? 1 : -1;            /* deterministic */
+}
+
+// Aggregates len / tc / td into ONE global ranking using the Copeland pairwise method (primary) with a Borda-count tie-break   
+// (secondary). Writes 1..k into plug[i].rank, 1 = best compressor. Equal candidates on every criterion share the same rank value.      *
+void plugrank(plug_t *plug, int k) {
+  int i, j;
+
+  if(k <= 0) return;
+  double *copeland = malloc((size_t)k * sizeof(double));
+  double *borda    = malloc((size_t)k * sizeof(double));
+  int    *order    = malloc((size_t)k * sizeof(int));
+  if(!copeland || !borda || !order) { free(copeland); free(borda); free(order); return; }
+  for(i = 0; i < k; i++) copeland[i] = 0.0;
+  // --- all-pairs duels: O(k^2), fine for small fleets like IDNUM=30 ---
+  for(i = 0; i < k; i++) {
+    for(j = i + 1; j < k; j++) {
+      int w = pairwise_winner(plug, i, j);
+      if(w > 0)      { copeland[i] += 1.0; copeland[j] -= 1.0; }
+      else if(w < 0) { copeland[j] += 1.0; copeland[i] -= 1.0; }
+    }
+  }
+  borda_scores(plug, k, borda);
+  for(i = 0; i < k; i++) { order[i] = i;     if(plug[i].id > 1) copeland[i] = 1e15; }
+  g_plug = plug; g_copeland = copeland; g_borda = borda;
+  qsort(order, (size_t)k, sizeof(int), final_cmp);
+  plug[order[0]].rank = 1;
+  for(i = 1; i < k; i++) {
+    int prev = order[i - 1], cur = order[i];
+    int identical = copeland[cur]     == copeland[prev] &&
+                       borda[cur]     == borda[prev]    &&
+                        plug[cur].len == plug[prev].len && plug[cur].tc  == plug[prev].tc && plug[cur].td  == plug[prev].td;
+    plug[cur].rank = identical ? plug[prev].rank : (unsigned)(i + 1);
+  }
+  free(copeland);
+  free(borda);
+  free(order);
+}
 
 #define PLUGN 256
 plug_t plug[PLUGN+1], plugt[PLUGN+1];
@@ -733,7 +841,7 @@ typedef enum { M_RATIO = 0, M_COMP = 1, M_DECOMP = 2 } metric_t;
 
 static void xml_escape(const char *in, char *out, size_t outsz) {
   size_t o = 0;
-  for (; *in && o + 6 < outsz; in++) {
+  for(; *in && o + 6 < outsz; in++) {
     const char *rep = NULL;
     switch (*in) {
       case '&': rep = "&amp;"; break;
@@ -749,9 +857,9 @@ static void xml_escape(const char *in, char *out, size_t outsz) {
 }
 static double max_metric(plug_t *a, int n, metric_t m, size_t len) {
   double mx = 0; int i;
-  for (i = 0; i < n; i++) {
+  for(i = 0; i < n; i++) {
     double v = (m == M_RATIO) ? a[i].len : (m == M_COMP) ? a[i].tc : a[i].td;
-    if (v > mx) mx = v;
+    if(v > mx) mx = v;
   }
   if(m == M_RATIO) mx = RATIO(mx, len);
   return mx <= 0 ? 1 : mx;
@@ -794,7 +902,7 @@ static void svg_poly_end(FILE *f, const char *fill, const char *stroke) {
 // 1) HORIZONTAL BAR CHART - single metric (ratio | compression | decomp)
 void chart_bar(const char *fname, char *name, plug_t *a, int n, metric_t metric, size_t len) {
   char s[256];
-  if (n > SVG_PLUGMAX) n = SVG_PLUGMAX;
+  if(n > SVG_PLUGMAX) n = SVG_PLUGMAX;
   sprintf(s, "%s_%s", fname, name);
   plug_t tmp[SVG_PLUGMAX];
   memcpy(tmp, a, n * sizeof(plug_t));
@@ -807,13 +915,13 @@ void chart_bar(const char *fname, char *name, plug_t *a, int n, metric_t metric,
   int h = TOP_MARGIN + n * (BAR_H + BAR_GAP) + BOTTOM_MARGIN;
 
   FILE *f = fopen(s, "w");
-  if (!f) { perror(s); return; }
+  if(!f) { perror(s); return; }
 
   char color[16];
-  if (metric == M_RATIO) {
+  if(metric == M_RATIO) {
     snprintf(s, 80, "TurboBench: Ratio '%s'", fname);
     strcpy(color, "#4C72B0");
-  } else if (metric == M_COMP) {
+  } else if(metric == M_COMP) {
     snprintf(s, 80, "TurboBench: C Speed MB/s '%s'", fname);
     strcpy(color, "#2E86AB");
   } else {
@@ -826,7 +934,7 @@ void chart_bar(const char *fname, char *name, plug_t *a, int n, metric_t metric,
   svg_line(f, LEFT_MARGIN, TOP_MARGIN - 10, LEFT_MARGIN, h - BOTTOM_MARGIN + 5, "#333", 1.5);
 
   int i;
-  for (i = 0; i < n; i++) {
+  for(i = 0; i < n; i++) {
     double v = metric == M_RATIO ? RATIO(tmp[i].len,len): metric == M_COMP ? tmp[i].tc : tmp[i].td;
     double y = TOP_MARGIN + i * (BAR_H + BAR_GAP);
     double bw = (v / mx) * plot_w;
@@ -834,8 +942,8 @@ void chart_bar(const char *fname, char *name, plug_t *a, int n, metric_t metric,
     svg_text(f, LEFT_MARGIN - 10, y + BAR_H * 0.7, "end", 13, "#222", s);
     svg_rect(f, LEFT_MARGIN, y, bw, BAR_H, color, 4);
     char lbl[64];
-    if (metric == M_RATIO)      snprintf(lbl, sizeof(lbl), "%.1f%%", v);
-    else if (metric == M_COMP)  snprintf(lbl, sizeof(lbl), "%.1f", v);
+    if(metric == M_RATIO)      snprintf(lbl, sizeof(lbl), "%.1f%%", v);
+    else if(metric == M_COMP)  snprintf(lbl, sizeof(lbl), "%.1f", v);
     else                        snprintf(lbl, sizeof(lbl), "%.1f", v);
     svg_text(f, LEFT_MARGIN + bw + 6, y + BAR_H * 0.7, "start", 12, "#111", lbl);
   }
@@ -860,7 +968,7 @@ void chart_grouped(const char *fname, char *name, plug_t *a, int n, size_t len) 
   int h = TOP_MARGIN + (int)(n * (group_h + BAR_GAP)) + BOTTOM_MARGIN;
 
   FILE *f = fopen(s, "w");
-  if (!f) { perror(s); return; }
+  if(!f) { perror(s); return; }
   snprintf(s, 80, "TurboBench: C/D Speed '%s'", fname);
   svg_open(f, CHART_W, h, s);
   double plot_w = CHART_W - LEFT_MARGIN - RIGHT_MARGIN;
@@ -873,7 +981,7 @@ void chart_grouped(const char *fname, char *name, plug_t *a, int n, size_t len) 
   svg_text(f, LEFT_MARGIN + 260, 51, "start", 12, "#111", "MB/s");
 
   int i;
-  for (i = 0; i < n; i++) {
+  for(i = 0; i < n; i++) {
     double y = TOP_MARGIN + i * (group_h + BAR_GAP);
     if(tmp[i].lev==INVLEV) sprintf(s, "%s", tmp[i].s); else sprintf(s, "%s,%d", tmp[i].s, tmp[i].lev);
     svg_text(f, LEFT_MARGIN - 10, y + group_h * 0.65, "end", 13, "#222", s);
@@ -915,7 +1023,7 @@ static void svg_marker(FILE *f, int shape, double cx, double cy, double r, const
       break;
     }
     case SHAPE_STAR         :  svg_poly_begin(f);
-      for (k = 0; k < 10; k++) {
+      for(k = 0; k < 10; k++) {
         double ang = -M_PI / 2 + k * M_PI / 5.0;
         double rad = (k % 2 == 0) ? r : r * 0.45;
         svg_poly_pt(f, cx + rad * cos(ang), cy + rad * sin(ang));
@@ -923,11 +1031,11 @@ static void svg_marker(FILE *f, int shape, double cx, double cy, double r, const
       svg_poly_end(f, fill, stroke);
       break;
     case SHAPE_PENTAGON:  svg_poly_begin(f);
-      for (k = 0; k < 5; k++) {  double ang = -M_PI / 2 + k * 2 * M_PI / 5.0;  svg_poly_pt(f, cx + r * cos(ang), cy + r * sin(ang));  }
+      for(k = 0; k < 5; k++) {  double ang = -M_PI / 2 + k * 2 * M_PI / 5.0;  svg_poly_pt(f, cx + r * cos(ang), cy + r * sin(ang));  }
       svg_poly_end(f, fill, stroke);
       break;
     case SHAPE_HEXAGON:   svg_poly_begin(f);
-      for (k = 0; k < 6; k++) {
+      for(k = 0; k < 6; k++) {
         double ang = k * M_PI / 3.0;
         svg_poly_pt(f, cx + r * cos(ang), cy + r * sin(ang));
       }
@@ -949,13 +1057,13 @@ static const char *palette[] = { "#2E86AB", "#E67E22", "#27AE60", "#C0392B", "#8
 #define SCATTER_MARGIN  50 //  //
 void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xmetric, size_t len) {
   char s[256];
-  if (n > SVG_PLUGMAX) n = SVG_PLUGMAX;
+  if(n > SVG_PLUGMAX) n = SVG_PLUGMAX;
   sprintf(s, "%s_%s", fname, name);
   FILE *f = fopen(s, "w");
-  if (!f) { perror(s); return; }
+  if(!f) { perror(s); return; }
   int svg_w = SCATTER_W + LEGEND_W;
   strncpy(s, fname, 30); s[30] = 0;
-  if (xmetric == M_COMP)
+  if(xmetric == M_COMP)
     snprintf(s, 80, "TurboBench: C Speed/Ratio %s", fname);
   else
     snprintf(s, 80, "TurboBench: D Speed/Ratio %s", fname);
@@ -968,7 +1076,7 @@ void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xme
   svg_line(f, px0, py0, px0 + pw, py0, "#333", 1.5);
   svg_line(f, px0, py0, px0, py0 - ph, "#333", 1.5);
   int gi;
-  for (gi = 0; gi <= 5; gi++) {
+  for(gi = 0; gi <= 5; gi++) {
     double gx = px0 + pw * gi / 5.0;
     double vx = mx_x * gi / 5.0;
     svg_line(f, gx, py0, gx, py0 - ph, "#eee", 1);
@@ -993,7 +1101,7 @@ void chart_scatter(const char *fname, char *name, plug_t *a, int n, metric_t xme
     const char *color = palette[i % PALETTE_N];
     int        shape = i % SHAPE_COUNT;
     svg_marker(f, shape, cx, cy, 6, color, "#333");
-    if (a[i].lev == INVLEV) sprintf(s, "%s", a[i].s);
+    if(a[i].lev == INVLEV) sprintf(s, "%s", a[i].s);
     else                    sprintf(s, "%s,%d", a[i].s, a[i].lev);
     double ly = legend_y + i * LEGEND_LINEH;
     svg_marker(f, shape, legend_x + LEGEND_SWATCH / 2, ly - 4, LEGEND_SWATCH / 2, color, "#333");
@@ -1108,9 +1216,9 @@ void plugprtth(FILE *f, int fmt) {
   switch(fmt) {
     case FMT_TEXT:
       if(memout)
-        fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s    SCORE       C MEM     D MEM   C STACK   D STACK Name            File\n");
+        fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s Rank        C MEM     D MEM   C STACK   D STACK Name            File\n");
       else
-        fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s    SCORE   Name            File\n");
+        fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s Rank    Name            File\n");
       break;
     case FMT_VBULLETIN:
       fprintf(f,"[table]C Size|ratio%|C MB/s|D MB/s|Name|File (MB=1.000.0000)\n");
@@ -1163,7 +1271,8 @@ double tc_smin, td_smin; // show only if greater than
 
 void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, double *ptc, double *ptd, FILE *f) {
   double ratio  = RATIO(plug->len,totinlen),           //ratio  = FACTOR(plug->len,totinlen),
-         tc     = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td), score = SCORE(plug->len,totinlen,plug->tc,plug->td);
+         tc     = TMBS(totinlen,plug->tc), td = TMBS(totinlen,plug->td);
+  unsigned score = SCORE(plug,totinlen);
   char   name[256], sratio[16];
   strratio(ratio, sratio);
   if(tc < tc_smin) return;  if(td < td_smin) return;
@@ -1179,6 +1288,8 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
     case FMT_TEXT:
       if(f == stdout) {
           #ifdef _WIN32
+        static int once = 0;
+        if(!once) { SetConsoleOutputCP(65001); once = 1; }
         HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
         fprintf(f, "%12"PRId64" %s", plug->len, sratio);
         #define BBOLD 2 //2=green, 15=white
@@ -1191,7 +1302,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         if(d) SetConsoleTextAttribute(h, 7);
 
         if(n) SetConsoleTextAttribute(h, BBOLD);
-        fprintf(f, "%8.2f ", score);
+        fprintf(f, "%3d %s", score, score<=3?medal[score]:"  ");
         if(n) SetConsoleTextAttribute(h, 7);
         if(memout) fprintf(f, "%9d %9d %9d %9d ", plug->memc, plug->memd, plug->stkc, plug->stkd);   
 
@@ -1201,14 +1312,14 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         fprintf(f, "%s\n", finame);
         #undef BBOLD
           #else
-        fprintf(f, "%12"PRId64" %s%s%9.2f%s %s%9.2f%s %s%8.2f%s   ",
-          plug->len, sratio, c?BOLDB:"", tc, c?BOLDE:"",  d?BOLDB:"", td, d?BOLDE:"", n?BOLDB:"", score, n?BOLDE:"", n?BOLDB:"", name, n?BOLDE:"", finame);
+        fprintf(f, "%12"PRId64" %s%s%9.2f%s %s%9.2f%s %s%3d%s%s   ",
+          plug->len, sratio, c?BOLDB:"", tc, c?BOLDE:"",  d?BOLDB:"", td, d?BOLDE:"", n?BOLDB:"", score, score<=3?medal[score]:"  ", n?BOLDE:"", n?BOLDB:"", name, n?BOLDE:"");
         if(memout) fprintf(f, "%9d %9d %9d %9d ", plug->memc, plug->memd, plug->stkc, plug->stkd);   
         fprintf(f, "%s%-16s%s%s\n", n?BOLDB:"", name, n?BOLDE:"", finame);
           #endif
       }
       else
-        fprintf(f,"%12"PRId64" %s   %9.2f   %9.2f %8.2f   %-32s %s\n", plug->len, sratio, tc, td, score, name, finame);
+        fprintf(f,"%12"PRId64" %s   %9.2f   %9.2f %3d   %-32s %s\n", plug->len, sratio, tc, td, score, name, finame);
       break;
     case FMT_VBULLETIN:
       fprintf(f, "%12"PRId64"|%s|%s%9.2f%s|%s%9.2f%s|%s%-16s%s|%s\n",
@@ -1484,6 +1595,8 @@ int plugprts(plug_t *plug, int k, char *finame, int xstdout, unsigned long long 
   if(!totlen) return 0;                                                                             if(verbose>1) printf("'%s'\n", finame);
 
   qsort(plugt, k, sizeof(plug_t), (int(*)(const void*,const void*))libcmp);
+  for(g = plugt; g < plugt+k; g++) g->rank = 0;
+  plugrank(plugt, k);  //for(g = plugt; g < plugt+k; g++) printf("(%d)", g->rank);
   char s[257];
   sprintf(s, "%s.%s", finame, fmtext[fmt]);
   FILE *fo = xstdout>=0?stdout:fopen(s, "w");
@@ -1740,7 +1853,7 @@ void bebuild(char **files, int argc, int recurse, char *foname, unsigned long lo
   #if defined(_WIN32) && !defined(__MINGW__)
 int getpagesize() {
   static int pagesize = 0;
-  if (pagesize == 0) {
+  if(pagesize == 0) {
     SYSTEM_INFO system_info;
     GetSystemInfo(&system_info);
     pagesize = max(system_info.dwPageSize, system_info.dwAllocationGranularity);
@@ -1885,6 +1998,7 @@ void usage(char *pgm, int bsize) {
   fprintf(stderr, "Output:\n");
   fprintf(stderr, " -v#      # = verbosity 0..3 {1}\n");
   fprintf(stderr, " -RX,Y    Show/Reveal only when compression/decompression speed > X/Y MB/s\n");
+  fprintf(stderr, " -Kstr    Rank Aggregation: str = combination of R/C/D = Ratio/Comp./Decomp. {RCD}\n");
   fprintf(stderr, " -kstr    str = Remark/Comment string\n");
   fprintf(stderr, " -U       print memory/stack usage\n");
   fprintf(stderr, " -l#      # = 1 : print all groups/plugins, # = 2 : print all codecs\n");
@@ -1953,49 +2067,50 @@ int main(int argc, char* argv[]) {
         printf("Option %s", long_options[option_index].name);
         if(optarg) printf (" with arg %s", optarg);  printf ("\n");
         break;
-      case 'b': bsize    = argtoi(optarg,Mb); bsizex++; break;
-      case 'B': filenmax = argtol(optarg, 'G');      break;
-      case 'C': cmp      = atoi(optarg);             break;
+      case 'b': bsize      = argtoi(optarg,Mb); bsizex++; break;
+      case 'B': filenmax   = argtol(optarg, 'G');      break;
+      case 'C': cmp        = atoi(optarg);             break;
       case 'd': coddicsize(argtoi(optarg,0));        break;
       //case 'D': dict     = optarg;                 break;
-      case 'D': rprio    = 0;                        break;
-      case 'e': scmd     = optarg;                   break;
-//    case 'E': xcmd     = optarg;                   break;
-      case 'F': fac      = strtod(optarg, NULL);     break;
-      case 'f': fuzz     = atoi(optarg);             break;
+      case 'D': rprio      = 0;                        break;
+      case 'e': scmd       = optarg;                   break;
+//    case 'E': xcmd       = optarg;                   break;
+      case 'F': fac        = strtod(optarg, NULL);     break;
+      case 'f': fuzz       = atoi(optarg);             break;
       case 'g': merge++;                             break;
       case 'G': plotmcpy++;                          break;
 
       case 'i':
       case 'I': { char *q = strchr(optarg,','); if((tm_Rep  = atoi(optarg))<=0) tm_rep=tm_Rep=1; if(q && (tm_Rep2 = atoi(q+1))<=0) tm_rep=tm_Rep2=1;}  break;
       case 'J': if((tm_Rep2 = atoi(optarg))<=0) tm_rep=tm_Rep2=1; break;
-      case 'k': rem      = optarg;                   break;
-      case 'L': tm_slp   = atoi(optarg);             break;
+      case 'K': { char *q = optarg; rankmode = (strchr(q,'R')?RANK_RATIO:0) | (strchr(q,'C')?RANK_COMP:0) | (strchr(q,'D')?RANK_DECOMP:0); } break;
+      case 'k': rem       = optarg;                   break;
+      case 'L': tm_slp    = atoi(optarg);             break;
 
-      case 'l': xplug    = atoi(optarg);             break;
-      case 'M': beb      = optarg;                   break;
+      case 'l': xplug     = atoi(optarg);             break;
+      case 'M': beb       = optarg;                   break;
       case 'm': mode++;                              break;
-      case 'N': delim    = atoi(optarg);             break;
+      case 'N': delim     = atoi(optarg);             break;
       case 'o': xstdout++;                           break;
-      case 'p': fmt      = atoi(optarg);             break;
+      case 'p': fmt       = atoi(optarg);             break;
       case 'P': mcpy++;                              break;
-      case 'Q': divxy    = atoi(optarg);
+      case 'Q': divxy     = atoi(optarg);
                 if(divxy>3) divxy=3;                 break;
       case 'R' :{ char *q = strchr(optarg,','); if((tc_smin = atoi(optarg)) <=0) tc_smin=1000; if(q && (td_smin = atoi(q+1))<=0) td_smin = 100; printf("minc=%.1f,mind=%.1f\n", tc_smin,td_smin); }
       case 'r': recurse++;                           break;
-      case 's': mininlen = argtoi(optarg,1);         break;
-      case 'S': speedup  = atoi(optarg); if(speedup < 0 || speedup > SP_TRANSFER) speedup=SP_TRANSFER; break;
-      case 't': tm_tx    = atoi(optarg);             break;
-      case 'T': tm_TX    = atoi(optarg);             break;
+      case 's': mininlen  = argtoi(optarg,1);         break;
+      case 'S': speedup   = atoi(optarg); if(speedup < 0 || speedup > SP_TRANSFER) speedup=SP_TRANSFER; break;
+      case 't': tm_tx     = atoi(optarg);             break;
+      case 'T': tm_TX     = atoi(optarg);             break;
       case 'U': memout++;                            break;
-      case 'v': verbose  = atoi(optarg);             break;
-      case 'V': tm_verbose = atoi(optarg);           break;
-      case 'Y': seg_ans  = argtoi(optarg,1);         break;
-      case 'Z': seg_huf  = argtoi(optarg,1);         break;
-      case 'w': xlog     =  xlog?0:1;                break;
-      case 'x': ylog     =  ylog?0:1;                break;
-      case 'y': xlog2    = xlog2?0:1;                break;
-      case 'z': ylog2    = ylog2?0:1;                break;
+      case 'v': verbose   = atoi(optarg);             break;
+      case 'V': tm_verbose= atoi(optarg);           break;
+      case 'Y': seg_ans   = argtoi(optarg,1);         break;
+      case 'Z': seg_huf   = argtoi(optarg,1);         break;
+      case 'w': xlog      =  xlog?0:1;                break;
+      case 'x': ylog      =  ylog?0:1;                break;
+      case 'y': xlog2     = xlog2?0:1;                break;
+      case 'z': ylog2     = ylog2?0:1;                break;
       BEOPT;
       case 'h':
       default:
@@ -2094,7 +2209,7 @@ int main(int argc, char* argv[]) {
       printf("Benchmark: %d from %d\n", krep+1, tm_Repk);
     for(p = plug; p < plug+k; p++) {
       plug_t *g = &plugt[p - plug];
-      totinlen = 0; g->len = g->tck = g->tdk = g->memc = g->memd = g->stkc = g->stkd = 0;
+      totinlen = 0; g->len = g->tck = g->tdk = g->memc = g->memd = g->stkc = g->stkd = g->rank = 0;
       BEFILE;
       for(fno = optind; fno < argc; fno++) {
         finame    = argvx[fno];                                                                            if(verbose > 1) printf("%s,%u\n", finame, filenmax);fflush(stdout);
