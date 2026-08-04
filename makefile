@@ -430,7 +430,6 @@ ifneq ($(wildcard pivco-huffman/.),)
 ifneq ($(wildcard OodleUE/.),)
 OODLE_DIR := OodleUE/Engine/Source/Runtime/OodleDataCompression/Sdks/2.9.16
 CXXFLAGS += -D_OODLE_EC -I$(OODLE_DIR)/src/oodle2/core -I$(OODLE_DIR)/src/oodle2/core/public -DOODLE_IMPORT_LIB
-#CFLAGS += -I$($(OODLE_DIR)/src/oodle2/core
 OODLE_SRCS := $(wildcard $(OODLE_DIR)src/oodle2/core/*.cpp) $(wildcard $(OODLE_DIR)src/oodle2/core/public/*.cpp) $(wildcard $(OODLE_DIR)src/oodle2/base/*.cpp) $(wildcard $(OODLE_DIR)include/*.cpp)
 ifeq ($(OS), Windows)
 OODLE_STATIC_LIB := $(OODLE_DIR)/lib/Win64/oo2core_win64.lib
