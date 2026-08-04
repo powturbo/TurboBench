@@ -102,8 +102,7 @@ jobs:
           DIST="dist/${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
           mkdir -p "$DIST"
 
-          # Copy the built executable.
-          # Adjust the name below if your Makefile outputs a different binary.
+          # Copy the built executable
           if [ -f "${APP_NAME}" ]; then
             cp "${APP_NAME}" "$DIST/"
           else
