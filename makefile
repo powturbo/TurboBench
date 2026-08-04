@@ -427,7 +427,7 @@ ifneq ($(wildcard pcodec_/.),)
 endif
 
 ifneq ($(wildcard pivco-huffman/.),)
-ifneq ($(wildcard OodleUE/.),)
+ifneq ($(wildcard OodleUE0/.),)
 OODLE_DIR := OodleUE/Engine/Source/Runtime/OodleDataCompression/Sdks/2.9.16
 CXXFLAGS += -D_OODLE_EC -I$(OODLE_DIR)/src/oodle2/core -I$(OODLE_DIR)/src/oodle2/core/public -DOODLE_IMPORT_LIB
 #CFLAGS += -I$($(OODLE_DIR)/src/oodle2/core
@@ -540,9 +540,11 @@ endif
 
 ifneq ($(wildcard zxc/.),)
 ifneq (,$(filter $(ARCH),x86_64 aarch64))
-CXXFLAGS += -D_ZXC -DZXC_STATIC_DEFINE
+CXXFLAGS += -D_ZXC 
+CFLAGS+=-DZXC_STATIC_DEFINE
 ZXCDIR = zxc/src/lib
-ZXC_BUILD = $(CC) -O3 -I$(ZXCDIR)/vendors -DZXC_STATIC_DEFINE $(ZXC_FLAGS) $< -c -o $@
+#ZXC_BUILD = $(CC) -O3 -I$(ZXCDIR)/vendors -DNDEBUG -DZXC_STATIC_DEFINE $(ZXC_FLAGS) $< -c -o $@
+ZXC_BUILD = $(CC) -O3 -DZXC_STATIC_DEFINE -DNDEBUG -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
 
 define ZXC_RULE
 $$(BUILDIR)/$$(ZXCDIR)/%$(1).o: ZXC_FLAGS = $(2)
@@ -552,7 +554,7 @@ $$(BUILDIR)/$$(ZXCDIR)/%$(1).o: $$(ZXCDIR)/%.c
 endef
 $(eval $(call ZXC_RULE,,))
 $(eval $(call ZXC_RULE,_default,-DZXC_FUNCTION_SUFFIX=_default))
-$(eval $(call ZXC_RULE,_avx2,-mavx2 -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2))
+$(eval $(call ZXC_RULE,_avx2,-mavx2 -mbmi -mbmi2 -mlzcnt -mno-avx512f -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2))
 $(eval $(call ZXC_RULE,_avx512,-mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512))
 $(eval $(call ZXC_RULE,_neon,$(_SSE) -DZXC_FUNCTION_SUFFIX=_neon -DZXC_USE_NEON64))
 ZXC_OBJS = common driver dispatch compress_default decompress_default dict_default huffman_default pivco_tables seekable 
