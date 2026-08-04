@@ -29,7 +29,7 @@ typedef struct plugs {
   int   id; 
   char  *s;
   int   codec; 
-  char  *name,*lev,*version; 
+  char  *name,*lev; 
   unsigned flag,blksize; 
 } plugs_t;
 
