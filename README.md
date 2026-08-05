@@ -42,12 +42,9 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 **Perfect for developers, researchers, and performance enthusiasts** who demand accurate, apples-to-apples comparisons.
 
 ---
+**TurboBench** — Precision you can rely on. The gold standard for compression benchmarking. 🚀
 
 **Try it now:**  
-[https://github.com/powturbo/TurboBench](https://github.com/powturbo/TurboBench)
-
-**TurboBench** — Precision you can rely on. The gold standard for compression benchmarking. 🚀
-### Release:
   - Build or Download turbobench from [releases](https://github.com/powturbo/TurboBench/releases)
   + List all plugins + version: "./turbobench -l2"<br />
   + List all compiled codecs: "./turbobench -l1"<br />
