@@ -152,7 +152,7 @@ void _vfree(void *p, size_t size) {
     #endif
 }
 
-  #if defined(NMEMSIZE) //|| defined(_WIN32) 
+  #if defined(NMEMSIZE) || defined(_WIN32) 
 #define mempeakinit() 0
 #define mempeak() 0
 #define mem_init()
@@ -1942,7 +1942,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     tc         = tm_tmin(nb);
     plug->len += outlen;
     plug->tc  += tc;
-    plug->memc = mempeak() - peak;                                            if(memused()>2048) printf("warning: memory in compression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
+    plug->memc = mempeak() - peak;                                              //if(memused()>2048) printf("warning: memory in compression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
     plug->stkc = stackpeak(_stack);
     
     if(cmp) {
@@ -1956,7 +1956,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
       td         = tm_tmin(nb);
       plug->td  += td;
       plug->memd = mempeak() - peak;                                            //if(tm_verbose && totinlen == filen) printf("%9.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
-      plug->stkd = stackpeak(_stack);                                           if(memused()>2048) printf("warning: memory in decompression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
+      plug->stkd = stackpeak(_stack);                                           //if(memused()>2048) printf("warning: memory in decompression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
       
       int e = memcheck(in, len, cpz, fuzz?3:cmp, finame);
       plug->err = plug->err?plug->err:e;
