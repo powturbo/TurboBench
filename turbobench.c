@@ -215,7 +215,7 @@ static inline size_t mempeak(void) { if(!memout) return 0;
     g_ready = NULL;
   }
   size_t cur = wmemused();
-  atomic_max(&g_peak, cur); // catch a final spike
+  atomic_max(&g_peak, cur); 
   return (g_peak > g_baseline) ? (g_peak - g_baseline) : 0;
 }
 #else
@@ -336,9 +336,9 @@ void free(void *p) {
 #define STACK_MAGIC  0x79a53fb6u
 
 #ifdef _WIN32
-#ifndef STACK_PAINT_BYTES
+  #ifndef STACK_PAINT_BYTES
 #define STACK_PAINT_BYTES  (128 * 1024)
-#endif
+  #endif
 #define STACK_PAINT_WORDS  (STACK_PAINT_BYTES / sizeof(unsigned))
 
 typedef struct { unsigned *low, *high; } memstack_t;
@@ -1992,7 +1992,6 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
   return totinlen;
 }
 
-
 void usage(char *pgm, int bsize) {
   char s[50] = "Unkown Compiler";
     #if defined(__clang__)
@@ -2098,17 +2097,17 @@ int main(int argc, char* argv[]) {
         if(optarg) printf (" with arg %s", optarg);  printf ("\n");
         break;
       case 'b': bsize      = argtoi(optarg,Mb); bsizex++; break;
-      case 'B': filenmax   = argtol(optarg, 'G');      break;
-      case 'C': cmp        = atoi(optarg);             break;
-      case 'd': coddicsize(argtoi(optarg,0));        break;
+      case 'B': filenmax   = argtol(optarg, 'G');     break;
+      case 'C': cmp        = atoi(optarg);            break;
+      case 'd': coddicsize(argtoi(optarg,0));         break;
       //case 'D': dict     = optarg;                 break;
-      case 'D': rprio      = 0;                        break;
-      case 'e': scmd       = optarg;                   break;
+      case 'D': rprio      = 0;                       break;
+      case 'e': scmd       = optarg;                  break;
 //    case 'E': xcmd       = optarg;                   break;
-      case 'F': fac        = strtod(optarg, NULL);     break;
-      case 'f': fuzz       = atoi(optarg);             break;
-      case 'g': merge++;                             break;
-      case 'G': plotmcpy++;                          break;
+      case 'F': fac        = strtod(optarg, NULL);    break;
+      case 'f': fuzz       = atoi(optarg);            break;
+      case 'g': merge++;                              break;
+      case 'G': plotmcpy++;                           break;
 
       case 'i':
       case 'I': { char *q = strchr(optarg,','); if((tm_Rep  = atoi(optarg))<=0) tm_rep=tm_Rep=1; if(q && (tm_Rep2 = atoi(q+1))<=0) tm_rep=tm_Rep2=1;}  break;
@@ -2119,22 +2118,22 @@ int main(int argc, char* argv[]) {
 
       case 'l': xplug     = atoi(optarg);             break;
       case 'M': beb       = optarg;                   break;
-      case 'm': mode++;                              break;
+      case 'm': mode++;                               break;
       case 'N': delim     = atoi(optarg);             break;
-      case 'o': xstdout++;                           break;
+      case 'o': xstdout++;                            break;
       case 'p': fmt       = atoi(optarg);             break;
-      case 'P': mcpy++;                              break;
+      case 'P': mcpy++;                               break;
       case 'Q': divxy     = atoi(optarg);
-                if(divxy>3) divxy=3;                 break;
+                if(divxy>3) divxy=3;                  break;
       case 'R' :{ char *q = strchr(optarg,','); if((tc_smin = atoi(optarg)) <=0) tc_smin=1000; if(q && (td_smin = atoi(q+1))<=0) td_smin = 100; printf("minc=%.1f,mind=%.1f\n", tc_smin,td_smin); }
-      case 'r': recurse++;                           break;
+      case 'r': recurse++;                            break;
       case 's': mininlen  = argtoi(optarg,1);         break;
       case 'S': speedup   = atoi(optarg); if(speedup < 0 || speedup > SP_TRANSFER) speedup=SP_TRANSFER; break;
       case 't': tm_tx     = atoi(optarg);             break;
       case 'T': tm_TX     = atoi(optarg);             break;
-      case 'U': memout++;                            break;
+      case 'U': memout++;                             break;
       case 'v': verbose   = atoi(optarg);             break;
-      case 'V': tm_verbose= atoi(optarg);           break;
+      case 'V': tm_verbose= atoi(optarg);             break;
       case 'Y': seg_ans   = argtoi(optarg,1);         break;
       case 'Z': seg_huf   = argtoi(optarg,1);         break;
       case 'w': xlog      =  xlog?0:1;                break;
@@ -2177,8 +2176,6 @@ int main(int argc, char* argv[]) {
     setpriority(PRIO_PROCESS, 0, -19);
       #endif
   }
-  //char rootdir[1024]; { char *p = argv[0], *q = strrchr(p,'/'); q = q?q:strrchr(p, '\\'); if(q) { strncpy(rootdir, p, q-p); rootdir[q-p] = 0; } } 
-
   if(!scmd) scmd = "FAST";                                                          if(verbose > 5) printf("%s\n", scmd);fflush(stdout);
   for(s[0] = 0;;) {
     char *q;
@@ -2334,5 +2331,4 @@ int main(int argc, char* argv[]) {
     #else
   putchar('\a');
     #endif
-
 }
