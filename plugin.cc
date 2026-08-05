@@ -22,6 +22,36 @@
     - email    : powturbo [_AT_] gmail [_DOT_] com
 **/
 //     TurboBench: plugin.cc - compressor plugins
+#include <cstdlib>
+#include <cstddef>
+#include <atomic>
+#include <new>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include "conf.h"
+#include "plugin.h"
+
+void* operator new(std::size_t size) {
+    void* p = mem_malloc(size);       // or call the real operator
+    if (!p) throw std::bad_alloc();
+    return p;
+}
+void operator delete(void* p) noexcept { mem_free(p); }
+// + new[], nothrow, aligned (C++17), sized-delete, etc.
+
+#include <new>          // for std::nothrow, etc.
+#include <cstddef>
+#include <cstdlib>      // optional, if you want to fall back
+
+extern "C" {
+void* cpp_new(std::size_t size) { return ::operator new(size); }             // throws std::bad_alloc on failure
+void* cpp_new_nothrow(std::size_t size) { return ::operator new(size, std::nothrow); }
+void cpp_delete(void* p) { ::operator delete(p); }
+void* cpp_new_array(std::size_t size) { return ::operator new[](size);}
+void cpp_delete_array(void* p) { ::operator delete[](p); }
+}
 enum {
 #define _MEMCPY 1
  P_LMCPY,   // must be 0
@@ -526,12 +556,6 @@ enum {
 };
 
 //-------------------------------------------------------------------------------------------------------------------
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "conf.h"
-#include "plugin.h"
 
   #if _AOM
 #include "EC/aom_/aom.h"
