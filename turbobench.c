@@ -167,7 +167,7 @@ static volatile size_t g_peak       = 0;
 static volatile LONG   g_sampling   = 0;
 static HANDLE g_thread              = NULL;
 
-static inline size_t memused_commit(void) {
+static inline size_t memused(void) {
   PROCESS_MEMORY_COUNTERS_EX pmc;
   pmc.cb = sizeof(pmc);
   if(!GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)))
@@ -177,7 +177,7 @@ static inline size_t memused_commit(void) {
 
 static DWORD WINAPI sampler_thread(LPVOID) {
   while(InterlockedCompareExchange(&g_sampling, 1, 1)) {
-    size_t cur = memused_commit();
+    size_t cur = memused();
     if(cur > g_peak) g_peak = cur;   // track running max
       Sleep(0);                        // yield; use a small Sleep(1) if CPU matters
   }
@@ -185,7 +185,7 @@ static DWORD WINAPI sampler_thread(LPVOID) {
 }
 
 static inline size_t mempeakinit(void) {  if(!memout) return 0;
-  g_baseline = memused_commit();
+  g_baseline = memused();
   g_peak     = g_baseline;
   InterlockedExchange(&g_sampling, 1);
   g_thread = CreateThread(NULL, 0, sampler_thread, NULL, 0, NULL);
@@ -196,7 +196,7 @@ static inline size_t mempeak(void) { if(!memout) return 0;
   InterlockedExchange(&g_sampling, 0);
   WaitForSingleObject(g_thread, INFINITE);
   CloseHandle(g_thread);
-  size_t cur = memused_commit();
+  size_t cur = memused();
   if(cur > g_peak) g_peak = cur;       // catch a final spike
   return (g_peak > g_baseline) ? (g_peak - g_baseline) : 0;
 }
