@@ -170,7 +170,7 @@ static volatile size_t g_peak = 0;
 static volatile LONG g_sampling = 0;
 static HANDLE g_thread = NULL;
 static HANDLE g_ready = NULL;
-static inline size_t memused(void) {
+static inline size_t wmemused(void) {
   PROCESS_MEMORY_COUNTERS_EX pmc = {};
   pmc.cb = sizeof(pmc);
   if(!GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc)))
@@ -188,15 +188,15 @@ static inline void atomic_max(volatile size_t* dest, size_t value) {
 static DWORD WINAPI sampler_thread(LPVOID) {
   SetEvent(g_ready);
   while(InterlockedCompareExchange(&g_sampling, 1, 1) == 1) {
-    size_t cur = memused();
+    size_t cur = wmemused();
     atomic_max(&g_peak, cur);
     Sleep(1); // yield; use a small Sleep(1) if CPU matters
   }
   return 0;
 }
-static inline size_t mempeakinit(void) { //if(!memout) return 0;
-  g_baseline = memused();
-  g_peak = g_baseline;
+static inline size_t mempeakinit(void) { if(!memout) return 0;
+  g_baseline = wmemused();
+  g_peak     = g_baseline;
   InterlockedExchange(&g_sampling, 1);
   g_ready = CreateEvent(NULL, TRUE, FALSE, NULL);
   if(!g_ready) return 0;
@@ -211,7 +211,7 @@ static inline size_t mempeakinit(void) { //if(!memout) return 0;
   // SetThreadPriority(g_thread, THREAD_PRIORITY_HIGHEST); // optional
   return g_baseline;
 }
-static inline size_t mempeak(void) { //if(!memout) return 0;
+static inline size_t mempeak(void) { if(!memout) return 0;
   InterlockedExchange(&g_sampling, 0);
   if(g_thread) {
     WaitForSingleObject(g_thread, 2000);
@@ -222,10 +222,12 @@ static inline size_t mempeak(void) { //if(!memout) return 0;
     CloseHandle(g_ready);
     g_ready = NULL;
   }
-  size_t cur = memused();
+  size_t cur = wmemused();
   atomic_max(&g_peak, cur); // catch a final spike
   return (g_peak > g_baseline) ? (g_peak - g_baseline) : 0;
 }
+size_t memused() { return g_peak - g_baseline; }
+
 #else
 static size_t mem_peak, mem_used;
 size_t mempeak() { return mem_peak; }
