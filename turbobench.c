@@ -74,7 +74,6 @@
 #include "cpu.h"
 #include "plugin.h"
 
-
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
@@ -248,10 +247,10 @@ void mem_sub(size_t size) {
 static ALIGNED(char, mem_heap[1<<20],32);
 static char *mem_heapp = mem_heap;
 
-void *(*mem_malloc)(size_t);
+static void *(*mem_malloc)(size_t);
 static void *(*mem_calloc)(size_t, size_t);
 static void *(*mem_realloc)(void*, size_t);
-void  (*mem_free)(void *);
+static void  (*mem_free)(void *);
 static void *(*mem_memalign)(size_t, size_t);
 static int   (*mem_posix_memalign)(void**, size_t, size_t);
 static void *(*mem_aligned_alloc)(size_t, size_t);
