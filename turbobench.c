@@ -1343,7 +1343,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         if(n) SetConsoleTextAttribute(h, BBOLD);
         fprintf(f, "%3d %s", score, score<MEDALMAX?medal[score]:"  ");
         if(n) SetConsoleTextAttribute(h, 7);
-        if(memout) fprintf(f, "%llu %llu %llu %llu ", plug->memc, plug->memd, plug->stkc, plug->stkd);   
+        if(memout) fprintf(f, "%9llu %9llu %9llu %9llu ", plug->memc, plug->memd, plug->stkc, plug->stkd);   
 
         if(n) SetConsoleTextAttribute(h, BBOLD);
         fprintf(f, "%-16s", name);
