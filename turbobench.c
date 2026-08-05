@@ -24,11 +24,11 @@
 //      TurboBench: main program
 #define _CRT_SECURE_NO_WARNINGS
 #define _GNU_SOURCE
+#define _FILE_OFFSET_BITS 64
 #define _LARGEFILE64_SOURCE 1
   #if defined(__CYGWIN__) && !defined(_WIN32)
 #define _WIN32
   #endif
-#define _FILE_OFFSET_BITS 64
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,35 +39,30 @@
 #include <math.h>
 #include <sys/types.h>
 #include <ctype.h>
-
-  #ifndef _WIN32
-#include <sys/resource.h>
-  #endif
-  
-  #ifdef __APPLE__
-#include <sys/malloc.h>
-#include <malloc/malloc.h>
-#define malloc_usable_size(p) malloc_size(p)  
-  #else
-#include <malloc.h>
-  #endif
-
   #ifdef _MSC_VER
 #include "vs/getopt.h"
   #else
 #include <getopt.h>
 #include <unistd.h>
   #endif
-  #if !defined(_WIN32)
+  #ifdef _WIN32
+#include <io.h>
+#include <fcntl.h>
+#include <sys/resource.h>
+  #else
 #include <sys/mman.h>
 #include <sys/resource.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/param.h>
-  #else
-#include <io.h>
-#include <fcntl.h>
   #endif
+  #ifdef __APPLE__
+#include <malloc/malloc.h>
+#define malloc_usable_size malloc_size
+  #else
+#include <malloc.h>
+  #endif
+
 #include <time.h>
 #include "conf.h"
 #include "time_.h"
@@ -81,7 +76,6 @@
 #define FACTOR(_clen_, _len_)          ((double)(_len_)/(double)(_clen_))
 //#define SCORE(_clen_, _len_) (plug->tc + 10.0 * plug->td + (double)_clen_/1000000.0)
 #define SCORE(_plug_, _len_)  _plug_->rank
-
 static char _cpubrand[65];
 static unsigned memout;
 
@@ -151,7 +145,7 @@ void _vfree(void *p, size_t size) {
     #endif
 }
 
-  #if defined(NMEMSIZE) //|| defined(_WIN32) 
+  #if defined(NMEMSIZE) || defined(_WIN32) 
 #define mempeakinit() 0
 #define mempeak() 0
 #define mem_init()
@@ -225,8 +219,6 @@ static inline size_t mempeak(void) { if(!memout) return 0;
   atomic_max(&g_peak, cur); // catch a final spike
   return (g_peak > g_baseline) ? (g_peak - g_baseline) : 0;
 }
-//size_t memused() { return g_peak - g_baseline; }
-
 #else
 static size_t mem_peak, mem_used;
 size_t mempeak() { return mem_peak; }
@@ -235,8 +227,7 @@ size_t memused() { return mem_used; }
 size_t mempeakinit() { mem_peak = mem_used = 0; return mem_peak; }
 
 void mem_add(size_t size) { if((mem_used += size) > mem_peak) mem_peak = mem_used; }
-void mem_sub(size_t size) { 
-  //if(size > mem_used) { fflush(stdout); printf("\nfree: warning size=%zu > mem_used=%zu\n", size, mem_used); } 
+void mem_sub(size_t size) {  //if(size > mem_used) { fflush(stdout); printf("\nfree: warning size=%zu > mem_used=%zu\n", size, mem_used); } 
   mem_used -= size > mem_used ? mem_used : size; 
 }
 
@@ -378,8 +369,8 @@ size_t stackpeak(memstack_t paint) {
 #elif defined(__linux__)
 #include <pthread.h>
 typedef unsigned* memstack_t;
-static unsigned *g_stack_lo;   /* lowest usable address                */
-static unsigned *g_stack_hi;   /* one-past the highest usable address  */
+static unsigned *g_stack_lo;   // lowest usable address                
+static unsigned *g_stack_hi;   // one-past the highest usable address
 
 NOINLINE unsigned *stackini(void) {
   pthread_attr_t attr;
