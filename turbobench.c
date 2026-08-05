@@ -152,7 +152,7 @@ void _vfree(void *p, size_t size) {
     #endif
 }
 
-  #if defined(NMEMSIZE) || defined(_WIN32) 
+  #if defined(NMEMSIZE) //|| defined(_WIN32) 
 #define mempeakinit() 0
 #define mempeak() 0
 #define mem_init()
