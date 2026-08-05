@@ -48,7 +48,6 @@
   #ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
-#include <sys/resource.h>
   #else
 #include <sys/mman.h>
 #include <sys/resource.h>
