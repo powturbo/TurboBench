@@ -165,7 +165,7 @@ endif
 
 C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
-#ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
+ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS #ERROR IN C_BLOSC BUILD  
 #CXXFLAGS+=-D_C_BLOSC2
@@ -185,7 +185,7 @@ $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
 	cmake --build $(BUILDIR)/c-blosc2 --parallel 4
 endif
 LDFLAGS += $(C_BLOSC2_LIB)
-#endif
+endif
 endif
 
 ifneq ($(wildcard ClickhouseXXX/.),)
