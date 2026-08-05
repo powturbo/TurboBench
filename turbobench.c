@@ -226,7 +226,7 @@ static inline size_t mempeak(void) { if(!memout) return 0;
   atomic_max(&g_peak, cur); // catch a final spike
   return (g_peak > g_baseline) ? (g_peak - g_baseline) : 0;
 }
-size_t memused() { return g_peak - g_baseline; }
+//size_t memused() { return g_peak - g_baseline; }
 
 #else
 static size_t mem_peak, mem_used;
@@ -1760,8 +1760,7 @@ static int mcpy = 0, mode, tincx, fuzz;
 unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t outsize, unsigned bsize, int id, int lev, char *prm, char *name, char *fname) {
   unsigned char *op,*oe = _out + outsize;
   codstart(bsize, id, lev, prm, 0);
-  TMBEG(tm_Rep);
-    mempeakinit();
+  TMBEG(tm_Rep);//    mempeakinit();
     unsigned char *in,*ip;
     for(op = _out, in = _in; in < _in+_inlen; ) {
       unsigned inlen, bs;
@@ -1794,7 +1793,7 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
 int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm) {
   unsigned char *ip;
   codstart(_inlen, id, lev, prm, 1);
-  TMBEG(tm_Rep2);     mempeakinit();
+  TMBEG(tm_Rep2);     //mempeakinit();
   unsigned char *out,*op;
   for(ip = _in, out = _out; out < _out+_outlen;) {
     unsigned outlen,bs;
