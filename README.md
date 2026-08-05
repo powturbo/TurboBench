@@ -44,83 +44,14 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ---
 **TurboBench** — Precision you can rely on. The gold standard for compression benchmarking. 🚀
 
-**Try it now:**  
+**Try it now:**
   - Build or Download turbobench from [releases](https://github.com/powturbo/TurboBench/releases)
   + List all plugins + version: "./turbobench -l2"<br />
   + List all compiled codecs: "./turbobench -l1"<br />
   + type "./turbobench -h" for help
 
 ### Benchmark:
-- see also: [Compression Benchmark](https://sites.google.com/site/powturbo/compression-benchmark)
-
-CPU: Sandy bridge i7-2600k at 4.4GHz, gcc 6.3, single thread.
-- Realistic and practical benchmark with large files
-- No PURE cache benchmark
-- All compressors with latest versions (2017-05-10)
-
-- File [app3.tar binary Portable Apps Suite](https://)
-
- (bold = pareto)  MB=1.000.000
-
-|C Size|ratio%|C MB/s|D MB/s|Name|
-|--------:|-----:|--------:|--------:|----------------|
-|32823983| 32.8|**3.40**|**67.92**|**lzma 9**|
-|32872154| 32.8|0.31|**315.27**|**brotli 11d27**|
-|32925079| 32.9|1.70|70.67|lzturbo 49|
-|33936389| 33.9|2.57|**1701.35**|**lzturbo 39**|
-|34105370| 34.1|3.32|952.59|zstd 22|
-|36751363| 36.7|**48.30**|**1701.59**|**lzturbo 32**|
-|36920708| 36.7|2.98|**2355.32**|**lzturbo 29**|
-|46546059| 46.5|**163.77**|1489.57|**lzturbo 31**|
-|46805879| 46.8|44.66|940.64|zstd 9|
-|48152545| 48.1|52.94|349.62|brotli 4|
-|49497505| 49.4| 2.48|2299.20|lizard 49
-|49773790| 49.7|38.08|1952.73|lzturbo 22|
-|49860700| 49.8|16.94|295.99|zlib 9|
-|49962678| 49.9|35.70|294.24|zlib 6|
-|50278958| 50.2|**282.43**|1372.91|**lzturbo 30**|
-|52509931| 52.5|**290.96**|347.16|brotli 1|
-|52549655| 52.5|239.35|2153.41|lzturbo 21|
-|52928477| 52.9|69.17|276.75|zlib 1|
-|52983490| 52.9|**393.67**|984.00|zstd 1|
-|54251482| 54.2|2.60|**4367.15**|**lzturbo 19**|
-|54410769| 54.4|46.37|3305.22|lz4 9|
-|55923645| 55.9|188.40|4200.23|lzturbo 12|
-|57606731| 57.6|386.90|3948.64|lzturbo 11|
-|59085723| 59.0|**698.39**|2196.24|**lzturbo 20**|
-|61455711| 61.4|**800.71**|4003.54|**lzturbo 10**|
-|61938605| 61.9|730.46|3330.40|lz4 1|
-|100098564|100.0|**8647.84**|**8408.10**|**memcpy**|
-
-------------------------------------------------------------------------
-
-Hardware: ODROID C2 - ARM 64 bits - 2Ghz CPU, OS: Ubuntu 16.04, gcc 5.3<br>
-Compressors with versions 16.08.2016 <br>
-[pd3d.tar](http://www.cbloom.com/pd3d.7z) - 3D Test Set (RAD Game Tools)
-
-
-|C Size|ratio|C MB/s|D MB/s|Name|
-|--------:|-----:|--------:|--------:|----------------|
-|8052040| 25.2|**0.53**|**23.23**|**lzma 9**|
-|9092280| 28.4|0.08|**52.61**|**brotli 11**|
-|9159574| 28.7|0.52|**119.76**|**lzturbo 39**|
-|9691094| 30.3|**0.68**|94.02|**zstd 22**|
-|9826984| 30.7|**3.24**|**136.91**|**lzturbo 32**|
-|10264073| 32.1|**26.15**|**142.28**|**lzturbo 30**|
-|10427322| 32.6|4.90|108.76|zstd 9|
-|10938385| 34.2|9.46|110.38|lzfse|
-|10966870| 34.3|8.92|101.96|zstd 5|
-|11059511| 34.6|1.74|98.16|zlib 9|
-|11121480| 34.8|7.63|97.47|zlib 6|
-|12649309| 39.6|0.61|**366.17**|**lzturbo 29**|
-|13302907| 41.6|19.07|**435.28**|**lzturbo 21**|
-|14237494| 44.5|0.66|**500.67**|**lzturbo 19**|
-|14283317| 44.7|10.04|329.14|lz4 9|
-|14723054| 46.1|**103.21**|483.81|**lzturbo 20**|
-|14814049| 46.4|8.14|484.09|lzturbo 12|
-|16069593| 50.3|**121.12**|365.08|**lz4 1**|
-|16166867| 50.6|111.43|475.66|lzturbo 10|
-|31952896|100.0|**1676.10**|**1704.00**|**memcpy**|
+- see : [Compression Benchmark](https://sites.google.com/site/powturbo/compression-benchmark)
 
 ##### - Groups FASTEST,FAST,EFFICIENT,MAX,OPTIMAL,BWT:
   + test all fast compressors in the lz4, lzturbo, zlib class<br />
