@@ -190,7 +190,7 @@ static DWORD WINAPI sampler_thread(LPVOID) {
   while(InterlockedCompareExchange(&g_sampling, 1, 1) == 1) {
     size_t cur = memused();
     atomic_max(&g_peak, cur);
-    Sleep(0); // yield; use a small Sleep(1) if CPU matters
+    Sleep(1); // yield; use a small Sleep(1) if CPU matters
   }
   return 0;
 }
@@ -1343,7 +1343,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         if(n) SetConsoleTextAttribute(h, BBOLD);
         fprintf(f, "%3d %s", score, score<MEDALMAX?medal[score]:"  ");
         if(n) SetConsoleTextAttribute(h, 7);
-        if(memout) fprintf(f, "%9d %9d %9d %9d ", plug->memc, plug->memd, plug->stkc, plug->stkd);   
+        if(memout) fprintf(f, "%llu %llu %llu %llu ", plug->memc, plug->memd, plug->stkc, plug->stkd);   
 
         if(n) SetConsoleTextAttribute(h, BBOLD);
         fprintf(f, "%-16s", name);
