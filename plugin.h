@@ -48,6 +48,14 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 char *codver(int codec, char *v, char *s);
 void *_valloc(size_t size, unsigned a);
 void _vfree(void *p, size_t size);
+
+void* cpp_new(size_t size);
+void* cpp_new_nothrow(size_t size);
+void cpp_delete(void* p);
+void* cpp_new_array(size_t size);
+void cpp_delete_array(void* p);
+extern void *(*mem_malloc)(size_t);
+extern void  (*mem_free)(void *);
   #ifdef __cplusplus
 }
   #endif
