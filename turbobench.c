@@ -68,12 +68,12 @@
 #include <io.h>
 #include <fcntl.h>
   #endif
-
 #include <time.h>
 #include "conf.h"
 #include "time_.h"
 #include "cpu.h"
 #include "plugin.h"
+
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -248,10 +248,10 @@ void mem_sub(size_t size) {
 static ALIGNED(char, mem_heap[1<<20],32);
 static char *mem_heapp = mem_heap;
 
-static void *(*mem_malloc)(size_t);
+void *(*mem_malloc)(size_t);
 static void *(*mem_calloc)(size_t, size_t);
 static void *(*mem_realloc)(void*, size_t);
-static void  (*mem_free)(void *);
+void  (*mem_free)(void *);
 static void *(*mem_memalign)(size_t, size_t);
 static int   (*mem_posix_memalign)(void**, size_t, size_t);
 static void *(*mem_aligned_alloc)(size_t, size_t);
