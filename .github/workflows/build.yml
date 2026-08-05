@@ -86,12 +86,5 @@ jobs:
 #          export CMAKE_AR=llvm-ar
 #          which llvm-ar
       - run: make
-        env:
-#        CC: ${{ matrix.compiler }}
-#        CFLAGS: ${{ matrix.cflags }}
-#        LDFLAGS: ${{ matrix.ldflags }}
-        CI: true
-
-      #STATIC=1
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
