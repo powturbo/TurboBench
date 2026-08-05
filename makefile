@@ -766,7 +766,7 @@ endif
 
 ifdef LZTURBO
 CFLAGS   += -D_NQUANT
-endif
+else
 $(TRC_BDIR)/transpose.o: $(TRC_DIR)/transpose.c
 	@mkdir -p $(@D)
 	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
@@ -776,6 +776,7 @@ $(TRC_BDIR)/transpose256.o: $(TRC_DIR)/transpose.c
 	@mkdir -p $(@D)
 	$(CC) -O3 $(CFLAGS) $(_AVX2) -w -c $< -o $@
 OB       += $(TRC_BDIR)/transpose256.o
+endif
 endif
 endif
 endif
