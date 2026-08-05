@@ -23,7 +23,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - Unlock peak performance — TurboBench reduces **throttling** by intelligently controlling the **CPU frequency**
 - Automatic sorting, updating, and merging of result files.
 - A **nightly github release** is created automatically whenever submodules change.
-
+- TurboBench rank aggregation crowns the top compression libraries with 🥇 🏆 👑 — see who's king!
 
 ## Broad Platform Support
 
