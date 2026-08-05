@@ -165,7 +165,7 @@ endif
 
 C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
-ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
+#ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS #ERROR IN C_BLOSC BUILD  
 #CXXFLAGS+=-D_C_BLOSC2
@@ -180,12 +180,12 @@ else
 CXXFLAGS+=-D_C_BLOSC2
 C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
 $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
-	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
-	          -DPREFER_EXTERNAL_LZ4=ON -DPREFER_EXTERNAL_ZLIB=ON -DPREFER_EXTERNAL_ZSTD=ON  -DBUILD_SHARED=OFF
-	cmake --build $(BUILDIR)/c-blosc2
+	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -G "MinGW Makefiles" -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
+	          -DPREFER_EXTERNAL_LZ4=ON -DPREFER_EXTERNAL_ZLIB=ON -DPREFER_EXTERNAL_ZSTD=ON  -DBUILD_SHARED=OFF -DBUILD_SHARED_LIBS=OFF 
+	cmake --build $(BUILDIR)/c-blosc2 --parallel 4
 endif
 LDFLAGS += $(C_BLOSC2_LIB)
-endif
+#endif
 endif
 
 ifneq ($(wildcard ClickhouseXXX/.),)
