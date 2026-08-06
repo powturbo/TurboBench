@@ -134,6 +134,9 @@ LDFLAGS += -ldl
 endif
 
 HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) -fopenmp -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
+ifeq ($(HAVE_OPENMP),no)
+  $(warning OpenMP not available)
+endif
 
 all: turbobench 
  
@@ -260,8 +263,6 @@ ifeq ($(HAVE_OPENMP),yes)
   LIBBSC_CFLAGS  += -fopenmp -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP
   LDFLAGS += -fopenmp
   $(info OpenMP enabled for libbsc)
-else
-  $(warning OpenMP not available for libbsc)
 endif
 
 OB += $(BUILDIR)/libbsc/libbsc/libbsc/libbsc.o \
