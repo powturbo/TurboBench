@@ -555,7 +555,7 @@ CXXFLAGS+=-fopenmp
 LDFLAGS += -fopenmp
 OB+=$(call obj,$(BUILDIR)/libzpaq_omp.o)
 else
-OB+=$(call obj,$(BUILDIR)/libzpaq.o)
+OB+=$(call obj,zpaq/libzpaq.o)
 endif
 ifneq ($(ARCH),x86_64)
   CXXFLAGS+= -DNOJIT
