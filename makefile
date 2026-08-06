@@ -134,7 +134,6 @@ LDFLAGS += -ldl
 endif
 
 HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) -fopenmp -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
-
 ifeq ($(HAVE_OPENMP),yes)
   CFLAGS   += -fopenmp -DLIBBSC_OPENMP_SUPPORT
   CXXFLAGS += -fopenmp
