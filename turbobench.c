@@ -2316,7 +2316,7 @@ int main(int argc, char* argv[]) {
                  finame, totinlen, p->len,    p->td,p->tc,p->s,p->lev,p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
     }
     for(g = plug; g < plug+gk; g++)
-      if(g->id >= 0 && g->tc > 1e-10 && g->td > 1e-10 && !plug->err) fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
+      if(g->id >= 0 /*&& g->tc > 1e-10 && g->td > 1e-10 && !plug->err*/) fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
                                  finame, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms);
     fclose(fo);
     printfile(s, 0, FMT_TEXT, rem);
