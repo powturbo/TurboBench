@@ -253,11 +253,11 @@ endif
 
 ifneq ($(wildcard libbsc/.),)
 CXXFLAGS+=-D_LIBBSC
-LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc -DLIBSAIS_OPENMP
+LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc 
 LIBBSC_LDFLAGS =
 
 ifeq ($(HAVE_OPENMP),yes)
-  LIBBSC_CFLAGS  += -fopenmp -DLIBBSC_OPENMP_SUPPORT
+  LIBBSC_CFLAGS  += -fopenmp -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP
   LDFLAGS += -fopenmp
   $(info OpenMP enabled for libbsc)
 else
@@ -558,14 +558,16 @@ endif
 
 ifneq ($(wildcard zpaq/.),)
 ifneq ($(OS),Darwin)
-$(BUILDIR)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
-	(echo '#include <omp.h>'; cat $<) > $@
 CXXFLAGS+=-D_ZPAQ -Izpaq
 ifeq ($(HAVE_OPENMP),yes)
+$(BUILDIR)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
+	(echo '#include <omp.h>'; cat $<) > $@
 CXXFLAGS+=-fopenmp
 LDFLAGS += -fopenmp
-endif
 OB+=$(call obj,$(BUILDIR)/libzpaq_omp.o)
+else
+OB+=$(call obj,$(BUILDIR)/libzpaq.o)
+endif
 ifneq ($(ARCH),x86_64)
   CXXFLAGS+= -DNOJIT
 endif
