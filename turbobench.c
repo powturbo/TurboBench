@@ -21,7 +21,7 @@
     - twitter  : https://twitter.com/powturbo
     - email    : powturbo [_AT_] gmail [_DOT_] com
 **/
-//      TurboBench: main program
+//   s TurboBench: main program
 #define _CRT_SECURE_NO_WARNINGS
 #define _GNU_SOURCE
 #define _FILE_OFFSET_BITS 64
