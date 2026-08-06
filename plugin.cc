@@ -231,10 +231,6 @@ enum {
 #define _MSCOMPRESS 0
 #endif
  P_MSCOMPRESS,
-#ifndef _NAKA
-#define _NAKA 0
-#endif
- P_NAKA,
 
 #ifndef _OPENZL
 #define _OPENZL 0
@@ -886,10 +882,6 @@ class Out: public libzpaq::Writer {
 
   #if _LZSS
 #include "lzss/lzss.h"
-  #endif
-
-  #if _NAKA
-#include "nakamichi/nakamichi.h"
   #endif
 
   #if _PCODEC
@@ -1635,7 +1627,7 @@ struct plugs plugs[] = {
   { P_LIZARD,        "lizard",        _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
   { P_LZ4,           "lz4",           _LZ4,       "Lz4",                     "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
   { P_LZ4ULTRA,      "lz4ultra",      _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
-  { P_LZAV,          "lzav",          _LZAV,      "lzav", "1,2" }, // https://github.com/avaneev/lzav
+  { P_LZAV,          "lzav",          _LZAV,      "lzav",                    "1,2" },
   { P_LZFSE,         "lzfse",         _LZFSE,     "lzfse",                   "" },  
   { P_LZFSEA,        "lzfsea",        _LZFSEA,    "lzfsea",                  "" },
   { P_LZJODY,        "lzjody",        _LZJODY,    "lzjody",                  "" },
@@ -1662,8 +1654,6 @@ struct plugs plugs[] = {
   { P_MISA77S,       "misa77_safe",   _MISA77,    "misa77 safe",             "0,1" },
   { P_MSCOMPRESS,    "mscompress",    _MSCOMPRESS,"ms-compress",             "2,3,4" },
  
-  { P_NAKA,          "naka",          _NAKA,      "Nakamichi Washigan",      "" },
-
   { P_OPENZL_U8,     "openzl_u8",     _OPENZL,    "openzl u8",               "" },
   { P_OPENZL_I8,     "openzl_i8",     _OPENZL,    "openzl i8",               "" },
   { P_OPENZL_U16,    "openzl_le_u16", _OPENZL,    "openzl u16",              "" },
@@ -2442,10 +2432,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_MISA77S: return misa77::compress(in, inlen, out, outsize, misa77::config(lev));
       #endif
 
-      #if _NAKA
-    case P_NAKA:    return NakaCompress( (char *)out, (char *)in, inlen);
-       #endif
- 
       #if _OPENZL
     case P_OPENZL_U8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >(inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;}
     case P_OPENZL_I8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >(inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;}
@@ -3312,10 +3298,6 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #if _MISA77
     case P_MISA77:  return misa77::decompress(in, inlen, out, outlen);
     case P_MISA77S: return misa77::decompress(in, inlen, out, outlen, misa77::dconfig(true));
-      #endif
-      
-      #if _NAKA
-    case P_NAKA:  return NakaDecompress((char *)out, (char *)in, inlen);
       #endif
       
       #if _OODLE
