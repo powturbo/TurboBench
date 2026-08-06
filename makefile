@@ -109,7 +109,8 @@ ifeq ($(OS),Windows)
   LDFLAGS=-Wl,--stack,33554432 -lpowrprof
 endif
 
-CFLAGS+=-w -Wall $(DDEBUG) -std=gnu99 -fpermissive -Wimplicit-function-declaration
+CFLAGS+=-w -Wall $(DDEBUG) -fpermissive 
+#-Wimplicit-function-declaration -std=gnu99 
 CXXFLAGS+=$(DDEBUG) -w -Wall -fpermissive  -fno-rtti
 
 ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
