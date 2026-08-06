@@ -258,27 +258,14 @@ ifneq ($(wildcard libbsc/.),)
 CXXFLAGS+=-D_LIBBSC
 LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc 
 LIBBSC_LDFLAGS =
-
 ifeq ($(HAVE_OPENMP),yes)
   LIBBSC_CFLAGS  += -fopenmp -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP
   LDFLAGS += -fopenmp
   $(info OpenMP enabled for libbsc)
 endif
-
-OB += $(BUILDIR)/libbsc/libbsc/libbsc/libbsc.o \
-	$(BUILDIR)/libbsc/libbsc/coder/coder.o \
-	$(BUILDIR)/libbsc/libbsc/coder/qlfc/qlfc.o \
-	$(BUILDIR)/libbsc/libbsc/coder/qlfc/qlfc_model.o \
-	$(BUILDIR)/libbsc/libbsc/filters/detectors.o \
-	$(BUILDIR)/libbsc/libbsc/filters/preprocessing.o \
-	$(BUILDIR)/libbsc/libbsc/adler32/adler32.o \
-	$(BUILDIR)/libbsc/libbsc/bwt/bwt.o \
-	$(BUILDIR)/libbsc/libbsc/st/st.o \
-	$(BUILDIR)/libbsc/libbsc/lzp/lzp.o \
-	$(BUILDIR)/libbsc/libbsc/platform/platform.o \
-	$(BUILDIR)/libbsc/libbsc/bwt/libsais/libsais.o
-
-LIBSAIS = 1
+OB += $(BUILDIR)/libbsc/libbsc/libbsc/libbsc.o $(BUILDIR)/libbsc/libbsc/coder/coder.o $(BUILDIR)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILDIR)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILDIR)/libbsc/libbsc/filters/detectors.o \
+	$(BUILDIR)/libbsc/libbsc/filters/preprocessing.o $(BUILDIR)/libbsc/libbsc/adler32/adler32.o $(BUILDIR)/libbsc/libbsc/bwt/bwt.o $(BUILDIR)/libbsc/libbsc/st/st.o $(BUILDIR)/libbsc/libbsc/lzp/lzp.o \
+	$(BUILDIR)/libbsc/libbsc/platform/platform.o $(BUILDIR)/libbsc/libbsc/bwt/libsais/libsais.o
 
 $(BUILDIR)/libbsc/%.o: libbsc/%.cpp
 	@mkdir -p $(dir $@)
@@ -287,6 +274,7 @@ $(BUILDIR)/libbsc/%.o: libbsc/%.cpp
 $(BUILDIR)/libbsc/%.o: libbsc/%.c
 	@mkdir -p $(dir $@)
 	cc $(LIBBSC_CFLAGS) -c $< -o $@
+LIBSAIS = 1
 endif
 
 ifneq ($(wildcard libdeflate/.),)
