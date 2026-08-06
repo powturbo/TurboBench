@@ -550,7 +550,7 @@ ifneq ($(wildcard zstd/.),)
 CXXFLAGS+=-D_ZSTD -Izstd/lib -Izstd/lib/common
 CFLAGS+=-Izstd/lib -Izstd/lib/common
 ZSTD_SRCS := $(wildcard zstd/lib/common/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/*.c) $(wildcard zstd/lib/decompress/*.S) $(wildcard zstd/lib/dictBuilder/*.c)
-# .S sources are passed directly to the linker (assembled at link time), so only the .c sources are compiled into $(BUILDIR) objects.
+#  .S sources are passed directly to the linker (assembled at link time), so only the .c sources are compiled into $(BUILDIR) objects.
 ZSTD_C_SRCS := $(filter %.c,$(ZSTD_SRCS))
 ZSTD_S_SRCS := $(filter %.S,$(ZSTD_SRCS))
 ZSTD_OBJS := $(call obj,$(ZSTD_C_SRCS)) $(ZSTD_S_SRCS)
