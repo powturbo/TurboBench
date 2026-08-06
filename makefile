@@ -134,14 +134,6 @@ LDFLAGS += -ldl
 endif
 
 HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) -fopenmp -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
-ifeq ($(HAVE_OPENMP),yes)
-  CFLAGS   += -fopenmp -DLIBBSC_OPENMP_SUPPORT
-  CXXFLAGS += -fopenmp
-  LDFLAGS  += -fopenmp
-  $(info OpenMP enabled)
-else
-  $(warning OpenMP not available)
-endif
 
 all: turbobench 
  
@@ -260,6 +252,15 @@ OB += $(call obj,$(KANZI_SRCS))
 endif
 
 ifneq ($(wildcard libbsc/.),)
+ifeq ($(HAVE_OPENMP),yes)
+  CFLAGS   += -fopenmp -DLIBBSC_OPENMP_SUPPORT
+#  CXXFLAGS += -fopenmp
+  LDFLAGS  += -fopenmp
+  $(info OpenMP enabled)
+else
+  $(warning OpenMP not available)
+endif
+
 CXXFLAGS+=-D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc
 OB+=$(call obj,libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/filters/detectors.o \
 	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o)
