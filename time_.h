@@ -256,7 +256,7 @@ static void pr(size_t l, size_t n) {
     else if(tm_verbose) { printf("%*.*f         ",                           TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm)); fflush(stdout); }\
     if(++_tm_i >= 16 || _tm_d >= 60) break; if((_tm_R & 7)==7) sleep_cool(tm_slp);\
   }\
-  if(tm_verbose>1) { printf("\b\b\b\b\b\b                "); fflush(stdout); }\
+  if(tm_verbose>1) { printf("\b\b\b\b\b               "); fflush(stdout); }\
 }
 
 #define TMEND(_size_) _tm_r++;\ 
