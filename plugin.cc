@@ -1286,6 +1286,17 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
   #if _ZXC
 #define ZXC_STATIC_DEFINE
 #include "zxc/include/zxc.h"
+/*static ZXC_NOINLINE ZXC_COLD int zxc_ensure_entropy_scratch(const zxc_cctx_t* RESTRICT ctx) {
+    if (LIKELY(ctx->pivco_scratch != NULL)) return ZXC_OK;
+    return zxc_cctx_alloc_entropy_scratch((zxc_cctx_t*)(uintptr_t)ctx);
+}
+static ZXC_NOINLINE ZXC_COLD int zxc_decode_lit_pivco(const zxc_cctx_t* RESTRICT ctx, const uint8_t* RESTRICT payload,  const size_t psize, const size_t required_size) {
+  const int arc = zxc_ensure_entropy_scratch(ctx);
+  if (UNLIKELY(arc != ZXC_OK)) return arc;
+  if (UNLIKELY(ctx->lit_buffer_cap < required_size + ZXC_PAD_SIZE || ctx->pivco_scratch_cap < required_size + ZXC_PIVCO_SCRATCH_PAD))
+    return ZXC_ERROR_CORRUPT_DATA;
+  return zxc_huf_decode_section(payload, psize, ctx->lit_buffer, required_size,  ctx->pivco_scratch);
+}*/
   #endif
 
   #if __cplusplus
