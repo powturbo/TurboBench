@@ -928,14 +928,6 @@ $(BUILDIR)/wflz/wfLZ.o: wflz/wfLZ.c
 OB+=$(BUILDIR)/wflz/wfLZ.o
 endif
 
-ifneq ($(wildcard nakamichi/.),)
-CXXFLAGS+=-D_NAKAMICHI
-$(BUILDIR)/nakamichi/Nakamichi_Okamigan.o: nakamichi/Nakamichi_Okamigan.c
-	@mkdir -p $(dir $@)
-	$(CC) -O3 -msse4.1 $(MARCH) $< -c -o $@
-OB+=$(call obj,nakamichi/Nakamichi_Washigan.o)
-endif
-
 ifneq ($(wildcard FastLZ/.),)
 CXXFLAGS+=-D_FASTLZ
 OB+=$(call obj,FastLZ/fastlz.o)
