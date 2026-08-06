@@ -133,9 +133,15 @@ else ifeq ($(OS),$(filter $(OS),Darwin FreeBSD GNU/kFreeBSD Linux NetBSD SunOS))
 LDFLAGS += -ldl
 endif
 
-ifdef OPENMP
-CFLAGS+=-fopenmp -DLIBBSC_OPENMP_SUPPORT
-LDFLAGS+=-fopenmp
+HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) -fopenmp -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
+
+ifeq ($(HAVE_OPENMP),yes)
+  CFLAGS   += -fopenmp -DLIBBSC_OPENMP_SUPPORT
+  CXXFLAGS += -fopenmp
+  LDFLAGS  += -fopenmp
+  $(info OpenMP enabled)
+else
+  $(warning OpenMP not available)
 endif
 
 all: turbobench 
