@@ -288,5 +288,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -elzma,9:fb273:lc2:lp2:t2
 ```
 
-Last update: 4 AUG 2026
+Last update: 7 AUG 2026
 
