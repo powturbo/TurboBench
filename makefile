@@ -963,7 +963,6 @@ CXXFLAGS+=-D_YAPPY
 OB+=$(call obj,yappy/yappy.o)
 endif
 
-
 ifneq ($(wildcard CSC/.),)
 CXXFLAGS+=-D_CSC
 OB+=$(call obj,CSC/src/libcsc/csc_analyzer.o CSC/src/libcsc/csc_coder.o CSC/src/libcsc/csc_dec.o CSC/src/libcsc/csc_default_alloc.o CSC/src/libcsc/csc_enc.o CSC/src/libcsc/csc_encoder_main.o CSC/src/libcsc/csc_filters.o CSC/src/libcsc/csc_lz.o CSC/src/libcsc/csc_memio.o \
