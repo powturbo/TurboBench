@@ -252,20 +252,40 @@ OB += $(call obj,$(KANZI_SRCS))
 endif
 
 ifneq ($(wildcard libbsc/.),)
+CXXFLAGS+=-D_LIBBSC
+LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc -DLIBSAIS_OPENMP
+LIBBSC_LDFLAGS =
+
 ifeq ($(HAVE_OPENMP),yes)
-  CFLAGS   += -fopenmp -DLIBBSC_OPENMP_SUPPORT
-#  CXXFLAGS += -fopenmp
-  LDFLAGS  += -fopenmp
-  $(info OpenMP enabled)
+  LIBBSC_CFLAGS  += -fopenmp -DLIBBSC_OPENMP_SUPPORT
+  LDFLAGS += -fopenmp
+  $(info OpenMP enabled for libbsc)
 else
-  $(warning OpenMP not available)
+  $(warning OpenMP not available for libbsc)
 endif
 
-CXXFLAGS+=-D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc
-OB+=$(call obj,libbsc/libbsc/libbsc/libbsc.o libbsc/libbsc/coder/coder.o libbsc/libbsc/coder/qlfc/qlfc.o libbsc/libbsc/coder/qlfc/qlfc_model.o libbsc/libbsc/filters/detectors.o \
-	libbsc/libbsc/filters/preprocessing.o libbsc/libbsc/adler32/adler32.o libbsc/libbsc/bwt/bwt.o libbsc/libbsc/st/st.o libbsc/libbsc/lzp/lzp.o)
-OB+=$(call obj,libbsc/libbsc/platform/platform.o libbsc/libbsc/bwt/libsais/libsais.o libbsc/libbsc/bwt/libsais/libsais.o)
-LIBSAIS=1
+OB += $(BUILDIR)/libbsc/libbsc/libbsc/libbsc.o \
+	$(BUILDIR)/libbsc/libbsc/coder/coder.o \
+	$(BUILDIR)/libbsc/libbsc/coder/qlfc/qlfc.o \
+	$(BUILDIR)/libbsc/libbsc/coder/qlfc/qlfc_model.o \
+	$(BUILDIR)/libbsc/libbsc/filters/detectors.o \
+	$(BUILDIR)/libbsc/libbsc/filters/preprocessing.o \
+	$(BUILDIR)/libbsc/libbsc/adler32/adler32.o \
+	$(BUILDIR)/libbsc/libbsc/bwt/bwt.o \
+	$(BUILDIR)/libbsc/libbsc/st/st.o \
+	$(BUILDIR)/libbsc/libbsc/lzp/lzp.o \
+	$(BUILDIR)/libbsc/libbsc/platform/platform.o \
+	$(BUILDIR)/libbsc/libbsc/bwt/libsais/libsais.o
+
+LIBSAIS = 1
+
+$(BUILDIR)/libbsc/%.o: libbsc/%.cpp
+	@mkdir -p $(dir $@)
+	cc $(LIBBSC_CFLAGS) -c $< -o $@
+
+$(BUILDIR)/libbsc/%.o: libbsc/%.c
+	@mkdir -p $(dir $@)
+	cc $(LIBBSC_CFLAGS) -c $< -o $@
 endif
 
 ifneq ($(wildcard libdeflate/.),)
@@ -537,10 +557,18 @@ OB += $(ZSTD_OBJS)
 endif
 
 ifneq ($(wildcard zpaq/.),)
-ifeq ($(OS),$(filter $(OS),Darwin))
-else
-CXXFLAGS+=-D_ZPAQ
-OB+=$(call obj,zpaq/libzpaq.o)
+ifneq ($(OS),Darwin)
+$(BUILDIR)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
+	(echo '#include <omp.h>'; cat $<) > $@
+CXXFLAGS+=-D_ZPAQ -Izpaq
+ifeq ($(HAVE_OPENMP),yes)
+CXXFLAGS+=-fopenmp
+LDFLAGS += -fopenmp
+endif
+OB+=$(call obj,$(BUILDIR)/libzpaq_omp.o)
+ifneq ($(ARCH),x86_64)
+  CXXFLAGS+= -DNOJIT
+endif
 endif
 endif
 
