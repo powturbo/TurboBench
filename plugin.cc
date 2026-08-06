@@ -802,7 +802,6 @@ class Out: public libzpaq::Writer {
 } zmemout;
   #endif
 
-
   #if _LZ4
 #include "lz4/lib/lz4.h"
 #include "lz4/lib/lz4hc.h"
@@ -1628,7 +1627,7 @@ struct plugs plugs[] = {
   
   { P_KANZI,         "kanzi",         _KANZI,     "kanzi",                   "0,1,2,3,4,5,6,7,8,9/T#" },
   
-  { P_LIBBSC,        "bsc",           _LIBBSC,    "bsc",                     "0,3,4,5,6,7,8/p:e#"},
+  { P_LIBBSC,        "bsc",           _LIBBSC,    "bsc",                     "0,3,4,5,6,7,8/P:t:e#"}, // Multithreading w. parameter t
   { P_LIBBSCC,       "bscqlfc",       _LIBBSC,    "bsc",                     "1,2"},
   { P_LIBDEFLATE,    "libdeflate",    _LIBDEFLATE,"libdeflate",              "1,2,3,4,5,6,7,8,9,12/dg"},
   { P_LIBLZF,        "lzf",           _LIBLZF,    "LibLZF",                  "" },
@@ -1667,12 +1666,12 @@ struct plugs plugs[] = {
 
   { P_OPENZL_U8,     "openzl_u8",     _OPENZL,    "openzl u8",               "" },
   { P_OPENZL_I8,     "openzl_i8",     _OPENZL,    "openzl i8",               "" },
-  { P_OPENZL_U16,    "openzl_u16",    _OPENZL,    "openzl u16",              "" },
-  { P_OPENZL_I16,    "openzl_i16",    _OPENZL,    "openzl i16",              "" },
-  { P_OPENZL_U32,    "openzl_u32",    _OPENZL,    "openzl u32",              "" },
-  { P_OPENZL_I32,    "openzl_i32",    _OPENZL,    "openzl i32",              "" },
-  { P_OPENZL_U64,    "openzl_u64",    _OPENZL,    "openzl u64",              "" },
-  { P_OPENZL_I64,    "openzl_i64",    _OPENZL,    "openzl i64",              "" },
+  { P_OPENZL_U16,    "openzl_le_u16", _OPENZL,    "openzl u16",              "" },
+  { P_OPENZL_I16,    "openzl_le_i16", _OPENZL,    "openzl i16",              "" },
+  { P_OPENZL_U32,    "openzl_le_u32", _OPENZL,    "openzl u32",              "" },
+  { P_OPENZL_I32,    "openzl_le_i32", _OPENZL,    "openzl i32",              "" },
+  { P_OPENZL_U64,    "openzl_le_u64", _OPENZL,    "openzl u64",              "" },
+  { P_OPENZL_I64,    "openzl_le_i64", _OPENZL,    "openzl i64",              "" },
   { P_OPENZL_SERIAL, "openzl_serial", _OPENZL,    "openzl serial",           "" },
   { P_OPENZL_GENERIC,"openzl_generic",_OPENZL,    "openzl generic",          "" },
   { P_OPENZL_ZSTD,   "openzl_zstd",   _OPENZL,    "openzl zstd",             "1,2,3,4,5,6,8,10,12,14,16,18,20,22,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99" },
@@ -1727,7 +1726,7 @@ struct plugs plugs[] = {
   { P_ZOPFLI,        "zopfli",        _ZOPFLI,    "zopfli",                   ""},
   { P_ZSTD,          "zstd",          _ZSTD,      "zstd",                     "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/d#" },
   { P_ZXC,           "zxc",           _ZXC,       "zxc",                      "1,2,3,4,5,6,7" },
-  { P_ZPAQ,          "zpaq",          _ZPAQ,      "libzpaq",                  "0,1,2,3,4,5" },
+  { P_ZPAQ,          "zpaq",          _ZPAQ,      "libzpaq",                  "0,1,2,3,4,5" }, // multithreading with lev 2 or 3
 
 //------------------------------------------------------------------
   { P_MCPY,          "imemcpy",     _MEMCPY,    "inline memcpy",              "" },
@@ -1860,7 +1859,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #endif
 
       #if _LIBBSC
-    #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING)      
+    #define BSC_MODE LIBBSC_FEATURE_FASTMODE | (strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0) | (strchr(prm,'t')?LIBBSC_FEATURE_MULTITHREADING:0)      
     case P_LIBBSC: case P_LIBBSCC: bsc_init(BSC_MODE); bsc_st_init(BSC_MODE); break;
       #endif
 
@@ -2128,28 +2127,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
       #endif
 
-      #if _LIBBSC
-    #define BSC_MODE LIBBSC_FEATURE_FASTMODE|(strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0)|(strchr(prm,'t')?0:LIBBSC_FEATURE_MULTITHREADING)
-    case P_LIBBSC: { int ec = (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1; ec = ec==0?3:(ec>3?3:ec);  
-      return bsc_compress(      in, out, inlen,strchr(prm,'p')?0:15,strchr(prm,'p')?0:128, lev<3?1:lev, ec, BSC_MODE);
-      //int bsc_compress_mt(const unsigned char * input, unsigned char * output, int n, int lzpHashSize, int lzpMinLen, int blockSorter, int coder, int features, int threads);
-    }
-    case P_LIBBSCC: return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
-    case P_LIBBSCBWT: { int bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, 0); *(unsigned *)out = bwtidx; return inlen+4; }
-    case P_ST: { memcpy(out+4,in, inlen); *(unsigned *)(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
-      #endif
-    int bsc_coder_compress(const unsigned char * input, unsigned char * output, int n, int coder, int features);
-
-      #if _LIBDEFLATE
-    case P_LIBDEFLATE:  {
-       struct libdeflate_compressor *dc = libdeflate_alloc_compressor(lev);
-            if(strchr(prm,'d')) outlen = libdeflate_deflate_compress(dc,in, inlen,out, outsize);
-       else if(strchr(prm,'g')) outlen = libdeflate_gzip_compress(   dc,in, inlen,out, outsize);
-       else                     outlen = libdeflate_zlib_compress(  dc,in, inlen,out, outsize);
-       libdeflate_free_compressor(dc); return outlen;
-      }
-      #endif
-
       #if _BZIP2
     case P_BZIP2:    { unsigned outlen = outsize; return BZ2_bzBuffToBuffCompress((char *)out, &outlen, (char *)in, inlen, 9, 0, 0)==BZ_OK?outlen:-1; }
       #endif
@@ -2247,6 +2224,27 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_KANZI: return kanzi_compress((char *)in, inlen, (char *)out, outsize, threadnum, lev);
       #endif
       
+      #if _LIBBSC
+    #define BSC_MODE LIBBSC_FEATURE_FASTMODE | (strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0) | (strchr(prm,'t')?LIBBSC_FEATURE_MULTITHREADING:0)      
+    case P_LIBBSC: { int ec = (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1; ec = ec==0?3:(ec>3?3:ec);  
+      return bsc_compress(      in, out, inlen,strchr(prm,'p')?0:15,strchr(prm,'p')?0:128, lev<3?1:lev, ec, BSC_MODE);
+      //int bsc_compress_mt(const unsigned char * input, unsigned char * output, int n, int lzpHashSize, int lzpMinLen, int blockSorter, int coder, int features, int threads);
+    }
+    case P_LIBBSCC: return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
+    case P_LIBBSCBWT: { int bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, 0); *(unsigned *)out = bwtidx; return inlen+4; }
+    case P_ST: { memcpy(out+4,in, inlen); *(unsigned *)(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
+      #endif
+
+      #if _LIBDEFLATE
+    case P_LIBDEFLATE:  {
+       struct libdeflate_compressor *dc = libdeflate_alloc_compressor(lev);
+            if(strchr(prm,'d')) outlen = libdeflate_deflate_compress(dc,in, inlen,out, outsize);
+       else if(strchr(prm,'g')) outlen = libdeflate_gzip_compress(   dc,in, inlen,out, outsize);
+       else                     outlen = libdeflate_zlib_compress(  dc,in, inlen,out, outsize);
+       libdeflate_free_compressor(dc); return outlen;
+      }
+      #endif
+
       #if _LIBLZF
     case P_LIBLZF:    return lzf_compress(in, inlen, out, outsize);
       #endif
@@ -3887,7 +3885,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
 
       #if _LZHAM
-    case P_LZHAM:  sprintf(s, "v2015.11.22 MT", LIBBSC_VERSION_STRING); break;
+    case P_LZHAM:  return "v2015.11.22 MT"; break;
       #endif
 
       #if _HEATSHRINK
