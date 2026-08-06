@@ -1263,7 +1263,10 @@ void plugprtth(FILE *f, int fmt) {
       fprintf(f,"<h3>TurboBench: Compressor Benchmark</h3><table id='myTable' class='tablesorter' style=\"width:35%%\"><thead><tr><th>C Size</th><th>ratio%%</th><th>C MB/s</th><th>D MB/s</th><th>Name</th><th>C Mem</th><th>D Mem</th><th>File</th></tr></thead><tbody>\n");
       break;
     case FMT_MARKDOWN:
-      fprintf(f,"|C Size|ratio%|C MB/s|D MB/s|Name|File|\n|--------:|-----:|--------:|--------:|----------------|----------------|\n");
+      if(memout)
+        fprintf(f,"|C Size|ratio%|C MB/s|D MB/s|Rank|C Mem|D Mem|C Stack|D Stack|Name|File|\n|--------:|-----:|--------:|--------:|--------:|--------:|--------:|--------:|----------------|----------------|\n");
+      else  
+        fprintf(f,"|C Size|ratio%|C MB/s|D MB/s|Rank|Name|File|\n|--------:|-----:|--------:|--------:|----------------|----------------|\n");
       break;
     case FMT_CSV:
       fprintf(f,"size,csize,ratio,ctime,dtime,name,file\n");
@@ -1371,7 +1374,11 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         finame);
       break;
     case FMT_MARKDOWN:
-      fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%s%s%s|%s|\n", plug->len, sratio, c?"**":"",  tc, c?"**":"",    d?"**":"",  td, d?"**":"",   n?"**":"",  name, n?"**":"",   finame);  break;
+      if(memout)
+        fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%u|%u|%u|%u|%s%s%s|%s|\n", plug->len, sratio, c?"**":"",  tc, c?"**":"",    d?"**":"",  td, d?"**":"", score, score<MEDALMAX?medal[score]:" ", 
+                      plug->memc, plug->memd, plug->stkc, plug->stkd, n?"**":"",  name, n?"**":"",   finame);
+      else        
+        fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%s%s%s|%s|\n", plug->len, sratio, c?"**":"",  tc, c?"**":"",    d?"**":"",  td, d?"**":"", score, score<MEDALMAX?medal[score]:" ",  n?"**":"",  name, n?"**":"",   finame);  break;
     case FMT_CSV:    fprintf(f,"%12"PRId64",%11"PRId64",%s,%9.2f,%9.2f,%-16s,%s\n",       totinlen, plug->len, sratio, tc, td, name, finame);  break;
     case FMT_TSV:    fprintf(f,"%12"PRId64"\t%11"PRId64"\t%s\t%9.2f\t%9.2f\t%-16s\t%s\n", totinlen, plug->len, sratio, tc, td, name, finame);  break;
     //case FMT_SQUASH: fprintf(f,"%12"PRId64",%11"PRId64",%5.1f,%9.2f,%9.2f,%-16s,%s\n",    finame, name, name, plug->len,        tc, tc, td, td);
@@ -1622,7 +1629,7 @@ void plugplotce(FILE *f, int fmt, char *s) {
 int plugprts(plug_t *plug, int k, char *finame, int xstdout, unsigned long long totlen, int fmt, char *t) {
   double ptc = 0.0, ptd = 0.0;
   plug_t *g;
-  if(!totlen) return 0;                                                                             if(verbose>1) printf("'%s'\n", finame);
+  if(!totlen) return 0;                                                                             if(verbose>1) printf("plugprts:'%s' k=%d\n", finame, k);
 
   qsort(plugt, k, sizeof(plug_t), (int(*)(const void*,const void*))libcmp);
   for(g = plugt; g < plugt+k; g++) g->rank = 0;
