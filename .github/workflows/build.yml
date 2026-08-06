@@ -82,7 +82,7 @@ jobs:
         # also export for the current shell
 #          export AR=llvm-ar
 #          export CMAKE_AR=llvm-ar
-#          which  llvm-ar
+#          which llvm-ar
       - run: make
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
