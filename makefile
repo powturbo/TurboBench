@@ -122,11 +122,6 @@ LDFLAGS+=-static
 NMEMSIZE=1
 endif
 
-# disable peak memory calculation
-#ifeq ($(OS),$(filter $(OS),Darwin))
-#NMEMSIZE=1
-#endif
-
 ifdef NMEMSIZE
 CFLAGS+=-DNMEMSIZE
 else ifeq ($(OS),$(filter $(OS),Darwin FreeBSD GNU/kFreeBSD Linux NetBSD SunOS))
@@ -140,12 +135,12 @@ endif
 
 all: turbobench 
  
+# ***************************************************************** codecs *****************************************************************************
 ifdef LZTURBO
 CXXFLAGS+=-D_LZTURBO
 include ../dev/x/lzturbo.mk
 endif
 
-# ***************************************************************** codecs *****************************************************************************
 ifneq ($(wildcard brotli/.),)
 CXXFLAGS+=-D_BROTLI -Ibrotli/c/include 
 CFLAGS+=-Ibrotli/c/include 
@@ -227,12 +222,14 @@ ifeq ($(NASM),)
   endif     
 else
 CXXFLAGS += -D_ISA_L
-ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ISAL_LIB := isa-l/bin/isa-l.a 
+ISAL_SRCS := $(shell find isa-l -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.cc' -o -name '*.asm' \))
+ISAL_LIB := $(BUILDIR)/bin/isa-l.a 
 $(ISAL_LIB): $(ISAL_SRCS)
-	mkdir -p $(BUILDIR)/isa-l
-	mkdir -p isa-l/bin
+	@mkdir -p $(BUILDIR)/isa-l
+	@mkdir -p $(BUILDIR)/bin
+	@mkdir -p isa-l/bin
 	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILDIR)/isa-l)
+	@mv isa-l/bin/isa-l.a $@
 endif
 LDFLAGS += $(ISAL_LIB)
 endif
