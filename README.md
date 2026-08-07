@@ -107,10 +107,11 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 
         ./turbobench -eFAST/bzip2 file
 
-  + creates a separate result file (file@SET.tbb) for each compressor set with a option<br />
+  + creates a separate result file (file@SET.tbb) for each compressor set with the 'a' option<br />
 
         ./turbobench -eTURBO -aTURBO file   
         ./turbobench -eFAST  -aFAST file   
+        ./turbobench -eturborc,1/pivco,0,1  -aec file   
 
 ##### - Print + Plot
 
