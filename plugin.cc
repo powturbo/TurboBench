@@ -2231,7 +2231,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
             if(strchr(prm,'d')) outlen = libdeflate_deflate_compress(dc,in, inlen,out, outsize);
        else if(strchr(prm,'g')) outlen = libdeflate_gzip_compress(   dc,in, inlen,out, outsize);
        else                     outlen = libdeflate_zlib_compress(  dc,in, inlen,out, outsize);
-       libdeflate_free_compressor(dc); return outlen;
+       libdeflate_free_compressor(dc); 
+       return outlen;
       }
       #endif
 
@@ -2942,8 +2943,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         case 17: return rcu3senc(   in, inlen, out);
         case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
         case 56: return anscdfenc(    in, inlen, out);
-        case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpenc( in, inlen, out, esize?esize:4); return inlen; }  
-        case 101: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tp4enc(in, inlen, out, esize?esize:4); return inlen; }       
+        //case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpenc( in, inlen, out, esize?esize:4); return inlen; }  
+        //case 101: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tp4enc(in, inlen, out, esize?esize:4); return inlen; }       
     default: return 0;
     //case 21: return utf8enc( in, inlen, out, bwtflag(1)|BWT_COPY|BWT_RATIO);
     //case 90: return lzpenc( in, inlen, out, 1, 0);
@@ -3773,8 +3774,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         case 17 : return rcu3sdec( in, outlen, out);        
         case 20 : return rcbwtdec( in, outlen, out, bwtlev, 0);
         case 56 : return anscdfdec(in, outlen, out);
-        case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpdec( in, outlen, out, esize?esize:4); return inlen; }  
-        case 101: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tp4dec(in, outlen, out, esize?esize:4); return inlen; }       
+        //case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpdec( in, outlen, out, esize?esize:4); return inlen; }  
+        //case 101: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tp4dec(in, outlen, out, esize?esize:4); return inlen; }       
         default: return 0;
         //case 21 : if(inlen==outlen) memcpy(out,in,outlen); else utf8dec( in, outlen, out); return outlen;
         //case 90 : if(inlen==outlen) memcpy(out,in,outlen); else lzpdec(  in, outlen, out, 1, 0); return outlen;
