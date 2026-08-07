@@ -190,28 +190,6 @@ OB+=$(call obj,Clickhouse/src/Compression/LZ4_decompress_faster.o)
 endif
 
 ISAL_LIB :=
-ifneq ($(wildcard isa-lxx/.),)
-NASM ?= $(shell command -v nasm)
-ifndef CROSS
-ifeq ($(NASM),)  # nasm not installed use prebuild libs
-  ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/isa-l.a),)
-    CXXFLAGS += -D_ISA_L
-    ISAL_LIB := isa-l_/$(OS)-$(ARCH)/isa-l.a    
-  endif     
-else
-CXXFLAGS += -D_ISA_L
-ISAL_SRCS := $(shell find isa-l -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ISAL_LIB := isa-l/bin/isa-l.a 
-$(ISAL_LIB): $(ISAL_SRCS)
-	mkdir -p $(BUILDIR)/isa-l
-	mkdir -p $(BUILDIR)/isa-l/bin
-	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILDIR)/isa-l)
-LDFLAGS += $(ISAL_LIB)
-endif
-endif
-endif
-
-ISAL_LIB :=
 ifneq ($(wildcard isa-l/.),)
 ifndef CROSS
 NASM ?= $(shell command -v nasm)
