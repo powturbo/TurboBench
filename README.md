@@ -74,7 +74,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 |**Metrics**|||
 | Rank aggregation & score with medals                 | ✅         | ❌      |
 | Pareto-front visualization          | ✅         | ❌      |
-| Multiple output formats (HTML, Markdown, CSV, encode.su)| ✅         | ❌      |
+| Multiple output formats (HTML, Markdown, CSV, encode.su)| ✅         | ⚠️   |
 | SVG bar & scatter images                             | ✅         | ❌      |
 | Transfer-speed sheets (GPRS → 5G, HDD, SSD, RAM,...) | ✅         | ❌      |
 | Peak memory/Stack usage (compress + decompress)      | ✅         | ❌      |
