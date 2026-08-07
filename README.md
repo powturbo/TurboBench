@@ -23,6 +23,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - Unlock peak performance — TurboBench reduces **throttling** by intelligently controlling the **CPU frequency**
 - Automatic sorting, updating, and merging of result files.
 - A **nightly github release** is created automatically whenever submodules change.
+- Creates a separate result file (file@SET.tbb) for each compressor set 
 - TurboBench rank aggregation crowns the top compression libraries with 🥇 🏆 👑 — see who's king!
 
 ## Broad Platform Support
@@ -74,11 +75,17 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 
         ./turbobench -eFAST/bzip2 file
 
+  + creates a separate result file (file@SET.tbb) for each compressor set with a option<br />
+
+        ./turbobench -eTURBO -aTURBO file   
+        ./turbobench -eFAST  -aFAST file   
+
 ##### - Print + Plot
 
-   + Print result file + "transfer+decompression speedup" plot to file.html for browsing
+   + Print result file + "transfer+decompression speedup" plot to (file.html -p2) for browsing, (file.md -p4) Markdown format
 
         ./turbobench -p2 -S2 file.tbb
+        ./turbobench -p4 file.tbb
 
 ##### - Bar/Scatter charts
    + SVG files automatically generated after each benchmark
@@ -288,5 +295,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -elzma,9:fb273:lc2:lp2:t2
 ```
 
-Last update: 7 AUG 2026
+Last update: 8 AUG 2026
 
