@@ -551,7 +551,7 @@ struct plugg {
 };
 
 struct plugg plugg[] = {
-  { "TURBO",     "lzturbo,10,11,12,19/lz4,1,12/lizard,10/chameleon,1,2/zxc,3,4,5,6/misa77,0,1,2,3,4/lzav,1,2/memcpy", "Fastest de-/compression. HDD/SSD/RAM speed" },
+  { "TURBO",     "lzturbo,10,11,12,19/lz4,1,5,9,12/zxc,3,4,5,6/misa77,0,1,2,3,4/lzav,1,2/memcpy", "Fastest de-/compression. HDD/SSD/RAM speed" },
   { "FAST",      "lzturbo,10,10a,11,12/lz4,1,5,9/lzav,1,2/misa77,0,1,2,3,4/brotli,0,1,4,5/zlib,1,6,9/libdeflate,1,6,9/zlib_ng,1,6/igzip,1,2,3/zstd,1,5,9/zxc,3,4,5,6,7/memcpy", "lz4,lzturbo,zlib class" },
   { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,6/zstd,5,9/libdeflate,6/zlib-ng,6/igzip,3/memcpy", "Compression speed > 'zlib 6' class" },
   { "MAX",       "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,12/lizard,19,29,39,49/lzlib,9/libdeflate,12/zstd,22/zxc,6,7/misa77,4/zlib,9/zlib-ng,9/memcpy","Best compression (slow)" },
@@ -2020,6 +2020,7 @@ void usage(char *pgm, int bsize) {
   fprintf(stderr, " -s#s     # = min. buffer size to duplicate & test small files (ex. -s50)\n");
   fprintf(stderr, "          s = modifier s:K,M,G=(1000, 1.000.000, 1.000.000.000) s:k,m,h=(1024,1Mb,1Gb). {m} ex. 64k or 64K\n");
   fprintf(stderr, " -r       process directories recursively\n");
+  fprintf(stderr, " -a#      add suffix # to tbb filename. file.tbb->file.#.tbb\n");
   fprintf(stderr, "Benchmark:\n");
   fprintf(stderr, " -iX,Y    Decompression/Compression iterations {3,3}. e.g. -i15,15\n");
   fprintf(stderr, " -t#      # = min. time in seconds per iterations.{1}\n");
@@ -2070,7 +2071,8 @@ void printfile(char *finame, int xstdout, int fmt, char *rem) {
   strncpy(s, finame, 255);
   s[255]=0;
   if((p = strrchr(s,'.')) && !strcmp(p, ".tbb"))
-    *p=0;
+    *p = 0;
+  if(p = strrchr(s,'@')) *p = 0;
   plugprts(plugt, k, s, xstdout, totinlen, fmt, rem);
 }
 
@@ -2083,7 +2085,7 @@ int main(int argc, char* argv[]) {
   int                recurse  = 0, xplug = 0,tm_Repk=1,plot=-1,fmt=0,fno,merge=0,rprio=1;
   unsigned           bsize    = 1u<<30, bsizex=0;
   unsigned long long filenmax = 0;
-  char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049];
+  char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049], fsuffix[17]="";
   char               *_argvx[1], **argvx=_argvx;                                          if(verbose > 5) printf("START1\n");fflush(stdout);
   
   cpubrand(_cpubrand, 64); 
@@ -2096,12 +2098,13 @@ int main(int argc, char* argv[]) {
       { "help",     0, 0, 'h'},
       { 0,          0, 0, 0}
     };
-    if((c = getopt_long(argc, argv, "0:1:2:3:4:5:6:7:8:9:A:b:B:C:d:De:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oO:Pp:Q:r:Rs:S:t:T:Uv:V:W:w:X:x:Y:y:Z:z:", long_options, &option_index)) == -1) break;
+    if((c = getopt_long(argc, argv, "0:1:2:3:4:5:6:7:8:9:a:b:B:C:d:De:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oO:Pp:Q:r:Rs:S:t:T:Uv:V:W:w:X:x:Y:y:Z:z:", long_options, &option_index)) == -1) break;
     switch(c) {
       case 0:
         printf("Option %s", long_options[option_index].name);
         if(optarg) printf (" with arg %s", optarg);  printf ("\n");
         break;
+      case 'a': snprintf(fsuffix, 16, "@%s", optarg); fsuffix[16] = 0; break;
       case 'b': bsize      = argtoi(optarg,Mb); bsizex++; break;
       case 'B': filenmax   = argtol(optarg, 'G');     break;
       case 'C': cmp        = atoi(optarg);            break;
@@ -2110,8 +2113,8 @@ int main(int argc, char* argv[]) {
       case 'D': rprio      = 0;                       break;
       case 'e': scmd       = optarg;                  break;
 //    case 'E': xcmd       = optarg;                   break;
-      case 'F': fac        = strtod(optarg, NULL);    break;
       case 'f': fuzz       = atoi(optarg);            break;
+      case 'F': fac        = strtod(optarg, NULL);    break;
       case 'g': merge++;                              break;
       case 'G': plotmcpy++;                           break;
 
@@ -2280,7 +2283,7 @@ int main(int argc, char* argv[]) {
       finame = p+1;
   }
   if(!totinlen) exit(0);
-  sprintf(s, "%s.tbb", finame);
+  sprintf(s, "%s%s.tbb", finame, fsuffix);
   if(merge /*|| tm_rep <= 1 && tm_rep2 <= 1*/) {
     if(merge == 1)
       plugprts(plugt, k, s, 1, totinlen, FMT_TEXT, rem);
