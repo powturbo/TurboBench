@@ -54,6 +54,38 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ### Benchmark:
 - see : [Compression Benchmark](https://sites.google.com/site/powturbo/compression-benchmark)
 
+### TurboBench vs LzBench
+
+| Feature                                              | TurboBench | Lzbench |
+|------------------------------------------------------|:----------:|:-------:|
+|**Benchmark**|||
+| Large number of codecs (isa-l/zlib-ng/blosc,...)| ✅         |  ⚠️  |
+| Control throttling via CPU frequency                 | ✅         | ❌      |
+| Automatic sorting, updating & merging of result files| ✅         | ❌      |
+| In-place progress display (compression/decompression speed) | ✅    | ❌      |
+| Separate results for each compressor set             | ✅         | ❌      |
+|**Data Handling**|||
+| Concatenation of small files into one multiblock file| ✅         | ❌      |
+| Independent compression of many small files| ✅         | ❌      |
+| Multiple files & recursive directories               | ✅         | ✅      |
+| Support for very large files (multi-GB)| ✅         | ⚠️      |
+| Dictionary support  | ✅         |  ❌        |
+| Codec parameter support  | ✅         |  ❌        |
+|**Metrics**|||
+| Rank aggregation & score with medals                 | ✅         | ❌      |
+| Pareto-front visualization          | ✅         | ❌      |
+| Multiple output formats (HTML, Markdown, CSV, encode.su)| ✅         | ❌      |
+| SVG bar & scatter images                             | ✅         | ❌      |
+| Transfer-speed sheets (GPRS → 5G, HDD, SSD, RAM,...) | ✅         | ❌      |
+| Peak memory/Stack usage (compress + decompress)      | ✅         | ❌      |
+|**Codec & Configuration Coverage**|||
+| Cross-platform support (x86, ARM, RISC-V, PowerPC…)   | ✅         | ⚠️      |
+|**Advanced**|||
+| Incremental benchmarking                             | ✅         | ❌      |
+| Simple integration of new codecs  | ✅         |  ❌        |
+| Nightly GitHub release w. executables                | ✅         | ❌      |
+| Submodule architecture with automatic codec update         | ✅         | ❌      |
+
 ##### - Groups FASTEST,FAST,EFFICIENT,MAX,OPTIMAL,BWT:
   + test all fast compressors in the lz4, lzturbo, zlib class<br />
     (additional groups can be defined in the "turbobench.ini" file)
