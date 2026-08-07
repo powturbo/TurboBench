@@ -181,7 +181,6 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
  - [Miniz](https://github.com/richgel999/miniz) 
  - [misa77](https://github.com/welcome-to-the-sunny-side/misa77) :new:2026.07
  - [ms-compress](https://github.com/coderforlife/ms-compress) 
- - [Nakamichi Washigan](http://www.overclock.net/t/1577282/fastest-open-source-decompressors-benchmark#post_24538188)
  - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
  - [OpnZL](https://github.com/facebook/openzl)  :new:2026.07 
  - [Pcodec](https://github.com/pcodec/pcodec) :new:2026.07
@@ -237,6 +236,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
  - [TurborANS](https://sites.google.com/site/powturbo)
  - [Finite State Coder v15-05](https://github.com/skal65535/fsc)
  - [Finite State Entropy v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
+ - [Oodle tans](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
 
 ###### Huffman Coding
  - [TurboHF-Huffmann v1.3](https://sites.google.com/site/powturbo)
@@ -245,8 +245,9 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
  - [Fast HF v2006](http://www.cipr.rpi.edu/research/SPIHT/) 
  - [FPC](https://github.com/algorithm314/FPC)
  - [FSE Huff](https://github.com/Cyan4973/FiniteStateEntropy)
+ - [Oodle huffman](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
  - [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html)
- - [Pico-Huffman](https://github.com/MarcinZukowski/pivco-huffman) :new:2026.07
+ - [Pivco-Huffman](https://github.com/MarcinZukowski/pivco-huffman) :new:2026.07
  
 ###### memcpy
  - [inline memcpy](https://github.com/powturbo/TurboBench)
