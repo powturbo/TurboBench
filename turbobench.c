@@ -182,7 +182,7 @@ static DWORD WINAPI sampler_thread(LPVOID) {
   while(InterlockedCompareExchange(&g_sampling, 1, 1) == 1) {
     size_t cur = wmemused();
     atomic_max(&g_peak, cur);
-    Sleep(1); // yield; use a small Sleep(1) if CPU matters
+    Sleep(0); // yield; use a small Sleep(1) if CPU matters
   }
   return 0;
 }
