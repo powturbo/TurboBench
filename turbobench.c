@@ -182,7 +182,7 @@ static DWORD WINAPI sampler_thread(LPVOID) {
   while(InterlockedCompareExchange(&g_sampling, 1, 1) == 1) {
     size_t cur = wmemused();
     atomic_max(&g_peak, cur);
-    Sleep(1); // yield; use a small Sleep(1) if CPU matters
+    Sleep(0); // yield; use a small Sleep(1) if CPU matters
   }
   return 0;
 }
@@ -754,7 +754,7 @@ void plugrank(plug_t *plug, int k) {
 
 #define PLUGN 256
 plug_t plug[PLUGN+1], plugt[PLUGN+1];
-int         seg_ans = 32*1024, seg_huf = 32*1024, seg_anx = 12*1024, seg_hufx=11*1024;
+int         seg_ans = 32*1024, seg_huf = 32*1024; //, seg_anx = 12*1024, seg_hufx=11*1024;
 static int  cmp = 2,trans;
 int         verbose=1;
 double      fac = 1.3;
@@ -1776,7 +1776,7 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
         if(bs == 2 && oplen >= (1<<16)) die("Output larger than input! Use option '-P'\n");
         if(mode || bsize < inlen) { bs==2?(ctou16(op) = oplen):(ctou32(op) = oplen); } op += oplen+bs; ip += iplen;
         if(op > _out+outsize)
-          die("Overflow error %llu, %u in lib=%d\n", outsize, (int)(op - _out), id);
+          die("Overflow error %llu, %u in lib=%d '%s %d'\n", outsize, (int)(op - _out), id, plug[id].s, plug[id].lev);
       }
     }
     size_t olen = op - _out;
