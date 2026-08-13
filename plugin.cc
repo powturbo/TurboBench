@@ -1905,9 +1905,13 @@ int codini(size_t insize, int codec, int lev, char *prm) {
         } else fprintf(stderr,"oo2core_9_win64.dll not found\n");
       } 
         #else
-      { 
+      {
           #ifdef __aarch64__
+            #ifdef __APPLE__
+        strcpy(oodle, "./liboo2coremac64.2.9.16.dylib");
+            #else
         strcpy(oodle, "./liboo2corelinuxarm64.so.9");
+            #endif
           #else
         strcpy(oodle, "./liboo2corelinux64.so.9");
           #endif
