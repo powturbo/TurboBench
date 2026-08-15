@@ -3,7 +3,7 @@
 # git clone --recursive git://github.com/powturbo/TurboBench.git
 # make
 #
-#---------------------------
+#----------------
 # Cross compile: export CROSS to aarch64 riscv64 loongarch64 or powerpc64le. Ex.:
 # export CROSS=aarch64
 # Testing with qemu
@@ -457,7 +457,7 @@ OB += $(call obj,$(TAMP_DIR)/common.o $(TAMP_DIR)/compressor.o $(TAMP_DIR)/decom
 endif
 
 LZ_LIB :=
-LZ_DIR=../lz
+LZ_DIR=../lz0
 ifneq ($(wildcard $(LZ_DIR)/.),)
 CXXFLAGS+=-D_LZ
 LZ_SRCS := $(shell find $(LZ_DIR)/lib -type f -name '*.[c]')
@@ -467,21 +467,10 @@ $(LZ_LIB):  $(LZ_SRCS)
 	$(MAKE) $(LZ_LIB) -C $(LZ_DIR) BUILD=$(BUILD)/lz
 LDFLAGS += $(LZ_LIB)
 CFLAGS  += -D_NQUANT
-else
-$(RC_BDIR)/tp.o: $(RC_DIR)/tp.c
-	@mkdir -p $(@D)
-	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
-OB       += $(RC_BDIR)/tp.o $(RC_BDIR)/tp_.o
-ifeq ($(ARCH), x86_64)
-$(RC_BDIR)/tp256.o: $(RC_DIR)/tp.c
-	@mkdir -p $(@D)
-	$(CC) -O3 $(CFLAGS) $(_AVX2) -w -c $< -o $@
-OB      += $(RC_BDIR)/tp256.o
-endif
 endif
 
 IC_LIB :=
-IC_DIR=../ic
+IC_DIR=../ic0
 ifneq ($(wildcard $(IC_DIR)/.),)
 CXXFLAGS+=-D_IC
 IC_SRCS := $(shell find $(IC_DIR)/lib -type f -name '*.[c]')
@@ -792,6 +781,16 @@ $(RC_BDIR)/anscdfx.o: $(RC_DIR)/anscdf.c $(RC_DIR)/anscdf_.h
 	@mkdir -p $(@D)
 	$(CC) -O3 $(CFLAGS) $(_AVX2) -falign-loops=32 -w -c $< -o $@
 OB       += $(RC_BDIR)/anscdfx.o	
+endif
+$(RC_BDIR)/tp.o: $(RC_DIR)/tp.c
+	@mkdir -p $(@D)
+	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
+OB       += $(RC_BDIR)/tp.o $(RC_BDIR)/tp_.o
+ifeq ($(ARCH), x86_64)
+$(RC_BDIR)/tp256.o: $(RC_DIR)/tp.c
+	@mkdir -p $(@D)
+	$(CC) -O3 $(CFLAGS) $(_AVX2) -w -c $< -o $@
+OB      += $(RC_BDIR)/tp256.o
 endif
 endif
 endif
