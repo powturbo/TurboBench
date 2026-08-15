@@ -966,7 +966,7 @@ void pco_ini() {
   #if _TURBORC
 #include "Turbo-Range-Coder/include/turborc.h"
 #include "Turbo-Range-Coder/include/anscdf.h"
-#include "Turbo-Range-Coder/include_/transpose.h"
+#include "Turbo-Range-Coder/include_/tp.h"
 //#include "Turbo-Range-Coder/rcutil.h"
   #endif
 
