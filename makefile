@@ -3,14 +3,13 @@
 # git clone --recursive git://github.com/powturbo/TurboBench.git
 # make
 #
-#----------------
+#---------------------------
 # Cross compile: export CROSS to aarch64 riscv64 loongarch64 or powerpc64le. Ex.:
 # export CROSS=aarch64
 # Testing with qemu
 # qemu-aarch64 -L /usr/aarch64-linux-gnu ./turbobench -l2
 # qemu-riscv64 -L /usr/riscv64-linux-gnu ./turbobench -l2
 # qemu-ppc64le -L /usr/powerpc64le-linux-gnu
-#LZTURBO=1
 
 CC ?= gcc
 #CC ?= clang
@@ -19,8 +18,8 @@ CX ?= clang
 #CX ?= gcc
 #CC = clang
 
-BUILDIR ?= build
-obj = $(addprefix $(BUILDIR)/,$(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(patsubst %.cpp,%.o,$(patsubst %.S,%.o,$(1))))))
+BUILD ?= build
+obj = $(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(patsubst %.cpp,%.o,$(patsubst %.S,%.o,$(1))))))
 
 #DEBUG=-DDEBUG -g
 DEBUG=-DNDEBUG
@@ -136,11 +135,6 @@ endif
 all: turbobench 
  
 # ***************************************************************** codecs *****************************************************************************
-ifdef LZTURBO
-CXXFLAGS+=-D_LZTURBO
-include ../dev/x/lzturbo.mk
-endif
-
 ifneq ($(wildcard brotli/.),)
 CXXFLAGS+=-D_BROTLI -Ibrotli/c/include 
 CFLAGS+=-Ibrotli/c/include 
@@ -165,20 +159,20 @@ ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS #ERROR IN C_BLOSC BUILD  
 #CXXFLAGS+=-D_C_BLOSC2
-#C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
+#C_BLOSC2_LIB = $(BUILD)/c-blosc2/blosc/libblosc2.a
 #$(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
 #	export CC=$(CROSS)-linux-gnu-gcc
 #	export CXX=$(CROSS)-linux-gnu-g++
-#	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
+#	cmake -S c-blosc2 -B $(BUILD)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
 #	          -DPREFER_EXTERNAL_LZ4=ON -DPREFER_EXTERNAL_ZLIB=ON -DPREFER_EXTERNAL_ZSTD=ON  -DBUILD_SHARED=OFF -DBUILD_SHARED_LIBS=OFF
-#	cmake --build $(BUILDIR)/c-blosc2
+#	cmake --build $(BUILD)/c-blosc2
 else
 CXXFLAGS+=-D_C_BLOSC2
-C_BLOSC2_LIB = $(BUILDIR)/c-blosc2/blosc/libblosc2.a
+C_BLOSC2_LIB = $(BUILD)/c-blosc2/blosc/libblosc2.a
 $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
-	cmake -S c-blosc2 -B $(BUILDIR)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
+	cmake -S c-blosc2 -B $(BUILD)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
 	          -DPREFER_EXTERNAL_LZ4=ON -DPREFER_EXTERNAL_ZLIB=ON -DPREFER_EXTERNAL_ZSTD=ON  -DBUILD_SHARED=OFF -DBUILD_SHARED_LIBS=OFF 
-	cmake --build $(BUILDIR)/c-blosc2 --parallel 4
+	cmake --build $(BUILD)/c-blosc2 --parallel 4
 endif
 LDFLAGS += $(C_BLOSC2_LIB)
 endif
@@ -201,12 +195,12 @@ ifeq ($(NASM),)
 else
 CXXFLAGS += -D_ISA_L
 ISAL_SRCS := $(shell find isa-l -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.cc' -o -name '*.asm' \))
-ISAL_LIB := $(BUILDIR)/bin/isa-l.a 
+ISAL_LIB := $(BUILD)/bin/isa-l.a 
 $(ISAL_LIB): $(ISAL_SRCS)
-	@mkdir -p $(BUILDIR)/isa-l
-	@mkdir -p $(BUILDIR)/bin
+	@mkdir -p $(BUILD)/isa-l
+	@mkdir -p $(BUILD)/bin
 	@mkdir -p isa-l/bin
-	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILDIR)/isa-l)
+	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILD)/isa-l)
 	@mv isa-l/bin/isa-l.a $@
 endif
 LDFLAGS += $(ISAL_LIB)
@@ -238,17 +232,17 @@ ifeq ($(HAVE_OPENMP),yes)
   LDFLAGS += -fopenmp
   $(info OpenMP enabled for libbsc)
 endif
-OB += $(BUILDIR)/libbsc/libbsc/libbsc/libbsc.o $(BUILDIR)/libbsc/libbsc/coder/coder.o $(BUILDIR)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILDIR)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILDIR)/libbsc/libbsc/filters/detectors.o \
-	$(BUILDIR)/libbsc/libbsc/filters/preprocessing.o $(BUILDIR)/libbsc/libbsc/adler32/adler32.o $(BUILDIR)/libbsc/libbsc/bwt/bwt.o $(BUILDIR)/libbsc/libbsc/st/st.o $(BUILDIR)/libbsc/libbsc/lzp/lzp.o \
-	$(BUILDIR)/libbsc/libbsc/platform/platform.o $(BUILDIR)/libbsc/libbsc/bwt/libsais/libsais.o
+OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
+	$(BUILD)/libbsc/libbsc/filters/preprocessing.o $(BUILD)/libbsc/libbsc/adler32/adler32.o $(BUILD)/libbsc/libbsc/bwt/bwt.o $(BUILD)/libbsc/libbsc/st/st.o $(BUILD)/libbsc/libbsc/lzp/lzp.o \
+	$(BUILD)/libbsc/libbsc/platform/platform.o $(BUILD)/libbsc/libbsc/bwt/libsais/libsais.o
 
-$(BUILDIR)/libbsc/%.o: libbsc/%.cpp
+$(BUILD)/libbsc/%.o: libbsc/%.cpp
 	@mkdir -p $(dir $@)
-	cc $(LIBBSC_CFLAGS) -c $< -o $@
+	$(CC) $(LIBBSC_CFLAGS) -c $< -o $@
 
-$(BUILDIR)/libbsc/%.o: libbsc/%.c
+$(BUILD)/libbsc/%.o: libbsc/%.c
 	@mkdir -p $(dir $@)
-	cc $(LIBBSC_CFLAGS) -c $< -o $@
+	$(CC) $(LIBBSC_CFLAGS) -c $< -o $@
 LIBSAIS = 1
 endif
 
@@ -322,8 +316,8 @@ endif
 
 ifneq ($(and $(wildcard LZSSE/.),$(filter x86_64,$(ARCH))),)
 CXXFLAGS += -D_LZSSE
-OB += $(addprefix $(BUILDIR)/LZSSE/, lzsse2/lzsse2.o lzsse4/lzsse4.o lzsse8/lzsse8.o)
-$(BUILDIR)/LZSSE/%.o: LZSSE/%.cpp
+OB += $(addprefix $(BUILD)/LZSSE/, lzsse2/lzsse2.o lzsse4/lzsse4.o lzsse8/lzsse8.o)
+$(BUILD)/LZSSE/%.o: LZSSE/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -O2 -msse4.1 -std=c++11 $< -c -o $@
 endif
@@ -335,11 +329,11 @@ endif
 ifneq ($(wildcard miniz/.),)
 miniz/miniz_export.h: miniz_/miniz_export.h
 	cp miniz_/miniz_export.h miniz/miniz_export.h
-$(BUILDIR)/miniz/miniz.o: miniz/miniz.c miniz/miniz_export.h
+$(BUILD)/miniz/miniz.o: miniz/miniz.c miniz/miniz_export.h
 	@mkdir -p $(dir $@)
 	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@
 CXXFLAGS+=-D_MINIZ
-OB+=$(BUILDIR)/miniz/miniz.o $(call obj,miniz/miniz_tdef.o miniz/miniz_tinfl.o)
+OB+=$(BUILD)/miniz/miniz.o $(call obj,miniz/miniz_tdef.o miniz/miniz_tinfl.o)
 endif
 
 ifneq ($(wildcard misa77/.),)
@@ -352,49 +346,49 @@ ifeq ($(ARCH),x86_64)
 MISA77_BASE := -march=x86-64
 MISA77_AVX2 := -mavx2
 endif
-$(BUILDIR)/$(MISA77_DIR)/src/%_portable.o: CXXFLAGS += $(MISA77_BASE)
-$(BUILDIR)/$(MISA77_DIR)/src/%_sse2.o: CXXFLAGS += $(MISA77_BASE)
-$(BUILDIR)/$(MISA77_DIR)/src/%_avx2.o: CXXFLAGS += $(MISA77_AVX2)
+$(BUILD)/$(MISA77_DIR)/src/%_portable.o: CXXFLAGS += $(MISA77_BASE)
+$(BUILD)/$(MISA77_DIR)/src/%_sse2.o: CXXFLAGS += $(MISA77_BASE)
+$(BUILD)/$(MISA77_DIR)/src/%_avx2.o: CXXFLAGS += $(MISA77_AVX2)
 
-$(BUILDIR)/$(MISA77_DIR)/src/%.o: $(MISA77_DIR)/src/%.cpp
+$(BUILD)/$(MISA77_DIR)/src/%.o: $(MISA77_DIR)/src/%.cpp
 	@mkdir -p $(dir $@)
 	$(MISA77_BUILD)
 
 OB += $(call obj,$(MISA77_SRCS) $(MISA77_OBJS))
 MISA77_ARCH_OBJS.x86_64  := isa/target_sse2.o isa/target_avx2.o
 MISA77_ARCH_OBJS.aarch64 := isa/target_neon.o
-OB += $(addprefix $(BUILDIR)/$(MISA77_DIR)/src/,$(MISA77_ARCH_OBJS.$(ARCH)))
+OB += $(addprefix $(BUILD)/$(MISA77_DIR)/src/,$(MISA77_ARCH_OBJS.$(ARCH)))
 endif
 
 ifneq ($(wildcard misa77),)
 CXXFLAGS += -D_MISA77
 MISA77_SRC := misa77/src
 ifeq ($(ARCH),x86_64)
-  $(BUILDIR)/$(MISA77_SRC)/%_sse2.o: CXXFLAGS += -march=x86-64
-  $(BUILDIR)/$(MISA77_SRC)/%_avx2.o: CXXFLAGS += $(_AVX2)
+  $(BUILD)/$(MISA77_SRC)/%_sse2.o: CXXFLAGS += -march=x86-64
+  $(BUILD)/$(MISA77_SRC)/%_avx2.o: CXXFLAGS += $(_AVX2)
   MISA77_VOBJS := isa/target_sse2.o isa/target_avx2.o
 else ifeq ($(ARCH),aarch64)
   MISA77_VOBJS := isa/target_neon.o
 endif
 
-$(BUILDIR)/$(MISA77_SRC)/%.o: $(MISA77_SRC)/%.cpp
+$(BUILD)/$(MISA77_SRC)/%.o: $(MISA77_SRC)/%.cpp
 	@mkdir -p $(@D)
 	$(CXX) -O3 $(CXXFLAGS) -std=c++20 -Imisa77/include -I$(MISA77_SRC) -c $< -o $@
 
 MISA77_SRCS := $(wildcard $(MISA77_SRC)/*.cpp)
-OB += $(call obj,$(MISA77_SRCS) $(MISA77_SRC)/isa/target_portable.o) $(addprefix $(BUILDIR)/$(MISA77_SRC)/,$(MISA77_VOBJS))
+OB += $(call obj,$(MISA77_SRCS) $(MISA77_SRC)/isa/target_portable.o) $(addprefix $(BUILD)/$(MISA77_SRC)/,$(MISA77_VOBJS))
 endif
 
 OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
 OPENZL_SRCS := $(shell find openzl -type f -name '*.[ch]' -o -name '*.cpp' -o -name '*.cc' -o -name 'CMakeLists.txt' -o -name 'Makefile')
 ifdef CROSS  # NOTWORKING
-#OPENZL_LIB = $(BUILDIR)/openzl/libopenzl.a
+#OPENZL_LIB = $(BUILD)/openzl/libopenzl.a
 #$(OPENZL_LIB): $(OPENZL_SRCS)
 #	export CC=$(CROSS)-linux-gnu-gcc
 #	export CXX=$(CROSS)-linux-gnu-g++
-#	cmake -S openzl -B $(BUILDIR)/openzl -DCMAKE_C_COMPILER=$(CROSS)-linux-gnu-gcc -DCMAKE_CXX_COMPILER=$(CROSS)-linux-gnu-g++
-#	cmake --build $(BUILDIR)/openzl --config Release
+#	cmake -S openzl -B $(BUILD)/openzl -DCMAKE_C_COMPILER=$(CROSS)-linux-gnu-gcc -DCMAKE_CXX_COMPILER=$(CROSS)-linux-gnu-g++
+#	cmake --build $(BUILD)/openzl --config Release
 else
 CXXFLAGS += -D_OPENZL -Iopenzl/include -Iopenzl/src
 ifeq ($(OS), Windows)
@@ -402,10 +396,10 @@ OPENZL_LIB = openzl/libopenzl.a
 $(OPENZL_LIB): $(OPENZL_SRCS)
 	cd openzl && $(MAKE) lib
 else
-OPENZL_LIB = $(BUILDIR)/openzl/libopenzl.a
+OPENZL_LIB = $(BUILD)/openzl/libopenzl.a
 $(OPENZL_LIB): $(OPENZL_SRCS)
-	cmake -S openzl -B $(BUILDIR)/openzl
-	cmake --build $(BUILDIR)/openzl --config Release
+	cmake -S openzl -B $(BUILD)/openzl
+	cmake --build $(BUILD)/openzl --config Release
 endif
 endif
 LDFLAGS += $(OPENZL_LIB)
@@ -462,17 +456,53 @@ TAMP_DIR = tamp/tamp/_c_src/tamp
 OB += $(call obj,$(TAMP_DIR)/common.o $(TAMP_DIR)/compressor.o $(TAMP_DIR)/decompressor.o)
 endif
 
+LZ_LIB :=
+LZ_DIR=../lz
+ifneq ($(wildcard $(LZ_DIR)/.),)
+CXXFLAGS+=-D_LZ
+LZ_SRCS := $(shell find $(LZ_DIR)/lib -type f -name '*.[c]')
+LZ_LIB = $(BUILD)/lz/liblz.a
+$(LZ_LIB):  $(LZ_SRCS)
+	@mkdir -p $(BUILD)/lz
+	$(MAKE) $(LZ_LIB) -C $(LZ_DIR) BUILD=$(BUILD)/lz
+LDFLAGS += $(LZ_LIB)
+CFLAGS  += -D_NQUANT
+else
+$(RC_BDIR)/tp.o: $(RC_DIR)/tp.c
+	@mkdir -p $(@D)
+	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
+OB       += $(RC_BDIR)/tp.o $(RC_BDIR)/tp_.o
+ifeq ($(ARCH), x86_64)
+$(RC_BDIR)/tp256.o: $(RC_DIR)/tp.c
+	@mkdir -p $(@D)
+	$(CC) -O3 $(CFLAGS) $(_AVX2) -w -c $< -o $@
+OB      += $(RC_BDIR)/tp256.o
+endif
+endif
+
+IC_LIB :=
+IC_DIR=../ic
+ifneq ($(wildcard $(IC_DIR)/.),)
+CXXFLAGS+=-D_IC
+IC_SRCS := $(shell find $(IC_DIR)/lib -type f -name '*.[c]')
+IC_LIB = $(BUILD)/ic/libic.a
+$(IC_LIB):  $(IC_SRCS)
+	@mkdir -p $(BUILD)/ic
+	$(MAKE) $(IC_LIB) -C $(IC_DIR) BUILD=$(BUILD)/ic
+LDFLAGS += $(IC_LIB)
+endif
+
 XZ_LIB :=
 ifneq ($(wildcard xz/.),)
 CXXFLAGS += -D_XZ
 XZ_SRCS := $(shell find xz/src/liblzma -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-XZ_LIB = $(BUILDIR)/xz/liblzma.a
+XZ_LIB = $(BUILD)/xz/liblzma.a
 ifdef CROSS
 $(XZ_LIB): $(XZ_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cmake -S xz -B $(BUILDIR)/xz && $(MAKE) -C $(BUILDIR)/xz
+	export CC=$(CROSS)-linux-gnu-gcc && cmake -S xz -B $(BUILD)/xz && $(MAKE) -C $(BUILD)/xz
 else
 $(XZ_LIB): $(XZ_SRCS)
-	cmake -S xz -B $(BUILDIR)/xz && $(MAKE) -C $(BUILDIR)/xz
+	cmake -S xz -B $(BUILD)/xz && $(MAKE) -C $(BUILD)/xz
 endif
 LDFLAGS += $(XZ_LIB)
 endif
@@ -487,17 +517,17 @@ ZLIB_NG_LIB :=
 ifneq ($(wildcard zlib-ng/.),)
 CXXFLAGS += -D_ZLIB_NG
 ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
-ZLIB_NG_LIB = $(BUILDIR)/zlib-ng/libz-ng.a
+ZLIB_NG_LIB = $(BUILD)/zlib-ng/libz-ng.a
 ifdef CROSS
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cmake -S zlib-ng -B $(BUILDIR)/zlib-ng -DWITH_NEON=OFF -DBUILD_TESTING=OFF -DWITH_GTEST=OFF -DWITH_GZFILEOP=OFF 
-	cmake --build $(BUILDIR)/zlib-ng --config Release
-	cp $(BUILDIR)/zlib-ng/zconf-ng.h zlib-ng_
+	export CC=$(CROSS)-linux-gnu-gcc && cmake -S zlib-ng -B $(BUILD)/zlib-ng -DWITH_NEON=OFF -DBUILD_TESTING=OFF -DWITH_GTEST=OFF -DWITH_GZFILEOP=OFF 
+	cmake --build $(BUILD)/zlib-ng --config Release
+	cp $(BUILD)/zlib-ng/zconf-ng.h zlib-ng_
 else
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
-	cmake -S zlib-ng -B $(BUILDIR)/zlib-ng -DWITH_NEON=OFF -DBUILD_TESTING=OFF -DWITH_GTEST=OFF -DWITH_GZFILEOP=OFF
-	cmake --build $(BUILDIR)/zlib-ng --config Release 
-	cp $(BUILDIR)/zlib-ng/zconf-ng.h zlib-ng_
+	cmake -S zlib-ng -B $(BUILD)/zlib-ng -DWITH_NEON=OFF -DBUILD_TESTING=OFF -DWITH_GTEST=OFF -DWITH_GZFILEOP=OFF
+	cmake --build $(BUILD)/zlib-ng --config Release 
+	cp $(BUILD)/zlib-ng/zconf-ng.h zlib-ng_
 endif
 LDFLAGS += $(ZLIB_NG_LIB)
 endif
@@ -513,7 +543,6 @@ ifneq ($(wildcard zstd/.),)
 CXXFLAGS+=-D_ZSTD -Izstd/lib -Izstd/lib/common
 CFLAGS+=-Izstd/lib -Izstd/lib/common
 ZSTD_SRCS := $(wildcard zstd/lib/common/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/*.c) $(wildcard zstd/lib/decompress/*.S) $(wildcard zstd/lib/dictBuilder/*.c)
-#  .S sources are passed directly to the linker (assembled at link time), so only the .c sources are compiled into $(BUILDIR) objects.
 ZSTD_C_SRCS := $(filter %.c,$(ZSTD_SRCS))
 ZSTD_S_SRCS := $(filter %.S,$(ZSTD_SRCS))
 ZSTD_OBJS := $(call obj,$(ZSTD_C_SRCS)) $(ZSTD_S_SRCS)
@@ -524,11 +553,11 @@ ifneq ($(wildcard zpaq/.),)
 ifneq ($(OS),Darwin)
 CXXFLAGS+=-D_ZPAQ -Izpaq
 ifeq ($(HAVE_OPENMP),yes)
-$(BUILDIR)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
+$(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
 CXXFLAGS+=-fopenmp
 LDFLAGS += -fopenmp
-OB+=$(call obj,$(BUILDIR)/libzpaq_omp.o)
+OB+=$(call obj,$(BUILD)/libzpaq_omp.o)
 else
 OB+=$(call obj,zpaq/libzpaq.o)
 endif
@@ -547,8 +576,8 @@ ZXCDIR = zxc/src/lib
 ZXC_BUILD = $(CC) -O3 -DZXC_STATIC_DEFINE -DNDEBUG -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
 
 define ZXC_RULE
-$$(BUILDIR)/$$(ZXCDIR)/%$(1).o: ZXC_FLAGS = $(2)
-$$(BUILDIR)/$$(ZXCDIR)/%$(1).o: $$(ZXCDIR)/%.c
+$$(BUILD)/$$(ZXCDIR)/%$(1).o: ZXC_FLAGS = $(2)
+$$(BUILD)/$$(ZXCDIR)/%$(1).o: $$(ZXCDIR)/%.c
 	@mkdir -p $$(dir $$@)
 	$$(ZXC_BUILD)
 endef
@@ -679,11 +708,11 @@ ifdef FREQTABO
 FREQOPT=-march=skylake -fwhole-program -fpermissive -fstrict-aliasing -fomit-frame-pointer -I../Lib3 -I../Lib -fno-stack-protector -fno-stack-check -fno-check-new -fno-exceptions \
   -fno-rtti -fno-operator-names -flto -ffat-lto-objects -Wl,-flto -fuse-linker-plugin -Wl,-O -Wl,--sort-common -Wl,--as-needed -ffunction-sections
 
-$(BUILDIR)/EC/freqtab/src/c_mem.o: EC/freqtab/src/c_mem.cpp
+$(BUILD)/EC/freqtab/src/c_mem.o: EC/freqtab/src/c_mem.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(FREQOPT) -O3 -std=c++11 $< -c -o $@
 
-$(BUILDIR)/EC/freqtab/src/model.o: EC/freqtab/src/model.cpp
+$(BUILD)/EC/freqtab/src/model.o: EC/freqtab/src/model.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(FREQOPT) -O3 -march=skylake -std=c++11 $< -c -o $@
 endif
@@ -700,7 +729,7 @@ ifneq ($(wildcard pivco-huffman/.),)
 ifndef CROSS
 PIVCODIR   = pivco-huffman
 CXXFLAGS  += -D_PIVCOHUF -I$(PIVCODIR)/include
-PIVCO_BDIR = $(BUILDIR)/$(PIVCODIR)
+PIVCO_BDIR = $(BUILD)/$(PIVCODIR)
 PIVCO_SRCS := $(shell find $(PIVCODIR)/src -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.cc' \))
 PIVCO_CMAKE_FILES := $(shell find $(PIVCODIR) -maxdepth 2 -name 'CMakeLists.txt')
 PIVCO_LIB   = $(PIVCO_BDIR)/libpivco_huffman_local.o
@@ -734,12 +763,12 @@ OB+=$(call obj,EC/recip_arith_/reciparith.o)
 endif
 
 ifneq ($(and $(wildcard EC/sserangecoding/.),$(filter x86_64,$(ARCH))),)
-$(BUILDIR)/EC/sserangecoding/sserangecoder.o: EC/sserangecoding/sserangecoder.cpp
+$(BUILD)/EC/sserangecoding/sserangecoder.o: EC/sserangecoding/sserangecoder.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -c -O3 $(CFLAGS) -march=corei7-avx -mtune=corei7-avx -mno-aes EC/sserangecoding/sserangecoder.cpp -o $@
 
 CXXFLAGS+=-D_SSERC
-OB+=$(BUILDIR)/EC/sserangecoding/sserangecoder.o
+OB+=$(BUILD)/EC/sserangecoding/sserangecoder.o
 endif
 
 ifneq ($(wildcard EC/subotin/.),)
@@ -750,34 +779,19 @@ endif
 ifneq ($(wildcard Turbo-Range-Coder/.),)
 ifneq ($(ARCH),loongarch64)
 CXXFLAGS += -D_TURBORC
-TRC_DIR  := Turbo-Range-Coder
-TRC_BDIR := $(BUILDIR)/$(TRC_DIR)
-CFLAGS   += -D_ANS -D_BWT -I$(TRC_DIR)/libsais/include 
-OB+=$(TRC_BDIR)/anscdfs.o $(TRC_BDIR)/rc_ss.o $(TRC_BDIR)/rc_s.o $(TRC_BDIR)/rccdf.o $(TRC_BDIR)/rcutil.o $(TRC_BDIR)/bec_b.o $(TRC_BDIR)/rccm_s.o $(TRC_BDIR)/rccm_ss.o \
-  $(TRC_BDIR)/rcqlfc_s.o $(TRC_BDIR)/rcqlfc_ss.o $(TRC_BDIR)/rcqlfc_sf.o $(TRC_BDIR)/rcbwt.o $(TRC_BDIR)/libsais/src/libsais16.o
-$(TRC_BDIR)/anscdfs.o: $(TRC_DIR)/anscdf.c $(TRC_DIR)/anscdf_.h
+RC_DIR  := Turbo-Range-Coder
+RC_BDIR := $(BUILD)/$(RC_DIR)
+CFLAGS   += -D_ANS -D_BWT -I$(RC_DIR)/libsais/include 
+OB+=$(RC_BDIR)/anscdfs.o $(RC_BDIR)/rc_ss.o $(RC_BDIR)/rc_s.o $(RC_BDIR)/rccdf.o $(RC_BDIR)/rcutil.o $(RC_BDIR)/bec_b.o $(RC_BDIR)/rccm_s.o $(RC_BDIR)/rccm_ss.o \
+  $(RC_BDIR)/rcqlfc_s.o $(RC_BDIR)/rcqlfc_ss.o $(RC_BDIR)/rcqlfc_sf.o $(RC_BDIR)/rcbwt.o $(RC_BDIR)/libsais/src/libsais16.o
+$(RC_BDIR)/anscdfs.o: $(RC_DIR)/anscdf.c $(RC_DIR)/anscdf_.h
 	@mkdir -p $(@D)
 	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
 ifeq ($(ARCH), x86_64)
-$(TRC_BDIR)/anscdfx.o: $(TRC_DIR)/anscdf.c $(TRC_DIR)/anscdf_.h
+$(RC_BDIR)/anscdfx.o: $(RC_DIR)/anscdf.c $(RC_DIR)/anscdf_.h
 	@mkdir -p $(@D)
 	$(CC) -O3 $(CFLAGS) $(_AVX2) -falign-loops=32 -w -c $< -o $@
-OB       += $(TRC_BDIR)/anscdfx.o	
-endif
-
-ifdef LZTURBO
-CFLAGS   += -D_NQUANT
-else
-$(TRC_BDIR)/transpose.o: $(TRC_DIR)/transpose.c
-	@mkdir -p $(@D)
-	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
-OB       += $(TRC_BDIR)/transpose.o $(TRC_BDIR)/transpose_.o
-ifeq ($(ARCH), x86_64)
-$(TRC_BDIR)/transpose256.o: $(TRC_DIR)/transpose.c
-	@mkdir -p $(@D)
-	$(CC) -O3 $(CFLAGS) $(_AVX2) -w -c $< -o $@
-OB       += $(TRC_BDIR)/transpose256.o
-endif
+OB       += $(RC_BDIR)/anscdfx.o	
 endif
 endif
 endif
@@ -807,12 +821,12 @@ CXXFLAGS+=-D_TURBORLE
 TRLEDIR = Turbo-Run-Length-Encoding
 BUILD_TRLE = $(CC) -O3 $(TRLE_FLAGS) $< -c -o $@
 
-$(BUILDIR)/$(TRLEDIR)/%.o: TRLE_FLAGS = $(_AVX2) -w -fstrict-aliasing -falign-loops=32 $(DEBUG)
-$(BUILDIR)/$(TRLEDIR)/%.o: $(TRLEDIR)/%.c
+$(BUILD)/$(TRLEDIR)/%.o: TRLE_FLAGS = $(_AVX2) -w -fstrict-aliasing -falign-loops=32 $(DEBUG)
+$(BUILD)/$(TRLEDIR)/%.o: $(TRLEDIR)/%.c
 	@mkdir -p $(dir $@)
 	$(BUILD_TRLE)
 
-OB+=$(BUILDIR)/$(TRLEDIR)/trlec.o $(BUILDIR)/$(TRLEDIR)/trled.o
+OB+=$(BUILD)/$(TRLEDIR)/trlec.o $(BUILD)/$(TRLEDIR)/trled.o
 
 CXXFLAGS+=-D_MRLE
 OB+=$(call obj,Turbo-Run-Length-Encoding/ext/mrle.o)
@@ -823,14 +837,14 @@ ifneq ($(wildcard hypersonic-rle-kit/.),)
 CXXFLAGS+=-D_HRLE
 HRLE=hypersonic-rle-kit
 
-$(BUILDIR)/$(HRLE)/src/simd_platform.o: $(HRLE)/src/simd_platform.c
+$(BUILD)/$(HRLE)/src/simd_platform.o: $(HRLE)/src/simd_platform.c
 	@mkdir -p $(dir $@)
 	$(CC) -O2 -mxsave $(MARCH) $(CFLAGS) $< -c -o $@
 
 OB+=$(call obj,$(HRLE)/src/rle_sh.o $(HRLE)/src/rle8_extreme_cpu.o $(HRLE)/src/rle8_low_entropy_cpu.o $(HRLE)/src/rle8_low_entropy_short_cpu.o $(HRLE)/src/rle8_mmtf.o \
   $(HRLE)/src/rle24_extreme_cpu.o $(HRLE)/src/rle48_extreme_cpu.o $(HRLE)/src/rle128_extreme_cpu.o \
   $(HRLE)/src/rleX_extreme_cpu.o $(HRLE)/src/rle8_mmtf.o)
-OB+=$(BUILDIR)/$(HRLE)/src/simd_platform.o
+OB+=$(BUILD)/$(HRLE)/src/simd_platform.o
 endif
 
 #-------------------------------------- Archived ----------------------------------
@@ -860,36 +874,36 @@ endif
 ifneq ($(wildcard xpack/.),)
 CXXFLAGS+=-D_XPACK
 # O2 instead of O3 because of error gcc 7
-$(BUILDIR)/xpack/lib/xpack_common.o: xpack/lib/xpack_common.c
+$(BUILD)/xpack/lib/xpack_common.o: xpack/lib/xpack_common.c
 	@mkdir -p $(dir $@)
 	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@
 
-$(BUILDIR)/xpack/lib/xpack_compress.o: xpack/lib/xpack_compress.c
+$(BUILD)/xpack/lib/xpack_compress.o: xpack/lib/xpack_compress.c
 	@mkdir -p $(dir $@)
 	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@
 
-$(BUILDIR)/xpack/lib/xpack_decompress.o: xpack/lib/xpack_decompress.c
+$(BUILD)/xpack/lib/xpack_decompress.o: xpack/lib/xpack_decompress.c
 	@mkdir -p $(dir $@)
 	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@
 
-$(BUILDIR)/xpack/lib/x86_cpu_features.o: xpack/lib/x86_cpu_features.c
+$(BUILD)/xpack/lib/x86_cpu_features.o: xpack/lib/x86_cpu_features.c
 	@mkdir -p $(dir $@)
 	$(CC) -O2 -Ixpack/common -Ixpack $(MARCH) $(CFLAGS) $< -c -o $@
 
-OB+=$(BUILDIR)/xpack/lib/xpack_common.o $(BUILDIR)/xpack/lib/xpack_compress.o $(BUILDIR)/xpack/lib/xpack_decompress.o $(BUILDIR)/xpack/lib/x86_cpu_features.o
+OB+=$(BUILD)/xpack/lib/xpack_common.o $(BUILD)/xpack/lib/xpack_compress.o $(BUILD)/xpack/lib/xpack_decompress.o $(BUILD)/xpack/lib/x86_cpu_features.o
 endif
 
 ifneq ($(wildcard pithy/.),)
 CXXFLAGS+=-D_PITHY
-$(BUILDIR)/pithy/pithy.o: pithy/pithy.c
+$(BUILD)/pithy/pithy.o: pithy/pithy.c
 	@mkdir -p $(dir $@)
 	$(CC) -O2 $(MARCH) $(CFLAGS)  $< -c -o $@
-OB+=$(BUILDIR)/pithy/pithy.o
+OB+=$(BUILD)/pithy/pithy.o
 endif
 
 ifneq ($(wildcard shrinker/.),)
 CXXFLAGS+=-D_SHRINKER
-$(BUILDIR)/shrinker/shrinker.o: shrinker/shrinker.c
+$(BUILD)/shrinker/shrinker.o: shrinker/shrinker.c
 	@mkdir -p $(dir $@)
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 OB+=$(call obj,shrinker/Shrinker.o)
@@ -897,10 +911,10 @@ endif
 
 ifneq ($(wildcard wlfz/.),)
 CXXFLAGS+=-D_WFLZ
-$(BUILDIR)/wflz/wfLZ.o: wflz/wfLZ.c
+$(BUILD)/wflz/wfLZ.o: wflz/wfLZ.c
 	@mkdir -p $(dir $@)
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-OB+=$(BUILDIR)/wflz/wfLZ.o
+OB+=$(BUILD)/wflz/wfLZ.o
 endif
 
 ifneq ($(wildcard FastLZ/.),)
@@ -962,19 +976,19 @@ endif
 #----------------------- GPL -------------------------
 ifneq ($(wildcard lzmat/.),)
 CXXFLAGS+=-DLZMAT
-$(BUILDIR)/lzmat/lzmat_dec.o: lzmat/lzmat_dec.c
+$(BUILD)/lzmat/lzmat_dec.o: lzmat/lzmat_dec.c
 	@mkdir -p $(dir $@)
 	$(CC) -O2 -D"__int64=long long" $(MARCH) $(CFLAGS) $< -c -o $@
-$(BUILDIR)/lzmat/lzmat_enc.o: lzmat/lzmat_enc.c
+$(BUILD)/lzmat/lzmat_enc.o: lzmat/lzmat_enc.c
 	@mkdir -p $(dir $@)
 	$(CC) -O2 -D"__int64=long long" $(MARCH) $(CFLAGS) $< -c -o $@
 
-OB+=$(BUILDIR)/lzmat/lzmat_enc.o $(BUILDIR)/lzmat/lzmat_dec.o
+OB+=$(BUILD)/lzmat/lzmat_enc.o $(BUILD)/lzmat/lzmat_dec.o
 endif
 
 ifneq ($(wildcard tornado/.),)
 CXXFLAGS+=-D_TORNADO
-$(BUILDIR)/tornado_/tormem.o: tornado_/tormem.cpp
+$(BUILD)/tornado_/tormem.o: tornado_/tormem.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(TORDEF) -D__x86_$(ARCH)__ -DFREEARC_$(ARCH)BIT -pipe -fforce-addr -fno-exceptions -fno-rtti -c tornado_/tormem.cpp -o $@
 ifeq ($(OS), Linux)
@@ -982,7 +996,7 @@ TORDEF=-DFREEARC_UNIX -DFREEARC_INTEL_BYTE_ORDER
 else
 TORDEF=-DFREEARC_WIN -DFREEARC_INTEL_BYTE_ORDER -D_UNICODE -DUNICODE
 endif
-OB+=$(BUILDIR)/tornado_/tormem.o
+OB+=$(BUILD)/tornado_/tormem.o
 endif
 
 ifneq ($(wildcard ms-compress/.),)
@@ -1001,48 +1015,48 @@ OB+=$(call obj,pysap/pysapcompress/vpa105CsObjInt.o pysap/pysapcompress/vpa106cs
 endif
 #--------------------------------------------------------------------
 
-OB+=$(ICL) $(HUF) $(ANX) $(LZ) $(BUILDIR)/plugin.o
+OB+=$(BUILD)/plugin.o
 
-$(BUILDIR)/plugin.o: plugin.cc $(C_BLOSC2_LIB) $(ISAL_LIB) $(OPENZL_LIB) $(ZLIB_NG_LIB) $(XZ_LIB) 
+$(BUILD)/plugin.o: plugin.cc $(C_BLOSC2_LIB) $(ISAL_LIB) $(OPENZL_LIB) $(XZ_LIB) $(ZLIB_NG_LIB) $(ZSTD_LIB) $(LZ_LIB) $(IC_LIB) 
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
 
 
-turbobench: $(OB) $(BUILDIR)/turbobench.o $(BUILDIR)/plugin.o $(BUILDIR)/cpu.o
+turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/cpu.o 
 	$(CXX) $^ $(LDFLAGS) -o turbobench
 
-$(BUILDIR)/%.o: %.c
+$(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@
 
-$(BUILDIR)/%.o: %.cc
+$(BUILD)/%.o: %.cc
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
 
-$(BUILDIR)/%.o: %.cpp
+$(BUILD)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS) $< -c -o $@
 
-$(BUILDIR)/%.o: %.S
+$(BUILD)/%.o: %.S
 	@mkdir -p $(dir $@)
 	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@
 
 
 ifeq ($(OS),Windows)
 clean:
-	rmdir /S /Q $(BUILDIR)
+	rmdir /S /Q $(BUILD)
 	del /S *~
 	del /S *.exe
 else
 clean:
-	rm -rf $(BUILDIR)
+	rm -rf $(BUILD)
 	find . -name "turbobench" -type f -delete
 	find . -name "*.o" -type f -delete
 	find . -name "*~" -type f -delete
 	find . -name "core" -type f -delete
 
 cleana:
-	rm -rf $(BUILDIR)
+	rm -rf $(BUILD)
 	find . -name "turbobench" -type f -delete
 	find . -name "*.o" -type f -delete
 	find . -name "*~" -type f -delete
