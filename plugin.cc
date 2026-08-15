@@ -527,8 +527,8 @@ enum {
 #endif
  P_PHAZ,              // PHAZ: PivCo-Huffman entropy transplant onto zstd
  P_MYCODEC, // User plugin
-  #ifdef _LZTURBO
-#include "../dev/x/beplug.h"
+  #ifdef _LZ
+#include "../lz/x/beplug.h"
   #endif
 };
 
@@ -1049,8 +1049,8 @@ int64_t _xz_decompress(char *in, size_t insize, char *out, size_t outsize, int t
 #include "libzling_/libzling_utils_mem.h"
   #endif
 
-  #ifdef _LZTURBO
-#include "../dev/x/beplugi.h"
+  #ifdef _LZ
+#include "../lz/x/beplugi.h"
   #endif
 //-----------------------------
   #if _BRC
@@ -1773,8 +1773,8 @@ struct plugs plugs[] = {
   { P_ST,           "st",          _LIBBSC,    "st  libbsc",              "3,4,5,6,7,8" },
   { P_BRC,          "brc",         _BRC,       "Behemoth-Rank-Coding",    "0,1" },
 //{ P_MYCODEC,   "mycodec",     _MYCODEC,  "0",        "My codec",             "           ",      "",        "" },   // Example for your codec
-    #ifdef _LZTURBO
-  #include "../dev/x/beplugr.h"
+    #ifdef _LZ
+  #include "../lz/x/beplugr.h"
     #endif
   { -1 }
 };
@@ -1975,8 +1975,8 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_YAPPY: YappyFillTables(); break;
       #endif
 
-      #ifdef _LZTURBO
-    #include "../dev/x/beplug0.h"
+      #ifdef _LZ
+    #include "../lz/x/beplug0.h"
       #endif
        #if _FSEHUF
 //    case P_FSEH: workmemsize = max(4096*sizeof(unsigned), workmemsize); break;
@@ -2987,8 +2987,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
       #endif
 
-      #ifdef _LZTURBO
-    #include "../dev/x/beplugc.c"
+      #ifdef _LZ
+    #include "../lz/x/beplugc.c"
       #endif
 
       #if _PIVCOHUF
@@ -3816,8 +3816,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     } break;
       #endif
 
-      #ifdef _LZTURBO
-    #include "../dev/x/beplugd.c"
+      #ifdef _LZ
+    #include "../lz/x/beplugd.c"
       #endif
 
       #if _PIVCOHUF
