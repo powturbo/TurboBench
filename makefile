@@ -457,7 +457,7 @@ OB += $(call obj,$(TAMP_DIR)/common.o $(TAMP_DIR)/compressor.o $(TAMP_DIR)/decom
 endif
 
 LZ_LIB :=
-LZ_DIR=../lz0
+LZ_DIR=../lz
 ifneq ($(wildcard $(LZ_DIR)/.),)
 CXXFLAGS+=-D_LZ
 LZ_SRCS := $(shell find $(LZ_DIR)/lib -type f -name '*.[c]')
@@ -470,7 +470,7 @@ CFLAGS  += -D_NQUANT
 endif
 
 IC_LIB :=
-IC_DIR=../ic0
+IC_DIR=../ic
 ifneq ($(wildcard $(IC_DIR)/.),)
 CXXFLAGS+=-D_IC
 IC_SRCS := $(shell find $(IC_DIR)/lib -type f -name '*.[c]')
@@ -782,6 +782,7 @@ $(RC_BDIR)/anscdfx.o: $(RC_DIR)/anscdf.c $(RC_DIR)/anscdf_.h
 	$(CC) -O3 $(CFLAGS) $(_AVX2) -falign-loops=32 -w -c $< -o $@
 OB       += $(RC_BDIR)/anscdfx.o	
 endif
+ifeq ($(wildcard $(IC_DIR)/.),)
 $(RC_BDIR)/tp.o: $(RC_DIR)/tp.c
 	@mkdir -p $(@D)
 	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
@@ -791,6 +792,7 @@ $(RC_BDIR)/tp256.o: $(RC_DIR)/tp.c
 	@mkdir -p $(@D)
 	$(CC) -O3 $(CFLAGS) $(_AVX2) -w -c $< -o $@
 OB      += $(RC_BDIR)/tp256.o
+endif
 endif
 endif
 endif
