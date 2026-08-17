@@ -18,6 +18,8 @@ CX ?= clang
 #CX ?= gcc
 #CC = clang
 
+MAKE ?= make
+CMAKE ?= cmake
 BUILD ?= build
 obj = $(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(patsubst %.cpp,%.o,$(patsubst %.S,%.o,$(1))))))
 
@@ -229,7 +231,7 @@ LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc
 LIBBSC_LDFLAGS =
 ifeq ($(HAVE_OPENMP),yes)
   LIBBSC_CFLAGS  += -fopenmp -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP
-  LDFLAGS += -fopenmp
+  FOPENMP = -fopenmp
   $(info OpenMP enabled for libbsc)
 endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
@@ -326,14 +328,14 @@ ifneq ($(wildcard memlz/.),)
 CXXFLAGS+=-D_MEMLZ
 endif
 
+MINIZ_LIB:=
 ifneq ($(wildcard miniz/.),)
-miniz/miniz_export.h: miniz_/miniz_export.h
-	cp miniz_/miniz_export.h miniz/miniz_export.h
-$(BUILD)/miniz/miniz.o: miniz/miniz.c miniz/miniz_export.h
-	@mkdir -p $(dir $@)
-	$(CC) -O3 $(MARCH) $(CFLAGS) $< -c -o $@
 CXXFLAGS+=-D_MINIZ
-OB+=$(BUILD)/miniz/miniz.o $(call obj,miniz/miniz_tdef.o miniz/miniz_tinfl.o)
+MINIZ_SRCS := $(shell find miniz -type f -name '*.[ch]' -o -name 'CMakeLists.txt')
+MINIZ_LIB = $(BUILD)/miniz/libminiz.a
+$(MINIZ_LIB): $(MINIZ_SRCS)
+	$(CMAKE) -S miniz -B $(BUILD)/miniz -DCMAKE_INSTALL_PREFIX=$(BUILD) && make -C $(BUILD)/miniz
+LDFLAGS += $(MINIZ_LIB)
 endif
 
 ifneq ($(wildcard misa77/.),)
@@ -545,7 +547,7 @@ ifeq ($(HAVE_OPENMP),yes)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
 CXXFLAGS+=-fopenmp
-LDFLAGS += -fopenmp
+FOPENMP = -fopenmp
 OB+=$(call obj,$(BUILD)/libzpaq_omp.o)
 else
 OB+=$(call obj,zpaq/libzpaq.o)
@@ -1015,16 +1017,16 @@ CXXFLAGS+=-D_PYSAP
 OB+=$(call obj,pysap/pysapcompress/vpa105CsObjInt.o pysap/pysapcompress/vpa106cslzc.o pysap/pysapcompress/vpa107cslzh.o pysap/pysapcompress/vpa108csulzh.o)
 endif
 #--------------------------------------------------------------------
-
 OB+=$(BUILD)/plugin.o
 
-$(BUILD)/plugin.o: plugin.cc $(C_BLOSC2_LIB) $(ISAL_LIB) $(OPENZL_LIB) $(XZ_LIB) $(ZLIB_NG_LIB) $(ZSTD_LIB) $(LZ_LIB) $(IC_LIB) 
+#$(C_BLOSC2_LIB) $(ISAL_LIB) $(MINIZ_LIB) $(OPENZL_LIB) $(XZ_LIB) $(ZLIB_NG_LIB) $(ZSTD_LIB) $(LZ_LIB) $(IC_LIB) 
+
+$(BUILD)/plugin.o: plugin.cc 
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
 
-
-turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/cpu.o 
-	$(CXX) $^ $(LDFLAGS) -o turbobench
+turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/cpu.o $(LDFLAGS)
+	$(CXX) $^ $(LDFLAGS) $(FOPENMP) -o turbobench
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
