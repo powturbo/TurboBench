@@ -176,7 +176,7 @@ $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
 	          -DPREFER_EXTERNAL_LZ4=ON -DPREFER_EXTERNAL_ZLIB=ON -DPREFER_EXTERNAL_ZSTD=ON  -DBUILD_SHARED=OFF -DBUILD_SHARED_LIBS=OFF 
 	cmake --build $(BUILD)/c-blosc2 --parallel 4
 endif
-LDFLAGS += $(C_BLOSC2_LIB)
+LIBS += $(C_BLOSC2_LIB)
 endif
 endif
 
@@ -205,7 +205,7 @@ $(ISAL_LIB): $(ISAL_SRCS)
 	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILD)/isa-l)
 	@mv isa-l/bin/isa-l.a $@
 endif
-LDFLAGS += $(ISAL_LIB)
+LIBS += $(ISAL_LIB)
 endif
 endif
 
@@ -231,7 +231,7 @@ LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc
 LIBBSC_LDFLAGS =
 ifeq ($(HAVE_OPENMP),yes)
   LIBBSC_CFLAGS  += -fopenmp -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP
-  FOPENMP = -fopenmp
+  LDFLAGS = -fopenmp
   $(info OpenMP enabled for libbsc)
 endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
@@ -335,7 +335,7 @@ MINIZ_SRCS := $(shell find miniz -type f -name '*.[ch]' -o -name 'CMakeLists.txt
 MINIZ_LIB = $(BUILD)/miniz/libminiz.a
 $(MINIZ_LIB): $(MINIZ_SRCS)
 	$(CMAKE) -S miniz -B $(BUILD)/miniz -DCMAKE_INSTALL_PREFIX=$(BUILD) && make -C $(BUILD)/miniz
-LDFLAGS += $(MINIZ_LIB)
+LIBS += $(MINIZ_LIB)
 endif
 
 ifneq ($(wildcard misa77/.),)
@@ -404,7 +404,7 @@ $(OPENZL_LIB): $(OPENZL_SRCS)
 	cmake --build $(BUILD)/openzl --config Release
 endif
 endif
-LDFLAGS += $(OPENZL_LIB)
+LIBS += $(OPENZL_LIB)
 endif
 
 # 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
@@ -430,7 +430,7 @@ else
 OODLE_STATIC_LIB := pivco-huffman/ext/oodle/build-out/ar/liboodle-data-static.a
 endif 
 OB += $(call obj,$(LZHAM_SRCS)) pivco-huffman/extras/bench/bench_oodle_wrapper.o
-LDFLAGS+=$(OODLE_STATIC_LIB)
+LIBS+=$(OODLE_STATIC_LIB)
 endif
 endif
 
@@ -438,7 +438,7 @@ FIRETRAIL_LIB :=
 ifneq ($(wildcard firetrail/.),)
 CXXFLAGS+=-D_FIRETRAIL
 FIRETRAIL_LIB=firetrail/libfiretrail.a
-LDFLAGS += $(FIRETRAIL_LIB)
+LIBS += $(FIRETRAIL_LIB)
 $(FIRETRAIL_LIB): firetrail/src/root.zig 
 	cd firetrail && zig build-lib -O ReleaseFast -femit-bin=libfiretrail.a src/root.zig -lc
 OB+=$(FIRETRAIL_LIB)	
@@ -467,7 +467,7 @@ LZ_LIB = $(BUILD)/lz/liblz.a
 $(LZ_LIB):  $(LZ_SRCS)
 	@mkdir -p $(BUILD)/lz
 	$(MAKE) $(LZ_LIB) -C $(LZ_DIR) BUILD=$(BUILD)/lz
-LDFLAGS += $(LZ_LIB)
+LIBS += $(LZ_LIB)
 CFLAGS  += -D_NQUANT
 endif
 
@@ -480,7 +480,7 @@ IC_LIB = $(BUILD)/ic/libic.a
 $(IC_LIB):  $(IC_SRCS)
 	@mkdir -p $(BUILD)/ic
 	$(MAKE) $(IC_LIB) -C $(IC_DIR) BUILD=$(BUILD)/ic
-LDFLAGS += $(IC_LIB)
+LIBS += $(IC_LIB)
 endif
 
 XZ_LIB :=
@@ -495,7 +495,7 @@ else
 $(XZ_LIB): $(XZ_SRCS)
 	cmake -S xz -B $(BUILD)/xz && $(MAKE) -C $(BUILD)/xz
 endif
-LDFLAGS += $(XZ_LIB)
+LIBS += $(XZ_LIB)
 endif
 
 ifneq ($(wildcard zlib/.),)
@@ -520,7 +520,7 @@ $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
 	cmake --build $(BUILD)/zlib-ng --config Release 
 	cp $(BUILD)/zlib-ng/zconf-ng.h zlib-ng_
 endif
-LDFLAGS += $(ZLIB_NG_LIB)
+LIBS += $(ZLIB_NG_LIB)
 endif
 
 ifneq ($(wildcard zopfli/.),)
@@ -547,7 +547,7 @@ ifeq ($(HAVE_OPENMP),yes)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
 CXXFLAGS+=-fopenmp
-FOPENMP = -fopenmp
+LDFLAGS = -fopenmp
 OB+=$(call obj,$(BUILD)/libzpaq_omp.o)
 else
 OB+=$(call obj,zpaq/libzpaq.o)
@@ -1019,14 +1019,12 @@ endif
 #--------------------------------------------------------------------
 OB+=$(BUILD)/plugin.o
 
-#$(C_BLOSC2_LIB) $(ISAL_LIB) $(MINIZ_LIB) $(OPENZL_LIB) $(XZ_LIB) $(ZLIB_NG_LIB) $(ZSTD_LIB) $(LZ_LIB) $(IC_LIB) 
-
 $(BUILD)/plugin.o: plugin.cc 
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
 
-turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/cpu.o $(LDFLAGS)
-	$(CXX) $^ $(LDFLAGS) $(FOPENMP) -o turbobench
+turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/cpu.o $(LIBS)
+	$(CXX) $^ $(LDFLAGS) $(LIBS) -o turbobench
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
