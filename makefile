@@ -473,7 +473,7 @@ IC_LIB :=
 IC_DIR=../ic
 ifneq ($(wildcard $(IC_DIR)/.),)
 CXXFLAGS+=-D_IC
-IC_SRCS := $(shell find $(IC_DIR)/lib -type f -name '*.[c]')
+IC_SRCS := $(shell find $(IC_DIR)/lib -type f -name '*.[c]' -name '*.[a]')
 IC_LIB = $(BUILD)/ic/libic.a
 $(IC_LIB):  $(IC_SRCS)
 	@mkdir -p $(BUILD)/ic
