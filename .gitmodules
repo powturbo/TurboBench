@@ -37,9 +37,6 @@
 [submodule "lz4"]
 	path = lz4
 	url = https://github.com/lz4/lz4
-[submodule "snappy"]
-	path = snappy
-	url = https://github.com/google/snappy
 [submodule "isa-l"]
 	path = isa-l
 	url = https://github.com/01org/isa-l
@@ -97,12 +94,6 @@
 [submodule "kanzi-cpp"]
 	path = kanzi-cpp
 	url = https://github.com/flanglet/kanzi-cpp.git
-[submodule "tamp"]
-	path = tamp
-	url = https://github.com/BrianPugh/tamp.git
-[submodule "openzl"]
-	path = openzl
-	url = https://github.com/facebook/openzl.git
 [submodule "memlz"]
 	path = memlz
 	url = https://github.com/rrrlasse/memlz.git
