@@ -85,9 +85,9 @@ jobs:
           install: >-
             git make cmake rsync
             mingw-w64-x86_64-gcc
-            # Optional: uncomment if you want LLVM/Clang
-            # mingw-w64-x86_64-clang
-            # mingw-w64-x86_64-openmp
+# Optional: uncomment if you want LLVM/Clang
+# mingw-w64-x86_64-clang
+# mingw-w64-x86_64-openmp
           update: true
 
       - run: git submodule update --init --recursive
