@@ -149,7 +149,7 @@ AOCL_BDIR = $(BUILD)/aocl-compression
 AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a   # ← note the /lib/
 AOCL_LIB  = $(AOCL_BDIR)/libaocl.a
 $(AOCL_ALIB): $(AOCL_SRCS)
-	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1 -DCMAKE_C_FLAGS="-Wno-error=attributes -Werror=format=]" #-DAOCL_ENABLE_THREADS=1 
+	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1 -DCMAKE_C_FLAGS="-Wno-error=attributes -Wno-error=format=]" #-DAOCL_ENABLE_THREADS=1 
 	$(CMAKE) --build $(AOCL_BDIR) --target install -j
 #	@test -f $@ || (echo "ERROR: $@ was not produced by the install step"; exit 1)
 $(AOCL_LIB): $(AOCL_ALIB)
