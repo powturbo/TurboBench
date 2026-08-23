@@ -3064,7 +3064,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _AOM
-    case P_AOM:     aomdec(in, inlen, out, outlen); return outlen;
+    case P_AOM: aomdec(in, inlen, out, outlen); return outlen;
       #endif
 
       #if _BALZ
