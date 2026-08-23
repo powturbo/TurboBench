@@ -142,7 +142,7 @@ all: turbobench
  
 # ***************************************************************** codecs *****************************************************************************
 AOCL_LIB:=
-ifneq ($(and $(wildcard aocl-compression/.),$(filter x86_64,$(ARCH))),)
+ifneq ($(and $(wildcard aocl-compression0/.),$(filter x86_64,$(ARCH))),)
 CXXFLAGS += -D_AOCL
 AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'CMakeLists.txt' \))
 AOCL_BDIR = $(BUILD)/aocl-compression
@@ -269,7 +269,7 @@ endif
 ifneq ($(wildcard libbsc/.),)
 CXXFLAGS+=-D_LIBBSC
 LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc 
-LIBBSC_LDFLAGS =
+LIBBSC_LDFLAGS :=
 ifeq ($(HAVE_OPENMP),yes)
   LIBBSC_CFLAGS  += -fopenmp -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP
   FOPENMP = -fopenmp
