@@ -6,6 +6,7 @@ on:
   pull_request:
     branches:
       - master
+
 jobs:
   linux:
     runs-on: '${{ matrix.os }}'
@@ -14,20 +15,26 @@ jobs:
       matrix:
         os: [ubuntu-latest, ubuntu-26.04-arm]
         compiler: ["gcc", "clang"]
-    env:      
+    env:
       CC: ${{ matrix.compiler }}
     steps:
       - uses: actions/checkout@v7
         with:
-          submodules: 'true'     
+          submodules: 'true'
+
       - run: git submodule update --init --recursive
-      - name: Install NASM
-        run: sudo apt-get update && sudo apt-get install -y nasm
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nasm libomp-dev
+
       - run: |
           lscpu
           gcc --version
-          clang --version || true     
-      - run: make      
+          clang --version || true
+
+      - run: make
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
 
@@ -38,15 +45,19 @@ jobs:
       matrix:
         os: [macos-latest]
         compiler: ["clang"]
-    env:      
+    env:
       CC: ${{ matrix.compiler }}
     steps:
       - uses: actions/checkout@v7
         with:
           submodules: 'true'
-      - run: git submodule update --init --recursive      
-      - name: Install NASM
-        run: brew install nasm        
+
+      - run: git submodule update --init --recursive
+
+      - name: Install dependencies
+        run: |
+          brew install nasm libomp
+
       - run: make
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l2
@@ -58,31 +69,29 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - name: Set git to use LF  
+      - name: Set git to use LF
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
         shell: bash
+
       - uses: actions/checkout@v7
         with:
           submodules: 'true'
+
       - uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
           install: >-
             git make cmake rsync
             mingw-w64-x86_64-gcc
-#            mingw-w64-x86_64-llvm
+            # Optional: uncomment if you want LLVM/Clang
+            # mingw-w64-x86_64-clang
+            # mingw-w64-x86_64-openmp
           update: true
+
       - run: git submodule update --init --recursive
-#      - name: Use llvm-ar (avoids MinGW ar temp-file issues)
-#        run: |
-#          echo "AR=llvm-ar"       >> $GITHUB_ENV
-#          echo "CMAKE_AR=llvm-ar" >> $GITHUB_ENV
-        # also export for the current shell
-#          export AR=llvm-ar
-#          export CMAKE_AR=llvm-ar
-#          which llvm-ar
+
       - run: make
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
