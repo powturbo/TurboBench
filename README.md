@@ -145,6 +145,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ### Plugins:
 #### Compressor Lz77,Rolz,Bwt,zpaq:
  - [LzTurbo](https://sites.google.com/site/powturbo)
+ - [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:08.2026
  - [Blosc](https://github.com/Blosc/c-blosc2)
  - [BriefLz](https://github.com/jibsen/brieflz) 
  - [Brotli](https://github.com/google/brotli) 
@@ -329,5 +330,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -elzma,9:fb273:lc2:lp2:t2
 ```
 
-Last update: 8 AUG 2026
+Last update: 23 AUG 2026
 
