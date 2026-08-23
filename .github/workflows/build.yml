@@ -27,8 +27,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y nasm libomp-dev
-          sudo apt-get install -y libomp-dev
+          sudo apt-get install -y nasm 
+#libomp-dev
       - run: |
           lscpu
           gcc --version
