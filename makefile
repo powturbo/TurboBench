@@ -145,7 +145,7 @@ ifneq ($(and $(wildcard aocl-compression/.),$(filter x86_64,$(ARCH))),)
 CXXFLAGS += -D_AOCL
 AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'CMakeLists.txt' \))
 AOCL_BDIR = $(BUILD)/aocl-compression
-AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a   # ← note the /lib/
+AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
 AOCL_LIB  = $(AOCL_BDIR)/libaocl.a
 ifeq ($(OS), Windows)
 $(AOCL_ALIB): $(AOCL_SRCS)
@@ -153,11 +153,18 @@ $(AOCL_ALIB): $(AOCL_SRCS)
 	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 LIB_DIR=$(abspath $(AOCL_BDIR))/lib BUILD_DIR=$(abspath $(AOCL_BDIR))
 #CC=$(if $(filter cc,$(notdir $(CC))),gcc,$(CC)) CXX=$(CXX)
 else
+ifeq ($(HAVE_OPENMP),yes)
+  LIBBSC_CFLAGS  += -fopenmp 
+  LDFLAGS = -fopenmp
+  AOCL_OMP = -DAOCL_ENABLE_THREADS=1
+endif
+
 $(AOCL_ALIB): $(AOCL_SRCS)
-	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1 -DAOCL_ENABLE_THREADS=1
+	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1 $(OMP)
 #		 -DCMAKE_C_FLAGS="-Wno-error=attributes -Wno-error=format -Wno-implicit-function-declaration"                 
 	$(CMAKE) --build $(AOCL_BDIR) --target install -j
 #	@test -f $@ || (echo "ERROR: $@ was not produced by the install step"; exit 1)
+
 endif
 $(AOCL_LIB): $(AOCL_ALIB)
 	mkdir -p $(dir $@)
