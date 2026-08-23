@@ -142,18 +142,25 @@ all: turbobench
 # ***************************************************************** codecs *****************************************************************************
 AOCL_LIB:=
 ifneq ($(and $(wildcard aocl-compression/.),$(filter x86_64,$(ARCH))),)
-#ifneq ($(OS), Windows)
 CXXFLAGS += -D_AOCL
 AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'CMakeLists.txt' \))
 AOCL_BDIR = $(BUILD)/aocl-compression
 AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a   # ← note the /lib/
 AOCL_LIB  = $(AOCL_BDIR)/libaocl.a
+ifneq ($(OS), Windows)
+$(AOCL_ALIB): $(AOCL_SRCS)
+	mkdir -p $(dir $@)
+	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 LIB_DIR=$(abspath $(AOCL_BDIR))/lib BUILD_DIR=$(abspath $(AOCL_BDIR))
+	@test -f $@ || (echo "ERROR: $@ was not produced by the install step"; exit 1)
+#CC=$(if $(filter cc,$(notdir $(CC))),gcc,$(CC)) CXX=$(CXX)  lib BUILD_DIR=$(BUILD)/aocl-compression
+else
 $(AOCL_ALIB): $(AOCL_SRCS)
 	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1 \
 		 -DCMAKE_C_FLAGS="-Wno-error=attributes -Wno-error=format -Wno-implicit-function-declaration"                 
 #-DAOCL_ENABLE_THREADS=1 
 	$(CMAKE) --build $(AOCL_BDIR) --target install -j
 #	@test -f $@ || (echo "ERROR: $@ was not produced by the install step"; exit 1)
+endif
 $(AOCL_LIB): $(AOCL_ALIB)
 	mkdir -p $(dir $@)
 	$(NM) -g --defined-only $< | awk '{print $$NF}' | \
@@ -163,7 +170,6 @@ $(AOCL_LIB): $(AOCL_ALIB)
 	rm -f $@.redef
 	@test -f $@ || (echo "ERROR: failed to create $@"; exit 1)
 LIBS += $(AOCL_LIB)
-#endif
 endif
 
 ifneq ($(wildcard brotli/.),)
