@@ -151,7 +151,7 @@ AOCL_LIB  = $(AOCL_BDIR)/libaocl.a
 ifeq ($(OS), Windows)
 $(AOCL_ALIB): $(AOCL_SRCS)
 	mkdir -p $(dir $@)
-	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 LIB_DIR=../$(AOCL_BDIR)/lib BUILD_DIR=../$(AOCL_BDIR)
+	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 BUILD_DIR=$(abspath $(AOCL_BDIR)) LIB_DIR=$(abspath $(AOCL_BDIR))/lib
 #	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 LIB_DIR=$(abspath $(AOCL_BDIR))/lib BUILD_DIR=$(abspath $(AOCL_BDIR))
 #CC=$(if $(filter cc,$(notdir $(CC))),gcc,$(CC)) CXX=$(CXX)
 else
