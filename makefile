@@ -145,8 +145,8 @@ ifneq ($(and $(wildcard aocl-compression/.),$(filter x86_64,$(ARCH))),)
 CXXFLAGS += -D_AOCL
 AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'CMakeLists.txt' \))
 AOCL_BDIR = $(BUILD)/aocl-compression
-AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
-AOCL_LIB  = $(AOCL_BDIR)/libaocl.a
+AOCL_ALIB = $(abspath $(AOCL_BDIR)/lib/libaocl_compression.a)
+AOCL_LIB  = $(abspath $(AOCL_BDIR)/libaocl.a)
 ifeq ($(OS), Windows)
 $(AOCL_ALIB): $(AOCL_SRCS)
 	mkdir -p $(dir $@)
