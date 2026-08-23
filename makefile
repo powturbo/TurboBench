@@ -152,8 +152,6 @@ ifeq ($(OS), Windows)
 $(AOCL_ALIB): $(AOCL_SRCS)
 	mkdir -p $(dir $@)
 	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 BUILD_DIR=$(abspath $(AOCL_BDIR)) LIB_DIR=$(abspath $(AOCL_BDIR))/lib
-#	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 LIB_DIR=$(abspath $(AOCL_BDIR))/lib BUILD_DIR=$(abspath $(AOCL_BDIR))
-#CC=$(if $(filter cc,$(notdir $(CC))),gcc,$(CC)) CXX=$(CXX)
 else
 ifeq ($(HAVE_OPENMP),yes)
   FOPENMP = -fopenmp
@@ -164,14 +162,11 @@ $(AOCL_ALIB): $(AOCL_SRCS)
 	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1 $(AOCL_OMP)
 #		 -DCMAKE_C_FLAGS="-Wno-error=attributes -Wno-error=format -Wno-implicit-function-declaration"                 
 	$(CMAKE) --build $(AOCL_BDIR) --target install -j
-#	@test -f $@ || (echo "ERROR: $@ was not produced by the install step"; exit 1)
-
+	@test -f $@ || (echo "ERROR: $@ was not produced by the install step"; exit 1)
 endif
 $(AOCL_LIB): $(AOCL_ALIB)
 	mkdir -p $(dir $@)
-	$(NM) -g --defined-only $< | awk '{print $$NF}' | \
-		grep -v ':$$' | grep -v '^aocl_llc_' | grep -v '^$$' | LC_ALL=C sort -u | \
-		awk 'NF{print $$1" AOCLLZB_"$$1}' > $@.redef
+	$(NM) -g --defined-only $< | awk '{print $$NF}' | grep -v ':$$' | grep -v '^aocl_llc_' | grep -v '^$$' | LC_ALL=C sort -u | awk 'NF{print $$1" AOCLLZB_"$$1}' > $@.redef
 	$(OBJCOPY) --remove-section=".gnu.lto_*" --remove-section=".llvmcmd" --remove-section=".llvmbc" --redefine-syms=$@.redef $< $@
 	rm -f $@.redef
 	@test -f $@ || (echo "ERROR: failed to create $@"; exit 1)
