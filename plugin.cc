@@ -3886,6 +3886,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
 char *codver(int codec, char *v, char *s) {
   switch(codec) { 
+      #if _AOLC
+    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: return aocl_llc_version(void);
+      #endif
       #if _BZIP2
     case P_BZIP2: return (char *)BZ2_bzlibVersion();
       #endif
