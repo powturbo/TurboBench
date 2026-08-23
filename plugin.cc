@@ -1608,7 +1608,7 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void
   
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
-  { P_AOCL_LZ4,      "aocl-lz4",      _AOCL,      "AMD aocl-compression lz4",    "1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_AOCL_LZ4,      "aocl-lz4",      _AOCL,      "AMD aocl-compression lz4",    "0,1,2,3,4,5,6,7,8,9,10,11,12" },
 // { P_AOCL_LZ4HC,    "aocl_lzhc",     _AOCL,      "AMD aocl-compression lz4hc",  "1,2,3,4,5,6,7,8,9,10,11,12" },
   { P_AOCL_LZMA,     "aocl-lzma",     _AOCL,      "AMD aocl-compression lzma",   "1,2,3,4,5,6,7,8,9" },
   { P_AOCL_BZIP2,    "aocl-bzip2",    _AOCL,      "AMD aocl-compression bzip2",  "" },
@@ -2062,7 +2062,7 @@ void codexit(int codec, int lev) {
   switch(codec) {
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD:  
-      aocl_llc_destroy(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)); break;
+      aocl_llc_destroy(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>0)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)); break;
       #endif
   
       #if _SNAPPY_C
@@ -2099,7 +2099,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: {
       aocl.inBuf = (char *)in; aocl.inSize = inlen; aocl.outBuf = (char *)out; aocl.outSize = outsize; aocl.level = lev;
-      return aocl_llc_compress(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)); 
+      return aocl_llc_compress(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>0)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)); 
     }
       #endif
 
@@ -3059,7 +3059,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #if _AOLC
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: { 
       aocl.inBuf = (char *)in; aocl.outBuf = (char *)out; aocl.inSize = inlen; aocl.outSize = outlen;  aocl.level = lev;
-      return aocl_llc_decompress(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)); 
+      return aocl_llc_decompress(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>0)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)); 
     }
       #endif
 
