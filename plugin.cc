@@ -1860,7 +1860,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
         aocl.inSize     = insize;
         aocl.level      = lev;
         aocl.numThreads = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;
-        if(aocl_llc_setup(&aocl, ((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)) die("aocl_llc_setup failed\n");
+        if(aocl_llc_setup(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)) ) die("aocl_llc_setup failed\n");
       } break;
       #endif
 
@@ -2062,7 +2062,7 @@ void codexit(int codec, int lev) {
   switch(codec) {
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD:  
-      aocl_llc_destroy(&aocl, ((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4); break;
+      aocl_llc_destroy(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)); break;
       #endif
   
       #if _SNAPPY_C
@@ -2098,8 +2098,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
   switch(codec) {
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: {
-      aocl.inBuf = in; aocl.inSize = inlen; aocl.outBuf = out; aocl.outSize = outsize; aocl.level = lev;
-      return aocl_llc_compress(&aocl, ((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4); 
+      aocl.inBuf = (char *)in; aocl.inSize = inlen; aocl.outBuf = (char *)out; aocl.outSize = outsize; aocl.level = lev;
+      return aocl_llc_compress(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)); 
     }
       #endif
 
@@ -3058,8 +3058,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
   switch(codec) {
       #if _AOLC
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: { 
-      aocl.inBuf = in; aocl.outBuf = out; aocl.inSize = inlen; aocl.outSize = outlen;  aocl.level = lev;
-      return aocl_llc_decompress(&aocl, ((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4); 
+      aocl.inBuf = (char *)in; aocl.outBuf = (char *)out; aocl.inSize = inlen; aocl.outSize = outlen;  aocl.level = lev;
+      return aocl_llc_decompress(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)); 
     }
       #endif
 
