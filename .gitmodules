@@ -118,3 +118,6 @@
 [submodule "tamp"]
 	path = tamp
 	url = https://github.com/BrianPugh/tamp.git
+[submodule "aocl-compression"]
+	path = aocl-compression
+	url = https://github.com/amd/aocl-compression.git

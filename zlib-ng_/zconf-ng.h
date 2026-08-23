@@ -19,7 +19,8 @@
 #  define __has_declspec_attribute(x) 0
 #endif
 
-/* Always define z_const as const */
+/* Always define z_const as const.
+ * Only for use on API-visible variables. */
 #define z_const const
 
 /* Maximum value for memLevel in deflateInit2 */
@@ -89,6 +90,15 @@
 #endif
 #ifndef Z_EXPORTVA
 #  define Z_EXPORTVA
+#endif
+
+/* API deprecated warning support */
+#if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ >= 4))
+    #define Z_DEPRECATED(msg) __attribute__((deprecated(msg)))
+#elif defined(_MSC_VER) && (_MSC_VER >= 1400)
+    #define Z_DEPRECATED(msg) __declspec(deprecated(msg))
+#else
+    #define Z_DEPRECATED(msg)
 #endif
 
 /* Conditional exports */
