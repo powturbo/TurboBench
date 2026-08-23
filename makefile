@@ -20,6 +20,9 @@ CX ?= clang
 
 MAKE ?= make
 CMAKE ?= cmake
+NM      ?= nm
+OBJCOPY ?= objcopy
+
 BUILD ?= build
 obj = $(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(patsubst %.cpp,%.o,$(patsubst %.S,%.o,$(1))))))
 
@@ -137,6 +140,55 @@ endif
 all: turbobench 
  
 # ***************************************************************** codecs *****************************************************************************
+AOCL_LIB:=
+ifneq ($(wildcard aocl-compression0/.),)
+CXXFLAGS+=-D_AOCL
+AOCL_SRCS := $(shell find aocl-compression -type f -name '*.[ch]' -o -name 'CMakeLists.txt')
+AOCL_ALIB = $(BUILD)/aocl-compression/libaocl_compression.a
+AOCL_LIB = $(BUILD)/aocl-compression/libaocl.a
+$(AOCL_ALIB): $(AOCL_SRCS)
+	$(CMAKE) -S aocl-compression -B $(BUILD)/aocl-compression -DCMAKE_INSTALL_PREFIX=$(BUILD)/aocl-compression -DCMAKE_BUILD_TYPE=Release -DAOCL_ENABLE_THREADS=1 -DBUILD_STATIC_LIBS=1 
+	$(CMAKE) --build $(BUILD)/aocl-compression --target install -j
+$(AOCL_LIB): $(AOCL_ALIB) ; @$(MKDIR) $(dir $@); $(NM) -g --defined-only $(AOCL_ALIB) | awk '$$2 ~ /^[TDBRGVWC]$$/ {print $$3}' | grep -v '^aocl_llc_' | sort -u | awk 'NF{print $$1" AOCLLZB_"$$1}' > $@.redef
+	$(OBJCOPY) --redefine-syms=$@.redef $(AOCL_ALIB) $@
+	rm -f $@.redef
+LIBS += $(AOCL_LIB)
+endif
+
+AOCL_LIB:=
+ifneq ($(wildcard aocl-compression/.),)
+CXXFLAGS += -D_AOCL
+AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'CMakeLists.txt' \))
+AOCL_BDIR = $(BUILD)/aocl-compression
+AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a   # ← note the /lib/
+AOCL_LIB  = $(AOCL_BDIR)/libaocl.a
+
+$(AOCL_ALIB): $(AOCL_SRCS)
+	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) \
+		-DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DAOCL_ENABLE_THREADS=1 \
+		-DBUILD_STATIC_LIBS=1
+	$(CMAKE) --build $(AOCL_BDIR) --target install -j
+#	@test -f $@ || (echo "ERROR: $@ was not produced by the install step"; exit 1)
+
+$(AOCL_LIB): $(AOCL_ALIB)
+	mkdir -p $(dir $@)
+	nm -g --defined-only $< | \
+		awk '{print $$NF}' | \
+		grep -v ':$$' | \
+		grep -v '^aocl_llc_' | \
+		grep -v '^$$' | \
+		LC_ALL=C sort -u | \
+		awk 'NF{print $$1" AOCLLZB_"$$1}' > $@.redef
+	objcopy --remove-section=".gnu.lto_*" --remove-section=".llvmcmd" --remove-section=".llvmbc" \
+		--redefine-syms=$@.redef $< $@
+	rm -f $@.redef
+	@test -f $@ || (echo "ERROR: failed to create $@"; exit 1)
+
+LIBS += $(AOCL_LIB)
+endif
+
 ifneq ($(wildcard brotli/.),)
 CXXFLAGS+=-D_BROTLI -Ibrotli/c/include 
 CFLAGS+=-Ibrotli/c/include 
