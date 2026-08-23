@@ -40,7 +40,6 @@ enum {
 #ifndef _AOCL
 #define _AOCL 0
 #endif
- P_AOCL,
  P_AOCL_LZ4,
  P_AOCL_LZ4HC,
  P_AOCL_LZMA,
@@ -1609,7 +1608,6 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
   { P_AOCL_LZ4,      "aocl-lz4",      _AOCL,      "AMD aocl-compression lz4",    "0,1,2,3,4,5,6,7,8,9,10,11,12" },
-// { P_AOCL_LZ4HC,    "aocl_lzhc",     _AOCL,      "AMD aocl-compression lz4hc",  "1,2,3,4,5,6,7,8,9,10,11,12" },
   { P_AOCL_LZMA,     "aocl-lzma",     _AOCL,      "AMD aocl-compression lzma",   "1,2,3,4,5,6,7,8,9" },
   { P_AOCL_BZIP2,    "aocl-bzip2",    _AOCL,      "AMD aocl-compression bzip2",  "" },
   { P_AOCL_SNAPPY,   "aocl-snappy",   _AOCL,      "AMD aocl-compression snappy", "" },
@@ -1859,7 +1857,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       { char *q;  memset(&aocl, 0, sizeof(aocl));   
         aocl.inSize     = insize;
         aocl.level      = lev;
-        aocl.numThreads = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;
+        aocl.numThreads = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;  
         if(aocl_llc_setup(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)) ) die("aocl_llc_setup failed\n");
       } break;
       #endif
