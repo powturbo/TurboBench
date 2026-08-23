@@ -37,6 +37,17 @@ enum {
 #define _MEMCPY 1
  P_LMCPY,   // must be 0
  P_MCPY,    // must be 1
+#ifndef _AOCL
+#define _AOCL 0
+#endif
+ P_AOCL,
+ P_AOCL_LZ4,
+ P_AOCL_LZ4HC,
+ P_AOCL_LZMA,
+ P_AOCL_BZIP2,
+ P_AOCL_SNAPPY,
+ P_AOCL_ZLIB,
+ P_AOCL_ZSTD,
 #ifndef _AOM
 #define _AOM 0
 #endif
@@ -533,6 +544,10 @@ enum {
 };
 
 //-------------------------------------------------------------------------------------------------------------------
+  #if _AOCL
+#include "aocl-compression/api/aocl_compression.h"
+static aocl_compression_desc aocl;
+  #endif
 
   #if _AOM
 #include "EC/aom_/aom.h"
@@ -1593,6 +1608,13 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void
   
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
+  { P_AOCL_LZ4,      "aocl-lz4",      _AOCL,      "AMD aocl-compression lz4",    "1,2,3,4,5,6,7,8,9,10,11,12" },
+// { P_AOCL_LZ4HC,    "aocl_lzhc",     _AOCL,      "AMD aocl-compression lz4hc",  "1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_AOCL_LZMA,     "aocl-lzma",     _AOCL,      "AMD aocl-compression lzma",   "1,2,3,4,5,6,7,8,9" },
+  { P_AOCL_BZIP2,    "aocl-bzip2",    _AOCL,      "AMD aocl-compression bzip2",  "" },
+  { P_AOCL_SNAPPY,   "aocl-snappy",   _AOCL,      "AMD aocl-compression snappy", "" },
+  { P_AOCL_ZLIB,     "aocl-zlib",     _AOCL,      "AMD aocl-compression zlib",   "1,2,3,4,5,6,7,8,9" },
+  { P_AOCL_ZSTD,     "aocl-zstd",     _AOCL,      "AMD aocl-compression zstd",   "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/d#" },
   { P_BPC,           "bpc",           _BPC,       "bit plane compression",   "" },
   { P_BRIEFLZ,       "brieflz",       _BRIEFLZ,   "BriefLz",                 "1,3,6,9" },
   { P_BROTLI,        "brotli",        _BROTLI,    "Brotli",                  "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
@@ -1832,6 +1854,16 @@ int codini(size_t insize, int codec, int lev, char *prm) {
   workmemsize = 0;
 
   switch(codec) {
+      #if _AOCL
+    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: 
+      { char *q;  memset(&aocl, 0, sizeof(aocl));   
+        aocl.inSize     = insize;
+        aocl.level      = lev;
+        aocl.numThreads = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;
+        if(aocl_llc_setup(&aocl, ((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)) die("aocl_llc_setup failed\n");
+      } break;
+      #endif
+
       #if _BRIEFLZ
     case P_BRIEFLZ: workmemsize = blz_workmem_size_level(insize, lev); break;
       #endif
@@ -1983,7 +2015,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #endif
  }
   if(!workmemsize) return 0;
-  if(workmemsize > sizeof(_workmem) && !(workmem = (char *)malloc(workmemsize)) ) {
+  if(workmemsize > sizeof(_workmem) && !(workmem = (char *)calloc(1,workmemsize)) ) {
     fprintf(stderr, "Codini: malloc error. workmemsize=%d\n", workmemsize);
     exit(0);
   }
@@ -2017,7 +2049,7 @@ int codend(size_t insize, int codec, int lev, char *prm, int mode) {
   return 0;
 }
 
-void codexit(int codec) {
+void codexit(int codec, int lev) {
   if(workmem != _workmem) {
       #if _MARLIN
     if(codec == P_MARLIN) Marlin_free_dictionary((Marlin *)workmem);
@@ -2025,14 +2057,19 @@ void codexit(int codec) {
       #endif
     free(workmem/*, workmemsize*/);
     workmem = _workmem;
-  } else {
-      #if _SNAPPY_C
-    if(codec == P_SNAPPY_C)
-      snappy_free_env(&env);
+    return;
+  } 
+  switch(codec) {
+      #if _AOCL
+    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD:  
+      aocl_llc_destroy(&aocl, ((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4); break;
       #endif
-
+  
+      #if _SNAPPY_C
+    case P_SNAPPY_C: snappy_free_env(&env);
+      #endif
       #if _FIRETRAIL
-    if(codec == P_FIRETRAIL) {
+    case P_FIRETRAIL: {
       if(firetrail_encoder) firetrail_encoder_destroy(firetrail_encoder); firetrail_encoder = NULL;
       if(firetrail_decoder) firetrail_decoder_destroy(firetrail_decoder); firetrail_decoder = NULL;
     }  
@@ -2059,6 +2096,13 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
   int      threadnum = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;
   
   switch(codec) {
+      #if _AOCL
+    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: {
+      aocl.inBuf = in; aocl.inSize = inlen; aocl.outBuf = out; aocl.outSize = outsize; aocl.level = lev;
+      return aocl_llc_compress(&aocl, ((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4); 
+    }
+      #endif
+
       #if _BALZ
     case P_BALZ: return balzcompress(in, inlen, out,lev);
       #endif
@@ -3012,6 +3056,13 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
   int  threadnum = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;
 
   switch(codec) {
+      #if _AOLC
+    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: { 
+      aocl.inBuf = in; aocl.outBuf = out; aocl.inSize = inlen; aocl.outSize = outlen;  aocl.level = lev;
+      return aocl_llc_decompress(&aocl, ((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4); 
+    }
+      #endif
+
       #if _AOM
     case P_AOM:     aomdec(in, inlen, out, outlen); return outlen;
       #endif
