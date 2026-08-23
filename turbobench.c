@@ -1990,7 +1990,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
   _vfree(_in, insizem);
   if(_cpy && _cpy != _in)
     _vfree(_cpy, insizem);
-  codexit(plug->id);
+  codexit(plug->id, plug->lev);
   fclose(fi);
   if(tm_verbose) { printf("\n"); fflush(stdout); }
   //if(verbose && filen > insize) plugprt(plug, totinlen, finame, FMT_TEXT, &ptc, &ptd,stdout);
