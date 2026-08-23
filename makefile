@@ -147,7 +147,7 @@ AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'C
 AOCL_BDIR = $(BUILD)/aocl-compression
 AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
 AOCL_LIB  = $(AOCL_BDIR)/libaocl.a
-ifneq ($(OS), Windows)
+ifeq ($(OS), Windows)
 $(AOCL_ALIB): $(AOCL_SRCS)
 	mkdir -p $(dir $@)
 	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 LIB_DIR=../$(AOCL_BDIR)/lib BUILD_DIR=../$(AOCL_BDIR)
@@ -155,7 +155,6 @@ $(AOCL_ALIB): $(AOCL_SRCS)
 #CC=$(if $(filter cc,$(notdir $(CC))),gcc,$(CC)) CXX=$(CXX)
 else
 ifeq ($(HAVE_OPENMP),yes)
-#  LIBBSC_CFLAGS  += -fopenmp 
   LDFLAGS = -fopenmp
   AOCL_OMP = -DAOCL_ENABLE_THREADS=1
 endif
