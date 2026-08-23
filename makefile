@@ -146,9 +146,9 @@ ifneq ($(and $(wildcard aocl-compression/.),$(filter x86_64,$(ARCH))),)
 CXXFLAGS += -D_AOCL
 AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'CMakeLists.txt' \))
 AOCL_BDIR = $(BUILD)/aocl-compression
-AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
 AOCL_LIB  = $(AOCL_BDIR)/libaocl.a
 ifeq ($(OS), Windows)
+AOCL_ALIB = $(AOCL_BDIR)/lib/aocl_compression.a
 $(AOCL_ALIB): $(AOCL_SRCS)
 	mkdir -p $(dir $@)
 	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 BUILD_DIR=$(abspath $(AOCL_BDIR)) LIB_DIR=$(abspath $(AOCL_BDIR))/lib
@@ -157,7 +157,7 @@ ifeq ($(HAVE_OPENMP),yes)
   FOPENMP = -fopenmp
   AOCL_OMP = -DAOCL_ENABLE_THREADS=1
 endif
-
+AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
 $(AOCL_ALIB): $(AOCL_SRCS)
 	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1 $(AOCL_OMP)
 #		 -DCMAKE_C_FLAGS="-Wno-error=attributes -Wno-error=format -Wno-implicit-function-declaration"                 
