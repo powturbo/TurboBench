@@ -133,6 +133,7 @@ LDFLAGS += -ldl
 endif
 
 HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) -fopenmp -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
+FOPENMP:=
 ifeq ($(HAVE_OPENMP),no)
   $(warning OpenMP not available)
 endif
@@ -147,7 +148,7 @@ AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'C
 AOCL_BDIR = $(BUILD)/aocl-compression
 AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
 AOCL_LIB  = $(AOCL_BDIR)/libaocl.a
-ifeq ($(OS), Windows)
+ifneq ($(OS), Windows)
 $(AOCL_ALIB): $(AOCL_SRCS)
 	mkdir -p $(dir $@)
 	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 LIB_DIR=../$(AOCL_BDIR)/lib BUILD_DIR=../$(AOCL_BDIR)
@@ -155,7 +156,7 @@ $(AOCL_ALIB): $(AOCL_SRCS)
 #CC=$(if $(filter cc,$(notdir $(CC))),gcc,$(CC)) CXX=$(CXX)
 else
 ifeq ($(HAVE_OPENMP),yes)
-  LDFLAGS = -fopenmp
+  FOPENMP = -fopenmp
   AOCL_OMP = -DAOCL_ENABLE_THREADS=1
 endif
 
@@ -271,7 +272,7 @@ LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc
 LIBBSC_LDFLAGS =
 ifeq ($(HAVE_OPENMP),yes)
   LIBBSC_CFLAGS  += -fopenmp -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP
-  LDFLAGS = -fopenmp
+  FOPENMP = -fopenmp
   $(info OpenMP enabled for libbsc)
 endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
@@ -587,7 +588,7 @@ ifeq ($(HAVE_OPENMP),yes)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
 CXXFLAGS+=-fopenmp
-LDFLAGS = -fopenmp
+FOPENMP = -fopenmp
 OB+=$(call obj,$(BUILD)/libzpaq_omp.o)
 else
 OB+=$(call obj,zpaq/libzpaq.o)
@@ -1064,7 +1065,7 @@ $(BUILD)/plugin.o: plugin.cc
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/cpu.o $(LIBS)
-	$(CXX) $^ $(LDFLAGS) $(LIBS) -o turbobench
+	$(CXX) $^ $(LDFLAGS) $(LIBS) $(FOPENMP) -o turbobench
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
