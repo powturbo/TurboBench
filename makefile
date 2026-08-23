@@ -141,7 +141,7 @@ all: turbobench
  
 # ***************************************************************** codecs *****************************************************************************
 AOCL_LIB:=
-ifneq ($(wildcard aocl-compression/.),)
+ifneq ($(and $(wildcard aocl-compression/.),$(filter x86_64,$(ARCH))),)
 CXXFLAGS += -D_AOCL
 AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'CMakeLists.txt' \))
 AOCL_BDIR = $(BUILD)/aocl-compression
