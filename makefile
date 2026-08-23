@@ -18,8 +18,8 @@ CX ?= clang
 #CX ?= gcc
 #CC = clang
 
-MAKE ?= make
-CMAKE ?= cmake
+MAKE    ?= make
+CMAKE   ?= cmake
 NM      ?= nm
 OBJCOPY ?= objcopy
 
@@ -149,15 +149,15 @@ AOCL_BDIR = $(BUILD)/aocl-compression
 AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a   # ← note the /lib/
 AOCL_LIB  = $(AOCL_BDIR)/libaocl.a
 $(AOCL_ALIB): $(AOCL_SRCS)
-	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1 -DCMAKE_C_FLAGS="-Wno-error=attributes" #-DAOCL_ENABLE_THREADS=1 
+	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1 -DCMAKE_C_FLAGS="-Wno-error=attributes -Werror=format=]" #-DAOCL_ENABLE_THREADS=1 
 	$(CMAKE) --build $(AOCL_BDIR) --target install -j
 #	@test -f $@ || (echo "ERROR: $@ was not produced by the install step"; exit 1)
 $(AOCL_LIB): $(AOCL_ALIB)
 	mkdir -p $(dir $@)
-	nm -g --defined-only $< | awk '{print $$NF}' | \
+	$(NM) -g --defined-only $< | awk '{print $$NF}' | \
 		grep -v ':$$' | grep -v '^aocl_llc_' | grep -v '^$$' | LC_ALL=C sort -u | \
 		awk 'NF{print $$1" AOCLLZB_"$$1}' > $@.redef
-	objcopy --remove-section=".gnu.lto_*" --remove-section=".llvmcmd" --remove-section=".llvmbc" --redefine-syms=$@.redef $< $@
+	$(OBJCOPY) --remove-section=".gnu.lto_*" --remove-section=".llvmcmd" --remove-section=".llvmbc" --redefine-syms=$@.redef $< $@
 	rm -f $@.redef
 	@test -f $@ || (echo "ERROR: failed to create $@"; exit 1)
 LIBS += $(AOCL_LIB)
