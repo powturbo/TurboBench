@@ -21,7 +21,9 @@ jobs:
           fetch-depth: 0
 
       - name: Update submodules to latest remote commit
-        run: git submodule update --remote --recursive
+        run: |
+          git submodule update --init --remote --recursive
+          git submodule foreach --recursive 'git reset --hard && git clean -dfx'
 
       - name: Check for submodule changes
         id: check_changes
