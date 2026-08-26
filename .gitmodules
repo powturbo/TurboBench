@@ -112,12 +112,15 @@
 [submodule "openzl"]
 	path = openzl
 	url = https://github.com/facebook/openzl.git
+	ignore = dirty
 [submodule "snappy"]
 	path = snappy
 	url = https://github.com/google/snappy.git
+	ignore = dirty
 [submodule "tamp"]
 	path = tamp
 	url = https://github.com/BrianPugh/tamp.git
+	ignore = dirty
 [submodule "aocl-compression"]
 	path = aocl-compression
 	url = https://github.com/amd/aocl-compression.git
