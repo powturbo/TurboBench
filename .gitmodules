@@ -121,3 +121,11 @@
 [submodule "aocl-compression"]
 	path = aocl-compression
 	url = https://github.com/amd/aocl-compression.git
+[submodule "master"]
+	branch = dev
+[openzl "master"]
+	branch = dev
+[snappy "master"]
+	branch = master
+[tamp "master"]
+	branch = master
