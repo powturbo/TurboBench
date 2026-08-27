@@ -436,12 +436,16 @@ $(OPENZL_LIB): $(OPENZL_SRCS)
 else
 OPENZL_LIB = $(BUILD)/openzl/libopenzl.a
 $(OPENZL_LIB): $(OPENZL_SRCS)
-	cmake -S openzl -B $(BUILD)/openzl
+	cmake -S openzl -B $(BUILD)/openzl -DOPENZL_ALLOW_INTROSPECTION=OFF -DOPENZL_INSTALL=OFF -DOPENZL_BUILD_CPP=OFF -DOPENZL_BUILD_CUSTOM_PARSERS=OFF -DOPENZL_BUILD_TOOLS=OFF -DOPENZL_BUILD_CLI=OFF -DOPENZL_BUILD_EXAMPLES=OFF
 	cmake --build $(BUILD)/openzl --config Release
 endif
 endif
 LIBS += $(OPENZL_LIB)
 endif
+
+
+
+
 
 # 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
 # download corresponding library from https://github.com/WorkingRobot/OodleUE
