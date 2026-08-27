@@ -47,6 +47,7 @@ enum {
  P_AOCL_SNAPPY,
  P_AOCL_ZLIB,
  P_AOCL_ZSTD,
+
 #ifndef _AOM
 #define _AOM 0
 #endif
@@ -546,6 +547,7 @@ enum {
   #if _AOCL
 #include "aocl-compression/api/aocl_compression.h"
 static aocl_compression_desc aocl;
+#define AOCL_CODEC(codec, lev) (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>0)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)
   #endif
 
   #if _AOM
@@ -1857,8 +1859,8 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       { char *q;  memset(&aocl, 0, sizeof(aocl));   
         aocl.inSize     = insize;
         aocl.level      = lev;
-        aocl.numThreads = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;  
-        if(aocl_llc_setup(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>1)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)) ) die("aocl_llc_setup failed\n");
+        aocl.numThreads = 1; //(q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;  
+        if(aocl_llc_setup(&aocl, AOCL_CODEC(codec,lev) )) die("aocl_llc_setup failed\n");
       } break;
       #endif
 
@@ -2060,7 +2062,7 @@ void codexit(int codec, int lev) {
   switch(codec) {
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD:  
-      aocl_llc_destroy(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>0)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)); break;
+      aocl_llc_destroy(&aocl, AOCL_CODEC(codec,lev) ); break;
       #endif
   
       #if _SNAPPY_C
@@ -2096,8 +2098,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
   switch(codec) {
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: {
-      aocl.inBuf = (char *)in; aocl.inSize = inlen; aocl.outBuf = (char *)out; aocl.outSize = outsize; aocl.level = lev;
-      return aocl_llc_compress(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>0)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)); 
+      aocl.inBuf = (char *)in; aocl.inSize = inlen; aocl.outBuf = (char *)out; aocl.outSize = inlen; aocl.level = lev;
+      return aocl_llc_compress(&aocl, AOCL_CODEC(codec,lev)); 
     }
       #endif
 
@@ -3055,9 +3057,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
   switch(codec) {
       #if _AOLC
-    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: { 
-      aocl.inBuf = (char *)in; aocl.outBuf = (char *)out; aocl.inSize = inlen; aocl.outSize = outlen;  aocl.level = lev;
-      return aocl_llc_decompress(&aocl, (aocl_compression_type)(((codec == P_AOCL_LZ4 && lev>0)?P_AOCL_LZ4HC:codec) - P_AOCL_LZ4)); 
+    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: {//  memset(&aocl, 0, sizeof(aocl); 
+      aocl.inBuf = (char *)in; aocl.outBuf = (char *)out; aocl.inSize = inlen; aocl.outSize = outlen; aocl.level = lev;      //if(aocl_llc_setup(&aocl, AOCL_CODEC(codec,lev) )) die("aocl_llc_setup failed\n");
+      return aocl_llc_decompress(&aocl, AOCL_CODEC(codec,lev) ); 
     }
       #endif
 
