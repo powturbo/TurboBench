@@ -3989,18 +3989,12 @@ char *codver(int codec, char *v, char *s) {
       #endif
 
       #if _OPENZL
-    case P_OPENZL_U8:
-    case P_OPENZL_I8:
-    case P_OPENZL_U16:
-    case P_OPENZL_I16:
-    case P_OPENZL_U32:
-    case P_OPENZL_I32:
-    case P_OPENZL_U64:
-    case P_OPENZL_I64:
-    case P_OPENZL_SERIAL:
-    case P_OPENZL_GENERIC:
-    case P_OPENZL_ZSTD:
-    case P_OPENZL_LZ4:   sprintf(s,"v%d.%d.%d", ZL_LIBRARY_VERSION_MAJOR, ZL_LIBRARY_VERSION_MINOR, ZL_LIBRARY_VERSION_PATCH); break;
+    case P_OPENZL_U8:  case P_OPENZL_I8:
+    case P_OPENZL_U16: case P_OPENZL_I16: 
+    case P_OPENZL_U32: case P_OPENZL_I32:
+    case P_OPENZL_U64: case P_OPENZL_I64:
+    case P_OPENZL_SERIAL: case P_OPENZL_GENERIC:  case P_OPENZL_ZSTD:  case P_OPENZL_LZ4:   
+    case P_OPENZL_TP: sprintf(s,"v%d.%d.%d", ZL_LIBRARY_VERSION_MAJOR, ZL_LIBRARY_VERSION_MINOR, ZL_LIBRARY_VERSION_PATCH); break;
       #endif
 
       #if _PCODEC
