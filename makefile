@@ -155,7 +155,8 @@ $(AOCL_ALIB): $(AOCL_SRCS)
 else
 ifeq ($(HAVE_OPENMP),yes)
   FOPENMP = -fopenmp
-  AOCL_OMP = -DAOCL_ENABLE_THREADS=1
+  AOCL_OMP = -DAOCL_ENABLE_THREADS=1 -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+#-DOpenMP_CXX_FLAGS="-fopenmp" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=/usr/lib/llvm-*/lib/libomp.so 
 endif
 AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
 $(AOCL_ALIB): $(AOCL_SRCS)
