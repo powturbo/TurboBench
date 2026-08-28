@@ -128,3 +128,6 @@
 	branch = master
 [tamp "master"]
 	branch = master
+[submodule "openzl"]
+	path = openzl
+	url = https://github.com/facebook/openzl.git
