@@ -109,10 +109,6 @@
 [submodule "GLZA"]
 	path = GLZA
 	url = https://github.com/kidq330/GLZA
-[submodule "openzl"]
-	path = openzl
-	url = https://github.com/facebook/openzl.git
-	ignore = dirty
 [submodule "snappy"]
 	path = snappy
 	url = https://github.com/google/snappy.git
