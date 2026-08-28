@@ -3909,6 +3909,9 @@ char *codver(int codec, char *v, char *s) {
       #if _FASTLZ
     case P_FASTLZ: return FASTLZ_VERSION_STRING;
       #endif
+      #if _FPC
+    case P_FPC : return "v2023.03.08";
+      #endif
    
       #if _GLZA
     case P_GLZA:  return "v0.12";
@@ -4008,7 +4011,7 @@ char *codver(int codec, char *v, char *s) {
     case P_PCODECF32:
     case P_PCODECI64:
     case P_PCODECU64:
-    case P_PCODECF64: return "v1.0.2"; break;  
+    case P_PCODECF64: return "v1.0.2";  
       #endif
 
       #if _PIVCOHUF
@@ -4024,7 +4027,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
       
       #if _TAMP
-    case P_TAMP:  return "v2.3.0"; break;
+    case P_TAMP:  return "v2.3.0";
       #endif
 
       #if _XZ
@@ -4039,6 +4042,10 @@ char *codver(int codec, char *v, char *s) {
     case P_ZLIB_NG:  strcpy(s,zlibng_version()); break;
       #endif
       
+      #if _ZOPFLI
+    case P_ZOPFLI:  return "v1.0.3";
+      #endif
+
       #if _ZSTD
     case P_ZSTD:    sprintf(s,"v%d.%d.%d MT", ZSTD_VERSION_MAJOR, ZSTD_VERSION_MINOR, ZSTD_VERSION_RELEASE); break;
       #endif
