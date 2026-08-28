@@ -603,7 +603,7 @@ void plugsprtv(FILE *f, int fmt) {
   for(gs = plugs; gs->id >= 0; gs++)
     if(gs->codec && strcmp(gs->name,pv)) {
       pv = gs->name;
-      char name[65],ver[33]; ver[0] = 0;
+      char name[128],ver[128]; ver[0] = 0;
       sprintf(name, "%s %s", gs->name, codver(gs->id, ""/*gs->ver*/, ver));
       switch(fmt) {
          case FMT_VBULLETIN:
