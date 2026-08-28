@@ -419,6 +419,7 @@ endif
 
 OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
+ifneq ($(OPENZL), 0)
 OPENZL_SRCS := $(shell find openzl -type f -name '*.[ch]' -o -name '*.cpp' -o -name '*.cc' -o -name 'CMakeLists.txt' -o -name 'Makefile')
 ifdef CROSS  # NOTWORKING
 #OPENZL_LIB = $(BUILD)/openzl/libopenzl.a
@@ -441,6 +442,7 @@ $(OPENZL_LIB): $(OPENZL_SRCS)
 endif
 endif
 LIBS += $(OPENZL_LIB)
+endif
 endif
 
 
