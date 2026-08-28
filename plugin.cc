@@ -1647,7 +1647,7 @@ struct plugs plugs[] = {
   { P_LIBLZF,        "lzf",           _LIBLZF,    "LibLZF",                  "" },
   { P_LIBLZG,        "lzg",           _LIBLZG,    "LibLzg",                  "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
   { P_LIZARD,        "lizard",        _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
-  { P_LZ4,           "lz4",           _LZ4,       "Lz4",                     "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
+  { P_LZ4,           "lz4",           _LZ4,       "Lz4",                     "0,1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
   { P_LZ4ULTRA,      "lz4ultra",      _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
   { P_LZAV,          "lzav",          _LZAV,      "lzav",                    "1,2" },
   { P_LZFSE,         "lzfse",         _LZFSE,     "lzfse",                   "" },  
@@ -1856,10 +1856,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
   switch(codec) {
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: 
-      { char *q;  memset(&aocl, 0, sizeof(aocl));   
-        aocl.inSize     = insize;
-        aocl.level      = lev;
-        aocl.numThreads = 1; //(q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;  
+      { char *q;  memset(&aocl, 0, sizeof(aocl));  aocl.inSize = insize; aocl.level = lev; aocl.numThreads = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;  
         if(aocl_llc_setup(&aocl, AOCL_CODEC(codec,lev) )) die("aocl_llc_setup failed\n");
       } break;
       #endif
@@ -2061,8 +2058,7 @@ void codexit(int codec, int lev) {
   } 
   switch(codec) {
       #if _AOCL
-    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD:  
-      aocl_llc_destroy(&aocl, AOCL_CODEC(codec,lev) ); break;
+    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: aocl_llc_destroy(&aocl, AOCL_CODEC(codec,lev) ); break;
       #endif
   
       #if _SNAPPY_C
@@ -2098,8 +2094,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
   switch(codec) {
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: {
-      aocl.inBuf = (char *)in; aocl.inSize = inlen; aocl.outBuf = (char *)out; aocl.outSize = inlen; aocl.level = lev;
-      return aocl_llc_compress(&aocl, AOCL_CODEC(codec,lev)); 
+      aocl.inBuf = (char *)in; aocl.inSize = inlen; aocl.outBuf = (char *)out; aocl.outSize = inlen; aocl.level = lev; return aocl_llc_compress(&aocl, AOCL_CODEC(codec,lev));  
     }
       #endif
 
@@ -3056,11 +3051,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
   int  threadnum = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;
 
   switch(codec) {
-      #if _AOLC
-    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: {//  memset(&aocl, 0, sizeof(aocl); 
-      aocl.inBuf = (char *)in; aocl.outBuf = (char *)out; aocl.inSize = inlen; aocl.outSize = outlen; aocl.level = lev;      //if(aocl_llc_setup(&aocl, AOCL_CODEC(codec,lev) )) die("aocl_llc_setup failed\n");
-      return aocl_llc_decompress(&aocl, AOCL_CODEC(codec,lev) ); 
-    }
+      #if _AOCL
+    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: 
+      aocl.inBuf = (char *)in; aocl.outBuf = (char *)out; aocl.inSize = inlen; aocl.outSize = outlen; aocl.level = lev; return aocl_llc_decompress(&aocl, AOCL_CODEC(codec,lev) );
       #endif
 
       #if _AOM
