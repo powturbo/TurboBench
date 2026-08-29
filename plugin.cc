@@ -4014,13 +4014,15 @@ char *codver(int codec, char *v, char *s) {
     case P_PCODECU64:
     case P_PCODECF64: return "v1.0.2";  
       #endif
-
       #if _PIVCOHUF
     case P_PIVCOHUF:  sprintf(s,"v%d.%d", PIVCOHUF_VERSION_MAJOR, PIVCOHUF_VERSION_MINOR); break;
       #endif
-      
       #if _PHAZ
     case P_PHAZ:      sprintf(s,"v%d.%d", PIVCOHUF_VERSION_MAJOR, PIVCOHUF_VERSION_MINOR); break;
+      #endif
+
+      #if _QUICKLZ
+    case P_QUICKLZ: return "v2012.01.13";
       #endif
 
       #if _SNAPPY
@@ -4037,16 +4039,13 @@ char *codver(int codec, char *v, char *s) {
 
       #if _ZLIB
     case P_ZLIB:  strcpy(s,zlib_version); break;
-      #endif
-      
+      #endif     
       #if _ZLIB_NG
     case P_ZLIB_NG:  strcpy(s,zlibng_version()); break;
       #endif
-      
       #if _ZOPFLI
     case P_ZOPFLI:  return "v1.0.3";
       #endif
-
       #if _ZSTD
     case P_ZSTD:    sprintf(s,"v%d.%d.%d MT", ZSTD_VERSION_MAJOR, ZSTD_VERSION_MINOR, ZSTD_VERSION_RELEASE); break;
       #endif
