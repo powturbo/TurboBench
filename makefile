@@ -1062,7 +1062,7 @@ endif
 #--------------------------------------------------------------------
 OB+=$(BUILD)/plugin.o
 
-$(BUILD)/plugin.o: plugin.cc 
+$(BUILD)/plugin.o: plugin.cc $(LIBS) 
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
 
