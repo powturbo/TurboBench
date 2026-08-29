@@ -483,7 +483,7 @@ endif
 
 SNAPPY_LIB := 
 ifneq ($(wildcard snappy/.),)
-CXXFLAGS+=-D_SNAPPY
+CXXFLAGS+=-D_SNAPPY -I$(BUILD)/snappy
 ifneq ($(ARCH),x86_64)
 SNAPPY_CMAKEFLAGS = -DSNAPPY_REQUIRE_AVX=ON -DSNAPPY_REQUIRE_AVX2=ON 
 endif
