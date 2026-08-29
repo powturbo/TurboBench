@@ -80,6 +80,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | Peak memory/Stack usage (compress + decompress)      | ✅         | ❌      |
 |**Codec & Configuration Coverage**|||
 | Cross-platform support (x86, ARM, RISC-V, PowerPC…)   | ✅         | ⚠️      |
+| Use codecs’ built-in tools, matching original optimizations  | ✅         | ❌       |
 |**Advanced**|||
 | Incremental benchmarking                             | ✅         | ❌      |
 | Simple integration of new codecs  | ✅         |  ❌        |
@@ -330,5 +331,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -elzma,9:fb273:lc2:lp2:t2
 ```
 
-Last update: 23 AUG 2026
+Last update: 01 SEP 2026
 
