@@ -4032,7 +4032,7 @@ char *codver(int codec, char *v, char *s) {
     case P_TAMP:  return "v2.3.0";
       #endif
       #if _TURBORC
-    case P_TURBORC: return TURBORC_VERSION_STR;
+    case P_TURBORC: return turborc_version();
       #endif
 
       #if _XZ
