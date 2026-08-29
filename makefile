@@ -446,14 +446,13 @@ LIBS += $(OPENZL_LIB)
 endif
 endif
 
-# 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
-# download corresponding library from https://github.com/WorkingRobot/OodleUE
-CXXFLAGS+=-D_OODLE
-ifneq ($(wildcard pcodec_/.),)
-endif
+#ifneq ($(wildcard pcodec_/.),)
+#endif
 
-ifneq ($(wildcard pivco-huffman/.),)
-ifneq ($(wildcard OodleUE/.),)
+# 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be available the current directory
+# ONLY FOR BENCHMARKING: download corresponding library from https://github.com/WorkingRobot/OodleUE
+CXXFLAGS+=-D_OODLE
+ifneq ($(and $(wildcard pivco-huffman/.),$(wildcard OodleUE/.)),)
 OODLE_DIR := OodleUE/Engine/Source/Runtime/OodleDataCompression/Sdks/2.9.16
 CXXFLAGS += -D_OODLE_EC -I$(OODLE_DIR)/src/oodle2/core -I$(OODLE_DIR)/src/oodle2/core/public -DOODLE_IMPORT_LIB
 OODLE_SRCS := $(wildcard $(OODLE_DIR)src/oodle2/core/*.cpp) $(wildcard $(OODLE_DIR)src/oodle2/core/public/*.cpp) $(wildcard $(OODLE_DIR)src/oodle2/base/*.cpp) $(wildcard $(OODLE_DIR)include/*.cpp)
@@ -471,7 +470,6 @@ endif
 OB += $(call obj,$(LZHAM_SRCS)) pivco-huffman/extras/bench/bench_oodle_wrapper.o
 LIBS+=$(OODLE_STATIC_LIB)
 endif
-endif
 
 FIRETRAIL_LIB :=
 ifneq ($(wildcard firetrail/.),)
@@ -483,12 +481,17 @@ $(FIRETRAIL_LIB): firetrail/src/root.zig
 OB+=$(FIRETRAIL_LIB)	
 endif
 
+SNAPPY_LIB := 
 ifneq ($(wildcard snappy/.),)
-# configure or copy directory "snappy_/*" to "snappy"
-ifneq (,$(wildcard snappy/snappy-stubs-public.h))
 CXXFLAGS+=-D_SNAPPY
-OB+=$(call obj,snappy/snappy-sinksource.o snappy/snappy-stubs-internal.o snappy/snappy.o)
+ifneq ($(ARCH),x86_64)
+SNAPPY_CMAKEFLAGS = -DSNAPPY_REQUIRE_AVX=ON -DSNAPPY_REQUIRE_AVX2=ON 
 endif
+SNAPPY_SRCS := $(shell find snappy -type f -name '*.[ch]' -o -name '*.[cc]' )
+SNAPPY_LIB := $(BUILD)/snappy/libsnappy.a
+$(SNAPPY_LIB): $(SNAPPY_SRCS)
+	$(CMAKE) -S snappy -B $(BUILD)/snappy -DSNAPPY_BUILD_TESTS=OFF -DSNAPPY_BUILD_BENCHMARKS=OFF -DSNAPPY_INSTALL=OFF && $(MAKE) -C $(BUILD)/snappy 
+LIBS += $(SNAPPY_LIB)
 endif
 
 ifneq ($(wildcard tamp/.),)
