@@ -80,7 +80,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | Peak memory/Stack usage (compress + decompress)      | ✅         | ❌      |
 |**Codec & Configuration Coverage**|||
 | Cross-platform support (x86, ARM, RISC-V, PowerPC…)   | ✅         | ⚠️      |
-| Use codecs’ built-in tools, matching original optimizations  | ✅         | ❌       |
+| Use codecs’ built-in tools, matching original builds & optimizations  | ✅         | ❌       |
 |**Advanced**|||
 | Incremental benchmarking                             | ✅         | ❌      |
 | Simple integration of new codecs  | ✅         |  ❌        |
