@@ -446,10 +446,6 @@ LIBS += $(OPENZL_LIB)
 endif
 endif
 
-
-
-
-
 # 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be in the same directory as turbobench[.exe]
 # download corresponding library from https://github.com/WorkingRobot/OodleUE
 CXXFLAGS+=-D_OODLE
@@ -812,10 +808,11 @@ endif
 
 ifneq ($(wildcard Turbo-Range-Coder/.),)
 ifneq ($(ARCH),loongarch64)
-CXXFLAGS += -D_TURBORC
 RC_DIR  := Turbo-Range-Coder
+BUILD_DATE := $(shell date +%Y%m%d)
+CXXFLAGS += -D_TURBORC
+CFLAGS   += -D_ANS -D_BWT -I$(RC_DIR)/libsais/include -DBUILD_VERSION="\"v$(BUILD_DATE)\"" 
 RC_BDIR := $(BUILD)/$(RC_DIR)
-CFLAGS   += -D_ANS -D_BWT -I$(RC_DIR)/libsais/include 
 OB+=$(RC_BDIR)/anscdfs.o $(RC_BDIR)/rc_ss.o $(RC_BDIR)/rc_s.o $(RC_BDIR)/rccdf.o $(RC_BDIR)/rcutil.o $(RC_BDIR)/bec_b.o $(RC_BDIR)/rccm_s.o $(RC_BDIR)/rccm_ss.o \
   $(RC_BDIR)/rcqlfc_s.o $(RC_BDIR)/rcqlfc_ss.o $(RC_BDIR)/rcqlfc_sf.o $(RC_BDIR)/rcbwt.o $(RC_BDIR)/libsais/src/libsais16.o
 $(RC_BDIR)/anscdfs.o: $(RC_DIR)/anscdf.c $(RC_DIR)/anscdf_.h
