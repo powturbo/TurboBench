@@ -3981,14 +3981,15 @@ char *codver(int codec, char *v, char *s) {
       #if _MINIZ
     case P_MINIZ : return "v11.3.2";
       #endif
-
       #if _MEMLZ
     case P_MEMLZ : return "v2025.12.10"; 
       #endif
-
       #if _MISA77
     case P_MISA77:
     case P_MISA77S:    sprintf(s,"v%d.%d.%d", MISA77_VERSION_MAJOR, MISA77_VERSION_MINOR, MISA77_VERSION_PATCH); break;
+      #endif
+      #if _MSCOMPRESS
+    case P_MSCOMPRESS: return "v2020.01.05";
       #endif
 
       #if _OPENZL
