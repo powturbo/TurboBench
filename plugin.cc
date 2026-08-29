@@ -4031,6 +4031,9 @@ char *codver(int codec, char *v, char *s) {
       #if _TAMP
     case P_TAMP:  return "v2.3.0";
       #endif
+      #if _TURBORC
+    case P_TURBORC: return TURBORC_VERSION_STR;
+      #endif
 
       #if _XZ
     case P_XZ:  sprintf(s,"v%d.%d", LZMA_VERSION_MAJOR, LZMA_VERSION_MINOR, LZMA_VERSION_PATCH); break;
