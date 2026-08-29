@@ -3930,7 +3930,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
 
       #if _ISA_L
-    case P_ISA_L:  sprintf(s,"v%d.%d.%d", ISAL_MAJOR_VERSION, ISAL_MINOR_VERSION, ISAL_PATCH_VERSION); break;
+    case P_ISA_L:  sprintf(s,"intel ISA-L v%d.%d.%d", ISAL_MAJOR_VERSION, ISAL_MINOR_VERSION, ISAL_PATCH_VERSION); break;
       #endif
 
       #if _KANZI
@@ -3942,8 +3942,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
       #if _LIBDEFLATE
     case P_LIBDEFLATE:  strcpy(s, LIBDEFLATE_VERSION_STRING); break;
-      #endif
-    
+      #endif   
       #if _LIBSLZ
     case P_LIBSLZ:  return "v1.3.0";
       #endif
