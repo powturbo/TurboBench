@@ -3898,7 +3898,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 char *codver(int codec, char *v, char *s) {
   switch(codec) { 
       #if _AOCL
-    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: return sprintf(s, "%s MT", aocl_llc_version()); break;
+    case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: sprintf(s, "%s MT", aocl_llc_version()); break;
       #endif
       #if _BZIP2
     case P_BZIP2: return (char *)BZ2_bzlibVersion();
@@ -3935,18 +3935,6 @@ char *codver(int codec, char *v, char *s) {
     case P_GLZA:  return "v0.12";
       #endif
 
-      #if _LIB
-    case P_LIB:  return "v2025.03.15";
-      #endif
-
-      #if _LZFSE
-    case P_LZFSE:  sprintf(s, "v2017.03.07", LIBBSC_VERSION_STRING); break;
-      #endif
-
-      #if _LZHAM
-    case P_LZHAM:  return "v2015.11.22 MT"; break;
-      #endif
-
       #if _HEATSHRINK
     case P_HEATSHRINK: sprintf(s,"v%d.%d.%d", HEATSHRINK_VERSION_MAJOR, HEATSHRINK_VERSION_MINOR, HEATSHRINK_VERSION_PATCH); break;
       #endif
@@ -3959,6 +3947,15 @@ char *codver(int codec, char *v, char *s) {
     case P_KANZI:  sprintf(s,"v%d.%d.%d MT", KANZI_DECOMP_VERSION_MAJOR, KANZI_DECOMP_VERSION_MINOR, KANZI_DECOMP_VERSION_PATCH); break;
       #endif
 
+      #if _LIB
+    case P_LIB:  return "v2025.03.15";
+      #endif
+      #if _LZFSE
+    case P_LZFSE:  sprintf(s, "v2017.03.07", LIBBSC_VERSION_STRING); break;
+      #endif
+      #if _LZHAM
+    case P_LZHAM:  return "v2015.11.22 MT"; break;
+      #endif
       #if _LIBBSC
     case P_LIBBSC:  sprintf(s, "%s MT", LIBBSC_VERSION_STRING); break;
       #endif
