@@ -99,7 +99,6 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
         ./turbobench -elzma,9mt2:d29:a1:fb273:mf=bt4:mc999:lc8:lp0:pb2 file
 
 ##### - Codecs:
-
   + individual codec test (output to screen & file.tbb)<br />
 
         ./turbobench -elzturbo,19,29,39/brotli,6/zlib,6 file
