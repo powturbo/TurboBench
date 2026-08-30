@@ -245,7 +245,7 @@ endif
 LIBS += $(ISAL_LIB)
 endif
 endif
-
+#--- G -------------------------
 ifneq ($(wildcard GLZA/.),)
 CXXFLAGS+=-D_GLZA
 GLZA_OBJS := $(call obj,GLZA/GLZAmodel.o GLZA/GLZAcomp.o GLZA/GLZAencode.o GLZA/GLZAcompress.o GLZA/GLZAformat.o GLZA/GLZAdecode.o)
@@ -254,14 +254,17 @@ $(GLZA_DIR)/%.o: GLZA/%.c
 	$(GLZA_BUILD)
 OB += $(GLZA_OBJS) 
 endif
-
+#--- K ---------------------------
 ifneq ($(wildcard kanzi-cpp/.),)
 CXXFLAGS+=-D_KANZI
 KANZI_DIR = kanzi-cpp/src
 KANZI_SRCS := $(wildcard $(KANZI_DIR)/io/*.cpp) $(wildcard $(KANZI_DIR)/entropy/*.cpp) $(wildcard $(KANZI_DIR)/bitstream/*.cpp) $(wildcard $(KANZI_DIR)/*.cpp) $(wildcard $(KANZI_DIR)/transform/*.cpp)
 OB += $(call obj,$(KANZI_SRCS))
 endif
-
+#---- L -----------------------
+ifneq ($(wildcard lib/.),)
+CXXFLAGS+=-D_LIB
+endif
 ifneq ($(wildcard libbsc/.),)
 CXXFLAGS+=-D_LIBBSC
 LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc 
