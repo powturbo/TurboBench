@@ -80,12 +80,12 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | Peak memory/Stack usage (compress + decompress)      | ✅         | ❌      |
 |**Codec & Configuration Coverage**|||
 | Cross-platform support (x86, ARM, RISC-V, PowerPC…)   | ✅         | ⚠️      |
+| Submodule architecture with automatic codec update         | ✅         | ❌      |
 | Use codecs’ built-in tools, matching original builds & optimizations  | ✅         | ❌       |
 |**Advanced**|||
 | Incremental benchmarking                             | ✅         | ❌      |
 | Simple integration of new codecs  | ✅         |  ❌        |
 | Nightly GitHub release w. executables                | ✅         | ❌      |
-| Submodule architecture with automatic codec update         | ✅         | ❌      |
 
 ##### - Groups FASTEST,FAST,EFFICIENT,MAX,OPTIMAL,BWT:
   + test all fast compressors in the lz4, lzturbo, zlib class<br />
@@ -146,31 +146,21 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ### Plugins:
 #### Compressor Lz77,Rolz,Bwt,zpaq:
  - [LzTurbo](https://sites.google.com/site/powturbo)
-
  - [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:08.2026
-
  - [Blosc](https://github.com/Blosc/c-blosc2)
  - [BriefLz](https://github.com/jibsen/brieflz) 
  - [Brotli](https://github.com/google/brotli) 
  - [Bzip2](http://www.bzip.org/downloads.html) 
-
  - [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
  - [CSC](https://github.com/fusiyuan2010/CSC) 
-
  - [Density](https://github.com/centaurean/density) 
  - [Doboz](https://bitbucket.org/attila_afra) 
-
  - [FastLz](http://fastlz.org) 
  - [Fast-lzma](https://github.com/conor42/fast-lzma2) 
-
  - [glza](https://github.com/kidq330/GLZA)
-
  - [heatshrink](https://github.com/atomicobject/heatshrink) 
-
  - [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l) 
- 
  - [kanzi](https://github.com/flanglet/kanzi-cpp) :new: 2026/07
-
  - [lib](https://github.com/vurtun/lib) :new: 2026/09
  - [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc)
  - [Libdeflate](https://github.com/ebiggers/libdeflate) 
@@ -190,20 +180,15 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
  - [Lzoma](https://github.com/alef78/lzoma) 
  - [LZSSE](https://github.com/ConorStokes/LZSSE)
  - [LZSA](https://github.com/emmanuel-marty/lzsa)
-
  - [Memlz](https://github.com/rrrlasse/memlz) :new:2026.07 
  - [Miniz](https://github.com/richgel999/miniz) 
  - [misa77](https://github.com/welcome-to-the-sunny-side/misa77) :new:2026.07
  - [ms-compress](https://github.com/coderforlife/ms-compress)
- 
  - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
  - [OpnZL](https://github.com/facebook/openzl)  :new:2026.07
- 
  - [Pcodec](https://github.com/pcodec/pcodec) :new:2026.07
  - [Pithy](https://github.com/johnezang/pithy) 
-
  - [Quicklz](https://github.com/robottwo/quicklz) 
-
  - [sap](https://github.com/CoreSecurity/pysap) 
  - [shoco](https://github.com/Ed-von-Schleck/shoco) 
  - [Shrinker](https://code.google.com/p/data-shrinker) 
@@ -211,20 +196,14 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
  - [smaz](https://github.com/antirez/smaz)
  - [Snappy](https://github.com/google/snappy) 
  - [Snappy-c](https://github.com/andikleen/snappy-c) 
-
  - [Tamp](https://github.com/BrianPugh/tamp) :new:2026.07
  - [Tornado](http://freearc.org) 
-
  - [Unishox](https://github.com/siara-cc/Unishox) 
-
  - [wfLZ](https://github.com/ShaneWF/wflz) 
-
  - [yalz77](https://github.com/ivan-tkatchev/yalz77) 
  - [yappy v2011]() 
- 
  - [xpack](https://github.com/ebiggers/xpack) 
  - [xz](https://github.com/tukaani-project/xz) :new:2026.05
-
  - [zlib](http://zlib.net)
  - [zlib-ng](https://github.com/Dead2/zlib-ng)
  - [zlib cloudflare](https://github.com/cloudflare/zlib)
@@ -232,7 +211,6 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
  - [zstd](https://github.com/facebook/zstd)
  - [zpaq](https://github.com/zpaq/zpaq)
  - [zxc](https://github.com/hellobertrand/zxc) :new:2026.05
-
 
 #### Entropy coder:
 
