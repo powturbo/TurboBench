@@ -149,6 +149,10 @@ enum {
 #endif
  P_DIVBWT,    //bwt
 
+#ifndef _LIB
+#define _LIB 0
+#endif
+ P_LIB, 
 #ifndef _LIBDEFLATE
 #define _LIBDEFLATE 0
 #endif
@@ -762,6 +766,13 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
 #include "libbsc/libbsc/libbsc.h"
 #include "libbsc/libbsc/st/st.h"
 #include "libbsc/libbsc/lzp/lzp.h"
+  #endif
+
+  #if _LIB
+#define SINFL_IMPLEMENTATION
+#define SDEFL_IMPLEMENTATION
+#include "lib/sdefl.h"
+#include "lib/sinfl.h"
   #endif
 
   #if _LIBDEFLATE
@@ -1641,6 +1652,7 @@ struct plugs plugs[] = {
   
   { P_KANZI,         "kanzi",         _KANZI,     "kanzi",                   "0,1,2,3,4,5,6,7,8,9/T#" },
   
+  { P_LIB,           "sdefl",         _LIB,       "sdefl/sinfl",             "1,3,3,4,6,7,8,9"},
   { P_LIBBSC,        "bsc",           _LIBBSC,    "bsc",                     "0,3,4,5,6,7,8/P:t:e#"}, // Multithreading w. parameter t
   { P_LIBBSCC,       "bscqlfc",       _LIBBSC,    "bsc",                     "1,2"},
   { P_LIBDEFLATE,    "libdeflate",    _LIBDEFLATE,"libdeflate",              "1,2,3,4,5,6,7,8,9,12/dg"},
@@ -2257,6 +2269,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_KANZI: return kanzi_compress((char *)in, inlen, (char *)out, outsize, threadnum, lev);
       #endif
       
+      #if _LIB
+    case P_LIB: { struct sdefl sdefl = {0}; return sdeflate(&sdefl, out, in, inlen, lev); }
+      #endif
       #if _LIBBSC
     #define BSC_MODE LIBBSC_FEATURE_FASTMODE | (strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0) | (strchr(prm,'t')?LIBBSC_FEATURE_MULTITHREADING:0)      
     case P_LIBBSC: { int ec = (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1; ec = ec==0?3:(ec>3?3:ec);  
@@ -3198,6 +3213,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_KANZI: return kanzi_decompress((char *)in, inlen, (char *)out, outlen, threadnum);
       #endif
 
+      #if _LIB
+    case P_LIB: { return sinflate(out, outlen, in, inlen); }
+      #endif
       #if _LIBBSC
     case P_LIBBSC:     return bsc_decompress(in, inlen, out, outlen, BSC_MODE);
     case P_LIBBSCC:    return bsc_coder_decompress(in, out, lev, BSC_MODE);
