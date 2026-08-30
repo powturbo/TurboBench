@@ -131,3 +131,6 @@
 [submodule "openzl"]
 	path = openzl
 	url = https://github.com/facebook/openzl.git
+[submodule "lib"]
+	path = lib
+	url = https://github.com/vurtun/lib.git
