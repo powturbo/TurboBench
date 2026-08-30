@@ -1652,9 +1652,9 @@ struct plugs plugs[] = {
   
   { P_KANZI,         "kanzi",         _KANZI,     "kanzi",                   "0,1,2,3,4,5,6,7,8,9/T#" },
   
-  { P_LIB,           "sdefl",         _LIB,       "sdefl/sinfl",             "1,3,3,4,6,7,8,9"},
-  { P_LIBBSC,        "bsc",           _LIBBSC,    "bsc",                     "0,3,4,5,6,7,8/P:t:e#"}, // Multithreading w. parameter t
-  { P_LIBBSCC,       "bscqlfc",       _LIBBSC,    "bsc",                     "1,2"},
+  { P_LIB,           "sdefl",         _LIB,       "lib:sdefl/sinfl",         "0,1,2,3,4,6,7,8"},
+  { P_LIBBSC,        "bsc",           _LIBBSC,    "libbsc/bsc",              "0,3,4,5,6,7,8/P:t:e#"}, // Multithreading w. parameter t
+  { P_LIBBSCC,       "bscqlfc",       _LIBBSC,    "libbsc/bsc",              "1,2"},
   { P_LIBDEFLATE,    "libdeflate",    _LIBDEFLATE,"libdeflate",              "1,2,3,4,5,6,7,8,9,12/dg"},
   { P_LIBLZF,        "lzf",           _LIBLZF,    "LibLZF",                  "" },
   { P_LIBLZG,        "lzg",           _LIBLZG,    "LibLzg",                  "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
@@ -3933,6 +3933,10 @@ char *codver(int codec, char *v, char *s) {
    
       #if _GLZA
     case P_GLZA:  return "v0.12";
+      #endif
+
+      #if _LIB
+    case P_LIB:  return "v2025.03.15";
       #endif
 
       #if _LZFSE
