@@ -146,22 +146,33 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ### Plugins:
 #### Compressor Lz77,Rolz,Bwt,zpaq:
  - [LzTurbo](https://sites.google.com/site/powturbo)
+
  - [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:08.2026
+
  - [Blosc](https://github.com/Blosc/c-blosc2)
  - [BriefLz](https://github.com/jibsen/brieflz) 
  - [Brotli](https://github.com/google/brotli) 
  - [Bzip2](http://www.bzip.org/downloads.html) 
+
  - [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
  - [CSC](https://github.com/fusiyuan2010/CSC) 
+
  - [Density](https://github.com/centaurean/density) 
  - [Doboz](https://bitbucket.org/attila_afra) 
+
  - [FastLz](http://fastlz.org) 
  - [Fast-lzma](https://github.com/conor42/fast-lzma2) 
+
  - [glza](https://github.com/kidq330/GLZA)
+
  - [heatshrink](https://github.com/atomicobject/heatshrink) 
+
  - [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l) 
- - [bsc](https://github.com/IlyaGrebnov/libbsc)
+ 
  - [kanzi](https://github.com/flanglet/kanzi-cpp) :new: 2026/07
+
+ - [lib](https://github.com/vurtun/lib) :new: 2026/09
+ - [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc)
  - [Libdeflate](https://github.com/ebiggers/libdeflate) 
  - [LibLZF](http://oldhome.schmorp.de/marc/liblzf.html) 
  - [LibLz](https://github.com/mbitsnbites/liblzg) 
@@ -179,15 +190,20 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
  - [Lzoma](https://github.com/alef78/lzoma) 
  - [LZSSE](https://github.com/ConorStokes/LZSSE)
  - [LZSA](https://github.com/emmanuel-marty/lzsa)
+
  - [Memlz](https://github.com/rrrlasse/memlz) :new:2026.07 
  - [Miniz](https://github.com/richgel999/miniz) 
  - [misa77](https://github.com/welcome-to-the-sunny-side/misa77) :new:2026.07
- - [ms-compress](https://github.com/coderforlife/ms-compress) 
+ - [ms-compress](https://github.com/coderforlife/ms-compress)
+ 
  - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
- - [OpnZL](https://github.com/facebook/openzl)  :new:2026.07 
+ - [OpnZL](https://github.com/facebook/openzl)  :new:2026.07
+ 
  - [Pcodec](https://github.com/pcodec/pcodec) :new:2026.07
  - [Pithy](https://github.com/johnezang/pithy) 
+
  - [Quicklz](https://github.com/robottwo/quicklz) 
+
  - [sap](https://github.com/CoreSecurity/pysap) 
  - [shoco](https://github.com/Ed-von-Schleck/shoco) 
  - [Shrinker](https://code.google.com/p/data-shrinker) 
@@ -195,17 +211,23 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
  - [smaz](https://github.com/antirez/smaz)
  - [Snappy](https://github.com/google/snappy) 
  - [Snappy-c](https://github.com/andikleen/snappy-c) 
+
  - [Tamp](https://github.com/BrianPugh/tamp) :new:2026.07
  - [Tornado](http://freearc.org) 
+
  - [Unishox](https://github.com/siara-cc/Unishox) 
+
  - [wfLZ](https://github.com/ShaneWF/wflz) 
+
  - [yalz77](https://github.com/ivan-tkatchev/yalz77) 
  - [yappy v2011]() 
+ 
+ - [xpack](https://github.com/ebiggers/xpack) 
+ - [xz](https://github.com/tukaani-project/xz) :new:2026.05
+
  - [zlib](http://zlib.net)
  - [zlib-ng](https://github.com/Dead2/zlib-ng)
  - [zlib cloudflare](https://github.com/cloudflare/zlib)
- - [xpack](https://github.com/ebiggers/xpack) 
- - [xz](https://github.com/tukaani-project/xz) :new:2026.05
  - [zopfli](https://code.google.com/p/zopfli) 
  - [zstd](https://github.com/facebook/zstd)
  - [zpaq](https://github.com/zpaq/zpaq)
