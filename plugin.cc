@@ -3904,7 +3904,7 @@ char *codver(int codec, char *v, char *s) {
     case P_BZIP2: return (char *)BZ2_bzlibVersion();
       #endif
       #if _BZIP3
-    case P_BZIP3: return "v1.5.3";
+    case P_BZIP3: return "v1.5.4";
       #endif
       #if _BRIEFLZ
     case P_BRIEFLZ:  sprintf(s,"v%d.%d.%d", BLZ_VER_MAJOR, BLZ_VER_MINOR, BLZ_VER_PATCH); break;
