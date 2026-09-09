@@ -328,7 +328,8 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -eFAST/OPTIMAL/bsc,0:e2 -i0
 ./turbobench eECODER -k"entropy coder test"
 ./turbobench enwik9 -elzma,9:fb273:lc2:lp2:t2
+./turbobench enwik9 -eFAST -aFAST
 ```
 
-Last update: 01 SEP 2026
+Last update: 10 SEP 2026
 
