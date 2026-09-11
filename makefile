@@ -260,7 +260,7 @@ IGUANA_BD := $(BUILD)/iguana
 OBJS_CX := $(IGUANA_BD)/ans1.o $(IGUANA_BD)/ans32.o $(IGUANA_BD)/ans_bitstream.o $(IGUANA_BD)/ans_byte_statistics.o $(IGUANA_BD)/ans_nibble.o $(IGUANA_BD)/ans_nibble_statistics.o\
            $(IGUANA_BD)/common.o $(IGUANA_BD)/decoder.o $(IGUANA_BD)/encoder.o $(IGUANA_BD)/entropy.o $(IGUANA_BD)/error.o $(IGUANA_BD)/output_stream.o
 ifeq ($(ARCH),aarch64)
-OBJS_CX += $(IGUANA_BD)/ans32_neon.o 
+OBJS_CX += $(IGUANA_BD)/ans32_neon.o $(IGUANA_BD)/decoder_neon.o 
 endif
 $(IGUANA_BD)/ans1.o:                 $(IGUANA_DIR)/ans1.cpp
 $(IGUANA_BD)/ans32.o:                $(IGUANA_DIR)/ans32.cpp
@@ -275,6 +275,8 @@ $(IGUANA_BD)/entropy.o:              $(IGUANA_DIR)/entropy.cpp
 $(IGUANA_BD)/error.o:                $(IGUANA_DIR)/error.cpp
 $(IGUANA_BD)/output_stream.o:        $(IGUANA_DIR)/output_stream.cpp
 $(IGUANA_BD)/ans32_neon.o:           $(IGUANA_DIR)/ans32_neon.cpp
+$(IGUANA_BD)/decoder_neon.o:         $(IGUANA_DIR)/decoder_neon.cpp
+
 $(OBJS_CX): | $(IGUANA_BD)/iguana
 	$(CX) -std=c++20 -DIGUANA_COMPILER_GNU=$(CX) -O3 $(CFLAGS) $(_SSE) -c $< -o $@
 
