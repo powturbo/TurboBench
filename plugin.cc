@@ -4015,6 +4015,9 @@ char *codver(int codec, char *v, char *s) {
     case P_HEATSHRINK: sprintf(s,"v%d.%d.%d", HEATSHRINK_VERSION_MAJOR, HEATSHRINK_VERSION_MINOR, HEATSHRINK_VERSION_PATCH); break;
       #endif
 
+      #if _IGUANA
+    case P_IGUANA:  return "v20231103";
+      #endif
       #if _ISA_L
     case P_ISA_L:  sprintf(s,"intel ISA-L v%d.%d.%d", ISAL_MAJOR_VERSION, ISAL_MINOR_VERSION, ISAL_PATCH_VERSION); break;
       #endif
