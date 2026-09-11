@@ -282,7 +282,7 @@ $(IGUANA_BD)/ans_nibble.o:           $(IGUANA_DIR)/ans_nibble.cpp
 $(IGUANA_BD)/ans_nibble_statistics.o:$(IGUANA_DIR)/ans_nibble_statistics.cpp
 $(IGUANA_BD)/common.o:               $(IGUANA_DIR)/common.cpp
 $(IGUANA_BD)/decoder.o:              $(IGUANA_DIR)/decoder.cpp
-$(IGUANA_BD)/encoder.o:              $(IGUANA_DIR)/encoder.cpp9
+$(IGUANA_BD)/encoder.o:              $(IGUANA_DIR)/encoder.cpp
 $(IGUANA_BD)/entropy.o:              $(IGUANA_DIR)/entropy.cpp
 $(IGUANA_BD)/error.o:                $(IGUANA_DIR)/error.cpp
 $(IGUANA_BD)/output_stream.o:        $(IGUANA_DIR)/output_stream.cpp
@@ -290,13 +290,13 @@ $(IGUANA_BD)/ans32_neon.o:           $(IGUANA_DIR)/ans32_neon.cpp
 $(IGUANA_BD)/decoder_neon.o:         $(IGUANA_DIR)/decoder_neon.cpp
 
 $(OBJS_CX): | $(IGUANA_BD)/iguana
-	$(CX) -std=c++20 -DIGUANA_COMPILER_GNU=$(CX) -O3 $(CFLAGS) $(_SSE) -c $< -o $@
+	$(CX) -std=c++23 -DIGUANA_COMPILER_GNU=$(CX) -O3 $(CFLAGS) $(_SSE) -c $< -o $@
 
 ifeq ($(ARCH),x86_64)
 OBJS_CX512 := $(IGUANA_BD)/ans32_avx512.o
 $(IGUANA_BD)/ans32_avx512.o: $(IGUANA_DIR)/ans32_avx512.cpp
 $(OBJS_CX512): | $(IGUANA_BD)/iguana
-	$(CX) -std=c++20 -O3 $(CFLAGS) $(IGUANA_FLAGS) -mavx512vl -mavx512bw -c $< -o $@
+	$(CX) -std=c++23 -O3 $(CFLAGS) $(IGUANA_FLAGS) -mavx512vl -mavx512bw -c $< -o $@
 endif
 
 $(IGUANA_BD)/iguana:
