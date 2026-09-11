@@ -261,7 +261,7 @@ endif
 IGUANA_LIB :=
 ifneq ($(wildcard iguana/.),)
 ifneq ($(filter $(ARCH),aarch64 x86_64),)
-ifneq ($(OS),$(filter $(OS),Darwin))
+ifeq ($(filter $(OS),Darwin Windows),)
 CXXFLAGS += -D_IGUANA
 IGUANA_DIR := iguana/iguana
 IGUANA_BD := $(BUILD)/iguana
@@ -287,13 +287,13 @@ $(IGUANA_BD)/ans32_neon.o:           $(IGUANA_DIR)/ans32_neon.cpp
 $(IGUANA_BD)/decoder_neon.o:         $(IGUANA_DIR)/decoder_neon.cpp
 
 $(OBJS_CX): | $(IGUANA_BD)/iguana
-	$(CX) -std=c++20 -DIGUANA_STATIC -DIGUANA_EXPORTS=1 -DIGUANA_COMPILER_GNU=$(CX) -O3 $(CFLAGS) $(_SSE) -c $< -o $@
+	$(CX) -std=c++20 -DIGUANA_STATIC -DIGUANA_EXPORTS=1 -fno-math-errno -DIGUANA_COMPILER_GNU=$(CX) -O3 $(CFLAGS) $(_SSE) -c $< -o $@
 
 ifeq ($(ARCH),x86_64)
 OBJS_CX512 := $(IGUANA_BD)/ans32_avx512.o
 $(IGUANA_BD)/ans32_avx512.o: $(IGUANA_DIR)/ans32_avx512.cpp
 $(OBJS_CX512): | $(IGUANA_BD)/iguana
-	$(CX) -std=c++20 -O3 $(CFLAGS) $(IGUANA_FLAGS) -mavx512vl -mavx512bw -c $< -o $@
+	$(CX) -std=c++20 -O3 $(CFLAGS) $(IGUANA_FLAGS) -fno-math-errno -mavx512vl -mavx512bw -c $< -o $@
 endif
 
 $(IGUANA_BD)/iguana:
