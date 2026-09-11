@@ -2316,7 +2316,12 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _IGUANA
+      #ifdef #
+        #ifdef __x86_64__
     case P_IGUANA:  return (isa >= (IS_AVX512|AVX512VL) )?IguanaComp(in, inlen, out):0;
+        #else
+    case P_IGUANA:  return IguanaComp(in, inlen, out);
+        #endif
       #endif
 
       #if _ISA_L
@@ -3270,8 +3275,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_HEATSHRINK: return hsdecompress(in, inlen, out, outlen);
       #endif
 
-      #if _IGUANA
-    case P_IGUANA: return (isa >= (IS_AVX512|AVX512VL) )?IguanaDecomp(in, inlen, out, outlen):0;
+        #ifdef __x86_64__
+    case P_IGUANA:  return (isa >= (IS_AVX512|AVX512VL) )?IguanaComp(in, inlen, out):0;
+        #else
+    case P_IGUANA: return IguanaDecomp(in, inlen, out, outlen);
       #endif
 
       #if _ISA_L
