@@ -232,7 +232,7 @@ endif
 
 #--- I -------------------------
 IGUANA_LIB:=
-ifneq ($(wildcard iguana/.),)
+ifneq ($(wildcard iguanacmake/.),)
 ifeq ($(ARCH),x86_64)
 #ifneq ($(filter $(ARCH),aarch64 x86_64),)
 CXXFLAGS+=-D_IGUANA
@@ -249,6 +249,47 @@ $(IGUANA_LIB): $(IGUANA_SRCS)
 LIBS += $(IGUANA_LIB)
 endif
 endif
+
+IGUANA_LIB :=
+ifneq ($(wildcard iguana/.),)
+ifneq ($(filter $(ARCH),aarch64 x86_64),)
+CXXFLAGS += -D_IGUANA
+IGUANA_DIR := iguana/iguana
+IGUANA_BD := $(BUILD)/iguana
+
+OBJS_CX := $(IGUANA_BD)/ans1.o $(IGUANA_BD)/ans32.o $(IGUANA_BD)/ans_bitstream.o $(IGUANA_BD)/ans_byte_statistics.o $(IGUANA_BD)/ans_nibble.o $(IGUANA_BD)/ans_nibble_statistics.o\
+           $(IGUANA_BD)/common.o $(IGUANA_BD)/decoder.o $(IGUANA_BD)/encoder.o $(IGUANA_BD)/entropy.o $(IGUANA_BD)/error.o $(IGUANA_BD)/output_stream.o
+$(IGUANA_BD)/ans1.o:                 $(IGUANA_DIR)/ans1.cpp
+$(IGUANA_BD)/ans32.o:                $(IGUANA_DIR)/ans32.cpp
+$(IGUANA_BD)/ans_bitstream.o:        $(IGUANA_DIR)/ans_bitstream.cpp
+$(IGUANA_BD)/ans_byte_statistics.o:  $(IGUANA_DIR)/ans_byte_statistics.cpp
+$(IGUANA_BD)/ans_nibble.o:           $(IGUANA_DIR)/ans_nibble.cpp
+$(IGUANA_BD)/ans_nibble_statistics.o:$(IGUANA_DIR)/ans_nibble_statistics.cpp
+$(IGUANA_BD)/common.o:               $(IGUANA_DIR)/common.cpp
+$(IGUANA_BD)/decoder.o:              $(IGUANA_DIR)/decoder.cpp
+$(IGUANA_BD)/encoder.o:              $(IGUANA_DIR)/encoder.cpp
+$(IGUANA_BD)/entropy.o:              $(IGUANA_DIR)/entropy.cpp
+$(IGUANA_BD)/error.o:                $(IGUANA_DIR)/error.cpp
+$(IGUANA_BD)/output_stream.o:        $(IGUANA_DIR)/output_stream.cpp
+$(OBJS_CX): | $(IGUANA_BD)/iguana
+	$(CX) -std=c++20 -DIGUANA_COMPILER_GNU=$(CX) -O3 $(CFLAGS) $(_AVX2) -c $< -o $@
+
+ifeq ($(ARCH),x86_64)
+OBJS_CX512 := $(IGUANA_BD)/ans32_avx512.o
+$(IGUANA_BD)/ans32_avx512.o: $(IGUANA_DIR)/ans32_avx512.cpp
+$(OBJS_CX512): | $(IGUANA_BD)/iguana
+	$(CX) -std=c++20 -O3 $(CFLAGS) -mavx512vl -mavx512bw -c $< -o $@
+endif
+
+$(IGUANA_BD)/iguana:
+	mkdir -p $@
+IGUANA_OBJS := $(OBJS_CX) $(OBJS_CX512)
+IGUANA_LIB  := $(IGUANA_BD)/libiguana.a
+$(IGUANA_LIB): $(IGUANA_OBJS) | $(IGUANA_BD)/iguana
+	$(AR) rcs $@ $^
+LIBS += $(IGUANA_LIB)
+endif 
+endif 
 
 ifneq ($(wildcard ClickhouseXXX/.),)
 CXXFLAGS+=-D_CLICKHOUSE -IClickhouse/src -IClickhouse	#-IClickhouse/base/pcg_random -IContrib/abseil-cpp
