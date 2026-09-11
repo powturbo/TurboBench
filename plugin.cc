@@ -32,6 +32,7 @@
 #include <time.h>
 #include "conf.h"
 #include "plugin.h"
+#include "cpu.h"
 
 enum {
 #define _MEMCPY 1
@@ -1926,10 +1927,11 @@ static ZSTD_DDict *ddictPtr;
   #endif
 
 static char _workmem[1<<16],*workmem=_workmem;
-static int state_size,dstate_size;
+static int state_size,dstate_size, isa;
 static size_t workmemsize;
 
 int codini(size_t insize, int codec, int lev, char *prm) {
+  isa = cpuisa();
   workmemsize = 0;
 
   switch(codec) {
@@ -2314,7 +2316,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _IGUANA
-    case P_IGUANA:  return IguanaComp(in, inlen, out);
+    case P_IGUANA:  if(isa > (IS_AVX512|AVX512VL) ) return IguanaComp(in, inlen, out);
       #endif
 
       #if _ISA_L
@@ -3269,7 +3271,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _IGUANA
-    case P_IGUANA: return IguanaDecomp(in, inlen, out, outlen);
+    case P_IGUANA: if(isa > (IS_AVX512|AVX512VL) ) return IguanaDecomp(in, inlen, out, outlen);
       #endif
 
       #if _ISA_L
