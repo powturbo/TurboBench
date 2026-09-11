@@ -129,8 +129,8 @@ enum {
 #endif
  P_HEATSHRINK,
 
-#ifndef _IGUANA_L
-#define _IGUANA_L 0
+#ifndef _IGUANA
+#define _IGUANA 0
 #endif
  P_IGUANA,
 #ifndef _ISA_L
@@ -2316,7 +2316,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _IGUANA
-    case P_IGUANA:  if(isa > (IS_AVX512|AVX512VL) ) return IguanaComp(in, inlen, out);
+    case P_IGUANA:  return (isa >= (IS_AVX512|AVX512VL) )?IguanaComp(in, inlen, out):0;
       #endif
 
       #if _ISA_L
@@ -3271,7 +3271,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _IGUANA
-    case P_IGUANA: if(isa > (IS_AVX512|AVX512VL) ) return IguanaDecomp(in, inlen, out, outlen);
+    case P_IGUANA: return (isa >= (IS_AVX512|AVX512VL) )?IguanaDecomp(in, inlen, out, outlen):0;
       #endif
 
       #if _ISA_L
