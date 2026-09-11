@@ -134,3 +134,6 @@
 [submodule "lib"]
 	path = lib
 	url = https://github.com/vurtun/lib.git
+[submodule "iguana"]
+	path = iguana
+	url = https://github.com/ClickHouse/iguana.git
