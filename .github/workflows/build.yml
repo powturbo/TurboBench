@@ -57,6 +57,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew install nasm libomp
+          cc -v
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
           curl -L -o silesia.tar.gz \
