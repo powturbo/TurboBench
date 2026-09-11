@@ -2316,7 +2316,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _IGUANA
-      #ifdef #
         #ifdef __x86_64__
     case P_IGUANA:  return (isa >= (IS_AVX512|AVX512VL) )?IguanaComp(in, inlen, out):0;
         #else
