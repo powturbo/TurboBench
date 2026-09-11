@@ -141,6 +141,7 @@ endif
 all: turbobench 
  
 # ***************************************************************** codecs *****************************************************************************
+#--- A -------------------------
 AOCL_LIB:=
 ifneq ($(and $(wildcard aocl-compression/.),$(filter x86_64,$(ARCH))),)
 CXXFLAGS += -D_AOCL
@@ -174,6 +175,7 @@ $(AOCL_LIB): $(AOCL_ALIB)
 LIBS += $(AOCL_LIB)
 endif
 
+#--- B -------------------------
 ifneq ($(wildcard brotli/.),)
 CXXFLAGS+=-D_BROTLI -Ibrotli/c/include 
 CFLAGS+=-Ibrotli/c/include 
@@ -192,6 +194,7 @@ CFLAGS+=-DVERSION=1 -Ibzip3/include -Wno-int-conversion
 OB+=$(call obj,bzip3/src/libbz3.o)
 endif
 
+#--- C -------------------------
 C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
 ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
@@ -217,6 +220,17 @@ LIBS += $(C_BLOSC2_LIB)
 endif
 endif
 
+#--- G -------------------------
+ifneq ($(wildcard GLZA/.),)
+CXXFLAGS+=-D_GLZA
+GLZA_OBJS := $(call obj,GLZA/GLZAmodel.o GLZA/GLZAcomp.o GLZA/GLZAencode.o GLZA/GLZAcompress.o GLZA/GLZAformat.o GLZA/GLZAdecode.o)
+GLZA_BUILD = $(CC) -O2 $(CFLAGS) $< -c -o $@
+$(GLZA_DIR)/%.o: GLZA/%.c
+	$(GLZA_BUILD)
+OB += $(GLZA_OBJS) 
+endif
+
+#--- I -------------------------
 IGUANA_LIB:=
 ifneq ($(wildcard iguana/.),)
 ifeq ($(ARCH),x86_64)
@@ -231,7 +245,7 @@ IGUANA_FLAGS=$(_SSE)
 endif
 $(IGUANA_LIB): $(IGUANA_SRCS)
 	cp turbobench_/iguana/CMakeLists.txt iguana
-	$(CMAKE) -S iguana -B $(BUILD)/iguana -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DIGUANA_STATIC=1 -DCMAKE_CXX_FLAGS='-DIGUANA_COMPILER_GNU="clang" $(IGUANA_FLAGS) -std=c++20' -DCMAKE_INSTALL_PREFIX=$(BUILD) && make -C $(BUILD)/iguana
+	$(CMAKE) -S iguana -B $(BUILD)/iguana -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DIGUANA_STATIC=1 -DCMAKE_CXX_FLAGS='-DIGUANA_COMPILER_GNU="g++" $(IGUANA_FLAGS) -std=c++20' -DCMAKE_INSTALL_PREFIX=$(BUILD) && make -C $(BUILD)/iguana
 LIBS += $(IGUANA_LIB)
 endif
 endif
@@ -263,15 +277,6 @@ $(ISAL_LIB): $(ISAL_SRCS)
 endif
 LIBS += $(ISAL_LIB)
 endif
-endif
-#--- G -------------------------
-ifneq ($(wildcard GLZA/.),)
-CXXFLAGS+=-D_GLZA
-GLZA_OBJS := $(call obj,GLZA/GLZAmodel.o GLZA/GLZAcomp.o GLZA/GLZAencode.o GLZA/GLZAcompress.o GLZA/GLZAformat.o GLZA/GLZAdecode.o)
-GLZA_BUILD = $(CC) -O2 $(CFLAGS) $< -c -o $@
-$(GLZA_DIR)/%.o: GLZA/%.c
-	$(GLZA_BUILD)
-OB += $(GLZA_OBJS) 
 endif
 #--- K ---------------------------
 ifneq ($(wildcard kanzi-cpp/.),)
