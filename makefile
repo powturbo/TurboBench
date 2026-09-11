@@ -222,9 +222,12 @@ ifneq ($(wildcard iguana/.),)
 CXXFLAGS+=-D_IGUANA
 IGUANA_SRCS := $(shell find miniz -type f -name '*.[ch]' -o -name 'CMakeLists.txt')
 IGUANA_LIB = $(BUILD)/iguana/libiguana.a
+ifeq ($(ARCH),x86_64)
+IGUANA_FLAGS=-mavx512vl -mavx512bw
+endif
 $(IGUANA_LIB): $(IGUANA_SRCS)
 	cp turbobench_/iguana/CMakeLists.txt iguana
-	$(CMAKE) -S iguana -B $(BUILD)/iguana -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DIGUANA_STATIC=1 -DCMAKE_CXX_FLAGS='-DIGUANA_COMPILER_GNU="g++" -std=c++20 -mavx512vl -mavx512bw' -DCMAKE_INSTALL_PREFIX=$(BUILD) && make -C $(BUILD)/iguana
+	$(CMAKE) -S iguana -B $(BUILD)/iguana -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DIGUANA_STATIC=1 -DCMAKE_CXX_FLAGS='-DIGUANA_COMPILER_GNU="g++" -std=c++20 $(IGUANA_FLAGS)' -DCMAKE_INSTALL_PREFIX=$(BUILD) && make -C $(BUILD)/iguana
 LIBS += $(IGUANA_LIB)
 endif
 
