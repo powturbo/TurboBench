@@ -253,6 +253,7 @@ endif
 IGUANA_LIB :=
 ifneq ($(wildcard iguana/.),)
 ifneq ($(filter $(ARCH),aarch64 x86_64),)
+ifneq ($(OS),$(filter $(OS),Darwin))
 CXXFLAGS += -D_IGUANA
 IGUANA_DIR := iguana/iguana
 IGUANA_BD := $(BUILD)/iguana
@@ -296,6 +297,7 @@ $(IGUANA_LIB): $(IGUANA_OBJS) | $(IGUANA_BD)/iguana
 LIBS += $(IGUANA_LIB)
 endif 
 endif 
+endif
 
 ifneq ($(wildcard ClickhouseXXX/.),)
 CXXFLAGS+=-D_CLICKHOUSE -IClickhouse/src -IClickhouse	#-IClickhouse/base/pcg_random -IContrib/abseil-cpp
