@@ -2312,7 +2312,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         #ifdef __x86_64__
     case P_IGUANA:  return (isa >= (IS_AVX512|AVX512VL) )?IguanaComp(in, inlen, out):0;
         #else
-    case P_IGUANA:  return IguanaComp(in, inlen, out);
+    case P_IGUANA:  return IguanaComp((const char *)in, inlen, (char *)out);
         #endif
       #endif
 
@@ -3271,7 +3271,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         #ifdef __x86_64__
     case P_IGUANA:  return (isa >= (IS_AVX512|AVX512VL) )?IguanaComp(in, inlen, out):0;
         #else
-    case P_IGUANA: return IguanaDecomp(in, inlen, out, outlen);
+    case P_IGUANA: return IguanaDecomp((const char *)in, inlen, (char *)out, outlen);
         #endif
       #endif
 
