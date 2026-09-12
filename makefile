@@ -267,10 +267,11 @@ CXXFLAGS += -D_IGUANA
 IGUANA_DIR := iguana/iguana
 IGUANA_BD := $(BUILD)/iguana
 IGUANA_CC := $(CX)
-#ifeq ($(OS),Windows)
-#IGUANA_CC := clang
-#endif
-IGUANA_FLAGS := -std=c++20 -DIGUANA_STATIC -DIGUANA_EXPORTS=1 -fno-math-errno -DIGUANA_COMPILER_GNU=$(IGUANA_CC)
+ifeq ($(OS),Windows)
+IGUANA_CC := clang
+endif
+IGUANA_FLAGS := -std=c++20 -DIGUANA_STATIC -fno-math-errno -DIGUANA_COMPILER_GNU=$(IGUANA_CC)
+#-DIGUANA_EXPORTS=1 
 ifeq ($(IGUANA_CC),clang)
 IGUANA_FLAGS += -DIGUANA_COMPILER_CLANG
 endif
