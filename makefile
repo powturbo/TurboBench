@@ -115,7 +115,7 @@ endif
 
 CFLAGS+=-w -Wall $(DDEBUG) -fpermissive 
 #-Wimplicit-function-declaration -std=gnu99 
-CXXFLAGS+=$(DDEBUG) -w -Wall -fpermissive  -fno-rtti
+CXXFLAGS+=$(DDEBUG) -w -Wall -fpermissive  -fno-rtti 
 
 ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
 LDFLAGS+=-lrt -lpthread
@@ -141,6 +141,7 @@ endif
 all: turbobench 
  
 # ***************************************************************** codecs *****************************************************************************
+#--- A -------------------------
 AOCL_LIB:=
 ifneq ($(and $(wildcard aocl-compression/.),$(filter x86_64,$(ARCH))),)
 CXXFLAGS += -D_AOCL
@@ -174,6 +175,7 @@ $(AOCL_LIB): $(AOCL_ALIB)
 LIBS += $(AOCL_LIB)
 endif
 
+#--- B -------------------------
 ifneq ($(wildcard brotli/.),)
 CXXFLAGS+=-D_BROTLI -Ibrotli/c/include 
 CFLAGS+=-Ibrotli/c/include 
@@ -192,6 +194,7 @@ CFLAGS+=-DVERSION=1 -Ibzip3/include -Wno-int-conversion
 OB+=$(call obj,bzip3/src/libbz3.o)
 endif
 
+#--- C -------------------------
 C_BLOSC2_LIB :=
 ifneq ($(wildcard c-blosc2/.),)
 ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
@@ -222,6 +225,97 @@ CXXFLAGS+=-D_CLICKHOUSE -IClickhouse/src -IClickhouse	#-IClickhouse/base/pcg_ran
 OB+=$(call obj,Clickhouse/src/Compression/LZ4_decompress_faster.o)
 endif
 
+#--- F -------------------------
+FIRETRAIL_LIB :=
+ifneq ($(wildcard firetrail/.),)
+CXXFLAGS+=-D_FIRETRAIL
+FIRETRAIL_LIB=firetrail/libfiretrail.a
+LIBS += $(FIRETRAIL_LIB)
+$(FIRETRAIL_LIB): firetrail/src/root.zig 
+	cd firetrail && zig build-lib -O ReleaseFast -femit-bin=libfiretrail.a src/root.zig -lc
+OB+=$(FIRETRAIL_LIB)	
+endif
+#--- G -------------------------
+ifneq ($(wildcard GLZA/.),)
+CXXFLAGS+=-D_GLZA
+GLZA_OBJS := $(call obj,GLZA/GLZAmodel.o GLZA/GLZAcomp.o GLZA/GLZAencode.o GLZA/GLZAcompress.o GLZA/GLZAformat.o GLZA/GLZAdecode.o)
+GLZA_BUILD = $(CC) -O2 $(CFLAGS) $< -c -o $@
+$(GLZA_DIR)/%.o: GLZA/%.c
+	$(GLZA_BUILD)
+OB += $(GLZA_OBJS) 
+endif
+
+#--- I -------------------------
+IC_LIB :=
+IC_DIR=../ic
+ifneq ($(wildcard $(IC_DIR)/.),)
+CXXFLAGS+=-D_IC
+IC_SRCS := $(shell find $(IC_DIR)/lib -type f -name '*.[c]' -name '*.[a]')
+IC_LIB = $(BUILD)/ic/libic.a
+$(IC_LIB):  $(IC_SRCS)
+	@mkdir -p $(BUILD)/ic
+	$(MAKE) $(IC_LIB) -C $(IC_DIR) BUILD=$(BUILD)/ic
+LIBS += $(IC_LIB)
+endif
+
+IGUANA_LIB :=
+ifneq ($(wildcard iguana/.),)
+ifneq ($(filter $(ARCH),aarch64 x86_64),)
+#ifeq ($(filter $(OS),Darwin Windows),)
+#ifneq ($(OS),Darwin)
+CXXFLAGS += -D_IGUANA
+IGUANA_DIR := iguana/iguana
+IGUANA_BD := $(BUILD)/iguana
+IGUANA_CC := $(CC)
+ifeq ($(OS),Windows)
+IGUANA_CC := clang
+endif
+IGUANA_FLAGS := -std=c++20 -DIGUANA_STATIC -DIGUANA_EXPORTS=1 -fno-math-errno -DIGUANA_COMPILER_GNU=$(COMP)
+ifeq ($(IGUANA_CC),clang)
+IGUANA_FLAGS += -DIGUANA_COMPILER_CLANG
+endif
+
+OBJS_CX := $(IGUANA_BD)/ans1.o $(IGUANA_BD)/ans32.o $(IGUANA_BD)/ans_bitstream.o $(IGUANA_BD)/ans_byte_statistics.o $(IGUANA_BD)/ans_nibble.o $(IGUANA_BD)/ans_nibble_statistics.o\
+           $(IGUANA_BD)/common.o $(IGUANA_BD)/decoder.o $(IGUANA_BD)/encoder.o $(IGUANA_BD)/entropy.o $(IGUANA_BD)/error.o $(IGUANA_BD)/output_stream.o
+ifeq ($(ARCH),aarch64)
+OBJS_CX += $(IGUANA_BD)/ans32_neon.o $(IGUANA_BD)/decoder_neon.o
+endif
+
+$(IGUANA_BD)/ans1.o:                 $(IGUANA_DIR)/ans1.cpp
+$(IGUANA_BD)/ans32.o:                $(IGUANA_DIR)/ans32.cpp
+$(IGUANA_BD)/ans_bitstream.o:        $(IGUANA_DIR)/ans_bitstream.cpp
+$(IGUANA_BD)/ans_byte_statistics.o:  $(IGUANA_DIR)/ans_byte_statistics.cpp
+$(IGUANA_BD)/ans_nibble.o:           $(IGUANA_DIR)/ans_nibble.cpp
+$(IGUANA_BD)/ans_nibble_statistics.o:$(IGUANA_DIR)/ans_nibble_statistics.cpp
+$(IGUANA_BD)/common.o:               $(IGUANA_DIR)/common.cpp
+$(IGUANA_BD)/decoder.o:              $(IGUANA_DIR)/decoder.cpp
+$(IGUANA_BD)/encoder.o:              $(IGUANA_DIR)/encoder.cpp
+$(IGUANA_BD)/entropy.o:              $(IGUANA_DIR)/entropy.cpp
+$(IGUANA_BD)/error.o:                $(IGUANA_DIR)/error.cpp
+$(IGUANA_BD)/output_stream.o:        $(IGUANA_DIR)/output_stream.cpp
+$(IGUANA_BD)/ans32_neon.o:           $(IGUANA_DIR)/ans32_neon.cpp
+$(IGUANA_BD)/decoder_neon.o:         $(IGUANA_DIR)/decoder_neon.cpp
+$(OBJS_CX): | $(IGUANA_BD)/iguana
+	$(IGUANA_CC) -O3 $(CFLAGS) $(IGUANA_FLAGS) $(_SSE) -c $< -o $@
+
+ifeq ($(ARCH),x86_64)
+OBJS_CX512 := $(IGUANA_BD)/ans32_avx512.o
+$(IGUANA_BD)/ans32_avx512.o: $(IGUANA_DIR)/ans32_avx512.cpp
+$(OBJS_CX512): | $(IGUANA_BD)/iguana
+	$(IGUANA_CC) -O3 $(CFLAGS) $(IGUANA_FLAGS) -mavx512vl -mavx512bw -c $< -o $@
+endif
+
+$(IGUANA_BD)/iguana:
+	mkdir -p $@
+#IGUANA_OBJS := $(OBJS_CX) $(OBJS_CX512)
+IGUANA_LIB  := $(IGUANA_BD)/libiguana.a
+$(IGUANA_LIB): $(OBJS_CX) $(OBJS_CX512) | $(IGUANA_BD)/iguana
+	$(AR) rcs $@ $^
+LIBS += $(IGUANA_LIB)
+endif 
+#endif 
+endif
+
 ISAL_LIB :=
 ifneq ($(wildcard isa-l/.),)
 ifndef CROSS
@@ -244,15 +338,6 @@ $(ISAL_LIB): $(ISAL_SRCS)
 endif
 LIBS += $(ISAL_LIB)
 endif
-endif
-#--- G -------------------------
-ifneq ($(wildcard GLZA/.),)
-CXXFLAGS+=-D_GLZA
-GLZA_OBJS := $(call obj,GLZA/GLZAmodel.o GLZA/GLZAcomp.o GLZA/GLZAencode.o GLZA/GLZAcompress.o GLZA/GLZAformat.o GLZA/GLZAdecode.o)
-GLZA_BUILD = $(CC) -O2 $(CFLAGS) $< -c -o $@
-$(GLZA_DIR)/%.o: GLZA/%.c
-	$(GLZA_BUILD)
-OB += $(GLZA_OBJS) 
 endif
 #--- K ---------------------------
 ifneq ($(wildcard kanzi-cpp/.),)
@@ -337,6 +422,19 @@ endif
 endif
 endif
 
+LZ_LIB :=
+LZ_DIR=../lz
+ifneq ($(wildcard $(LZ_DIR)/.),)
+CXXFLAGS+=-D_LZ
+LZ_SRCS := $(shell find $(LZ_DIR)/lib -type f -name '*.[c]')
+LZ_LIB = $(BUILD)/lz/liblz.a
+$(LZ_LIB):  $(LZ_SRCS)
+	@mkdir -p $(BUILD)/lz
+	$(MAKE) $(LZ_LIB) -C $(LZ_DIR) BUILD=$(BUILD)/lz
+LIBS += $(LZ_LIB)
+CFLAGS  += -D_NQUANT
+endif
+
 ifneq ($(wildcard lzlib-1.16/.),)
 CXXFLAGS+=-D_LZLIB
 OB+=$(call obj,lzlib-1.16/lzlib.o lzlib_/bbexample.o)
@@ -364,6 +462,7 @@ $(BUILD)/LZSSE/%.o: LZSSE/%.cpp
 	$(CXX) -O2 -msse4.1 -std=c++11 $< -c -o $@
 endif
 
+#---- M -----------------------
 ifneq ($(wildcard memlz/.),)
 CXXFLAGS+=-D_MEMLZ
 endif
@@ -421,6 +520,7 @@ MISA77_SRCS := $(wildcard $(MISA77_SRC)/*.cpp)
 OB += $(call obj,$(MISA77_SRCS) $(MISA77_SRC)/isa/target_portable.o) $(addprefix $(BUILD)/$(MISA77_SRC)/,$(MISA77_VOBJS))
 endif
 
+#---- O -----------------------
 OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
 ifneq ($(OPENZL), 0)
@@ -449,9 +549,6 @@ LIBS += $(OPENZL_LIB)
 endif
 endif
 
-#ifneq ($(wildcard pcodec_/.),)
-#endif
-
 # 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be available the current directory
 # ONLY FOR BENCHMARKING: download corresponding library from https://github.com/WorkingRobot/OodleUE
 CXXFLAGS+=-D_OODLE
@@ -474,16 +571,11 @@ OB += $(call obj,$(LZHAM_SRCS)) pivco-huffman/extras/bench/bench_oodle_wrapper.o
 LIBS+=$(OODLE_STATIC_LIB)
 endif
 
-FIRETRAIL_LIB :=
-ifneq ($(wildcard firetrail/.),)
-CXXFLAGS+=-D_FIRETRAIL
-FIRETRAIL_LIB=firetrail/libfiretrail.a
-LIBS += $(FIRETRAIL_LIB)
-$(FIRETRAIL_LIB): firetrail/src/root.zig 
-	cd firetrail && zig build-lib -O ReleaseFast -femit-bin=libfiretrail.a src/root.zig -lc
-OB+=$(FIRETRAIL_LIB)	
-endif
+#--- P -------------------------
+#ifneq ($(wildcard pcodec_/.),)
+#endif
 
+#--- S -------------------------
 SNAPPY_LIB := 
 ifneq ($(wildcard snappy/.),)
 CXXFLAGS+=-D_SNAPPY -I$(BUILD)/snappy
@@ -497,37 +589,47 @@ $(SNAPPY_LIB): $(SNAPPY_SRCS)
 LIBS += $(SNAPPY_LIB)
 endif
 
+#--- T -------------------------
 ifneq ($(wildcard tamp/.),)
 CXXFLAGS+=-D_TAMP
 TAMP_DIR = tamp/tamp/_c_src/tamp
 OB += $(call obj,$(TAMP_DIR)/common.o $(TAMP_DIR)/compressor.o $(TAMP_DIR)/decompressor.o)
 endif
 
-LZ_LIB :=
-LZ_DIR=../lz
-ifneq ($(wildcard $(LZ_DIR)/.),)
-CXXFLAGS+=-D_LZ
-LZ_SRCS := $(shell find $(LZ_DIR)/lib -type f -name '*.[c]')
-LZ_LIB = $(BUILD)/lz/liblz.a
-$(LZ_LIB):  $(LZ_SRCS)
-	@mkdir -p $(BUILD)/lz
-	$(MAKE) $(LZ_LIB) -C $(LZ_DIR) BUILD=$(BUILD)/lz
-LIBS += $(LZ_LIB)
-CFLAGS  += -D_NQUANT
+ifneq ($(wildcard Turbo-Range-Coder/.),)
+ifneq ($(ARCH),loongarch64)
+RC_DIR  := Turbo-Range-Coder
+BUILD_DATE := $(shell date +%Y%m%d)
+CXXFLAGS += -D_TURBORC
+CFLAGS   += -D_ANS -D_BWT -I$(RC_DIR)/libsais/include -DBUILD_VERSION="\"v$(BUILD_DATE)\"" 
+RC_BDIR := $(BUILD)/$(RC_DIR)
+OB+=$(RC_BDIR)/anscdfs.o $(RC_BDIR)/rc_ss.o $(RC_BDIR)/rc_s.o $(RC_BDIR)/rccdf.o $(RC_BDIR)/rcutil.o $(RC_BDIR)/bec_b.o $(RC_BDIR)/rccm_s.o $(RC_BDIR)/rccm_ss.o \
+  $(RC_BDIR)/rcqlfc_s.o $(RC_BDIR)/rcqlfc_ss.o $(RC_BDIR)/rcqlfc_sf.o $(RC_BDIR)/rcbwt.o $(RC_BDIR)/libsais/src/libsais16.o
+$(RC_BDIR)/anscdfs.o: $(RC_DIR)/anscdf.c $(RC_DIR)/anscdf_.h
+	@mkdir -p $(@D)
+	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
+ifeq ($(ARCH), x86_64)
+$(RC_BDIR)/anscdfx.o: $(RC_DIR)/anscdf.c $(RC_DIR)/anscdf_.h
+	@mkdir -p $(@D)
+	$(CC) -O3 $(CFLAGS) $(_AVX2) -falign-loops=32 -w -c $< -o $@
+OB       += $(RC_BDIR)/anscdfx.o	
+endif
+ifeq ($(wildcard $(IC_DIR)/.),)
+$(RC_BDIR)/tp.o: $(RC_DIR)/tp.c
+	@mkdir -p $(@D)
+	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
+OB       += $(RC_BDIR)/tp.o $(RC_BDIR)/tp_.o
+ifeq ($(ARCH), x86_64)
+$(RC_BDIR)/tp256.o: $(RC_DIR)/tp.c
+	@mkdir -p $(@D)
+	$(CC) -O3 $(CFLAGS) $(_AVX2) -w -c $< -o $@
+OB      += $(RC_BDIR)/tp256.o
+endif
+endif
+endif
 endif
 
-IC_LIB :=
-IC_DIR=../ic
-ifneq ($(wildcard $(IC_DIR)/.),)
-CXXFLAGS+=-D_IC
-IC_SRCS := $(shell find $(IC_DIR)/lib -type f -name '*.[c]' -name '*.[a]')
-IC_LIB = $(BUILD)/ic/libic.a
-$(IC_LIB):  $(IC_SRCS)
-	@mkdir -p $(BUILD)/ic
-	$(MAKE) $(IC_LIB) -C $(IC_DIR) BUILD=$(BUILD)/ic
-LIBS += $(IC_LIB)
-endif
-
+#--- X -------------------------
 XZ_LIB :=
 ifneq ($(wildcard xz/.),)
 CXXFLAGS += -D_XZ
@@ -543,6 +645,7 @@ endif
 LIBS += $(XZ_LIB)
 endif
 
+#--- Z -------------------------
 ifneq ($(wildcard zlib/.),)
 CXXFLAGS+=-D_ZLIB
 ZD=zlib/
@@ -695,6 +798,7 @@ OB+=$(call obj,Unishox2/unishox2.o turbobench_/unishox.o)
 CXXFLAGS+=-D_UNISHOX3 -Imarisa-trie/include
 OB+=$(call obj,Unishox2/Unishox3_Alpha/unishox3.o)
 endif
+
 #------------------------- Entropy coder -----------------------------------------
 # First download or clone aomedia (git clone https://aomedia.googlesource.com/aom) into TurboBench directory
 # after cmake, put the generated "aom_config.h" into the aom directory
@@ -810,39 +914,6 @@ endif
 ifneq ($(wildcard EC/subotin/.),)
 CXXFLAGS+=-D_SUBOTIN
 OB+=$(call obj,EC/subotin_/subotin.o)
-endif
-
-ifneq ($(wildcard Turbo-Range-Coder/.),)
-ifneq ($(ARCH),loongarch64)
-RC_DIR  := Turbo-Range-Coder
-BUILD_DATE := $(shell date +%Y%m%d)
-CXXFLAGS += -D_TURBORC
-CFLAGS   += -D_ANS -D_BWT -I$(RC_DIR)/libsais/include -DBUILD_VERSION="\"v$(BUILD_DATE)\"" 
-RC_BDIR := $(BUILD)/$(RC_DIR)
-OB+=$(RC_BDIR)/anscdfs.o $(RC_BDIR)/rc_ss.o $(RC_BDIR)/rc_s.o $(RC_BDIR)/rccdf.o $(RC_BDIR)/rcutil.o $(RC_BDIR)/bec_b.o $(RC_BDIR)/rccm_s.o $(RC_BDIR)/rccm_ss.o \
-  $(RC_BDIR)/rcqlfc_s.o $(RC_BDIR)/rcqlfc_ss.o $(RC_BDIR)/rcqlfc_sf.o $(RC_BDIR)/rcbwt.o $(RC_BDIR)/libsais/src/libsais16.o
-$(RC_BDIR)/anscdfs.o: $(RC_DIR)/anscdf.c $(RC_DIR)/anscdf_.h
-	@mkdir -p $(@D)
-	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
-ifeq ($(ARCH), x86_64)
-$(RC_BDIR)/anscdfx.o: $(RC_DIR)/anscdf.c $(RC_DIR)/anscdf_.h
-	@mkdir -p $(@D)
-	$(CC) -O3 $(CFLAGS) $(_AVX2) -falign-loops=32 -w -c $< -o $@
-OB       += $(RC_BDIR)/anscdfx.o	
-endif
-ifeq ($(wildcard $(IC_DIR)/.),)
-$(RC_BDIR)/tp.o: $(RC_DIR)/tp.c
-	@mkdir -p $(@D)
-	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
-OB       += $(RC_BDIR)/tp.o $(RC_BDIR)/tp_.o
-ifeq ($(ARCH), x86_64)
-$(RC_BDIR)/tp256.o: $(RC_DIR)/tp.c
-	@mkdir -p $(@D)
-	$(CC) -O3 $(CFLAGS) $(_AVX2) -w -c $< -o $@
-OB      += $(RC_BDIR)/tp256.o
-endif
-endif
-endif
 endif
 
 ifneq ($(wildcard EC/vecrc/.),)
@@ -1067,7 +1138,7 @@ OB+=$(BUILD)/plugin.o
 
 $(BUILD)/plugin.o: plugin.cc $(LIBS) 
 	@mkdir -p $(dir $@)
-	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
+	$(CXX) -O3 $(MARCH) $(CXXFLAGS) -std=c++20  $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/cpu.o $(LIBS)
 	$(CXX) $^ $(LDFLAGS) $(LIBS) $(FOPENMP) -o turbobench
@@ -1123,5 +1194,24 @@ cleana:
 	rm -rf zstd/tests
 	rm -rf zstd/doc
 	rm -rf zlib/contrib
+endif
+
+#------ Archive ---------------------
+ifneq ($(wildcard iguanacmake/.),)
+ifeq ($(ARCH),x86_64)
+#ifneq ($(filter $(ARCH),aarch64 x86_64),)
+CXXFLAGS+=-D_IGUANA
+IGUANA_SRCS := $(shell find miniz -type f -name '*.[ch]' -o -name 'CMakeLists.txt')
+IGUANA_LIB = $(BUILD)/iguana/libiguana.a
+ifeq ($(ARCH),x86_64)
+IGUANA_FLAGS=-mavx512vl -mavx512bw
+else
+IGUANA_FLAGS=$(_SSE)
+endif
+$(IGUANA_LIB): $(IGUANA_SRCS)
+	cp turbobench_/iguana/CMakeLists.txt iguana
+	$(CMAKE) -S iguana -B $(BUILD)/iguana -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DIGUANA_STATIC=1 -DCMAKE_CXX_FLAGS='-DIGUANA_COMPILER_GNU="g++" $(IGUANA_FLAGS) -std=c++20' -DCMAKE_INSTALL_PREFIX=$(BUILD) && make -C $(BUILD)/iguana
+LIBS += $(IGUANA_LIB)
+endif
 endif
 
