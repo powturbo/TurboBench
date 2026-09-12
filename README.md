@@ -144,26 +144,26 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 
 ### Plugins:
 #### Compressor Lz77,Rolz,Bwt,zpaq:
- - [LzTurbo](https://sites.google.com/site/powturbo)
- - [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:08.2026<br />
- - [Blosc](https://github.com/Blosc/c-blosc2)
- - [BriefLz](https://github.com/jibsen/brieflz) 
- - [Brotli](https://github.com/google/brotli) 
- - [Bzip2](http://www.bzip.org/downloads.html)
+- [LzTurbo](https://sites.google.com/site/powturbo)
+- [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:08.2026<br />
+- [Blosc](https://github.com/Blosc/c-blosc2)
+- [BriefLz](https://github.com/jibsen/brieflz) 
+- [Brotli](https://github.com/google/brotli) 
+- [Bzip2](http://www.bzip.org/downloads.html)
  
- - [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
- - [CSC](https://github.com/fusiyuan2010/CSC)
- 
- - [Density](https://github.com/centaurean/density) 
- - [Doboz](https://bitbucket.org/attila_afra)
- 
- - [FastLz](http://fastlz.org) 
- - [Fast-lzma](https://github.com/conor42/fast-lzma2)
- 
- - [glza](https://github.com/kidq330/GLZA)
+- [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
+- [CSC](https://github.com/fusiyuan2010/CSC)
 
- - [heatshrink](https://github.com/atomicobject/heatshrink)
- 
+- [Density](https://github.com/centaurean/density) 
+- [Doboz](https://bitbucket.org/attila_afra)
+
+- [FastLz](http://fastlz.org) 
+- [Fast-lzma](https://github.com/conor42/fast-lzma2)
+
+- [glza](https://github.com/kidq330/GLZA)
+
+- [heatshrink](https://github.com/atomicobject/heatshrink)
+
  - [Iguana](https://github.com/ClickHouse/iguana) :new:2026/09
  - [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l)
 
