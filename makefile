@@ -261,16 +261,23 @@ endif
 IGUANA_LIB :=
 ifneq ($(wildcard iguana/.),)
 ifneq ($(filter $(ARCH),aarch64 x86_64),)
-ifeq ($(filter $(OS),Darwin Windows),)
+#ifeq ($(filter $(OS),Darwin Windows),)
+ifneq ($(OS),Darwin)
 CXXFLAGS += -D_IGUANA
 IGUANA_DIR := iguana/iguana
 IGUANA_BD := $(BUILD)/iguana
 
+COMP := $(CC)
+ifeq ($(OS),Windows)
+COMP := clang
+endif
+
 OBJS_CX := $(IGUANA_BD)/ans1.o $(IGUANA_BD)/ans32.o $(IGUANA_BD)/ans_bitstream.o $(IGUANA_BD)/ans_byte_statistics.o $(IGUANA_BD)/ans_nibble.o $(IGUANA_BD)/ans_nibble_statistics.o\
            $(IGUANA_BD)/common.o $(IGUANA_BD)/decoder.o $(IGUANA_BD)/encoder.o $(IGUANA_BD)/entropy.o $(IGUANA_BD)/error.o $(IGUANA_BD)/output_stream.o
 ifeq ($(ARCH),aarch64)
-OBJS_CX += $(IGUANA_BD)/ans32_neon.o $(IGUANA_BD)/decoder_neon.o 
+OBJS_CX += $(IGUANA_BD)/ans32_neon.o $(IGUANA_BD)/decoder_neon.o
 endif
+
 $(IGUANA_BD)/ans1.o:                 $(IGUANA_DIR)/ans1.cpp
 $(IGUANA_BD)/ans32.o:                $(IGUANA_DIR)/ans32.cpp
 $(IGUANA_BD)/ans_bitstream.o:        $(IGUANA_DIR)/ans_bitstream.cpp
@@ -287,13 +294,13 @@ $(IGUANA_BD)/ans32_neon.o:           $(IGUANA_DIR)/ans32_neon.cpp
 $(IGUANA_BD)/decoder_neon.o:         $(IGUANA_DIR)/decoder_neon.cpp
 
 $(OBJS_CX): | $(IGUANA_BD)/iguana
-	$(CX) -std=c++20 -DIGUANA_STATIC -DIGUANA_EXPORTS=1 -fno-math-errno -DIGUANA_COMPILER_GNU=$(CX) -O3 $(CFLAGS) $(_SSE) -c $< -o $@
+	$(COMP) -std=c++20 -DIGUANA_STATIC -DIGUANA_EXPORTS=1 -fno-math-errno -DIGUANA_COMPILER_GNU=$(CX) -O3 $(CFLAGS) $(_SSE) -c $< -o $@
 
 ifeq ($(ARCH),x86_64)
 OBJS_CX512 := $(IGUANA_BD)/ans32_avx512.o
 $(IGUANA_BD)/ans32_avx512.o: $(IGUANA_DIR)/ans32_avx512.cpp
 $(OBJS_CX512): | $(IGUANA_BD)/iguana
-	$(CX) -std=c++20 -O3 $(CFLAGS) $(IGUANA_FLAGS) -fno-math-errno -mavx512vl -mavx512bw -c $< -o $@
+	$(COMP) -std=c++20 -O3 $(CFLAGS) $(IGUANA_FLAGS) -fno-math-errno -mavx512vl -mavx512bw -c $< -o $@
 endif
 
 $(IGUANA_BD)/iguana:
