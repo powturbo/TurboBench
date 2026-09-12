@@ -272,7 +272,7 @@ IGUANA_CC := clang
 endif
 IGUANA_FLAGS := -std=c++20 -DIGUANA_STATIC -DIGUANA_EXPORTS=1 -fno-math-errno -DIGUANA_COMPILER_GNU=$(COMP)
 ifeq ($(IGUANA_CC),clang)
-IGUANA_FLAGS := -DIGUANA_COMPILER_CLANG
+IGUANA_FLAGS += -DIGUANA_COMPILER_CLANG
 endif
 
 OBJS_CX := $(IGUANA_BD)/ans1.o $(IGUANA_BD)/ans32.o $(IGUANA_BD)/ans_bitstream.o $(IGUANA_BD)/ans_byte_statistics.o $(IGUANA_BD)/ans_nibble.o $(IGUANA_BD)/ans_nibble_statistics.o\
