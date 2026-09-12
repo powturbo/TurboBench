@@ -145,13 +145,13 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ### Plugins:
 #### Compressor Lz77,Rolz,Bwt,zpaq:
 - [LzTurbo](https://sites.google.com/site/powturbo)
-- [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:08.2026<br />
+- [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:08.2026
 - [Blosc](https://github.com/Blosc/c-blosc2)
-- [BriefLz](https://github.com/jibsen/brieflz) 
-- [Brotli](https://github.com/google/brotli) 
-- [Bzip2](http://www.bzip.org/downloads.html)
- 
-- [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
+-[BriefLz](https://github.com/jibsen/brieflz)
+-[Brotli](https://github.com/google/brotli)
+-[Bzip2](http://www.bzip.org/downloads.html)
+
+-[Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
 - [CSC](https://github.com/fusiyuan2010/CSC)
 
 - [Density](https://github.com/centaurean/density) 
