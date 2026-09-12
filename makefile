@@ -115,7 +115,7 @@ endif
 
 CFLAGS+=-w -Wall $(DDEBUG) -fpermissive 
 #-Wimplicit-function-declaration -std=gnu99 
-CXXFLAGS+=$(DDEBUG) -w -Wall -fpermissive  -fno-rtti -std=c++20 
+CXXFLAGS+=$(DDEBUG) -w -Wall -fpermissive  -fno-rtti 
 
 ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
 LDFLAGS+=-lrt -lpthread
@@ -1138,7 +1138,7 @@ OB+=$(BUILD)/plugin.o
 
 $(BUILD)/plugin.o: plugin.cc $(LIBS) 
 	@mkdir -p $(dir $@)
-	$(CXX) -O3 $(MARCH) $(CXXFLAGS)  $< -c -o $@
+	$(CXX) -O3 $(MARCH) $(CXXFLAGS) -std=c++20  $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/cpu.o $(LIBS)
 	$(CXX) $^ $(LDFLAGS) $(LIBS) $(FOPENMP) -o turbobench
