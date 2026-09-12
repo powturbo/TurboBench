@@ -231,6 +231,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
  - [zpaq](https://github.com/zpaq/zpaq)
  - [zxc](https://github.com/hellobertrand/zxc) :new:2026.05
 
+
 #### Entropy coder:
 
 ###### bitwise range coder
