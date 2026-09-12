@@ -30,6 +30,10 @@
 #define IS_AVX512    0x800
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //------- CPU instruction set
 // cpuiset  = 0: return current simd set,
 // cpuiset != 0: set simd set 0:scalar, 20:sse2, 52:avx2
@@ -42,4 +46,8 @@ char *cpustr(unsigned cpuisa);
 unsigned cpuisa(void);
 
 char *cpubrand(char *s, size_t maxlen);
+
+#ifdef __cplusplus
+}
+#endif
 
