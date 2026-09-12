@@ -32,11 +32,13 @@
 #include <time.h>
 #include "conf.h"
 #include "plugin.h"
+#include "cpu.h"
 
 enum {
 #define _MEMCPY 1
  P_LMCPY,   // must be 0
  P_MCPY,    // must be 1
+
 #ifndef _AOCL
 #define _AOCL 0
 #endif
@@ -94,7 +96,6 @@ enum {
 #ifndef _DAALA
 #define _DAALA 0
 #endif
-
  P_DAALA,
 #ifndef _DENSITY
 #define _DENSITY 0
@@ -113,25 +114,30 @@ enum {
 #define _FLZMA2 0
 #endif
  P_FLZMA2,
+
 #ifndef _GIPFELI
 #define _GIPFELI 0
 #endif
-
  P_GIPFELI,
 #ifndef _GLZA
 #define _GLZA 0
 #endif
  P_GLZA,
+
 #ifndef _HEATSHRINK
 #define _HEATSHRINK 0
 #endif
-
  P_HEATSHRINK,
+
+#ifndef _IGUANA
+#define _IGUANA 0
+#endif
+ P_IGUANA,
 #ifndef _ISA_L
 #define _ISA_L 0
 #endif
-
  P_ISA_L,
+
 #ifndef _KANZI
 #define _KANZI 0
 #endif
@@ -148,7 +154,6 @@ enum {
 #define _DIVBWT 0
 #endif
  P_DIVBWT,    //bwt
-
 #ifndef _LIB
 #define _LIB 0
 #endif
@@ -165,11 +170,6 @@ enum {
 #define _LIBLZG 0
 #endif
  P_LIBLZG,
- 
-#ifndef _MEMLZ
-#define _MEMLZ 0
-#endif
- P_MEMLZ,
  
 #ifndef _LZ4
 #define _LZ4 0
@@ -233,6 +233,11 @@ enum {
  P_LZSSE2,
  P_LZSSE4,
  P_LZSSE8,
+
+#ifndef _MEMLZ
+#define _MEMLZ 0
+#endif
+ P_MEMLZ,
 #ifndef _MINIZ
 #define _MINIZ 0
 #endif
@@ -687,6 +692,61 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 
   #if _HEATSHRINK
 #include "heatshrink_/heatshrink.h"
+  #endif
+
+  #if _IGUANA
+#include "iguana/iguana/encoder.h"
+#include "iguana/iguana/decoder.h"
+#include "iguana/iguana/output_stream.h"
+#include "iguana/iguana/input_stream.h"
+#include "iguana/iguana/entropy.h"
+#include <stdexcept>
+#include <format>   // C++20
+
+#define ENCODER_OVERHEAD 1024
+unsigned getMaxCompressedDataSize(unsigned uncompressed_size) { return uncompressed_size + ENCODER_OVERHEAD; }
+
+unsigned IguanaComp(const char * source, unsigned source_size, char *dest) {
+  iguana::output_stream out;
+  out.reserve(source_size + ENCODER_OVERHEAD);
+
+  const iguana::encoder::part part {
+    .m_data = reinterpret_cast<const std::uint8_t *>(source),
+    .m_size = source_size,       
+    .m_entropy_mode = iguana::entropy_mode::ans32,                         // Per-substream entropy stage: 32-way interleaved 8-bit rANS (the reference default).
+    .m_encoding = iguana::encoding::iguana,                                // Full Iguana pipeline: LZ structural compression followed by the entropy stage above.
+    .m_rejection_threshold = iguana::encoder::default_rejection_threshold, // With a threshold of 1.0 the encoder stores a block (or substream) verbatim whenever compression would not make it smaller, so the output never grows beyond the input by more than the small control header.
+  };
+  try {
+    iguana::encoder encoder;
+    encoder.encode(out, part);
+  }
+  catch (const std::exception & e) {    
+    throw std::runtime_error(std::format("Cannot compress with Iguana codec: {}", e.what()));
+  }
+  const std::size_t compressed_size = out.size();
+/*    if (compressed_size > getMaxCompressedDataSize(source_size))
+        throw std::runtime_error(std::format("Iguana codec produced {} bytes, which exceeds the reserved size {} for an input of {} bytes",
+            compressed_size, getMaxCompressedDataSize(source_size), source_size);*/
+  memcpy(dest, out.data(), out.size());
+  return static_cast<unsigned>(out.size());
+}
+
+unsigned IguanaDecomp(const char *source, unsigned source_size, char *dest, unsigned uncompressed_size) {
+  iguana::output_stream out;
+  out.reserve(uncompressed_size);
+  try {
+    iguana::decoder decoder;
+    iguana::input_stream in(reinterpret_cast<const std::uint8_t *>(source), source_size);
+    decoder.decode(out, in);
+  }
+  catch (const std::exception & e) {
+    throw std::runtime_error(std::format("Cannot decompress Iguana-encoded data: {}", e.what()));
+  }
+  //if (out.size() != uncompressed_size) throw std::runtime_error(std::format("Iguana codec decompressed {} bytes, but {} were expected", out.size(), uncompressed_size);
+  memcpy(dest, out.data(), uncompressed_size /*out.size()*/);
+  return source_size; //static_cast<unsigned>(out.size());
+}
   #endif
 
   #if _ISA_L
@@ -1648,6 +1708,7 @@ struct plugs plugs[] = {
   
   { P_HEATSHRINK,    "heatshrink",    _HEATSHRINK,"heatshrink",              "" },
   
+  { P_IGUANA,        "iguana",        _IGUANA,    "iguana",                  "" },
   { P_ISA_L,         "igzip",         _ISA_L,     "igzip",                   "0,1,2,3" },
   
   { P_KANZI,         "kanzi",         _KANZI,     "kanzi",                   "0,1,2,3,4,5,6,7,8,9/T#" },
@@ -1859,10 +1920,11 @@ static ZSTD_DDict *ddictPtr;
   #endif
 
 static char _workmem[1<<16],*workmem=_workmem;
-static int state_size,dstate_size;
+static int state_size,dstate_size, isa;
 static size_t workmemsize;
 
 int codini(size_t insize, int codec, int lev, char *prm) {
+  isa = cpuisa();
   workmemsize = 0;
 
   switch(codec) {
@@ -2246,6 +2308,13 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_HEATSHRINK:   return hscompress(in, inlen, out);
       #endif
 
+      #if _IGUANA
+        #ifdef __x86_64__
+    case P_IGUANA:  return (isa >= (IS_AVX512|AVX512VL) )?IguanaComp(in, inlen, out):0;
+        #else
+    case P_IGUANA:  return IguanaComp((const char *)in, inlen, (char *)out);
+        #endif
+      #endif
 
       #if _ISA_L
     case P_ISA_L: struct isal_zstream s;
@@ -3198,6 +3267,14 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_HEATSHRINK: return hsdecompress(in, inlen, out, outlen);
       #endif
 
+      #if _IGUANA
+        #ifdef __x86_64__
+    case P_IGUANA:  return (isa >= (IS_AVX512|AVX512VL) )?IguanaComp(in, inlen, out):0;
+        #else
+    case P_IGUANA: return IguanaDecomp((const char *)in, inlen, (char *)out, outlen);
+        #endif
+      #endif
+
       #if _ISA_L
     case P_ISA_L: { struct inflate_state s; int rc; isal_inflate_init(&s);
          /*    if(prm && *prm == 'd') { s.crc_flag = ISAL_DEFLATE; }
@@ -3939,6 +4016,9 @@ char *codver(int codec, char *v, char *s) {
     case P_HEATSHRINK: sprintf(s,"v%d.%d.%d", HEATSHRINK_VERSION_MAJOR, HEATSHRINK_VERSION_MINOR, HEATSHRINK_VERSION_PATCH); break;
       #endif
 
+      #if _IGUANA
+    case P_IGUANA:  return "v20231103";
+      #endif
       #if _ISA_L
     case P_ISA_L:  sprintf(s,"intel ISA-L v%d.%d.%d", ISAL_MAJOR_VERSION, ISAL_MINOR_VERSION, ISAL_PATCH_VERSION); break;
       #endif
