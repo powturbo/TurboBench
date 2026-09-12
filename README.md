@@ -299,7 +299,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ### Output & Plotting Options
 * `-v#`   `#` = verbosity 0..3 {`1`}
 * `-rX,Y` Show/Reveal only when compression/decompression speed > `X/Y` MB/s
-* `-a#`   Add suffix # to tbb filename. file.tbb->file@#.tbb
+* `-a#`   Add suffix category # to tbb filename. file.tbb->file@#.tbb
 
 * `-Kstr` Rank Aggregation: str = combination of R/C/D = Ratio/Comp./Decomp. {RCD}
 * `-kstr` `str` = Remark/Comment string
