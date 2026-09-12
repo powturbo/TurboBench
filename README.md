@@ -146,11 +146,10 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 #### Compressor Lz77,Rolz,Bwt,zpaq:
 - [LzTurbo](https://sites.google.com/site/powturbo)
 - [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:08.2026
-- [Blosc](https://github.com/Blosc/c-blosc2)
 - [BriefLz](https://github.com/jibsen/brieflz)
 - [Brotli](https://github.com/google/brotli)
 - [Bzip2](http://www.bzip.org/downloads.html)
--[Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
+- [hameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
 - [CSC](https://github.com/fusiyuan2010/CSC)
 - [Density](https://github.com/centaurean/density) 
 - [Doboz](https://bitbucket.org/attila_afra)
@@ -185,8 +184,6 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [misa77](https://github.com/welcome-to-the-sunny-side/misa77) :new:2026.07
 - [ms-compress](https://github.com/coderforlife/ms-compress)
 - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
-- [OpnZL](https://github.com/facebook/openzl)  :new:2026.07
-- [Pcodec](https://github.com/pcodec/pcodec) :new:2026.07
 - [Pithy](https://github.com/johnezang/pithy) 
 - [Quicklz](https://github.com/robottwo/quicklz) 
 - [sap](https://github.com/CoreSecurity/pysap) 
@@ -204,7 +201,6 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [yappy v2011]()
 - [xpack](https://github.com/ebiggers/xpack) 
 - [xz](https://github.com/tukaani-project/xz) :new:2026.05
-
 - [zlib](http://zlib.net)
 - [zlib-ng](https://github.com/Dead2/zlib-ng)
 - [zlib cloudflare](https://github.com/cloudflare/zlib)
@@ -212,6 +208,11 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [zstd](https://github.com/facebook/zstd)
 - [zpaq](https://github.com/zpaq/zpaq)
 - [zxc](https://github.com/hellobertrand/zxc) :new:2026.05
+
+#### Integer / Floating point:
+- [Blosc](https://github.com/Blosc/c-blosc2)
+- [OpnZL](https://github.com/facebook/openzl)  :new:2026.07
+- [Pcodec](https://github.com/pcodec/pcodec) :new:2026.07
 
 #### Entropy coder:
 
