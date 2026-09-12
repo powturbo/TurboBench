@@ -204,6 +204,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [yappy v2011]()
 - [xpack](https://github.com/ebiggers/xpack) 
 - [xz](https://github.com/tukaani-project/xz) :new:2026.05
+
 - [zlib](http://zlib.net)
 - [zlib-ng](https://github.com/Dead2/zlib-ng)
 - [zlib cloudflare](https://github.com/cloudflare/zlib)
