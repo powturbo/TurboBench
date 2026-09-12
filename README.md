@@ -145,8 +145,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ### Plugins:
 #### Compressor Lz77,Rolz,Bwt,zpaq:
  - [LzTurbo](https://sites.google.com/site/powturbo)
- - [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:08.2026
-<br />
+ - [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:08.2026<br />
  - [Blosc](https://github.com/Blosc/c-blosc2)
  - [BriefLz](https://github.com/jibsen/brieflz) 
  - [Brotli](https://github.com/google/brotli) 
