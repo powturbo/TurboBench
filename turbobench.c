@@ -2020,7 +2020,7 @@ void usage(char *pgm, int bsize) {
   fprintf(stderr, " -s#s     # = min. buffer size to duplicate & test small files (ex. -s50)\n");
   fprintf(stderr, "          s = modifier s:K,M,G=(1000, 1.000.000, 1.000.000.000) s:k,m,h=(1024,1Mb,1Gb). {m} ex. 64k or 64K\n");
   fprintf(stderr, " -r       process directories recursively\n");
-  fprintf(stderr, " -a#      add suffix # to tbb filename. file.tbb->file.#.tbb\n");
+  fprintf(stderr, " -a#      add suffix category # to tbb filename. file.tbb->file@#.tbb\n");
   fprintf(stderr, "Benchmark:\n");
   fprintf(stderr, " -iX,Y    Decompression/Compression iterations {3,3}. e.g. -i15,15\n");
   fprintf(stderr, " -t#      # = min. time in seconds per iterations.{1}\n");
