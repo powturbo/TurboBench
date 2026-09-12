@@ -83,13 +83,17 @@ jobs:
       - uses: actions/checkout@v7
         with:
           submodules: 'true'
-      - uses: msys2/setup-msys2@v2
+- uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
-          install: >-
-            git make cmake rsync mingw-w64-x86_64-gcc mingw-w64-x86_64-clang
-# mingw-w64-x86_64-openmp
           update: true
+          install: >-
+            git
+            make
+            cmake
+            rsync
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-clang
       - run: git submodule update --init --recursive
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
