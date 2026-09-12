@@ -552,7 +552,7 @@ struct plugg {
 
 struct plugg plugg[] = {
   { "TURBO",     "lzturbo,10,11,12,19/lz4,1,5,9,12/zxc,3,4,5,6/misa77,0,1,2,3,4/lzav,1,2/memcpy", "Fastest de-/compression. HDD/SSD/RAM speed" },
-  { "FAST",      "lzturbo,10,10a,11,12/lz4,1,5,9/lzav,1,2/misa77,0,1,2,4/brotli,0,1,4,5/iguana/zlib,1,6/libdeflate,1,6/zlib_ng,1,6/igzip,1,2,3/zstd,1,3,9/zxc,3,4,5,7/memcpy", "lz4,,zlib,zstd class" },
+  { "FAST",      "lzturbo,10,10a,11,12/lz4,1,5,9,12/lzav,1,2/misa77,0,1,2,3,4/brotli,0,1,4,5,6/zlib,1,6,9/libdeflate,1,6,12/zlib_ng,1,6,9/igzip,1,2,3/zstd,1,3,9/zxc,3,4,5,7/memcpy", "lz4,,zlib,zstd class" },
   { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,6/zstd,5,9/libdeflate,6/zlib-ng,6/igzip,3/memcpy", "Compression speed > 'zlib 6' class" },
   { "MAX",       "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,12/lizard,19,29,39,49/lzlib,9/libdeflate,12/zstd,22/zxc,6,7/misa77,4/zlib,9/zlib-ng,9/memcpy","Best compression (slow)" },
   { "OPTIMAL"    "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,12/libdeflate,12/lizard,49/lzlib,9/zstd,22/zopfli/memcpy", "Optimal compression (slow)" },
