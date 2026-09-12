@@ -280,6 +280,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 * `-B#s` : `#` = max benchmark filesize {`1GB`} (e.g., `-B4G`)
 * `-s#s` : `#` = min buffer size to duplicate & test small files (e.g., `-s50`)
 * `-r`   : process directories recursively
+* `-a#`  : Add category # to tbb filename. file.tbb -> file@#.tbb
 
 **Size Modifiers (`s`):**
 * `K, M, G` = 1,000, 1,000,000, 1,000,000,000
@@ -298,8 +299,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 
 ### Output & Plotting Options
 * `-v#`   `#` = verbosity 0..3 {`1`}
-* `-rX,Y` Show/Reveal only when compression/decompression speed > `X/Y` MB/s
-* `-a#`   Add suffix category # to tbb filename. file.tbb->file@#.tbb
+* `-RX,Y` Show/Reveal only when compression/decompression speed > `X/Y` MB/s
 
 * `-Kstr` Rank Aggregation: str = combination of R/C/D = Ratio/Comp./Decomp. {RCD}
 * `-kstr` `str` = Remark/Comment string
