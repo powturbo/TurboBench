@@ -266,7 +266,7 @@ ifneq ($(filter $(ARCH),aarch64 x86_64),)
 CXXFLAGS += -D_IGUANA
 IGUANA_DIR := iguana/iguana
 IGUANA_BD := $(BUILD)/iguana
-IGUANA_CC := $(CC)
+IGUANA_CC := $(CX)
 #ifeq ($(OS),Windows)
 #IGUANA_CC := clang
 #endif
