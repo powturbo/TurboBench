@@ -66,13 +66,34 @@ jobs:
         if: matrix.platform == 'linux'
         run: make STATIC=1
 
+      - name: Generate silesia.tar.md (Linux)
+        if: matrix.platform == 'linux'
+        run: |
+          curl -L -o silesia.tar.gz \
+            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+          gunzip silesia.tar.gz
+          ./turbobench.exe silesia.tar -U -V0
+          ./turbobench.exe silesia.tar.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
+          ls -la silesia.*.tar.md
+
       # ---------------- macOS ----------------
       - name: Build (macOS)
         if: matrix.platform == 'macos'
         run: make
 
+      - name: Generate silesia.tar.md (macOS)
+        if: matrix.platform == 'macos'
+        run: |
+          curl -L -o silesia.tar.gz \
+            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+          gunzip silesia.tar.gz
+          ./turbobench.exe silesia.tar -U -V0
+          ./turbobench.exe silesia.tar.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
+          ls -la silesia.*.tar.md
+
       # ---------------- Windows (MSYS2) ----------------
-      # FIX: Disable automatic CRLF conversion before checkout
       - name: Set git to use LF
         if: matrix.platform == 'windows'
         run: |
@@ -93,6 +114,18 @@ jobs:
         shell: msys2 {0}
         run: make STATIC=1 PHAZ=0
 
+      - name: Generate silesia.tar.md (Windows)
+        if: matrix.platform == 'windows'
+        shell: msys2 {0}
+        run: |
+          curl -L -o silesia.tar.gz \
+            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+          gunzip silesia.tar.gz
+          ./turbobench.exe silesia.tar -U -V0
+          ./turbobench.exe silesia.tar.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
+          ls -la silesia.*.tar.md
+
       # ---------------- Package (Linux/macOS) ----------------
       - name: Package artifact (Linux/macOS)
         if: matrix.platform != 'windows'
@@ -101,17 +134,14 @@ jobs:
           set -e
           DIST="dist/${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
           mkdir -p "$DIST"
-
-          # Copy the built executable
           if [ -f "${APP_NAME}" ]; then
             cp "${APP_NAME}" "$DIST/"
           else
             find . -maxdepth 1 -type f -perm -u+x -iname "${APP_NAME}*" -exec cp {} "$DIST/" \;
           fi
-
           [ -f README.md ] && cp README.md "$DIST/" || true
           [ -f LICENSE ] && cp LICENSE "$DIST/" || true
-
+          [ -f "silesia.${{ matrix.name }}.tar.md" ] && cp "silesia.${{ matrix.name }}.tar.md" "$DIST/" || true
           tar -C dist -czf "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz" \
             "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
 
@@ -123,17 +153,15 @@ jobs:
           set -e
           DIST="dist/${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
           mkdir -p "$DIST"
-
           if [ -f "${APP_NAME}.exe" ]; then
             cp "${APP_NAME}.exe" "$DIST/"
           elif [ -f "${APP_NAME}" ]; then
             cp "${APP_NAME}" "$DIST/${APP_NAME}.exe"
           fi
-
           [ -f turbobench.ini ] && cp turbobench.ini "$DIST/" || true
           [ -f README.md ] && cp README.md "$DIST/" || true
           [ -f LICENSE ] && cp LICENSE "$DIST/" || true
-
+          [ -f "silesia.${{ matrix.name }}.tar.md" ] && cp "silesia.${{ matrix.name }}.tar.md" "$DIST/" || true
           cd dist
           zip -r "../${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}.zip" \
             "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
@@ -145,6 +173,7 @@ jobs:
           path: |
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
+            silesia.${{ matrix.name }}.tar.md
           if-no-files-found: ignore
 
   release:
@@ -161,7 +190,7 @@ jobs:
       - name: Flatten artifacts into a release folder
         run: |
           mkdir -p release
-          find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec cp {} release/ \;
+          find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" -o -name "silesia.*.tar.md" \) -exec cp {} release/ \;
           ls -la release
 
       - name: Create GitHub Release
@@ -173,3 +202,66 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-benchmark-md:
+    name: Concatenate silesia results into benchmark.md
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Concatenate all silesia.*.tar.md into benchmark.md
+        run: |
+          # Start with a clean header
+          {
+            echo "# TurboBench Silesia Corpus Results"
+            echo ""
+            echo "Generated automatically by the Release workflow."
+            echo ""
+            echo "---"
+            echo ""
+          } > benchmark.md
+
+          # Append each platform result in a deterministic order
+          for f in $(find artifacts -name 'silesia.*.tar.md' | sort); do
+            platform=$(basename "$f" | sed 's/^silesia\.//;s/\.tar\.md$//')
+            echo "## Platform: ${platform}" >> benchmark.md
+            echo "" >> benchmark.md
+            cat "$f" >> benchmark.md
+            echo "" >> benchmark.md
+            echo "---" >> benchmark.md
+            echo "" >> benchmark.md
+            echo "Appended: $f"
+          done
+
+          echo ""
+          echo "Final benchmark.md contents preview:"
+          head -n 40 benchmark.md
+          echo "..."
+          wc -l benchmark.md
+
+      - name: Commit and push benchmark.md (update if it already exists)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add benchmark.md
+          if git diff --staged --quiet; then
+            echo "No changes detected – benchmark.md is already up to date"
+          else
+            git commit -m "Update benchmark.md (concatenated Silesia results) from build ${{ github.ref_name || github.sha }}"
+            git push
+            echo "Successfully updated and pushed benchmark.md"
+          fi
