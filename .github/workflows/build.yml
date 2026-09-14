@@ -57,18 +57,11 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq \
-            build-essential nasm make \
-            gcc-14 g++-14 \
-            clang-19
-
-          # Make gcc-14 / g++-14 the default
-          sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
-          sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
-          sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
-          sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
-
-          # Make clang-18 the default clang
+          sudo apt-get install -y -qq build-essential nasm make gcc-15 g++-14 clang-20
+          sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-15  100
+          sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-15  100
+          sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-15  100
+          sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-15  100
           sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
           sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
 
