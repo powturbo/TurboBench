@@ -338,6 +338,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 
 Last update: 13 SEP 2026
 #### TurboBench: 2026.09.13 14:25 - AMD Ryzen 5 6600HS Creator Edition (bold = pareto)  MB=1.000.000
+
 |C Size|ratio%|C MB/s|D MB/s|Rank|Name|File|
 |--------:|-----:|--------:|--------:|----------------|----------------|
 |0|  0.0000% |**0.00**|**inf**|1👑|**iguana**|silesia.tar|
