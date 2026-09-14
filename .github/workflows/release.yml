@@ -1,17 +1,13 @@
 name: Release
-
 on:
   push:
     tags:
       - "v*.*.*"
   workflow_dispatch:
-
 permissions:
   contents: write
-
 env:
   APP_NAME: turbobench
-
 jobs:
   build:
     name: Build (${{ matrix.name }})
@@ -28,6 +24,10 @@ jobs:
             os: ubuntu-24.04-arm
             platform: linux
             arch: aarch64
+          - name: linux-riscv64
+            os: ubuntu-24.04-riscv
+            platform: linux
+            arch: riscv64
 #          - name: macos-x86_64
 #            os: macos-13
 #            platform: macos
@@ -48,24 +48,29 @@ jobs:
  #           arch: aarch64
  #           msystem: CLANGARM64
  #           mingw_pkg: mingw-w64-clang-aarch64-gcc-compat
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
-
       # ----------------- Linux ----------------
       - name: Install build tools (Linux)
-        if: matrix.platform == 'linux'
+        if: matrix.platform == 'linux' && matrix.name != 'linux-riscv64'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential
-
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq build-essential nasm make
+          if [ "${{ matrix.os }}" = "ubuntu-24.04-riscv" ]; then
+            sudo apt-get install -y -qq gcc-14 g++-14 clang-20
+            sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
+            sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
+            sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
+            sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
+            sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
+            sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
+          fi
       - name: Build (Linux)
         if: matrix.platform == 'linux'
         run: make STATIC=1
-
       - name: Generate silesia.tar.md (Linux)
         if: matrix.platform == 'linux'
         run: |
@@ -76,12 +81,10 @@ jobs:
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
           ls -la silesia.*.tar.md
-
       # ---------------- macOS ----------------
       - name: Build (macOS)
         if: matrix.platform == 'macos'
         run: make
-
       - name: Generate silesia.tar.md (macOS)
         if: matrix.platform == 'macos'
         run: |
@@ -92,7 +95,6 @@ jobs:
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
           ls -la silesia.*.tar.md
-
       # ---------------- Windows (MSYS2) ----------------
       - name: Set git to use LF
         if: matrix.platform == 'windows'
@@ -100,7 +102,6 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.eol lf
         shell: bash
-
       - name: Setup MSYS2 (Windows)
         if: matrix.platform == 'windows'
         uses: msys2/setup-msys2@v2
@@ -108,12 +109,10 @@ jobs:
           msystem: MINGW64
           install: git zip make cmake rsync mingw-w64-x86_64-gcc mingw-w64-x86_64-clang
           update: true
-
       - name: Build (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
         run: make STATIC=1 PHAZ=0
-
       - name: Generate silesia.tar.md (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
@@ -125,7 +124,6 @@ jobs:
           ./turbobench.exe silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
           ls -la silesia.*.tar.md
-
       # ---------------- Package (Linux/macOS) ----------------
       - name: Package artifact (Linux/macOS)
         if: matrix.platform != 'windows'
@@ -144,7 +142,6 @@ jobs:
           [ -f "silesia.${{ matrix.name }}.tar.md" ] && cp "silesia.${{ matrix.name }}.tar.md" "$DIST/" || true
           tar -C dist -czf "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz" \
             "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
-
       # ---------------- Package (Windows) ----------------
       - name: Package artifact (Windows)
         if: matrix.platform == 'windows'
@@ -165,7 +162,6 @@ jobs:
           cd dist
           zip -r "../${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}.zip" \
             "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
-
       - name: Upload build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -175,7 +171,6 @@ jobs:
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
             silesia.${{ matrix.name }}.tar.md
           if-no-files-found: ignore
-
   release:
     name: Create GitHub Release
     needs: build
@@ -186,13 +181,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-
       - name: Flatten artifacts into a release folder
         run: |
           mkdir -p release
           find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" -o -name "silesia.*.tar.md" \) -exec cp {} release/ \;
           ls -la release
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -202,7 +195,6 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   update-benchmark-md:
     name: Concatenate silesia results into benchmark.md
     needs: build
@@ -216,12 +208,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.repository.default_branch }}
-
       - name: Download all build artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-
       - name: Concatenate all silesia.*.tar.md into benchmark.md
         run: |
           # Start with a clean header
@@ -233,7 +223,6 @@ jobs:
             echo "---"
             echo ""
           } > benchmark.md
-
           # Append each platform result in a deterministic order
           for f in $(find artifacts -name 'silesia.*.tar.md' | sort); do
             platform=$(basename "$f" | sed 's/^silesia\.//;s/\.tar\.md$//')
@@ -245,18 +234,15 @@ jobs:
             echo "" >> benchmark.md
             echo "Appended: $f"
           done
-
           echo ""
           echo "Final benchmark.md contents preview:"
           head -n 40 benchmark.md
           echo "..."
           wc -l benchmark.md
-
       - name: Commit and push benchmark.md (update if it already exists)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
           git add benchmark.md
           if git diff --staged --quiet; then
             echo "No changes detected – benchmark.md is already up to date"
