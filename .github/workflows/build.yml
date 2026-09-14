@@ -79,9 +79,9 @@ jobs:
       - name: Build & test
         run: |
           make
-#         ./turbobench -l2
-#         ./turbobench turbobench -V0 -U
-#         ./turbobench silesia.tar -V0 -U
+          ./turbobench -l2
+          ./turbobench turbobench -V0 -U
+          ./turbobench silesia.tar -V0 -U
 
   macos:
     runs-on: '${{ matrix.os }}'
