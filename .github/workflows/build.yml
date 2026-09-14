@@ -64,24 +64,24 @@ jobs:
           arch: riscv64
           distro: ubuntu24.04
           githubToken: ${{ github.token }}
-	install: |
-	  apt-get update -qq
-	  apt-get install -y -qq \
-	    build-essential nasm make \
-	    gcc-14 g++-14 \
-	    clang-19   
-          # Make gcc-14 / g++-14 the default "gcc" / "g++"
-  	  update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
-	  update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
-	  update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
-	  update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
-  	  # Optional: also make a "clang" symlink point at the new one
-          update-alternatives --install /usr/bin/clang  clang  /usr/bin/clang-18  100
-          update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100 || true
-          # Sanity check
-	  which gcc; gcc --version
-          which clang; clang --version || true
-        run: |
+	  install: |
+	    apt-get update -qq
+	    apt-get install -y -qq \
+	      build-essential nasm make \
+	      gcc-14 g++-14 \
+	      clang-19   
+            # Make gcc-14 / g++-14 the default "gcc" / "g++"
+  	    update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
+	    update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
+	    update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
+	    update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
+  	    # Optional: also make a "clang" symlink point at the new one
+            update-alternatives --install /usr/bin/clang  clang  /usr/bin/clang-18  100
+            update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100 || true
+            # Sanity check
+	    which gcc; gcc --version
+            which clang; clang --version || true
+          run: |
             export CC=${{ matrix.compiler }}
             echo "=== Using compiler: $CC ==="
             $CC --version
