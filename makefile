@@ -95,8 +95,8 @@ ifeq ($(ARCH),aarch64)
   CFLAGS=$(_SSE)
 else ifeq ($(ARCH),riscv64)
 #  CFLAGS=-march=rv64gc_zba_zbb_zbs
-  CFLAGS=-march=rv64gcv_zvbb 
-  CFLAGS+=-mabi=lp64d -mno-strict-align
+  CFLAGS=-march=rv64gcv -mabi=lp64d -mno-strict-align
+  _SSE=-march=rv64gcv_zvbb
 else ifeq ($(ARCH),ppc64le)
   _SSE=-D__SSE4_1__
   CFLAGS=-mcpu=power9 -mtune=power9 $(_SSE)
