@@ -365,3 +365,9 @@ Last update: 13 SEP 2026
 |101737344| 48.00%   |821.15|4958.21|12 |aocl-lz4 0|silesia.tar|
 |211948544|100.00%   |<span style="color:green">**19641.23**</span>|19269.80|24 |<span style="color:green">**memcpy**</span>|silesia.tar|
 
+
+| C Size    | ratio%   | C MB/s                                      | D MB/s   | Rank | Name          | File         |
+|----------:|---------:|--------------------------------------------:|---------:|-----:|---------------|--------------|
+| 0         | 0.0000%  | <span style="color:red">**0.00**</span>     | **inf**  | 1👑  | **iguana**    | silesia.tar  |
+| 73881185  | 34.86%   | <span style="color:green">**66.60**</span>  | 3266.58  | 17   | **lzav 2**    | silesia.tar  |
+| 83472460  | 39.38%   | <span style="color:#e67e22">**161.46**</span>| 6186.47 | 2🏆  | **lzturbo 12**| silesia.tar  |
