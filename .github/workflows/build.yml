@@ -41,16 +41,36 @@ jobs:
       - run: ./turbobench silesia.tar -V0 -U
 
   linux-riscv:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-riscv
     strategy:
       fail-fast: false
       matrix:
         compiler: ["gcc", "clang"]
+    env:
+      CC: ${{ matrix.compiler }}
     steps:
       - uses: actions/checkout@v7
         with:
           submodules: 'true'
       - run: git submodule update --init --recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            build-essential nasm make \
+            gcc-14 g++-14 \
+            clang-19
+
+          # Make gcc-14 / g++-14 the default
+          sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
+          sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
+          sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
+          sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
+
+          # Make clang-18 the default clang
+          sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-19   100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100 || true
 
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
@@ -58,38 +78,21 @@ jobs:
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
 
-      - name: Build & test on riscv64 (QEMU)
-        uses: uraimo/run-on-arch-action@v3
-        with:
-          arch: riscv64
-          distro: ubuntu24.04
-          githubToken: ${{ github.token }}
-          install: |
-	    apt-get update -qq
-	    apt-get install -y -qq \
-	      build-essential nasm make \
-	      gcc-14 g++-14 \
-	      clang-19   
-            # Make gcc-14 / g++-14 the default "gcc" / "g++"
-  	    update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
-	    update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
-	    update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
-	    update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
-  	    # Optional: also make a "clang" symlink point at the new one
-            update-alternatives --install /usr/bin/clang  clang  /usr/bin/clang-18  100
-            update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100 || true
-            # Sanity check
-	    which gcc; gcc --version
-            which clang; clang --version || true
-          run: |
-            export CC=${{ matrix.compiler }}
-            echo "=== Using compiler: $CC ==="
-            $CC --version
-            uname -m
-            make
-            ./turbobench -l2
-            ./turbobench turbobench -V0 -U
-            ./turbobench silesia.tar -V0 -U
+      - name: Show environment
+        run: |
+          uname -m
+          lscpu
+          echo "=== Using CC=$CC ==="
+          $CC --version
+          gcc --version
+          clang --version || true
+
+      - name: Build & test
+        run: |
+          make
+          ./turbobench -l2
+          ./turbobench turbobench -V0 -U
+          ./turbobench silesia.tar -V0 -U
 
   macos:
     runs-on: '${{ matrix.os }}'
