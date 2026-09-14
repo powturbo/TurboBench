@@ -41,36 +41,46 @@ jobs:
       - run: ./turbobench silesia.tar -V0 -U
 
   linux-riscv:
-    runs-on: ubuntu-24.04-riscv
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         compiler: ["gcc", "clang"]
-    env:
-      CC: ${{ matrix.compiler }}
     steps:
       - uses: actions/checkout@v7
         with:
           submodules: 'true'
       - run: git submodule update --init --recursive
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y nasm
+
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
           curl -L -o silesia.tar.gz \
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
-      - run: |
-          uname -m
-          lscpu
-          gcc --version
-          clang --version || true
-      - run: make
-      - run: ./turbobench -l2
-      - run: ./turbobench turbobench -V0 -U
-      - run: ./turbobench silesia.tar -V0 -U
+
+      - name: Build & test on riscv64 (QEMU)
+        uses: uraimo/run-on-arch-action@v3
+        with:
+          arch: riscv64
+          distro: ubuntu24.04
+          githubToken: ${{ github.token }}
+          install: |
+            apt-get update -qq
+            apt-get install -y -qq build-essential nasm gcc g++ clang make
+            # Make sure both compilers are really available
+            which gcc
+            which clang
+            gcc --version
+            clang --version
+          run: |
+            export CC=${{ matrix.compiler }}
+            echo "=== Using compiler: $CC ==="
+            $CC --version
+            uname -m
+            make
+            ./turbobench -l2
+            ./turbobench turbobench -V0 -U
+            ./turbobench silesia.tar -V0 -U
 
   macos:
     runs-on: '${{ matrix.os }}'
