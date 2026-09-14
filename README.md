@@ -337,37 +337,8 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ```
 
 Last update: 13 SEP 2026
-#### TurboBench: 2026.09.14 07:11 - AMD Ryzen 5 6600HS Creator Edition (bold = pareto)  MB=1.000.000
-|C Size|ratio%|C MB/s|D MB/s|Rank|Name|File|
-|--------:|-----:|--------:|--------:|----------------|----------------|------------------------------|
-|0|  0.0000% |<span style="color:green">**0.00**</span>|<span style="color:green">**inf**</span>|1👑|<span style="color:green">**iguana**</span>|silesia.tar|
-|73881185| 34.86%   |<span style="color:green">**66.60**</span>|3266.58|17 |<span style="color:green">**lzav 2**</span>|silesia.tar|
-|75266141| 35.51%   |10.97|5605.18|9 |misa77 4|silesia.tar|
-|76936438| 36.30%   |12.70|4485.21|21 |zxc 6|silesia.tar|
-|77263367| 36.45%   |14.92|4782.02|13 |lz4 12|silesia.tar|
-|77334804| 36.49%   |2.63|6384.76|10 |lzturbo 19|silesia.tar|
-|77885207| 36.75%   |45.49|4679.91|15 |lz4 9|silesia.tar|
-|78896100| 37.22%   |<span style="color:green">**87.60**</span>|4620.23|18 |<span style="color:green">**lz4 5**</span>|silesia.tar|
-|80029075| 37.76%   |19.11|6752.96|8 |misa77 3|silesia.tar|
-|83472460| 39.38%   |<span style="color:green">**161.46**</span>|6186.47|2🏆|<span style="color:green">**lzturbo 12**</span>|silesia.tar|
-|84581856| 39.91%   |<span style="color:green">**566.98**</span>|3532.71|11 |<span style="color:green">**lzav 1**</span>|silesia.tar|
-|85353186| 40.27%   |102.68|4642.70|19 |zxc 5|silesia.tar|
-|85477033| 40.33%   |90.44|7048.97|3🥇|misa77 2|silesia.tar|
-|87574989| 41.32%   |341.04|5854.45|4🥈|lzturbo 11|silesia.tar|
-|89135641| 42.06%   |379.84|4128.57|20 |aocl-lz4 1|silesia.tar|
-|90385717| 42.65%   |114.66|7765.96|5🥉|misa77 1|silesia.tar|
-|90806105| 42.84%   |171.48|4674.34|22 |zxc 4|silesia.tar|
-|92153283| 43.48%   |413.51|4410.17|23 |oodle 111|silesia.tar|
-|94526874| 44.60%   |331.72|6817.92|7 |misa77 0|silesia.tar|
-|97995107| 46.24%   |232.72|5090.63|16 |zxc 3|silesia.tar|
-|99943063| 47.15%   |<span style="color:green">**873.46**</span>|6020.75|6 |<span style="color:green">**lzturbo 10**</span>|silesia.tar|
-|100883728| 47.60%   |793.94|4877.20|14 |lz4 1|silesia.tar|
-|101737344| 48.00%   |821.15|4958.21|12 |aocl-lz4 0|silesia.tar|
-|211948544|100.00%   |<span style="color:green">**19641.23**</span>|19269.80|24 |<span style="color:green">**memcpy**</span>|silesia.tar|
-
-
-| C Size    | ratio%   | C MB/s                                      | D MB/s   | Rank | Name          | File         |
-|----------:|---------:|--------------------------------------------:|---------:|-----:|---------------|--------------|
-| 0         | 0.0000%  | <span style="color:red">**0.00**</span>     | **inf**  | 1👑  | **iguana**    | silesia.tar  |
-| 73881185  | 34.86%   | <span style="color:green">**66.60**</span>  | 3266.58  | 17   | **lzav 2**    | silesia.tar  |
-| 83472460  | 39.38%   | <span style="color:#e67e22">**161.46**</span>| 6186.47 | 2🏆  | **lzturbo 12**| silesia.tar  |
+| C Size    | ratio%   | C MB/s                          | D MB/s   | Rank | Name          | File         |
+|----------:|---------:|--------------------------------:|---------:|-----:|---------------|--------------|
+| 0         | 0.0000%  | $\color{red}{\mathbf{0.00}}$    | **inf**  | 1👑  | **iguana**    | silesia.tar  |
+| 73881185  | 34.86%   | $\color{green}{\mathbf{66.60}}$ | 3266.58  | 17   | **lzav 2**    | silesia.tar  |
+| 83472460  | 39.38%   | $\color{#e67e22}{\mathbf{161.46}}$ | 6186.47 | 2🏆 | **lzturbo 12**| silesia.tar  |
