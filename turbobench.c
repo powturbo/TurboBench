@@ -1374,8 +1374,10 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         finame);
       break;
     case FMT_MARKDOWN:
-      #define MD_B "<span style=\"color:green\">**"
-      #define MD_E "**</span>"
+      //#define MD_B "<span style=\"color:green\">**"
+      //#define MD_E "**</span>"
+      #define MD_B "$\color{green}{\mathbf{"
+      #define MD_E "}}$"
       if(memout)
         fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%u|%u|%u|%u|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ", 
                       plug->memc, plug->memd, plug->stkc, plug->stkd, n?MD_B:"",  name, n?MD_E:"",   finame);
