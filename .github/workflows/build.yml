@@ -64,7 +64,7 @@ jobs:
           arch: riscv64
           distro: ubuntu24.04
           githubToken: ${{ github.token }}
-	  install: |
+          install: |
 	    apt-get update -qq
 	    apt-get install -y -qq \
 	      build-essential nasm make \
