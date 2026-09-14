@@ -139,7 +139,7 @@ jobs:
           fi
           [ -f README.md ] && cp README.md "$DIST/" || true
           [ -f LICENSE ] && cp LICENSE "$DIST/" || true
-          [ -f "silesia.${{ matrix.name }}.tar.md" ] && cp "silesia.${{ matrix.name }}.tar.md" "$DIST/" || true
+          # silesia.*.tar.md is intentionally NOT packaged into the archive
           tar -C dist -czf "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz" \
             "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
       # ---------------- Package (Windows) ----------------
@@ -158,7 +158,7 @@ jobs:
           [ -f turbobench.ini ] && cp turbobench.ini "$DIST/" || true
           [ -f README.md ] && cp README.md "$DIST/" || true
           [ -f LICENSE ] && cp LICENSE "$DIST/" || true
-          [ -f "silesia.${{ matrix.name }}.tar.md" ] && cp "silesia.${{ matrix.name }}.tar.md" "$DIST/" || true
+          # silesia.*.tar.md is intentionally NOT packaged into the archive
           cd dist
           zip -r "../${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}.zip" \
             "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
@@ -184,7 +184,8 @@ jobs:
       - name: Flatten artifacts into a release folder
         run: |
           mkdir -p release
-          find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" -o -name "silesia.*.tar.md" \) -exec cp {} release/ \;
+          # Only ship the real binary packages – exclude silesia.*.tar.md
+          find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec cp {} release/ \;
           ls -la release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
