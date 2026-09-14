@@ -7,8 +7,8 @@ Generated automatically by the Release workflow.
 ## Platform: linux-aarch64
 
 #### TurboBench: 2026.09.14 04:10 - Unknown Linux CPU (bold = pareto)  MB=1.000.000
-|C Size|ratio%|C MB/s|D MB/s|Rank|Name|File|
-|--------:|-----:|--------:|--------:|----------------|----------------|
+| C Size    | ratio%   | C MB/s   | D MB/s   | Rank | Name          | File         |
+|----------:|---------:|---------:|---------:|-----:|---------------|--------------|
 |58470485| 27.59%   |**40.90**|**515.64**|17 |**brotli 6**|silesia.tar|
 |59249005| 27.95%   |**54.48**|**1142.93**|4🥈|**zstd 9**|silesia.tar|
 |59555449| 28.10%   |**54.80**|514.13|13 |**brotli 5**|silesia.tar|
@@ -50,8 +50,8 @@ Generated automatically by the Release workflow.
 ## Platform: linux-x86_64
 
 #### TurboBench: 2026.09.14 04:12 - AMD EPYC 7763 64-Core Processor (bold = pareto)  MB=1.000.000
-|C Size|ratio%|C MB/s|D MB/s|Rank|Name|File|
-|--------:|-----:|--------:|--------:|----------------|----------------|
+| C Size    | ratio%   | C MB/s   | D MB/s   | Rank | Name          | File         |
+|----------:|---------:|---------:|---------:|-----:|---------------|--------------|
 |58470485| 27.59%   |**42.91**|**429.74**|14 |**brotli 6**|silesia.tar|
 |59249005| 27.95%   |**51.40**|**1188.63**|3🥇|**zstd 9**|silesia.tar|
 |59555449| 28.10%   |50.76|422.58|17 |brotli 5|silesia.tar|
@@ -93,8 +93,8 @@ Generated automatically by the Release workflow.
 ## Platform: macos-aarch64
 
 #### TurboBench: 2026.09.14 04:09 - Apple M1 (Virtual) (bold = pareto)  MB=1.000.000
-|C Size|ratio|C MB/s|D MB/s|Rank|Name|File|
-|--------:|-----:|--------:|--------:|----------------|----------------|
+| C Size    | ratio%   | C MB/s   | D MB/s   | Rank | Name          | File         |
+|----------:|---------:|---------:|---------:|-----:|---------------|--------------|
 |58470485| 27.59%   |**57.80**|**403.70**|19 |**brotli 6**|silesia.tar|
 |59249005| 27.95%   |**58.68**|**1406.57**|5🥉|**zstd 9**|silesia.tar|
 |59555449| 28.10%   |**60.12**|455.28|15 |**brotli 5**|silesia.tar|
@@ -136,8 +136,8 @@ Generated automatically by the Release workflow.
 ## Platform: windows-x86_64
 
 #### TurboBench: 2026.09.14 04:21 - AMD EPYC 7763 64-Core Processor (bold = pareto)  MB=1.000.000
-|C Size|ratio%|C MB/s|D MB/s|Rank|Name|File|
-|--------:|-----:|--------:|--------:|----------------|----------------|
+| C Size    | ratio%   | C MB/s   | D MB/s   | Rank | Name          | File         |
+|----------:|---------:|---------:|---------:|-----:|---------------|--------------|
 |58470485| 27.59%   |**41.95**|**420.80**|16 |**brotli 6**|silesia.tar|
 |59249005| 27.95%   |**49.53**|**1048.04**|3🥇|**zstd 9**|silesia.tar|
 |59555449| 28.10%   |48.67|417.75|19 |brotli 5|silesia.tar|
