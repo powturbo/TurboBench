@@ -64,13 +64,11 @@ jobs:
           sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
           sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
           sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
-
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
           curl -L -o silesia.tar.gz \
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
-
       - name: Show environment
         run: |
           uname -m
@@ -79,7 +77,6 @@ jobs:
           $CC --version
           gcc --version
           clang --version || true
-
       - name: Build & test
         run: |
           make
