@@ -72,8 +72,8 @@ jobs:
           curl -L -o silesia.tar.gz \
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
-          ./turbobench.exe silesia.tar -U -V0
-          ./turbobench.exe silesia.tar.tbb -p4
+          ./turbobench silesia.tar -U -V0
+          ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
           ls -la silesia.*.tar.md
 
@@ -88,8 +88,8 @@ jobs:
           curl -L -o silesia.tar.gz \
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
-          ./turbobench.exe silesia.tar -U -V0
-          ./turbobench.exe silesia.tar.tbb -p4
+          ./turbobench silesia.tar -U -V0
+          ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
           ls -la silesia.*.tar.md
 
