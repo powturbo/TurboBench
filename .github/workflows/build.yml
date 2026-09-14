@@ -40,6 +40,38 @@ jobs:
       - run: ./turbobench turbobench -V0 -U
       - run: ./turbobench silesia.tar -V0 -U
 
+  linux-riscv:
+    runs-on: ubuntu-24.04-riscv
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: ["gcc", "clang"]
+    env:
+      CC: ${{ matrix.compiler }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: 'true'
+      - run: git submodule update --init --recursive
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nasm
+      - name: Download silesia.tar.gz and gunzip → silesia.tar
+        run: |
+          curl -L -o silesia.tar.gz \
+            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+          gunzip silesia.tar.gz
+      - run: |
+          uname -m
+          lscpu
+          gcc --version
+          clang --version || true
+      - run: make
+      - run: ./turbobench -l2
+      - run: ./turbobench turbobench -V0 -U
+      - run: ./turbobench silesia.tar -V0 -U
+
   macos:
     runs-on: '${{ matrix.os }}'
     strategy:
