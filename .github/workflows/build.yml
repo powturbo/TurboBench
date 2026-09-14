@@ -69,8 +69,8 @@ jobs:
           sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
 
           # Make clang-18 the default clang
-          sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-19   100
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100 || true
+          sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
 
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
