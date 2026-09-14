@@ -79,6 +79,7 @@ jobs:
       - name: Build & test
         run: |
           make
+          ./turbobench -h
           ./turbobench -l2
           ./turbobench turbobench -V0 -U
           ./turbobench silesia.tar -V0 -U
