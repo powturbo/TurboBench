@@ -79,14 +79,12 @@ jobs:
       - name: Build 
         run: make
       - name: benchmark
+        if: matrix.compiler == 'gcc'  # clang 20 emits illegal instruction
         run: |
           ./turbobench -h
           ./turbobench -l2
           ./turbobench turbobench -V0 -U
           ./turbobench silesia.tar -V0 -U
-
-#        if: matrix.compiler == 'gcc' 
-# clang emits illegal instructions
 
   macos:
     runs-on: '${{ matrix.os }}'
