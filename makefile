@@ -716,7 +716,7 @@ endif
 endif
 
 ifneq ($(wildcard zxc/.),)
-ifneq (,$(filter $(ARCH),x86_64 aarch64))
+#ifneq (,$(filter $(ARCH),x86_64 aarch64))
 PLG_FLAGS += -D_ZXC 
 #CFLAGS+=-DZXC_STATIC_DEFINE
 ZXCDIR = zxc/src/lib
@@ -742,7 +742,7 @@ else ifeq ($(ARCH),aarch64)
   ZXC_OBJS += $(foreach e,neon,compress_$(e) decompress_$(e) huffman_$(e))
 endif
 OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))
-endif
+#endif
 endif
 
 #------------------------------------ Manual Download ---------------------------------------------------------------------------
