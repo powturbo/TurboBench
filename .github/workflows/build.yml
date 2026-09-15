@@ -80,10 +80,13 @@ jobs:
         run: make
       - name: benchmark
         run: |
+          ./turbobench -h
           ./turbobench -l2
           ./turbobench turbobench -V0 -U
           ./turbobench silesia.tar -V0 -U
+
 #        if: matrix.compiler == 'gcc' 
+# clang emits illegal instructions
 
   macos:
     runs-on: '${{ matrix.os }}'
