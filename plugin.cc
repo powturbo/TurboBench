@@ -1806,7 +1806,7 @@ struct plugs plugs[] = {
 
   
   { P_ZLIB,          "zlib",          _ZLIB,      "zlib",                     "1,2,3,4,5,6,7,8,9" },
-  { P_ZLIB_NG,       "zlib_ng",       _ZLIB_NG,   "zlib-ng",                  "1,2,3,4,5,6,7,8,9" },
+  { P_ZLIB_NG,       "zlib-ng",       _ZLIB_NG,   "zlib-ng",                  "1,2,3,4,5,6,7,8,9" },
   { P_ZLING,         "zling",         _ZLING,     "Libzling",                 "0,1,2,3,4" },
   { P_ZOPFLI,        "zopfli",        _ZOPFLI,    "zopfli",                   ""},
   { P_ZSTD,          "zstd",          _ZSTD,      "zstd",                     "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/d#" },
