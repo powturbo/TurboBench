@@ -96,6 +96,9 @@ ifeq ($(ARCH),aarch64)
 else ifeq ($(ARCH),riscv64)
 #  CFLAGS=-march=rv64gc_zba_zbb_zbs
 #  CFLAGS=-mabi=lp64d -mno-strict-align
+ifneq ($(filter clang clang++,$(CC) $(CXX)),)
+  CFLAGS=-march=rv64gc -fno-vectorize -fno-slp-vectorize
+endif
   _SSE=-march=rv64gcv_zvbb
 else ifeq ($(ARCH),ppc64le)
   _SSE=-D__SSE4_1__
@@ -716,11 +719,8 @@ endif
 endif
 
 ifneq ($(wildcard zxc/.),)
-#ifneq (,$(filter $(ARCH),x86_64 aarch64))
 PLG_FLAGS += -D_ZXC 
-#CFLAGS+=-DZXC_STATIC_DEFINE
 ZXCDIR = zxc/src/lib
-#ZXC_BUILD = $(CC) -O3 -I$(ZXCDIR)/vendors -DNDEBUG -DZXC_STATIC_DEFINE $(ZXC_FLAGS) $< -c -o $@
 ZXC_BUILD = $(CC) -O3 -DZXC_STATIC_DEFINE -DNDEBUG -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
 
 define ZXC_RULE
@@ -742,7 +742,6 @@ else ifeq ($(ARCH),aarch64)
   ZXC_OBJS += $(foreach e,neon,compress_$(e) decompress_$(e) huffman_$(e))
 endif
 OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))
-#endif
 endif
 
 #------------------------------------ Manual Download ---------------------------------------------------------------------------
