@@ -61,8 +61,8 @@ jobs:
           sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
           sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
           sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
-          sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
+          sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-21   100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-21 100 || true
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
           curl -L -o silesia.tar.gz \
@@ -76,13 +76,14 @@ jobs:
           $CC --version
           gcc --version
           clang --version || true
-      - name: Build & test
+      - name: Build 
+        run: make
+      - name: benchmark
         run: |
-          make
-          ./turbobench -h
           ./turbobench -l2
           ./turbobench turbobench -V0 -U
           ./turbobench silesia.tar -V0 -U
+#        if: matrix.compiler == 'gcc' 
 
   macos:
     runs-on: '${{ matrix.os }}'
