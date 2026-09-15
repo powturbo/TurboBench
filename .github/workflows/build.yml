@@ -56,13 +56,13 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq build-essential nasm make gcc-14 g++-14 clang-21
+          sudo apt-get install -y -qq build-essential nasm make gcc-14 g++-14 clang-20
           sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
           sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
           sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
           sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
-          sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-21   100
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-21 100 || true
+          sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
           curl -L -o silesia.tar.gz \
