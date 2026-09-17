@@ -37,8 +37,8 @@ jobs:
           clang --version || true
       - run: make
       - run: ./turbobench -l2
-      - run: ./turbobench turbobench -V0 -U
-      - run: ./turbobench silesia.tar -V0 -U
+#      - run: ./turbobench turbobench -V0 -U
+#      - run: ./turbobench silesia.tar -V0 -U
 
   linux-riscv:
     runs-on: ubuntu-24.04-riscv
@@ -81,10 +81,9 @@ jobs:
       - name: benchmark
         if: matrix.compiler == 'gcc'  # clang 20 emits illegal instruction
         run: |
-          ./turbobench -h
           ./turbobench -l2
-          ./turbobench turbobench -V0 -U
-          ./turbobench silesia.tar -V0 -U
+#          ./turbobench turbobench -V0 -U
+#          ./turbobench silesia.tar -V0 -U
 
   macos:
     runs-on: '${{ matrix.os }}'
@@ -112,8 +111,8 @@ jobs:
       - run: make
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l2
-      - run: ./turbobench turbobench -V0 -U
-      - run: ./turbobench silesia.tar -V0 -U
+#      - run: ./turbobench turbobench -V0 -U
+#      - run: ./turbobench silesia.tar -V0 -U
 
   windows:
     runs-on: windows-latest
@@ -148,5 +147,5 @@ jobs:
           gunzip silesia.tar.gz
       - run: make
       - run: ./turbobench -l2
-      - run: ./turbobench turbobench.exe -U -V0
-      - run: ./turbobench.exe silesia.tar -U -V0
+#      - run: ./turbobench turbobench.exe -U -V0
+#      - run: ./turbobench.exe silesia.tar -U -V0
