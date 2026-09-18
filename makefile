@@ -1148,7 +1148,7 @@ $(BUILD)/plugin.o: plugin.cc $(LIBS)
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(MARCH) $(PLG_FLAGS) $(CXXFLAGS) -std=c++20  $< -c -o $@
 
-turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/cpu.o $(LIBS)
+turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
 	$(CXX) $^ $(LDFLAGS) $(LIBS) $(FOPENMP) -o turbobench
 
 $(BUILD)/%.o: %.c
