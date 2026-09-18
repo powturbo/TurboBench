@@ -1010,7 +1010,7 @@ void pco_ini() {
   #endif
 
   #if _QUICKLZ
-#include "turbobench_/quicklz_/quicklz-c.h"
+#include "turbobench_/quicklz/quicklz-c.h"
   #endif
 
   #if _PYSAP
