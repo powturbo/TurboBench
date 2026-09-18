@@ -437,9 +437,9 @@ LIBS += $(LZ_LIB)
 CFLAGS  += -D_NQUANT
 endif
 
-ifneq ($(wildcard lzlib-1.16/.),)
+ifneq ($(wildcard lzlib/.),)
 PLG_FLAGS+=-D_LZLIB
-OB+=$(call obj,lzlib-1.16/lzlib.o lzlib_/bbexample.o)
+OB+=$(call obj,lzlib/lzlib.o turbobench_/lzlib_/bbexample.o)
 endif
 
 ifneq ($(wildcard lzma/.),)
@@ -673,7 +673,7 @@ else
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
 	cmake -S zlib-ng -B $(BUILD)/zlib-ng -DWITH_NEON=OFF -DBUILD_TESTING=OFF -DWITH_GTEST=OFF -DWITH_GZFILEOP=OFF
 	cmake --build $(BUILD)/zlib-ng --config Release 
-	cp $(BUILD)/zlib-ng/zconf-ng.h zlib-ng_
+	cp $(BUILD)/zlib-ng/zconf-ng.h turbobench_
 endif
 LIBS += $(ZLIB_NG_LIB)
 endif
@@ -1132,9 +1132,9 @@ PLG_FLAGS+=-D_MSCOMPRESS
 OB+=$(call obj,ms-compress/src/mscomp.o ms-compress/src/lznt1_compress.o ms-compress/src/lznt1_decompress.o ms-compress/src/xpress_compress.o ms-compress/src/xpress_decompress.o ms-compress/src/xpress_huff_compress.o ms-compress/src/xpress_huff_decompress.o)
 endif
 
-ifneq ($(wildcard quicklz_/.),)
+ifneq ($(wildcard quicklz/.),)
 PLG_FLAGS+=-D_QUICKLZ
-OB+=$(call obj,quicklz_/quicklz1.o quicklz_/quicklz2.o quicklz_/quicklz3.o)
+OB+=$(call obj,turbobench_/quicklz_/quicklz1.o turbobench_/quicklz_/quicklz2.o turbobench_/quicklz_/quicklz3.o)
 endif
 
 ifneq ($(wildcard pysap/.),)
