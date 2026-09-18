@@ -845,7 +845,7 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
 
   #if _LZLIB
 #include "lzlib/lzlib.h"
-#include "lzlib_/bbexample.h"
+#include "turbobench_/lzlib/bbexample.h"
   struct Lzma_options
     {
     int dictionary_size;        /* 4 KiB .. 512 MiB */
