@@ -172,7 +172,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [lizard](https://github.com/inikep/lz5) 
 - [Lzfse](https://github.com/lzfse/lzfse)
 - [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) 
-- [Lzlib](http://www.nongnu.org/lzip) 
+- [Lzlib](https://github.com/aonez/lzlib) :new: 2026/09 
 - [Lzmat](https://github.com/nemequ/lzmat) 
 - [Lzma](http://7-zip.org) 
 - [Lzo](http://www.oberhumer.com/opensource/lzo) 
@@ -336,5 +336,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -eFAST -aFAST
 ```
 
-Last update: 14 SEP 2026
+Last update: 18 SEP 2026
 
