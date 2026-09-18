@@ -137,3 +137,6 @@
 [submodule "iguana"]
 	path = iguana
 	url = https://github.com/ClickHouse/iguana.git
+[submodule "lzlib"]
+	path = lzlib
+	url = https://github.com/aonez/lzlib.git
