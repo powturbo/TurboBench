@@ -844,7 +844,29 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
   #endif
 
   #if _LZLIB
-#include "lzlib-1.16/lzlib.h"
+#include "lzlib/lzlib.h"
+#include "lzlib_/bbexample.h"
+  struct Lzma_options
+    {
+    int dictionary_size;        /* 4 KiB .. 512 MiB */
+    int match_len_limit;        /* 5 .. 273 */
+    };
+  /* Mapping from gzip/bzip2 style 1..9 compression modes
+
+     to the corresponding LZMA compression modes. */
+  const struct Lzma_options option_mapping[] =
+    {
+    {   65535,  16 },       /* -0 (65535,16 chooses fast encoder) */
+    { 1 << 20,   5 },       /* -1 */
+    { 3 << 19,   6 },       /* -2 */
+    { 1 << 21,   8 },       /* -3 */
+    { 3 << 20,  12 },       /* -4 */
+    { 1 << 22,  20 },       /* -5 */
+    { 1 << 23,  36 },       /* -6 */
+    { 1 << 24,  68 },       /* -7 */
+    { 3 << 23, 132 },       /* -8 */
+    { 1 << 25, 273 } };     /* -9 */
+  struct Lzma_options encoder_options;
   #endif
 
   #if _LIZARD
@@ -902,30 +924,6 @@ class Out: public libzpaq::Writer {
 
   #if _LZHAM
 #include "lzham_codec_devel/include/lzham.h"
-  #endif
-
-  #if _LZLIB
-#include "lzlib_/bbexample.h"
-  struct Lzma_options
-    {
-    int dictionary_size;        /* 4 KiB .. 512 MiB */
-    int match_len_limit;        /* 5 .. 273 */
-    };
-  /* Mapping from gzip/bzip2 style 1..9 compression modes
-     to the corresponding LZMA compression modes. */
-  const struct Lzma_options option_mapping[] =
-    {
-    {   65535,  16 },       /* -0 (65535,16 chooses fast encoder) */
-    { 1 << 20,   5 },       /* -1 */
-    { 3 << 19,   6 },       /* -2 */
-    { 1 << 21,   8 },       /* -3 */
-    { 3 << 20,  12 },       /* -4 */
-    { 1 << 22,  20 },       /* -5 */
-    { 1 << 23,  36 },       /* -6 */
-    { 1 << 24,  68 },       /* -7 */
-    { 3 << 23, 132 },       /* -8 */
-    { 1 << 25, 273 } };     /* -9 */
-  struct Lzma_options encoder_options;
   #endif
 
   #if _LZMAT
@@ -1012,7 +1010,7 @@ void pco_ini() {
   #endif
 
   #if _QUICKLZ
-#include "quicklz_/quicklz-c.h"
+#include "turbobench_/quicklz_/quicklz-c.h"
   #endif
 
   #if _PYSAP
@@ -1349,7 +1347,7 @@ int unishox2_decompressx(const char *in, int inlen, char *out, int lev);
   #endif
 
   #if _ZLIB_NG
-#include "zlib-ng_/zconf-ng.h"
+//#include "turbobench_/zconf-ng.h"
 #define Z_EXTERN
 #define Z_EXPORT   
 Z_EXTERN Z_EXPORT const char *zlibng_version(void);
