@@ -30,9 +30,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "conf.h"
+#include "turbobench_/conf.h"
+#include "turbobench_/cpu.h"
 #include "plugin.h"
-#include "cpu.h"
 
 enum {
 #define _MEMCPY 1
