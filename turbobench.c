@@ -63,9 +63,9 @@
   #endif
 
 #include <time.h>
-#include "conf.h"
-#include "time_.h"
-#include "cpu.h"
+#include "turbobench_/conf.h"
+#include "turbobench_/time_.h"
+#include "turbobench_/cpu.h"
 #include "plugin.h"
 
 #define STRINGIFY(x) #x
