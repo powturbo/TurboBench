@@ -1134,7 +1134,7 @@ endif
 
 ifneq ($(wildcard quicklz/.),)
 PLG_FLAGS+=-D_QUICKLZ
-OB+=$(call obj,turbobench_/quicklz_/quicklz1.o turbobench_/quicklz_/quicklz2.o turbobench_/quicklz_/quicklz3.o)
+OB+=$(call obj,turbobench_/quicklz/quicklz1.o turbobench_/quicklz/quicklz2.o turbobench_/quicklz/quicklz3.o)
 endif
 
 ifneq ($(wildcard pysap/.),)
