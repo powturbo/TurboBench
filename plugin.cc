@@ -882,6 +882,7 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
   #endif
 
   #if _MEMLZ
+#define MEMLZ_IMPLEMENTATION
 #include "memlz/memlz.h"
   #endif
 
