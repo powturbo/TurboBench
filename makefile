@@ -439,7 +439,7 @@ endif
 
 ifneq ($(wildcard lzlib/.),)
 PLG_FLAGS+=-D_LZLIB
-OB+=$(call obj,lzlib/lzlib.o turbobench_/lzlib_/bbexample.o)
+OB+=$(call obj,lzlib/lzlib.o turbobench_/lzlib/bbexample.o)
 endif
 
 ifneq ($(wildcard lzma/.),)
