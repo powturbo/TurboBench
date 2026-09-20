@@ -473,7 +473,7 @@ endif
 
 MINIZ_LIB:=
 ifneq ($(wildcard miniz/.),)
-PLG_FLAGS+=-D_MINIZ
+PLG_FLAGS+=-D_MINIZ -I$(BUILD)/miniz
 MINIZ_SRCS := $(shell find miniz -type f -name '*.[ch]' -o -name 'CMakeLists.txt')
 MINIZ_LIB = $(BUILD)/miniz/libminiz.a
 $(MINIZ_LIB): $(MINIZ_SRCS)
@@ -1172,7 +1172,7 @@ endif
 #--------------------------------------------------------------------
 OB+=$(BUILD)/plugin.o
 
-$(BUILD)/plugin.o: plugin.cc $(LIBS) 
+$(BUILD)/plugin.o: plugin.cc | $(LIBS) 
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(MARCH) $(PLG_FLAGS) $(CXXFLAGS) -std=c++20  $< -c -o $@
 
@@ -1237,7 +1237,7 @@ ifneq ($(wildcard iguanacmake/.),)
 ifeq ($(ARCH),x86_64)
 #ifneq ($(filter $(ARCH),aarch64 x86_64),)
 CXXFLAGS+=-D_IGUANA
-IGUANA_SRCS := $(shell find miniz -type f -name '*.[ch]' -o -name 'CMakeLists.txt')
+IGUANA_SRCS := $(shell find iguana -type f -name '*.[ch]' -o -name 'CMakeLists.txt')
 IGUANA_LIB = $(BUILD)/iguana/libiguana.a
 ifeq ($(ARCH),x86_64)
 IGUANA_FLAGS=-mavx512vl -mavx512bw
