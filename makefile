@@ -527,8 +527,6 @@ endif
 #---- O -----------------------
 OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
-ifneq ($(OPENZL), 0)
-OPENZL_SRCS := $(shell find openzl -type f -name '*.[ch]' -o -name '*.cpp' -o -name '*.cc' -o -name 'CMakeLists.txt' -o -name 'Makefile')
 ifdef CROSS  # NOTWORKING
 #OPENZL_LIB = $(BUILD)/openzl/libopenzl.a
 #$(OPENZL_LIB): $(OPENZL_SRCS)
@@ -538,22 +536,24 @@ ifdef CROSS  # NOTWORKING
 #	cmake --build $(BUILD)/openzl --config Release
 else
 PLG_FLAGS += -D_OPENZL
-CXXFLAGS += -Iopenzl/include -Iopenzl/src
-ifeq ($(OS), Windows)
-OPENZL_LIB = openzl/libopenzl.a
-$(OPENZL_LIB): $(OPENZL_SRCS)
-	cd openzl && $(MAKE) lib
-else
-OPENZL_LIB = $(BUILD)/openzl/libopenzl.a
-$(OPENZL_LIB): $(OPENZL_SRCS)
-	cmake -S openzl -B $(BUILD)/openzl -DOPENZL_ALLOW_INTROSPECTION=OFF -DOPENZL_INSTALL=OFF -DOPENZL_BUILD_CPP=OFF -DOPENZL_BUILD_CUSTOM_PARSERS=OFF -DOPENZL_BUILD_TOOLS=OFF -DOPENZL_BUILD_CLI=OFF -DOPENZL_BUILD_EXAMPLES=OFF
-	cmake --build $(BUILD)/openzl --config Release
-endif
-endif
-LIBS += $(OPENZL_LIB)
-endif
-endif
+CXXFLAGS  += -Iopenzl/include -Iopenzl/src
+OPENZL_BUILD_DIR := $(BUILD)/openzl
+OPENZL_LIB       := $(OPENZL_BUILD_DIR)/libopenzl.a
 
+OPENZL_SRCS := $(shell find openzl -type f \( -name '*.c' -o -name '*.h' -o -name '*.cpp' -o -name '*.cc' -o -name 'CMakeLists.txt' -o -name '*.cmake' \))
+OPENZL_CMAKE_FILES := $(shell find openzl -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \))
+LIBS      += $(OPENZL_LIB)
+
+$(OPENZL_BUILD_DIR)/CMakeCache.txt: $(OPENZL_CMAKE_FILES)
+	cmake -S openzl -B $(OPENZL_BUILD_DIR) -DCMAKE_BUILD_TYPE=Release -DOPENZL_ALLOW_INTROSPECTION=OFF -DOPENZL_INSTALL=OFF -DOPENZL_BUILD_CPP=OFF -DOPENZL_BUILD_CUSTOM_PARSERS=OFF \
+              -DOPENZL_BUILD_TOOLS=OFF -DOPENZL_BUILD_CLI=OFF -DOPENZL_BUILD_EXAMPLES=OFF
+	@touch $@
+
+$(OPENZL_LIB): $(OPENZL_BUILD_DIR)/CMakeCache.txt $(OPENZL_SRCS)
+	cmake --build $(OPENZL_BUILD_DIR) --config Release
+	@touch $@
+endif
+endif
 # 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be available the current directory
 # ONLY FOR BENCHMARKING: download corresponding library from https://github.com/WorkingRobot/OodleUE
 PLG_FLAGS+=-D_OODLE
@@ -671,7 +671,7 @@ endif
 
 ZLIB_NG_LIB :=
 ifneq ($(wildcard zlib-ng/.),)
-PLG_FLAGS += -D_ZLIB_NG
+PLG_FLAGS += -D_ZLIB_NG -I$(BUILD)/zlib-ng
 ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ZLIB_NG_LIB = $(BUILD)/zlib-ng/libz-ng.a
 ifdef CROSS
@@ -683,7 +683,7 @@ else
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
 	cmake -S zlib-ng -B $(BUILD)/zlib-ng -DWITH_NEON=OFF -DBUILD_TESTING=OFF -DWITH_GTEST=OFF -DWITH_GZFILEOP=OFF
 	cmake --build $(BUILD)/zlib-ng --config Release 
-	cp $(BUILD)/zlib-ng/zconf-ng.h turbobench_
+#	cp $(BUILD)/zlib-ng/zconf-ng.h turbobench_
 endif
 LIBS += $(ZLIB_NG_LIB)
 endif
@@ -903,12 +903,14 @@ ifneq ($(PHAZ), 0)
 PLG_FLAGS     += -D_PHAZ
 PHAZ_DIR      = $(PIVCODIR)/extras/phaz
 PHAZ_BDIR     = $(PIVCODIR)/build
-PHAZ_LIB      = $(PHAZ_DIR)/build/phaz_local.o
+#PHAZ_LIB      = $(PHAZ_DIR)/build/phaz_local.o
+PHAZ_LIB      = $(PIVCO_BDIR)/phaz_local.o
 $(PHAZ_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
 	@mkdir -p $(PHAZ_BDIR)
 	cmake -S $(PIVCODIR) -B $(PHAZ_BDIR) -DCMAKE_BUILD_TYPE=Release
 	cmake --build $(PHAZ_BDIR) --target pivco_huffman_local -j
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) PH=$(PIVCODIR) bash $(PHAZ_DIR)/tools/build.sh
+	cp $(PHAZ_DIR)/build/phaz_local.o $(PIVCO_BDIR)
 OB += $(PHAZ_LIB)
 endif
 LDFLAGS += -lm
