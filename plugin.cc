@@ -4163,7 +4163,7 @@ char *codver(int codec, char *v, char *s) {
     case P_MINIZ : return "v11.3.2";
       #endif
       #if _MEMLZ
-    case P_MEMLZ : return "v0.3/v2026.09.18"; 
+    case P_MEMLZ : return "v0.4/v2026.09.19"; 
       #endif
       #if _MISA77
     case P_MISA77:
