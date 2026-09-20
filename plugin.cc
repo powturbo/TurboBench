@@ -565,7 +565,8 @@ enum {
   #endif
 };
 
-//--- A ----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------Include --------------------------------------------------------------------------------
+//--- A ----------------------------------------
   #if _AOCL
 #include "aocl-compression/api/aocl_compression.h"
 static aocl_compression_desc aocl;
@@ -576,17 +577,19 @@ static aocl_compression_desc aocl;
 #include "EC/aom_/aom.h"
   #endif
 
-//--- B -----------------------------------------------------------
+//--- B ---------------------------------------
   #if _BPC
 #include "BitPlaneComp/src/BPCompressor.hh"
   #endif
 
-  #if _BRIEFLZ
-#include "brieflz/include/brieflz.h"
+  #if _BRC
+#include "Behemoth-Rank-Coding/brc.hpp"
+int vsrc_forwards(unsigned char * src, unsigned char * dst, size_t src_size);
+int vsrc_reverse(unsigned char * src, unsigned char * dst, size_t src_size);
   #endif
 
-  #if _BZIP2
-#include "bzip2/bzlib.h"
+  #if _BRIEFLZ
+#include "brieflz/include/brieflz.h"
   #endif
 
   #if _BROTLI
@@ -595,6 +598,15 @@ static aocl_compression_desc aocl;
 #include "brotli/c/common/version.h"
   #endif
 
+  #if _BZIP2
+#include "bzip2/bzlib.h"
+  #endif
+
+  #if _BZIP3
+#include "bzip3/include/libbz3.h"
+  #endif
+
+//--- C -----------------------------------------------------------
   #if _C_BLOSC2
     #ifdef C_C_BLOSC2LZ
 #include "c-blosc2/blosclz.h"
@@ -643,7 +655,6 @@ unsigned bloscdecomp(unsigned char *in, size_t inlen, unsigned char *out, unsign
 }   
   #endif
 
-//--- C -----------------------------------------------------------
   #if _CLICKHOUSE
 #include "Clickhouse/src/Compression/LZ4_decompress_faster.h"  
   #endif
@@ -691,6 +702,10 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
   #endif
 
 //--- F -----------------------------------------------------------
+  #if _FASTLZ
+#include "FastLZ/fastlz.h"
+  #endif
+
   #if _FLZMA2
 #define __LZMA_ENC_H  
 #define __LZMA_DEC_H  
@@ -903,7 +918,6 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
 #include "lzma/C/7zVersion.h"
   #endif
 
-//------  L -------------------------------------
   #if _ZPAQ
 #include "zpaq/libzpaq.h"
 void libzpaq::error(const char* msg) {
@@ -936,6 +950,10 @@ class Out: public libzpaq::Writer {
 #include "lzav/lzav.h"  
   #endif
 
+
+  #if _LZFSE
+#include "lzfse/src/lzfse.h"
+  #endif
 
   #if _LZFSEA
 #include <compression.h>
@@ -981,6 +999,13 @@ class Out: public libzpaq::Writer {
   #endif
 
 //------  M -------------------------------------
+  #if _MINIZ
+typedef unsigned long mz_ulong;
+extern "C" int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len, int level);
+extern "C" int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len);
+//#include "miniz/miniz.h" conflict with zlib.h
+  #endif
+
   #if _MISA77
 #include "misa77/include/misa77/misa77.h"
   #endif
@@ -996,6 +1021,118 @@ class Out: public libzpaq::Writer {
 
   #if _MWLZ
 #include "mwlz/mwlz.h"
+  #endif
+
+//------  O -------------------------------------
+  #if _OPENZL  // Adapted from lzbench
+#include "openzl/include/openzl/openzl.h"
+#include "openzl/include/openzl/codecs/zl_segmenters.h"
+#include "openzl/include/openzl/openzl.h"
+#include "openzl/src/openzl/codecs/transpose/decode_transpose_kernel.h"
+#include "openzl/src/openzl/codecs/transpose/encode_transpose_kernel.h"
+#include "openzl/src/openzl/shared/portability.h"
+#define OPENZL_FORMAT_VERSION 24
+#define WINDOWLOG_OPENZL      27
+typedef struct {
+  ZL_Compressor* cgraph;
+  ZL_CCtx *cctx;
+  ZL_DCtx *dctx;
+} openzl_params_s;
+
+static openzl_params_s *_openzl_init_base(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = (openzl_params_s*)malloc(sizeof(openzl_params_s));
+  params->cgraph = ZL_Compressor_create();  assert(params->cgraph);
+  params->cctx   = ZL_CCtx_create();        assert(params->cctx);
+  params->dctx   = ZL_DCtx_create();        assert(params->dctx);
+  ZL_Report report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_formatVersion, OPENZL_FORMAT_VERSION);
+  if(ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+  return params;
+}
+
+static openzl_params_s *_openzl_init_serial(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);  
+  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_LZ);// ZL_GRAPH_LZ: standard graph for LZ compression, offer performance similar to Zstd. Used for serial data (aka raw bytes).
+  if (ZL_isError(report)) printf("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+  return params;
+}
+
+template <typename TInteger>
+static openzl_params_s *_openzl_init_integer_t(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
+  ZL_GraphID graph = ZL_GRAPH_FIELD_LZ; // Build a graph to compress signed or unsigned integers (Little Endian). Adapted from OpenZL buildIntProfile() source code in cli/utils/compress_profiles.cpp .
+  if (std::is_signed<TInteger>::value) 
+    graph = ZL_Compressor_registerStaticGraph_fromNode1o(params->cgraph, ZL_NODE_ZIGZAG, graph);
+  
+  graph = ZL_Compressor_registerStaticGraph_fromNode1o(params->cgraph, ZL_Node_interpretAsLE(8*sizeof(TInteger)), graph);
+  graph = ZL_Compressor_buildNumFromSerialSegmenter(params->cgraph, sizeof(TInteger), 0, graph);
+
+  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, graph);
+  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+  return params;
+}
+
+template openzl_params_s *_openzl_init_integer_t<uint8_t >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<int8_t  >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<uint16_t>(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<int16_t >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<uint32_t>(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<int32_t >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<uint64_t>(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *_openzl_init_integer_t<int64_t >(size_t insize, size_t level, size_t windowLog);
+
+openzl_params_s *_openzl_init_generic(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
+  // ZL_GRAPH_COMPRESS_GENERIC: "default" generic compression suitable for any stream type. Used as a fallback if a compressor does not match the characteristics of the data. Currently corresponds to Zstd level 6.
+  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_COMPRESS_GENERIC);
+  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+  return params;
+}
+
+openzl_params_s *_openzl_init_zstd(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);  
+  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_ZSTD); // ZL_GRAPH_ZSTD: Zstd compression.
+  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+   // Valid compression levels range from -99 (?) to -1 and from 1 to 22. Level 0 requests the default behaviour, which corresponds to level 6.
+  report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_compressionLevel, level);
+  if (ZL_isError(report)) {
+    printf("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+    abort();
+  }
+  return params;
+}
+
+static openzl_params_s *_openzl_init_lz4(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
+  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_LZ4); // ZL_GRAPH_LZ4: LZ4 compression.
+  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report)); 
+  report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_compressionLevel, level); // Valid compression levels range from -99 (?) to -1 and from 1 to 12. Level 0 requests the default behaviour, which corresponds to level 6.
+  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
+  return params;
+}
+
+static void _openzl_deinit(openzl_params_s *params) {
+  if (!params) return;
+  if (params->dctx) ZL_DCtx_free(params->dctx);
+  if (params->cctx) ZL_CCtx_free(params->cctx);
+  if (params->cgraph) ZL_Compressor_free(params->cgraph);
+  free(params);
+}
+
+static int64_t _openzl_compress(char *inbuf, size_t insize, char *outbuf, size_t outsize, openzl_params_s *params) {
+  if(!params || !params->cctx || !params->cgraph) return 0;
+  ZL_Report report = ZL_CCtx_refCompressor(params->cctx, params->cgraph);
+  if (ZL_isError(report)) die("OpenZL compression error: %s\n", ZL_CCtx_getErrorContextString(params->cctx, report));
+  report = ZL_CCtx_compress(params->cctx, outbuf, outsize, inbuf, insize);
+  if(ZL_isError(report)) die("OpenZL compression error: %s\n", ZL_CCtx_getErrorContextString(params->cctx, report));
+  return (int64_t) ZL_validResult(report);
+}
+
+static int64_t _openzl_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsize, openzl_params_s *params) {
+  if(!params || !params->dctx) return 0;
+  ZL_Report report = ZL_DCtx_decompress(params->dctx, outbuf, outsize, inbuf, insize);
+  if (ZL_isError(report)) die("OpenZL decompression error: %s\n", ZL_DCtx_getErrorContextString(params->dctx, report));
+  return (int64_t) ZL_validResult(report);
+}
   #endif
 
 //------  P -------------------------------------
@@ -1150,16 +1287,6 @@ int64_t _xz_decompress(char *in, size_t insize, char *out, size_t outsize, int t
 }
   #endif
 
-  #if _ZLIBLIB
-#include <zlib.h>
-//     #elif defined(ZLIB_NG)          // zlib-ng.a compatible mode : "./configure --zlib-compat" (see zlib-ng/INSTALL)
-//#include "zlib/zlib.h"
-  #elif defined(ZLIB_INTEL)
-#include "zlib_intel/zlib.h"
-  #else
-#include "zlib/zlib.h"
-  #endif
-
 //------  Y -------------------------------------
   #if _YALZ77
 #include "yalz77/lz77.h"
@@ -1170,6 +1297,19 @@ int64_t _xz_decompress(char *in, size_t insize, char *out, size_t outsize, int t
   #endif
 
 //------  Z -------------------------------------
+  #if _ZXC
+#define ZXC_STATIC_DEFINE
+#include "zxc/include/zxc.h"
+  #endif
+
+  #if _ZLIBLIB
+#include <zlib.h>
+  #elif defined(ZLIB_INTEL)
+#include "zlib_intel/zlib.h"
+  #else
+#include "zlib/zlib.h"
+  #endif
+
   #if _ZLING
 #include "libzling/src/libzling.h"
 #include "libzling_/libzling_utils_mem.h"
@@ -1179,126 +1319,7 @@ int64_t _xz_decompress(char *in, size_t insize, char *out, size_t outsize, int t
 #include "../lz/x/beplugi.h"
   #endif
 
-//-----------------------------
-  #if _BRC
-#include "Behemoth-Rank-Coding/brc.hpp"
-int vsrc_forwards(unsigned char * src, unsigned char * dst, size_t src_size);
-int vsrc_reverse(unsigned char * src, unsigned char * dst, size_t src_size);
-  #endif
-
-  #if _OPENZL  // Adapted from lzbench
-#include "openzl/include/openzl/openzl.h"
-#include "openzl/include/openzl/codecs/zl_segmenters.h"
-#include "openzl/include/openzl/openzl.h"
-#include "openzl/src/openzl/codecs/transpose/decode_transpose_kernel.h"
-#include "openzl/src/openzl/codecs/transpose/encode_transpose_kernel.h"
-#include "openzl/src/openzl/shared/portability.h"
-#define OPENZL_FORMAT_VERSION 24
-#define WINDOWLOG_OPENZL      27
-typedef struct {
-  ZL_Compressor* cgraph;
-  ZL_CCtx *cctx;
-  ZL_DCtx *dctx;
-} openzl_params_s;
-
-static openzl_params_s *_openzl_init_base(size_t insize, size_t level, size_t windowLog) {
-  openzl_params_s *params = (openzl_params_s*)malloc(sizeof(openzl_params_s));
-  params->cgraph = ZL_Compressor_create();  assert(params->cgraph);
-  params->cctx   = ZL_CCtx_create();        assert(params->cctx);
-  params->dctx   = ZL_DCtx_create();        assert(params->dctx);
-  ZL_Report report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_formatVersion, OPENZL_FORMAT_VERSION);
-  if(ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
-  return params;
-}
-
-static openzl_params_s *_openzl_init_serial(size_t insize, size_t level, size_t windowLog) {
-  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);  
-  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_LZ);// ZL_GRAPH_LZ: standard graph for LZ compression, offer performance similar to Zstd. Used for serial data (aka raw bytes).
-  if (ZL_isError(report)) printf("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
-  return params;
-}
-
-template <typename TInteger>
-static openzl_params_s *_openzl_init_integer_t(size_t insize, size_t level, size_t windowLog) {
-  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
-  ZL_GraphID graph = ZL_GRAPH_FIELD_LZ; // Build a graph to compress signed or unsigned integers (Little Endian). Adapted from OpenZL buildIntProfile() source code in cli/utils/compress_profiles.cpp .
-  if (std::is_signed<TInteger>::value) 
-    graph = ZL_Compressor_registerStaticGraph_fromNode1o(params->cgraph, ZL_NODE_ZIGZAG, graph);
-  
-  graph = ZL_Compressor_registerStaticGraph_fromNode1o(params->cgraph, ZL_Node_interpretAsLE(8*sizeof(TInteger)), graph);
-  graph = ZL_Compressor_buildNumFromSerialSegmenter(params->cgraph, sizeof(TInteger), 0, graph);
-
-  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, graph);
-  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
-  return params;
-}
-
-template openzl_params_s *_openzl_init_integer_t<uint8_t >(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<int8_t  >(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<uint16_t>(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<int16_t >(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<uint32_t>(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<int32_t >(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<uint64_t>(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<int64_t >(size_t insize, size_t level, size_t windowLog);
-
-openzl_params_s *_openzl_init_generic(size_t insize, size_t level, size_t windowLog) {
-  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
-  // ZL_GRAPH_COMPRESS_GENERIC: "default" generic compression suitable for any stream type. Used as a fallback if a compressor does not match the characteristics of the data. Currently corresponds to Zstd level 6.
-  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_COMPRESS_GENERIC);
-  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
-  return params;
-}
-
-openzl_params_s *_openzl_init_zstd(size_t insize, size_t level, size_t windowLog) {
-  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);  
-  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_ZSTD); // ZL_GRAPH_ZSTD: Zstd compression.
-  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
-   // Valid compression levels range from -99 (?) to -1 and from 1 to 22. Level 0 requests the default behaviour, which corresponds to level 6.
-  report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_compressionLevel, level);
-  if (ZL_isError(report)) {
-    printf("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
-    abort();
-  }
-  return params;
-}
-
-static openzl_params_s *_openzl_init_lz4(size_t insize, size_t level, size_t windowLog) {
-  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
-  ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_LZ4); // ZL_GRAPH_LZ4: LZ4 compression.
-  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report)); 
-  report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_compressionLevel, level); // Valid compression levels range from -99 (?) to -1 and from 1 to 12. Level 0 requests the default behaviour, which corresponds to level 6.
-  if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
-  return params;
-}
-
-static void _openzl_deinit(openzl_params_s *params) {
-  if (!params) return;
-  if (params->dctx) ZL_DCtx_free(params->dctx);
-  if (params->cctx) ZL_CCtx_free(params->cctx);
-  if (params->cgraph) ZL_Compressor_free(params->cgraph);
-  free(params);
-}
-
-static int64_t _openzl_compress(char *inbuf, size_t insize, char *outbuf, size_t outsize, openzl_params_s *params) {
-  if(!params || !params->cctx || !params->cgraph) return 0;
-  ZL_Report report = ZL_CCtx_refCompressor(params->cctx, params->cgraph);
-  if (ZL_isError(report)) die("OpenZL compression error: %s\n", ZL_CCtx_getErrorContextString(params->cctx, report));
-  report = ZL_CCtx_compress(params->cctx, outbuf, outsize, inbuf, insize);
-  if(ZL_isError(report)) die("OpenZL compression error: %s\n", ZL_CCtx_getErrorContextString(params->cctx, report));
-  return (int64_t) ZL_validResult(report);
-}
-
-static int64_t _openzl_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsize, openzl_params_s *params) {
-  if(!params || !params->dctx) return 0;
-  ZL_Report report = ZL_DCtx_decompress(params->dctx, outbuf, outsize, inbuf, insize);
-  if (ZL_isError(report)) die("OpenZL decompression error: %s\n", ZL_DCtx_getErrorContextString(params->dctx, report));
-  return (int64_t) ZL_validResult(report);
-}
-  #endif
-
 //=============================================================================================================================
-
   #if __cplusplus
 extern "C" {
   #endif
@@ -1309,20 +1330,12 @@ static firetrail_encoder_t *firetrail_encoder;
 static firetrail_decoder_t *firetrail_decoder;
 #endif 
 
-  #if _BZIP3
-#include "bzip3/include/libbz3.h"
-  #endif
-
   #if _CHAMELEON
 #include "chameleon/Chameleon2.h"
   #endif
 
   #if _DENSITY
 #include "density/src/density_api.h"
-  #endif
-
-  #if _FASTLZ
-#include "FastLZ/fastlz.h"
   #endif
 
   #if _LIBLZF
@@ -1333,21 +1346,10 @@ static firetrail_decoder_t *firetrail_decoder;
 #include "libslz/src/slz.h"
   #endif
 
-  #if _LZFSE
-#include "lzfse/src/lzfse.h"
-  #endif
-
   #if _LZJODY
 #include "lzjody/lzjody.h"
   #endif
 
-  #if _MINIZ
-typedef unsigned long mz_ulong;
-int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len, int level);
-int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len);
-  #endif
-
-//------  N -------------------------------------
   #if _NZ1
 size_t nanozip_compress(  const uint8_t *input, size_t in_size, uint8_t *output, size_t out_size, int window_size);
 size_t nanozip_decompress(const uint8_t *input, size_t in_size, uint8_t *output, size_t out_size);
@@ -1406,22 +1408,6 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
 
   #if _ZOPFLI
 #include "zopfli/src/zopfli/zopfli.h"
-  #endif
-
-  #if _ZXC
-#define ZXC_STATIC_DEFINE
-#include "zxc/include/zxc.h"
-/*static ZXC_NOINLINE ZXC_COLD int zxc_ensure_entropy_scratch(const zxc_cctx_t* RESTRICT ctx) {
-    if (LIKELY(ctx->pivco_scratch != NULL)) return ZXC_OK;
-    return zxc_cctx_alloc_entropy_scratch((zxc_cctx_t*)(uintptr_t)ctx);
-}
-static ZXC_NOINLINE ZXC_COLD int zxc_decode_lit_pivco(const zxc_cctx_t* RESTRICT ctx, const uint8_t* RESTRICT payload,  const size_t psize, const size_t required_size) {
-  const int arc = zxc_ensure_entropy_scratch(ctx);
-  if (UNLIKELY(arc != ZXC_OK)) return arc;
-  if (UNLIKELY(ctx->lit_buffer_cap < required_size + ZXC_PAD_SIZE || ctx->pivco_scratch_cap < required_size + ZXC_PIVCO_SCRATCH_PAD))
-    return ZXC_ERROR_CORRUPT_DATA;
-  return zxc_huf_decode_section(payload, psize, ctx->lit_buffer, required_size,  ctx->pivco_scratch);
-}*/
   #endif
 
   #if __cplusplus
@@ -2755,9 +2741,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _TSQ
     case P_TSQ: { TSQCompressionContext_MT *cctx = tsqAllocateContextCompression_MT(threadnum, false); if(!cctx) return 0; 
       uint8_t *compressed = nullptr; size_t cs = 0;
-      tsqCompress_MT(cctx, (uint8_t*)in, inlen, false, &compressed, &cs, false, 2, lev);
-      memcpy(out, compressed, cs); tsqDeallocateContextCompression_MT(cctx);
-      free(compressed);
+      tsqCompress_MT(cctx, (uint8_t*)in, inlen, false, &compressed, &cs, false, 2, lev);      memcpy(out, compressed, cs); 
+      tsqDeallocateContextCompression_MT(cctx); free(compressed);
       return cs; 
     }
       #endif
