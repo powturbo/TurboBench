@@ -636,6 +636,16 @@ endif
 endif
 endif
 
+TSQ_LIB :=
+ifneq ($(wildcard turbosqueeze/.),)
+PLG_FLAGS+=-D_TSQ
+TSQ_SRCS := $(shell find turbosqueeze -type f -name '*.cpp' -o -name '*.h')
+TSQ_LIB = $(BUILD)/tsq/libturbosqueeze.a
+$(TSQ_LIB): $(TSQ_SRCS)
+	cmake -S turbosqueeze -B $(BUILD)/tsq && $(MAKE) -C $(BUILD)/tsq
+LIBS += $(TSQ_LIB)
+endif
+
 #--- X -------------------------
 XZ_LIB :=
 ifneq ($(wildcard xz/.),)
@@ -1130,6 +1140,24 @@ endif
 ifneq ($(wildcard ms-compress/.),)
 PLG_FLAGS+=-D_MSCOMPRESS
 OB+=$(call obj,ms-compress/src/mscomp.o ms-compress/src/lznt1_compress.o ms-compress/src/lznt1_decompress.o ms-compress/src/xpress_compress.o ms-compress/src/xpress_decompress.o ms-compress/src/xpress_huff_compress.o ms-compress/src/xpress_huff_decompress.o)
+endif
+
+ifneq ($(wildcard mwlz/.),)
+PLG_FLAGS+=-D_MWLZ
+OB+=$(call obj,mwlz/mwlz.o)
+endif
+
+ifneq ($(wildcard NZ1/.),)
+PLG_FLAGS+=-D_NZ1
+ifeq ($(ARCH),x86_64)
+NZ1_FLAGS = $(_AVX2)
+else ifeq ($(ARCH),aarch64)
+NZ1_FLAGS = $(_SSE)
+endif
+$(BUILD)/NZ1/nz1.o: NZ1/nz1.c
+	@mkdir -p $(dir $@)
+	$(CC) -O3 $(NZ1_FLAGS) $(CFLAGS) $< -c -o $@
+OB += $(BUILD)/NZ1/nz1.o
 endif
 
 ifneq ($(wildcard quicklz/.),)
