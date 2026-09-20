@@ -140,6 +140,3 @@
 [submodule "lzlib"]
 	path = lzlib
 	url = https://github.com/aonez/lzlib.git
-[submodule "NZ1"]
-	path = NZ1
-	url = https://github.com/Ferki-git-creator/NZ1.git
