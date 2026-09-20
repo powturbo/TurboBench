@@ -251,6 +251,15 @@ enum {
 #define _MSCOMPRESS 0
 #endif
  P_MSCOMPRESS,
+#ifndef _MWLZ
+#define _MWLZ 0
+#endif
+ P_MWLZ,
+
+#ifndef _NZ1
+#define _NZ1 0
+#endif
+ P_NZ1,
 
 #ifndef _OPENZL
 #define _OPENZL 0
@@ -356,6 +365,10 @@ enum {
 #define _TORNADO 0
 #endif
  P_TORNADO,
+#ifndef _TSQ
+#define _TSQ 0
+#endif
+ P_TSQ,
  
 #ifndef _UNISHOX2
 #define _UNISHOX2 0
@@ -552,7 +565,7 @@ enum {
   #endif
 };
 
-//-------------------------------------------------------------------------------------------------------------------
+//--- A ----------------------------------------------------------------------------------------------------------------------------
   #if _AOCL
 #include "aocl-compression/api/aocl_compression.h"
 static aocl_compression_desc aocl;
@@ -563,6 +576,7 @@ static aocl_compression_desc aocl;
 #include "EC/aom_/aom.h"
   #endif
 
+//--- B -----------------------------------------------------------
   #if _BPC
 #include "BitPlaneComp/src/BPCompressor.hh"
   #endif
@@ -629,6 +643,7 @@ unsigned bloscdecomp(unsigned char *in, size_t inlen, unsigned char *out, unsign
 }   
   #endif
 
+//--- C -----------------------------------------------------------
   #if _CLICKHOUSE
 #include "Clickhouse/src/Compression/LZ4_decompress_faster.h"  
   #endif
@@ -665,6 +680,7 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 }
   #endif
 
+//--- D -----------------------------------------------------------
   #if _DAALA
 #include "EC/daala_/daala.h"
   #endif
@@ -674,6 +690,7 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 #include "doboz/Source/Doboz/Decompressor.h"
   #endif
 
+//--- F -----------------------------------------------------------
   #if _FLZMA2
 #define __LZMA_ENC_H  
 #define __LZMA_DEC_H  
@@ -681,6 +698,7 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 #include "fast-lzma2/lzma2_dec.h"
   #endif
 
+//--- G -----------------------------------------------------------
   #if _GIPFELI
 #include "gipfeli/gipfeli.h"
   #endif
@@ -690,10 +708,12 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 #include "GLZA/GLZAdecode.h"
   #endif
 
+//--- H -----------------------------------------------------------
   #if _HEATSHRINK
 #include "heatshrink_/heatshrink.h"
   #endif
 
+//--- I -----------------------------------------------------------
   #if _IGUANA
 #include "iguana/iguana/encoder.h"
 #include "iguana/iguana/decoder.h"
@@ -758,6 +778,7 @@ unsigned IguanaDecomp(const char *source, unsigned source_size, char *dest, unsi
     #endif
   #endif
 
+//--- K --------------------------------------------------------------
   #if _KANZI
 #include "kanzi-cpp/src/types.hpp"
 #include "kanzi-cpp/src/InputStream.hpp"
@@ -821,7 +842,8 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
   return total;
 }
   #endif
-  
+
+//--- L -------------------------------------------------------  
   #if _LIBBSC
 #include "libbsc/libbsc/libbsc.h"
 #include "libbsc/libbsc/st/st.h"
@@ -881,11 +903,7 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
 #include "lzma/C/7zVersion.h"
   #endif
 
-  #if _MEMLZ
-#define MEMLZ_IMPLEMENTATION
-#include "memlz/memlz.h"
-  #endif
-
+//------  L -------------------------------------
   #if _ZPAQ
 #include "zpaq/libzpaq.h"
 void libzpaq::error(const char* msg) {
@@ -945,6 +963,10 @@ class Out: public libzpaq::Writer {
 #include "lzoma_/lzoma.h"
   #endif
 
+  #if _LZSS
+#include "lzss/lzss.h"
+  #endif
+
   #if _LZSA
 #include "lzsa/src/shrink_inmem.h"
 #include "lzsa/src/expand_inmem.h"
@@ -958,6 +980,7 @@ class Out: public libzpaq::Writer {
 #include "LZSSE/lzsse8/lzsse8.h"
   #endif
 
+//------  M -------------------------------------
   #if _MISA77
 #include "misa77/include/misa77/misa77.h"
   #endif
@@ -966,10 +989,16 @@ class Out: public libzpaq::Writer {
 #include "ms-compress/include/mscomp.h"
   #endif
 
-  #if _LZSS
-#include "lzss/lzss.h"
+  #if _MEMLZ
+#define MEMLZ_IMPLEMENTATION
+#include "memlz/memlz.h"
   #endif
 
+  #if _MWLZ
+#include "mwlz/mwlz.h"
+  #endif
+
+//------  P -------------------------------------
   #if _PCODEC
 #include "pcodec_/cpcodec.h" // https://github.com/pcodec/pcodec --------------------------------------------
   #if defined(_WIN32)
@@ -1010,10 +1039,6 @@ void pco_ini() {
 #include "pithy/pithy.h"
   #endif
 
-  #if _QUICKLZ
-#include "turbobench_/quicklz/quicklz-c.h"
-  #endif
-
   #if _PYSAP
 #include "pysap/pysapcompress/hpa101saptype.h"
 #include "pysap/pysapcompress/hpa104CsObject.h"
@@ -1024,6 +1049,12 @@ void pco_ini() {
 #undef min
   #endif
 
+//------  Q -------------------------------------
+  #if _QUICKLZ
+#include "turbobench_/quicklz/quicklz-c.h"
+  #endif
+
+//------  S -------------------------------------
   #if _SHRINKER
 #include "shrinker/Shrinker.h"
   #endif
@@ -1036,6 +1067,7 @@ void pco_ini() {
 #include "snappy/snappy.h"
   #endif
 
+//------  T -------------------------------------
   #if _TAMP
 #include "tamp/tamp/_c_src/tamp/compressor.h"
 #include "tamp/tamp/_c_src/tamp/decompressor.h"
@@ -1049,6 +1081,10 @@ void pco_ini() {
 #include "tornado_/tormem.h"
   #endif
 
+  #if _TSQ
+#include "turbosqueeze/turbosqueeze.h"
+  #endif
+
   #if _TURBORC
 #include "Turbo-Range-Coder/include/turborc.h"
 #include "Turbo-Range-Coder/include/anscdf.h"
@@ -1056,6 +1092,7 @@ void pco_ini() {
 //#include "Turbo-Range-Coder/rcutil.h"
   #endif
 
+//------  W -------------------------------------
   #if _WFLZ
 #include "wflz/wfLZ.h"
   #endif
@@ -1064,16 +1101,9 @@ void pco_ini() {
 #include "../wimlib/include/wimlib.h"
   #endif
 
+//------  X -------------------------------------
   #if _XPACK
 #include "xpack/libxpack.h"
-  #endif
-
-  #if _YALZ77
-#include "yalz77/lz77.h"
-  #endif
-
-  #if _YAPPY
-#include "yappy/yappy.hpp"
   #endif
 
   #if _XZ
@@ -1130,6 +1160,16 @@ int64_t _xz_decompress(char *in, size_t insize, char *out, size_t outsize, int t
 #include "zlib/zlib.h"
   #endif
 
+//------  Y -------------------------------------
+  #if _YALZ77
+#include "yalz77/lz77.h"
+  #endif
+
+  #if _YAPPY
+#include "yappy/yappy.hpp"
+  #endif
+
+//------  Z -------------------------------------
   #if _ZLING
 #include "libzling/src/libzling.h"
 #include "libzling_/libzling_utils_mem.h"
@@ -1138,6 +1178,7 @@ int64_t _xz_decompress(char *in, size_t insize, char *out, size_t outsize, int t
   #ifdef _LZ
 #include "../lz/x/beplugi.h"
   #endif
+
 //-----------------------------
   #if _BRC
 #include "Behemoth-Rank-Coding/brc.hpp"
@@ -1255,6 +1296,7 @@ static int64_t _openzl_decompress(char *inbuf, size_t insize, char *outbuf, size
   return (int64_t) ZL_validResult(report);
 }
   #endif
+
 //=============================================================================================================================
 
   #if __cplusplus
@@ -1303,6 +1345,12 @@ static firetrail_decoder_t *firetrail_decoder;
 typedef unsigned long mz_ulong;
 int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len, int level);
 int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len);
+  #endif
+
+//------  N -------------------------------------
+  #if _NZ1
+size_t nanozip_compress(  const uint8_t *input, size_t in_size, uint8_t *output, size_t out_size, int window_size);
+size_t nanozip_decompress(const uint8_t *input, size_t in_size, uint8_t *output, size_t out_size);
   #endif
 
   #if _OODLE
@@ -1747,6 +1795,8 @@ struct plugs plugs[] = {
   { P_MISA77,        "misa77",        _MISA77,    "misa77",                  "0,1,2,3,4,-1" },
   { P_MISA77S,       "misa77_safe",   _MISA77,    "misa77 safe",             "0,1" },
   { P_MSCOMPRESS,    "mscompress",    _MSCOMPRESS,"ms-compress",             "2,3,4" },
+  { P_MWLZ,          "mwlz",          _MWLZ,      "mwlz",                    "" },
+  { P_NZ1,           "nz1",           _NZ1,       "nz1 nanozip 1",           "" },
  
   { P_OPENZL_U8,     "openzl_u8",     _OPENZL,    "openzl u8",               "" },
   { P_OPENZL_I8,     "openzl_i8",     _OPENZL,    "openzl i8",               "" },
@@ -1791,6 +1841,7 @@ struct plugs plugs[] = {
   { P_TAMP,          "tamp",          _TAMP,      "tamp",                     "8,9,10,11,12,13,14,15" },
   { P_TCOBS,         "tcobs",         _TCOBS,     "tcobs",                    "" },
   { P_TORNADO,       "tornado",       _TORNADO,   "Tornado",                  "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
+  { P_TSQ,           "tsq",           _TSQ,       "turbosqueeze",             "0,1,2,3,4,5,6,7" },
   
   { P_UNISHOX2,      "unishox2",      _UNISHOX2,  "unishox2",                 "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
   { P_UNISHOX3,      "unishox3",      _UNISHOX3,  "unishox3",                 "" },
@@ -2480,10 +2531,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_LIBLZG: { lzg_encoder_config_t cfg; LZG_InitEncoderConfig(&cfg); cfg.fast = LZG_TRUE; cfg.level = lev; return LZG_Encode(in, inlen, out, outsize, &cfg); }
       #endif
 
-      #if _MEMLZ
-    case P_MEMLZ: memlz_reset((memlz_state*)workmem); return memlz_stream_compress(out, in, inlen, (memlz_state*)workmem);
-      #endif
-
       #if _LZMAT
     case P_LZMAT:   { MP_U32 outs=outsize; int rc = lzmat_encode(out, &outs, in, inlen); return rc == LZMAT_STATUS_OK ? outs : 0; }
       #endif
@@ -2546,8 +2593,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #endif
 
-      #if _MSCOMPRESS
-    case P_MSCOMPRESS: { size_t outlen=outsize; return ms_compress((MSCompFormat)lev, in, inlen, out, &outlen)?0:outlen; }
+      #if _MEMLZ
+    case P_MEMLZ: memlz_reset((memlz_state*)workmem); return memlz_stream_compress(out, in, inlen, (memlz_state*)workmem);
       #endif
 
       #if _MINIZ
@@ -2557,6 +2604,18 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _MISA77
     case P_MISA77:
     case P_MISA77S: return misa77::compress(in, inlen, out, outsize, misa77::config(lev));
+      #endif
+
+      #if _MSCOMPRESS
+    case P_MSCOMPRESS: { size_t outlen=outsize; return ms_compress((MSCompFormat)lev, in, inlen, out, &outlen)?0:outlen; }
+      #endif
+
+      #if _MWLZ
+    case P_MWLZ: return mwlz_compress(in, inlen, out, outsize, MWLZ_DICT_FREEZE);
+      #endif
+
+      #if _NZ1
+    case P_NZ1: return nanozip_compress(in, inlen, out, outsize, ((1 << 16) - 1));
       #endif
 
       #if _OPENZL
@@ -2691,6 +2750,16 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _TORNADO
     case P_TORNADO:   return torcompress(lev, in, out, inlen);
+      #endif
+
+      #if _TSQ
+    case P_TSQ: { TSQCompressionContext_MT *cctx = tsqAllocateContextCompression_MT(threadnum, false); if(!cctx) return 0; 
+      uint8_t *compressed = nullptr; size_t cs = 0;
+      tsqCompress_MT(cctx, (uint8_t*)in, inlen, false, &compressed, &cs, false, 2, lev);
+      memcpy(out, compressed, cs); tsqDeallocateContextCompression_MT(cctx);
+      free(compressed);
+      return cs; 
+    }
       #endif
 
       #if _UNISHOX2
@@ -3430,10 +3499,6 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         #endif
       #endif
 
-      #if _MSCOMPRESS
-     case P_MSCOMPRESS: { size_t _outlen = outlen; return ms_decompress((MSCompFormat)lev, in, inlen, out, &_outlen)==MSCOMP_OK?inlen:0; }
-      #endif
-
       #if _MINIZ
     case P_MINIZ: { uLongf outsize = outlen; int rc = mz_uncompress(out, &outsize, in, inlen); } break;
       #endif
@@ -3442,7 +3507,19 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_MISA77:  return misa77::decompress(in, inlen, out, outlen);
     case P_MISA77S: return misa77::decompress(in, inlen, out, outlen, misa77::dconfig(true));
       #endif
+
+      #if _MSCOMPRESS
+    case P_MSCOMPRESS: { size_t _outlen = outlen; return ms_decompress((MSCompFormat)lev, in, inlen, out, &_outlen)==MSCOMP_OK?inlen:0; }
+      #endif
+
+      #if _MWLZ
+    case P_MWLZ: return mwlz_decompress(in, inlen, out, outlen);
+      #endif
       
+      #if _NZ1
+    case P_NZ1: return nanozip_decompress(in, inlen, out, outlen);
+      #endif
+
       #if _OODLE
     case P_OODLE: { 
       int nodll = strchr(prm,'d')?1:0;  
@@ -3582,6 +3659,13 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _TORNADO
     case P_TORNADO: return tordecompress(in, out, inlen, outlen);
+      #endif
+
+      #if _TSQ
+    case P_TSQ: { TSQDecompressionContext_MT *dctx = tsqAllocateContextDecompression_MT(8, false); uint8_t *decompressed = nullptr; size_t ds = 0;
+      tsqDecompress_MT(dctx, in, inlen, false, &decompressed, &ds, false); tsqDeallocateContextDecompression_MT(dctx);
+      memcpy(out, decompressed, ds);
+    } break;
       #endif
 
       #if _UNISHOX2
@@ -4087,6 +4171,10 @@ char *codver(int codec, char *v, char *s) {
       #endif
       #if _MSCOMPRESS
     case P_MSCOMPRESS: return "v2020.01.05";
+      #endif
+
+      #if _NZ1
+    case P_NZ1 : return "v2025.08.10"; 
       #endif
 
       #if _OPENZL
