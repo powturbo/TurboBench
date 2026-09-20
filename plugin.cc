@@ -2276,6 +2276,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _BZIP3
     case P_BZIP3:    { 
+        #if 0
       #define BZIP3_SIZE 511*MB
       struct bz3_state *st = bz3_new(BZIP3_SIZE);
       unsigned char *ip,*op = out;
@@ -2290,7 +2291,12 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       }
       bz3_free(st);
       return op - out;
-    }
+        #else
+      size_t cs = outsize; uint32_t block_size = 1 << (19 + lev); // level 1 = 1 MB, level 3 = 4 MB, level 9 = 256 MB, level 10 = 511 MB
+      int rc = bz3_compress(block_size > (511 << 20) ? (511 << 20) : block_size, (uint8_t*)in, (uint8_t*)out, inlen, &cs);
+      return rc == BZ3_OK?cs:0;
+        #endif
+      }
       #endif
 
       #if _CHAMELEON
@@ -3099,12 +3105,11 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_TURBORC: { //int ec = 0; 
       char *q;
       unsigned bwtlev = 9, xprep8=0, forcelzp=0, verbose=0, xsort=0, itmax=0, lenmin=1, nutf8=0, z=0;
-      if(q = strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1));  
+      if(q = strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1)); 
       if(q = strchr(prm,'m')) lenmin = atoi(q+(q[1]=='='?2:1));  
       if(q = strchr(prm,'U')) nutf8  = 1;
       if(q = strchr(prm,'s')) z = 2; else if(q = strchr(prm,'u')) z = 4;
-
-      #define bwtflag(z) (z==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | forcelzp | (verbose?BWT_VERBOSE:0) | (nutf8?BWT_NUTF8:0) | xsort <<14 | itmax <<10 | lenmin
+      #define bwtflag(z) (z==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | forcelzp | (nutf8?BWT_NUTF8:0) | (verbose?BWT_VERBOSE:0) | xsort <<14 | itmax <<10 | lenmin
       switch(lev) {
         case  1: return rcsenc(    in, inlen, out);
         case  2: return rccsenc(   in, inlen, out); 
@@ -3121,7 +3126,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         case 13: return z==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
         case 14: return z==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
         case 17: return rcu3senc(   in, inlen, out);
-        case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));
+        case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));  
         case 56: return anscdfenc(    in, inlen, out);
         //case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpenc( in, inlen, out, esize?esize:4); return inlen; }  
         //case 101: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tp4enc(in, inlen, out, esize?esize:4); return inlen; }       
@@ -3229,7 +3234,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _BZIP3
     case P_BZIP3: { //size_t outsize = outlen; return bz3_decompress(in, out, inlen, &outsize)==BZ3_OK?outlen:-1; 
-        struct bz3_state *st = bz3_new(BZIP3_SIZE);
+        /*struct bz3_state *st = bz3_new(BZIP3_SIZE);
         unsigned char *ip = in, *op;
         for(op = out; op < out+outlen;) { 
           unsigned iplen = ctou32(ip), oplen = (out+outlen) - op; oplen = min(oplen, BZIP3_SIZE);
@@ -3239,7 +3244,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
           ip += 4+iplen;          
         }
         bz3_free(st);
-        return op-out;
+        return op-out;*/
+        size_t ds = outlen;
+        int rc = bz3_decompress((uint8_t*)in, (uint8_t*)out, inlen, &ds); return rc == BZ3_OK?ds:rc;
+        return ds;
       }
       #endif
 
