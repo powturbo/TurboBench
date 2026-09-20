@@ -2091,7 +2091,19 @@ int main(int argc, char* argv[]) {
   unsigned long long filenmax = 0;
   char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049], fsuffix[17]="";
   char               *_argvx[1], **argvx=_argvx;                                          if(verbose > 5) printf("START1\n");fflush(stdout);
-  
+      #ifndef _WIN32
+  { const  rlim_t kStackSize = 32 * 1024 * 1024;
+    struct rlimit rl;
+    int rc = getrlimit(RLIMIT_STACK, &rl);
+    if (!rc && rl.rlim_cur < kStackSize) {
+      rl.rlim_cur = kStackSize;
+          if(rc = setrlimit(RLIMIT_STACK, &rl)) {
+            fprintf(stderr, "setrlimit failed. rc = %d. set stack size to '20971520'\n", rc);
+          }
+    }
+  }
+    #endif
+
   cpubrand(_cpubrand, 64); 
   
   int c, digit_optind = 0;                                              
