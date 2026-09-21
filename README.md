@@ -22,7 +22,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - Built to avoid common pitfalls like cache scenarios and throttling found in other tools.
 - Unlock peak performance — TurboBench reduces **throttling** by intelligently controlling the **CPU frequency**
 - Automatic sorting, updating, and merging of result files.
-- A **nightly github [releases](https://github.com/powturbo/TurboBench/releases) & [Benchmarks](https://github.com/powturbo/TurboBench/blob/master/benchmark.md)** is created automatically whenever submodules change.
+- A **nightly github [release](https://github.com/powturbo/TurboBench/releases) and [Benchmark](https://github.com/powturbo/TurboBench/blob/master/benchmark.md)** are created automatically whenever submodules change.
 - Creates a separate result file (file@SET.tbb) for each compressor set 
 - TurboBench rank aggregation crowns the top compression libraries with 🥇 🏆 👑 — see who's king!
 
@@ -336,5 +336,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -eFAST -aFAST
 ```
 
-Last update: 20 SEP 2026
+Last update: 21 SEP 2026
 
