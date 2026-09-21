@@ -300,6 +300,10 @@ enum {
 #define _PYSAP 0
 #endif
  P_PYSAP,
+#ifndef _PULSAR
+#define _PULSAR 0
+#endif
+ P_PULSAR,
  
 #ifndef _QUICKLZ
 #define _QUICKLZ 0
@@ -565,6 +569,13 @@ enum {
   #endif
 };
 
+#ifdef __cplusplus
+#define EXTERN_C_BEGIN  extern "C" {
+#define EXTERN_C_END    }
+#else
+#define EXTERN_C_BEGIN
+#define EXTERN_C_END
+#endif
 //----------------------------------------------Include --------------------------------------------------------------------------------
 //--- A ----------------------------------------
   #if _AOCL
@@ -1003,7 +1014,6 @@ class Out: public libzpaq::Writer {
 typedef unsigned long mz_ulong;
 extern "C" int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len, int level);
 extern "C" int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len);
-//#include "miniz/miniz.h" conflict with zlib.h
   #endif
 
   #if _MISA77
@@ -1176,6 +1186,12 @@ void pco_ini() {
 #include "pithy/pithy.h"
   #endif
 
+  #if _PULSAR
+extern "C" int pulsar_encode_c(const unsigned char *input_ptr, size_t input_len, unsigned char **out_ptr, size_t *out_len);
+extern "C" int pulsar_decode_c(const unsigned char *input_ptr, size_t input_len, unsigned char **out_ptr, size_t *out_len);
+extern "C" char *pulsar_version(void);
+  #endif
+
   #if _PYSAP
 #include "pysap/pysapcompress/hpa101saptype.h"
 #include "pysap/pysapcompress/hpa104CsObject.h"
@@ -1202,6 +1218,13 @@ void pco_ini() {
 
   #if _SNAPPY
 #include "snappy/snappy.h"
+  #endif
+
+  #if _SNAPPY_C
+EXTERN_C_BEGIN
+#include "snappy-c/snappy.h"
+EXTERN_C_END
+struct snappy_env env;
   #endif
 
 //------  T -------------------------------------
@@ -1310,6 +1333,21 @@ int64_t _xz_decompress(char *in, size_t insize, char *out, size_t outsize, int t
 #include "zlib/zlib.h"
   #endif
 
+EXTERN_C_BEGIN
+  #if _ZLIB_NG
+//#include "turbobench_/zconf-ng.h"
+#define Z_EXTERN
+#define Z_EXPORT   
+Z_EXTERN Z_EXPORT const char *zlibng_version(void);
+Z_EXTERN Z_EXPORT int32_t zng_compress2(uint8_t *dest, size_t *destLen, const uint8_t *source, size_t sourceLen, int32_t level);
+Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const uint8_t *source, size_t sourceLen);
+  #endif
+
+  #if _ZOPFLI
+#include "zopfli/src/zopfli/zopfli.h"
+  #endif
+EXTERN_C_END
+
   #if _ZLING
 #include "libzling/src/libzling.h"
 #include "libzling_/libzling_utils_mem.h"
@@ -1320,9 +1358,7 @@ int64_t _xz_decompress(char *in, size_t insize, char *out, size_t outsize, int t
   #endif
 
 //=============================================================================================================================
-  #if __cplusplus
-extern "C" {
-  #endif
+EXTERN_C_BEGIN
 
   #if _FIRETRAIL
 #include "firetrail/firetrail.h"
@@ -1383,11 +1419,6 @@ static fOodleLZ_CompressOptions_GetDefault OodleLZ_CompressOptions_GetDefault_;
 #include "smaz/smaz.h"
   #endif
 
-  #if _SNAPPY_C
-#include "snappy-c/snappy.h"
-struct snappy_env env;
-  #endif
-
   #if _UNISHOX2
 int unishox2_compressx(  const char *in, int inlen, char *out, int lev);
 int unishox2_decompressx(const char *in, int inlen, char *out, int lev);
@@ -1396,23 +1427,7 @@ int unishox2_decompressx(const char *in, int inlen, char *out, int lev);
   #if _UNISHOX3
 #include "unishox2/Unishox3_Alpha/unishox3.h"
   #endif
-
-  #if _ZLIB_NG
-//#include "turbobench_/zconf-ng.h"
-#define Z_EXTERN
-#define Z_EXPORT   
-Z_EXTERN Z_EXPORT const char *zlibng_version(void);
-Z_EXTERN Z_EXPORT int32_t zng_compress2(uint8_t *dest, size_t *destLen, const uint8_t *source, size_t sourceLen, int32_t level);
-Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const uint8_t *source, size_t sourceLen);
-  #endif
-
-  #if _ZOPFLI
-#include "zopfli/src/zopfli/zopfli.h"
-  #endif
-
-  #if __cplusplus
-}
-  #endif
+EXTERN_C_END
 // ======================================== Encoding =====================================================
   #if _GANS
 #include "EC/rans.h"
@@ -1723,7 +1738,7 @@ struct plugs plugs[] = {
   { P_BRIEFLZ,       "brieflz",       _BRIEFLZ,   "BriefLz",                 "1,3,6,9" },
   { P_BROTLI,        "brotli",        _BROTLI,    "Brotli",                  "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
   { P_BZIP2,         "bzip2",         _BZIP2,     "Bzip2",                   "" },
-  { P_BZIP3,         "bzip3",         _BZIP3,     "Bzip3",                   "" },
+  { P_BZIP3,         "bzip3",         _BZIP3,     "Bzip3",                   "0,1,2,3,4,5,6,7,8,9,10/b#" },
   
   { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                "0,1,2,3,4,5,6,7,8,9,100/SBDsd", 64*1024},
   { P_CHAMELEON,     "chameleon",     _CHAMELEON, "Chameleon",               "1,2" },
@@ -1811,6 +1826,7 @@ struct plugs plugs[] = {
   { P_PCODECF64,     "pcodec_f64",    _PCODEC,    "pcodec_f64",               "0,1,2,3,4,5,6,7,8,9" },
   { P_PHAZ,          "phaz",          _PHAZ,      "PivCo-Huffman/zstd",       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },  // level = zstd level
   { P_PITHY,         "pithy",         _PITHY,     "Pithy",                    "0,1,2,3,4,5,6,7,8,9" }, 
+  { P_PULSAR,        "pulsar",        _PULSAR,    "pulsar",                   "" },
   { P_PYSAP,         "sap",           _PYSAP,     "sap",                      "0,1,2" },
   
   { P_QUICKLZ,       "quicklz",       _QUICKLZ,   "Quicklz",                  "1,2,3" },
@@ -2275,28 +2291,12 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _BZIP3
-    case P_BZIP3:    { 
-        #if 0
-      #define BZIP3_SIZE 511*MB
-      struct bz3_state *st = bz3_new(BZIP3_SIZE);
-      unsigned char *ip,*op = out;
-      for(ip = in; ip < in+inlen;) { 
-        unsigned iplen = (in+inlen) - ip; iplen = min(iplen, BZIP3_SIZE);
-        op+=4; memcpy(op, ip, iplen);
-        int rc = bz3_encode_block(st, op, iplen);
-        //BZIP3_API int bz3_compress_mt(u32 block_size, const u8 * const in, u8 * out, size_t in_size, size_t * out_size, int threads);
-        if(rc == -1) die("bzip3 encode failed");
-        ctou32(op-4) = rc; op += rc;
-        ip += iplen;        
-      }
-      bz3_free(st);
-      return op - out;
-        #else
-      size_t cs = outsize; uint32_t block_size = 1 << (19 + lev); // level 1 = 1 MB, level 3 = 4 MB, level 9 = 256 MB, level 10 = 511 MB
-      int rc = bz3_compress(block_size > (511 << 20) ? (511 << 20) : block_size, (uint8_t*)in, (uint8_t*)out, inlen, &cs);
+    case P_BZIP3: { char *q;
+      size_t cs = outsize; uint32_t blocksize = 1 << (19 + lev); blocksize = blocksize > (511 << 20) ? (511 << 20) : blocksize; // level 1 = 1 MB, level 3 = 4 MB, level 9 = 256 MB, level 10 = 511 MB
+      if(!lev && (q = strchr(prm,'b'))) blocksize = (1<<20)*atoi(q+(q[1]=='='?2:1)); 
+      int rc = bz3_compress(blocksize, (uint8_t*)in, (uint8_t*)out, inlen, &cs);
       return rc == BZ3_OK?cs:0;
-        #endif
-      }
+    }
       #endif
 
       #if _CHAMELEON
@@ -2664,6 +2664,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _PITHY
     case P_PITHY: return pithy_Compress((const char *)in, inlen, (char *)out, outsize, lev);
+      #endif
+
+      #if _PULSAR
+    case P_PULSAR: { uint8_t *pout; size_t cs; int rc = pulsar_encode_c((const uint8_t *)in, inlen, &pout, &cs); if(cs > 0) memcpy(out, pout, cs); free(pout); return cs;}
       #endif
 
       #if _PYSAP
@@ -3233,22 +3237,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _BZIP3
-    case P_BZIP3: { //size_t outsize = outlen; return bz3_decompress(in, out, inlen, &outsize)==BZ3_OK?outlen:-1; 
-        /*struct bz3_state *st = bz3_new(BZIP3_SIZE);
-        unsigned char *ip = in, *op;
-        for(op = out; op < out+outlen;) { 
-          unsigned iplen = ctou32(ip), oplen = (out+outlen) - op; oplen = min(oplen, BZIP3_SIZE);
-          memcpy(op, ip+4, iplen);
-          if(bz3_decode_block(st, op, iplen, oplen, iplen) == -1) die("bzip3 decode failed");
-          op += oplen;  
-          ip += 4+iplen;          
-        }
-        bz3_free(st);
-        return op-out;*/
-        size_t ds = outlen;
-        int rc = bz3_decompress((uint8_t*)in, (uint8_t*)out, inlen, &ds); return rc == BZ3_OK?ds:rc;
-        return ds;
-      }
+    case P_BZIP3: { size_t ds = outlen;  int rc = bz3_decompress((uint8_t*)in, (uint8_t*)out, inlen, &ds); return rc == BZ3_OK?ds:rc;  return ds;  }
       #endif
 
       #if _C_BLOSC2
@@ -3566,6 +3555,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _PITHY
     case P_PITHY: return pithy_Decompress((const char *)in, inlen, (char *)out, outlen);
+      #endif
+
+      #if _PULSAR
+    case P_PULSAR: { uint8_t *pout; size_t ds; int rc = pulsar_decode_c((const uint8_t *)in, inlen, &pout, &ds); memcpy(out, pout, outlen); free(pout); return rc;}
       #endif
 
       #if _PYSAP
@@ -4197,6 +4190,10 @@ char *codver(int codec, char *v, char *s) {
       #endif
       #if _PHAZ
     case P_PHAZ:      sprintf(s,"v%d.%d", PIVCOHUF_VERSION_MAJOR, PIVCOHUF_VERSION_MINOR); break;
+      #endif
+
+      #if _PULSAR
+    case P_PULSAR: return pulsar_version();
       #endif
 
       #if _QUICKLZ
