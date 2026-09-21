@@ -580,6 +580,28 @@ endif
 #ifneq ($(wildcard pcodec_/.),)
 #endif
 
+PULSAR_LIB := 
+ifneq ($(wildcard pulsar-best/.),)
+HAVE_CARGO := $(shell command -v cargo >/dev/null 2>&1 && echo 1 || echo 0)
+ifeq ($(HAVE_CARGO),1)
+PLG_FLAGS+=-D_PULSAR
+PULSAR_DIR := pulsar-best
+PULSAR_BDIR := $(BUILD)/$(PULSAR_DIR)
+PULSAR_SRCS := $(shell find $(PULSAR_DIR)/src -type f -name '*.rs' -o -name '*.toml' )
+PULSAR_LIB := $(PULSAR_BDIR)/release/libpulsar.a 
+#  LDFLAGS += -L$(PULSAR_DIR)target/release -lpulsar -ldl -lpthread -lm
+$(PULSAR_LIB): $(PULSAR_SRCS)
+	mkdir -p $(PULSAR_BDIR) 
+	cargo rustc --manifest-path $(PULSAR_DIR)/Cargo.toml --lib --crate-type=staticlib --release --target-dir $(PULSAR_BDIR) -- --print=native-static-libs
+
+#cargo rustc --crate-type=$(DENSITY_BUILD_TYPE) --release -- --print=native-static-libs
+#	cd $(PULSAR_DIR) && cargo rustc --lib --crate-type=staticlib --release --target-dir $(PULSAR_BDIR) -- --print=native-static-libs
+LIBS += $(PULSAR_LIB)
+else
+  $(info Cargo not found – skipping Pulsar build)
+endif
+endif
+
 #--- S -------------------------
 SNAPPY_LIB := 
 ifneq ($(wildcard snappy/.),)
