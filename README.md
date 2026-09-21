@@ -22,7 +22,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - Built to avoid common pitfalls like cache scenarios and throttling found in other tools.
 - Unlock peak performance — TurboBench reduces **throttling** by intelligently controlling the **CPU frequency**
 - Automatic sorting, updating, and merging of result files.
-- A **nightly github [release](https://github.com/powturbo/TurboBench/releases) and [Benchmark](https://github.com/powturbo/TurboBench/blob/master/benchmark.md)** are created automatically whenever submodules change.
+- A **nightly github [release](https://github.com/powturbo/TurboBench/releases) and [benchmarks](https://github.com/powturbo/TurboBench/blob/master/benchmark.md)** are created automatically whenever submodules change.
 - Creates a separate result file (file@SET.tbb) for each compressor set 
 - TurboBench rank aggregation crowns the top compression libraries with 🥇 🏆 👑 — see who's king!
 
@@ -185,6 +185,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [ms-compress](https://github.com/coderforlife/ms-compress)
 - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
 - [Pithy](https://github.com/johnezang/pithy) 
+- [Pulsar/bwt](https://github.com/ceedot-rock/pulsar-best) :new:2026.09 
 - [Quicklz](https://github.com/robottwo/quicklz) 
 - [sap](https://github.com/CoreSecurity/pysap) 
 - [shoco](https://github.com/Ed-von-Schleck/shoco) 
