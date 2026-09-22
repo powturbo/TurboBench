@@ -434,7 +434,6 @@ $(LZ_LIB):  $(LZ_SRCS)
 	@mkdir -p $(BUILD)/lz
 	$(MAKE) $(LZ_LIB) -C $(LZ_DIR) BUILD=$(BUILD)/lz
 LIBS += $(LZ_LIB)
-CFLAGS  += -D_NQUANT
 endif
 
 ifneq ($(wildcard lzlib/.),)
@@ -624,37 +623,22 @@ TAMP_DIR = tamp/tamp/_c_src/tamp
 OB += $(call obj,$(TAMP_DIR)/common.o $(TAMP_DIR)/compressor.o $(TAMP_DIR)/decompressor.o)
 endif
 
+RC_LIB :=
 ifneq ($(wildcard Turbo-Range-Coder/.),)
 ifneq ($(ARCH),loongarch64)
-RC_DIR  := Turbo-Range-Coder
-BUILD_DATE := $(shell date +%Y%m%d)
 PLG_FLAGS += -D_TURBORC
-CFLAGS   += -D_ANS -D_BWT -I$(RC_DIR)/libsais/include -DBUILD_VERSION="\"v$(BUILD_DATE)\"" 
+RC_DIR  := Turbo-Range-Coder
+RC_SRCS := $(shell find $(RC_DIR) -type f \( -name '*.[ch]' -o -name '*.cpp' -o -name '*.cc' \))
 RC_BDIR := $(BUILD)/$(RC_DIR)
-OB+=$(RC_BDIR)/anscdfs.o $(RC_BDIR)/rc_ss.o $(RC_BDIR)/rc_s.o $(RC_BDIR)/rccdf.o $(RC_BDIR)/rcutil.o $(RC_BDIR)/bec_b.o $(RC_BDIR)/rccm_s.o $(RC_BDIR)/rccm_ss.o \
-  $(RC_BDIR)/rcqlfc_s.o $(RC_BDIR)/rcqlfc_ss.o $(RC_BDIR)/rcqlfc_sf.o $(RC_BDIR)/rcbwt.o $(RC_BDIR)/libsais/src/libsais16.o
+RC_LIB  := $(RC_BDIR)/librc.a
+$(RC_LIB): $(RC_SRCS)
+	@mkdir -p $(RC_BDIR)
+	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT"
+LIBS += $(RC_LIB)
 
-$(RC_BDIR)/anscdfs.o: $(RC_DIR)/anscdf.c $(RC_DIR)/anscdf_.h
-	@mkdir -p $(@D)
-	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
-ifeq ($(ARCH), x86_64)
-$(RC_BDIR)/anscdfx.o: $(RC_DIR)/anscdf.c $(RC_DIR)/anscdf_.h
-	@mkdir -p $(@D)
-	$(CC) -O3 $(CFLAGS) $(_AVX2) -falign-loops=32 -w -c $< -o $@
-OB       += $(RC_BDIR)/anscdfx.o	
-endif
-ifeq ($(wildcard $(IC_DIR)/.),)
-$(RC_BDIR)/tp.o: $(RC_DIR)/tp.c
-	@mkdir -p $(@D)
-	$(CC) -O3 $(CFLAGS) $(_SSE) -falign-loops=32 -w -c $< -o $@
-OB       += $(RC_BDIR)/tp.o $(RC_BDIR)/tp_.o
-ifeq ($(ARCH), x86_64)
-$(RC_BDIR)/tp256.o: $(RC_DIR)/tp.c
-	@mkdir -p $(@D)
-	$(CC) -O3 $(CFLAGS) $(_AVX2) -w -c $< -o $@
-OB      += $(RC_BDIR)/tp256.o
-endif
-endif
+# libsais16 is not included in libbsc
+CFLAGS += -I$(RC_DIR)/libsais/include
+OB += $(RC_BDIR)/libsais/src/libsais16.o
 endif
 endif
 
@@ -1254,41 +1238,5 @@ cleana:
 	rm -rf zstd/tests
 	rm -rf zstd/doc
 	rm -rf zlib/contrib
-endif
-
-#------ Archive ---------------------
-ifneq ($(wildcard iguanacmake/.),)
-ifeq ($(ARCH),x86_64)
-#ifneq ($(filter $(ARCH),aarch64 x86_64),)
-CXXFLAGS+=-D_IGUANA
-IGUANA_SRCS := $(shell find iguana -type f -name '*.[ch]' -o -name 'CMakeLists.txt')
-IGUANA_LIB = $(BUILD)/iguana/libiguana.a
-ifeq ($(ARCH),x86_64)
-IGUANA_FLAGS=-mavx512vl -mavx512bw
-else
-IGUANA_FLAGS=$(_SSE)
-endif
-$(IGUANA_LIB): $(IGUANA_SRCS)
-	cp turbobench_/iguana/CMakeLists.txt iguana
-	$(CMAKE) -S iguana -B $(BUILD)/iguana -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DIGUANA_STATIC=1 -DCMAKE_CXX_FLAGS='-DIGUANA_COMPILER_GNU="g++" $(IGUANA_FLAGS) -std=c++20' -DCMAKE_INSTALL_PREFIX=$(BUILD) && make -C $(BUILD)/iguana
-LIBS += $(IGUANA_LIB)
-endif
-$(RC_BDIR)/anscdfs.o:               $(RC_DIR)/anscdfs.c
-$(RC_BDIR)/rc_ss.o:                 $(RC_DIR)/rc_ss.c
-$(RC_BDIR)/rc_s.o :                 $(RC_DIR)/rc_s.c
-$(RC_BDIR)/rccdf.o:                 $(RC_DIR)/rccdf.c
-$(RC_BDIR)/rcutil.o:                $(RC_DIR)/rcutil.c
-$(RC_BDIR)/bec_b.o:                 $(RC_DIR)/bec_b.c
-$(RC_BDIR)/rccm_s.o:                $(RC_DIR)/rccm_s.c 
-$(RC_BDIR)/rccm_ss.o :              $(RC_DIR)/rccm_ss.c
-$(RC_BDIR)/rcqlfc_s.o:              $(RC_DIR)/rcqlfc_s.c
-$(RC_BDIR)/rcqlfc_ss.o:             $(RC_DIR)/rcqlfc_ss.c
-$(RC_BDIR)/rcqlfc_sf.o:             $(RC_DIR)/rcqlfc_sf.c  
-$(RC_BDIR)/rcbwt.o:                 $(RC_DIR)/rcbwt.c
-$(RC_BDIR)/libsais/src/libsais16.o: $(RC_DIR)/libsais/src/libsais16.c
-RC_FLAGS := -falign-loops=32 -w
-$(RC_OBJ): | $(RC_BDIR)
-	$(CC) -O3 $(CFLAGS) $(RC_FLAGS) $(_SSE)  -c $< -o $@
-
 endif
 
