@@ -1759,7 +1759,7 @@ struct plugs plugs[] = {
   { P_IGUANA,        "iguana",        _IGUANA,    "iguana",                  "" },
   { P_ISA_L,         "igzip",         _ISA_L,     "igzip",                   "0,1,2,3" },
   
-  { P_KANZI,         "kanzi",         _KANZI,     "kanzi",                   "0,1,2,3,4,5,6,7,8,9/T#" },
+  { P_KANZI,         "kanzi",         _KANZI,     "kanzi",                   "0,1,2,3,4,5,6,7,8,9/T#" }, //0:none|none 1:lzx|none 2:dna+lz|huffman 3: 4:text+utf+exe+pack+mm+rolz|none 5:text+utf+bwt+rank+zrlt|ans0 6:text+utf+bwt+srt+zrlt|fpaq 7:lzp+text+utf+bwt+lzp|cm 8:exe+rlt+text+utf+dna|tpaq 9:exe+rlt+text+utf+dna|tpaqx",
   
   { P_LIB,           "sdefl",         _LIB,       "lib:sdefl/sinfl",         "0,1,2,3,4,6,7,8"},
   { P_LIBBSC,        "bsc",           _LIBBSC,    "libbsc/bsc",              "0,3,4,5,6,7,8/P:t:e#"}, // Multithreading w. parameter t
