@@ -551,15 +551,15 @@ struct plugg {
 };
 
 struct plugg plugg[] = {
-  { "TURBO",     "lzturbo,10,11,12,19/lz4,1,5,9,12/zxc,3,4,5,6/misa77,0,1,2,3,4/lzav,1,2/memcpy", "Fastest de-/compression. HDD/SSD/RAM speed" },
+  { "TURBO",     "lzturbo,10,11,12,19/lz4,1,5,9,12/zxc,3,4,5,6/misa77,0,1,2,3,4/lzav,1,2/memcpy",                                                                       "Fastest de-/compression. HDD/SSD/RAM speed" },
   { "FAST",      "lzturbo,10,10a,11,12/lz4,1,5,9,12/lzav,1,2/memlz/misa77,0,1,2,3,4/brotli,0,1,4,5,6/zlib,1,6,9/libdeflate,1,6,12/zlib-ng,1,6,9/igzip,1,2,3/zstd,1,3,9/zxc,3,4,5,7/memcpy", "lz4,zlib,zstd class" },
-  { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,6/zstd,5,9/libdeflate,6/zlib-ng,6/igzip,3/memcpy", "Compression speed > 'zlib 6' class" },
-  { "MAX",       "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,12/lizard,19,29,39,49/lzlib,9/libdeflate,12/zstd,22/zxc,6,7/misa77,4/zlib,9/zlib-ng,9/memcpy","Best compression (slow)" },
-  { "OPTIMAL"    "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,12/libdeflate,12/lizard,49/lzlib,9/zstd,22/zopfli/memcpy", "Optimal compression (slow)" },
-  { "BWT"        "bsc_st,4,5/bsc,2/bcm/bzip2/bzip3/turborc,20e8,20e9/memcpy", "ST & BWT" },
-  { "ECODER"     "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/pivco,0,1/memcpy",  "Entropy coder" },
-  { "MEMCPY"     "imemcpy/memcpy", "memcpy" },
-  { "WEB"        "zlib,1,6,9/libdeflate,1,6,9,12/zlib-ng,1,6,9/igzip,0,1,2,3/zopfli/brotli,1,2,4,5,11/slz,1,6,9/zstd,1,9,15,22", "web/http compression"}
+  { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,6/zstd,5,9/libdeflate,6/zlib-ng,6/igzip,3/memcpy",                                                                         "Compression speed > 'zlib 6' class" },
+  { "MAX",       "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,12/lizard,19,29,39,49/lzlib,9/libdeflate,12/zstd,22/zxc,6,7/misa77,4/zlib,9/zlib-ng,9/memcpy",                "Best compression (slow)" },
+  { "OPTIMAL",   "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,12/libdeflate,12/lizard,49/lzlib,9/zstd,22/zopfli/memcpy",                                                    "Optimal compression (slow)" },
+  { "BWT",       "turborc,20e3,20e4,20e5,20e7,20e8,20e9/bsc,0,0e0,0e2,3,4/kanzi,5,6,7/bzip2/bzip3/pulsar/memcpy",                                                       "ST & BWT" },
+  { "ECODER",    "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/pivco,0,1/memcpy", "Entropy coder" },
+  { "MEMCPY",    "imemcpy/memcpy",                                                                                                                                      "memcpy" },
+  { "WEB",       "zlib,1,6,9/libdeflate,1,6,9,12/zlib-ng,1,6,9/igzip,0,1,2,3/zopfli/brotli,1,2,4,5,11/slz,1,6,9/zstd,1,9,15,22",                                        "web/http compression"}
 };
 
 #define PLUGGSIZE (sizeof(plugg)/sizeof(plugg[0]))
@@ -2226,7 +2226,7 @@ int main(int argc, char* argv[]) {
       fclose(fi);
     }
     if(!i)
-      for(i = 0; i < PLUGGSIZE; i++)
+      for(i = 0; i < PLUGGSIZE; i++) //{  printf("search:%s\n ", plugg[i].id);
         if(!strcmp(scmd, plugg[i].id)) {
           strcat(s, "/ON/");
           strcat(s, plugg[i].s);
