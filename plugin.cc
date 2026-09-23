@@ -549,8 +549,13 @@ enum {
  P_TORNADOHF,
 #ifndef _TURBORC
 #define _TURBORC 0
+#define _BWTSATAN 0
+#else
+#define _BWTSATAN 1
 #endif
  P_TURBORC,
+ P_BWTSATAN,
+
 #ifndef _XPACK
 #define _XPACK 0
 #endif
@@ -1030,7 +1035,7 @@ extern "C" int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const un
   #endif
 
   #if _MWLZ
-#include "mwlz/mwlz.h"
+#include "mwlz_c/mwlz.h"
   #endif
 
 //------  O -------------------------------------
@@ -1734,22 +1739,23 @@ struct plugs plugs[] = {
   { P_AOCL_SNAPPY,   "aocl-snappy",   _AOCL,      "AMD aocl-compression snappy", "" },
   { P_AOCL_ZLIB,     "aocl-zlib",     _AOCL,      "AMD aocl-compression zlib",   "1,2,3,4,5,6,7,8,9" },
   { P_AOCL_ZSTD,     "aocl-zstd",     _AOCL,      "AMD aocl-compression zstd",   "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/d#" },
-  { P_BPC,           "bpc",           _BPC,       "bit plane compression",   "" },
-  { P_BRIEFLZ,       "brieflz",       _BRIEFLZ,   "BriefLz",                 "1,3,6,9" },
-  { P_BROTLI,        "brotli",        _BROTLI,    "Brotli",                  "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
-  { P_BZIP2,         "bzip2",         _BZIP2,     "Bzip2",                   "" },
-  { P_BZIP3,         "bzip3",         _BZIP3,     "Bzip3",                   "0,1,2,3,4,5,6,7,8,9,10/b#" },
+  { P_BPC,           "bpc",           _BPC,       "bit plane compression",       "" },
+  { P_BRIEFLZ,       "brieflz",       _BRIEFLZ,   "BriefLz",                     "1,3,6,9" },
+  { P_BROTLI,        "brotli",        _BROTLI,    "Brotli",                      "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
+  { P_BWTSATAN,      "bwtsatan",      _BWTSATAN,  "BwtSatan",                    "0,2,3,4,5,6,7,8,9/m#:lzp length,P:utf8, V:verbose, Z:force lzp, s:bwt16" }, 
+  { P_BZIP2,         "bzip2",         _BZIP2,     "Bzip2",                       "" },
+  { P_BZIP3,         "bzip3",         _BZIP3,     "Bzip3",                       "0,1,2,3,4,5,6,7,8,9,10/b#" },
   
-  { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                "0,1,2,3,4,5,6,7,8,9,100/SBDsd", 64*1024},
-  { P_CHAMELEON,     "chameleon",     _CHAMELEON, "Chameleon",               "1,2" },
-  { P_CSC,           "csc",           _CSC,       "CSC",                     "1,2,3,4,5" },
-  { P_CLICKHOUSE,    "lz4_ch",        _CLICKHOUSE,"lz4 Clickhouse",          "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
+  { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                    "0,1,2,3,4,5,6,7,8,9,100/SBDsd", 64*1024},
+  { P_CHAMELEON,     "chameleon",     _CHAMELEON, "Chameleon",                   "1,2" },
+  { P_CSC,           "csc",           _CSC,       "CSC",                         "1,2,3,4,5" },
+  { P_CLICKHOUSE,    "lz4_ch",        _CLICKHOUSE,"lz4 Clickhouse",              "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
   
-  { P_DENSITY,       "density",       _DENSITY,   "Density",                 "1,2,3" },
-  { P_DOBOZ,         "doboz",         _DOBOZ,     "Doboz",                   "" },  //crash on windows
+  { P_DENSITY,       "density",       _DENSITY,   "Density",                     "1,2,3" },
+  { P_DOBOZ,         "doboz",         _DOBOZ,     "Doboz",                       "" },  //crash on windows
   
-  { P_FASTLZ,        "fastlz",        _FASTLZ,    "FastLz",                  "1,2" },
-  { P_FLZMA2,        "flzma2",        _FLZMA2,    "Fast-lzma2",              "0,1,2,3,4,5,6,7,8,9,10,11/mt#" },
+  { P_FASTLZ,        "fastlz",        _FASTLZ,    "FastLz",                      "1,2" },
+  { P_FLZMA2,        "flzma2",        _FLZMA2,    "Fast-lzma2",                  "0,1,2,3,4,5,6,7,8,9,10,11/mt#" },
   
   { P_GIPFELI,       "gipfeli",       _GIPFELI,   "Gipfeli",                 "" },
   { P_GLZA,          "glza",          _GLZA,      "glza",                    "" },
@@ -2215,7 +2221,7 @@ static unsigned char getbyte() { return *gip++; }
 unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outsize, int codec, int lev, char *prm) { unsigned outlen; unsigned char *oend=out+outsize; //printf("#(%d), inlen=%d,outsize=%d\n", codec, inlen, outsize);fflush(stdout);
   char     *q        = strchr(prm,'d');
   unsigned dsize     = q?argtoi(q+(q[1]=='='?2:1),0):dicsize; 
-  int      threadnum = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;
+  int      threadnum = (q = strchr(prm,'t'))?atoi(q+(q[1]=='='?2:1)):1;
   
   switch(codec) {
       #if _AOCL
@@ -3105,6 +3111,22 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_TORNADOHF:     return torhenc(in, inlen, out, outsize);
       #endif
 
+      #if _BWTSATAN
+    case P_BWTSATAN: { 
+      char *q;
+      unsigned lenmin=1, xprep8=0, nutf8=0, verbose=0, forcelzp=0, xsort=0, itmax=0, s=0;
+      if(q = strchr(prm,'m')) lenmin    = atoi(q+(q[1]=='='?2:1)); //bwt options  
+      if(q = strchr(prm,'P')) xprep8    = 1;
+      if(q = strchr(prm,'N')) nutf8     = 1;
+      if(q = strchr(prm,'V')) verbose   = 1;
+      if(q = strchr(prm,'Z')) forcelzp  = 1;
+      if(q = strchr(prm,'S')) xsort     = 1;
+      if(q = strchr(prm,'s')) s = 2; else if(q = strchr(prm,'u')) s = 4;
+      #define bwtflag(s) (s==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | forcelzp | (nutf8?BWT_NUTF8:0) | (verbose?BWT_VERBOSE:0) | xsort <<14 | itmax <<10 | lenmin
+      return rcbwtenc(in, inlen, out, lev, 0, bwtflag(1));  
+    }
+      #endif
+
       #if _TURBORC
     case P_TURBORC: { //int ec = 0; 
       char *q;
@@ -3965,6 +3987,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_TORNADOHF:    torhdec(in, inlen, out, outlen); break;
       #endif
 
+      #if _BWTSATAN
+    case P_BWTSATAN: return rcbwtdec( in, outlen, out, lev, 0);
+      #endif
+
       #if _TURBORC
     case P_TURBORC: { //unsigned prm1 = 5,prm2 = 6; char *q; //if(q=strchr(prm,'r')) { prm1 = atoi(q+(q[1]=='='?2:1)); prm2 = prm1%10; prm1 = prm1/10; if(prm1>9)prm1=9;if(!prm1) prm1=1; if(prm2>9)prm2=9;if(!prm2) prm2=1; }
       unsigned bwtlev = 9,z=0;
@@ -4212,7 +4238,8 @@ char *codver(int codec, char *v, char *s) {
     case P_TAMP:  return "v2.3.0";
       #endif
       #if _TURBORC
-    case P_TURBORC: return (char *)turborc_version();
+    case P_TURBORC: 
+    case P_BWTSATAN: return (char *)turborc_version();
       #endif
 
       #if _XZ
