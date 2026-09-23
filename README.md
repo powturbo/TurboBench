@@ -143,13 +143,12 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 
 
 ### Plugins:
-#### Compressor Lz77,Rolz,Bwt,zpaq:
+#### Compressor Lz77,Rolz,zpaq:
 - [LzTurbo](https://sites.google.com/site/powturbo)
 - [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:08.2026
 - [BriefLz](https://github.com/jibsen/brieflz)
 - [Brotli](https://github.com/google/brotli)
-- [Bzip2](http://www.bzip.org/downloads.html)
-- [hameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
+- [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
 - [CSC](https://github.com/fusiyuan2010/CSC)
 - [Density](https://github.com/centaurean/density) 
 - [Doboz](https://bitbucket.org/attila_afra)
@@ -161,7 +160,6 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l)
 - [kanzi](https://github.com/flanglet/kanzi-cpp) :new: 2026/07
 - [lib](https://github.com/vurtun/lib) :new: 2026/09
-- [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc)
 - [Libdeflate](https://github.com/ebiggers/libdeflate) 
 - [LibLZF](http://oldhome.schmorp.de/marc/liblzf.html) 
 - [LibLz](https://github.com/mbitsnbites/liblzg) 
@@ -185,7 +183,6 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [ms-compress](https://github.com/coderforlife/ms-compress)
 - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
 - [Pithy](https://github.com/johnezang/pithy) 
-- [Pulsar/bwt](https://github.com/ceedot-rock/pulsar-best) :new:2026.09 
 - [Quicklz](https://github.com/robottwo/quicklz) 
 - [sap](https://github.com/CoreSecurity/pysap) 
 - [shoco](https://github.com/Ed-von-Schleck/shoco) 
@@ -209,6 +206,14 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [zstd](https://github.com/facebook/zstd)
 - [zpaq](https://github.com/zpaq/zpaq)
 - [zxc](https://github.com/hellobertrand/zxc) :new:2026.05
+
+#### BWT - Burrows–Wheeler transform:
+- [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc)
+- [BwtSatan](https://github.com/powturbo/Turbo-Range-Coder) :new:2026.09 
+- [bzip2](http://www.bzip.org/downloads.html)
+- [bzip3](https://github.com/iczelia/bzip3)
+- [kanzi (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) :new: 2026/07
+- [Pulsar/bwt](https://github.com/ceedot-rock/pulsar-best) :new:2026.09 
 
 #### Integer / Floating point:
 - [Blosc](https://github.com/Blosc/c-blosc2)
