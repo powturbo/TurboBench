@@ -1150,9 +1150,28 @@ PLG_FLAGS+=-D_MSCOMPRESS
 OB+=$(call obj,ms-compress/src/mscomp.o ms-compress/src/lznt1_compress.o ms-compress/src/lznt1_decompress.o ms-compress/src/xpress_compress.o ms-compress/src/xpress_decompress.o ms-compress/src/xpress_huff_compress.o ms-compress/src/xpress_huff_decompress.o)
 endif
 
-ifneq ($(wildcard mwlz/.),)
+ifneq ($(wildcard mwlz_c/.),)
 PLG_FLAGS+=-D_MWLZ
-OB+=$(call obj,mwlz/mwlz.o)
+OB+=$(call obj,mwlz_c/mwlz.o)
+endif
+
+MWLZ_LIB := 
+ifneq ($(wildcard mwlz_rust/.),)
+HAVE_CARGO := $(shell command -v cargo >/dev/null 2>&1 && echo 1 || echo 0)
+ifeq ($(HAVE_CARGO),1)
+PLG_FLAGS+=-D_MWLZ
+MWLZ_DIR := mwlz
+MWLZ_BDIR := $(BUILD)/$(MWLZ_DIR)
+MWLZ_SRCS := $(shell find $(MWLZ_DIR)/src -type f -name '*.rs' -o -name '*.toml' )
+MWLZ_LIB := $(MWLZ_BDIR)/release/libmwlz.a 
+#  LDFLAGS += -L$(MWLZ_DIR)target/release -lpulsar -ldl -lpthread -lm
+$(MWLZ_LIB): $(MWLZ_SRCS)
+	mkdir -p $(MWLZ_BDIR) 
+	cargo rustc --manifest-path $(MWLZ_DIR)/Cargo.toml --lib --crate-type=staticlib --release --target-dir $(MWLZ_BDIR) -- --print=native-static-libs
+LIBS += $(MWLZ_LIB)
+else
+  $(info Cargo not found – skipping mwlz build)
+endif
 endif
 
 ifneq ($(wildcard NZ1/.),)
