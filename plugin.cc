@@ -3108,27 +3108,31 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _TURBORC
     case P_TURBORC: { //int ec = 0; 
       char *q;
-      unsigned bwtlev = 9, xprep8=0, forcelzp=0, verbose=0, xsort=0, itmax=0, lenmin=1, nutf8=0, z=0;
-      if(q = strchr(prm,'e')) bwtlev = atoi(q+(q[1]=='='?2:1)); 
-      if(q = strchr(prm,'m')) lenmin = atoi(q+(q[1]=='='?2:1));  
-      if(q = strchr(prm,'U')) nutf8  = 1;
-      if(q = strchr(prm,'s')) z = 2; else if(q = strchr(prm,'u')) z = 4;
-      #define bwtflag(z) (z==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | forcelzp | (nutf8?BWT_NUTF8:0) | (verbose?BWT_VERBOSE:0) | xsort <<14 | itmax <<10 | lenmin
+      unsigned bwtlev = 9, lenmin=1, xprep8=0, nutf8=0, verbose=0, forcelzp=0, xsort=0, itmax=0, s=0;
+      if(q = strchr(prm,'e')) bwtlev    = atoi(q+(q[1]=='='?2:1)); 
+      if(q = strchr(prm,'m')) lenmin    = atoi(q+(q[1]=='='?2:1)); //bwt options  
+      if(q = strchr(prm,'P')) xprep8    = 1;
+      if(q = strchr(prm,'N')) nutf8     = 1;
+      if(q = strchr(prm,'V')) verbose   = 1;
+      if(q = strchr(prm,'Z')) forcelzp  = 1;
+      if(q = strchr(prm,'S')) xsort     = 1;
+      if(q = strchr(prm,'s')) s = 2; else if(q = strchr(prm,'u')) s = 4;
+      #define bwtflag(s) (s==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | forcelzp | (nutf8?BWT_NUTF8:0) | (verbose?BWT_VERBOSE:0) | xsort <<14 | itmax <<10 | lenmin
       switch(lev) {
         case  1: return rcsenc(    in, inlen, out);
         case  2: return rccsenc(   in, inlen, out); 
         case  3: return rcc2senc(  in, inlen, out);
         case  4: return rcxsenc(   in, inlen, out);
         case  5: return rcx2senc(   in, inlen, out);
-        case  6: return z==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
-        case  7: return z==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
+        case  6: return s==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
+        case  7: return s==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
         case  8: rcc2senc32(in,inlen,out);
         case  9: return rcmsenc(    in, inlen, out);
         case 10: return rcm2senc(   in, inlen, out);
         case 11: return rcmrsenc(   in, inlen, out);
         case 12: return rcmrrsenc(  in, inlen, out);
-        case 13: return z==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
-        case 14: return z==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
+        case 13: return s==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
+        case 14: return s==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
         case 17: return rcu3senc(   in, inlen, out);
         case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));  
         case 56: return anscdfenc(    in, inlen, out);
