@@ -556,7 +556,7 @@ struct plugg plugg[] = {
   { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,6/zstd,5,9/libdeflate,6/zlib-ng,6/igzip,3/memcpy",                                                                         "Compression speed > 'zlib 6' class" },
   { "MAX",       "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,12/lizard,19,29,39,49/lzlib,9/libdeflate,12/zstd,22/zxc,6,7/misa77,4/zlib,9/zlib-ng,9/memcpy",                "Best compression (slow)" },
   { "OPTIMAL",   "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,12/libdeflate,12/lizard,49/lzlib,9/zstd,22/zopfli/memcpy",                                                    "Optimal compression (slow)" },
-  { "BWT",       "turborc,20e3,20e4,20e5,20e7,20e8,20e9/bsc,0,0e0,0e2,4/kanzi,5,6,7/bzip2/bzip3,10/pulsar/memcpy",                                                       "ST & BWT" },
+  { "BWT",       "bwtsatan,3,4,5,7,8,9/bsc,0,0e0,0e2,4/kanzi,5,6,7/bzip2/bzip3,10/pulsar/memcpy",                                                                        "ST & BWT" },
   { "ECODER",    "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/pivco,0,1/memcpy", "Entropy coder" },
   { "MEMCPY",    "imemcpy/memcpy",                                                                                                                                      "memcpy" },
   { "WEB",       "zlib,1,6,9/libdeflate,1,6,9,12/zlib-ng,1,6,9/igzip,0,1,2,3/zopfli/brotli,1,2,4,5,11/slz,1,6,9/zstd,1,9,15,22",                                        "web/http compression"}
@@ -784,8 +784,8 @@ int plugins(plug_t *plug, plugs_t *gs, int *pk, unsigned bsize, unsigned bsizex,
 
 int plugreg(plug_t *plug, char *cmd, int k, unsigned bsize, unsigned bsizex) {
   static char *cempty="";
-  int ignore = 0;
-
+  int ignore = 0; char *q;
+  //if(q = strchr(cmd,'/')) *q = 0;
   while(*cmd) {
     while(isspace(*cmd))
       cmd++;
