@@ -1777,7 +1777,7 @@ struct plugs plugs[] = {
   
   { P_GIPFELI,       "gipfeli",       _GIPFELI,   "Gipfeli",                 "" },
   { P_GLZA,          "glza",          _GLZA,      "glza",                    "" },
-  //{ P_GLYD,          "glyd",          _GLYD,      "glyd",                    "0,1,2,3,4,5,6" }, // DEFAULT 0,,FAST 1, TURBO 2, MAX 3, ULTRA 4, COLD 5, MAX_LONG 6 /* max with the 128 MB long-distance matcher
+//{ P_GLYD,          "glyd",          _GLYD,      "glyd",                    "0,1,2,3,4,5,6" }, // DEFAULT 0,,FAST 1, TURBO 2, MAX 3, ULTRA 4, COLD 5, MAX_LONG 6 /* max with the 128 MB long-distance matcher
   { P_GLYD,          "glyd",          _GLYD,      "glyd",                    "0,1,2" },
   { P_GLYDP,         "glyd_par",      _GLYD,      "glyd parallel",           "0,1,2" },
 
@@ -3494,7 +3494,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _MEMLZ
-    return (int64_t)memlz_decompress(out, in); //memlz_reset((memlz_state*)workmem); return (int64_t)memlz_stream_decompress(out, in, (memlz_state*)workmem);
+    case P_MEMLZ: return (int64_t)memlz_decompress(out, in); //memlz_reset((memlz_state*)workmem); return (int64_t)memlz_stream_decompress(out, in, (memlz_state*)workmem);
       #endif
 
       #if _LZHAM
