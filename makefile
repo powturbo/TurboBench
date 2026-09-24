@@ -1201,7 +1201,7 @@ OB+=$(BUILD)/plugin.o
 
 $(BUILD)/plugin.o: plugin.cc | $(LIBS) 
 	@mkdir -p $(dir $@)
-	$(CXX) -O3 $(MARCH) $(PLG_FLAGS) $(CXXFLAGS) -std=c++20  $< -c -o $@
+	$(CXX) -O3 $(MARCH) $(PLG_FLAGS) $(CXXFLAGS) $(_SSE) -std=c++20  $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
 	$(CXX) $^ $(LDFLAGS) $(LIBS) $(FOPENMP) -o turbobench
