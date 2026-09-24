@@ -263,6 +263,7 @@ LIBS += $(GLYD_LIB)
 else
   $(info Cargo not found – skipping Pulsar build)
 endif
+LDFLAGS+=-Wl,--allow-multiple-definition 
 endif
 
 #--- I -------------------------
@@ -641,6 +642,7 @@ LIBS += $(PULSAR_LIB)
 else
   $(info Cargo not found – skipping Pulsar build)
 endif
+LDFLAGS+=-Wl,--allow-multiple-definition 
 endif
 
 #--- S -------------------------
@@ -1246,7 +1248,7 @@ $(BUILD)/plugin.o: plugin.cc | $(LIBS)
 	$(CXX) -O3 $(MARCH) $(PLG_FLAGS) $(CXXFLAGS) -std=c++20  $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
-	$(CXX) $^ $(LDFLAGS) $(LIBS) $(FOPENMP) -Wl,--allow-multiple-definition -o turbobench
+	$(CXX) $^ $(LDFLAGS) $(LIBS) $(FOPENMP) -o turbobench
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
