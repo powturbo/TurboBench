@@ -124,6 +124,12 @@ enum {
 #endif
  P_GLZA,
 
+#ifndef _GLYD
+#define _GLYD 0
+#endif
+ P_GLYD,
+ P_GLYDP,
+
 #ifndef _HEATSHRINK
 #define _HEATSHRINK 0
 #endif
@@ -742,6 +748,10 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
   #if _GLZA
 #include "GLZA/GLZAcomp.h"
 #include "GLZA/GLZAdecode.h"
+  #endif
+
+  #if _GLYD
+#include "Glyd/include/glyd.h"
   #endif
 
 //--- H -----------------------------------------------------------
@@ -1767,7 +1777,10 @@ struct plugs plugs[] = {
   
   { P_GIPFELI,       "gipfeli",       _GIPFELI,   "Gipfeli",                 "" },
   { P_GLZA,          "glza",          _GLZA,      "glza",                    "" },
-  
+  //{ P_GLYD,          "glyd",          _GLYD,      "glyd",                    "0,1,2,3,4,5,6" }, // DEFAULT 0,,FAST 1, TURBO 2, MAX 3, ULTRA 4, COLD 5, MAX_LONG 6 /* max with the 128 MB long-distance matcher
+  { P_GLYD,          "glyd",          _GLYD,      "glyd",                    "0,1,2" },
+  { P_GLYDP,         "glyd_par",      _GLYD,      "glyd parallel",           "0,1,2" },
+
   { P_HEATSHRINK,    "heatshrink",    _HEATSHRINK,"heatshrink",              "" },
   
   { P_IGUANA,        "iguana",        _IGUANA,    "iguana",                  "" },
@@ -2359,6 +2372,22 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _GLZA
     case P_GLZA:  { size_t outsize; return GLZAcomp(inlen, (uint8_t *)in, &outsize, (uint8_t *)out, (FILE *)0, 0)?outsize:0; }
+      #endif
+
+      #if _GLYD
+    case P_GLYD:   
+      switch(lev) {
+        case 0: return glyd_compress(               (const uint8_t*)in, inlen, out, outsize);
+        case 1: return glyd_compress_max(           (const uint8_t*)in, inlen, out, outsize);
+        case 2: return glyd_compress_ultra(         (const uint8_t*)in, inlen, out, outsize);
+      }
+    case P_GLYDP:   
+      switch(lev) {
+        case 0: return glyd_compress_parallel(      (const uint8_t*)in, inlen, out, outsize);
+        case 1: return glyd_compress_max_parallel(  (const uint8_t*)in, inlen, out, outsize);
+        case 2: return glyd_compress_ultra_parallel((const uint8_t*)in, inlen, out, outsize);
+      }
+    //case P_GLYD: { uint8_t *pout; size_t cs=0; glyd_compress2((const uint8_t*)in, inlen, lev, 0, threadnum, &pout, &cs); return cs; 
       #endif
 
       #if _HEATSHRINK
@@ -3352,6 +3381,11 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_GLZA: { size_t outsize; GLZAdecode(inlen, (uint8_t *)in, &outsize, (uint8_t *)out, (FILE *)0, 0); break; }
       #endif
 
+      #if _GLYD
+    case P_GLYD:  return glyd_decompress(         (const uint8_t*)in, inlen, out, outlen);
+    case P_GLYDP: return glyd_decompress_parallel((const uint8_t*)in, inlen, out, outlen);
+      #endif
+
       #if _HEATSHRINK
     case P_HEATSHRINK: return hsdecompress(in, inlen, out, outlen);
       #endif
@@ -4126,6 +4160,9 @@ char *codver(int codec, char *v, char *s) {
    
       #if _GLZA
     case P_GLZA:  return "v0.12";
+      #endif
+      #if _GLYD
+    case P_GLYD:  return glyd_version();
       #endif
 
       #if _HEATSHRINK
