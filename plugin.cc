@@ -4162,7 +4162,7 @@ char *codver(int codec, char *v, char *s) {
     case P_GLZA:  return "v0.12";
       #endif
       #if _GLYD
-    case P_GLYD:  return glyd_version();
+    case P_GLYD:  return (char *)glyd_version();
       #endif
 
       #if _HEATSHRINK
