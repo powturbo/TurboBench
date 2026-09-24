@@ -468,6 +468,17 @@ endif
 #---- M -----------------------
 ifneq ($(wildcard memlz/.),)
 PLG_FLAGS+=-D_MEMLZ
+ifeq ($(ARCH),x86_64)
+MEMLZ_FLAGS := $(_SSE)
+endif
+MEMLZ_LIB := $(BUILD)/memlz/memlz.o
+$(BUILD)/memlz/memlz.c: memlz/memlz.h
+	@mkdir -p $(dir $@)
+	cp memlz/memlz.h $(BUILD)/memlz/memlz.c 
+
+$(MEMLZ_LIB) : $(BUILD)/memlz/memlz.c
+	$(CC) -O3 $(CFLAGS) $(MEMLZ_FLAGS) -DMEMLZ_IMPLEMENTATION $< -c -o $@
+OB += $(MEMLZ_LIB)
 endif
 
 MINIZ_LIB:=
@@ -1201,7 +1212,7 @@ OB+=$(BUILD)/plugin.o
 
 $(BUILD)/plugin.o: plugin.cc | $(LIBS) 
 	@mkdir -p $(dir $@)
-	$(CXX) -O3 $(MARCH) $(PLG_FLAGS) $(CXXFLAGS) $(_SSE) -std=c++20  $< -c -o $@
+	$(CXX) -O3 $(MARCH) $(PLG_FLAGS) $(CXXFLAGS) -std=c++20  $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
 	$(CXX) $^ $(LDFLAGS) $(LIBS) $(FOPENMP) -o turbobench
