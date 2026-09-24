@@ -465,6 +465,18 @@ $(BUILD)/LZSSE/%.o: LZSSE/%.cpp
 	$(CXX) -O2 -msse4.1 -std=c++11 $< -c -o $@
 endif
 
+LZRAVEN_LIB :=
+LZRAVEN_DIR=liblzraven
+ifneq ($(wildcard $(LZRAVEN_DIR)/.),)
+PLG_FLAGS+=-D_LZRAVEN
+LZRAVEN_SRCS := $(shell find $(LZRAVEN_DIR)/src -type f -name '*.[ch]' )
+LZRAVEN_LIB = $(BUILD)/liblzraven/liblzraven.a
+$(LZRAVEN_LIB):  $(LZRAVEN_SRCS)
+	@mkdir -p $(BUILD)/liblzraven 
+	$(MAKE) -C $(LZRAVEN_DIR) WARN="-Wno-error=format-truncation" BUILD=$(abspath $(BUILD)/liblzraven) 
+LIBS += $(LZRAVEN_LIB)
+endif
+
 #---- M -----------------------
 ifneq ($(wildcard memlz/.),)
 PLG_FLAGS+=-D_MEMLZ
