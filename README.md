@@ -155,6 +155,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [FastLz](http://fastlz.org) 
 - [Fast-lzma](https://github.com/conor42/fast-lzma2)
 - [glza](https://github.com/kidq330/GLZA)
+- [Glyd / rust ](https://github.com/surya-koritala/Glyd) :new:2026/09
 - [heatshrink](https://github.com/atomicobject/heatshrink)
 - [Iguana](https://github.com/ClickHouse/iguana) :new:2026/09
 - [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l)
@@ -214,7 +215,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [bzip2](http://www.bzip.org/downloads.html)
 - [bzip3](https://github.com/iczelia/bzip3)
 - [kanzi (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) :new: 2026/07
-- [Pulsar/bwt](https://github.com/ceedot-rock/pulsar-best) :new:2026.09 
+- [Pulsar/bwt rust](https://github.com/ceedot-rock/pulsar-best) :new:2026.09 
 
 #### Integer / Floating point:
 - [Blosc](https://github.com/Blosc/c-blosc2)
@@ -343,5 +344,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -eFAST -aFAST
 ```
 
-Last update: 21 SEP 2026
+Last update: 24 SEP 2026
 
