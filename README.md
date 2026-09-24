@@ -175,6 +175,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [Lzma](http://7-zip.org) 
 - [Lzo](http://www.oberhumer.com/opensource/lzo) 
 - [Lzoma](https://github.com/alef78/lzoma) 
+- [lzraven (Reimplementation)](https://github.com/anat0m1a/liblzraven) :new:2026.09
 - [LZSSE](https://github.com/ConorStokes/LZSSE)
 - [LZSA](https://github.com/emmanuel-marty/lzsa)
 - [Memlz](https://github.com/rrrlasse/memlz) :new:2026.07 
