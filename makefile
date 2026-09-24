@@ -246,6 +246,25 @@ $(GLZA_DIR)/%.o: GLZA/%.c
 OB += $(GLZA_OBJS) 
 endif
 
+GLYD_LIB := 
+ifneq ($(wildcard Glyd/.),)
+HAVE_CARGO := $(shell command -v cargo >/dev/null 2>&1 && echo 1 || echo 0)
+ifeq ($(HAVE_CARGO),1)
+PLG_FLAGS+=-D_GLYD
+GLYD_DIR := Glyd
+GLYD_BDIR := $(BUILD)/$(GLYD_DIR)
+GLYD_SRCS := $(shell find $(GLYD_DIR)/src -type f -name '*.rs' -o -name '*.toml' )
+GLYD_LIB := $(GLYD_BDIR)/release/libglyd.a 
+#  LDFLAGS += -L$(GLYD_DIR)target/release -lglyd -ldl -lpthread -lm
+$(GLYD_LIB): $(GLYD_SRCS)
+	mkdir -p $(GLYD_BDIR) 
+	cargo rustc --manifest-path $(GLYD_DIR)/Cargo.toml --lib --crate-type=staticlib --release --target-dir $(GLYD_BDIR) -- --print=native-static-libs
+LIBS += $(GLYD_LIB)
+else
+  $(info Cargo not found – skipping Pulsar build)
+endif
+endif
+
 #--- I -------------------------
 IC_LIB :=
 IC_DIR=../ic
@@ -1227,7 +1246,7 @@ $(BUILD)/plugin.o: plugin.cc | $(LIBS)
 	$(CXX) -O3 $(MARCH) $(PLG_FLAGS) $(CXXFLAGS) -std=c++20  $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
-	$(CXX) $^ $(LDFLAGS) $(LIBS) $(FOPENMP) -o turbobench
+	$(CXX) $^ $(LDFLAGS) $(LIBS) $(FOPENMP) -Wl,--allow-multiple-definition -o turbobench
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
