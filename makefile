@@ -260,10 +260,10 @@ $(GLYD_LIB): $(GLYD_SRCS)
 	mkdir -p $(GLYD_BDIR) 
 	cargo rustc --manifest-path $(GLYD_DIR)/Cargo.toml --lib --crate-type=staticlib --release --target-dir $(GLYD_BDIR) -- --print=native-static-libs
 LIBS += $(GLYD_LIB)
+LDFLAGS+=-Wl,--allow-multiple-definition 
 else
   $(info Cargo not found – skipping Pulsar build)
 endif
-LDFLAGS+=-Wl,--allow-multiple-definition 
 endif
 
 #--- I -------------------------
@@ -639,10 +639,10 @@ $(PULSAR_LIB): $(PULSAR_SRCS)
 #cargo rustc --crate-type=$(DENSITY_BUILD_TYPE) --release -- --print=native-static-libs
 #	cd $(PULSAR_DIR) && cargo rustc --lib --crate-type=staticlib --release --target-dir $(PULSAR_BDIR) -- --print=native-static-libs
 LIBS += $(PULSAR_LIB)
+LDFLAGS+=-Wl,--allow-multiple-definition 
 else
   $(info Cargo not found – skipping Pulsar build)
 endif
-LDFLAGS+=-Wl,--allow-multiple-definition 
 endif
 
 #--- S -------------------------
