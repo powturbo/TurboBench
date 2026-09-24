@@ -1030,7 +1030,6 @@ extern "C" int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const un
   #endif
 
   #if _MEMLZ
-#define MEMLZ_IMPLEMENTATION
 #include "memlz/memlz.h"
   #endif
 
@@ -2045,9 +2044,9 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_LZO1c: P_LZO1f: P_LZO1x: P_LZO1y: P_LZO1z: P_LZO2a: lzo_init(); workmemsize = LZO1X_MEM_COMPRESS; break;
       #endif
 
-      #if _MEMLZ
-    case P_MEMLZ: workmemsize = sizeof(memlz_state); break;
-      #endif
+//      #if _MEMLZ
+//    case P_MEMLZ: workmemsize = sizeof(memlz_state); break;
+//      #endif
 
       #if _OODLE
     case P_OODLE: 
@@ -2592,7 +2591,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _MEMLZ
-    case P_MEMLZ: memlz_reset((memlz_state*)workmem); return memlz_stream_compress(out, in, inlen, (memlz_state*)workmem);
+    case P_MEMLZ: return memlz_compress(out, in, inlen); // memlz_reset((memlz_state*)workmem); return memlz_stream_compress(out, in, inlen, (memlz_state*)workmem);
       #endif
 
       #if _MINIZ
@@ -3443,7 +3442,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _MEMLZ
-    case P_MEMLZ: memlz_reset((memlz_state*)workmem); return (int64_t)memlz_stream_decompress(out, in, (memlz_state*)workmem);
+    return (int64_t)memlz_decompress(out, in); //memlz_reset((memlz_state*)workmem); return (int64_t)memlz_stream_decompress(out, in, (memlz_state*)workmem);
       #endif
 
       #if _LZHAM
