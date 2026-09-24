@@ -143,3 +143,6 @@
 [submodule "liblzraven"]
 	path = liblzraven
 	url = https://github.com/anat0m1a/liblzraven.git
+[submodule "Glyd"]
+	path = Glyd
+	url = https://github.com/surya-koritala/Glyd.git
