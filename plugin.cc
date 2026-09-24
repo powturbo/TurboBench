@@ -170,6 +170,11 @@ enum {
 #define _LIBLZG 0
 #endif
  P_LIBLZG,
+
+#ifndef _LZRAVEN
+#define _LZRAVEN 0
+#endif
+ P_LZRAVEN,
  
 #ifndef _LZ4
 #define _LZ4 0
@@ -896,6 +901,11 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
 #include "liblzg/src/include/lzg.h"
   #endif
 
+  #if _LIZARD
+#include "lizard/lib/lizard_compress.h"    //v2.0
+#include "lizard/lib/lizard_decompress.h"
+  #endif
+
   #if _LZLIB
 #include "lzlib/lzlib.h"
 #include "turbobench_/lzlib/bbexample.h"
@@ -922,9 +932,8 @@ int64_t kanzi_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsiz
   struct Lzma_options encoder_options;
   #endif
 
-  #if _LIZARD
-#include "lizard/lib/lizard_compress.h"    //v2.0
-#include "lizard/lib/lizard_decompress.h"
+  #if _LZRAVEN
+#include "liblzraven/include/lzraven.h"
   #endif
 
   #if _LZMA
@@ -1772,6 +1781,7 @@ struct plugs plugs[] = {
   { P_LIBDEFLATE,    "libdeflate",    _LIBDEFLATE,"libdeflate",              "1,2,3,4,5,6,7,8,9,12/dg"},
   { P_LIBLZF,        "lzf",           _LIBLZF,    "LibLZF",                  "" },
   { P_LIBLZG,        "lzg",           _LIBLZG,    "LibLzg",                  "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
+  { P_LZRAVEN,       "lzraven",       _LZRAVEN,   "lzraven",                 "" },
   { P_LIZARD,        "lizard",        _LIZARD,    "Lizard",                  "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
   { P_LZ4,           "lz4",           _LZ4,       "Lz4",                     "0,1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
   { P_LZ4ULTRA,      "lz4ultra",      _LZ4ULTRA,  "Lz4ultra",                "9,10,11,12/z" },
@@ -2044,9 +2054,9 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_LZO1c: P_LZO1f: P_LZO1x: P_LZO1y: P_LZO1z: P_LZO2a: lzo_init(); workmemsize = LZO1X_MEM_COMPRESS; break;
       #endif
 
-//      #if _MEMLZ
-//    case P_MEMLZ: workmemsize = sizeof(memlz_state); break;
-//      #endif
+      #if _LZRAVEN
+    case P_LZRAVEN: workmemsize = lzraven_encode_scratch_size(); break;
+      #endif
 
       #if _OODLE
     case P_OODLE: 
@@ -2563,6 +2573,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_LZO1y:   { lzo_uint out_len; lev<999?  lzo1y_1_compress(in, inlen, out, &out_len, workmem):lzo1y_999_compress(in, inlen, out, &out_len, workmem); return out_len; }
     case P_LZO1z:   { lzo_uint out_len; lzo1z_999_compress(in, inlen, out, &out_len, workmem); return out_len; }
     case P_LZO2a:   { lzo_uint out_len; lzo2a_999_compress(in, inlen, out, &out_len, workmem); return out_len; }
+      #endif
+
+      #if _LZRAVEN
+    case P_LZRAVEN: { return lzraven_encode_buffer(out, outsize, in, inlen, workmem); }
       #endif
 
       #if _LZSA
@@ -3404,6 +3418,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         LZ4F_freeDecompressionContext(ctx);
         return rc;
       }
+      #endif
+
+      #if _LZRAVEN
+    case P_LZRAVEN: return lzraven_decode_buffer(out, outlen, in, inlen);
       #endif
 
       #if _LZ4ULTRA
