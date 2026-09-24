@@ -140,3 +140,6 @@
 [submodule "lzlib"]
 	path = lzlib
 	url = https://github.com/aonez/lzlib.git
+[submodule "liblzraven"]
+	path = liblzraven
+	url = https://github.com/anat0m1a/liblzraven.git
