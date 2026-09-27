@@ -21,6 +21,8 @@ jobs:
         with:
           submodules: 'true'
       - run: git submodule update --init --recursive
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -35,11 +37,12 @@ jobs:
           lscpu
           gcc --version
           clang --version || true
+          rustc --version
+          cargo --version
       - run: make
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
       - run: ./turbobench silesia.tar -V0 -U
-
   linux-riscv:
     runs-on: ubuntu-24.04-riscv
     strategy:
@@ -53,6 +56,8 @@ jobs:
         with:
           submodules: 'true'
       - run: git submodule update --init --recursive
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
@@ -76,6 +81,8 @@ jobs:
           $CC --version
           gcc --version
           clang --version || true
+          rustc --version
+          cargo --version
       - name: Build 
         run: make
       - name: benchmark
@@ -84,68 +91,3 @@ jobs:
           ./turbobench -l2
 #          ./turbobench turbobench -V0 -U
 #          ./turbobench silesia.tar -V0 -U
-
-  macos:
-    runs-on: '${{ matrix.os }}'
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest]
-        compiler: ["clang"]
-    env:
-      CC: ${{ matrix.compiler }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          submodules: 'true'
-      - run: git submodule update --init --recursive
-      - name: Install dependencies
-        run: |
-          brew install nasm libomp
-          cc -v
-      - name: Download silesia.tar.gz and gunzip → silesia.tar
-        run: |
-          curl -L -o silesia.tar.gz \
-            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-          gunzip silesia.tar.gz
-      - run: make
-      - run: sysctl -n machdep.cpu.brand_string
-      - run: ./turbobench -l2
-      - run: ./turbobench turbobench -V0 -U
-      - run: ./turbobench silesia.tar -V0 -U
-
-  windows:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - name: Set git to use LF
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
-        shell: bash
-      - uses: actions/checkout@v7
-        with:
-          submodules: 'true'
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
-          install: >-
-            git
-            make
-            cmake
-            rsync
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-clang
-      - run: git submodule update --init --recursive
-      - name: Download silesia.tar.gz and gunzip → silesia.tar
-        run: |
-          curl -L -o silesia.tar.gz \
-            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-          gunzip silesia.tar.gz
-      - run: make
-      - run: ./turbobench -l2
-      - run: ./turbobench turbobench.exe -U -V0
-      - run: ./turbobench.exe silesia.tar -U -V0
