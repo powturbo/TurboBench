@@ -654,6 +654,9 @@ RUST_TARGET       := $(BUILD)/rust
 RUST_LIB          := $(RUST_TARGET)/release/lib$(RUST_PKG_NAME).a
 RUST_MANIFEST_DIR := $(BUILD)/ruststatic_manifest
 RUST_MANIFEST     := $(RUST_MANIFEST_DIR)/Cargo.toml
+ifeq ($(ARCH),x86_64)
+RUSTFLAGS_EXTRA := -C target-feature=+bmi1,+bmi2,+lzcnt,+avx2
+endif
 
 RUST_FEATURES :=
 ifneq ($(wildcard density/.),)
@@ -712,7 +715,7 @@ $(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml $(PCO_C_BUILD)/Cargo.toml
 	@echo "----------------------------"
 
 $(RUST_LIB): $(RUST_MANIFEST)
-	cargo build --release --manifest-path=$(RUST_MANIFEST) --target-dir=$(RUST_TARGET) $(RUST_FEATURES_ARG)
+	RUSTFLAGS="$(RUSTFLAGS_EXTRA)" cargo build --release --manifest-path=$(RUST_MANIFEST) --target-dir=$(RUST_TARGET) $(RUST_FEATURES_ARG)
 rustlib: $(RUST_LIB)
 LIBS += $(RUST_LIB)
 .PHONY: rustlib
