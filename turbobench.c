@@ -603,8 +603,9 @@ void plugsprtv(FILE *f, int fmt) {
   for(gs = plugs; gs->id >= 0; gs++)
     if(gs->codec && strcmp(gs->name,pv)) {
       pv = gs->name;
-      char name[128],ver[128]; ver[0] = 0;
-      sprintf(name, "%s %s", gs->name, codver(gs->id, ""/*gs->ver*/, ver));
+      char name[256+1], ver[64+1]; 
+      strncpy(ver, codver(gs->id, "", ver), 64); ver[64]=0;
+      sprintf(name, "%s %s", gs->name, ver);
       switch(fmt) {
          case FMT_VBULLETIN:
          case FMT_VBULLETIN2:
