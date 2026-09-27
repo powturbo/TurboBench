@@ -245,6 +245,10 @@ enum {
  P_LZSSE4,
  P_LZSSE8,
 
+#ifndef _MBROTLI
+#define _MBROTLI 0
+#endif
+ P_MBROTLI,
 #ifndef _MEMLZ
 #define _MEMLZ 0
 #endif
@@ -723,6 +727,22 @@ static size_t cscwrite(MemISeqOutStream *so, const void *out, size_t outlen) {
 #include "EC/daala_/daala.h"
   #endif
 
+  #if _DENSITY
+EXTERN_C_BEGIN
+uintptr_t chameleon_encode(const uint8_t *in, uintptr_t inlen, uint8_t *out, uintptr_t outsize);
+uintptr_t chameleon_decode(const uint8_t *in, uintptr_t inlen, uint8_t *out, uintptr_t outsize);
+uintptr_t chameleon_safe_encode_buffer_size(uintptr_t size);
+
+uintptr_t cheetah_encode(  const uint8_t *in, uintptr_t inlen, uint8_t *out, uintptr_t outsize);
+uintptr_t cheetah_decode(  const uint8_t *in, uintptr_t inlen, uint8_t *out, uintptr_t outsize);
+uintptr_t cheetah_safe_encode_buffer_size(uintptr_t size);
+
+uintptr_t lion_encode(     const uint8_t *in, uintptr_t inlen, uint8_t *out, uintptr_t outsize);
+uintptr_t lion_decode(     const uint8_t *in, uintptr_t inlen, uint8_t *out, uintptr_t outsize);
+uintptr_t lion_safe_encode_buffer_size(uintptr_t size);
+EXTERN_C_END
+  #endif
+
   #if _DOBOZ
 #include "doboz/Source/Doboz/Compressor.h"
 #include "doboz/Source/Doboz/Decompressor.h"
@@ -1034,6 +1054,10 @@ class Out: public libzpaq::Writer {
   #endif
 
 //------  M -------------------------------------
+  #if _MBROTLI
+#include "mbrotli/mbrotli-ffi/include/mbrotli.h"
+  #endif
+
   #if _MINIZ
 typedef unsigned long mz_ulong;
 extern "C" int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len, int level);
@@ -1170,6 +1194,12 @@ static int64_t _openzl_decompress(char *inbuf, size_t insize, char *outbuf, size
 
 //------  P -------------------------------------
   #if _PCODEC
+#include "pcodec/pco_c/include/cpcodec.h"
+#define pco_compress   pco_standalone_simple_compress_into
+#define pco_decompress pco_standalone_simple_decompress_into
+  #endif
+
+  #if _PCODEC0 // dynamic lib
 #include "pcodec_/cpcodec.h" // https://github.com/pcodec/pcodec --------------------------------------------
   #if defined(_WIN32)
 #include <windows.h>
@@ -1391,10 +1421,6 @@ static firetrail_decoder_t *firetrail_decoder;
 
   #if _CHAMELEON
 #include "chameleon/Chameleon2.h"
-  #endif
-
-  #if _DENSITY
-#include "density/src/density_api.h"
   #endif
 
   #if _LIBLZF
@@ -1819,6 +1845,7 @@ struct plugs plugs[] = {
   { P_LZSSE4,        "lzsse4",        _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
   { P_LZSSE8,        "lzsse8",        _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
 
+  { P_MBROTLI,       "mbrotli",       _MBROTLI,   "mbrotli",                      "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
   { P_MEMLZ,         "memlz",         _MEMLZ,     "memlz",                   "" },
   { P_MINIZ,         "miniz",         _MINIZ,     "miniz",                   "1,2,3,4,5,6,7,8,9" },
   { P_MISA77,        "misa77",        _MISA77,    "misa77",                  "0,1,2,3,4,-1" },
@@ -2027,6 +2054,15 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_C_BLOSC2: blosc2_init(); blosc2_set_nthreads(1);break;
       #endif
 
+      #if _DENSITY
+    case P_DENSITY:
+      switch (lev) {
+        case 1: workmemsize = chameleon_safe_encode_buffer_size(insize); break;
+        case 2: workmemsize = cheetah_safe_encode_buffer_size(  insize); break;
+        case 3: workmemsize = lion_safe_encode_buffer_size(     insize); break;
+      }
+      #endif
+
       #if _FASTARI
     case P_FASTARI: workmemsize = FA_WORKMEM; break;
       #endif
@@ -2112,7 +2148,7 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       break;
       #endif
 
-      #if _PCODEC
+      #if _PCODEC0
     case P_PCODECI8:
     case P_PCODECU8:
     case P_PCODECI16:
@@ -2347,9 +2383,11 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _DENSITY
-    case P_DENSITY: {
-        density_processing_result rs = density_compress((const uint8_t *)in, inlen, (uint8_t*)out, outsize, (const DENSITY_ALGORITHM)lev/*, DENSITY_BLOCK_TYPE_DEFAULT, NULL, NULL*/);
-        return rs.state?0:rs.bytesWritten;
+    case P_DENSITY: 
+      switch (lev) {
+        case 1: return chameleon_encode((uint8_t *)in, inlen, (uint8_t *)out, outsize);
+        case 2: return cheetah_encode(  (uint8_t *)in, inlen, (uint8_t *)out, outsize);
+        case 3: return lion_encode(     (uint8_t *)in, inlen, (uint8_t *)out, outsize);
       }
       #endif       
 
@@ -2633,6 +2671,18 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #endif
 
+      #if _MBROTLI
+    case P_MBROTLI: { 
+      unsigned lgwin = BROTLI_DEFAULT_WINDOW, mode = BROTLI_DEFAULT_MODE; size_t esize = outsize;
+      if(q = strchr(prm,'w'))              lgwin = atoi(q+(q[1]=='='?2:1));     // window specified by local parameter w
+      else if(dsize)                       lgwin = bsr32(dsize)-powof2(dsize);  // window specified by global option -d
+      else if(lev < 10 || strchr(prm,'W')) lgwin = BROTLI_DEFAULT_WINDOW;       // set default=24 for lev<10
+      else                               { lgwin = bsr32(inlen)-powof2(inlen); lgwin = min(lgwin,BROTLI_LARGE_MAX_WINDOW_BITS); }// set large window brotli
+      int rc = mbrotli_compress((const uint8_t*)in, inlen, (uint8_t*)out, &esize, lev, lgwin);
+      return rc?esize:0;
+    }
+      #endif
+
       #if _MEMLZ
     case P_MEMLZ: return memlz_compress(out, in, inlen); // memlz_reset((memlz_state*)workmem); return memlz_stream_compress(out, in, inlen, (memlz_state*)workmem);
       #endif
@@ -2696,6 +2746,20 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif     
 
       #if _PCODEC
+    case P_PCODECI8:  { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_I8,  &config, out, outsize, &w); return w; } break;
+    case P_PCODECU8:  { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_U8,  &config, out, outsize, &w); return w; } break;
+    
+    case P_PCODECI16: { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/2, PCO_TYPE_I16, &config, out, outsize, &w); return w; } break;
+    case P_PCODECU16: { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/2, PCO_TYPE_U16, &config, out, outsize, &w); return w; } break;
+    case P_PCODECF16: { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/2, PCO_TYPE_F16, &config, out, outsize, &w); return w; } break;
+    case P_PCODECI32: { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/4, PCO_TYPE_I32, &config, out, outsize, &w); return w; } break;
+    case P_PCODECU32: { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/4, PCO_TYPE_U32, &config, out, outsize, &w); return w; } break;
+    case P_PCODECF32: { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/4, PCO_TYPE_F32, &config, out, outsize, &w); return w; } break;
+    case P_PCODECI64: { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/8, PCO_TYPE_I64, &config, out, outsize, &w); return w; } break;
+    case P_PCODECU64: { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/8, PCO_TYPE_U64, &config, out, outsize, &w); return w; } break;
+    case P_PCODECF64: { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen/8, PCO_TYPE_F64, &config, out, outsize, &w); return w; } break;
+      #endif
+      #if _PCODEC0
     case P_PCODECI8:  if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_I8,  &config, out, outsize, &w); return w; } break;
     case P_PCODECU8:  if(pco_compress) { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_U8,  &config, out, outsize, &w); return w; } break;
     
@@ -3348,7 +3412,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _DENSITY
-    case P_DENSITY: { density_processing_result rs = density_decompress((uint8_t *)in, inlen, (uint8_t*)out, outlen/*+DENSITY_MINIMUM_OUTPUT_BUFFER_SIZE*/);  return rs.state?0:rs.bytesWritten; }
+    case P_DENSITY: 
+      switch (lev) {
+        case 1: return chameleon_decode((uint8_t *)in, inlen, (uint8_t *)out, outlen);
+        case 2: return cheetah_decode(  (uint8_t *)in, inlen, (uint8_t *)out, outlen);
+        case 3: return lion_decode(     (uint8_t *)in, inlen, (uint8_t *)out, outlen);
+      }
       #endif
 
       #if _DOBOZ
@@ -3558,6 +3627,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         #endif
       #endif
 
+      #if _MBROTLI
+    case P_MBROTLI: { size_t osize = outlen; int rc = mbrotli_decompress((const uint8_t*)in, inlen, (uint8_t*)out, &osize);
+        return rc?osize:0;
+    }
+      #endif
+
       #if _MINIZ
     case P_MINIZ: { uLongf outsize = outlen; int rc = mz_uncompress(out, &outsize, in, inlen); } break;
       #endif
@@ -3617,6 +3692,19 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
        #endif
 
       #if _PCODEC
+    case P_PCODECI8:  { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_I8,  out, outlen, &w); return w; } break;
+    case P_PCODECU8:  { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_U8,  out, outlen, &w); return w; } break;
+    case P_PCODECI16: { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_I16, out, outlen, &w); return w; } break;
+    case P_PCODECU16: { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_U16, out, outlen, &w); return w; } break;
+    case P_PCODECF16: { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_F16, out, outlen, &w); return w; } break;
+    case P_PCODECI32: { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_I32, out, outlen, &w); return w; } break;
+    case P_PCODECU32: { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_U32, out, outlen, &w); return w; } break;
+    case P_PCODECF32: { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_F32, out, outlen, &w); return w; } break;
+    case P_PCODECI64: { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_I64, out, outlen, &w); return w; } break;
+    case P_PCODECU64: { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_U64, out, outlen, &w); return w; } break;
+    case P_PCODECF64: { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_F64, out, outlen, &w); return w; } break;
+      #endif
+      #if _PCODEC0
     case P_PCODECI8:  if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_I8,  out, outlen, &w); return w; } break;
     case P_PCODECU8:  if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_U8,  out, outlen, &w); return w; } break;
     case P_PCODECI16: if(pco_decompress) { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_I16, out, outlen, &w); return w; } break;
@@ -4145,7 +4233,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
 
       #if _DENSITY
-    case P_DENSITY: sprintf(s,"v%d.%d.%d", density_version_major(), density_version_minor(), density_version_revision()); break;
+    case P_DENSITY: return "v0.16.6 v2025-05-24";
       #endif
 
       #if _FLZMA2
@@ -4229,6 +4317,9 @@ char *codver(int codec, char *v, char *s) {
     case P_LZSSE2: case P_LZSSE4: case P_LZSSE8: return "v2018.10.24"; break;
       #endif
 
+      #if _MBROTLI
+    case P_MBROTLI : return "v0.5.2";
+      #endif
       #if _MINIZ
     case P_MINIZ : return "v11.3.2";
       #endif
@@ -4277,7 +4368,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
 
       #if _PULSAR
-    case P_PULSAR: return pulsar_version();
+    case P_PULSAR: { strncpy(s, pulsar_version(), 64); s[64] = 0; char *q; if(q = strchr(s,' ')) *q = 0; } 
       #endif
 
       #if _QUICKLZ
