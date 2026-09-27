@@ -247,7 +247,7 @@ OB += $(GLZA_OBJS)
 endif
 
 GLYD_LIB := 
-ifneq ($(wildcard Glyd/.),)
+ifneq ($(wildcard Glyd0/.),)
 HAVE_CARGO := $(shell command -v cargo >/dev/null 2>&1 && echo 1 || echo 0)
 ifeq ($(HAVE_CARGO),1)
 PLG_FLAGS+=-D_GLYD
@@ -622,8 +622,10 @@ endif
 #ifneq ($(wildcard pcodec_/.),)
 #endif
 
+
+
 PULSAR_LIB := 
-ifneq ($(wildcard pulsar-best/.),)
+ifneq ($(wildcard pulsar-best0/.),)
 HAVE_CARGO := $(shell command -v cargo >/dev/null 2>&1 && echo 1 || echo 0)
 ifeq ($(HAVE_CARGO),1)
 PLG_FLAGS+=-D_PULSAR
@@ -645,21 +647,75 @@ else
 endif
 endif
 
-#--- S -------------------------
-SNAPPY_LIB := 
-ifneq ($(wildcard snappy/.),)
-PLG_FLAGS+=-D_SNAPPY
-CXXFLAGS+=-I$(BUILD)/snappy
-ifneq ($(ARCH),x86_64)
-SNAPPY_CMAKEFLAGS = -DSNAPPY_REQUIRE_AVX=ON -DSNAPPY_REQUIRE_AVX2=ON 
+#--- R -------------------------
+RUST_DIR          := turbobench_
+RUST_PKG_NAME     := ruststatic
+RUST_TARGET       := $(BUILD)/rust
+RUST_LIB          := $(RUST_TARGET)/release/lib$(RUST_PKG_NAME).a
+RUST_MANIFEST_DIR := $(BUILD)/ruststatic_manifest
+RUST_MANIFEST     := $(RUST_MANIFEST_DIR)/Cargo.toml
+
+RUST_FEATURES :=
+ifneq ($(wildcard density/.),)
+  RUST_FEATURES += density
+  PLG_FLAGS += -D_DENSITY
 endif
-SNAPPY_SRCS := $(shell find snappy -type f -name '*.[ch]' -o -name '*.[cc]' )
-SNAPPY_LIB := $(BUILD)/snappy/libsnappy.a
-$(SNAPPY_LIB): $(SNAPPY_SRCS)
-	$(CMAKE) -S snappy -B $(BUILD)/snappy -DSNAPPY_BUILD_TESTS=OFF -DSNAPPY_BUILD_BENCHMARKS=OFF -DSNAPPY_INSTALL=OFF && $(MAKE) -C $(BUILD)/snappy 
-LIBS += $(SNAPPY_LIB)
+ifneq ($(wildcard Glyd/.),)
+  RUST_FEATURES += glyd
+  PLG_FLAGS += -D_GLYD
+endif
+ifneq ($(wildcard mbrotli/.),)
+  RUST_FEATURES += mbrotli
+  PLG_FLAGS += -D_MBROTLI
+endif
+ifneq ($(wildcard pcodec/.),)
+  RUST_FEATURES += pcodec
+  PLG_FLAGS += -D_PCODEC
+endif
+ifneq ($(wildcard pulsar-best/.),)
+  RUST_FEATURES += pulsar
+  PLG_FLAGS += -D_PULSAR
 endif
 
+comma := ,
+empty :=
+space := $(empty) $(empty)
+RUST_FEATURES_CSV := $(subst $(space),$(comma),$(strip $(RUST_FEATURES)))
+RUST_FEATURES_ARG := $(if $(RUST_FEATURES_CSV),--features=$(RUST_FEATURES_CSV))
+
+PCODEC_SRC   := pcodec
+PCODEC_BUILD := $(BUILD)/pcodec
+PCO_C_BUILD  := $(PCODEC_BUILD)/pco_c
+
+$(PCO_C_BUILD)/Cargo.toml: $(PCODEC_SRC)/pco_c/Cargo.toml
+	@mkdir -p $(PCODEC_BUILD)
+	cp -a $(PCODEC_SRC)/. $(PCODEC_BUILD)/
+	sed -i.bak 's/crate-type = \["cdylib", "staticlib"\]/crate-type = ["rlib", "cdylib", "staticlib"]/' \
+		$(PCO_C_BUILD)/Cargo.toml
+	@echo "--> patched $(PCO_C_BUILD)/Cargo.toml (added rlib)"
+
+$(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml $(PCO_C_BUILD)/Cargo.toml
+	@echo "--> generating $(RUST_MANIFEST)"
+	@rm -rf $(RUST_MANIFEST_DIR)
+	@mkdir -p $(RUST_MANIFEST_DIR)
+	cp $(RUST_DIR)/Cargo.toml $@
+	cp -a $(RUST_DIR)/src $(RUST_MANIFEST_DIR)/
+	sed -i.bak -E \
+		-e 's|path\s*=\s*"\.\./density"|path = "$(abspath density)"|' \
+		-e 's|path\s*=\s*"\.\./Glyd"|path = "$(abspath Glyd)"|' \
+		-e 's|path\s*=\s*"\.\./mbrotli/mbrotli-ffi"|path = "$(abspath mbrotli/mbrotli-ffi)"|' \
+		-e 's|path\s*=\s*"\.\./pcodec/pco_c"|path = "$(abspath $(PCO_C_BUILD))"|' \
+		-e 's|path\s*=\s*"\.\./pulsar-best"|path = "$(abspath pulsar-best)"|' \
+		$@
+	@echo "----- generated paths -----"
+	@grep -E 'path\s*=' $@ || true
+	@echo "----------------------------"
+
+$(RUST_LIB): $(RUST_MANIFEST)
+	cargo build --release --manifest-path=$(RUST_MANIFEST) --target-dir=$(RUST_TARGET) $(RUST_FEATURES_ARG)
+rustlib: $(RUST_LIB)
+LIBS += $(RUST_LIB)
+.PHONY: rustlib
 #--- T -------------------------
 ifneq ($(wildcard tamp/.),)
 PLG_FLAGS+=-D_TAMP
@@ -1043,7 +1099,7 @@ PLG_FLAGS+=-D_CHAMELEON
 OB+=$(call obj,chameleon/chameleon.o)
 endif
 
-ifneq ($(wildcard density/.),)
+ifneq ($(wildcard density_c/.),)
 PLG_FLAGS+=-D_DENSITY
 OB+=$(call obj,density/src/buffers/buffer.o density/src/algorithms/algorithms.o density/src/algorithms/dictionaries.o density/src/structure/header.o density/src/globals.o density/src/buffers/buffer.o \
 	density/src/algorithms/chameleon/core/chameleon_decode.o density/src/algorithms/chameleon/core/chameleon_encode.o \
