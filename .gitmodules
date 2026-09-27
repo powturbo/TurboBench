@@ -146,3 +146,15 @@
 [submodule "Glyd"]
 	path = Glyd
 	url = https://github.com/surya-koritala/Glyd.git
+[submodule "pulsar-best"]
+	path = pulsar-best
+	url = https://github.com/ceedot-rock/pulsar-best.git
+[submodule "mbrotli"]
+	path = mbrotli
+	url = https://github.com/Mnwa/mbrotli.git
+[submodule "density"]
+	path = density
+	url = https://github.com/g1mv/density.git
+[submodule "pcodec"]
+	path = pcodec
+	url = https://github.com/pcodec/pcodec.git
