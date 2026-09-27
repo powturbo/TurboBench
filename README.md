@@ -145,16 +145,16 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ### Plugins:
 #### Compressor Lz77,Rolz,zpaq:
 - [LzTurbo](https://sites.google.com/site/powturbo)
-- [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:08.2026
+- [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:2026/09
 - [BriefLz](https://github.com/jibsen/brieflz)
 - [Brotli](https://github.com/google/brotli)
 - [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
 - [CSC](https://github.com/fusiyuan2010/CSC)
-- [Density](https://github.com/centaurean/density) 
+- [Density / rust](https://github.com/g1mv/density) :new:2026/09
 - [Doboz](https://bitbucket.org/attila_afra)
 - [FastLz](http://fastlz.org) 
 - [Fast-lzma](https://github.com/conor42/fast-lzma2)
-- [glza](https://github.com/kidq330/GLZA)
+- [glza](https://github.com/kidq330/GLZA) 
 - [Glyd / rust ](https://github.com/surya-koritala/Glyd) :new:2026/09
 - [heatshrink](https://github.com/atomicobject/heatshrink)
 - [Iguana](https://github.com/ClickHouse/iguana) :new:2026/09
@@ -176,12 +176,13 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [Lzma](http://7-zip.org) 
 - [Lzo](http://www.oberhumer.com/opensource/lzo) 
 - [Lzoma](https://github.com/alef78/lzoma) 
-- [lzraven (Reimplementation)](https://github.com/anat0m1a/liblzraven) :new:2026.09
+- [lzraven (reimplementation)](https://github.com/anat0m1a/liblzraven) :new:2026/09
 - [LZSSE](https://github.com/ConorStokes/LZSSE)
 - [LZSA](https://github.com/emmanuel-marty/lzsa)
-- [Memlz](https://github.com/rrrlasse/memlz) :new:2026.07 
+- [mbrotli / rust](https://github.com/Mnwa/mbrotli) :new:2026/09
+- [Memlz](https://github.com/rrrlasse/memlz) :new:2026/07 
 - [Miniz](https://github.com/richgel999/miniz) 
-- [misa77](https://github.com/welcome-to-the-sunny-side/misa77) :new:2026.07
+- [misa77](https://github.com/welcome-to-the-sunny-side/misa77) :new:2026/07
 - [ms-compress](https://github.com/coderforlife/ms-compress)
 - [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
 - [Pithy](https://github.com/johnezang/pithy) 
@@ -193,34 +194,34 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [smaz](https://github.com/antirez/smaz)
 - [Snappy](https://github.com/google/snappy) 
 - [Snappy-c](https://github.com/andikleen/snappy-c) 
-- [Tamp](https://github.com/BrianPugh/tamp) :new:2026.07
+- [Tamp](https://github.com/BrianPugh/tamp) :new:2026/07
 - [Tornado](http://freearc.org)
 - [Unishox](https://github.com/siara-cc/Unishox)
 - [wfLZ](https://github.com/ShaneWF/wflz)
 - [yalz77](https://github.com/ivan-tkatchev/yalz77) 
 - [yappy v2011]()
 - [xpack](https://github.com/ebiggers/xpack) 
-- [xz](https://github.com/tukaani-project/xz) :new:2026.05
+- [xz](https://github.com/tukaani-project/xz) :new:2026/05
 - [zlib](http://zlib.net)
 - [zlib-ng](https://github.com/Dead2/zlib-ng)
 - [zlib cloudflare](https://github.com/cloudflare/zlib)
 - [zopfli](https://code.google.com/p/zopfli) 
 - [zstd](https://github.com/facebook/zstd)
 - [zpaq](https://github.com/zpaq/zpaq)
-- [zxc](https://github.com/hellobertrand/zxc) :new:2026.05
+- [zxc](https://github.com/hellobertrand/zxc) :new:2026/05
 
 #### BWT - Burrows–Wheeler transform:
 - [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc)
-- [BwtSatan](https://github.com/powturbo/Turbo-Range-Coder) :new:2026.09 
+- [BwtSatan](https://github.com/powturbo/Turbo-Range-Coder) :new:2026/09 
 - [bzip2](http://www.bzip.org/downloads.html)
 - [bzip3](https://github.com/iczelia/bzip3)
-- [kanzi (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) :new: 2026/07
-- [Pulsar/bwt rust](https://github.com/ceedot-rock/pulsar-best) :new:2026.09 
+- [kanzi bwt (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) :new: 2026/07
+- [Pulsar / rust](https://github.com/ceedot-rock/pulsar-best) :new:2026/09 
 
 #### Integer / Floating point:
 - [Blosc](https://github.com/Blosc/c-blosc2)
-- [OpnZL](https://github.com/facebook/openzl)  :new:2026.07
-- [Pcodec](https://github.com/pcodec/pcodec) :new:2026.07
+- [OpnZL](https://github.com/facebook/openzl)  :new:2026/07
+- [Pcodec](https://github.com/pcodec/pcodec) :new:2026/07
 
 #### Entropy coder:
 
@@ -344,5 +345,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -eFAST -aFAST
 ```
 
-Last update: 24 SEP 2026
+Last update: 28 SEP 2026
 
