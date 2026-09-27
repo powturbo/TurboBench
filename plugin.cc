@@ -1845,7 +1845,7 @@ struct plugs plugs[] = {
   { P_LZSSE4,        "lzsse4",        _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
   { P_LZSSE8,        "lzsse8",        _LZSSE,     "lzsse",                   "0,1,2,3,4,5,6,7,8,9,12,16,17"},
 
-  { P_MBROTLI,       "mbrotli",       _MBROTLI,   "mbrotli",                      "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
+  { P_MBROTLI,       "mbrotli",       _MBROTLI,   "mbrotli",                 "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
   { P_MEMLZ,         "memlz",         _MEMLZ,     "memlz",                   "" },
   { P_MINIZ,         "miniz",         _MINIZ,     "miniz",                   "1,2,3,4,5,6,7,8,9" },
   { P_MISA77,        "misa77",        _MISA77,    "misa77",                  "0,1,2,3,4,-1" },
@@ -2679,7 +2679,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       else if(lev < 10 || strchr(prm,'W')) lgwin = BROTLI_DEFAULT_WINDOW;       // set default=24 for lev<10
       else                               { lgwin = bsr32(inlen)-powof2(inlen); lgwin = min(lgwin,BROTLI_LARGE_MAX_WINDOW_BITS); }// set large window brotli
       int rc = mbrotli_compress((const uint8_t*)in, inlen, (uint8_t*)out, &esize, lev, lgwin);
-      return rc?esize:0;
+      return rc?0:esize;
     }
       #endif
 
@@ -3629,7 +3629,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _MBROTLI
     case P_MBROTLI: { size_t osize = outlen; int rc = mbrotli_decompress((const uint8_t*)in, inlen, (uint8_t*)out, &osize);
-        return rc?osize:0;
+        return rc?0:osize;
     }
       #endif
 
