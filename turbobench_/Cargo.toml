@@ -1,0 +1,30 @@
+[package]
+name = "ruststatic"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.85"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[dependencies]
+density-rs = { path = "../density", optional = true }
+glyd    = { path = "../Glyd",        optional = true }
+mbrotli-ffi = { path = "../mbrotli/mbrotli-ffi", optional = true }
+cpcodec  = { path = "../pcodec/pco_c", optional = true }
+pulsar  = { path = "../pulsar-best",  optional = true }
+
+[features]
+default = []
+density = ["dep:density-rs"]
+glyd    = ["dep:glyd"]
+mbrotli = ["dep:mbrotli-ffi"]
+pcodec  = ["dep:cpcodec"]
+pulsar  = ["dep:pulsar"]
+
+
+#[lib]
+#name = "ruststatic"
+#path = "lib.rs"
+
