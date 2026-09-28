@@ -147,7 +147,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | Compressor | Added | Language | Comment |
 |---|---|---|---|
 | [LzTurbo](https://sites.google.com/site/powturbo) |  |c  |  |
-| [AMD AOCL-Compression](https://github.com/amd/aocl-compression) | 2026/09 |c++  |  |
+| [AMD AOCL-Compression](https://github.com/amd/aocl-compression) | 2026/09 |c++  |tuned lz4,zstd,bzip2 for amd64  |
 | [BriefLz](https://github.com/jibsen/brieflz) |  |c  |  |
 | [Brotli](https://github.com/google/brotli) |  |c  |  |
 | [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) |  |c  |  |
@@ -159,7 +159,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [glza](https://github.com/kidq330/GLZA) |  |c  |  |
 | [Glyd](https://github.com/surya-koritala/Glyd) | 2026/09 | rust |  |
 | [heatshrink](https://github.com/atomicobject/heatshrink) |  |c  |  |
-| [Iguana](https://github.com/ClickHouse/iguana) | 2026/09 |c++  |  |
+| [Iguana](https://github.com/ClickHouse/iguana) | 2026/09 |c++  |Not reliable|
 | [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l) |  |c  |  |
 | [kanzi](https://github.com/flanglet/kanzi-cpp) | 2026/07 |c++  |  |
 | [lib](https://github.com/vurtun/lib) | 2026/09 |c  |  |
@@ -170,15 +170,15 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Lz4](https://github.com/Cyan4973/lz4) |  |c  |  |
 | [Lz4ultra](https://github.com/emmanuel-marty/lz4ultra) |  |c  |  |
 | [lzjody](https://github.com/deep-soft/lzjody) |  |c  |  |
-| [lizard](https://github.com/inikep/lz5) |  |  |c  |
-| [Lzfse](https://github.com/lzfse/lzfse) |  |  |c  |
+| [lizard](https://github.com/inikep/lz5) |  |c  |  |
+| [Lzfse](https://github.com/lzfse/lzfse) |  |c  |  |
 | [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) |  |c++  |  |
 | [Lzlib](https://github.com/aonez/lzlib) | 2026/09 |c  |  |
 | [Lzmat](https://github.com/nemequ/lzmat) |  |c  |  |
 | [Lzma](http://7-zip.org) |  |c  |  |
 | [Lzo](http://www.oberhumer.com/opensource/lzo) |  |c  |  |
 | [Lzoma](https://github.com/alef78/lzoma) |  |c  |  |
-| [lzraven](https://github.com/anat0m1a/liblzraven) | 2026/09 |c  |Reimplementation of Apple's lzravens|
+| [lzraven](https://github.com/anat0m1a/liblzraven) | 2026/09 |c  |Reimplementation of Apple's lzraven|
 | [LZSSE](https://github.com/ConorStokes/LZSSE) |  |c  |  |
 | [LZSA](https://github.com/emmanuel-marty/lzsa) |  |c  |  |
 | [mbrotli](https://github.com/Mnwa/mbrotli) | 2026/09 | rust |  |
@@ -186,8 +186,8 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Miniz](https://github.com/richgel999/miniz) |  |c  |  |
 | [misa77](https://github.com/welcome-to-the-sunny-side/misa77) | 2026/07 |c++ |  |
 | [ms-compress](https://github.com/coderforlife/ms-compress) |  |c++  |  |
-| [mzip](https://github.com/Cranot/mzip) |2026/09  |c  |  |
-| [Oodle](http://www.radgametools.com/oodle.htm) |  |c++  | windows/linux/macos x86_64/aarch64, dynamic lib |
+| [mzip](https://github.com/Cranot/mzip) |2026/09  |c  |too slow|
+| [Oodle](http://www.radgametools.com/oodle.htm) |  |c++  | windows/linux/macos x86_64/aarch64, dynamic lib required|
 | [Pithy](https://github.com/johnezang/pithy) |  |c  |  |
 | [Quicklz](https://github.com/robottwo/quicklz) |  |c  |  |
 | [sap](https://github.com/CoreSecurity/pysap) |  |c++|  |
