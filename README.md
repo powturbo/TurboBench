@@ -144,71 +144,74 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 
 ### Plugins:
 #### Compressor Lz77,Rolz,zpaq:
-- [LzTurbo](https://sites.google.com/site/powturbo)
-- [AMD AOCL-Compression](https://github.com/amd/aocl-compression) :new:2026/09
-- [BriefLz](https://github.com/jibsen/brieflz)
-- [Brotli](https://github.com/google/brotli)
-- [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) 
-- [CSC](https://github.com/fusiyuan2010/CSC)
-- [Density / rust](https://github.com/g1mv/density) :new:2026/09
-- [Doboz](https://bitbucket.org/attila_afra)
-- [FastLz](http://fastlz.org) 
-- [Fast-lzma](https://github.com/conor42/fast-lzma2)
-- [glza](https://github.com/kidq330/GLZA) 
-- [Glyd / rust ](https://github.com/surya-koritala/Glyd) :new:2026/09
-- [heatshrink](https://github.com/atomicobject/heatshrink)
-- [Iguana](https://github.com/ClickHouse/iguana) :new:2026/09
-- [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l)
-- [kanzi](https://github.com/flanglet/kanzi-cpp) :new: 2026/07
-- [lib](https://github.com/vurtun/lib) :new: 2026/09
-- [Libdeflate](https://github.com/ebiggers/libdeflate) 
-- [LibLZF](http://oldhome.schmorp.de/marc/liblzf.html) 
-- [LibLz](https://github.com/mbitsnbites/liblzg) 
-- [LibSLZ](https://github.com/wtarreau/libslz)
-- [Lz4](https://github.com/Cyan4973/lz4) 
-- [Lz4ultra](https://github.com/emmanuel-marty/lz4ultra)
-- [lzjody](https://github.com/deep-soft/lzjody) 
-- [lizard](https://github.com/inikep/lz5) 
-- [Lzfse](https://github.com/lzfse/lzfse)
-- [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) 
-- [Lzlib](https://github.com/aonez/lzlib) :new: 2026/09 
-- [Lzmat](https://github.com/nemequ/lzmat) 
-- [Lzma](http://7-zip.org) 
-- [Lzo](http://www.oberhumer.com/opensource/lzo) 
-- [Lzoma](https://github.com/alef78/lzoma) 
-- [lzraven (reimplementation)](https://github.com/anat0m1a/liblzraven) :new:2026/09
-- [LZSSE](https://github.com/ConorStokes/LZSSE)
-- [LZSA](https://github.com/emmanuel-marty/lzsa)
-- [mbrotli / rust](https://github.com/Mnwa/mbrotli) :new:2026/09
-- [Memlz](https://github.com/rrrlasse/memlz) :new:2026/07 
-- [Miniz](https://github.com/richgel999/miniz) 
-- [misa77](https://github.com/welcome-to-the-sunny-side/misa77) :new:2026/07
-- [ms-compress](https://github.com/coderforlife/ms-compress)
-- [Oodle](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
-- [Pithy](https://github.com/johnezang/pithy) 
-- [Quicklz](https://github.com/robottwo/quicklz) 
-- [sap](https://github.com/CoreSecurity/pysap) 
-- [shoco](https://github.com/Ed-von-Schleck/shoco) 
-- [Shrinker](https://code.google.com/p/data-shrinker) 
-- [Smallz4](https://github.com/stbrumme/smallz4) 
-- [smaz](https://github.com/antirez/smaz)
-- [Snappy](https://github.com/google/snappy) 
-- [Snappy-c](https://github.com/andikleen/snappy-c) 
-- [Tamp](https://github.com/BrianPugh/tamp) :new:2026/07
-- [Tornado](http://freearc.org)
-- [Unishox](https://github.com/siara-cc/Unishox)
-- [wfLZ](https://github.com/ShaneWF/wflz)
-- [yalz77](https://github.com/ivan-tkatchev/yalz77) 
-- [yappy v2011]()
-- [xpack](https://github.com/ebiggers/xpack) 
-- [xz](https://github.com/tukaani-project/xz) :new:2026/05
-- [zlib](http://zlib.net)
-- [zlib-ng](https://github.com/Dead2/zlib-ng)
-- [zlib cloudflare](https://github.com/cloudflare/zlib)
-- [zopfli](https://code.google.com/p/zopfli) 
-- [zstd](https://github.com/facebook/zstd)
-- [zpaq](https://github.com/zpaq/zpaq)
-- [zxc](https://github.com/hellobertrand/zxc) :new:2026/05
+| Compressor | Added | Language | Comment |
+|---|---|---|---|
+| [LzTurbo](https://sites.google.com/site/powturbo) |  |c  |  |
+| [AMD AOCL-Compression](https://github.com/amd/aocl-compression) | 2026/09 |c++  |  |
+| [BriefLz](https://github.com/jibsen/brieflz) |  |c  |  |
+| [Brotli](https://github.com/google/brotli) |  |c  |  |
+| [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) |  |c  |  |
+| [CSC](https://github.com/fusiyuan2010/CSC) |  |c  |  |
+| [Density](https://github.com/g1mv/density) | 2026/09 | rust |  |
+| [Doboz](https://bitbucket.org/attila_afra) |  |c  |  |
+| [FastLz](http://fastlz.org) |  |c  |  |
+| [Fast-lzma](https://github.com/conor42/fast-lzma2) |  |c  |  |
+| [glza](https://github.com/kidq330/GLZA) |  |c  |  |
+| [Glyd](https://github.com/surya-koritala/Glyd) | 2026/09 | rust |  |
+| [heatshrink](https://github.com/atomicobject/heatshrink) |  |c  |  |
+| [Iguana](https://github.com/ClickHouse/iguana) | 2026/09 |c++  |  |
+| [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l) |  |c  |  |
+| [kanzi](https://github.com/flanglet/kanzi-cpp) | 2026/07 |c++  |  |
+| [lib](https://github.com/vurtun/lib) | 2026/09 |c  |  |
+| [Libdeflate](https://github.com/ebiggers/libdeflate) |  |c  |  |
+| [LibLZF](http://oldhome.schmorp.de/marc/liblzf.html) |  |c  |  |
+| [LibLz](https://github.com/mbitsnbites/liblzg) |  |c  |  |
+| [LibSLZ](https://github.com/wtarreau/libslz) |  |c  |  |
+| [Lz4](https://github.com/Cyan4973/lz4) |  |c  |  |
+| [Lz4ultra](https://github.com/emmanuel-marty/lz4ultra) |  |c  |  |
+| [lzjody](https://github.com/deep-soft/lzjody) |  |c  |  |
+| [lizard](https://github.com/inikep/lz5) |  |  |c  |
+| [Lzfse](https://github.com/lzfse/lzfse) |  |  |c  |
+| [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) |  |c++  |  |
+| [Lzlib](https://github.com/aonez/lzlib) | 2026/09 |c  |  |
+| [Lzmat](https://github.com/nemequ/lzmat) |  |c  |  |
+| [Lzma](http://7-zip.org) |  |c  |  |
+| [Lzo](http://www.oberhumer.com/opensource/lzo) |  |c  |  |
+| [Lzoma](https://github.com/alef78/lzoma) |  |c  |  |
+| [lzraven](https://github.com/anat0m1a/liblzraven) | 2026/09 |c  |Reimplementation of Apple's lzravens|
+| [LZSSE](https://github.com/ConorStokes/LZSSE) |  |c  |  |
+| [LZSA](https://github.com/emmanuel-marty/lzsa) |  |c  |  |
+| [mbrotli](https://github.com/Mnwa/mbrotli) | 2026/09 | rust |  |
+| [Memlz](https://github.com/rrrlasse/memlz) | 2026/07 |c  |  |
+| [Miniz](https://github.com/richgel999/miniz) |  |c  |  |
+| [misa77](https://github.com/welcome-to-the-sunny-side/misa77) | 2026/07 |c++ |  |
+| [ms-compress](https://github.com/coderforlife/ms-compress) |  |c++  |  |
+| [mzip](https://github.com/Cranot/mzip) |2026/09  |c  |  |
+| [Oodle](http://www.radgametools.com/oodle.htm) |  |c++  | windows/linux/macos x86_64/aarch64, dynamic lib |
+| [Pithy](https://github.com/johnezang/pithy) |  |c  |  |
+| [Quicklz](https://github.com/robottwo/quicklz) |  |c  |  |
+| [sap](https://github.com/CoreSecurity/pysap) |  |c++|  |
+| [shoco](https://github.com/Ed-von-Schleck/shoco) |  |c  |  |
+| [Shrinker](https://code.google.com/p/data-shrinker) |  |c  |  |
+| [Smallz4](https://github.com/stbrumme/smallz4) |  |c  |  |
+| [smaz](https://github.com/antirez/smaz) |  |  |c  |
+| [Snappy](https://github.com/google/snappy) |  |c++ |  |
+| [Snappy-c](https://github.com/andikleen/snappy-c) |  |c  |  |
+| [Tamp](https://github.com/BrianPugh/tamp) | 2026/07 |c |  |
+| [Tornado](http://freearc.org) |  |c++  |  |
+| [Unishox](https://github.com/siara-cc/Unishox) |  |c  |  |
+| [wfLZ](https://github.com/ShaneWF/wflz) |  |c  |  |
+| [yalz77](https://github.com/ivan-tkatchev/yalz77) |  |c  |  |
+| [yappy v2011]() |  |c  |  |
+| [xpack](https://github.com/ebiggers/xpack) |  |  |  |
+| [xz](https://github.com/tukaani-project/xz) | 2026/05 |c  |  |
+| [zlib](http://zlib.net) |  |c  |  |
+| [zlib-ng](https://github.com/Dead2/zlib-ng) |  |c  |  |
+| [zlib cloudflare](https://github.com/cloudflare/zlib) |  |  |  |
+| [zopfli](https://code.google.com/p/zopfli) |  |c  |  |
+| [zstd](https://github.com/facebook/zstd) |  |c  |  |
+| [zpaq](https://github.com/zpaq/zpaq) |  |c++  |  |
+| [zxc](https://github.com/hellobertrand/zxc) | 2026/05 |c  |  |
 
 #### BWT - Burrows–Wheeler transform:
 - [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc)
@@ -216,7 +219,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - [bzip2](http://www.bzip.org/downloads.html)
 - [bzip3](https://github.com/iczelia/bzip3)
 - [kanzi bwt (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) :new: 2026/07
-- [Pulsar / rust](https://github.com/ceedot-rock/pulsar-best) :new:2026/09 
+- [Pulsar / rust](https://github.com/ceedot-rock/pulsar-best) :new:2026/09 (very slow)
 
 #### Integer / Floating point:
 - [Blosc](https://github.com/Blosc/c-blosc2)
