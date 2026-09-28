@@ -566,6 +566,11 @@ MISA77_SRCS := $(wildcard $(MISA77_SRC)/*.cpp)
 OB += $(call obj,$(MISA77_SRCS) $(MISA77_SRC)/isa/target_portable.o) $(addprefix $(BUILD)/$(MISA77_SRC)/,$(MISA77_VOBJS))
 endif
 
+ifneq ($(wildcard mzip/.),)
+PLG_FLAGS+=-D_MZIP
+OB += mzip.o mzip/ppmd/Ppmd7.o mzip/ppmd/Ppmd7Dec.o mzip/ppmd/Ppmd7Enc.o
+endif
+
 #---- O -----------------------
 OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
@@ -619,11 +624,6 @@ LIBS+=$(OODLE_STATIC_LIB)
 endif
 
 #--- P -------------------------
-#ifneq ($(wildcard pcodec_/.),)
-#endif
-
-
-
 PULSAR_LIB := 
 ifneq ($(wildcard pulsar-best0/.),)
 HAVE_CARGO := $(shell command -v cargo >/dev/null 2>&1 && echo 1 || echo 0)
