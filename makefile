@@ -862,70 +862,6 @@ endif
 OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))
 endif
 
-#------------------------------------ Manual Download ---------------------------------------------------------------------------
-ifneq ($(wildcard brieflz/.),)
-PLG_FLAGS+=-D_BRIEFLZ
-CFLAGS+=-Ibrieflz/include
-OB+=$(call obj,brieflz/src/brieflz.o brieflz/src/depack.o)
-endif
-
-ifneq ($(wildcard fast-lzma2/.),)
-PLG_FLAGS+=-D_FLZMA2
-FLZMA2_SRCS := $(wildcard fast-lzma2/*.c) 
-FLZMA2_SRCS := $(filter-out %/xxhash.c, $(FLZMA2_SRCS))
-FLZMA2_OBJS := $(call obj,$(FLZMA2_SRCS))
-OB += $(FLZMA2_OBJS)
-endif
-
-ifneq ($(wildcard lz4ultra/.),)
-PLG_FLAGS+=-D_LZ4ULTRA
-CXXFLAGS+=-Ilz4ultra/src -Ilz4ultra/src/libdivsufsort/include
-OB+=$(call obj,lz4ultra/src/shrink_inmem.o lz4ultra/src/expand_inmem.o lz4ultra/src/shrink_block.o lz4ultra/src/expand_block.o lz4ultra/src/shrink_context.o lz4ultra/src/matchfinder.o lz4ultra/src/frame.o)
-ifeq ($(DIVSORT), 1)
-else
-OB+=$(call obj,lz4ultra/src/libdivsufsort/lib/divsufsort.o lz4ultra/src/libdivsufsort/lib/sssort.o lz4ultra/src/libdivsufsort/lib/trsort.o)
-DIVSORT=1
-endif
-endif
-
-ifneq ($(wildcard lzsa/.),)
-PLG_FLAGS+=-D_LZSA
-CFLAGS+=-Ilzsa/src -Ilzsa/src/libdivsufsort/include
-OB+=$(call obj,lzsa/src/expand_block_v1.o lzsa/src/expand_block_v2.o lzsa/src/expand_context.o lzsa/src/expand_inmem.o lzsa/src/shrink_block_v1.o lzsa/src/shrink_block_v2.o lzsa/src/shrink_inmem.o lzsa/src/shrink_context.o \
-    lzsa/src/matchfinder.o lzsa/src/frame.o)
-ifeq ($(DIVSORT), 1)
-else
-OB+=$(call obj,lzsa/src/libdivsufsort/lib/divsufsort.o lzsa/src/libdivsufsort/lib/sssort.o lzsa/src/libdivsufsort/lib/trsort.o)
-DIVSORT=1
-endif
-endif
-
-ifneq ($(wildcard snappy-c/.),)
-PLG_FLAGS+=-D_SNAPPY_C
-OB+=$(call obj,snappy-c/snappy.o snappy-c/util.o)
-endif
-
-ifneq ($(wildcard gipfeli/.),)
-PLG_FLAGS+=-D_GIPFELI
-OB+=$(call obj,gipfeli/lz77.o gipfeli/entropy.o gipfeli/entropy_code_builder.o gipfeli/decompress.o gipfeli/gipfeli-internal.o)
-endif
-
-ifneq ($(wildcard tcobs/.),)
-PLG_FLAGS+=-D_TCOBS
-CXXFLAGS+=-Drestrict=__restrict
-OB+=$(call obj,tcobs/v2/tcobsEncode.o tcobs/v2/tcobsDecode.o)
-endif
-
-ifdef SMALLZ4
-PLG_FLAGS+=-DSMALLZ4
-endif
-
-ifneq ($(wildcard Unishox2/.),)
-PLG_FLAGS+=-D_UNISHOX2
-OB+=$(call obj,Unishox2/unishox2.o turbobench_/unishox.o)
-CXXFLAGS+=-Imarisa-trie/include
-OB+=$(call obj,Unishox2/Unishox3_Alpha/unishox3.o)
-endif
 
 #------------------------- Entropy coder -----------------------------------------
 # First download or clone aomedia (git clone https://aomedia.googlesource.com/aom) into TurboBench directory
@@ -1098,10 +1034,22 @@ OB+=$(call obj,$(HRLE)/src/rle_sh.o $(HRLE)/src/rle8_extreme_cpu.o $(HRLE)/src/r
 OB+=$(BUILD)/$(HRLE)/src/simd_platform.o
 endif
 
-#-------------------------------------- Archived ----------------------------------
+#------------------------------------ Manual Download ---------------------------------------------------------------------------
+ifneq ($(wildcard brieflz/.),)
+PLG_FLAGS+=-D_BRIEFLZ
+CFLAGS+=-Ibrieflz/include
+OB+=$(call obj,brieflz/src/brieflz.o brieflz/src/depack.o)
+endif
+
 ifneq ($(wildcard chameleon/.),)
 PLG_FLAGS+=-D_CHAMELEON
 OB+=$(call obj,chameleon/chameleon.o)
+endif
+
+ifneq ($(wildcard CSC/.),)
+PLG_FLAGS+=-D_CSC
+OB+=$(call obj,CSC/src/libcsc/csc_analyzer.o CSC/src/libcsc/csc_coder.o CSC/src/libcsc/csc_dec.o CSC/src/libcsc/csc_default_alloc.o CSC/src/libcsc/csc_enc.o CSC/src/libcsc/csc_encoder_main.o CSC/src/libcsc/csc_filters.o CSC/src/libcsc/csc_lz.o CSC/src/libcsc/csc_memio.o \
+	CSC/src/libcsc/csc_mf.o CSC/src/libcsc/csc_model.o CSC/src/libcsc/csc_profiler.o)
 endif
 
 ifneq ($(wildcard density_c/.),)
@@ -1112,6 +1060,73 @@ OB+=$(call obj,density/src/buffers/buffer.o density/src/algorithms/algorithms.o 
 	density/src/algorithms/cheetah/core/cheetah_decode.o density/src/algorithms/cheetah/core/cheetah_encode.o)
 endif
 
+ifneq ($(wildcard doboz/.),)
+PLG_FLAGS+=-D_DOBOZ
+OB+=$(call obj,doboz/Source/Doboz/Compressor.o doboz/Source/Doboz/Decompressor.o doboz/Source/Doboz/Dictionary.o)
+endif
+
+ifneq ($(wildcard fast-lzma2/.),)
+PLG_FLAGS+=-D_FLZMA2
+FLZMA2_SRCS := $(wildcard fast-lzma2/*.c) 
+FLZMA2_SRCS := $(filter-out %/xxhash.c, $(FLZMA2_SRCS))
+FLZMA2_OBJS := $(call obj,$(FLZMA2_SRCS))
+OB += $(FLZMA2_OBJS)
+endif
+
+ifneq ($(wildcard FastLZ/.),)
+PLG_FLAGS+=-D_FASTLZ
+OB+=$(call obj,FastLZ/fastlz.o)
+endif
+
+ifneq ($(wildcard gipfeli/.),)
+PLG_FLAGS+=-D_GIPFELI
+OB+=$(call obj,gipfeli/lz77.o gipfeli/entropy.o gipfeli/entropy_code_builder.o gipfeli/decompress.o gipfeli/gipfeli-internal.o)
+endif
+
+ifneq ($(wildcard heatshrink_/.),)
+PLG_FLAGS+=-D_HEATSHRINK
+OB+=$(call obj,heatshrink_/heatshrink.o heatshrink/heatshrink_encoder.o heatshrink/heatshrink_decoder.o)
+endif
+
+ifneq ($(wildcard liblzf/.),)
+PLG_FLAGS+=-D_LIBLZF
+OB+=$(call obj,liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o)
+endif
+
+ifneq ($(wildcard liblzg/.),)
+PLG_FLAGS+=-D_LIBLZG
+OB+=$(call obj,liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o)
+endif
+
+ifneq ($(wildcard libzling/.),)
+PLG_FLAGS+=-D_LIBZLING
+# Disabled : compile error in gcc 7.2
+#OB+=libzling/src/libzling.o libzling/src/libzling_huffman.o libzling/src/libzling_utils.o libzling/src/libzling_lz.o libzling_/libzling_utils_mem.o
+endif
+
+ifneq ($(wildcard lz4ultra/.),)
+PLG_FLAGS+=-D_LZ4ULTRA
+CXXFLAGS+=-Ilz4ultra/src -Ilz4ultra/src/libdivsufsort/include
+OB+=$(call obj,lz4ultra/src/shrink_inmem.o lz4ultra/src/expand_inmem.o lz4ultra/src/shrink_block.o lz4ultra/src/expand_block.o lz4ultra/src/shrink_context.o lz4ultra/src/matchfinder.o lz4ultra/src/frame.o)
+ifeq ($(DIVSORT), 1)
+else
+OB+=$(call obj,lz4ultra/src/libdivsufsort/lib/divsufsort.o lz4ultra/src/libdivsufsort/lib/sssort.o lz4ultra/src/libdivsufsort/lib/trsort.o)
+DIVSORT=1
+endif
+endif
+
+ifneq ($(wildcard lzsa/.),)
+PLG_FLAGS+=-D_LZSA
+CFLAGS+=-Ilzsa/src -Ilzsa/src/libdivsufsort/include
+OB+=$(call obj,lzsa/src/expand_block_v1.o lzsa/src/expand_block_v2.o lzsa/src/expand_context.o lzsa/src/expand_inmem.o lzsa/src/shrink_block_v1.o lzsa/src/shrink_block_v2.o lzsa/src/shrink_inmem.o lzsa/src/shrink_context.o \
+    lzsa/src/matchfinder.o lzsa/src/frame.o)
+ifeq ($(DIVSORT), 1)
+else
+OB+=$(call obj,lzsa/src/libdivsufsort/lib/divsufsort.o lzsa/src/libdivsufsort/lib/sssort.o lzsa/src/libdivsufsort/lib/trsort.o)
+DIVSORT=1
+endif
+endif
+
 ifneq ($(wildcard lzjody/.),)
 PLG_FLAGS+=-D_LZJODY
 OB+=$(call obj,lzjody/lzjody.o lzjody/byteplane_xfrm.o)
@@ -1120,6 +1135,54 @@ endif
 ifneq ($(wildcard lzoma_/.),)
 PLG_FLAGS+=-D_LZOMA
 OB+=$(call obj,lzoma_/pack.o lzoma_/unpack.o lzoma_/divsufsort.o)
+endif
+
+ifneq ($(wildcard pithy/.),)
+PLG_FLAGS+=-D_PITHY
+$(BUILD)/pithy/pithy.o: pithy/pithy.c
+	@mkdir -p $(dir $@)
+	$(CC) -O2 $(MARCH) $(CFLAGS)  $< -c -o $@
+OB+=$(BUILD)/pithy/pithy.o
+endif
+
+ifneq ($(wildcard shoco/.),)
+PLG_FLAGS+=-D_SHOCO
+OB+=$(call obj,shoco/shoco.o)
+endif
+
+ifneq ($(wildcard shrinker/.),)
+PLG_FLAGS+=-D_SHRINKER
+$(BUILD)/shrinker/shrinker.o: shrinker/shrinker.c
+	@mkdir -p $(dir $@)
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
+OB+=$(call obj,shrinker/Shrinker.o)
+endif
+
+ifneq ($(wildcard smaz/.),)
+PLG_FLAGS+=-D_SMAZ
+OB+=$(call obj,smaz/smaz.o)
+endif
+
+ifneq ($(wildcard snappy-c/.),)
+PLG_FLAGS+=-D_SNAPPY_C
+OB+=$(call obj,snappy-c/snappy.o snappy-c/util.o)
+endif
+
+ifdef SMALLZ4
+PLG_FLAGS+=-DSMALLZ4
+endif
+
+ifneq ($(wildcard tcobs/.),)
+PLG_FLAGS+=-D_TCOBS
+CXXFLAGS+=-Drestrict=__restrict
+OB+=$(call obj,tcobs/v2/tcobsEncode.o tcobs/v2/tcobsDecode.o)
+endif
+
+ifneq ($(wildcard Unishox2/.),)
+PLG_FLAGS+=-D_UNISHOX2
+OB+=$(call obj,Unishox2/unishox2.o turbobench_/unishox.o)
+CXXFLAGS+=-Imarisa-trie/include
+OB+=$(call obj,Unishox2/Unishox3_Alpha/unishox3.o)
 endif
 
 ifneq ($(wildcard xpack/.),)
@@ -1144,22 +1207,6 @@ $(BUILD)/xpack/lib/x86_cpu_features.o: xpack/lib/x86_cpu_features.c
 OB+=$(BUILD)/xpack/lib/xpack_common.o $(BUILD)/xpack/lib/xpack_compress.o $(BUILD)/xpack/lib/xpack_decompress.o $(BUILD)/xpack/lib/x86_cpu_features.o
 endif
 
-ifneq ($(wildcard pithy/.),)
-PLG_FLAGS+=-D_PITHY
-$(BUILD)/pithy/pithy.o: pithy/pithy.c
-	@mkdir -p $(dir $@)
-	$(CC) -O2 $(MARCH) $(CFLAGS)  $< -c -o $@
-OB+=$(BUILD)/pithy/pithy.o
-endif
-
-ifneq ($(wildcard shrinker/.),)
-PLG_FLAGS+=-D_SHRINKER
-$(BUILD)/shrinker/shrinker.o: shrinker/shrinker.c
-	@mkdir -p $(dir $@)
-	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
-OB+=$(call obj,shrinker/Shrinker.o)
-endif
-
 ifneq ($(wildcard wlfz/.),)
 PLG_FLAGS+=-D_WFLZ
 $(BUILD)/wflz/wfLZ.o: wflz/wfLZ.c
@@ -1168,62 +1215,16 @@ $(BUILD)/wflz/wfLZ.o: wflz/wfLZ.c
 OB+=$(BUILD)/wflz/wfLZ.o
 endif
 
-ifneq ($(wildcard FastLZ/.),)
-PLG_FLAGS+=-D_FASTLZ
-OB+=$(call obj,FastLZ/fastlz.o)
-endif
-
-ifneq ($(wildcard heatshrink_/.),)
-PLG_FLAGS+=-D_HEATSHRINK
-OB+=$(call obj,heatshrink_/heatshrink.o heatshrink/heatshrink_encoder.o heatshrink/heatshrink_decoder.o)
-endif
-
-ifneq ($(wildcard liblzf/.),)
-PLG_FLAGS+=-D_LIBLZF
-OB+=$(call obj,liblzf/lzf_c.o liblzf/lzf_c_best.o liblzf/lzf_d.o)
-endif
-
-ifneq ($(wildcard liblzg/.),)
-PLG_FLAGS+=-D_LIBLZG
-OB+=$(call obj,liblzg/src/lib/encode.o liblzg/src/lib/decode.o liblzg/src/lib/checksum.o)
-endif
-
-ifneq ($(wildcard shoco/.),)
-PLG_FLAGS+=-D_SHOCO
-OB+=$(call obj,shoco/shoco.o)
-endif
-
-ifneq ($(wildcard smaz/.),)
-PLG_FLAGS+=-D_SMAZ
-OB+=$(call obj,smaz/smaz.o)
-endif
-
 ifneq ($(wildcard yappy/.),)
 PLG_FLAGS+=-D_YAPPY
 OB+=$(call obj,yappy/yappy.o)
-endif
-
-ifneq ($(wildcard CSC/.),)
-PLG_FLAGS+=-D_CSC
-OB+=$(call obj,CSC/src/libcsc/csc_analyzer.o CSC/src/libcsc/csc_coder.o CSC/src/libcsc/csc_dec.o CSC/src/libcsc/csc_default_alloc.o CSC/src/libcsc/csc_enc.o CSC/src/libcsc/csc_encoder_main.o CSC/src/libcsc/csc_filters.o CSC/src/libcsc/csc_lz.o CSC/src/libcsc/csc_memio.o \
-	CSC/src/libcsc/csc_mf.o CSC/src/libcsc/csc_model.o CSC/src/libcsc/csc_profiler.o)
-endif
-
-ifneq ($(wildcard doboz/.),)
-PLG_FLAGS+=-D_DOBOZ
-OB+=$(call obj,doboz/Source/Doboz/Compressor.o doboz/Source/Doboz/Decompressor.o doboz/Source/Doboz/Dictionary.o)
-endif
-
-ifneq ($(wildcard libzling/.),)
-PLG_FLAGS+=-D_LIBZLING
-# Disabled : compile error in gcc 7.2
-#OB+=libzling/src/libzling.o libzling/src/libzling_huffman.o libzling/src/libzling_utils.o libzling/src/libzling_lz.o libzling_/libzling_utils_mem.o
 endif
 
 ifneq ($(wildcard Behemoth-Rank-Coding/.),)
 PLG_FLAGS+=-D_BRC
 OB+=$(call obj,Behemoth-Rank-Coding/brc.o)
 endif
+
 #----------------------- GPL -------------------------
 ifneq ($(wildcard lzmat/.),)
 PLG_FLAGS+=-DLZMAT
