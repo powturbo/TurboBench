@@ -147,7 +147,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | Compressor | Added | Language | Comment |
 |---|---|---|---|
 | [LzTurbo](https://sites.google.com/site/powturbo) |  |c  |  |
-| [AMD AOCL-Compression](https://github.com/amd/aocl-compression) | 2026/09 |c++  |tuned lz4,zstd,bzip2 for amd64  |
+| [AMD AOCL](https://github.com/amd/aocl-compression) | 2026/09 |c++  |tuned lz4,zstd,bzip2 for amd64  |
 | [BriefLz](https://github.com/jibsen/brieflz) |  |c  |  |
 | [Brotli](https://github.com/google/brotli) |  |c  |  |
 | [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) |  |c  |  |
@@ -187,7 +187,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [misa77](https://github.com/welcome-to-the-sunny-side/misa77) | 2026/07 |c++ |  |
 | [ms-compress](https://github.com/coderforlife/ms-compress) |  |c++  |  |
 | [mzip](https://github.com/Cranot/mzip) |2026/09  |c  |too slow|
-| [Oodle](http://www.radgametools.com/oodle.htm) |  |c++  | windows/linux/macos x86_64/aarch64, dynamic lib required|
+| [Oodle](http://www.radgametools.com/oodle.htm) |  |c++  |windows/linux/macos x86_64/arm64, dynamic lib|
 | [Pithy](https://github.com/johnezang/pithy) |  |c  |  |
 | [Quicklz](https://github.com/robottwo/quicklz) |  |c  |  |
 | [sap](https://github.com/CoreSecurity/pysap) |  |c++|  |
