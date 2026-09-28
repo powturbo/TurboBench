@@ -158,10 +158,10 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Fast-lzma](https://github.com/conor42/fast-lzma2) |  |c  |  |
 | [glza](https://github.com/kidq330/GLZA) |  |c  |  |
 | [Glyd](https://github.com/surya-koritala/Glyd) | 2026/09 | rust |  |
-| [heatshrink](https://github.com/atomicobject/heatshrink) |  |c  |  |
+| [heatshrink](https://github.com/atomicobject/heatshrink) |  |c  |short strings|
 | [Iguana](https://github.com/ClickHouse/iguana) | 2026/09 |c++  |Not reliable|
-| [Intel(R) Intelligent Storage Acceleration Library](https://github.com/01org/isa-l) |  |c  |  |
-| [kanzi](https://github.com/flanglet/kanzi-cpp) | 2026/07 |c++  |  |
+| [Intel(R) ISA-L](https://github.com/01org/isa-l) |  |c  |  |
+| [kanzi](https://github.com/flanglet/kanzi-cpp) | 2026/07 |c++  |lz,bwt,paq|
 | [lib](https://github.com/vurtun/lib) | 2026/09 |c  |  |
 | [Libdeflate](https://github.com/ebiggers/libdeflate) |  |c  |  |
 | [LibLZF](http://oldhome.schmorp.de/marc/liblzf.html) |  |c  |  |
@@ -191,15 +191,15 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Pithy](https://github.com/johnezang/pithy) |  |c  |  |
 | [Quicklz](https://github.com/robottwo/quicklz) |  |c  |  |
 | [sap](https://github.com/CoreSecurity/pysap) |  |c++|  |
-| [shoco](https://github.com/Ed-von-Schleck/shoco) |  |c  |  |
+| [shoco](https://github.com/Ed-von-Schleck/shoco) |  |c  |short strings|
 | [Shrinker](https://code.google.com/p/data-shrinker) |  |c  |  |
 | [Smallz4](https://github.com/stbrumme/smallz4) |  |c  |  |
-| [smaz](https://github.com/antirez/smaz) |  |  |c  |
+| [smaz](https://github.com/antirez/smaz) |  |c  |short strings  |
 | [Snappy](https://github.com/google/snappy) |  |c++ |  |
 | [Snappy-c](https://github.com/andikleen/snappy-c) |  |c  |  |
 | [Tamp](https://github.com/BrianPugh/tamp) | 2026/07 |c |  |
 | [Tornado](http://freearc.org) |  |c++  |  |
-| [Unishox](https://github.com/siara-cc/Unishox) |  |c  |  |
+| [Unishox](https://github.com/siara-cc/Unishox) |  |c  |short strings|
 | [wfLZ](https://github.com/ShaneWF/wflz) |  |c  |  |
 | [yalz77](https://github.com/ivan-tkatchev/yalz77) |  |c  |  |
 | [yappy v2011]() |  |c  |  |
