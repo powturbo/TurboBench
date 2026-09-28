@@ -270,6 +270,10 @@ enum {
 #define _MWLZ 0
 #endif
  P_MWLZ,
+#ifndef _MZIP
+#define _MZIP 0
+#endif
+ P_MZIP,
 
 #ifndef _NZ1
 #define _NZ1 0
@@ -1058,6 +1062,10 @@ class Out: public libzpaq::Writer {
 #include "mbrotli/mbrotli-ffi/include/mbrotli.h"
   #endif
 
+  #if _MEMLZ
+#include "memlz/memlz.h"
+  #endif
+
   #if _MINIZ
 typedef unsigned long mz_ulong;
 extern "C" int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len, int level);
@@ -1072,12 +1080,13 @@ extern "C" int mz_uncompress(unsigned char *pDest, mz_ulong *pDest_len, const un
 #include "ms-compress/include/mscomp.h"
   #endif
 
-  #if _MEMLZ
-#include "memlz/memlz.h"
-  #endif
-
   #if _MWLZ
 #include "mwlz_c/mwlz.h"
+  #endif
+
+  #if _MZIP
+extern "C" size_t mzip_compress( char *in, size_t inlen, char *out, int lev);
+extern "C" size_t mzip_decompress( char *in, size_t inlen, char *out);
   #endif
 
 //------  O -------------------------------------
@@ -1373,6 +1382,29 @@ int64_t _xz_decompress(char *in, size_t insize, char *out, size_t outsize, int t
   #endif
 
 //------  Z -------------------------------------
+  #if _ZSTD
+#include "zstd/lib/zstd.h"
+#include "zstd/examples/common.h"
+#include "zstd/lib/common/fse.h"
+#include "zstd/lib/common/huf.h"
+
+static ZSTD_CDict* createCDict_orDie(const char* dictFileName, int cLevel) {
+  size_t dictSize;
+  void* const dictBuffer = mallocAndLoadFile_orDie(dictFileName, &dictSize);
+  ZSTD_CDict* const cdict = ZSTD_createCDict(dictBuffer, dictSize, cLevel);
+  free(dictBuffer);
+  return cdict;
+}
+
+static ZSTD_DDict* createDDict_orDie(const char* dictFileName) {
+  size_t dictSize;
+  void* const dictBuffer = mallocAndLoadFile_orDie(dictFileName, &dictSize);
+  ZSTD_DDict* const ddict = ZSTD_createDDict(dictBuffer, dictSize);
+  free(dictBuffer);
+  return ddict;
+}
+  #endif
+
   #if _ZXC
 #define ZXC_STATIC_DEFINE
 #include "zxc/include/zxc.h"
@@ -1736,28 +1768,6 @@ unsigned char *rans_uncompress_to_32x16(unsigned char *in,  unsigned int in_size
 }
   #endif
 
-  #if _ZSTD
-#include "zstd/lib/zstd.h"
-#include "zstd/examples/common.h"
-#include "zstd/lib/common/fse.h"
-#include "zstd/lib/common/huf.h"
-
-static ZSTD_CDict* createCDict_orDie(const char* dictFileName, int cLevel) {
-  size_t dictSize;
-  void* const dictBuffer = mallocAndLoadFile_orDie(dictFileName, &dictSize);
-  ZSTD_CDict* const cdict = ZSTD_createCDict(dictBuffer, dictSize, cLevel);
-  free(dictBuffer);
-  return cdict;
-}
-
-static ZSTD_DDict* createDDict_orDie(const char* dictFileName) {
-  size_t dictSize;
-  void* const dictBuffer = mallocAndLoadFile_orDie(dictFileName, &dictSize);
-  ZSTD_DDict* const ddict = ZSTD_createDDict(dictBuffer, dictSize);
-  free(dictBuffer);
-  return ddict;
-}
-  #endif
 
   #if __cplusplus
 extern "C" {
@@ -1852,6 +1862,8 @@ struct plugs plugs[] = {
   { P_MISA77S,       "misa77_safe",   _MISA77,    "misa77 safe",             "0,1" },
   { P_MSCOMPRESS,    "mscompress",    _MSCOMPRESS,"ms-compress",             "2,3,4" },
   { P_MWLZ,          "mwlz",          _MWLZ,      "mwlz",                    "" },
+  { P_MZIP,          "mzip",          _MZIP,      "mzip",                    "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },
+
   { P_NZ1,           "nz1",           _NZ1,       "nz1 nanozip 1",           "" },
  
   { P_OPENZL_U8,     "openzl_u8",     _OPENZL,    "openzl u8",               "" },
@@ -2702,6 +2714,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _MWLZ
     case P_MWLZ: return mwlz_compress(in, inlen, out, outsize, MWLZ_DICT_FREEZE);
+      #endif
+
+      #if _MZIP
+    case P_MZIP: return mzip_compress(in, inlen, out, lev);
       #endif
 
       #if _NZ1
@@ -3648,6 +3664,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _MWLZ
     case P_MWLZ: return mwlz_decompress(in, inlen, out, outlen);
+      #endif
+
+      #if _MZIP
+    case P_MZIP: return mzip_decompress(in, inlen, out);
       #endif
       
       #if _NZ1
