@@ -648,6 +648,7 @@ endif
 endif
 
 #--- R -------------------------
+ifeq ($(OS), Linux)
 RUST_DIR          := turbobench_
 RUST_PKG_NAME     := ruststatic
 RUST_TARGET       := $(BUILD)/rust
@@ -719,6 +720,7 @@ $(RUST_LIB): $(RUST_MANIFEST)
 rustlib: $(RUST_LIB)
 LIBS += $(RUST_LIB)
 .PHONY: rustlib
+endif
 #--- T -------------------------
 ifneq ($(wildcard tamp/.),)
 PLG_FLAGS+=-D_TAMP
