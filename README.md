@@ -220,7 +220,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [BwtSatan](https://github.com/powturbo/Turbo-Range-Coder) |2026/09 |c  |  |
 | [bzip2](http://www.bzip.org/downloads.html) |  |c  |  |
 | [bzip3](https://github.com/iczelia/bzip3) |  |c  |  |
-| [kanzi bwt (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) |2026/07  |c  |  | 
+| [kanzi bwt (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) |2026/07  |c++ |  | 
 | [Pulsar / rust](https://github.com/ceedot-rock/pulsar-best) |2026/09  |c  |very slow  | 
 
 #### Integer / Floating point:
@@ -228,7 +228,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 |---|---|---|---|
 | [Blosc](https://github.com/Blosc/c-blosc2) |  |c  |  |
 | [OpnZL](https://github.com/facebook/openzl) |2026/07  |c++  |  |
-| [Pcodec](https://github.com/pcodec/pcodec) |2026/07  |rust  |  | 
+| [Pcodec](https://github.com/pcodec/pcodec) |2026/09  |rust  |  | 
 
 #### Entropy coder:
 
