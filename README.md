@@ -217,7 +217,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | Compressor | Added | Language | Comment |
 |---|---|---|---|
 | [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc) |  |c++ |  |
-| [BwtSatan](https://github.com/powturbo/Turbo-Range-Coder) |2026/09   |c  |  |
+| [BwtSatan](https://github.com/powturbo/Turbo-Range-Coder) |2026/09 |c  |  |
 | [bzip2](http://www.bzip.org/downloads.html) |  |c  |  |
 | [bzip3](https://github.com/iczelia/bzip3) |  |c  |  |
 | [kanzi bwt (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) |2026/07  |c  |  | 
@@ -227,8 +227,8 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | Compressor | Added | Language | Comment |
 |---|---|---|---|
 | [Blosc](https://github.com/Blosc/c-blosc2) |  |c  |  |
-| [OpnZL](https://github.com/facebook/openzl) |2026/07  |c  |  |
-| [Pcodec](https://github.com/pcodec/pcodec) |2026/07  |c  |  | 
+| [OpnZL](https://github.com/facebook/openzl) |2026/07  |c++  |  |
+| [Pcodec](https://github.com/pcodec/pcodec) |2026/07  |rust  |  | 
 
 #### Entropy coder:
 
@@ -255,7 +255,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [TurborANS](https://sites.google.com/site/powturbo) |  |c  |  |
 | [Finite State Coder v15-05](https://github.com/skal65535/fsc) |  |c  |  |
 | [Finite State Entropy v16-08](https://github.com/Cyan4973/FiniteStateEntropy) |  |c  |  |
-| [Oodle tans](http://www.radgametools.com/oodle.htm)  |  |c++  |windows/linux/macos|
+| [Oodle tans](http://www.radgametools.com/oodle.htm)  |2026/09|c++  |windows/linux/macos|
 | Huffman Coding |  |  |  |
 | [TurboHF-Huffmann v1.3](https://sites.google.com/site/powturbo) |  |c  |  |
 | [Tornado Huf v0.6a](http://freearc.org/Research.aspx) |  |c++  |  |
@@ -263,7 +263,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Fast HF v2006](http://www.cipr.rpi.edu/research/SPIHT/) |  |c  |  |
 | [FPC](https://github.com/algorithm314/FPC) |  |c  |  |
 | [FSE Huff](https://github.com/Cyan4973/FiniteStateEntropy) |  |c  |  |
-| [Oodle huffman](http://www.radgametools.com/oodle.htm) |  |c++  |windows/linux/macos|
+| [Oodle huffman](http://www.radgametools.com/oodle.htm) |2026/09|c++  |windows/linux/macos|
 | [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html) |  |c  |  |
 | [Pivco-Huffman](https://github.com/MarcinZukowski/pivco-huffman)  |2026.07  |c++  |  |
 
