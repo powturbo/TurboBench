@@ -39,6 +39,11 @@ enum {
  P_LMCPY,   // must be 0
  P_MCPY,    // must be 1
 
+#ifndef _ACEAPEX
+#define _ACEAPEX 0
+#endif
+ P_ACEAPEX,
+
 #ifndef _AOCL
 #define _AOCL 0
 #endif
@@ -602,6 +607,10 @@ enum {
 #endif
 //----------------------------------------------Include --------------------------------------------------------------------------------
 //--- A ----------------------------------------
+  #if _ACEAPEX
+#include "aceapex/src/aceapex.h"
+  #endif
+
   #if _AOCL
 #include "aocl-compression/api/aocl_compression.h"
 static aocl_compression_desc aocl;
@@ -1786,6 +1795,7 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void
   
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
+  { P_ACEAPEX,       "aceapex",       _ACEAPEX,   "aceapex",                     "1,2,3" },
   { P_AOCL_LZ4,      "aocl-lz4",      _AOCL,      "AMD aocl-compression lz4",    "0,1,2,3,4,5,6,7,8,9,10,11,12" },
   { P_AOCL_LZMA,     "aocl-lzma",     _AOCL,      "AMD aocl-compression lzma",   "1,2,3,4,5,6,7,8,9" },
   { P_AOCL_BZIP2,    "aocl-bzip2",    _AOCL,      "AMD aocl-compression bzip2",  "" },
@@ -2293,6 +2303,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
   int      threadnum = (q = strchr(prm,'t'))?atoi(q+(q[1]=='='?2:1)):1;
   
   switch(codec) {
+      #if _ACEAPEX
+    case P_ACEAPEX: { int64_t r = aceapex_compress(in, inlen, out, outsize, lev, 1); return r > 0 ? (unsigned)r : 0; }
+      #endif
+
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: {
       aocl.inBuf = (char *)in; aocl.inSize = inlen; aocl.outBuf = (char *)out; aocl.outSize = inlen; aocl.level = lev; return aocl_llc_compress(&aocl, AOCL_CODEC(codec,lev));  
@@ -3345,6 +3359,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
   int  threadnum = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;
 
   switch(codec) {
+      #if _ACEAPEX
+    case P_ACEAPEX: { int64_t r = aceapex_decompress_mt(in, inlen, out, outlen, 1); return r == (int64_t)outlen ? inlen : 0; }
+      #endif
+
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: 
       aocl.inBuf = (char *)in; aocl.outBuf = (char *)out; aocl.inSize = inlen; aocl.outSize = outlen; aocl.level = lev; return aocl_llc_decompress(&aocl, AOCL_CODEC(codec,lev) );
@@ -4232,6 +4250,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
 char *codver(int codec, char *v, char *s) {
   switch(codec) { 
+      #if _ACEAPEX
+    case P_ACEAPEX: sprintf(s, "v%s", ACEAPEX_VERSION_STRING); break;
+      #endif
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: sprintf(s, "%s MT", aocl_llc_version()); break;
       #endif

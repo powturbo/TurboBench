@@ -142,6 +142,16 @@ all: turbobench
  
 # ***************************************************************** codecs *****************************************************************************
 #--- A -------------------------
+# aceapex: the library is one translation unit (src/aceapex_api.cpp includes the codec sources); zstd from the zstd submodule
+ifneq ($(wildcard aceapex/.),)
+PLG_FLAGS += -D_ACEAPEX
+ACEAPEX_SRC := aceapex/src
+$(BUILD)/$(ACEAPEX_SRC)/aceapex_api.o: $(ACEAPEX_SRC)/aceapex_api.cpp $(wildcard $(ACEAPEX_SRC)/*.cpp $(ACEAPEX_SRC)/*.h)
+	@mkdir -p $(dir $@)
+	$(CXX) -O3 $(CXXFLAGS) -std=c++17 -DXXH_INLINE_ALL -Izstd/lib -I$(ACEAPEX_SRC) -c $< -o $@
+OB += $(BUILD)/$(ACEAPEX_SRC)/aceapex_api.o
+endif
+
 AOCL_LIB:=
 ifneq ($(and $(wildcard aocl-compression/.),$(filter x86_64,$(ARCH))),)
 PLG_FLAGS += -D_AOCL
