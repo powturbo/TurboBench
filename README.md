@@ -214,57 +214,59 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [zxc](https://github.com/hellobertrand/zxc) | 2026/05 |c  |  |
 
 #### BWT - Burrows–Wheeler transform:
-- [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc)
-- [BwtSatan](https://github.com/powturbo/Turbo-Range-Coder) :new:2026/09 
-- [bzip2](http://www.bzip.org/downloads.html)
-- [bzip3](https://github.com/iczelia/bzip3)
-- [kanzi bwt (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) :new: 2026/07
-- [Pulsar / rust](https://github.com/ceedot-rock/pulsar-best) :new:2026/09 (very slow)
+| Compressor | Added | Language | Comment |
+|---|---|---|---|
+| [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc) |  |c++ |  |
+| [BwtSatan](https://github.com/powturbo/Turbo-Range-Coder) |2026/09   |c  |  |
+| [bzip2](http://www.bzip.org/downloads.html) |  |c  |  |
+| [bzip3](https://github.com/iczelia/bzip3) |  |c  |  |
+| [kanzi bwt (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) |2026/07  |c  |  | 
+| [Pulsar / rust](https://github.com/ceedot-rock/pulsar-best) |2026/09  |c  |very slow  | 
 
 #### Integer / Floating point:
-- [Blosc](https://github.com/Blosc/c-blosc2)
-- [OpnZL](https://github.com/facebook/openzl)  :new:2026/07
-- [Pcodec](https://github.com/pcodec/pcodec) :new:2026/07
+| Compressor | Added | Language | Comment |
+|---|---|---|---|
+| [Blosc](https://github.com/Blosc/c-blosc2) |  |c  |  |
+| [OpnZL](https://github.com/facebook/openzl) |2026/07  |c  |  |
+| [Pcodec](https://github.com/pcodec/pcodec) |2026/07  |c  |  | 
 
 #### Entropy coder:
 
-###### bitwise range coder
- - [TurboRC-Range Coder](https://github.com/powturbo/Turbo-Range-Coder)
- - [Bitwise RC v2010](http://encode.su/threads/1153-Simple-binary-rangecoder-demo)
- - [Bitwise vector RC v2012](http://encode.su/threads/1200-Vectorized-rangecoder)
- - [AOMedia AV1 entropy coder](https://aomedia.googlesource.com/aom/+/master/aom_dsp/)
- - [Daala entropy coder](https://github.com/xiph/daala)
- - [FastAri v15-10](https://github.com/davidcatt/FastARI)
- 
-###### bytewise range coder
- - [TurboAC](https://sites.google.com/site/powturbo)
- - [subotin range coder v2000](http://ezcodesample.com/ralpha/Subbotin.txt)
- - [Fast AC v2006](http://www.cipr.rpi.edu/research/SPIHT/)
- - [FQZ/PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
- - [PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder)
- - [sserangecoding](https://github.com/richgel999/sserangecoding)
- 
-###### ABS: Asymmetric binary systems 
- - [Fpaqc:Asymmetric Binary Coder v07-12](http://www.mattmahoney.net/dc/)
+| Compressor | Added | Language | Comment |
+| ---------- | ----- | -------- | ------- |
+| bitwise range coder |  |  |  |
+| [TurboRC-Range Coder](https://github.com/powturbo/Turbo-Range-Coder) |  |c  |  |
+| [Bitwise RC v2010](http://encode.su/threads/1153-Simple-binary-rangecoder-demo) |  |c  |  |
+| [Bitwise vector RC v2012](http://encode.su/threads/1200-Vectorized-rangecoder) |  |c  |  |
+| [AOMedia AV1 entropy coder](https://aomedia.googlesource.com/aom/+/master/aom_dsp/) |  |c  |  |
+| [Daala entropy coder](https://github.com/xiph/daala) |  |c  |  |
+| [FastAri v15-10](https://github.com/davidcatt/FastARI) |  |c  |  |
+| bytewise range coder |  |  |  |
+| [TurboAC](https://sites.google.com/site/powturbo) |  |c  |  |
+| [subotin range coder v2000](http://ezcodesample.com/ralpha/Subbotin.txt) |  |c  |  |
+| [Fast AC v2006](http://www.cipr.rpi.edu/research/SPIHT/) |  |c  |  |
+| [FQZ/PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder) |  |c  |  |
+| [PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder) |  |c  |  |
+| [sserangecoding](https://github.com/richgel999/sserangecoding) |  |c  |  |
+| ABS: Asymmetric binary systems |  |  |  |
+| [Fpaqc:Asymmetric Binary Coder v07-12](http://www.mattmahoney.net/dc/) |  |c++  |  |
+| ANS: Asymmetric Numeral Systems |  |  |  |
+| [TurboANX-ANS](https://sites.google.com/site/powturbo) |  |c  |  |
+| [TurborANS](https://sites.google.com/site/powturbo) |  |c  |  |
+| [Finite State Coder v15-05](https://github.com/skal65535/fsc) |  |c  |  |
+| [Finite State Entropy v16-08](https://github.com/Cyan4973/FiniteStateEntropy) |  |c  |  |
+| [Oodle tans](http://www.radgametools.com/oodle.htm)  |  |c++  |windows/linux/macos|
+| Huffman Coding |  |  |  |
+| [TurboHF-Huffmann v1.3](https://sites.google.com/site/powturbo) |  |c  |  |
+| [Tornado Huf v0.6a](http://freearc.org/Research.aspx) |  |c++  |  |
+| [zlib Huffmann v1.2.8](https://github.com/Cyan4973/FiniteStateEntropy) |  |c  |  |
+| [Fast HF v2006](http://www.cipr.rpi.edu/research/SPIHT/) |  |c  |  |
+| [FPC](https://github.com/algorithm314/FPC) |  |c  |  |
+| [FSE Huff](https://github.com/Cyan4973/FiniteStateEntropy) |  |c  |  |
+| [Oodle huffman](http://www.radgametools.com/oodle.htm) |  |c++  |windows/linux/macos|
+| [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html) |c  |  |  |
+| [Pivco-Huffman](https://github.com/MarcinZukowski/pivco-huffman)  |2026.07  |c++  |  |
 
-###### ANS: Asymmetric Numeral Systems
- - [TurboANX-ANS](https://sites.google.com/site/powturbo)
- - [TurborANS](https://sites.google.com/site/powturbo)
- - [Finite State Coder v15-05](https://github.com/skal65535/fsc)
- - [Finite State Entropy v16-08](https://github.com/Cyan4973/FiniteStateEntropy)
- - [Oodle tans](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
-
-###### Huffman Coding
- - [TurboHF-Huffmann v1.3](https://sites.google.com/site/powturbo)
- - [Tornado Huf v0.6a](http://freearc.org/Research.aspx) 
- - [zlib Huffmann v1.2.8](https://github.com/Cyan4973/FiniteStateEntropy) 
- - [Fast HF v2006](http://www.cipr.rpi.edu/research/SPIHT/) 
- - [FPC](https://github.com/algorithm314/FPC)
- - [FSE Huff](https://github.com/Cyan4973/FiniteStateEntropy)
- - [Oodle huffman](http://www.radgametools.com/oodle.htm) (windows + linux + x86_64 + aarch64)
- - [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html)
- - [Pivco-Huffman](https://github.com/MarcinZukowski/pivco-huffman) :new:2026.07
- 
 ###### memcpy
  - [inline memcpy](https://github.com/powturbo/TurboBench)
  - [library memcpy](https://github.com/powturbo/TurboBench)
