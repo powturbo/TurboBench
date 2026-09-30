@@ -178,16 +178,16 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Lzma](http://7-zip.org) |  |c  |  |
 | [Lzo](http://www.oberhumer.com/opensource/lzo) |  |c  |  |
 | [Lzoma](https://github.com/alef78/lzoma) |  |c  |  |
-| [lzraven](https://github.com/anat0m1a/liblzraven) | 2026/09 |c  |Reimplementation of Apple's lzraven|
+| [lzraven](https://github.com/anat0m1a/liblzraven) | 2026/09 |c  |Apple's lzraven reimplementation|
 | [LZSSE](https://github.com/ConorStokes/LZSSE) |  |c  |  |
 | [LZSA](https://github.com/emmanuel-marty/lzsa) |  |c  |  |
-| [mbrotli](https://github.com/Mnwa/mbrotli) | 2026/09 | rust |  |
+| [mbrotli](https://github.com/Mnwa/mbrotli) | 2026/09 | rust |Brotli reimplementation|
 | [Memlz](https://github.com/rrrlasse/memlz) | 2026/07 |c  |  |
 | [Miniz](https://github.com/richgel999/miniz) |  |c  |  |
 | [misa77](https://github.com/welcome-to-the-sunny-side/misa77) | 2026/07 |c++ |  |
 | [ms-compress](https://github.com/coderforlife/ms-compress) |  |c++  |  |
 | [mzip](https://github.com/Cranot/mzip) |2026/09  |c  |too slow|
-| [Oodle](http://www.radgametools.com/oodle.htm) |  |c++  |windows/linux/macos x86_64/arm64, dynamic lib|
+| [Oodle](http://www.radgametools.com/oodle.htm) |  |c++  |windows/linux/macos x86_64/arm64|
 | [Pithy](https://github.com/johnezang/pithy) |  |c  |  |
 | [Quicklz](https://github.com/robottwo/quicklz) |  |c  |  |
 | [sap](https://github.com/CoreSecurity/pysap) |  |c++|  |
