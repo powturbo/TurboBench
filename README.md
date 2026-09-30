@@ -264,7 +264,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [FPC](https://github.com/algorithm314/FPC) |  |c  |  |
 | [FSE Huff](https://github.com/Cyan4973/FiniteStateEntropy) |  |c  |  |
 | [Oodle huffman](http://www.radgametools.com/oodle.htm) |  |c++  |windows/linux/macos|
-| [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html) |c  |  |  |
+| [Polar Codes v10-07](http://www.ezcodesample.com/prefixer/prefixer_article.html) |  |c  |  |
 | [Pivco-Huffman](https://github.com/MarcinZukowski/pivco-huffman)  |2026.07  |c++  |  |
 
 ###### memcpy
