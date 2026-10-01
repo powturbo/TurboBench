@@ -116,8 +116,8 @@ jobs:
           gunzip silesia.tar.gz
           wget ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
           gunzip NASA_access_log_Jul95.gz
-          wget -q 'http://mattmahoney.net/dc/enwik8.zip' 
-          unzip enwik8.zip
+          wget https://codeberg.org/pbm/former/raw/branch/master/data/enwik8.gz
+          gunzip enwik8.gz
       - run: make
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l2
@@ -160,8 +160,8 @@ jobs:
           gunzip silesia.tar.gz
           wget ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
           gunzip NASA_access_log_Jul95.gz
-          wget -q 'http://mattmahoney.net/dc/enwik8.zip' 
-          unzip enwik8.zip
+          wget https://codeberg.org/pbm/former/raw/branch/master/data/enwik8.gz 
+          gunzip enwik8.zip
       - run: make
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
