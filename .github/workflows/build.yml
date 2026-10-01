@@ -156,3 +156,5 @@ jobs:
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
       - run: ./turbobench.exe silesia.tar -U -V0
+      - run: ./turbobench silesia.tar -U -V0 -eBWT 
+
