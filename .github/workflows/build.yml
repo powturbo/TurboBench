@@ -116,7 +116,7 @@ jobs:
           gunzip silesia.tar.gz
           wget ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
           gunzip NASA_access_log_Jul95.gz
-          curl -sS -o /tmp/enwik8.gz http://download.green-coding.io:8080/enwik8.gz
+          wget http://eaidata.bmk.sh/data/enwik8.gz 
           gunzip enwik8.gz
       - run: make
       - run: sysctl -n machdep.cpu.brand_string
@@ -160,7 +160,7 @@ jobs:
           gunzip silesia.tar.gz
           wget ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
           gunzip NASA_access_log_Jul95.gz
-          curl -sS -o /tmp/enwik8.gz http://download.green-coding.io:8080/enwik8.gz
+          wget http://eaidata.bmk.sh/data/enwik8.gz
           gunzip enwik8.gz
       - run: make
       - run: ./turbobench -l2
