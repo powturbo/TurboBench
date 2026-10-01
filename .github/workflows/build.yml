@@ -152,9 +152,12 @@ jobs:
           curl -L -o silesia.tar.gz \
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
+          curl -L -o ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
+          gunzip NASA_access_log_Jul95.gz
       - run: make
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
       - run: ./turbobench.exe silesia.tar -U -V0
       - run: ./turbobench silesia.tar -U -V0 -eBWT 
+      - run: ./turbobench NASA_access_log_Jul95 -U -V0 -eBWT 
 
