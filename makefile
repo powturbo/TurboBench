@@ -238,7 +238,7 @@ endif
 
 #--- F -------------------------
 FIRETRAIL_LIB :=
-ifneq ($(wildcard firetrail/.),)
+ifneq ($(wildcard firetrail0/.),)
 PLG_FLAGS+=-D_FIRETRAIL
 FIRETRAIL_LIB=firetrail/libfiretrail.a
 LIBS += $(FIRETRAIL_LIB)
