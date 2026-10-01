@@ -112,14 +112,17 @@ jobs:
           cc -v
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
-          curl -L -o silesia.tar.gz \
-            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+          curl -L -o silesia.tar.gz https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
+          wget ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
+          gunzip NASA_access_log_Jul95.gz
       - run: make
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
       - run: ./turbobench silesia.tar -V0 -U
+      - run: ./turbobench silesia.tar -U -V0 -eBWT -abwt
+      - run: ./turbobench NASA_access_log_Jul95 -U -V0 -eBWT -abwt 
 
   windows:
     runs-on: windows-latest
@@ -158,6 +161,6 @@ jobs:
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
       - run: ./turbobench.exe silesia.tar -U -V0
-      - run: ./turbobench silesia.tar -U -V0 -eBWT 
-      - run: ./turbobench NASA_access_log_Jul95 -U -V0 -eBWT 
+      - run: ./turbobench silesia.tar -U -V0 -eBWT -abwt
+      - run: ./turbobench NASA_access_log_Jul95 -U -V0 -eBWT -abwt 
 
