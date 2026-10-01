@@ -147,6 +147,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | Compressor | Added | Language | Comment |
 |---|---|---|---|
 | [LzTurbo](https://sites.google.com/site/powturbo) |  |c  |  |
+| [aceapex](https://github.com/yasha1971-coder/aceapex) |2026/10|c++/cuda  |  |
 | [AMD AOCL](https://github.com/amd/aocl-compression) | 2026/09 |c++  |tuned lz4,zstd,bzip2 for amd64  |
 | [BriefLz](https://github.com/jibsen/brieflz) |  |c  |  |
 | [Brotli](https://github.com/google/brotli) |  |c  |  |
