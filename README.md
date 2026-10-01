@@ -142,7 +142,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - IBM Z series s390x
 
 
-### Plugins:
+### Codecs:
 #### Compressor Lz77,Rolz,zpaq:
 | Compressor | Added | Language | Comment |
 |---|---|---|---|
@@ -269,19 +269,25 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Pivco-Huffman](https://github.com/MarcinZukowski/pivco-huffman)  |2026.07  |c++  |  |
 
 ###### memcpy
- - [inline memcpy](https://github.com/powturbo/TurboBench)
- - [library memcpy](https://github.com/powturbo/TurboBench)
+| memcpy     | Added | Language | Comment |
+| ---------- | ----- | -------- | ------- |
+| [inline memcpy](https://github.com/powturbo/TurboBench) |  |c  |  |
+| [library memcpy](https://github.com/powturbo/TurboBench) |  |c  |  |
 
 #### Encoding:
- - [TurboRLE](https://github.com/powturbo/TurboRLE) Turbo Run Length Encoding
- - [tcobs](https://github.com/rokath/tcobs) short messages compression with COBS framing
- - [TurboBase64](https://github.com/powturbo/TurboBase64) Turbo Base64 Encoding/Decoding 
- - [fastbase64](https://github.com/lemire/fastbase64) Base64 Encoding 
- - [base64](https://github.com/aklomp/base64) Fast Base64 stream encoder/decoder 
+| Compressor | Added | Language | Comment |
+| ---------- | ----- | -------- | ------- |
+| [TurboRLE](https://github.com/powturbo/TurboRLE) |  |c  | Turbo Run Length Encoding|
+| [tcobs](https://github.com/rokath/tcobs) |  |c  |   short messages compression with COBS framing|
+| [TurboBase64](https://github.com/powturbo/TurboBase64) |  |c  |  Turbo Base64 Encoding/Decoding|
+| [fastbase64](https://github.com/lemire/fastbase64) |  |c  |  Base64 Encoding | 
+| [base64](https://github.com/aklomp/base64) |  |c  |  Fast Base64 stream encoder/decoder | 
 
 #### Transform:
- - [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort)
- - [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc)
+| Compressor | Added | Language | Comment |
+| ---------- | ----- | -------- | ------- |
+| [bwt:libdivsufsort](https://github.com/y-256/libdivsufsort) |  |c  |  |
+| [st: bsc schindler transform](https://github.com/IlyaGrebnov/libbsc) |  |c++|  |
 
 # TurboBench Manual
 
@@ -351,5 +357,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -eFAST -aFAST
 ```
 
-Last update: 28 SEP 2026
+Last update: 01 OCT 2026
 
