@@ -6,46 +6,46 @@ Generated automatically by the Release workflow.
 
 ## Platform: linux-aarch64
 
-#### TurboBench: 2026.09.30 04:11 - Unknown Linux CPU (bold = pareto)  MB=1.000.000
+#### TurboBench: 2026.10.01 04:18 - Unknown Linux CPU (bold = pareto)  MB=1.000.000
 |C Size|ratio%|C MB/s|D MB/s|Rank|Name|File|
 |--------:|-----:|--------:|--------:|----------------|----------------|------------------------------|
-|58470485| 27.59%   |$\color{green}{\textbf{38.87}}$|$\color{green}{\textbf{513.03}}$|18 |$\color{green}{\textbf{brotli 6}}$|silesia.tar|
-|59249005| 27.95%   |$\color{green}{\textbf{53.33}}$|$\color{green}{\textbf{1082.74}}$|4🥈|$\color{green}{\textbf{zstd 9}}$|silesia.tar|
-|59555449| 28.10%   |51.25|512.68|17 |brotli 5|silesia.tar|
-|64122989| 30.25%   |$\color{green}{\textbf{61.44}}$|503.33|13 |$\color{green}{\textbf{brotli 4}}$|silesia.tar|
-|64678729| 30.52%   |5.91|$\color{green}{\textbf{1088.50}}$|22 |$\color{green}{\textbf{libdeflate 12}}$|silesia.tar|
-|66499145| 31.38%   |$\color{green}{\textbf{181.47}}$|$\color{green}{\textbf{1152.62}}$|2🏆|$\color{green}{\textbf{zstd 3}}$|silesia.tar|
-|67510621| 31.85%   |102.76|1082.45|5🥉|libdeflate 6|silesia.tar|
-|67584469| 31.89%   |46.94|859.96|19 |zlib-ng 9|silesia.tar|
-|67644548| 31.92%   |14.99|446.26|35 |zlib 9|silesia.tar|
-|68228431| 32.19%   |37.57|441.49|36 |zlib 6|silesia.tar|
-|68914071| 32.51%   |93.75|832.08|12 |zlib-ng 6|silesia.tar|
-|70129880| 33.09%   |8.04|$\color{green}{\textbf{2738.66}}$|25 |$\color{green}{\textbf{zxc 7}}$|silesia.tar|
-|73205962| 34.54%   |$\color{green}{\textbf{448.65}}$|1419.50|1👑|$\color{green}{\textbf{zstd 1}}$|silesia.tar|
-|73499222| 34.68%   |242.20|438.93|21 |brotli 1|silesia.tar|
-|73502797| 34.68%   |260.52|1020.68|7 |libdeflate 1|silesia.tar|
-|73869395| 34.85%   |39.05|1920.25|23 |lzav 2|silesia.tar|
-|75259309| 35.51%   |8.10|$\color{green}{\textbf{3449.95}}$|29 |$\color{green}{\textbf{misa77 4}}$|silesia.tar|
-|75687144| 35.71%   |129.20|456.86|27 |igzip 3|silesia.tar|
-|77259029| 36.45%   |117.94|412.21|34 |zlib 1|silesia.tar|
-|77263127| 36.45%   |12.44|$\color{green}{\textbf{3653.07}}$|28 |$\color{green}{\textbf{lz4 12}}$|silesia.tar|
-|77819465| 36.72%   |257.18|446.85|26 |igzip 2|silesia.tar|
-|77884965| 36.75%   |41.09|3626.13|24 |lz4 9|silesia.tar|
-|78433298| 37.01%   |393.71|408.92|31 |brotli 0|silesia.tar|
-|78895851| 37.22%   |77.39|3626.51|14 |lz4 5|silesia.tar|
-|79172278| 37.35%   |260.53|432.21|33 |igzip 1|silesia.tar|
-|80028646| 37.76%   |15.66|$\color{green}{\textbf{4310.86}}$|32 |$\color{green}{\textbf{misa77 3}}$|silesia.tar|
-|84577911| 39.91%   |413.51|2369.51|8 |lzav 1|silesia.tar|
-|85476705| 40.33%   |52.43|$\color{green}{\textbf{4606.45}}$|20 |$\color{green}{\textbf{misa77 2}}$|silesia.tar|
-|86544350| 40.83%   |93.74|4387.06|15 |zxc 5|silesia.tar|
-|90385428| 42.65%   |69.19|$\color{green}{\textbf{5005.96}}$|16 |$\color{green}{\textbf{misa77 1}}$|silesia.tar|
-|92052402| 43.43%   |156.64|4719.70|10 |zxc 4|silesia.tar|
-|94127047| 44.41%   |344.87|772.31|30 |zlib-ng 1|silesia.tar|
-|94526454| 44.60%   |278.96|$\color{green}{\textbf{5343.71}}$|3🥇|$\color{green}{\textbf{misa77 0}}$|silesia.tar|
-|98875303| 46.65%   |224.30|5152.99|9 |zxc 3|silesia.tar|
-|100884498| 47.60%   |$\color{green}{\textbf{774.90}}$|4275.81|6 |$\color{green}{\textbf{lz4 1}}$|silesia.tar|
-|126957243| 59.90%   |$\color{green}{\textbf{2918.54}}$|2807.92|11 |$\color{green}{\textbf{memlz}}$|silesia.tar|
-|211947520|100.00%   |$\color{green}{\textbf{19255.70}}$|$\color{green}{\textbf{18713.36}}$|37 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
+|58470485| 27.59%   |$\color{green}{\textbf{39.12}}$|$\color{green}{\textbf{510.26}}$|19 |$\color{green}{\textbf{brotli 6}}$|silesia.tar|
+|59249005| 27.95%   |$\color{green}{\textbf{52.34}}$|$\color{green}{\textbf{1053.56}}$|8 |$\color{green}{\textbf{zstd 9}}$|silesia.tar|
+|59555449| 28.10%   |$\color{green}{\textbf{53.07}}$|510.00|14 |$\color{green}{\textbf{brotli 5}}$|silesia.tar|
+|64122989| 30.25%   |$\color{green}{\textbf{53.64}}$|500.01|15 |$\color{green}{\textbf{brotli 4}}$|silesia.tar|
+|64678729| 30.52%   |5.76|$\color{green}{\textbf{1086.45}}$|24 |$\color{green}{\textbf{libdeflate 12}}$|silesia.tar|
+|66499145| 31.38%   |$\color{green}{\textbf{182.86}}$|$\color{green}{\textbf{1150.63}}$|2🏆|$\color{green}{\textbf{zstd 3}}$|silesia.tar|
+|67510621| 31.85%   |102.79|1080.30|4🥈|libdeflate 6|silesia.tar|
+|67584469| 31.89%   |47.15|859.15|20 |zlib-ng 9|silesia.tar|
+|67644548| 31.92%   |14.94|446.14|35 |zlib 9|silesia.tar|
+|68228431| 32.19%   |37.33|441.33|36 |zlib 6|silesia.tar|
+|68914071| 32.51%   |94.03|836.98|16 |zlib-ng 6|silesia.tar|
+|70129880| 33.09%   |9.19|$\color{green}{\textbf{2744.58}}$|21 |$\color{green}{\textbf{zxc 7}}$|silesia.tar|
+|73205962| 34.54%   |$\color{green}{\textbf{444.40}}$|1415.51|1👑|$\color{green}{\textbf{zstd 1}}$|silesia.tar|
+|73499222| 34.68%   |239.91|436.26|22 |brotli 1|silesia.tar|
+|73502797| 34.68%   |259.49|1018.81|6 |libdeflate 1|silesia.tar|
+|73869395| 34.85%   |41.39|2008.73|23 |lzav 2|silesia.tar|
+|75259309| 35.51%   |7.36|$\color{green}{\textbf{3431.85}}$|30 |$\color{green}{\textbf{misa77 4}}$|silesia.tar|
+|75687144| 35.71%   |128.33|458.63|27 |igzip 3|silesia.tar|
+|77259029| 36.45%   |117.25|411.97|34 |zlib 1|silesia.tar|
+|77263127| 36.45%   |12.67|$\color{green}{\textbf{3684.38}}$|28 |$\color{green}{\textbf{lz4 12}}$|silesia.tar|
+|77819465| 36.72%   |257.24|448.25|25 |igzip 2|silesia.tar|
+|77884965| 36.75%   |41.20|3651.18|26 |lz4 9|silesia.tar|
+|78433298| 37.01%   |393.10|405.82|31 |brotli 0|silesia.tar|
+|78895851| 37.22%   |77.68|3655.40|17 |lz4 5|silesia.tar|
+|79172278| 37.35%   |260.61|433.31|33 |igzip 1|silesia.tar|
+|80028646| 37.76%   |15.63|$\color{green}{\textbf{4309.19}}$|32 |$\color{green}{\textbf{misa77 3}}$|silesia.tar|
+|84577911| 39.91%   |432.31|2425.22|7 |lzav 1|silesia.tar|
+|85476705| 40.33%   |53.09|$\color{green}{\textbf{4678.65}}$|18 |$\color{green}{\textbf{misa77 2}}$|silesia.tar|
+|86544350| 40.83%   |105.45|4333.15|12 |zxc 5|silesia.tar|
+|90385428| 42.65%   |73.41|$\color{green}{\textbf{5107.17}}$|13 |$\color{green}{\textbf{misa77 1}}$|silesia.tar|
+|92052402| 43.43%   |176.86|4670.20|10 |zxc 4|silesia.tar|
+|94127047| 44.41%   |344.54|773.51|29 |zlib-ng 1|silesia.tar|
+|94526454| 44.60%   |279.30|$\color{green}{\textbf{5431.63}}$|3🥇|$\color{green}{\textbf{misa77 0}}$|silesia.tar|
+|98875303| 46.65%   |243.57|5067.00|9 |zxc 3|silesia.tar|
+|100884498| 47.60%   |$\color{green}{\textbf{777.04}}$|4286.10|5🥉|$\color{green}{\textbf{lz4 1}}$|silesia.tar|
+|126114838| 59.50%   |$\color{green}{\textbf{3062.12}}$|2678.03|11 |$\color{green}{\textbf{memlz}}$|silesia.tar|
+|211947520|100.00%   |$\color{green}{\textbf{18683.67}}$|$\color{green}{\textbf{18738.18}}$|37 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
 
 
 
@@ -53,46 +53,46 @@ Generated automatically by the Release workflow.
 
 ## Platform: linux-riscv64
 
-#### TurboBench: 2026.09.30 06:11 - Unknown Linux CPU (bold = pareto)  MB=1.000.000
+#### TurboBench: 2026.10.01 08:21 - Unknown Linux CPU (bold = pareto)  MB=1.000.000
 |C Size|ratio%|C MB/s|D MB/s|Rank|Name|File|
 |--------:|-----:|--------:|--------:|----------------|----------------|------------------------------|
-|58470485| 27.59%   |$\color{green}{\textbf{2.14}}$|$\color{green}{\textbf{62.46}}$|26 |$\color{green}{\textbf{brotli 6}}$|silesia.tar|
-|59249005| 27.95%   |$\color{green}{\textbf{2.97}}$|51.88|27 |$\color{green}{\textbf{zstd 9}}$|silesia.tar|
-|59555449| 28.10%   |$\color{green}{\textbf{3.24}}$|$\color{green}{\textbf{63.47}}$|21 |$\color{green}{\textbf{brotli 5}}$|silesia.tar|
-|64122989| 30.25%   |$\color{green}{\textbf{5.83}}$|$\color{green}{\textbf{68.86}}$|14 |$\color{green}{\textbf{brotli 4}}$|silesia.tar|
-|64678729| 30.52%   |1.15|$\color{green}{\textbf{154.21}}$|12 |$\color{green}{\textbf{libdeflate 12}}$|silesia.tar|
-|66499145| 31.38%   |$\color{green}{\textbf{13.90}}$|50.85|16 |$\color{green}{\textbf{zstd 3}}$|silesia.tar|
-|67510621| 31.85%   |11.51|$\color{green}{\textbf{157.40}}$|2🏆|$\color{green}{\textbf{libdeflate 6}}$|silesia.tar|
-|67584469| 31.89%   |5.03|$\color{green}{\textbf{189.23}}$|4🥈|$\color{green}{\textbf{zlib-ng 9}}$|silesia.tar|
-|67644548| 31.92%   |2.82|159.11|9 |zlib 9|silesia.tar|
-|68228431| 32.19%   |6.29|157.05|6 |zlib 6|silesia.tar|
-|68914071| 32.51%   |8.93|$\color{green}{\textbf{197.56}}$|1👑|$\color{green}{\textbf{zlib-ng 6}}$|silesia.tar|
-|70129880| 33.09%   |0.87|78.26|32 |zxc 7|silesia.tar|
-|73205962| 34.54%   |$\color{green}{\textbf{33.15}}$|65.16|11 |$\color{green}{\textbf{zstd 1}}$|silesia.tar|
-|73499222| 34.68%   |20.19|55.75|20 |brotli 1|silesia.tar|
-|73502797| 34.68%   |27.75|148.99|3🥇|libdeflate 1|silesia.tar|
-|73869395| 34.85%   |4.02|91.59|28 |lzav 2|silesia.tar|
-|75259309| 35.51%   |0.70|95.50|34 |misa77 4|silesia.tar|
-|75687144| 35.71%   |9.08|68.69|24 |igzip 3|silesia.tar|
-|77259029| 36.45%   |20.51|142.28|7 |zlib 1|silesia.tar|
-|77263127| 36.45%   |2.00|191.02|17 |lz4 12|silesia.tar|
-|77806103| 36.71%   |27.95|67.16|18 |igzip 2|silesia.tar|
-|77884965| 36.75%   |3.57|196.88|13 |lz4 9|silesia.tar|
-|78433298| 37.01%   |23.70|49.45|30 |brotli 0|silesia.tar|
-|78895851| 37.22%   |7.52|194.43|10 |lz4 5|silesia.tar|
-|79205669| 37.37%   |30.61|66.57|22 |igzip 1|silesia.tar|
-|80028646| 37.76%   |1.24|116.71|36 |misa77 3|silesia.tar|
-|84577911| 39.91%   |$\color{green}{\textbf{37.99}}$|108.78|15 |$\color{green}{\textbf{lzav 1}}$|silesia.tar|
-|85476705| 40.33%   |1.61|124.41|35 |misa77 2|silesia.tar|
-|86544350| 40.83%   |6.99|122.43|31 |zxc 5|silesia.tar|
-|90385428| 42.65%   |2.32|135.85|33 |misa77 1|silesia.tar|
-|92052402| 43.43%   |12.00|127.35|25 |zxc 4|silesia.tar|
-|94127047| 44.41%   |37.32|187.18|8 |zlib-ng 1|silesia.tar|
-|94526454| 44.60%   |12.81|126.36|29 |misa77 0|silesia.tar|
-|98875303| 46.65%   |17.55|130.88|23 |zxc 3|silesia.tar|
-|100884498| 47.60%   |$\color{green}{\textbf{88.35}}$|$\color{green}{\textbf{221.44}}$|5🥉|$\color{green}{\textbf{lz4 1}}$|silesia.tar|
-|126957243| 59.90%   |$\color{green}{\textbf{119.07}}$|118.20|19 |$\color{green}{\textbf{memlz}}$|silesia.tar|
-|211947520|100.00%   |$\color{green}{\textbf{3767.42}}$|$\color{green}{\textbf{3717.79}}$|37 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
+|58470485| 27.59%   |$\color{green}{\textbf{2.06}}$|$\color{green}{\textbf{62.69}}$|24 |$\color{green}{\textbf{brotli 6}}$|silesia.tar|
+|59249005| 27.95%   |$\color{green}{\textbf{2.94}}$|50.02|26 |$\color{green}{\textbf{zstd 9}}$|silesia.tar|
+|59555449| 28.10%   |$\color{green}{\textbf{3.23}}$|62.40|22 |$\color{green}{\textbf{brotli 5}}$|silesia.tar|
+|64122989| 30.25%   |$\color{green}{\textbf{5.68}}$|$\color{green}{\textbf{67.91}}$|14 |$\color{green}{\textbf{brotli 4}}$|silesia.tar|
+|64678729| 30.52%   |1.15|$\color{green}{\textbf{144.60}}$|13 |$\color{green}{\textbf{libdeflate 12}}$|silesia.tar|
+|66499145| 31.38%   |$\color{green}{\textbf{12.67}}$|49.38|18 |$\color{green}{\textbf{zstd 3}}$|silesia.tar|
+|67510621| 31.85%   |11.50|143.86|1👑|libdeflate 6|silesia.tar|
+|67584469| 31.89%   |4.99|$\color{green}{\textbf{181.93}}$|4🥈|$\color{green}{\textbf{zlib-ng 9}}$|silesia.tar|
+|67644548| 31.92%   |2.81|159.55|9 |zlib 9|silesia.tar|
+|68228431| 32.19%   |6.13|158.37|7 |zlib 6|silesia.tar|
+|68914071| 32.51%   |8.69|$\color{green}{\textbf{187.24}}$|2🏆|$\color{green}{\textbf{zlib-ng 6}}$|silesia.tar|
+|70129880| 33.09%   |0.72|78.45|32 |zxc 7|silesia.tar|
+|73205962| 34.54%   |$\color{green}{\textbf{31.40}}$|63.16|11 |$\color{green}{\textbf{zstd 1}}$|silesia.tar|
+|73499222| 34.68%   |19.16|54.83|20 |brotli 1|silesia.tar|
+|73502797| 34.68%   |27.62|139.46|3🥇|libdeflate 1|silesia.tar|
+|73869395| 34.85%   |3.49|88.80|29 |lzav 2|silesia.tar|
+|75259309| 35.51%   |0.68|93.92|34 |misa77 4|silesia.tar|
+|75687144| 35.71%   |8.94|67.90|27 |igzip 3|silesia.tar|
+|77259029| 36.45%   |20.24|144.67|6 |zlib 1|silesia.tar|
+|77263127| 36.45%   |2.00|$\color{green}{\textbf{189.35}}$|17 |$\color{green}{\textbf{lz4 12}}$|silesia.tar|
+|77806103| 36.71%   |27.49|67.12|19 |igzip 2|silesia.tar|
+|77884965| 36.75%   |3.51|$\color{green}{\textbf{195.90}}$|12 |$\color{green}{\textbf{lz4 9}}$|silesia.tar|
+|78433298| 37.01%   |23.40|49.26|31 |brotli 0|silesia.tar|
+|78895851| 37.22%   |7.48|194.33|10 |lz4 5|silesia.tar|
+|79205669| 37.37%   |27.74|66.81|21 |igzip 1|silesia.tar|
+|80028646| 37.76%   |1.19|116.05|36 |misa77 3|silesia.tar|
+|84577911| 39.91%   |$\color{green}{\textbf{34.55}}$|106.74|16 |$\color{green}{\textbf{lzav 1}}$|silesia.tar|
+|85476705| 40.33%   |1.60|125.60|35 |misa77 2|silesia.tar|
+|86544350| 40.83%   |9.43|121.17|30 |zxc 5|silesia.tar|
+|90385428| 42.65%   |2.33|137.45|33 |misa77 1|silesia.tar|
+|92052402| 43.43%   |15.10|127.46|25 |zxc 4|silesia.tar|
+|94127047| 44.41%   |$\color{green}{\textbf{36.62}}$|178.76|8 |$\color{green}{\textbf{zlib-ng 1}}$|silesia.tar|
+|94526454| 44.60%   |13.01|128.53|28 |misa77 0|silesia.tar|
+|98875303| 46.65%   |20.05|132.30|23 |zxc 3|silesia.tar|
+|100884498| 47.60%   |$\color{green}{\textbf{91.03}}$|$\color{green}{\textbf{227.87}}$|5🥉|$\color{green}{\textbf{lz4 1}}$|silesia.tar|
+|126114838| 59.50%   |$\color{green}{\textbf{107.16}}$|137.24|15 |$\color{green}{\textbf{memlz}}$|silesia.tar|
+|211947520|100.00%   |$\color{green}{\textbf{3143.32}}$|$\color{green}{\textbf{3181.77}}$|37 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
 
 
 
@@ -100,46 +100,46 @@ Generated automatically by the Release workflow.
 
 ## Platform: linux-x86_64
 
-#### TurboBench: 2026.09.30 04:12 - AMD EPYC 9V74 80-Core Processor (bold = pareto)  MB=1.000.000
+#### TurboBench: 2026.10.01 04:21 - AMD EPYC 7763 64-Core Processor (bold = pareto)  MB=1.000.000
 |C Size|ratio%|C MB/s|D MB/s|Rank|Name|File|
 |--------:|-----:|--------:|--------:|----------------|----------------|------------------------------|
-|58470485| 27.59%   |$\color{green}{\textbf{42.79}}$|$\color{green}{\textbf{412.48}}$|20 |$\color{green}{\textbf{brotli 6}}$|silesia.tar|
-|59249005| 27.95%   |$\color{green}{\textbf{52.37}}$|$\color{green}{\textbf{1275.22}}$|3🥇|$\color{green}{\textbf{zstd 9}}$|silesia.tar|
-|59555449| 28.10%   |51.06|403.63|23 |brotli 5|silesia.tar|
-|64122989| 30.25%   |$\color{green}{\textbf{70.41}}$|403.40|14 |$\color{green}{\textbf{brotli 4}}$|silesia.tar|
-|64678729| 30.52%   |4.44|813.56|29 |libdeflate 12|silesia.tar|
-|66499145| 31.38%   |$\color{green}{\textbf{210.68}}$|1164.10|1👑|$\color{green}{\textbf{zstd 3}}$|silesia.tar|
-|67510621| 31.85%   |77.21|805.84|5🥉|libdeflate 6|silesia.tar|
-|67584469| 31.89%   |31.50|732.85|25 |zlib-ng 9|silesia.tar|
-|67644548| 31.92%   |9.53|325.25|36 |zlib 9|silesia.tar|
-|68228431| 32.19%   |23.51|321.09|35 |zlib 6|silesia.tar|
-|68914071| 32.51%   |68.57|712.18|17 |zlib-ng 6|silesia.tar|
-|70129880| 33.09%   |5.70|$\color{green}{\textbf{2666.21}}$|26 |$\color{green}{\textbf{zxc 7}}$|silesia.tar|
-|73205962| 34.54%   |$\color{green}{\textbf{344.50}}$|1261.22|2🏆|$\color{green}{\textbf{zstd 1}}$|silesia.tar|
-|73499222| 34.68%   |223.14|333.65|19 |brotli 1|silesia.tar|
-|73502797| 34.68%   |190.51|764.00|9 |libdeflate 1|silesia.tar|
-|73869395| 34.85%   |49.71|2384.94|21 |lzav 2|silesia.tar|
-|75126016| 35.45%   |187.77|701.59|18 |igzip 3|silesia.tar|
-|75259309| 35.51%   |9.37|$\color{green}{\textbf{5364.27}}$|22 |$\color{green}{\textbf{misa77 4}}$|silesia.tar|
-|76581595| 36.13%   |$\color{green}{\textbf{398.18}}$|680.01|10 |$\color{green}{\textbf{igzip 2}}$|silesia.tar|
-|77259029| 36.45%   |86.59|300.86|34 |zlib 1|silesia.tar|
-|77263127| 36.45%   |9.84|3408.28|31 |lz4 12|silesia.tar|
-|77884965| 36.75%   |28.31|3325.76|30 |lz4 9|silesia.tar|
-|78111974| 36.85%   |$\color{green}{\textbf{418.24}}$|664.00|15 |$\color{green}{\textbf{igzip 1}}$|silesia.tar|
-|78433298| 37.01%   |320.86|311.09|32 |brotli 0|silesia.tar|
-|78895851| 37.22%   |55.24|3260.28|27 |lz4 5|silesia.tar|
-|80028646| 37.76%   |14.53|$\color{green}{\textbf{6020.04}}$|28 |$\color{green}{\textbf{misa77 3}}$|silesia.tar|
-|84577911| 39.91%   |$\color{green}{\textbf{431.30}}$|2408.33|4🥈|$\color{green}{\textbf{lzav 1}}$|silesia.tar|
-|85476705| 40.33%   |63.63|$\color{green}{\textbf{6081.18}}$|11 |$\color{green}{\textbf{misa77 2}}$|silesia.tar|
-|86544350| 40.83%   |66.42|4401.00|24 |zxc 5|silesia.tar|
-|90385428| 42.65%   |82.32|$\color{green}{\textbf{7047.30}}$|8 |$\color{green}{\textbf{misa77 1}}$|silesia.tar|
-|92052402| 43.43%   |110.97|4644.41|12 |zxc 4|silesia.tar|
-|94127047| 44.41%   |229.16|639.88|33 |zlib-ng 1|silesia.tar|
-|94526454| 44.60%   |224.19|5905.80|6 |misa77 0|silesia.tar|
-|98875303| 46.65%   |157.98|5034.98|16 |zxc 3|silesia.tar|
-|100884498| 47.60%   |$\color{green}{\textbf{533.84}}$|3494.54|7 |$\color{green}{\textbf{lz4 1}}$|silesia.tar|
-|126957243| 59.90%   |$\color{green}{\textbf{3530.46}}$|2336.36|13 |$\color{green}{\textbf{memlz}}$|silesia.tar|
-|211947520|100.00%   |$\color{green}{\textbf{19493.01}}$|$\color{green}{\textbf{19563.18}}$|37 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
+|58470485| 27.59%   |$\color{green}{\textbf{44.57}}$|$\color{green}{\textbf{443.66}}$|21 |$\color{green}{\textbf{brotli 6}}$|silesia.tar|
+|59249005| 27.95%   |$\color{green}{\textbf{54.62}}$|$\color{green}{\textbf{1303.82}}$|3🥇|$\color{green}{\textbf{zstd 9}}$|silesia.tar|
+|59555449| 28.10%   |52.19|434.18|25 |brotli 5|silesia.tar|
+|64122989| 30.25%   |$\color{green}{\textbf{80.66}}$|438.19|16 |$\color{green}{\textbf{brotli 4}}$|silesia.tar|
+|64678729| 30.52%   |5.35|844.19|29 |libdeflate 12|silesia.tar|
+|66499145| 31.38%   |$\color{green}{\textbf{210.13}}$|1185.54|1👑|$\color{green}{\textbf{zstd 3}}$|silesia.tar|
+|67510621| 31.85%   |87.97|841.71|4🥈|libdeflate 6|silesia.tar|
+|67584469| 31.89%   |36.02|807.54|23 |zlib-ng 9|silesia.tar|
+|67644548| 31.92%   |10.82|360.84|36 |zlib 9|silesia.tar|
+|68228431| 32.19%   |26.74|356.86|35 |zlib 6|silesia.tar|
+|68914071| 32.51%   |77.82|777.04|19 |zlib-ng 6|silesia.tar|
+|70129880| 33.09%   |7.36|$\color{green}{\textbf{2784.06}}$|26 |$\color{green}{\textbf{zxc 7}}$|silesia.tar|
+|73205962| 34.54%   |$\color{green}{\textbf{371.45}}$|1274.99|2🏆|$\color{green}{\textbf{zstd 1}}$|silesia.tar|
+|73499222| 34.68%   |240.62|350.22|24 |brotli 1|silesia.tar|
+|73502797| 34.68%   |216.65|786.35|8 |libdeflate 1|silesia.tar|
+|73869395| 34.85%   |55.54|2581.42|17 |lzav 2|silesia.tar|
+|75126016| 35.45%   |195.17|766.17|20 |igzip 3|silesia.tar|
+|75259309| 35.51%   |10.05|$\color{green}{\textbf{4832.14}}$|22 |$\color{green}{\textbf{misa77 4}}$|silesia.tar|
+|76581595| 36.13%   |$\color{green}{\textbf{437.20}}$|741.93|9 |$\color{green}{\textbf{igzip 2}}$|silesia.tar|
+|77259029| 36.45%   |93.77|334.49|34 |zlib 1|silesia.tar|
+|77263127| 36.45%   |10.98|3586.43|31 |lz4 12|silesia.tar|
+|77884965| 36.75%   |30.54|3514.88|30 |lz4 9|silesia.tar|
+|78111974| 36.85%   |$\color{green}{\textbf{451.32}}$|723.98|12 |$\color{green}{\textbf{igzip 1}}$|silesia.tar|
+|78433298| 37.01%   |341.69|325.90|32 |brotli 0|silesia.tar|
+|78895851| 37.22%   |58.70|3444.17|27 |lz4 5|silesia.tar|
+|80028646| 37.76%   |14.84|$\color{green}{\textbf{5219.10}}$|28 |$\color{green}{\textbf{misa77 3}}$|silesia.tar|
+|84577911| 39.91%   |420.37|2701.07|5🥉|lzav 1|silesia.tar|
+|85476705| 40.33%   |65.52|$\color{green}{\textbf{5524.65}}$|11 |$\color{green}{\textbf{misa77 2}}$|silesia.tar|
+|86544350| 40.83%   |87.24|4278.66|18 |zxc 5|silesia.tar|
+|90385428| 42.65%   |85.18|$\color{green}{\textbf{6179.77}}$|10 |$\color{green}{\textbf{misa77 1}}$|silesia.tar|
+|92052402| 43.43%   |144.78|4438.04|13 |zxc 4|silesia.tar|
+|94127047| 44.41%   |263.10|698.63|33 |zlib-ng 1|silesia.tar|
+|94526454| 44.60%   |252.37|5207.81|6 |misa77 0|silesia.tar|
+|98875303| 46.65%   |196.90|4706.49|14 |zxc 3|silesia.tar|
+|100884498| 47.60%   |$\color{green}{\textbf{592.03}}$|3674.10|7 |$\color{green}{\textbf{lz4 1}}$|silesia.tar|
+|126114838| 59.50%   |$\color{green}{\textbf{3219.62}}$|2471.03|15 |$\color{green}{\textbf{memlz}}$|silesia.tar|
+|211947520|100.00%   |$\color{green}{\textbf{22780.26}}$|$\color{green}{\textbf{22329.07}}$|37 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
 
 
 
@@ -147,46 +147,46 @@ Generated automatically by the Release workflow.
 
 ## Platform: macos-aarch64
 
-#### TurboBench: 2026.09.30 04:06 - Apple M1 (Virtual) (bold = pareto)  MB=1.000.000
+#### TurboBench: 2026.10.01 04:16 - Apple M1 (Virtual) (bold = pareto)  MB=1.000.000
 |C Size|ratio|C MB/s|D MB/s|Rank|Name|File|
 |--------:|-----:|--------:|--------:|----------------|----------------|------------------------------|
-|58470485| 27.59%   |$\color{green}{\textbf{57.36}}$|$\color{green}{\textbf{474.55}}$|15 |$\color{green}{\textbf{brotli 6}}$|silesia.tar|
-|59249005| 27.95%   |$\color{green}{\textbf{64.93}}$|$\color{green}{\textbf{1314.04}}$|4🥈|$\color{green}{\textbf{zstd 9}}$|silesia.tar|
-|59555449| 28.10%   |$\color{green}{\textbf{69.83}}$|459.70|19 |$\color{green}{\textbf{brotli 5}}$|silesia.tar|
-|64122989| 30.25%   |$\color{green}{\textbf{108.42}}$|471.66|10 |$\color{green}{\textbf{brotli 4}}$|silesia.tar|
-|64678729| 30.52%   |5.57|972.48|25 |libdeflate 12|silesia.tar|
-|66499145| 31.38%   |$\color{green}{\textbf{288.50}}$|1261.20|1👑|$\color{green}{\textbf{zstd 3}}$|silesia.tar|
-|67510621| 31.85%   |101.02|960.52|9 |libdeflate 6|silesia.tar|
-|67584469| 31.89%   |50.40|811.91|22 |zlib-ng 9|silesia.tar|
-|67644548| 31.92%   |13.85|363.99|35 |zlib 9|silesia.tar|
-|68228431| 32.19%   |35.48|367.38|34 |zlib 6|silesia.tar|
-|68914071| 32.51%   |102.49|784.64|16 |zlib-ng 6|silesia.tar|
-|70129880| 33.09%   |6.43|$\color{green}{\textbf{3682.97}}$|23 |$\color{green}{\textbf{zxc 7}}$|silesia.tar|
-|73205962| 34.54%   |$\color{green}{\textbf{500.33}}$|1349.73|2🏆|$\color{green}{\textbf{zstd 1}}$|silesia.tar|
-|73499222| 34.68%   |274.25|369.93|11 |brotli 1|silesia.tar|
-|73502797| 34.68%   |254.44|902.68|7 |libdeflate 1|silesia.tar|
-|73869395| 34.85%   |109.89|3292.59|8 |lzav 2|silesia.tar|
-|75259309| 35.51%   |11.19|$\color{green}{\textbf{7589.88}}$|20 |$\color{green}{\textbf{misa77 4}}$|silesia.tar|
-|75687144| 35.71%   |140.96|279.07|31 |igzip 3|silesia.tar|
-|77259029| 36.45%   |126.03|342.28|32 |zlib 1|silesia.tar|
-|77263127| 36.45%   |11.74|4173.67|28 |lz4 12|silesia.tar|
-|77806103| 36.71%   |229.99|267.69|33 |igzip 2|silesia.tar|
-|77884965| 36.75%   |38.63|4160.81|27 |lz4 9|silesia.tar|
-|78433298| 37.01%   |444.98|346.08|24 |brotli 0|silesia.tar|
-|78895851| 37.22%   |78.21|4079.44|21 |lz4 5|silesia.tar|
-|79205669| 37.37%   |248.86|262.40|36 |igzip 1|silesia.tar|
-|80028646| 37.76%   |18.34|$\color{green}{\textbf{7854.27}}$|26 |$\color{green}{\textbf{misa77 3}}$|silesia.tar|
-|84577911| 39.91%   |$\color{green}{\textbf{542.98}}$|3224.52|5🥉|$\color{green}{\textbf{lzav 1}}$|silesia.tar|
-|85476705| 40.33%   |74.71|$\color{green}{\textbf{8032.57}}$|17 |$\color{green}{\textbf{misa77 2}}$|silesia.tar|
-|86544350| 40.83%   |63.29|4845.07|29 |zxc 5|silesia.tar|
-|90385428| 42.65%   |97.78|$\color{green}{\textbf{9560.97}}$|12 |$\color{green}{\textbf{misa77 1}}$|silesia.tar|
-|92052402| 43.43%   |110.10|5309.04|18 |zxc 4|silesia.tar|
-|94127047| 44.41%   |320.35|723.07|30 |zlib-ng 1|silesia.tar|
-|94526454| 44.60%   |284.92|8719.97|3🥇|misa77 0|silesia.tar|
-|98875303| 46.65%   |165.48|6882.75|13 |zxc 3|silesia.tar|
-|100884498| 47.60%   |$\color{green}{\textbf{649.22}}$|4371.31|6 |$\color{green}{\textbf{lz4 1}}$|silesia.tar|
-|126957243| 59.90%   |$\color{green}{\textbf{5876.66}}$|2795.33|14 |$\color{green}{\textbf{memlz}}$|silesia.tar|
-|211947520|100.00%   |$\color{green}{\textbf{26825.40}}$|$\color{green}{\textbf{26556.51}}$|37 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
+|58470485| 27.59%   |$\color{green}{\textbf{64.93}}$|$\color{green}{\textbf{523.21}}$|11 |$\color{green}{\textbf{brotli 6}}$|silesia.tar|
+|59249005| 27.95%   |63.80|$\color{green}{\textbf{1206.17}}$|5🥉|$\color{green}{\textbf{zstd 9}}$|silesia.tar|
+|59555449| 28.10%   |$\color{green}{\textbf{73.76}}$|498.82|15 |$\color{green}{\textbf{brotli 5}}$|silesia.tar|
+|64122989| 30.25%   |$\color{green}{\textbf{103.63}}$|457.70|9 |$\color{green}{\textbf{brotli 4}}$|silesia.tar|
+|64678729| 30.52%   |5.65|941.87|26 |libdeflate 12|silesia.tar|
+|66499145| 31.38%   |$\color{green}{\textbf{289.88}}$|1160.47|1👑|$\color{green}{\textbf{zstd 3}}$|silesia.tar|
+|67510621| 31.85%   |109.67|1052.51|4🥈|libdeflate 6|silesia.tar|
+|67584469| 31.89%   |48.67|759.14|22 |zlib-ng 9|silesia.tar|
+|67644548| 31.92%   |15.56|405.41|35 |zlib 9|silesia.tar|
+|68228431| 32.19%   |39.30|401.88|33 |zlib 6|silesia.tar|
+|68914071| 32.51%   |99.14|782.94|16 |zlib-ng 6|silesia.tar|
+|70129880| 33.09%   |8.19|$\color{green}{\textbf{3840.05}}$|21 |$\color{green}{\textbf{zxc 7}}$|silesia.tar|
+|73205962| 34.54%   |$\color{green}{\textbf{483.58}}$|1305.29|2🏆|$\color{green}{\textbf{zstd 1}}$|silesia.tar|
+|73499222| 34.68%   |280.91|379.91|17 |brotli 1|silesia.tar|
+|73502797| 34.68%   |271.97|989.74|6 |libdeflate 1|silesia.tar|
+|73869395| 34.85%   |76.16|2848.72|18 |lzav 2|silesia.tar|
+|75259309| 35.51%   |11.02|$\color{green}{\textbf{8141.18}}$|12 |$\color{green}{\textbf{misa77 4}}$|silesia.tar|
+|75687144| 35.71%   |141.65|278.16|34 |igzip 3|silesia.tar|
+|77259029| 36.45%   |136.44|376.17|31 |zlib 1|silesia.tar|
+|77263127| 36.45%   |10.05|4085.26|27 |lz4 12|silesia.tar|
+|77806103| 36.71%   |221.99|283.00|32 |igzip 2|silesia.tar|
+|77884965| 36.75%   |32.52|3186.51|30 |lz4 9|silesia.tar|
+|78433298| 37.01%   |460.41|367.29|23 |brotli 0|silesia.tar|
+|78895851| 37.22%   |70.96|3366.97|24 |lz4 5|silesia.tar|
+|79205669| 37.37%   |264.22|285.42|36 |igzip 1|silesia.tar|
+|80028646| 37.76%   |17.84|8099.18|25 |misa77 3|silesia.tar|
+|84577911| 39.91%   |421.33|3089.61|7 |lzav 1|silesia.tar|
+|85476705| 40.33%   |47.48|5810.28|29 |misa77 2|silesia.tar|
+|86544350| 40.83%   |95.62|5996.87|20 |zxc 5|silesia.tar|
+|90385428| 42.65%   |84.42|7799.64|19 |misa77 1|silesia.tar|
+|92052402| 43.43%   |164.20|7099.23|10 |zxc 4|silesia.tar|
+|94127047| 44.41%   |302.02|709.04|28 |zlib-ng 1|silesia.tar|
+|94526454| 44.60%   |298.35|$\color{green}{\textbf{8798.15}}$|3🥇|$\color{green}{\textbf{misa77 0}}$|silesia.tar|
+|98875303| 46.65%   |196.66|7406.09|13 |zxc 3|silesia.tar|
+|100884498| 47.60%   |$\color{green}{\textbf{585.69}}$|4057.58|8 |$\color{green}{\textbf{lz4 1}}$|silesia.tar|
+|126114838| 59.50%   |$\color{green}{\textbf{6105.18}}$|3067.04|14 |$\color{green}{\textbf{memlz}}$|silesia.tar|
+|211947520|100.00%   |$\color{green}{\textbf{27604.52}}$|$\color{green}{\textbf{26085.85}}$|37 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
 
 
 
@@ -194,43 +194,43 @@ Generated automatically by the Release workflow.
 
 ## Platform: windows-x86_64
 
-#### TurboBench: 2026.09.30 04:16 - AMD EPYC 9V74 80-Core Processor (bold = pareto)  MB=1.000.000
+#### TurboBench: 2026.10.01 04:22 - AMD EPYC 9V45 96-Core Processor (bold = pareto)  MB=1.000.000
 |C Size|ratio%|C MB/s|D MB/s|Rank|Name|File|
 |--------:|-----:|--------:|--------:|----------------|----------------|------------------------------|
-|58470485| 27.59%   |$\color{green}{\textbf{50.20}}$|$\color{green}{\textbf{513.98}}$|15 |$\color{green}{\textbf{brotli 6}}$|silesia.tar|
-|59249005| 27.95%   |$\color{green}{\textbf{60.10}}$|$\color{green}{\textbf{1372.62}}$|7 |$\color{green}{\textbf{zstd 9}}$|silesia.tar|
-|59555449| 28.10%   |$\color{green}{\textbf{60.61}}$|499.52|20 |$\color{green}{\textbf{brotli 5}}$|silesia.tar|
-|64122989| 30.25%   |$\color{green}{\textbf{74.00}}$|507.24|16 |$\color{green}{\textbf{brotli 4}}$|silesia.tar|
-|64678729| 30.52%   |5.64|952.66|29 |libdeflate 12|silesia.tar|
-|66499145| 31.38%   |$\color{green}{\textbf{247.07}}$|1263.83|2🏆|$\color{green}{\textbf{zstd 3}}$|silesia.tar|
-|67510621| 31.85%   |97.95|1000.53|5🥉|libdeflate 6|silesia.tar|
-|67584469| 31.89%   |40.90|975.98|21 |zlib-ng 9|silesia.tar|
-|67644548| 31.92%   |12.13|399.50|32 |zlib 9|silesia.tar|
-|68228431| 32.19%   |29.87|388.76|33 |zlib 6|silesia.tar|
-|68914071| 32.51%   |85.99|927.52|17 |zlib-ng 6|silesia.tar|
-|70129880| 33.09%   |7.03|$\color{green}{\textbf{3110.75}}$|25 |$\color{green}{\textbf{zxc 7}}$|silesia.tar|
-|73205962| 34.54%   |$\color{green}{\textbf{419.42}}$|1445.70|1👑|$\color{green}{\textbf{zstd 1}}$|silesia.tar|
-|73499222| 34.68%   |276.96|416.67|18 |brotli 1|silesia.tar|
-|73502797| 34.68%   |249.24|948.20|10 |libdeflate 1|silesia.tar|
-|73869395| 34.85%   |76.14|2561.02|13 |lzav 2|silesia.tar|
-|75259309| 35.51%   |9.51|$\color{green}{\textbf{5589.33}}$|22 |$\color{green}{\textbf{misa77 4}}$|silesia.tar|
-|77259029| 36.45%   |105.90|369.35|31 |zlib 1|silesia.tar|
-|77263127| 36.45%   |12.57|4123.49|28 |lz4 12|silesia.tar|
-|77884965| 36.75%   |36.56|4097.19|26 |lz4 9|silesia.tar|
-|78433298| 37.01%   |395.83|389.13|27 |brotli 0|silesia.tar|
-|78895851| 37.22%   |69.74|4008.54|23 |lz4 5|silesia.tar|
-|80028646| 37.76%   |16.92|$\color{green}{\textbf{6233.93}}$|24 |$\color{green}{\textbf{misa77 3}}$|silesia.tar|
-|84577911| 39.91%   |$\color{green}{\textbf{511.13}}$|3063.27|4🥈|$\color{green}{\textbf{lzav 1}}$|silesia.tar|
-|85476705| 40.33%   |76.17|$\color{green}{\textbf{6609.32}}$|9 |$\color{green}{\textbf{misa77 2}}$|silesia.tar|
-|86544350| 40.83%   |77.84|5220.00|19 |zxc 5|silesia.tar|
-|90385428| 42.65%   |98.93|$\color{green}{\textbf{7466.36}}$|6 |$\color{green}{\textbf{misa77 1}}$|silesia.tar|
-|92052402| 43.43%   |131.58|5448.24|11 |zxc 4|silesia.tar|
-|94127047| 44.41%   |338.34|830.73|30 |zlib-ng 1|silesia.tar|
-|94526454| 44.60%   |283.09|6677.83|3🥇|misa77 0|silesia.tar|
-|98875303| 46.65%   |188.50|5908.44|12 |zxc 3|silesia.tar|
-|100884498| 47.60%   |$\color{green}{\textbf{672.67}}$|4243.28|8 |$\color{green}{\textbf{lz4 1}}$|silesia.tar|
-|126957243| 59.90%   |$\color{green}{\textbf{4060.22}}$|2505.85|14 |$\color{green}{\textbf{memlz}}$|silesia.tar|
-|211947520|100.00%   |$\color{green}{\textbf{21656.03}}$|$\color{green}{\textbf{21578.86}}$|34 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
+|58470485| 27.59%   |$\color{green}{\textbf{57.15}}$|$\color{green}{\textbf{569.14}}$|16 |$\color{green}{\textbf{brotli 6}}$|silesia.tar|
+|59249005| 27.95%   |$\color{green}{\textbf{67.46}}$|$\color{green}{\textbf{1709.09}}$|6 |$\color{green}{\textbf{zstd 9}}$|silesia.tar|
+|59555449| 28.10%   |$\color{green}{\textbf{73.57}}$|568.12|19 |$\color{green}{\textbf{brotli 5}}$|silesia.tar|
+|64122989| 30.25%   |$\color{green}{\textbf{80.71}}$|555.91|20 |$\color{green}{\textbf{brotli 4}}$|silesia.tar|
+|64678729| 30.52%   |6.55|1098.50|28 |libdeflate 12|silesia.tar|
+|66499145| 31.38%   |$\color{green}{\textbf{315.24}}$|1651.44|1👑|$\color{green}{\textbf{zstd 3}}$|silesia.tar|
+|67510621| 31.85%   |119.97|1075.26|7 |libdeflate 6|silesia.tar|
+|67584469| 31.89%   |49.53|1075.08|24 |zlib-ng 9|silesia.tar|
+|67644548| 31.92%   |15.21|441.95|33 |zlib 9|silesia.tar|
+|68228431| 32.19%   |37.26|438.69|32 |zlib 6|silesia.tar|
+|68914071| 32.51%   |105.18|1044.17|17 |zlib-ng 6|silesia.tar|
+|70129880| 33.09%   |10.16|$\color{green}{\textbf{4101.23}}$|25 |$\color{green}{\textbf{zxc 7}}$|silesia.tar|
+|73205962| 34.54%   |$\color{green}{\textbf{519.09}}$|1833.06|2🏆|$\color{green}{\textbf{zstd 1}}$|silesia.tar|
+|73499222| 34.68%   |337.39|466.78|18 |brotli 1|silesia.tar|
+|73502797| 34.68%   |282.40|1037.68|12 |libdeflate 1|silesia.tar|
+|73869395| 34.85%   |96.67|3031.55|13 |lzav 2|silesia.tar|
+|75259309| 35.51%   |10.13|$\color{green}{\textbf{7889.06}}$|21 |$\color{green}{\textbf{misa77 4}}$|silesia.tar|
+|77259029| 36.45%   |126.49|408.72|31 |zlib 1|silesia.tar|
+|77263127| 36.45%   |15.93|5027.22|29 |lz4 12|silesia.tar|
+|77884965| 36.75%   |44.95|4810.65|27 |lz4 9|silesia.tar|
+|78433298| 37.01%   |501.39|444.16|26 |brotli 0|silesia.tar|
+|78895851| 37.22%   |84.42|4746.86|22 |lz4 5|silesia.tar|
+|80028646| 37.76%   |21.51|$\color{green}{\textbf{9236.80}}$|23 |$\color{green}{\textbf{misa77 3}}$|silesia.tar|
+|84577911| 39.91%   |$\color{green}{\textbf{649.15}}$|3431.40|4🥈|$\color{green}{\textbf{lzav 1}}$|silesia.tar|
+|85476705| 40.33%   |97.24|9076.98|9 |misa77 2|silesia.tar|
+|86544350| 40.83%   |109.11|6504.05|14 |zxc 5|silesia.tar|
+|90385428| 42.65%   |129.33|$\color{green}{\textbf{10818.62}}$|5🥉|$\color{green}{\textbf{misa77 1}}$|silesia.tar|
+|92052402| 43.43%   |181.46|6952.97|10 |zxc 4|silesia.tar|
+|94127047| 44.41%   |397.65|933.27|30 |zlib-ng 1|silesia.tar|
+|94526454| 44.60%   |366.11|9497.13|3🥇|misa77 0|silesia.tar|
+|98875303| 46.65%   |246.47|7684.83|11 |zxc 3|silesia.tar|
+|100884498| 47.60%   |$\color{green}{\textbf{781.04}}$|5046.25|8 |$\color{green}{\textbf{lz4 1}}$|silesia.tar|
+|126114838| 59.50%   |$\color{green}{\textbf{6890.36}}$|2908.05|15 |$\color{green}{\textbf{memlz}}$|silesia.tar|
+|211947520|100.00%   |$\color{green}{\textbf{27096.33}}$|$\color{green}{\textbf{26825.40}}$|34 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
 
 
 
