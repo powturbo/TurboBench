@@ -161,7 +161,7 @@ jobs:
           wget ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
           gunzip NASA_access_log_Jul95.gz
           wget https://codeberg.org/pbm/former/raw/branch/master/data/enwik8.gz 
-          gunzip enwik8.zip
+          gunzip enwik8.gz
       - run: make
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
