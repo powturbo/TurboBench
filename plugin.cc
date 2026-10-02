@@ -1203,7 +1203,7 @@ static int64_t ozl_compress(char *in, size_t insize, char *out, size_t outsize, 
   return (int64_t) ZL_validResult(report);
 }
 
-static int64_t ozl_decompress(unsigned char *in, size_t insize, unsigned char *out, size_t outsize, openzl_params_s *params) {
+static int64_t ozl_decompress(char *in, size_t insize, char *out, size_t outsize, openzl_params_s *params) {
   if(!params || !params->dctx) return 0;
   ZL_Report report = ZL_DCtx_decompress(params->dctx, out, outsize, in, insize);
   if (ZL_isError(report)) die("OpenZL decompression error: %s\n", ZL_DCtx_getErrorContextString(params->dctx, report));
