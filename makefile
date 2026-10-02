@@ -597,35 +597,25 @@ ifdef CROSS  # NOTWORKING
 else
 PLG_FLAGS += -D_OPENZL
 CXXFLAGS  += -Iopenzl/include -Iopenzl/src
-
 OPENZL_BDIR := $(BUILD)/openzl
 OPENZL_LIB  := $(OPENZL_BDIR)/libopenzl.a
-
 OPENZL_CMAKE_FILES := $(shell find openzl -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \))
 OPENZL_SRCS := $(shell find openzl -type f \( -name '*.c' -o -name '*.h' -o -name '*.cpp' -o -name '*.cc' \))
-
-# optional extra libs on non-Windows
 OPENZL_CLIBS :=
-ifneq ($(OS),Windows)
+OPENZL_CMAKE_FLAGS :=
+ifeq ($(filter Windows,$(OS))$(filter risc64,$(ARCH)),)   
+# Only non-Windows/riscv64. Windows: build error, riscv64: building too slow  
 PLG_FLAGS += -D_OZLCSV
-OPENZL_CLIBS := $(OPENZL_BDIR)/custom_parsers/libcustom_parsers.a \
-                $(OPENZL_BDIR)/custom_parsers/csv/libcsv_parser.a \
-                $(OPENZL_BDIR)/custom_parsers/shared_components/libshared_components.a
+OPENZL_CLIBS := $(OPENZL_BDIR)/custom_parsers/libcustom_parsers.a $(OPENZL_BDIR)/custom_parsers/csv/libcsv_parser.a $(OPENZL_BDIR)/custom_parsers/shared_components/libshared_components.a
+OPENZL_CMAKE_FLAGS := -DOPENZL_BUILD_CPP=OFF -DOPENZL_BUILD_CUSTOM_PARSERS=OFF -DOPENZL_BUILD_CLI=OFF
+else
 endif
 
 LIBS += $(OPENZL_LIB) $(OPENZL_CLIBS)
-
-# 1. Configure (only when CMake files change)
 $(OPENZL_BDIR)/CMakeCache.txt: $(OPENZL_CMAKE_FILES)
-	cmake -S openzl -B $(OPENZL_BDIR) \
-	      -DCMAKE_BUILD_TYPE=Release \
-	      -DOPENZL_ALLOW_INTROSPECTION=OFF \
-	      -DOPENZL_INSTALL=OFF \
-	      -DOPENZL_BUILD_TOOLS=OFF \
-	      -DOPENZL_BUILD_EXAMPLES=OFF
+	cmake -S openzl -B $(OPENZL_BDIR) -DCMAKE_BUILD_TYPE=Release -DOPENZL_ALLOW_INTROSPECTION=OFF -DOPENZL_INSTALL=OFF -DOPENZL_BUILD_TOOLS=OFF -DOPENZL_BUILD_EXAMPLES=OFF $(OPENZL_CMAKE_FLAGS)
 	@touch $@
 
-# 2. Build the library (and the extra archives) when sources or the cache change
 $(OPENZL_LIB) $(OPENZL_CLIBS): $(OPENZL_BDIR)/CMakeCache.txt $(OPENZL_SRCS)
 	cmake --build $(OPENZL_BDIR) --config Release
 	@touch $(OPENZL_LIB) $(OPENZL_CLIBS)   # ensure Make sees them as up-to-date
