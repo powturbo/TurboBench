@@ -597,23 +597,37 @@ ifdef CROSS  # NOTWORKING
 else
 PLG_FLAGS += -D_OPENZL
 CXXFLAGS  += -Iopenzl/include -Iopenzl/src
+
 OPENZL_BDIR := $(BUILD)/openzl
 OPENZL_LIB  := $(OPENZL_BDIR)/libopenzl.a
-OPENZL_SRCS := $(shell find openzl -type f \( -name '*.c' -o -name '*.h' -o -name '*.cpp' -o -name '*.cc' -o -name 'CMakeLists.txt' -o -name '*.cmake' \))
-OPENZL_CLIBS :=
-ifneq ($(OS), Windows)
-OPENZL_CLIBS := $(OPENZL_BDIR)/custom_parsers/libcustom_parsers.a $(OPENZL_BDIR)/custom_parsers/csv/libcsv_parser.a $(OPENZL_BDIR)/custom_parsers/shared_components/libshared_components.a
-endif
 
 OPENZL_CMAKE_FILES := $(shell find openzl -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \))
+OPENZL_SRCS := $(shell find openzl -type f \( -name '*.c' -o -name '*.h' -o -name '*.cpp' -o -name '*.cc' \))
+
+# optional extra libs on non-Windows
+OPENZL_CLIBS :=
+ifneq ($(OS),Windows)
+OPENZL_CLIBS := $(OPENZL_BDIR)/custom_parsers/libcustom_parsers.a \
+                $(OPENZL_BDIR)/custom_parsers/csv/libcsv_parser.a \
+                $(OPENZL_BDIR)/custom_parsers/shared_components/libshared_components.a
+endif
+
 LIBS += $(OPENZL_LIB) $(OPENZL_CLIBS)
+
+# 1. Configure (only when CMake files change)
 $(OPENZL_BDIR)/CMakeCache.txt: $(OPENZL_CMAKE_FILES)
-	cmake -S openzl -B $(OPENZL_BDIR) -DCMAKE_BUILD_TYPE=Release -DOPENZL_ALLOW_INTROSPECTION=OFF -DOPENZL_INSTALL=OFF  \
-              -DOPENZL_BUILD_TOOLS=OFF -DOPENZL_BUILD_EXAMPLES=OFF
+	cmake -S openzl -B $(OPENZL_BDIR) \
+	      -DCMAKE_BUILD_TYPE=Release \
+	      -DOPENZL_ALLOW_INTROSPECTION=OFF \
+	      -DOPENZL_INSTALL=OFF \
+	      -DOPENZL_BUILD_TOOLS=OFF \
+	      -DOPENZL_BUILD_EXAMPLES=OFF
 	@touch $@
-#-DOPENZL_BUILD_CPP=OFF -DOPENZL_BUILD_CUSTOM_PARSERS=ON -DOPENZL_BUILD_CLI=OFF 
+
+# 2. Build the library (and the extra archives) when sources or the cache change
+$(OPENZL_LIB) $(OPENZL_CLIBS): $(OPENZL_BDIR)/CMakeCache.txt $(OPENZL_SRCS)
 	cmake --build $(OPENZL_BDIR) --config Release
-	@touch $@
+	@touch $(OPENZL_LIB) $(OPENZL_CLIBS)   # ensure Make sees them as up-to-date
 endif
 endif
 
