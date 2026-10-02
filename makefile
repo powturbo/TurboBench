@@ -754,12 +754,10 @@ RC_BDIR := $(BUILD)/$(RC_DIR)
 RC_LIB  := $(RC_BDIR)/librc.a
 $(RC_LIB): $(RC_SRCS)
 	@mkdir -p $(RC_BDIR)
-	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT"
+	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT" $(abspath $(RC_BDIR))/librc.a
 LIBS += $(RC_LIB)
-
-# libsais16 is not included in libbsc
 CFLAGS += -I$(RC_DIR)/libsais/include
-OB += $(RC_BDIR)/libsais/src/libsais16.o
+OB += $(RC_BDIR)/libsais/src/libsais16.o # libsais16 is not included in libbsc
 endif
 endif
 
