@@ -607,8 +607,8 @@ ifeq ($(filter Windows,$(OS))$(filter risc64,$(ARCH)),)
 # Only non-Windows/riscv64. Windows: build error, riscv64: building too slow  
 PLG_FLAGS += -D_OZLCSV
 OPENZL_CLIBS := $(OPENZL_BDIR)/custom_parsers/libcustom_parsers.a $(OPENZL_BDIR)/custom_parsers/csv/libcsv_parser.a $(OPENZL_BDIR)/custom_parsers/shared_components/libshared_components.a
-OPENZL_CMAKE_FLAGS := -DOPENZL_BUILD_CPP=OFF -DOPENZL_BUILD_CUSTOM_PARSERS=OFF -DOPENZL_BUILD_CLI=OFF
 else
+OPENZL_CMAKE_FLAGS := -DOPENZL_BUILD_CPP=OFF -DOPENZL_BUILD_CUSTOM_PARSERS=OFF -DOPENZL_BUILD_CLI=OFF
 endif
 
 LIBS += $(OPENZL_LIB) $(OPENZL_CLIBS)
