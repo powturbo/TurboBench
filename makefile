@@ -594,23 +594,26 @@ ifdef CROSS  # NOTWORKING
 else
 PLG_FLAGS += -D_OPENZL
 CXXFLAGS  += -Iopenzl/include -Iopenzl/src
-OPENZL_BUILD_DIR := $(BUILD)/openzl
-OPENZL_LIB       := $(OPENZL_BUILD_DIR)/libopenzl.a
+OPENZL_BDIR := $(BUILD)/openzl
+OPENZL_LIB       := $(OPENZL_BDIR)/libopenzl.a
 
 OPENZL_SRCS := $(shell find openzl -type f \( -name '*.c' -o -name '*.h' -o -name '*.cpp' -o -name '*.cc' -o -name 'CMakeLists.txt' -o -name '*.cmake' \))
 OPENZL_CMAKE_FILES := $(shell find openzl -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \))
-LIBS      += $(OPENZL_LIB)
+LIBS += $(OPENZL_BDIR)/custom_parsers/libcustom_parsers.a $(OPENZL_BDIR)/custom_parsers/csv/libcsv_parser.a $(OPENZL_BDIR)/custom_parsers/shared_components/libshared_components.a
+#$(OPENZL_BDIR)/libopenzl_profile_graphs.a 
+LIBS += $(OPENZL_LIB)
 
-$(OPENZL_BUILD_DIR)/CMakeCache.txt: $(OPENZL_CMAKE_FILES)
-	cmake -S openzl -B $(OPENZL_BUILD_DIR) -DCMAKE_BUILD_TYPE=Release -DOPENZL_ALLOW_INTROSPECTION=OFF -DOPENZL_INSTALL=OFF -DOPENZL_BUILD_CPP=OFF -DOPENZL_BUILD_CUSTOM_PARSERS=OFF \
-              -DOPENZL_BUILD_TOOLS=OFF -DOPENZL_BUILD_CLI=OFF -DOPENZL_BUILD_EXAMPLES=OFF
+$(OPENZL_BDIR)/CMakeCache.txt: $(OPENZL_CMAKE_FILES)
+	cmake -S openzl -B $(OPENZL_BDIR) -DCMAKE_BUILD_TYPE=Release -DOPENZL_ALLOW_INTROSPECTION=OFF -DOPENZL_INSTALL=OFF  \
+              -DOPENZL_BUILD_TOOLS=OFF -DOPENZL_BUILD_EXAMPLES=OFF
 	@touch $@
-
-$(OPENZL_LIB): $(OPENZL_BUILD_DIR)/CMakeCache.txt $(OPENZL_SRCS)
-	cmake --build $(OPENZL_BUILD_DIR) --config Release
+#-DOPENZL_BUILD_CPP=OFF -DOPENZL_BUILD_CUSTOM_PARSERS=ON -DOPENZL_BUILD_CLI=OFF 
+$(OPENZL_LIB): $(OPENZL_BDIR)/CMakeCache.txt $(OPENZL_SRCS)
+	cmake --build $(OPENZL_BDIR) --config Release
 	@touch $@
 endif
 endif
+
 # 'oo2core_9_win64.dll', 'liboo2corelinuxarm64.so.9' or 'liboo2corelinux64.so.9' must be available the current directory
 # ONLY FOR BENCHMARKING: download corresponding library from https://github.com/WorkingRobot/OodleUE
 PLG_FLAGS+=-D_OODLE
