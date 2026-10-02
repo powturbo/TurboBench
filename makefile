@@ -607,6 +607,7 @@ OPENZL_SRCS := $(shell find openzl -type f \( -name '*.c' -o -name '*.h' -o -nam
 # optional extra libs on non-Windows
 OPENZL_CLIBS :=
 ifneq ($(OS),Windows)
+PLG_FLAGS += -D_OZLCSV
 OPENZL_CLIBS := $(OPENZL_BDIR)/custom_parsers/libcustom_parsers.a \
                 $(OPENZL_BDIR)/custom_parsers/csv/libcsv_parser.a \
                 $(OPENZL_BDIR)/custom_parsers/shared_components/libshared_components.a
