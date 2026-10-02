@@ -146,8 +146,8 @@ all: turbobench
 ifneq ($(wildcard aceapex/.),)
 PLG_FLAGS += -D_ACEAPEX
 ACEAPEX_DIR := aceapex/src
-#ACEAPEX_SRCS := $(wildcard $(ACEAPEX_DIR)/*.cpp) 
-#ACEAPEX_SRCS := $(filter-out %/aceapex_main.cpp, $(ACEAPEX_DIR))
+ACEAPEX_SRCS := $(wildcard $(ACEAPEX_DIR)/*.cpp) 
+ACEAPEX_SRCS := $(filter-out %/aceapex_main.cpp, $(ACEAPEX_DIR))
 
 $(BUILD)/$(ACEAPEX_DIR)/aceapex_api.o: $(ACEAPEX_DIR)/aceapex_api.cpp $(ACEAPEX_SRCS) $(wildcard $(ACEAPEX_DIR)/*.h) 
 	@mkdir -p $(dir $@)
