@@ -301,6 +301,9 @@ enum {
  P_OPENZL_ZSTD,
  P_OPENZL_LZ4,
  P_OPENZL_TP,
+#ifndef _OZLCSV
+#define _OZLCSV 0
+#endif
  P_OPENZL_CSV,
 
 #ifndef _PCODEC
@@ -1210,6 +1213,7 @@ static int64_t ozl_decompress(char *in, size_t insize, char *out, size_t outsize
   return (int64_t) ZL_validResult(report);
 }
 
+  #if _OZLCSV
 #include "openzl/zl_compress.h"
 #include "openzl/zl_compressor.h"
 #include "openzl/zl_decompress.h"
@@ -1242,6 +1246,7 @@ size_t ozl_csvdecomp(unsigned char *in, size_t inlen, unsigned char *out, size_t
   size_t produced = ZL_validResult(report);
   return (produced == outlen) ? produced : 0;
 }
+    #endif
   #endif
 
 //------  P -------------------------------------
@@ -1922,8 +1927,7 @@ struct plugs plugs[] = {
   { P_OPENZL_ZSTD,   "openzl_zstd",   _OPENZL,    "openzl zstd",                 "1,2,3,4,5,6,8,10,12,14,16,18,20,22,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99" },
   { P_OPENZL_LZ4,    "openzl_lz4",    _OPENZL,    "openzl lz4",                  "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99" }, 
   { P_OPENZL_TP,     "openzl_tp",     _OPENZL,    "openzl transpose",            "2,4,8" },
-  { P_OPENZL_CSV,    "openzl_csv",    _OPENZL,    "openzl csv",                  "1,2,3,4,5,6,7,8,9 / b#:blocksize in MiB W:Without header s#:separator N:Null aware" },
-
+  { P_OPENZL_CSV,    "openzl_csv",    _OZLCSV,    "openzl csv",                  "1,2,3,4,5,6,7,8,9 / b#:blocksize in MiB W:Without header s#:separator N:Null aware" },
   { P_PCODECI8,      "pcodec_i8",     _PCODEC,    "pcodec_i8",                   "0,1,2,3,4,5,6,7,8,9" },
   { P_PCODECU8,      "pcodec_u8",     _PCODEC,    "pcodec_u8",                   "0,1,2,3,4,5,6,7,8,9" },
   { P_PCODECI16,     "pcodec_i16",    _PCODEC,    "pcodec_i16",                  "0,1,2,3,4,5,6,7,8,9" },
@@ -2786,10 +2790,12 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_OPENZL_GENERIC:{ char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_generic(            inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;} break;
     case P_OPENZL_ZSTD:   { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_zstd(               inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;} break;
     case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_lz4(                inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;} break;
-    case P_OPENZL_TP:     ZS_transposeEncode(out, in, inlen / lev, lev);  return inlen;  
+    case P_OPENZL_TP:     ZS_transposeEncode(out, in, inlen / lev, lev);  return inlen;
+        #if _OZLCSV  
     case P_OPENZL_CSV:    { size_t blksize = (q = strchr(prm,'b'))?argtoi(q+(q[1]=='='?2:1), 'M'):20000000; int sep = (q=strchr(prm,'s'))?*(q+(q[1]=='='?2:1)):',';
       return ozl_csvcomp(in, inlen, out, outsize, lev, blksize, strchr(prm,'W')?0:1, sep, strchr(prm,'N')?1:0);
     }
+        #endif
       #endif
 
       #if _OODLE
@@ -3765,7 +3771,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_OPENZL_ZSTD:   { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_zstd(                inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;}
     case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_lz4(                 inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;}
     case P_OPENZL_TP :    ZS_transposeDecode(out, in, inlen / lev, lev);  return inlen;
-    case P_OPENZL_CSV :   return ozl_csvdecomp(in, inlen, out, outlen);  
+         #if _OZLCSV
+    case P_OPENZL_CSV :   return ozl_csvdecomp(in, inlen, out, outlen);
+         #endif  
        #endif
 
       #if _PCODEC
