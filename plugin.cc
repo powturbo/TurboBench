@@ -301,6 +301,7 @@ enum {
  P_OPENZL_ZSTD,
  P_OPENZL_LZ4,
  P_OPENZL_TP,
+ P_OPENZL_CSV,
 
 #ifndef _PCODEC
 #define _PCODEC 0
@@ -1106,7 +1107,7 @@ extern "C" size_t mzip_decompress( char *in, size_t inlen, char *out);
 #include "openzl/src/openzl/codecs/transpose/decode_transpose_kernel.h"
 #include "openzl/src/openzl/codecs/transpose/encode_transpose_kernel.h"
 #include "openzl/src/openzl/shared/portability.h"
-#define OPENZL_FORMAT_VERSION 24
+#define OZL_FORMAT_VERSION    24
 #define WINDOWLOG_OPENZL      27
 typedef struct {
   ZL_Compressor* cgraph;
@@ -1114,26 +1115,26 @@ typedef struct {
   ZL_DCtx *dctx;
 } openzl_params_s;
 
-static openzl_params_s *_openzl_init_base(size_t insize, size_t level, size_t windowLog) {
+static openzl_params_s *ozl_init_base(size_t insize, size_t level, size_t windowLog) {
   openzl_params_s *params = (openzl_params_s*)malloc(sizeof(openzl_params_s));
   params->cgraph = ZL_Compressor_create();  assert(params->cgraph);
   params->cctx   = ZL_CCtx_create();        assert(params->cctx);
   params->dctx   = ZL_DCtx_create();        assert(params->dctx);
-  ZL_Report report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_formatVersion, OPENZL_FORMAT_VERSION);
+  ZL_Report report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_formatVersion, OZL_FORMAT_VERSION);
   if(ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
   return params;
 }
 
-static openzl_params_s *_openzl_init_serial(size_t insize, size_t level, size_t windowLog) {
-  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);  
+static openzl_params_s *ozl_init_serial(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = ozl_init_base(insize, level, windowLog);  
   ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_LZ);// ZL_GRAPH_LZ: standard graph for LZ compression, offer performance similar to Zstd. Used for serial data (aka raw bytes).
   if (ZL_isError(report)) printf("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
   return params;
 }
 
 template <typename TInteger>
-static openzl_params_s *_openzl_init_integer_t(size_t insize, size_t level, size_t windowLog) {
-  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
+static openzl_params_s *ozl_init_integer_t(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = ozl_init_base(insize, level, windowLog);
   ZL_GraphID graph = ZL_GRAPH_FIELD_LZ; // Build a graph to compress signed or unsigned integers (Little Endian). Adapted from OpenZL buildIntProfile() source code in cli/utils/compress_profiles.cpp .
   if (std::is_signed<TInteger>::value) 
     graph = ZL_Compressor_registerStaticGraph_fromNode1o(params->cgraph, ZL_NODE_ZIGZAG, graph);
@@ -1146,25 +1147,25 @@ static openzl_params_s *_openzl_init_integer_t(size_t insize, size_t level, size
   return params;
 }
 
-template openzl_params_s *_openzl_init_integer_t<uint8_t >(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<int8_t  >(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<uint16_t>(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<int16_t >(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<uint32_t>(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<int32_t >(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<uint64_t>(size_t insize, size_t level, size_t windowLog);
-template openzl_params_s *_openzl_init_integer_t<int64_t >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *ozl_init_integer_t<uint8_t >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *ozl_init_integer_t<int8_t  >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *ozl_init_integer_t<uint16_t>(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *ozl_init_integer_t<int16_t >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *ozl_init_integer_t<uint32_t>(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *ozl_init_integer_t<int32_t >(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *ozl_init_integer_t<uint64_t>(size_t insize, size_t level, size_t windowLog);
+template openzl_params_s *ozl_init_integer_t<int64_t >(size_t insize, size_t level, size_t windowLog);
 
-openzl_params_s *_openzl_init_generic(size_t insize, size_t level, size_t windowLog) {
-  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
+static openzl_params_s *ozl_init_generic(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = ozl_init_base(insize, level, windowLog);
   // ZL_GRAPH_COMPRESS_GENERIC: "default" generic compression suitable for any stream type. Used as a fallback if a compressor does not match the characteristics of the data. Currently corresponds to Zstd level 6.
   ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_COMPRESS_GENERIC);
   if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
   return params;
 }
 
-openzl_params_s *_openzl_init_zstd(size_t insize, size_t level, size_t windowLog) {
-  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);  
+static openzl_params_s *ozl_init_zstd(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = ozl_init_base(insize, level, windowLog);  
   ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_ZSTD); // ZL_GRAPH_ZSTD: Zstd compression.
   if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report));
    // Valid compression levels range from -99 (?) to -1 and from 1 to 22. Level 0 requests the default behaviour, which corresponds to level 6.
@@ -1176,8 +1177,8 @@ openzl_params_s *_openzl_init_zstd(size_t insize, size_t level, size_t windowLog
   return params;
 }
 
-static openzl_params_s *_openzl_init_lz4(size_t insize, size_t level, size_t windowLog) {
-  openzl_params_s *params = _openzl_init_base(insize, level, windowLog);
+static openzl_params_s *ozl_init_lz4(size_t insize, size_t level, size_t windowLog) {
+  openzl_params_s *params = ozl_init_base(insize, level, windowLog);
   ZL_Report report = ZL_Compressor_selectStartingGraphID(params->cgraph, ZL_GRAPH_LZ4); // ZL_GRAPH_LZ4: LZ4 compression.
   if (ZL_isError(report)) die("OpenZL initialisation error: %s\n", ZL_Compressor_getErrorContextString(params->cgraph, report)); 
   report = ZL_Compressor_setParameter(params->cgraph, ZL_CParam_compressionLevel, level); // Valid compression levels range from -99 (?) to -1 and from 1 to 12. Level 0 requests the default behaviour, which corresponds to level 6.
@@ -1185,7 +1186,7 @@ static openzl_params_s *_openzl_init_lz4(size_t insize, size_t level, size_t win
   return params;
 }
 
-static void _openzl_deinit(openzl_params_s *params) {
+static void ozl_deinit(openzl_params_s *params) {
   if (!params) return;
   if (params->dctx) ZL_DCtx_free(params->dctx);
   if (params->cctx) ZL_CCtx_free(params->cctx);
@@ -1193,20 +1194,53 @@ static void _openzl_deinit(openzl_params_s *params) {
   free(params);
 }
 
-static int64_t _openzl_compress(char *inbuf, size_t insize, char *outbuf, size_t outsize, openzl_params_s *params) {
+static int64_t ozl_compress(char *in, size_t insize, char *out, size_t outsize, openzl_params_s *params) {
   if(!params || !params->cctx || !params->cgraph) return 0;
   ZL_Report report = ZL_CCtx_refCompressor(params->cctx, params->cgraph);
   if (ZL_isError(report)) die("OpenZL compression error: %s\n", ZL_CCtx_getErrorContextString(params->cctx, report));
-  report = ZL_CCtx_compress(params->cctx, outbuf, outsize, inbuf, insize);
+  report = ZL_CCtx_compress(params->cctx, out, outsize, in, insize);
   if(ZL_isError(report)) die("OpenZL compression error: %s\n", ZL_CCtx_getErrorContextString(params->cctx, report));
   return (int64_t) ZL_validResult(report);
 }
 
-static int64_t _openzl_decompress(char *inbuf, size_t insize, char *outbuf, size_t outsize, openzl_params_s *params) {
+static int64_t ozl_decompress(unsigned char *in, size_t insize, unsigned char *out, size_t outsize, openzl_params_s *params) {
   if(!params || !params->dctx) return 0;
-  ZL_Report report = ZL_DCtx_decompress(params->dctx, outbuf, outsize, inbuf, insize);
+  ZL_Report report = ZL_DCtx_decompress(params->dctx, out, outsize, in, insize);
   if (ZL_isError(report)) die("OpenZL decompression error: %s\n", ZL_DCtx_getErrorContextString(params->dctx, report));
   return (int64_t) ZL_validResult(report);
+}
+
+#include "openzl/zl_compress.h"
+#include "openzl/zl_compressor.h"
+#include "openzl/zl_decompress.h"
+#include "openzl/zl_errors.h"
+#include "openzl/zl_version.h"
+#include "openzl/custom_parsers/csv/csv_profile.h"   // CSV profile (from custom_parsers)
+
+using openzl::custom_parsers::ZL_createGraph_genericCSVCompressor;
+using openzl::custom_parsers::ZL_createGraph_genericCSVCompressorWithOptions;
+
+size_t ozl_csvcomp(unsigned char *in, size_t inlen, unsigned char *out, size_t outsize, int lev, size_t blksize, int hasheader, int sep, int usenull) {
+  //printf("lev=%d, b=%zu h=%d sep=%c N=%d\n", lev, blksize, hasheader, sep, usenull); fflush(stdout);
+  ZL_Compressor *c = ZL_Compressor_create();                                                               if(!c) return 0; // /zli train --profile csv your_sample_csvs/ -o trained_csv.zli  and load the serialized .zli instead of calling ZL_createGraph_genericCSVCompressor every time  
+  ZL_GraphID graph = ZL_createGraph_genericCSVCompressorWithOptions(c, 20000000, hasheader, sep, usenull);  if(!ZL_GraphID_isValid(graph)) { ZL_Compressor_free(c); return 0; }
+                                                                                                           if(ZL_isError(ZL_Compressor_selectStartingGraphID(c, graph))) { ZL_Compressor_free(c); return 0; }
+  ZL_Compressor_setParameter(c, ZL_CParam_formatVersion,  OZL_FORMAT_VERSION);
+  ZL_Compressor_setParameter(c, ZL_CParam_compressionLevel, lev);
+  ZL_CCtx *cctx = ZL_CCtx_create();                                                                        if(!cctx) { ZL_Compressor_free(c); return 0; }
+                                                                                                           if (ZL_isError(ZL_CCtx_refCompressor(cctx, c))) { ZL_CCtx_free(cctx); ZL_Compressor_free(c);  return 0; }
+  ZL_Report report = ZL_CCtx_compress(cctx, out, outsize, in, inlen);
+  size_t rc = 0;
+  if(!ZL_isError(report)) rc = ZL_validResult(report);    // printf("ZL_CCtx_compress %s\n", ZL_CCtx_getErrorContextString(cctx, report)); 
+  ZL_CCtx_free(cctx);
+  ZL_Compressor_free(c);
+  return rc;
+}
+
+size_t ozl_csvdecomp(unsigned char *in, size_t inlen, unsigned char *out, size_t outlen) {
+  ZL_Report report = ZL_decompress(out, outlen, in, inlen);                                if(ZL_isError(report)) return 0;
+  size_t produced = ZL_validResult(report);
+  return (produced == outlen) ? produced : 0;
 }
   #endif
 
@@ -1888,6 +1922,7 @@ struct plugs plugs[] = {
   { P_OPENZL_ZSTD,   "openzl_zstd",   _OPENZL,    "openzl zstd",                 "1,2,3,4,5,6,8,10,12,14,16,18,20,22,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99" },
   { P_OPENZL_LZ4,    "openzl_lz4",    _OPENZL,    "openzl lz4",                  "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99" }, 
   { P_OPENZL_TP,     "openzl_tp",     _OPENZL,    "openzl transpose",            "2,4,8" },
+  { P_OPENZL_CSV,    "openzl_csv",    _OPENZL,    "openzl csv",                  "1,2,3,4,5,6,7,8,9 / b#:blocksize in MiB W:Without header s#:separator N:Null aware" },
 
   { P_PCODECI8,      "pcodec_i8",     _PCODEC,    "pcodec_i8",                   "0,1,2,3,4,5,6,7,8,9" },
   { P_PCODECU8,      "pcodec_u8",     _PCODEC,    "pcodec_u8",                   "0,1,2,3,4,5,6,7,8,9" },
@@ -2739,19 +2774,22 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _OPENZL
-    case P_OPENZL_U8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >(inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_I8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >(inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_U16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint16_t>(inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_I16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint16_t>(inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_U32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint32_t>(inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_I32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint32_t>(inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_U64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint64_t>(inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_I64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint64_t>(inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_SERIAL: { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_serial(             inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;} break; 
-    case P_OPENZL_GENERIC:{ char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_generic(            inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;} break;
-    case P_OPENZL_ZSTD:   { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_zstd(               inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;} break;
-    case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_lz4(                inlen, lev, windowLog); int64_t rc = _openzl_compress((char *)in, inlen, (char *)out, outsize, p); _openzl_deinit(p); return rc;} break;
-    case P_OPENZL_TP :    ZS_transposeEncode(out, in, inlen / lev, lev);  return inlen;  
+    case P_OPENZL_U8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >(inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_I8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >(inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_U16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint16_t>(inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_I16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint16_t>(inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_U32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint32_t>(inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_I32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint32_t>(inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_U64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint64_t>(inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_I64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint64_t>(inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_SERIAL: { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_serial(             inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;} break; 
+    case P_OPENZL_GENERIC:{ char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_generic(            inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;} break;
+    case P_OPENZL_ZSTD:   { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_zstd(               inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;} break;
+    case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_lz4(                inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;} break;
+    case P_OPENZL_TP:     ZS_transposeEncode(out, in, inlen / lev, lev);  return inlen;  
+    case P_OPENZL_CSV:    { size_t blksize = (q = strchr(prm,'b'))?argtoi(q+(q[1]=='='?2:1), 'M'):20000000; int sep = (q=strchr(prm,'s'))?*(q+(q[1]=='='?2:1)):',';
+      return ozl_csvcomp(in, inlen, out, outsize, lev, blksize, strchr(prm,'W')?0:1, sep, strchr(prm,'N')?1:0);
+    }
       #endif
 
       #if _OODLE
@@ -3714,19 +3752,20 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _OPENZL
-    case P_OPENZL_U8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_I8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_U16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_I16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_U32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_I32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_U64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_I64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_SERIAL: { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_serial(              inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;} 
-    case P_OPENZL_GENERIC:{ char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_generic(             inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;} 
-    case P_OPENZL_ZSTD:   { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_zstd(                inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
-    case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = _openzl_init_lz4(                 inlen, lev, windowLog); int64_t rc = _openzl_decompress((char *)in, inlen, (char *)out, outlen, p); _openzl_deinit(p); return rc;}
+    case P_OPENZL_U8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_I8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_U16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_I16:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_U32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_I32:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_U64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_I64:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >( inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_SERIAL: { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_serial(              inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;} 
+    case P_OPENZL_GENERIC:{ char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_generic(             inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;} 
+    case P_OPENZL_ZSTD:   { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_zstd(                inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;}
+    case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_lz4(                 inlen, lev, windowLog); int64_t rc = ozl_decompress((char *)in, inlen, (char *)out, outlen, p); ozl_deinit(p); return rc;}
     case P_OPENZL_TP :    ZS_transposeDecode(out, in, inlen / lev, lev);  return inlen;
+    case P_OPENZL_CSV :   return ozl_csvdecomp(in, inlen, out, outlen);  
        #endif
 
       #if _PCODEC
