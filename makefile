@@ -598,8 +598,9 @@ else
 PLG_FLAGS += -D_OPENZL
 CXXFLAGS  += -Iopenzl/include -Iopenzl/src
 OPENZL_BDIR := $(BUILD)/openzl
-OPENZL_LIB       := $(OPENZL_BDIR)/libopenzl.a
+OPENZL_LIB  := $(OPENZL_BDIR)/libopenzl.a
 OPENZL_SRCS := $(shell find openzl -type f \( -name '*.c' -o -name '*.h' -o -name '*.cpp' -o -name '*.cc' -o -name 'CMakeLists.txt' -o -name '*.cmake' \))
+OPENZL_CLIBS :=
 ifneq ($(OS), Windows)
 OPENZL_CLIBS := $(OPENZL_BDIR)/custom_parsers/libcustom_parsers.a $(OPENZL_BDIR)/custom_parsers/csv/libcsv_parser.a $(OPENZL_BDIR)/custom_parsers/shared_components/libshared_components.a
 endif
