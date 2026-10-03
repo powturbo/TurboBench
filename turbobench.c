@@ -2122,7 +2122,7 @@ int main(int argc, char* argv[]) {
         if(optarg) printf (" with arg %s", optarg);  printf ("\n");
         break;
       case 'a': snprintf(fsuffix, 16, "@%s", optarg); fsuffix[16] = 0; break;
-      case 'b': bsize      = argtoi(optarg,Mb); bsizex++; break;
+      case 'b': bsize      = argtoi(optarg,MB); bsizex++; break;
       case 'B': filenmax   = argtol(optarg, 'G');     break;
       case 'C': cmp        = atoi(optarg);            break;
       case 'd': coddicsize(argtoi(optarg,0));         break;
