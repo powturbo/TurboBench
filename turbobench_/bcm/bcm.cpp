@@ -34,7 +34,7 @@ limitations under the License.
 #  endif
 #endif
 #include "bcm.h"
-#include "../libbsc/libbsc/bwt/libsais/libsais.h"
+#include "../../libbsc/libbsc/bwt/libsais/libsais.h"
 
 typedef unsigned char U8;
 typedef unsigned short U16;
