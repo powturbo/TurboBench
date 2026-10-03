@@ -189,6 +189,11 @@ LIBS += $(AOCL_LIB)
 endif
 
 #--- B -------------------------
+ifneq ($(wildcard turbobench_/bcm/.),)
+PLG_FLAGS+=-D_BCM
+OB+=$(call obj,turbobench_/bcm/bcm.o)
+endif
+
 ifneq ($(wildcard brotli/.),)
 PLG_FLAGS+=-D_BROTLI
 CXXFLAGS+=-Ibrotli/c/include 
