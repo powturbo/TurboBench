@@ -60,6 +60,11 @@ enum {
 #endif
  P_AOM,
  
+#ifndef _BCM
+#define _BCM 0
+#endif
+ P_BCM,
+ P_BCMEC,
 #ifndef _BPC
 #define _BPC 0
 #endif
@@ -626,6 +631,10 @@ static aocl_compression_desc aocl;
   #endif
 
 //--- B ---------------------------------------
+  #if _BCM
+#include "turbobench_/bcm/bcm.h"
+  #endif
+
   #if _BPC
 #include "BitPlaneComp/src/BPCompressor.hh"
   #endif
@@ -1841,6 +1850,7 @@ struct plugs plugs[] = {
   { P_AOCL_SNAPPY,   "aocl-snappy",   _AOCL,      "AMD aocl-compression snappy", "" },
   { P_AOCL_ZLIB,     "aocl-zlib",     _AOCL,      "AMD aocl-compression zlib",   "1,2,3,4,5,6,7,8,9" },
   { P_AOCL_ZSTD,     "aocl-zstd",     _AOCL,      "AMD aocl-compression zstd",   "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/d#" },
+  { P_BCM,           "bcm",           _BCM,       "bcm / bwt",                   "" },
   { P_BPC,           "bpc",           _BPC,       "bit plane compression",       "" },
   { P_BRIEFLZ,       "brieflz",       _BRIEFLZ,   "BriefLz",                     "1,3,6,9" },
   { P_BROTLI,        "brotli",        _BROTLI,    "Brotli",                      "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
@@ -1985,6 +1995,7 @@ struct plugs plugs[] = {
   { P_LMCPY,         "memcpy",      _MEMCPY,    "library memcpy",                "" },
   { P_AOM,           "AOM",         _AOM,       "AV1 Entropy coder",             ""},
   { P_DAALA,         "Daala",       _DAALA,     "DAALA Entropy Coder",           ""},
+  { P_BCMEC,         "bcmec",       _BCM,       "bcm Entropy Coder",             "" },
   { P_FPC,           "fpc",         _FPC,       "Fast Prefix Coder",             "0,8,9,10,11,12,16,32,48,63" },
   { P_FREQTAB,       "freqtab",     _FREQTAB,   "FreqTable v2.E. shelwien",      "" },
   { P_FSC,           "fsc",         _FSC,       "Finite State Coder",            "", E_ANS },
@@ -4303,7 +4314,12 @@ char *codver(int codec, char *v, char *s) {
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: sprintf(s, "%s MT", aocl_llc_version()); break;
       #endif
-      #if _BZIP2
+ 
+     #if _BCMEC
+    case P_BCM:
+    case P_BCMEC: return "v1.65";
+     #endif
+     #if _BZIP2
     case P_BZIP2: return (char *)BZ2_bzlibVersion();
       #endif
       #if _BZIP3
