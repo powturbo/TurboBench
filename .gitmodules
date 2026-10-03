@@ -162,3 +162,6 @@
 	path = aceapex
 	url = https://github.com/yasha1971-coder/aceapex
 	branch = release
+[submodule "bcm"]
+	path = bcm
+	url = https://github.com/FS-make-simple/bcm.git
