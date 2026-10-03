@@ -217,6 +217,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 #### BWT - Burrows–Wheeler transform:
 | Compressor | Added | Language | Comment |
 |---|---|---|---|
+| [bcm](https://github.com/FS-make-simple/bcm) |2026/10 |c++ |  |
 | [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc) |  |c++ |  |
 | [BwtSatan](https://github.com/powturbo/Turbo-Range-Coder) |2026/09 |c  |  |
 | [bzip2](http://www.bzip.org/downloads.html) |  |c  |  |
@@ -227,9 +228,9 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 #### Integer / Floating point:
 | Compressor | Added | Language | Comment |
 |---|---|---|---|
-| [Blosc](https://github.com/Blosc/c-blosc2) |  |c  |  |
-| [OpnZL](https://github.com/facebook/openzl) |2026/07  |c++  |  |
-| [Pcodec](https://github.com/pcodec/pcodec) |2026/09  |rust  |  | 
+| [Blosc](https://github.com/Blosc/c-blosc2) |  |c  |integer/fp 8-64  |
+| [OpnZL](https://github.com/facebook/openzl) |2026/07  |c++  |i8-i64,u8-u64,csv,...  |
+| [Pcodec](https://github.com/pcodec/pcodec) |2026/09  |rust  |i8-i64,u8-u64,f32,f64  | 
 
 #### Entropy coder:
 
