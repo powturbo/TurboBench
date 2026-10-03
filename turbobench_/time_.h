@@ -267,7 +267,7 @@ static void pr(size_t l, size_t n) {
     else if(tm_verbose) { printf("%*.*f         ",                           TM_FWIDTH,TM_FPRE, TMBS(_size_, tm_min/tm_rm)); fflush(stdout); }\
     if(++_tm_i >= 16 || _tm_d >= 60) break; if((_tm_R & 7)==7) sleep_cool(tm_slp);\
   }\
-  if(tm_verbose>1) { printf("\b\b\b\b\b      \b\b\b\b"); fflush(stdout); }\
+  if(tm_verbose>1) { printf("\b\b\b\b\b      \b\b\b\b"); fflush(stdout); } printf("\r"); fflush(stdout); /*printf("\rProgress: %3d%%\033[K", i);*/\
 }
 
 #define TM(_name_, _efunc_, _size_, _len_, _dfunc_) do {\
@@ -280,7 +280,7 @@ static void pr(size_t l, size_t n) {
   dm = tm_min; dr = tm_rm; \
   if(tm_verbose>1)    { printf("%*.*f      \b\b\b\b\b", TM_FWIDTH, TM_FPRE, TMBS(_size_, dm/dr) ); fflush(stdout); }\
   else if(tm_verbose) { printf("%*.*f      ",           TM_FWIDTH, TM_FPRE, TMBS(_size_, dm/dr) ); fflush(stdout); }\
-  if(tm_verbose)    { printf("%s ", _name_?_name_:#_efunc_); fflush(stdout); }\
+  if(tm_verbose)    { printf("%s ", _name_?_name_:#_efunc_); fflush(stdout); }  printf("\r"); fflush(stdout); \
 } while(0)
 
 #define TM0(_name_, _efunc_, _size_, _len_) do {\
