@@ -1856,7 +1856,7 @@ struct plugs plugs[] = {
   { P_BROTLI,        "brotli",        _BROTLI,    "Brotli",                      "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
   { P_BWTSATAN,      "bwtsatan",      _BWTSATAN,  "BwtSatan",                    "0,2,3,4,5,6,7,8,9/m#:lzp length,P:utf8, V:verbose, Z:force lzp, s:bwt16" }, 
   { P_BZIP2,         "bzip2",         _BZIP2,     "Bzip2",                       "" },
-  { P_BZIP3,         "bzip3",         _BZIP3,     "Bzip3",                       "0,16,32,64,128,256,511/b#:level 0 blocksize in Mib{16}" },
+  { P_BZIP3,         "bzip3",         _BZIP3,     "Bzip3",                       "0,16,32,64,128,256,512/b#:level 0 blocksize in Mib{16}" },
   
   { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                    "0,1,2,3,4,5,6,7,8,9,100/SBDsd", 64*1024},
   { P_CHAMELEON,     "chameleon",     _CHAMELEON, "Chameleon",                   "1,2" },
@@ -2065,17 +2065,17 @@ struct plugs plugs[] = {
 #define MB 1000000
 #define GB 1000000000
 
-unsigned argtoi(char *s, unsigned def) {
+static unsigned argtoi(char *s, unsigned def) {
   char *p;
-  unsigned n = strtol(s, &p, 10),f = 1;
+  unsigned n = strtol(s, &p, 10),f = 1;          
   switch(*p) {
-    case 'B': f = 1; break;
     case 'K': f = KB; break;
     case 'M': f = MB; break;
     case 'G': f = GB; break;
     case 'k': f = Kb; break;
     case 'm': f = Mb; break;
     case 'g': f = Gb; break;
+    case 'B': return n; break;
     case 'b': def = 0;
     default: if(!def) return n>=32?0xffffffffu:(1u << n); f = def;
   }
@@ -2432,8 +2432,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _BZIP3
     case P_BZIP3: { char *q;
       size_t cs = outsize; uint32_t blocksize = lev?lev:16; blocksize = lev*1000000;     //1 << (19 + lev); blocksize = blocksize > (511 << 20) ? (511 << 20) : blocksize; // level 1 = 1 MB, level 3 = 4 MB, level 9 = 256 MB, level 10 = 511 MB
-      if(!lev && (q = strchr(prm,'b'))) blocksize = argtoi(q+(q[1]=='='?2:1), 'M'); 
-      blocksize = CLAMP(blocksize, 65000, 511*1000000); 
+      if(!lev && (q = strchr(prm,'b'))) { blocksize = argtoi(q+(q[1]=='='?2:1), MB); }
+      blocksize = CLAMP(blocksize, 65000, 511000000); 
       int rc = bz3_compress(blocksize, (uint8_t*)in, (uint8_t*)out, inlen, &cs);
       return rc == BZ3_OK?cs:0;
     }
@@ -2803,7 +2803,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_OPENZL_LZ4:    { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_lz4(                inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;} break;
     case P_OPENZL_TP:     ZS_transposeEncode(out, in, inlen / lev, lev);  return inlen;
         #if _OZLCSV  
-    case P_OPENZL_CSV:    { size_t blksize = (q = strchr(prm,'b'))?argtoi(q+(q[1]=='='?2:1), 'M'):20000000; int sep = (q=strchr(prm,'s'))?*(q+(q[1]=='='?2:1)):',';
+    case P_OPENZL_CSV:    { size_t blksize = (q = strchr(prm,'b'))?argtoi(q+(q[1]=='='?2:1), MB):20000000; int sep = (q=strchr(prm,'s'))?*(q+(q[1]=='='?2:1)):',';
       return ozl_csvcomp(in, inlen, out, outsize, lev, blksize, strchr(prm,'W')?0:1, sep, strchr(prm,'N')?1:0);
     }
         #endif
