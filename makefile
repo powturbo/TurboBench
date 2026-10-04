@@ -592,6 +592,7 @@ endif
 #---- O -----------------------
 OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
+ifneq ($(ARCH),risc64v)  # Too slow build on CI
 ifdef CROSS  # NOTWORKING
 #OPENZL_LIB = $(BUILD)/openzl/libopenzl.a
 #$(OPENZL_LIB): $(OPENZL_SRCS)
@@ -624,6 +625,7 @@ $(OPENZL_BDIR)/CMakeCache.txt: $(OPENZL_CMAKE_FILES)
 $(OPENZL_LIB) $(OPENZL_CLIBS): $(OPENZL_BDIR)/CMakeCache.txt $(OPENZL_SRCS)
 	cmake --build $(OPENZL_BDIR) --config Release
 	@touch $(OPENZL_LIB) $(OPENZL_CLIBS)   # ensure Make sees them as up-to-date
+endif
 endif
 endif
 
