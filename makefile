@@ -592,7 +592,7 @@ endif
 #---- O -----------------------
 OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
-ifneq ($(ARCH),risc64v)  # Too slow build on CI
+ifneq ($(OPENZL), 0) # don't build
 ifdef CROSS  # NOTWORKING
 #OPENZL_LIB = $(BUILD)/openzl/libopenzl.a
 #$(OPENZL_LIB): $(OPENZL_SRCS)
@@ -609,8 +609,7 @@ OPENZL_CMAKE_FILES := $(shell find openzl -type f \( -name 'CMakeLists.txt' -o -
 OPENZL_SRCS := $(shell find openzl -type f \( -name '*.c' -o -name '*.h' -o -name '*.cpp' -o -name '*.cc' \))
 OPENZL_CLIBS :=
 OPENZL_CMAKE_FLAGS :=
-ifeq ($(filter Windows,$(OS))$(filter risc64,$(ARCH)),)   
-# Only non-Windows/riscv64. Windows: build error, riscv64: building too slow  
+ifneq ($(OS), Windows)  #build error in Windows #ifeq ($(filter Windows,$(OS))$(filter riscv64,$(ARCH)),) 
 PLG_FLAGS += -D_OZLCSV
 OPENZL_CLIBS := $(OPENZL_BDIR)/custom_parsers/libcustom_parsers.a $(OPENZL_BDIR)/custom_parsers/csv/libcsv_parser.a $(OPENZL_BDIR)/custom_parsers/shared_components/libshared_components.a
 else
