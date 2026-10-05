@@ -890,7 +890,7 @@ CXXFLAGS+=-Izpaq
 ifeq ($(HAVE_OPENMP),yes)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
-CXXFLAGS+=$(FOPENMP)
+CXXFLAGS+=-fopenmp
 #FOPENMP = -fopenmp
 OB+=$(call obj,$(BUILD)/libzpaq_omp.o)
 else
