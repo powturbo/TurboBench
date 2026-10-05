@@ -3305,15 +3305,14 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _BWTSATAN
     case P_BWTSATAN: { 
       char *q;
-      unsigned lenmin=1, xprep8=0, nutf8=0, verbose=0, forcelzp=0, xsort=0, bwtmt = 0, itmax=0, bwt16=0;
+      unsigned lenmin=1, xprep8=0, nutf8=0, verbose=0, forcelzp=0, xsort=0, bwtmt = 0, itmax=0, s=0;
       if(q = strchr(prm,'m')) lenmin    = atoi(q+(q[1]=='='?2:1)); //bwt options  
       if(q = strchr(prm,'P')) xprep8    = BWT_PREP8;
       if(q = strchr(prm,'N')) nutf8     = BWT_NUTF8;
       if(q = strchr(prm,'V')) verbose   = 1;
       if(q = strchr(prm,'Z')) forcelzp  = BWT_LZP;
-      if(q = strchr(prm,'S')) xsort     = 1;
-      if(q = strchr(prm,'t')) bwtmt     = BWT_MT;
-      if(q = strchr(prm,'X')) bwt16     = BWT_BWT16;
+      if(q = strchr(prm,'X')) xsort     = 1;
+      if(q = strchr(prm,'S')) s = 2; else if(q = strchr(prm,'U')) s = 4;
       if(q = strchr(prm,'t')) threads   = atoi(q+(q[2]=='='?3:2)); threads = CLAMP(threads, 1, 64); 
       #define bwtflag(s) (s==2?BWT_BWT16:0) | xprep8 | forcelzp | nutf8 | bwtmt | (verbose?BWT_VERBOSE:0) | xsort <<14 | itmax <<10 | lenmin
       return rcbwtenc(in, inlen, out, lev, threads, bwtflag(1)); 
@@ -3323,16 +3322,16 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _TURBORC
     case P_TURBORC: { //int ec = 0; 
       char *q;
-      unsigned bwtlev = 9, lenmin=1, xprep8=0, nutf8=0, verbose=0, forcelzp=0, xsort=0, bwtmt = 0, itmax=0, bwt16=0;
+      unsigned bwtlev = 9, lenmin=1, xprep8=0, nutf8=0, verbose=0, forcelzp=0, xsort=0, bwtmt = 0, itmax=0, s=0;
       if(q = strchr(prm,'e')) bwtlev    = atoi(q+(q[1]=='='?2:1)); 
       if(q = strchr(prm,'m')) lenmin    = atoi(q+(q[1]=='='?2:1)); //bwt options  
       if(q = strchr(prm,'P')) xprep8++;
       if(q = strchr(prm,'N')) nutf8++;
       if(q = strchr(prm,'V')) verbose++;
       if(q = strchr(prm,'Z')) forcelzp++;
-      if(q = strchr(prm,'S')) xsort++;
-      if(q = strchr(prm,'t')) bwtmt     = BWT_MT;
-      if(q = strchr(prm,'X')) bwt16     = BWT_BWT16;
+      if(q = strchr(prm,'X')) xsort++;
+      if(q = strchr(prm,'S')) s = 2; else if(q = strchr(prm,'U')) s = 4;
+      if(q = strchr(prm,'t')) threads   = atoi(q+(q[2]=='='?3:2)); threads = CLAMP(threads, 1, 64); 
       #define bwtflag(z) (z==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | (forcelzp?BWT_LZP:0) | (nutf8?BWT_NUTF8:0) | (verbose?BWT_VERBOSE:0) | threads << 16 | xsort <<14 | itmax <<10 | lenmin
       switch(lev) {
         case  1: return rcsenc(    in, inlen, out);
