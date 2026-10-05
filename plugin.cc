@@ -1854,7 +1854,7 @@ struct plugs plugs[] = {
   { P_BPC,           "bpc",           _BPC,       "bit plane compression",       "" },
   { P_BRIEFLZ,       "brieflz",       _BRIEFLZ,   "BriefLz",                     "1,3,6,9" },
   { P_BROTLI,        "brotli",        _BROTLI,    "Brotli",                      "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
-  { P_BWTSATAN,      "bwtsatan",      _BWTSATAN,  "BwtSatan",                    "0,2,3,4,5,6,7,8,9/m#:lzp length,P:utf8, V:verbose, Z:force lzp, s:bwt16" }, 
+  { P_BWTSATAN,      "bwtsatan",      _BWTSATAN,  "BwtSatan",                    "0,3,4,5,6,7,8,9/m#:lzp length,P:utf8, V:verbose, Z:force lzp, s:bwt16" }, 
   { P_BZIP2,         "bzip2",         _BZIP2,     "Bzip2",                       "" },
   { P_BZIP3,         "bzip3",         _BZIP3,     "Bzip3",                       "0,16,32,64,128,256,512/b#:level 0 blocksize in Mib{16}" },
   
