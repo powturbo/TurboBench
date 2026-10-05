@@ -3313,7 +3313,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       if(q = strchr(prm,'Z')) forcelzp  = BWT_LZP;
       if(q = strchr(prm,'X')) xsort     = 1;
       if(q = strchr(prm,'S')) s = 2; else if(q = strchr(prm,'U')) s = 4;
-      if(q = strchr(prm,'t')) threads   = atoi(q+(q[2]=='='?3:2)); threads = CLAMP(threads, 1, 64); 
+      if(q = strchr(prm,'t')) threads   = atoi(q+(q[2]=='='?2:1)); threads = CLAMP(threads, 1, 64); 
       #define bwtflag(s) (s==2?BWT_BWT16:0) | xprep8 | forcelzp | nutf8 | bwtmt | (verbose?BWT_VERBOSE:0) | xsort <<14 | itmax <<10 | lenmin
       return rcbwtenc(in, inlen, out, lev, threads, bwtflag(1)); 
     }
@@ -3331,7 +3331,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       if(q = strchr(prm,'Z')) forcelzp++;
       if(q = strchr(prm,'X')) xsort++;
       if(q = strchr(prm,'S')) s = 2; else if(q = strchr(prm,'U')) s = 4;
-      if(q = strchr(prm,'t')) threads   = atoi(q+(q[2]=='='?3:2)); threads = CLAMP(threads, 1, 64); 
+      if(q = strchr(prm,'t')) threads   = atoi(q+(q[2]=='='?2:1)); threads = CLAMP(threads, 1, 64); 
       #define bwtflag(z) (z==2?BWT_BWT16:0) | (xprep8?BWT_PREP8:0) | (forcelzp?BWT_LZP:0) | (nutf8?BWT_NUTF8:0) | (verbose?BWT_VERBOSE:0) | threads << 16 | xsort <<14 | itmax <<10 | lenmin
       switch(lev) {
         case  1: return rcsenc(    in, inlen, out);
@@ -4225,7 +4225,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _BWTSATAN
-    case P_BWTSATAN: if(q = strchr(prm,'t')) threads = atoi(q+(q[2]=='='?3:2)); threads = CLAMP(threads, 1, 64); return rcbwtdec( in, outlen, out, lev, threads);
+    case P_BWTSATAN: if(q = strchr(prm,'t')) threads = atoi(q+(q[2]=='='?2:1)); threads = CLAMP(threads, 1, 64); return rcbwtdec( in, outlen, out, lev, threads);
       #endif
 
       #if _TURBORC
