@@ -89,8 +89,9 @@ jobs:
         if: matrix.compiler == 'gcc'  # clang 20 emits illegal instruction
         run: |
           ./turbobench -l2
+          ./turbobench silesia.tar -U -V0
+          ./turbobench silesia.tar -U -V0 -eBWT -abwt
 #          ./turbobench turbobench -V0 -U
-#          ./turbobench silesia.tar -V0 -U
 
   macos:
     runs-on: '${{ matrix.os }}'
@@ -124,6 +125,7 @@ jobs:
       - run: ./turbobench turbobench -V0 -U
       - run: ./turbobench silesia.tar -V0 -U
       - run: ./turbobench silesia.tar -V0 -U -eBWT -abwt
+      - run: ./turbobench silesia.tar -V0 -U -ebwtsatan,8b68m,9b68m -b68m -abwt
       - run: ./turbobench NASA_access_log_Jul95 -V0 -eBWT -abwt 
       - run: ./turbobench enwik8 -V0 -eBWT -abwt 
 
@@ -166,7 +168,8 @@ jobs:
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
       - run: ./turbobench.exe silesia.tar -U -V0
-      - run: ./turbobench silesia.tar -U -V0 -eBWT -abwt
+      - run: ./turbobench silesia.tar -V0 -eBWT -abwt
+      - run: ./turbobench silesia.tar -V0 -ebwtsatan,8b68m,9b68m -b68m -abwt
       - run: ./turbobench NASA_access_log_Jul95 -V0 -eBWT -abwt 
       - run: ./turbobench enwik8 -V0 -eBWT -abwt 
 
