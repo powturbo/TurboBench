@@ -434,7 +434,7 @@ PLG_FLAGS+=-D_LIBBSC
 LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc 
 LIBBSC_LDFLAGS :=
 ifeq ($(HAVE_OPENMP),yes)
-  LIBBSC_CFLAGS  += -fopenmp -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP
+  LIBBSC_CFLAGS  += $(FOPENMP) -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP
 #  FOPENMP = -fopenmp
   $(info OpenMP enabled for libbsc)
 endif
@@ -890,7 +890,7 @@ CXXFLAGS+=-Izpaq
 ifeq ($(HAVE_OPENMP),yes)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
-CXXFLAGS+=-fopenmp
+CXXFLAGS+=$(FOPENMP)
 #FOPENMP = -fopenmp
 OB+=$(call obj,$(BUILD)/libzpaq_omp.o)
 else
