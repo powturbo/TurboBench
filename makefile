@@ -132,6 +132,11 @@ else ifeq ($(OS),$(filter $(OS),Darwin FreeBSD GNU/kFreeBSD Linux NetBSD SunOS))
 LDFLAGS += -ldl
 endif
 
+ifeq ($(OS),Darwin)
+export CFLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include"
+export LDFLAGS="-L$(brew --prefix libomp)/lib -lomp"
+endif
+
 HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) -fopenmp -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
 FOPENMP:=
 ifeq ($(HAVE_OPENMP),no)
