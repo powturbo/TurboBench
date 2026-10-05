@@ -61,6 +61,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
+          sudo apt install libomp-dev
           sudo apt-get install -y -qq build-essential nasm make gcc-14 g++-14 clang-20
           sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
           sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
