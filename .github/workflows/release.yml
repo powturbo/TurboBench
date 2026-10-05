@@ -70,7 +70,7 @@ jobs:
           fi
       - name: Build (Linux)
         if: matrix.platform == 'linux'
-        run: make STATIC=1
+        run: make STATIC=1 OPENZL=0 PHAZ=0
       - name: Generate silesia.tar.md (Linux)
         if: matrix.platform == 'linux' 
         run: |
