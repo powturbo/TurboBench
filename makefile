@@ -166,7 +166,8 @@ else
   else
     FOPENMP := -fopenmp
   endif
-  HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
+###  HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
+  HAVE_OPENMP := no
 endif
 
 ifeq ($(HAVE_OPENMP),no)
