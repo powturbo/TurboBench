@@ -155,6 +155,8 @@ jobs:
             rsync
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-clang
+            mingw-w64-x86_64-libgomp
+            mingw-w64-x86_64-llvm-openmp
       - run: git submodule update --init --recursive
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
