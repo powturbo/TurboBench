@@ -174,6 +174,13 @@ ifeq ($(HAVE_OPENMP),no)
   FOPENMP :=
 else
   $(info OpenMP enabled with $(FOPENMP))
+  OMP_H := $(shell gcc -print-file-name=include/omp.h 2>/dev/null)
+  ifneq ($(OMP_H),)
+    CFLAGS += -I$(dir $(OMP_H))
+  else
+    # Last-resort fallback
+    CFLAGS += -I/usr/lib/gcc/$(shell gcc -dumpmachine 2>/dev/null)/$(shell gcc -dumpversion 2>/dev/null)/include
+  endif
   CFLAGS  += -DLIBSAIS_OPENMP $(OMP_CFLAGS)
   LDFLAGS += $(OMP_LDFLAGS)
 endif
