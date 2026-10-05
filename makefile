@@ -208,7 +208,7 @@ $(AOCL_ALIB): $(AOCL_SRCS)
 	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 BUILD_DIR=$(abspath $(AOCL_BDIR)) LIB_DIR=$(abspath $(AOCL_BDIR))/lib
 else
 ifeq ($(HAVE_OPENMP),yes)
-  FOPENMP = -fopenmp
+#  FOPENMP = -fopenmp
   AOCL_OMP = -DAOCL_ENABLE_THREADS=1 -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
 #-DOpenMP_CXX_FLAGS="-fopenmp" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=/usr/lib/llvm-*/lib/libomp.so 
 endif
@@ -435,7 +435,7 @@ LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc
 LIBBSC_LDFLAGS :=
 ifeq ($(HAVE_OPENMP),yes)
   LIBBSC_CFLAGS  += -fopenmp -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP
-  FOPENMP = -fopenmp
+#  FOPENMP = -fopenmp
   $(info OpenMP enabled for libbsc)
 endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
@@ -891,7 +891,7 @@ ifeq ($(HAVE_OPENMP),yes)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
 CXXFLAGS+=-fopenmp
-FOPENMP = -fopenmp
+#FOPENMP = -fopenmp
 OB+=$(call obj,$(BUILD)/libzpaq_omp.o)
 else
 OB+=$(call obj,zpaq/libzpaq.o)
