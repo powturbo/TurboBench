@@ -84,7 +84,7 @@ jobs:
           rustc --version
           cargo --version
       - name: Build 
-        run: make
+        run: make OPENZL=0 PHAZ=0
       - name: benchmark
         if: matrix.compiler == 'gcc'  # clang 20 emits illegal instruction
         run: |
