@@ -166,8 +166,7 @@ else
   else
     FOPENMP := -fopenmp
   endif
-###  HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
-  HAVE_OPENMP := no
+  HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
 endif
 
 ifeq ($(HAVE_OPENMP),no)
@@ -175,13 +174,6 @@ ifeq ($(HAVE_OPENMP),no)
   FOPENMP :=
 else
   $(info OpenMP enabled with $(FOPENMP))
-  OMP_H := $(shell gcc -print-file-name=include/omp.h 2>/dev/null)
-  ifneq ($(OMP_H),)
-    CFLAGS += -I$(dir $(OMP_H))
-  else
-    # Last-resort fallback
-    CFLAGS += -I/usr/lib/gcc/$(shell gcc -dumpmachine 2>/dev/null)/$(shell gcc -dumpversion 2>/dev/null)/include
-  endif
   CFLAGS  += -DLIBSAIS_OPENMP $(OMP_CFLAGS)
   LDFLAGS += $(OMP_LDFLAGS)
 endif
@@ -216,7 +208,6 @@ $(AOCL_ALIB): $(AOCL_SRCS)
 	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 BUILD_DIR=$(abspath $(AOCL_BDIR)) LIB_DIR=$(abspath $(AOCL_BDIR))/lib
 else
 ifeq ($(HAVE_OPENMP),yes)
-#  FOPENMP = -fopenmp
   AOCL_OMP = -DAOCL_ENABLE_THREADS=1 -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
 #-DOpenMP_CXX_FLAGS="-fopenmp" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=/usr/lib/llvm-*/lib/libomp.so 
 endif
@@ -443,7 +434,6 @@ LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc
 LIBBSC_LDFLAGS :=
 ifeq ($(HAVE_OPENMP),yes)
   LIBBSC_CFLAGS  += -fopenmp -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP
-#  FOPENMP = -fopenmp
   $(info OpenMP enabled for libbsc)
 endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
@@ -816,7 +806,11 @@ $(RC_LIB): $(RC_SRCS)
 	@mkdir -p $(RC_BDIR)
 	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT" $(abspath $(RC_BDIR))/librc.a
 LIBS += $(RC_LIB)
-CFLAGS += -DLIBSAIS_OPENMP -I$(RC_DIR)/libsais/include
+ifeq ($(HAVE_OPENMP),yes)
+CFLAGS += -DLIBSAIS_OPENMP 
+$(info OpenMP enabled for Turbo-Range-Coder)
+endif
+CFLAGS += -I$(RC_DIR)/libsais/include 
 OB += $(RC_BDIR)/libsais/src/libsais16.o # libsais16 is not included in libbsc
 endif
 endif
@@ -899,7 +893,7 @@ ifeq ($(HAVE_OPENMP),yes)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
 CXXFLAGS+=-fopenmp
-#FOPENMP = -fopenmp
+$(info OpenMP enabled for libbsc)
 OB+=$(call obj,$(BUILD)/libzpaq_omp.o)
 else
 OB+=$(call obj,zpaq/libzpaq.o)
