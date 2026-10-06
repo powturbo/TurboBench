@@ -176,6 +176,7 @@ else
   CFLAGS  += -DLIBSAIS_OPENMP $(OMP_CFLAGS)
   LDFLAGS += $(OMP_LDFLAGS)
 endif
+
 #------------------------------------------------------------------------------------------------
 all: turbobench 
  
@@ -207,8 +208,9 @@ $(AOCL_ALIB): $(AOCL_SRCS)
 	mkdir -p $(dir $@)
 	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 BUILD_DIR=$(abspath $(AOCL_BDIR)) LIB_DIR=$(abspath $(AOCL_BDIR))/lib
 else
-ifeq ($(HAVE_OPENMP),1)
+ifneq ($(HAVE_OPENMP),0)
   AOCL_OMP = -DAOCL_ENABLE_THREADS=1 -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ $(OMP_CFLAGS)       #-DOpenMP_CXX_FLAGS="-fopenmp" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=/usr/lib/llvm-*/lib/libomp.so 
+  $(info OpenMP enabled for aocl)
 endif
 AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
 $(AOCL_ALIB): $(AOCL_SRCS)
@@ -434,7 +436,7 @@ ifneq ($(wildcard libbsc/.),)
 PLG_FLAGS+=-D_LIBBSC
 LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc 
 LIBBSC_LDFLAGS :=
-ifeq ($(HAVE_OPENMP),1)
+ifneq ($(HAVE_OPENMP),0)
   LIBBSC_CFLAGS  += -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP $(OMP_CFLAGS)
   $(info OpenMP enabled for libbsc)
 endif
@@ -807,7 +809,7 @@ $(RC_LIB): $(RC_SRCS)
 	@mkdir -p $(RC_BDIR)
 	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT" $(abspath $(RC_BDIR))/librc.a
 LIBS += $(RC_LIB)
-ifeq ($(HAVE_OPENMP),1)
+ifneq ($(HAVE_OPENMP),0)
 CFLAGS += -DLIBSAIS_OPENMP 
 $(info OpenMP enabled for Turbo-Range-Coder)
 endif
@@ -890,7 +892,7 @@ ifneq ($(wildcard zpaq/.),)
 ifneq ($(OS),Darwin)
 PLG_FLAGS+=-D_ZPAQ
 CXXFLAGS+=-Izpaq
-ifeq ($(HAVE_OPENMP),1)
+ifneq ($(HAVE_OPENMP),0)
 $(info OpenMP enabled for libzpaq)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
