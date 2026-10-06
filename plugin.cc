@@ -818,7 +818,7 @@ EXTERN_C_END
 #define ENCODER_OVERHEAD 1024
 unsigned getMaxCompressedDataSize(unsigned uncompressed_size) { return uncompressed_size + ENCODER_OVERHEAD; }
 
-unsigned IguanaComp(const char * source, unsigned source_size, char *dest) {
+unsigned IguanaComp(const unsigned char * source, unsigned source_size, unsigned char *dest) {
   iguana::output_stream out;
   out.reserve(source_size + ENCODER_OVERHEAD);
 
@@ -844,7 +844,7 @@ unsigned IguanaComp(const char * source, unsigned source_size, char *dest) {
   return static_cast<unsigned>(out.size());
 }
 
-unsigned IguanaDecomp(const char *source, unsigned source_size, char *dest, unsigned uncompressed_size) {
+unsigned IguanaDecomp(const unsigned char *source, unsigned source_size, unsigned char *dest, unsigned uncompressed_size) {
   iguana::output_stream out;
   out.reserve(uncompressed_size);
   try {
