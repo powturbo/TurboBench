@@ -27,7 +27,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y nasm 
-#libomp-dev
+          sudo apt-get install libomp-dev
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
           curl -L -o silesia.tar.gz \
