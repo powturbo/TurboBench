@@ -11,11 +11,11 @@
 # qemu-riscv64 -L /usr/riscv64-linux-gnu ./turbobench -l2
 # qemu-ppc64le -L /usr/powerpc64le-linux-gnu
 
-#CC ?= gcc
-#CXX ?= g++
-CC ?= clang
-CXX = clang++
-CX ?= clang
+CC ?= gcc
+CXX ?= g++
+#CC ?= clang
+#CXX = clang++
+#CX ?= clang
 #CX ?= gcc
 
 MAKE    ?= make
