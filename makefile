@@ -12,7 +12,7 @@
 # qemu-ppc64le -L /usr/powerpc64le-linux-gnu
 
 CC ?= gcc
-CXX ?= g++
+#CXX ?= g++
 #CC ?= clang
 #CXX = clang++
 CX ?= clang
