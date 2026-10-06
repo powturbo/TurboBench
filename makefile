@@ -142,6 +142,7 @@ ifeq ($(ARCH),riscv64)
   OMP_CFLAGS  :=
   OMP_LDFLAGS :=
 else
+ifeq ($(CC),gcc)
   HAVE_OPENMP := no
   FOPENMP     :=
   OMP_CFLAGS  :=
@@ -176,6 +177,7 @@ else
     endif
     HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
   endif
+endif
 endif
 
 ifeq ($(HAVE_OPENMP),no)
