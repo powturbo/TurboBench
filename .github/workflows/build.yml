@@ -39,7 +39,7 @@ jobs:
           clang --version || true
           rustc --version
           cargo --version
-      - run: make
+      - run: make OPENZL=0 PHAZ=0
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
       - run: ./turbobench silesia.tar -V0 -U
@@ -120,7 +120,7 @@ jobs:
           gunzip NASA_access_log_Jul95.gz
           wget https://codeberg.org/pbm/former/raw/branch/master/data/enwik8.gz
           gunzip enwik8.gz
-      - run: make
+      - run: make OPENZL=0 PHAZ=0
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
@@ -167,7 +167,7 @@ jobs:
           gunzip NASA_access_log_Jul95.gz
           wget https://codeberg.org/pbm/former/raw/branch/master/data/enwik8.gz 
           gunzip enwik8.gz
-      - run: make
+      - run: make OPENZL=0 PHAZ=0
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
       - run: ./turbobench.exe silesia.tar -U -V0
