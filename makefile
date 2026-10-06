@@ -62,6 +62,7 @@ endif
 CXX:=$(CP)-g++
 ifeq ($(CX),clang)
 CX=clang --target=$(CP) --sysroot=/usr/$(CP) -fuse-ld=lld
+CXX:=$(CP)-clang++
 ifeq ($(CC),clang)
 CC=$(CX)
 else
