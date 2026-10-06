@@ -133,16 +133,11 @@ LDFLAGS += -ldl
 endif
 
 # ---------- OpenMP detection ----------
-ifeq ($(ARCH),riscv64)  # Force-disable OpenMP on riscv64. CI build error
-  HAVE_OPENMP := no
-  FOPENMP     :=
-  OMP_CFLAGS  :=
-  OMP_LDFLAGS :=
-else
-  HAVE_OPENMP := no
-  FOPENMP     :=
-  OMP_CFLAGS  :=
-  OMP_LDFLAGS :=
+HAVE_OPENMP := 0
+FOPENMP     :=
+OMP_CFLAGS  :=
+OMP_LDFLAGS :=
+ifneq ($(OPENMP),0)  # Force-disable OpenMP 
   ifeq ($(OS),Darwin)
     # macOS + Homebrew libomp
     LIBOMP_PREFIX := $(shell brew --prefix libomp 2>/dev/null)
@@ -153,12 +148,12 @@ else
       OMP_LDFLAGS := -L$(LIBOMP_PREFIX)/lib -lomp
       # Test that it really works
       ifneq ($(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) $(OMP_CFLAGS) $(OMP_LDFLAGS) -x c - -o /dev/null 2>/dev/null && echo ok),)
-        HAVE_OPENMP := yes
+        HAVE_OPENMP := 1
       endif
     endif
   else ifneq (,$(filter MINGW% MSYS% UCRT% CLANG%,$(MSYSTEM)))
     # Windows / MSYS2 – we already install libgomp
-    HAVE_OPENMP := yes
+    HAVE_OPENMP := 1
     ifeq ($(findstring clang,$(CC)),clang)
       FOPENMP := -fopenmp=libgomp
     else
@@ -171,11 +166,11 @@ else
 #    else
       FOPENMP := -fopenmp
 #    endif
-    HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
+    HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
   endif
 endif
 
-ifeq ($(HAVE_OPENMP),no)
+ifeq ($(HAVE_OPENMP),0)
   $(warning OpenMP not available)
   FOPENMP :=
 else
@@ -214,7 +209,7 @@ $(AOCL_ALIB): $(AOCL_SRCS)
 	mkdir -p $(dir $@)
 	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 BUILD_DIR=$(abspath $(AOCL_BDIR)) LIB_DIR=$(abspath $(AOCL_BDIR))/lib
 else
-ifeq ($(HAVE_OPENMP),yes)
+ifeq ($(HAVE_OPENMP),1)
   AOCL_OMP = -DAOCL_ENABLE_THREADS=1 -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ $(OMP_CFLAGS)       #-DOpenMP_CXX_FLAGS="-fopenmp" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=/usr/lib/llvm-*/lib/libomp.so 
 endif
 AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
@@ -440,7 +435,7 @@ ifneq ($(wildcard libbsc/.),)
 PLG_FLAGS+=-D_LIBBSC
 LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc 
 LIBBSC_LDFLAGS :=
-ifeq ($(HAVE_OPENMP),yes)
+ifeq ($(HAVE_OPENMP),1)
   LIBBSC_CFLAGS  += -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP $(OMP_CFLAGS)
   $(info OpenMP enabled for libbsc)
 endif
@@ -814,7 +809,7 @@ $(RC_LIB): $(RC_SRCS)
 	@mkdir -p $(RC_BDIR)
 	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT" $(abspath $(RC_BDIR))/librc.a
 LIBS += $(RC_LIB)
-ifeq ($(HAVE_OPENMP),yes)
+ifeq ($(HAVE_OPENMP),1)
 CFLAGS += -DLIBSAIS_OPENMP 
 $(info OpenMP enabled for Turbo-Range-Coder)
 endif
@@ -897,7 +892,7 @@ ifneq ($(wildcard zpaq/.),)
 ifneq ($(OS),Darwin)
 PLG_FLAGS+=-D_ZPAQ
 CXXFLAGS+=-Izpaq
-ifeq ($(HAVE_OPENMP),yes)
+ifeq ($(HAVE_OPENMP),1)
 $(info OpenMP enabled for libzpaq)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
