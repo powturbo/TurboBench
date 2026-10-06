@@ -134,40 +134,47 @@ LDFLAGS += -ldl
 endif
 
 # ---------- OpenMP detection ----------
-HAVE_OPENMP := no
-FOPENMP     :=
-OMP_CFLAGS  :=
-OMP_LDFLAGS :=
-
-ifeq ($(OS),Darwin)
-  # macOS + Homebrew libomp
-  LIBOMP_PREFIX := $(shell brew --prefix libomp 2>/dev/null)
-  ifneq ($(LIBOMP_PREFIX),)
-    # Apple Clang needs -Xpreprocessor
-    FOPENMP     := -Xpreprocessor -fopenmp
-    OMP_CFLAGS  := -I$(LIBOMP_PREFIX)/include
-    OMP_LDFLAGS := -L$(LIBOMP_PREFIX)/lib -lomp
-    # Test that it really works
-    ifneq ($(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) $(OMP_CFLAGS) $(OMP_LDFLAGS) -x c - -o /dev/null 2>/dev/null && echo ok),)
-      HAVE_OPENMP := yes
-    endif
-  endif
-else ifneq (,$(filter MINGW% MSYS% UCRT% CLANG%,$(MSYSTEM)))
-  # Windows / MSYS2 – we already install libgomp
-  HAVE_OPENMP := yes
-  ifeq ($(findstring clang,$(CC)),clang)
-    FOPENMP := -fopenmp=libgomp
-  else
-    FOPENMP := -fopenmp
-  endif
+# Force-disable OpenMP on riscv64
+ifeq ($(ARCH),riscv64)
+  HAVE_OPENMP := no
+  FOPENMP     :=
+  OMP_CFLAGS  :=
+  OMP_LDFLAGS :=
 else
-  # Linux
-  ifeq ($(findstring clang,$(CC)),clang)
-    FOPENMP := -fopenmp=libgomp
+  HAVE_OPENMP := no
+  FOPENMP     :=
+  OMP_CFLAGS  :=
+  OMP_LDFLAGS :=
+  ifeq ($(OS),Darwin)
+    # macOS + Homebrew libomp
+    LIBOMP_PREFIX := $(shell brew --prefix libomp 2>/dev/null)
+    ifneq ($(LIBOMP_PREFIX),)
+      # Apple Clang needs -Xpreprocessor
+      FOPENMP     := -Xpreprocessor -fopenmp
+      OMP_CFLAGS  := -I$(LIBOMP_PREFIX)/include
+      OMP_LDFLAGS := -L$(LIBOMP_PREFIX)/lib -lomp
+      # Test that it really works
+      ifneq ($(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) $(OMP_CFLAGS) $(OMP_LDFLAGS) -x c - -o /dev/null 2>/dev/null && echo ok),)
+        HAVE_OPENMP := yes
+      endif
+    endif
+  else ifneq (,$(filter MINGW% MSYS% UCRT% CLANG%,$(MSYSTEM)))
+    # Windows / MSYS2 – we already install libgomp
+    HAVE_OPENMP := yes
+    ifeq ($(findstring clang,$(CC)),clang)
+      FOPENMP := -fopenmp=libgomp
+    else
+      FOPENMP := -fopenmp
+    endif
   else
-    FOPENMP := -fopenmp
+    # Linux
+    ifeq ($(findstring clang,$(CC)),clang)
+      FOPENMP := -fopenmp=libgomp
+    else
+      FOPENMP := -fopenmp
+    endif
+    HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
   endif
-  HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
 endif
 
 ifeq ($(HAVE_OPENMP),no)
