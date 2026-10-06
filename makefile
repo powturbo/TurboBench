@@ -344,7 +344,7 @@ endif
 
 IGUANA_LIB :=
 ifneq ($(wildcard iguana/.),)
-ifneq ($(IGUANA), 0) 
+#ifneq ($(IGUANA), 0) 
 ifneq ($(filter $(ARCH),aarch64 x86_64),)
 ifneq ($(OS),Windows)
 PLG_FLAGS += -D_IGUANA
@@ -399,7 +399,7 @@ $(IGUANA_LIB): $(OBJS_CX) $(OBJS_CX512) | $(IGUANA_BD)/iguana
 LIBS += $(IGUANA_LIB)
 endif 
 endif 
-endif 
+#endif 
 endif
 
 ISAL_LIB :=
