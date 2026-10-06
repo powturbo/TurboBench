@@ -79,6 +79,7 @@ jobs:
           uname -m
           lscpu
           echo "=== Using CC=$CC ==="
+          make -p -f /dev/null | grep '^CXX'
           $CC --version
           gcc --version
           clang --version || true
