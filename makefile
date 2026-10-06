@@ -11,12 +11,12 @@
 # qemu-riscv64 -L /usr/riscv64-linux-gnu ./turbobench -l2
 # qemu-ppc64le -L /usr/powerpc64le-linux-gnu
 
-CC ?= gcc
-#CC ?= clang
-CXX ?= g++
+#CC ?= gcc
+#CXX ?= g++
+CC ?= clang
+CXX = clang++
 CX ?= clang
 #CX ?= gcc
-#CC = clang
 
 MAKE    ?= make
 CMAKE   ?= cmake
@@ -58,8 +58,6 @@ CP=$(CROSS)-unknown-elf
 else
 CP=$(CROSS)-linux-gnu
 endif
-
-#CXX:=$(CP)-g++
 ifeq ($(CX),clang)
 CX=clang --target=$(CP) --sysroot=/usr/$(CP) -fuse-ld=lld
 CXX:=$(CP)-clang++
@@ -135,14 +133,12 @@ LDFLAGS += -ldl
 endif
 
 # ---------- OpenMP detection ----------
-# Force-disable OpenMP on riscv64
-ifeq ($(ARCH),riscv64)
+ifeq ($(ARCH),riscv64)  # Force-disable OpenMP on riscv64. CI build error
   HAVE_OPENMP := no
   FOPENMP     :=
   OMP_CFLAGS  :=
   OMP_LDFLAGS :=
 else
-ifeq ($(CC),gcc)
   HAVE_OPENMP := no
   FOPENMP     :=
   OMP_CFLAGS  :=
@@ -178,7 +174,6 @@ ifeq ($(CC),gcc)
     HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
   endif
 endif
-endif
 
 ifeq ($(HAVE_OPENMP),no)
   $(warning OpenMP not available)
@@ -208,6 +203,7 @@ endif
 
 AOCL_LIB:=
 ifneq ($(and $(wildcard aocl-compression/.),$(filter x86_64,$(ARCH))),)
+ifneq ($(AOCL), 0) 
 PLG_FLAGS += -D_AOCL
 AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'CMakeLists.txt' \))
 AOCL_BDIR = $(BUILD)/aocl-compression
@@ -219,13 +215,11 @@ $(AOCL_ALIB): $(AOCL_SRCS)
 	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 BUILD_DIR=$(abspath $(AOCL_BDIR)) LIB_DIR=$(abspath $(AOCL_BDIR))/lib
 else
 ifeq ($(HAVE_OPENMP),yes)
-  AOCL_OMP = -DAOCL_ENABLE_THREADS=1 -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ $(OMP_CFLAGS)
-#-DOpenMP_CXX_FLAGS="-fopenmp" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=/usr/lib/llvm-*/lib/libomp.so 
+  AOCL_OMP = -DAOCL_ENABLE_THREADS=1 -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ $(OMP_CFLAGS)       #-DOpenMP_CXX_FLAGS="-fopenmp" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=/usr/lib/llvm-*/lib/libomp.so 
 endif
 AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
 $(AOCL_ALIB): $(AOCL_SRCS)
 	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1 $(AOCL_OMP)
-#		 -DCMAKE_C_FLAGS="-Wno-error=attributes -Wno-error=format -Wno-implicit-function-declaration"                 
 	$(CMAKE) --build $(AOCL_BDIR) --target install -j
 	@test -f $@ || (echo "ERROR: $@ was not produced by the install step"; exit 1)
 endif
@@ -236,6 +230,7 @@ $(AOCL_LIB): $(AOCL_ALIB)
 	rm -f $@.redef
 	@test -f $@ || (echo "ERROR: failed to create $@"; exit 1)
 LIBS += $(AOCL_LIB)
+endif
 endif
 
 #--- B -------------------------
@@ -349,6 +344,7 @@ endif
 
 IGUANA_LIB :=
 ifneq ($(wildcard iguana/.),)
+ifneq ($(IGUANA), 0) 
 ifneq ($(filter $(ARCH),aarch64 x86_64),)
 ifneq ($(OS),Windows)
 PLG_FLAGS += -D_IGUANA
@@ -401,6 +397,7 @@ IGUANA_LIB  := $(IGUANA_BD)/libiguana.a
 $(IGUANA_LIB): $(OBJS_CX) $(OBJS_CX512) | $(IGUANA_BD)/iguana
 	$(AR) rcs $@ $^
 LIBS += $(IGUANA_LIB)
+endif 
 endif 
 endif 
 endif
@@ -633,7 +630,7 @@ MISA77_SRCS := $(wildcard $(MISA77_SRC)/*.cpp)
 OB += $(call obj,$(MISA77_SRCS) $(MISA77_SRC)/isa/target_portable.o) $(addprefix $(BUILD)/$(MISA77_SRC)/,$(MISA77_VOBJS))
 endif
 
-ifneq ($(wildcard mzip/.),)
+ifneq ($(wildcard mzip0/.),)
 PLG_FLAGS+=-D_MZIP
 OB += mzip.o mzip/ppmd/Ppmd7.o mzip/ppmd/Ppmd7Dec.o mzip/ppmd/Ppmd7Enc.o
 endif
@@ -827,7 +824,7 @@ endif
 endif
 
 TSQ_LIB :=
-ifneq ($(wildcard turbosqueeze/.),)
+ifneq ($(wildcard turbosqueeze0/.),)
 PLG_FLAGS+=-D_TSQ
 TSQ_SRCS := $(shell find turbosqueeze -type f -name '*.cpp' -o -name '*.h')
 TSQ_LIB = $(BUILD)/tsq/libturbosqueeze.a
@@ -900,11 +897,11 @@ ifneq ($(wildcard zpaq/.),)
 ifneq ($(OS),Darwin)
 PLG_FLAGS+=-D_ZPAQ
 CXXFLAGS+=-Izpaq
-ifeq ($(HAVE_OPENMP),yes)
+ifeq ($(HAVE_OPENMP),yes0)
+$(info OpenMP enabled for libzpaq)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
 CXXFLAGS+=$(OMP_CFLAGS)
-$(info OpenMP enabled for libzpaq)
 OB+=$(call obj,$(BUILD)/libzpaq_omp.o)
 else
 OB+=$(call obj,zpaq/libzpaq.o)
