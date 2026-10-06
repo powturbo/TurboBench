@@ -68,7 +68,6 @@ jobs:
           sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
           sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
           sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
-#         sudo apt install libomp-dev
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
           curl -L -o silesia.tar.gz \
@@ -85,15 +84,14 @@ jobs:
           clang --version || true
           rustc --version
           cargo --version
-      - name: Build 
+      - name: make 
         run: make OPENZL=0 PHAZ=0 OPENMP=0
       - name: benchmark
-        if: matrix.compiler == 'gcc'  # clang 20 emits illegal instruction
+        if: matrix.compiler == 'gcc' 
         run: |
           ./turbobench -l2
           ./turbobench silesia.tar -U -V0
           ./turbobench silesia.tar -U -V0 -eBWT -abwt
-#          ./turbobench turbobench -V0 -U
 
   macos:
     runs-on: '${{ matrix.os }}'
@@ -176,4 +174,7 @@ jobs:
       - run: ./turbobench silesia.tar -V0 -ebwtsatan,7x,8x,9x -b68m -abwt
       - run: ./turbobench NASA_access_log_Jul95 -V0 -eBWT -abwt 
       - run: ./turbobench enwik8 -V0 -eBWT -abwt 
+
+#riscv64
+#         sudo apt install libomp-dev
 
