@@ -15,7 +15,7 @@ CC ?= gcc
 CXX ?= g++
 #CC ?= clang
 #CXX = clang++
-#CX ?= clang
+CX ?= clang
 #CX ?= gcc
 
 MAKE    ?= make
