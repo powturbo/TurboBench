@@ -897,7 +897,7 @@ ifneq ($(wildcard zpaq/.),)
 ifneq ($(OS),Darwin)
 PLG_FLAGS+=-D_ZPAQ
 CXXFLAGS+=-Izpaq
-ifeq ($(HAVE_OPENMP),yes0)
+ifeq ($(HAVE_OPENMP),yes)
 $(info OpenMP enabled for libzpaq)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
