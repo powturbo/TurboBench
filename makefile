@@ -10,9 +10,10 @@
 # qemu-aarch64 -L /usr/aarch64-linux-gnu ./turbobench -l2
 # qemu-riscv64 -L /usr/riscv64-linux-gnu ./turbobench -l2
 # qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+OPENMP ?= 1 
 
 CC ?= gcc
-#CXX ?= g++
+CXX ?= clang++
 #CC ?= clang
 #CXX = clang++
 CX ?= clang
@@ -137,22 +138,19 @@ HAVE_OPENMP := 0
 FOPENMP     :=
 OMP_CFLAGS  :=
 OMP_LDFLAGS :=
-ifneq ($(OPENMP),0)  # Force-disable OpenMP 
+ifneq ($(OPENMP),0) 
   ifeq ($(OS),Darwin)
-    # macOS + Homebrew libomp
     LIBOMP_PREFIX := $(shell brew --prefix libomp 2>/dev/null)
     ifneq ($(LIBOMP_PREFIX),)
-      # Apple Clang needs -Xpreprocessor
       FOPENMP     := -Xpreprocessor -fopenmp
       OMP_CFLAGS  := -I$(LIBOMP_PREFIX)/include
       OMP_LDFLAGS := -L$(LIBOMP_PREFIX)/lib -lomp
-      # Test that it really works
       ifneq ($(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) $(OMP_CFLAGS) $(OMP_LDFLAGS) -x c - -o /dev/null 2>/dev/null && echo ok),)
         HAVE_OPENMP := 1
       endif
     endif
   else ifneq (,$(filter MINGW% MSYS% UCRT% CLANG%,$(MSYSTEM)))
-    # Windows / MSYS2 – we already install libgomp
+    # Windows / MSYS2 – libgomp must be installed
     HAVE_OPENMP := 1
     ifeq ($(findstring clang,$(CC)),clang)
       FOPENMP := -fopenmp=libgomp
@@ -431,6 +429,7 @@ endif
 ifneq ($(wildcard lib/.),)
 PLG_FLAGS+=-D_LIB
 endif
+
 ifneq ($(wildcard libbsc/.),)
 PLG_FLAGS+=-D_LIBBSC
 LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc 
@@ -442,10 +441,9 @@ endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
 	$(BUILD)/libbsc/libbsc/filters/preprocessing.o $(BUILD)/libbsc/libbsc/adler32/adler32.o $(BUILD)/libbsc/libbsc/bwt/bwt.o $(BUILD)/libbsc/libbsc/st/st.o $(BUILD)/libbsc/libbsc/lzp/lzp.o \
 	$(BUILD)/libbsc/libbsc/platform/platform.o $(BUILD)/libbsc/libbsc/bwt/libsais/libsais.o
-
 $(BUILD)/libbsc/%.o: libbsc/%.cpp
 	@mkdir -p $(dir $@)
-	$(CC) $(LIBBSC_CFLAGS) -c $< -o $@
+	$(CXX) $(LIBBSC_CFLAGS) -c $< -o $@
 
 $(BUILD)/libbsc/%.o: libbsc/%.c
 	@mkdir -p $(dir $@)
