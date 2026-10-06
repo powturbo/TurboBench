@@ -166,11 +166,11 @@ else
     endif
   else
     # Linux
-    ifeq ($(findstring clang,$(CC)),clang)
-      FOPENMP := -fopenmp=libgomp
-    else
+#    ifeq ($(findstring clang,$(CC)),clang)
+#      FOPENMP := -fopenmp=libgomp
+#    else
       FOPENMP := -fopenmp
-    endif
+#    endif
     HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo yes || echo no)
   endif
 endif
