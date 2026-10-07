@@ -73,19 +73,16 @@ jobs:
           fi
       - name: Build (Linux)
         if: matrix.platform == 'linux'
-        run: make STATIC=1 OPENZL=0 PHAZ=0
+        run: make STATIC=1 AOCL=0 BLOSC=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0
       - name: Generate silesia.tar.md (Linux)
-        if: matrix.platform == 'linux' 
+        if: matrix.platform == 'linux' && matrix.os == 'ubuntu-24.04-riscv'
         run: |
-          curl -L -o silesia.tar.gz \
-            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+          curl -L -o silesia.tar.gz https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
-          if [ "${{ matrix.os }}" = "ubuntu-24.04-riscv" ]; then
-            ./turbobench silesia.tar -U -V0
-            ./turbobench silesia.tar.tbb -p4
-            mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
-            ls -la silesia.*.tar.md
-          fi
+          ./turbobench silesia.tar -U -V0
+          ./turbobench silesia.tar.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
+          ls -la silesia.*.tar.md
       # ---------------- macOS ----------------
       - name: Build (macOS)
         if: matrix.platform == 'macos'
@@ -114,7 +111,7 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
-          install: git zip make cmake rsync mingw-w64-x86_64-gcc mingw-w64-x86_64-clang
+          install: git zip make cmake rsync mingw-w64-x86_64-gcc mingw-w64-x86_64-clang mingw-w64-x86_64-libgomp mingw-w64-x86_64-llvm-openmp
           update: true
       - name: Build (Windows)
         if: matrix.platform == 'windows'
