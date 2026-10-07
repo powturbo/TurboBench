@@ -440,7 +440,7 @@ PLG_FLAGS+=-D_LIBBSC
 LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc 
 LIBBSC_LDFLAGS :=
 ifneq ($(HAVE_OPENMP),0)
-  LIBBSC_CFLAGS  += -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP $(OMP_CFLAGS)
+  LIBBSC_CFLAGS  += -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP $(OMP_CFLAGS) 
   $(info OpenMP enabled for libbsc)
 endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
@@ -448,7 +448,7 @@ OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.
 	$(BUILD)/libbsc/libbsc/platform/platform.o $(BUILD)/libbsc/libbsc/bwt/libsais/libsais.o
 $(BUILD)/libbsc/%.o: libbsc/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(LIBBSC_CFLAGS) -c $< -o $@
+	$(CXX) $(LIBBSC_CFLAGS)  -c $< -o $@
 
 $(BUILD)/libbsc/%.o: libbsc/%.c
 	@mkdir -p $(dir $@)
