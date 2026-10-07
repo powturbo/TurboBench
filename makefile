@@ -266,16 +266,16 @@ ifdef CROSS #ERROR IN C_BLOSC BUILD
 #$(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
 #	export CC=$(CROSS)-linux-gnu-gcc
 #	export CXX=$(CROSS)-linux-gnu-g++
-#	cmake -S c-blosc2 -B $(BUILD)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
+#	$(CMAKE) -S c-blosc2 -B $(BUILD)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
 #	          -DPREFER_EXTERNAL_LZ4=ON -DPREFER_EXTERNAL_ZLIB=ON -DPREFER_EXTERNAL_ZSTD=ON  -DBUILD_SHARED=OFF -DBUILD_SHARED_LIBS=OFF
-#	cmake --build $(BUILD)/c-blosc2
+#	$(CMAKE) --build $(BUILD)/c-blosc2
 else
 PLG_FLAGS+=-D_C_BLOSC2
 C_BLOSC2_LIB = $(BUILD)/c-blosc2/blosc/libblosc2.a
 $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
-	cmake -S c-blosc2 -B $(BUILD)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
+	$(CMAKE) -S c-blosc2 -B $(BUILD)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
 	          -DPREFER_EXTERNAL_LZ4=ON -DPREFER_EXTERNAL_ZLIB=ON -DPREFER_EXTERNAL_ZSTD=ON  -DBUILD_SHARED=OFF -DBUILD_SHARED_LIBS=OFF 
-	cmake --build $(BUILD)/c-blosc2 --parallel 4
+	$(CMAKE) --build $(BUILD)/c-blosc2 --parallel 4
 endif
 LIBS += $(C_BLOSC2_LIB)
 endif
@@ -581,7 +581,7 @@ PLG_FLAGS+=-D_MINIZ -I$(BUILD)/miniz
 MINIZ_SRCS := $(shell find miniz -type f -name '*.[ch]' -o -name 'CMakeLists.txt')
 MINIZ_LIB = $(BUILD)/miniz/libminiz.a
 $(MINIZ_LIB): $(MINIZ_SRCS)
-	$(CMAKE) -S miniz -B $(BUILD)/miniz -DCMAKE_INSTALL_PREFIX=$(BUILD) && make -C $(BUILD)/miniz
+	$(CMAKE) -S miniz -B $(BUILD)/miniz -DCMAKE_INSTALL_PREFIX=$(BUILD) -DPROJECT_NAME=tb && make -C $(BUILD)/miniz
 LIBS += $(MINIZ_LIB)
 endif
 
@@ -642,8 +642,8 @@ ifdef CROSS  # NOTWORKING
 #$(OPENZL_LIB): $(OPENZL_SRCS)
 #	export CC=$(CROSS)-linux-gnu-gcc
 #	export CXX=$(CROSS)-linux-gnu-g++
-#	cmake -S openzl -B $(BUILD)/openzl -DCMAKE_C_COMPILER=$(CROSS)-linux-gnu-gcc -DCMAKE_CXX_COMPILER=$(CROSS)-linux-gnu-g++
-#	cmake --build $(BUILD)/openzl --config Release
+#	$(CMAKE) -S openzl -B $(BUILD)/openzl -DCMAKE_C_COMPILER=$(CROSS)-linux-gnu-gcc -DCMAKE_CXX_COMPILER=$(CROSS)-linux-gnu-g++
+#	$(CMAKE) --build $(BUILD)/openzl --config Release
 else
 PLG_FLAGS += -D_OPENZL
 CXXFLAGS  += -Iopenzl/include -Iopenzl/src
@@ -662,11 +662,11 @@ endif
 
 LIBS += $(OPENZL_LIB) $(OPENZL_CLIBS)
 $(OPENZL_BDIR)/CMakeCache.txt: $(OPENZL_CMAKE_FILES)
-	cmake -S openzl -B $(OPENZL_BDIR) -DCMAKE_BUILD_TYPE=Release -DOPENZL_ALLOW_INTROSPECTION=OFF -DOPENZL_INSTALL=OFF -DOPENZL_BUILD_TOOLS=OFF -DOPENZL_BUILD_EXAMPLES=OFF $(OPENZL_CMAKE_FLAGS)
+	$(CMAKE) -S openzl -B $(OPENZL_BDIR) -DCMAKE_BUILD_TYPE=Release -DOPENZL_ALLOW_INTROSPECTION=OFF -DOPENZL_INSTALL=OFF -DOPENZL_BUILD_TOOLS=OFF -DOPENZL_BUILD_EXAMPLES=OFF $(OPENZL_CMAKE_FLAGS)
 	@touch $@
 
 $(OPENZL_LIB) $(OPENZL_CLIBS): $(OPENZL_BDIR)/CMakeCache.txt $(OPENZL_SRCS)
-	cmake --build $(OPENZL_BDIR) --config Release
+	$(CMAKE) --build $(OPENZL_BDIR) --config Release
 	@touch $(OPENZL_LIB) $(OPENZL_CLIBS)   # ensure Make sees them as up-to-date
 endif
 endif
@@ -829,7 +829,7 @@ PLG_FLAGS+=-D_TSQ
 TSQ_SRCS := $(shell find turbosqueeze -type f -name '*.cpp' -o -name '*.h')
 TSQ_LIB = $(BUILD)/tsq/libturbosqueeze.a
 $(TSQ_LIB): $(TSQ_SRCS)
-	cmake -S turbosqueeze -B $(BUILD)/tsq && $(MAKE) -C $(BUILD)/tsq
+	$(CMAKE) -S turbosqueeze -B $(BUILD)/tsq && $(MAKE) -C $(BUILD)/tsq
 LIBS += $(TSQ_LIB)
 endif
 
@@ -841,10 +841,10 @@ XZ_SRCS := $(shell find xz/src/liblzma -type f -name '*.[c]' -o -name '*.cpp' -o
 XZ_LIB = $(BUILD)/xz/liblzma.a
 ifdef CROSS
 $(XZ_LIB): $(XZ_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cmake -S xz -B $(BUILD)/xz && $(MAKE) -C $(BUILD)/xz
+	export CC=$(CROSS)-linux-gnu-gcc && $(CMAKE) -S xz -B $(BUILD)/xz && $(MAKE) -C $(BUILD)/xz
 else
 $(XZ_LIB): $(XZ_SRCS)
-	cmake -S xz -B $(BUILD)/xz && $(MAKE) -C $(BUILD)/xz
+	$(CMAKE) -S xz -B $(BUILD)/xz && $(MAKE) -C $(BUILD)/xz
 endif
 LIBS += $(XZ_LIB)
 endif
@@ -863,13 +863,13 @@ ZLIB_NG_SRCS := $(shell find zlib-ng -type f -name '*.[c]' -o -name '*.cpp' -o -
 ZLIB_NG_LIB = $(BUILD)/zlib-ng/libz-ng.a
 ifdef CROSS
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
-	export CC=$(CROSS)-linux-gnu-gcc && cmake -S zlib-ng -B $(BUILD)/zlib-ng -DWITH_NEON=OFF -DBUILD_TESTING=OFF -DWITH_GTEST=OFF -DWITH_GZFILEOP=OFF 
-	cmake --build $(BUILD)/zlib-ng --config Release
+	export CC=$(CROSS)-linux-gnu-gcc && $(CMAKE) -S zlib-ng -B $(BUILD)/zlib-ng -DWITH_NEON=OFF -DBUILD_TESTING=OFF -DWITH_GTEST=OFF -DWITH_GZFILEOP=OFF 
+	$(CMAKE) --build $(BUILD)/zlib-ng --config Release
 	cp $(BUILD)/zlib-ng/zconf-ng.h zlib-ng_
 else
 $(ZLIB_NG_LIB): $(ZLIB_NG_SRCS)
-	cmake -S zlib-ng -B $(BUILD)/zlib-ng -DWITH_NEON=OFF -DBUILD_TESTING=OFF -DWITH_GTEST=OFF -DWITH_GZFILEOP=OFF
-	cmake --build $(BUILD)/zlib-ng --config Release 
+	$(CMAKE) -S zlib-ng -B $(BUILD)/zlib-ng -DWITH_NEON=OFF -DBUILD_TESTING=OFF -DWITH_GTEST=OFF -DWITH_GZFILEOP=OFF
+	$(CMAKE) --build $(BUILD)/zlib-ng --config Release 
 #	cp $(BUILD)/zlib-ng/zconf-ng.h turbobench_
 endif
 LIBS += $(ZLIB_NG_LIB)
@@ -1017,8 +1017,8 @@ PIVCO_CMAKE_FILES := $(shell find $(PIVCODIR) -maxdepth 2 -name 'CMakeLists.txt'
 PIVCO_LIB   = $(PIVCO_BDIR)/libpivco_huffman_local.o
 $(PIVCO_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
 	mkdir -p $(PIVCO_BDIR)
-	cmake -S $(PIVCODIR) -B $(PIVCO_BDIR) -DCMAKE_BUILD_TYPE=Release
-	cmake --build $(PIVCO_BDIR) --target pivco_huffman_local -j
+	$(CMAKE) -S $(PIVCODIR) -B $(PIVCO_BDIR) -DCMAKE_BUILD_TYPE=Release
+	$(CMAKE) --build $(PIVCO_BDIR) --target pivco_huffman_local -j
 OB += $(PIVCO_LIB)
 # PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor; level = zstd level). Built from the pivco-huffman submodule's extras/phaz via
 # its own build.sh: patches a private zstd copy (TurboBench's pinned zstd/ SHA 5233c58e) and merges it + pivco into phaz_local.o exporting only
@@ -1031,8 +1031,8 @@ PHAZ_BDIR     = $(PIVCODIR)/build
 PHAZ_LIB      = $(PIVCO_BDIR)/phaz_local.o
 $(PHAZ_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
 	@mkdir -p $(PHAZ_BDIR)
-	cmake -S $(PIVCODIR) -B $(PHAZ_BDIR) -DCMAKE_BUILD_TYPE=Release
-	cmake --build $(PHAZ_BDIR) --target pivco_huffman_local -j
+	$(CMAKE) -S $(PIVCODIR) -B $(PHAZ_BDIR) -DCMAKE_BUILD_TYPE=Release
+	$(CMAKE) --build $(PHAZ_BDIR) --target pivco_huffman_local -j
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) PH=$(PIVCODIR) bash $(PHAZ_DIR)/tools/build.sh
 	cp $(PHAZ_DIR)/build/phaz_local.o $(PIVCO_BDIR)
 OB += $(PHAZ_LIB)
