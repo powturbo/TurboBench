@@ -421,6 +421,14 @@ enum {
 #endif
  P_WFLZ,
  
+#ifndef _WZIP
+#define _WZIP 0
+#endif
+ P_WLZ4,
+ P_WLZ4FAST,
+ P_WLZ4HC,
+ P_WZIP,
+ 
 #ifndef _YALZ77
 #define _YALZ77 0
 #endif
@@ -1376,6 +1384,13 @@ struct snappy_env env;
 #include "wflz/wfLZ.h"
   #endif
 
+  #if _WZIP
+#include "wzip/src/WLZ4.h"
+#include "wzip/src/WZIP.h"
+static WLZ_State_Str *wlz4st;
+static WLZhc_State_Str *wlz4hcst;
+  #endif
+
   #if _WIMLIB
 #include "../wimlib/include/wimlib.h"
   #endif
@@ -1974,6 +1989,10 @@ struct plugs plugs[] = {
   { P_UNISHOX3,      "unishox3",      _UNISHOX3,  "unishox3",                    "" },
   
   { P_WFLZ,          "wflz",          _WFLZ,      "wfLZ",                        "1,2" },
+  { P_WLZ4,          "wlz4",          _WZIP,      "wlz4",                        "" },
+  { P_WLZ4FAST,      "wlz4fast",      _WZIP,      "wlz4",                        "1,2,3,4,5,6,7,8,9,10,12,16,20,24,32,48,64,99" },
+  { P_WLZ4HC,        "wlz4hc",        _WZIP,      "wlz4",                        "0,1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_WZIP,          "wzip",          _WZIP,      "wzip",                        "0,1,2,3,4,5,6,7,8,9,10,11,12,13/t#" },
   
   { P_XPACK,         "xpack",         _XPACK,     "xpack",                       "1,2,3,4,5,6,7,8,9" },
   { P_XZ,            "xz",            _XZ,        "xz",                          "0,1,2,3,4,5,6,7,8,9/d#:fb#:lp#:lc#:pb#:a#:mt#" },
@@ -2322,6 +2341,10 @@ void codexit(int codec, int lev) {
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: aocl_llc_destroy(&aocl, AOCL_CODEC(codec,lev) ); break;
       #endif
   
+      #if _WZIP
+    case P_WLZ4: case P_WLZ4FAST: if(wlz4st) WLZ_Free_State(wlz4st); wlz4st = NULL; break;
+    case P_WLZ4HC:   if(wlz4hcst) WLZhc_Free_State(wlz4hcst); wlz4hcst = NULL; break;
+      #endif
       #if _SNAPPY_C
     case P_SNAPPY_C: snappy_free_env(&env);
       #endif
@@ -2964,6 +2987,17 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _WFLZ
     case P_WFLZ:    return lev<=1?wfLZ_CompressFast( (const uint8_t* WF_RESTRICT const)in, inlen, (uint8_t* WF_RESTRICT const)out, (const uint8_t* WF_RESTRICT)workmem, 0 ):
                                       wfLZ_Compress( (const uint8_t* WF_RESTRICT const)in, inlen, (uint8_t* WF_RESTRICT const)out, (const uint8_t* WF_RESTRICT)workmem, 0 );
+      #endif
+
+      #if _WZIP
+    case P_WLZ4:     if(!wlz4st && !(wlz4st = WLZ_New_State())) return 0;
+                     return WLZ_Compress(wlz4st, (const char *)in, (char *)out, inlen, outsize);
+    case P_WLZ4FAST: if(!wlz4st && !(wlz4st = WLZ_New_State())) return 0;
+                     return WLZ_Compress_Fast(wlz4st, (const char *)in, (char *)out, inlen, outsize, lev);
+    case P_WLZ4HC:   if(!wlz4hcst && !(wlz4hcst = WLZhc_New_State())) return 0;
+                     return WLZhc_Compress(wlz4hcst, (const char *)in, (char *)out, inlen, outsize, lev);
+    case P_WZIP:     { int cap = outsize > 0x7fffffffu ? 0x7fffffff : (int)outsize;
+                       int rc = wzip_compress_mt(in, (int)inlen, out, &cap, lev, threads); return rc > 0 ? rc : 0; }
       #endif
 
       #if _WIMLIB
@@ -3928,6 +3962,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_WFLZ:    wfLZ_Decompress( in, out); return inlen;
       #endif
 
+      #if _WZIP
+    case P_WLZ4: case P_WLZ4FAST: case P_WLZ4HC:
+      return WLZ_Decompress((const char *)in, (char *)out, inlen, outlen) == outlen ? inlen : 0;
+    case P_WZIP: { int cap = (int)outlen; return wzip_decompress(in, (int)inlen, out, &cap) == (int)outlen ? inlen : 0; }
+      #endif
+
       #if _WIMLIB
     case P_WIMLIB: { struct wimlib_decompressor *decompressor; if(wimlib_create_decompressor(lev, 32*1024/*inlen*/, &decompressor)) return 0;
         outlen = wimlib_decompress(in, inlen, out, outlen, decompressor);  wimlib_free_decompressor(decompressor); return inlen;
@@ -4310,6 +4350,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
 char *codver(int codec, char *v, char *s) {
   switch(codec) { 
+      #if _WZIP
+    case P_WLZ4: case P_WLZ4FAST: case P_WLZ4HC: sprintf(s, "v%d.%d.%d", WLZ_VERSION_MAJOR, WLZ_VERSION_MINOR, WLZ_VERSION_RELEASE); break;
+    case P_WZIP:     sprintf(s, "v%s MT", WZIP_VERSION_STRING); break;
+      #endif
       #if _ACEAPEX
     case P_ACEAPEX: sprintf(s, "v%s", ACEAPEX_VERSION_STRING); break;
       #endif

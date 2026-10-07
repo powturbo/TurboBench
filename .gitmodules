@@ -165,3 +165,6 @@
 [submodule "bcm"]
 	path = bcm
 	url = https://github.com/FS-make-simple/bcm.git
+[submodule "wzip"]
+	path = wzip
+	url = https://github.com/icodywu/WZIP
