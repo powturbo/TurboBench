@@ -150,13 +150,14 @@ ifneq ($(OPENMP),0)
       endif
     endif
   else ifneq (,$(filter MINGW% MSYS% UCRT% CLANG%,$(MSYSTEM)))
-    # Windows / MSYS2 – libgomp must be installed
-    HAVE_OPENMP := 1
+    # Windows / MSYS2 – test whether -fopenmp actually works
     ifeq ($(findstring clang,$(CC)),clang)
       FOPENMP := -fopenmp=libgomp
     else
       FOPENMP := -fopenmp
     endif
+    HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | \
+    $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
   else
     # Linux
 #    ifeq ($(findstring clang,$(CC)),clang)
@@ -196,8 +197,8 @@ endif
 endif
 
 AOCL_LIB:=
-ifneq ($(and $(wildcard aocl-compression/.),$(filter x86_64,$(ARCH))),)
 ifneq ($(AOCL), 0) 
+ifneq ($(and $(wildcard aocl-compression/.),$(filter x86_64,$(ARCH))),)
 PLG_FLAGS += -D_AOCL
 AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'CMakeLists.txt' \))
 AOCL_BDIR = $(BUILD)/aocl-compression
@@ -255,6 +256,7 @@ endif
 
 #--- C -------------------------
 C_BLOSC2_LIB :=
+ifneq ($(BLOSC), 0) 
 ifneq ($(wildcard c-blosc2/.),)
 ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
@@ -276,6 +278,7 @@ $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
 	cmake --build $(BUILD)/c-blosc2 --parallel 4
 endif
 LIBS += $(C_BLOSC2_LIB)
+endif
 endif
 endif
 
@@ -716,6 +719,7 @@ endif
 endif
 
 #--- R -------------------------
+ifneq ($(RUST), 0)
 ifeq ($(OS), Linux)
 RUST_DIR          := turbobench_
 RUST_PKG_NAME     := ruststatic
@@ -788,6 +792,7 @@ $(RUST_LIB): $(RUST_MANIFEST)
 rustlib: $(RUST_LIB)
 LIBS += $(RUST_LIB)
 .PHONY: rustlib
+endif
 endif
 #--- T -------------------------
 ifneq ($(wildcard tamp/.),)
@@ -1000,6 +1005,7 @@ PLG_FLAGS+=-D_GANS
 OB+=$(call obj,EC/rans.o EC/head_cbloom.o)
 endif
 
+ifneq ($(PIVCO), 0)
 ifneq ($(wildcard pivco-huffman/.),)
 ifndef CROSS
 PIVCODIR   = pivco-huffman
@@ -1032,6 +1038,7 @@ $(PHAZ_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
 OB += $(PHAZ_LIB)
 endif
 LDFLAGS += -lm
+endif
 endif
 endif
 
