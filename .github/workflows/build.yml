@@ -39,7 +39,7 @@ jobs:
           clang --version || true
           rustc --version
           cargo --version
-      - run: make OPENZL=0 PIVCO=0 RUST=0
+      - run: make BLOSC=0 OPENZL=0 PIVCO=0 RUST=0
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
       - run: ./turbobench silesia.tar -V0 -U
