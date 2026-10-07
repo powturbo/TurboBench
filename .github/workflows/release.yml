@@ -71,18 +71,23 @@ jobs:
             sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
             sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
           fi
-      - name: Build (Linux)
-        if: matrix.platform == 'linux'
-        run: make STATIC=1 AOCL=0 BLOSC=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0
-      - name: Generate silesia.tar.md (Linux)
-        if: matrix.platform == 'linux' && matrix.os != 'ubuntu-24.04-riscv'
-        run: |
-          curl -L -o silesia.tar.gz https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-          gunzip silesia.tar.gz
-          ./turbobench silesia.tar -U -V0
-          ./turbobench silesia.tar.tbb -p4
-          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
-          ls -la silesia.*.tar.md
+	- name: Build (Linux)
+          if: matrix.platform == 'linux'
+          run: |
+            if [ "${{ matrix.os }}" = "ubuntu-24.04-riscv" ]; then
+              make STATIC=1 AOCL=0 BLOSC=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0
+            else
+              make STATIC=1
+            fi
+        - name: Generate silesia.tar.md (Linux)
+          if: matrix.platform == 'linux' && matrix.os != 'ubuntu-24.04-riscv'
+          run: |
+            curl -L -o silesia.tar.gz https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+            gunzip silesia.tar.gz
+            ./turbobench silesia.tar -U -V0
+            ./turbobench silesia.tar.tbb -p4
+            mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
+            ls -la silesia.*.tar.md
       # ---------------- macOS ----------------
       - name: Build (macOS)
         if: matrix.platform == 'macos'
