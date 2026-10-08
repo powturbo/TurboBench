@@ -240,7 +240,8 @@ PLG_FLAGS+=-D_BROTLI
 BROTLI_SRCS := $(wildcard brotli/c/common/*.c) $(wildcard brotli/c/dec/*.c) $(wildcard brotli/*.c) $(wildcard brotli/c/enc/*.c)
 BROTLI_LIB = $(BUILD)/brotli/libbrotlienc.a $(BUILD)/brotli/libbrotlidec.a $(BUILD)/brotli/libbrotlicommon.a
 $(BROTLI_LIB): $(BROTLI_SRCS)
-	$(CMAKE) -S brotli -B $(BUILD)/brotli -DBUILD_SHARED_LIBS=OFF -DBROTLI_BUILD_TOOLS=OFF -DBROTLI_BUNDLED_MODE=ON && make -C $(BUILD)/brotli
+	$(CMAKE) -S brotli -B $(BUILD)/brotli -DBUILD_SHARED_LIBS=OFF -DBROTLI_BUILD_TOOLS=OFF -DBROTLI_BUNDLED_MODE=ON 
+	$(CMAKE) --build $(BUILD)/brotli --parallel 4
 LIBS+=$(BROTLI_LIB)
 endif
 
