@@ -183,8 +183,8 @@ else
   LDFLAGS += $(OMP_LDFLAGS)
 endif
 
-$(info CC="$(CXX)")
-$(info CXX="$(CC)")
+$(info CC="$(CC)")
+$(info CXX="$(CXX)")
 
 #------------------------------------------------------------------------------------------------
 all: turbobench 
@@ -450,10 +450,11 @@ endif
 
 ifneq ($(wildcard libbsc/.),)
 PLG_FLAGS+=-D_LIBBSC
-LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc 
+LIBBSC_CXXFLAGS = -DLIBBSC_SORT_TRANSFORM_SUPPORT -DLIBBSC_OPENMP_SUPPORT -ICSC/src/libcsc
+LIBBSC_CFLAGS := 
 LIBBSC_LDFLAGS :=
 ifneq ($(HAVE_OPENMP),0)
-  LIBBSC_CFLAGS  += -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP $(OMP_CFLAGS) $(FOPENMP) -Wno-deprecated-openmp
+  LIBBSC_CFLAGS  = -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP $(OMP_CFLAGS) $(FOPENMP) -Wno-deprecated-openmp
   $(info OpenMP enabled for libbsc)
 endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
@@ -461,11 +462,11 @@ OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.
       $(BUILD)/libbsc/libbsc/platform/platform.o $(BUILD)/libbsc/libbsc/bwt/libsais/libsais.o
 $(BUILD)/libbsc/%.o: libbsc/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(LIBBSC_CFLAGS)  -c $< -o $@
+	$(CXX) -O3 $(LIBBSC_CXXFLAGS)  -c $< -o $@
 
 $(BUILD)/libbsc/%.o: libbsc/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(LIBBSC_CFLAGS) -Wno-deprecated-openmp -c $< -o $@
+	$(CC) -O3 $(LIBBSC_CFLAGS) -Wno-deprecated-openmp -c $< -o $@
 LIBSAIS = 1
 endif
 
