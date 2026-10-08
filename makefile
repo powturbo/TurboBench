@@ -174,7 +174,7 @@ ifeq ($(HAVE_OPENMP),0)
   FOPENMP :=
 else
   $(info OpenMP enabled with $(FOPENMP))
-  CFLAGS  += $(OMP_CFLAGS)
+  CFLAGS  += $(OMP_CFLAGS) $(FOPENMP)
   LDFLAGS += $(OMP_LDFLAGS)
 endif
 
@@ -182,7 +182,7 @@ endif
 all: turbobench 
  
 # ***************************************************************** codecs *****************************************************************************
-#--- A -------------------------
+#--- A ------------------------------------------------------------------------------------------------------------------------------------
 # aceapex: the library is one translation unit (src/aceapex_api.cpp includes the codec sources); zstd from the zstd submodule
 ifneq ($(wildcard aceapex/.),)
 ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
@@ -229,7 +229,7 @@ LIBS += $(AOCL_LIB)
 endif
 endif
 
-#--- B -------------------------
+#--- B -------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard turbobench_/bcm/.),)
 PLG_FLAGS+=-D_BCM
 OB+=$(call obj,turbobench_/bcm/bcm.o)
@@ -258,7 +258,7 @@ $(BZIP3_LIB): $(BZIP3_SRCS)
 LIBS+=$(BZIP3_LIB)
 endif
 
-#--- C -------------------------
+#--- C ----------------------------------------------------------------------------------------------------------------------------------
 C_BLOSC2_LIB :=
 ifneq ($(BLOSC), 0) 
 ifneq ($(wildcard c-blosc2/.),)
@@ -301,7 +301,7 @@ $(FIRETRAIL_LIB): firetrail/src/root.zig
 	cd firetrail && zig build-lib -O ReleaseFast -femit-bin=libfiretrail.a src/root.zig -lc
 OB+=$(FIRETRAIL_LIB)	
 endif
-#--- G -------------------------
+#--- G -----------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard GLZA/.),)
 PLG_FLAGS+=-D_GLZA
 GLZA_OBJS := $(call obj,GLZA/GLZAmodel.o GLZA/GLZAcomp.o GLZA/GLZAencode.o GLZA/GLZAcompress.o GLZA/GLZAformat.o GLZA/GLZAdecode.o)
@@ -434,7 +434,7 @@ KANZI_DIR = kanzi-cpp/src
 KANZI_SRCS := $(wildcard $(KANZI_DIR)/io/*.cpp) $(wildcard $(KANZI_DIR)/entropy/*.cpp) $(wildcard $(KANZI_DIR)/bitstream/*.cpp) $(wildcard $(KANZI_DIR)/*.cpp) $(wildcard $(KANZI_DIR)/transform/*.cpp)
 OB += $(call obj,$(KANZI_SRCS))
 endif
-#---- L -----------------------
+#---- L -----------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard lib/.),)
 PLG_FLAGS+=-D_LIB
 endif
@@ -444,7 +444,7 @@ PLG_FLAGS+=-D_LIBBSC
 LIBBSC_CFLAGS = -O3 -D_LIBBSC -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc 
 LIBBSC_LDFLAGS :=
 ifneq ($(HAVE_OPENMP),0)
-  LIBBSC_CFLAGS  += -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP $(OMP_CFLAGS) 
+  LIBBSC_CFLAGS  += -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP $(OMP_CFLAGS) $(FOPENMP) -Wno-deprecated-openmp
   $(info OpenMP enabled for libbsc)
 endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
@@ -456,7 +456,7 @@ $(BUILD)/libbsc/%.o: libbsc/%.cpp
 
 $(BUILD)/libbsc/%.o: libbsc/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(LIBBSC_CFLAGS) -c $< -o $@
+	$(CC) $(LIBBSC_CFLAGS) -Wno-deprecated-openmp -c $< -o $@
 LIBSAIS = 1
 endif
 
@@ -571,7 +571,7 @@ $(LZRAVEN_LIB):  $(LZRAVEN_SRCS)
 LIBS += $(LZRAVEN_LIB)
 endif
 
-#---- M ----------------------------------------------------------------------------------------------------------------------
+#---- M ----------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard memlz/.),)
 PLG_FLAGS+=-D_MEMLZ
 ifeq ($(ARCH),x86_64)
@@ -706,7 +706,7 @@ OB += $(call obj,$(LZHAM_SRCS)) pivco-huffman/extras/bench/bench_oodle_wrapper.o
 LIBS+=$(OODLE_STATIC_LIB)
 endif
 
-#--- P -------------------------
+#--- P --------------------------------------------------------------------------------------------------------------------
 PULSAR_LIB := 
 ifneq ($(wildcard pulsar-best0/.),)
 HAVE_CARGO := $(shell command -v cargo >/dev/null 2>&1 && echo 1 || echo 0)
@@ -730,7 +730,7 @@ else
 endif
 endif
 
-#--- R -------------------------
+#--- R ------------------------------------------------------------------------------------------------------------------
 ifneq ($(RUST), 0)
 ifeq ($(OS), Linux)
 RUST_DIR          := turbobench_
@@ -806,7 +806,7 @@ LIBS += $(RUST_LIB)
 .PHONY: rustlib
 endif
 endif
-#--- T -------------------------
+#--- T ----------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard tamp/.),)
 PLG_FLAGS+=-D_TAMP
 TAMP_DIR = tamp/tamp/_c_src/tamp
@@ -827,13 +827,13 @@ $(RC_LIB): $(RC_SRCS)
 LIBS += $(RC_LIB)
 # libsais16 is not included in libbsc 
 ifneq ($(HAVE_OPENMP),0)
-LIBSAIS16_FLAGS = -DLIBSAIS_OPENMP 
+LIBSAIS16_FLAGS = -DLIBSAIS_OPENMP $(OMP_CFLAGS) $(FOPENMP) -Wno-deprecated-openmp
 $(info OpenMP enabled for Turbo-Range-Coder/libsais16)
 endif
 LIBSAIS16 := $(RC_BDIR)/libsais/src/libsais16.o
 $(LIBSAIS16) : $(RC_DIR)/libsais/src/libsais16.c
 	@mkdir -p $(dir $@)
-	$(CC) -O3 -I$(RC_DIR)/libsais/include $(LIBSAIS16_FLAGS) $< -c -o $@
+	$(CC) -O3 -I$(RC_DIR)/libsais/include $(FOPENMP) $(LIBSAIS16_FLAGS) $< -c -o $@
 OB += $(LIBSAIS16)
 endif
 endif
@@ -916,7 +916,7 @@ ifneq ($(HAVE_OPENMP),0)
 $(info OpenMP enabled for libzpaq)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
-CXXFLAGS+=$(OMP_CFLAGS)
+CXXFLAGS+=$(OMP_CFLAGS) 
 OB+=$(call obj,$(BUILD)/libzpaq_omp.o)
 else
 OB+=$(call obj,zpaq/libzpaq.o)
