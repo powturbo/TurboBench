@@ -874,6 +874,17 @@ $(TSQ_LIB): $(TSQ_SRCS)
 LIBS += $(TSQ_LIB)
 endif
 
+#--- W -------------------------
+# wzip: WLZ4 and WZIP (plain C); WZIP's levels 7-13 find matches in threads of their own (t#)
+ifneq ($(wildcard wzip/.),)
+PLG_FLAGS += -D_WZIP
+WZIP_SRC := wzip/src
+$(BUILD)/$(WZIP_SRC)/%.o: $(WZIP_SRC)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) -O2 $(CFLAGS) -DNDEBUG -DWZIP_MULTITHREAD=1 -c $< -o $@
+OB += $(call obj,$(addprefix $(WZIP_SRC)/,WLZ4.c WZIP_L.c WZIP_M.c WZIP_wrapper.c Huffman_Compress.c Huffman_Decompress.c))
+endif
+
 #--- X -------------------------
 XZ_LIB :=
 ifneq ($(wildcard xz/.),)
