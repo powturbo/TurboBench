@@ -185,6 +185,11 @@ endif
 
 $(info CC="$(CC)")
 $(info CXX="$(CXX)")
+ifeq ($(CXX),g++)
+  LFOPENMP := -fopenmp
+else
+  LFOPENMP := $(FOPENMP)
+endif
 
 #------------------------------------------------------------------------------------------------
 all: turbobench 
@@ -1424,7 +1429,7 @@ $(BUILD)/plugin.o: plugin.cc | $(LIBS)
 	$(CXX) -O3 $(MARCH) $(PLG_FLAGS) $(CXXFLAGS) -std=c++20  $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
-	$(CXX) $^ $(LDFLAGS) $(LIBS) $(FOPENMP) -o turbobench
+	$(CXX) $^ $(LDFLAGS) $(LIBS) $(LFOPENMP) -o turbobench
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
