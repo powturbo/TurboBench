@@ -151,20 +151,25 @@ ifneq ($(OPENMP),0)
     endif
   else ifneq (,$(filter MINGW% MSYS% UCRT% CLANG%,$(MSYSTEM)))
     # Windows / MSYS2 – test whether -fopenmp actually works
+    FOPENMP     := -fopenmp
+    ifeq ($(findstring clang,$(CC)),clang)
+      OMP_LDFLAGS := -lomp
+    else
+      OMP_LDFLAGS := -lgomp
+    endif
+    HAVE_OPENMP := $(shell \
+      echo '#include <omp.h>' > _omp_test.c && \
+      echo 'int main(){return omp_get_max_threads();}' >> _omp_test.c && \
+      $(CC) $(FOPENMP) _omp_test.c -o _omp_test $(OMP_LDFLAGS) 2>/dev/null && \
+      echo 1 || echo 0; \
+      rm -f _omp_test.c _omp_test _omp_test.exe)
+  else
+    # Linux
     ifeq ($(findstring clang,$(CC)),clang)
       FOPENMP := -fopenmp=libgomp
     else
       FOPENMP := -fopenmp
     endif
-    HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | \
-    $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
-  else
-    # Linux
-#    ifeq ($(findstring clang,$(CC)),clang)
-#      FOPENMP := -fopenmp=libgomp
-#    else
-      FOPENMP := -fopenmp
-#    endif
     HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
   endif
 endif
@@ -174,7 +179,8 @@ ifeq ($(HAVE_OPENMP),0)
   FOPENMP :=
 else
   $(info OpenMP enabled with $(FOPENMP))
-  CFLAGS  += $(OMP_CFLAGS) $(FOPENMP)
+  CFLAGS_BWT += -DLIBSAIS_OPENMP $(OMP_CFLAGS)
+  CFLAGS     += -DLIBSAIS_OPENMP
   LDFLAGS += $(OMP_LDFLAGS)
 endif
 
