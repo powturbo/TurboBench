@@ -49,7 +49,6 @@ else
   OS := $(shell uname -s)
   ARCH := $(shell uname -m)
 endif
-#$(info OS="$(OS)")
 
 ifndef CROSS
 else
@@ -183,6 +182,9 @@ else
   CFLAGS     += -DLIBSAIS_OPENMP
   LDFLAGS += $(OMP_LDFLAGS)
 endif
+
+$(info CC="$(CXX)")
+$(info CXX="$(CC)")
 
 #------------------------------------------------------------------------------------------------
 all: turbobench 
@@ -455,8 +457,8 @@ ifneq ($(HAVE_OPENMP),0)
   $(info OpenMP enabled for libbsc)
 endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
-	$(BUILD)/libbsc/libbsc/filters/preprocessing.o $(BUILD)/libbsc/libbsc/adler32/adler32.o $(BUILD)/libbsc/libbsc/bwt/bwt.o $(BUILD)/libbsc/libbsc/st/st.o $(BUILD)/libbsc/libbsc/lzp/lzp.o \
-	$(BUILD)/libbsc/libbsc/platform/platform.o $(BUILD)/libbsc/libbsc/bwt/libsais/libsais.o
+      $(BUILD)/libbsc/libbsc/filters/preprocessing.o $(BUILD)/libbsc/libbsc/adler32/adler32.o $(BUILD)/libbsc/libbsc/bwt/bwt.o $(BUILD)/libbsc/libbsc/st/st.o $(BUILD)/libbsc/libbsc/lzp/lzp.o \
+      $(BUILD)/libbsc/libbsc/platform/platform.o $(BUILD)/libbsc/libbsc/bwt/libsais/libsais.o
 $(BUILD)/libbsc/%.o: libbsc/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(LIBBSC_CFLAGS)  -c $< -o $@
@@ -467,13 +469,24 @@ $(BUILD)/libbsc/%.o: libbsc/%.c
 LIBSAIS = 1
 endif
 
+ifneq ($(wildcard libbsc000/.),)
+PLG_FLAGS+=-D_LIBBSC
+LIBBSC_SRCS := $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
+      $(BUILD)/libbsc/libbsc/filters/preprocessing.o $(BUILD)/libbsc/libbsc/adler32/adler32.o $(BUILD)/libbsc/libbsc/bwt/bwt.o $(BUILD)/libbsc/libbsc/st/st.o $(BUILD)/libbsc/libbsc/lzp/lzp.o \
+      $(BUILD)/libbsc/libbsc/platform/platform.o $(BUILD)/libbsc/libbsc/bwt/libsais/libsais.o
+LIBBSC_LIB = $(BUILD)/libbsc/libbsc.a
+$(LIBBSC_LIB): $(LIBSC_SRCS)
+	$(CMAKE) -S libbsc -B $(BUILD)/libbsc -DBSC_ENABLE_CUDA=OFF && make -C $(BUILD)/libbsc
+LIBS+=$(LIBBSC_LIB)
+endif
+
 ifneq ($(wildcard libdeflate/.),)
 PLG_FLAGS+=-D_LIBDEFLATE
 LIBDEFLATE_SRCS := $(wildcard libdeflate/lib/*.c) libdeflate/lib/arm/cpu_features.c libdeflate/lib/x86/cpu_features.c 
-LIDEFLATE_LIB = $(BUILD)/libdeflate/libdeflate.a
-$(LIDEFLATE_LIB): $(LIDEFLATE_SRCS)
+LIBDEFLATE_LIB = $(BUILD)/libdeflate/libdeflate.a
+$(LIBDEFLATE_LIB): $(LIBDEFLATE_SRCS)
 	$(CMAKE) -S libdeflate -B $(BUILD)/libdeflate -DLIBDEFLATE_BUILD_SHARED_LIB=OFF -DLIBDEFLATE_BUILD_GZIP=OFF && make -C $(BUILD)/libdeflate
-LIBS+=$(LIDEFLATE_LIB)
+LIBS+=$(LIBDEFLATE_LIB)
 endif
 
 ifneq ($(wildcard libslz/.),)
