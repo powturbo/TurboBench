@@ -2348,8 +2348,8 @@ static unsigned char getbyte() { return *gip++; }
   #endif
 
 unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outsize, int codec, int lev, char *prm) { unsigned outlen; unsigned char *oend=out+outsize; //printf("#(%d), inlen=%d,outsize=%d\n", codec, inlen, outsize);fflush(stdout);
-  char     *q        = strchr(prm,'d');
-  unsigned dsize     = q?argtoi(q+(q[1]=='='?2:1),0):dicsize; 
+  char     *q      = strchr(prm,'d');
+  unsigned dsize   = q?argtoi(q+(q[1]=='='?2:1),0):dicsize; 
   int      threads = (q = strchr(prm,'t'))?atoi(q+(q[1]=='='?2:1)):1;
   
   switch(codec) {
