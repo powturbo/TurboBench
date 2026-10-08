@@ -242,7 +242,7 @@ OB+=$(call obj,turbobench_/bcm/bcm.o)
 endif
 
 ifneq ($(wildcard brotli/.),)
-PLG_FLAGS+=-D_BROTLI -I/brotli/include
+PLG_FLAGS+=-D_BROTLI -Ibrotli/include
 BROTLI_SRCS := $(wildcard brotli/c/common/*.c) $(wildcard brotli/c/dec/*.c) $(wildcard brotli/*.c) $(wildcard brotli/c/enc/*.c)
 BROTLI_LIB = $(BUILD)/brotli/libbrotlienc.a $(BUILD)/brotli/libbrotlidec.a $(BUILD)/brotli/libbrotlicommon.a
 $(BROTLI_LIB): $(BROTLI_SRCS)
