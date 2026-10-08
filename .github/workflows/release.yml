@@ -28,10 +28,10 @@ jobs:
             os: ubuntu-24.04-riscv
             platform: linux
             arch: riscv64
-#          - name: macos-x86_64
-#            os: macos-13
-#            platform: macos
-#            arch: x86_64
+          # - name: macos-x86_64
+          #   os: macos-13
+          #   platform: macos
+          #   arch: x86_64
           - name: macos-aarch64
             os: macos-26
             platform: macos
@@ -42,27 +42,29 @@ jobs:
             arch: x86_64
             msystem: UCRT64
             mingw_pkg: mingw-w64-ucrt-x86_64-gcc
- #         - name: windows-aarch64
- #           os: windows-11-arm
- #           platform: windows
- #           arch: aarch64
- #           msystem: CLANGARM64
- #           mingw_pkg: mingw-w64-clang-aarch64-gcc-compat
+          # - name: windows-aarch64
+          #   os: windows-11-arm
+          #   platform: windows
+          #   arch: aarch64
+          #   msystem: CLANGARM64
+          #   mingw_pkg: mingw-w64-clang-aarch64-gcc-compat
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+
       # ------------------ Linux ----------------
       - name: Install build tools (Linux)
-        if: matrix.platform == 'linux' 
-        run:|
+        if: matrix.platform == 'linux'
+        run: |
           sudo apt-get update -qq
           if [ "${{ matrix.os }}" != "ubuntu-24.04-riscv" ]; then
             sudo apt install libomp-dev
-          fi          
+          fi
           sudo apt-get install -y -qq build-essential nasm make
           if [ "${{ matrix.os }}" = "ubuntu-24.04-riscv" ]; then
             sudo apt-get install -y -qq gcc-14 g++-14
@@ -71,29 +73,33 @@ jobs:
             sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
             sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
           fi
-    - name: Build (Linux)
-          if: matrix.platform == 'linux'
-          run: |
-            if [ "${{ matrix.os }}" = "ubuntu-24.04-riscv" ]; then
-              make STATIC=1 AOCL=0 BLOSC=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0
-            else
-              make STATIC=1
-            fi
-        - name: Generate silesia.tar.md (Linux)
-          if: matrix.platform == 'linux' && matrix.os != 'ubuntu-24.04-riscv'
-          run: |
-            curl -L -o silesia.tar.gz https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-            gunzip silesia.tar.gz
-            ./turbobench silesia.tar -U -V0
-            ./turbobench silesia.tar.tbb -p4
-            mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
-            ls -la silesia.*.tar.md
+
+      - name: Build (Linux)
+        if: matrix.platform == 'linux'
+        run: |
+          if [ "${{ matrix.os }}" = "ubuntu-24.04-riscv" ]; then
+            make STATIC=1 AOCL=0 BLOSC=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0
+          else
+            make STATIC=1
+          fi
+
+      - name: Generate silesia.tar.md (Linux)
+        if: matrix.platform == 'linux' && matrix.os != 'ubuntu-24.04-riscv'
+        run: |
+          curl -L -o silesia.tar.gz https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+          gunzip silesia.tar.gz
+          ./turbobench silesia.tar -U -V0
+          ./turbobench silesia.tar.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
+          ls -la silesia.*.tar.md
+
       # ---------------- macOS ----------------
       - name: Build (macOS)
         if: matrix.platform == 'macos'
         run: |
           brew install nasm libomp
           make
+
       - name: Generate silesia.tar.md (macOS)
         if: matrix.platform == 'macos'
         run: |
@@ -104,6 +110,7 @@ jobs:
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
           ls -la silesia.*.tar.md
+
       # ---------------- Windows (MSYS2) ----------------
       - name: Set git to use LF
         if: matrix.platform == 'windows'
@@ -111,17 +118,20 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.eol lf
         shell: bash
+
       - name: Setup MSYS2 (Windows)
         if: matrix.platform == 'windows'
         uses: msys2/setup-msys2@v2
         with:
-          msystem: MINGW64
-          install: git zip make cmake rsync mingw-w64-x86_64-gcc mingw-w64-x86_64-clang mingw-w64-x86_64-libgomp mingw-w64-x86_64-llvm-openmp
+          msystem: ${{ matrix.msystem }}          # use the value from the matrix
+          install: git zip make cmake rsync ${{ matrix.mingw_pkg }} mingw-w64-x86_64-libgomp mingw-w64-x86_64-llvm-openmp
           update: true
+
       - name: Build (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
         run: make STATIC=1 PHAZ=0
+
       - name: Generate silesia.tar.md (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
@@ -133,6 +143,7 @@ jobs:
           ./turbobench.exe silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
           ls -la silesia.*.tar.md
+
       # ---------------- Package (Linux/macOS) ----------------
       - name: Package artifact (Linux/macOS)
         if: matrix.platform != 'windows'
@@ -151,6 +162,7 @@ jobs:
           # silesia.*.tar.md is intentionally NOT packaged into the archive
           tar -C dist -czf "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz" \
             "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
+
       # ---------------- Package (Windows) ----------------
       - name: Package artifact (Windows)
         if: matrix.platform == 'windows'
@@ -171,6 +183,7 @@ jobs:
           cd dist
           zip -r "../${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}.zip" \
             "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
+
       - name: Upload build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -180,6 +193,7 @@ jobs:
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
             silesia.${{ matrix.name }}.tar.md
           if-no-files-found: ignore
+
   release:
     name: Create GitHub Release
     needs: build
@@ -205,6 +219,7 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   update-benchmark-md:
     name: Concatenate silesia results into benchmark.md
     needs: build
