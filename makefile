@@ -164,7 +164,7 @@ ifneq ($(OPENMP),0)
       rm -f _omp_test.c _omp_test _omp_test.exe)
   else
     # Linux
-    ifeq ($(findstring clang,$(CXX)),clang)
+    ifeq ($(findstring clang,$(CC)),clang)
       FOPENMP := -fopenmp=libgomp
     else
       FOPENMP := -fopenmp
