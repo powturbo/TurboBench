@@ -71,7 +71,7 @@ jobs:
             sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
             sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
           fi
-	- name: Build (Linux)
+    - name: Build (Linux)
           if: matrix.platform == 'linux'
           run: |
             if [ "${{ matrix.os }}" = "ubuntu-24.04-riscv" ]; then
