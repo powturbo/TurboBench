@@ -174,7 +174,7 @@ ifeq ($(HAVE_OPENMP),0)
   FOPENMP :=
 else
   $(info OpenMP enabled with $(FOPENMP))
-  CFLAGS  += -DLIBSAIS_OPENMP $(OMP_CFLAGS)
+  CFLAGS  += $(OMP_CFLAGS)
   LDFLAGS += $(OMP_LDFLAGS)
 endif
 
@@ -237,10 +237,11 @@ endif
 
 ifneq ($(wildcard brotli/.),)
 PLG_FLAGS+=-D_BROTLI
-CXXFLAGS+=-Ibrotli/c/include 
-CFLAGS+=-Ibrotli/c/include 
 BROTLI_SRCS := $(wildcard brotli/c/common/*.c) $(wildcard brotli/c/dec/*.c) $(wildcard brotli/*.c) $(wildcard brotli/c/enc/*.c)
-OB += $(call obj,$(BROTLI_SRCS))
+BROTLI_LIB = $(BUILD)/brotli/libbrotlienc.a $(BUILD)/brotli/libbrotlidec.a $(BUILD)/brotli/libbrotlicommon.a
+$(BROTLI_LIB): $(BROTLI_SRCS)
+	$(CMAKE) -S brotli -B $(BUILD)/brotli -DBUILD_SHARED_LIBS=OFF -DBROTLI_BUILD_TOOLS=OFF -DBROTLI_BUNDLED_MODE=ON && make -C $(BUILD)/brotli
+LIBS+=$(BROTLI_LIB)
 endif
 
 ifneq ($(wildcard bzip2/.),)
@@ -250,8 +251,11 @@ endif
 
 ifneq ($(wildcard bzip3/.),)
 PLG_FLAGS+=-D_BZIP3
-CFLAGS+=-DVERSION=1 -Ibzip3/include -Wno-int-conversion
-OB+=$(call obj,bzip3/src/libbz3.o)
+BZIP3_SRCS := bzip3/src/libbz3.c
+BZIP3_LIB = $(BUILD)/bzip3/libbzip3.a
+$(BZIP3_LIB): $(BZIP3_SRCS)
+	$(CMAKE) -S bzip3 -B $(BUILD)/bzip3 -DBZIP3_BUILD_APPS=OFF -DBUILD_SHARED_LIBS=OFF && make -C $(BUILD)/bzip3
+LIBS+=$(BZIP3_LIB)
 endif
 
 #--- C -------------------------
@@ -287,7 +291,7 @@ PLG_FLAGS+=-D_CLICKHOUSE -IClickhouse/src -IClickhouse	#-IClickhouse/base/pcg_ra
 OB+=$(call obj,Clickhouse/src/Compression/LZ4_decompress_faster.o)
 endif
 
-#--- F -------------------------
+#--- F ----------------------------------------------------------------------------------------------------------------------------------------------
 FIRETRAIL_LIB :=
 ifneq ($(wildcard firetrail0/.),)
 PLG_FLAGS+=-D_FIRETRAIL
@@ -327,7 +331,7 @@ else
 endif
 endif
 
-#--- I -------------------------
+#--- I -----------------------------------------------------------------------------------------------------------------------------------------------
 IC_LIB :=
 IC_DIR=../ic
 ifneq ($(wildcard $(IC_DIR)/.),)
@@ -423,7 +427,7 @@ endif
 LIBS += $(ISAL_LIB)
 endif
 endif
-#--- K ---------------------------
+#--- K ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard kanzi-cpp/.),)
 PLG_FLAGS+=-D_KANZI
 KANZI_DIR = kanzi-cpp/src
@@ -458,9 +462,11 @@ endif
 
 ifneq ($(wildcard libdeflate/.),)
 PLG_FLAGS+=-D_LIBDEFLATE
-CFLAGS+=-Ilibdeflate -Ilibdeflate/common
 LIBDEFLATE_SRCS := $(wildcard libdeflate/lib/*.c) libdeflate/lib/arm/cpu_features.c libdeflate/lib/x86/cpu_features.c 
-OB += $(call obj,$(LIBDEFLATE_SRCS))
+LIDEFLATE_LIB = $(BUILD)/libdeflate/libdeflate.a
+$(LIDEFLATE_LIB): $(LIDEFLATE_SRCS)
+	$(CMAKE) -S libdeflate -B $(BUILD)/libdeflate -DLIBDEFLATE_BUILD_SHARED_LIB=OFF -DLIBDEFLATE_BUILD_GZIP=OFF && make -C $(BUILD)/libdeflate
+LIBS+=$(LIDEFLATE_LIB)
 endif
 
 ifneq ($(wildcard libslz/.),)
@@ -506,7 +512,7 @@ endif
 endif
 LZHAM_OBJS += $(call obj,$(LZHAM_SRCS))
 $(LZHAM_OBJS): $(BUILD)/%.o: %.cpp | $(BUILD)
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(LZHAM_FLAGS) -c $< -o $@
 OB+=$(LZHAM_OBJS)
 endif
@@ -565,7 +571,7 @@ $(LZRAVEN_LIB):  $(LZRAVEN_SRCS)
 LIBS += $(LZRAVEN_LIB)
 endif
 
-#---- M -----------------------
+#---- M ----------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard memlz/.),)
 PLG_FLAGS+=-D_MEMLZ
 ifeq ($(ARCH),x86_64)
@@ -639,7 +645,7 @@ PLG_FLAGS+=-D_MZIP
 OB += mzip.o mzip/ppmd/Ppmd7.o mzip/ppmd/Ppmd7Dec.o mzip/ppmd/Ppmd7Enc.o
 endif
 
-#---- O -----------------------
+#---- O --------------------------------------------------------------------------------------------------------------------------------------------
 OPENZL_LIB :=
 ifneq ($(wildcard openzl/.),)
 ifneq ($(OPENZL), 0) # don't build
@@ -813,19 +819,22 @@ ifneq ($(ARCH),loongarch64)
 PLG_FLAGS += -D_TURBORC
 RC_DIR  := Turbo-Range-Coder
 RC_SRCS := $(shell find $(RC_DIR) -type f \( -name '*.[ch]' -o -name '*.cpp' -o -name '*.cc' \))
-
 RC_BDIR := $(BUILD)/$(RC_DIR)
 RC_LIB  := $(RC_BDIR)/librc.a
 $(RC_LIB): $(RC_SRCS)
 	@mkdir -p $(RC_BDIR)
 	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT" $(abspath $(RC_BDIR))/librc.a
 LIBS += $(RC_LIB)
+# libsais16 is not included in libbsc 
 ifneq ($(HAVE_OPENMP),0)
-CFLAGS += -DLIBSAIS_OPENMP 
-$(info OpenMP enabled for Turbo-Range-Coder)
+LIBSAIS16_FLAGS = -DLIBSAIS_OPENMP 
+$(info OpenMP enabled for Turbo-Range-Coder/libsais16)
 endif
-CFLAGS += -I$(RC_DIR)/libsais/include 
-OB += $(RC_BDIR)/libsais/src/libsais16.o # libsais16 is not included in libbsc
+LIBSAIS16 := $(RC_BDIR)/libsais/src/libsais16.o
+$(LIBSAIS16) : $(RC_DIR)/libsais/src/libsais16.c
+	@mkdir -p $(dir $@)
+	$(CC) -O3 -I$(RC_DIR)/libsais/include $(LIBSAIS16_FLAGS) $< -c -o $@
+OB += $(LIBSAIS16)
 endif
 endif
 
