@@ -43,7 +43,7 @@ jobs:
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
       - run: ./turbobench silesia.tar -V0 -U
-      - run: ./turbobench silesia.tar -V0 -U -eBWT
+      - run: ./turbobench silesia.tar -V0 -U -eBWT -abwt
   linux-riscv:
     runs-on: ubuntu-24.04-riscv
     strategy:
