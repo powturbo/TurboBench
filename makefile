@@ -16,8 +16,8 @@ CC ?= gcc
 CXX ?= clang++
 #CC ?= clang
 #CXX = clang++
-CX ?= clang
-#CX ?= gcc
+CY ?= clang
+#CY ?= gcc
 
 MAKE    ?= make
 CMAKE   ?= cmake
@@ -41,8 +41,8 @@ ifneq (,$(filter Windows%,$(OS)))
   OS := Windows
   CC=gcc
 # CC=clang
-# CX=gcc
-  CX=clang
+# CY=gcc
+  CY=clang
   CXX=g++
   ARCH=x86_64
 else
@@ -59,18 +59,18 @@ CP=$(CROSS)-unknown-elf
 else
 CP=$(CROSS)-linux-gnu
 endif
-ifeq ($(CX),clang)
-CX=clang --target=$(CP) --sysroot=/usr/$(CP) -fuse-ld=lld
-CXX:=$(CP)-clang++
+ifeq ($(CY),clang)
+CY=clang --target=$(CP) --sysroot=/usr/$(CP) -fuse-ld=lld
+#CXX:=$(CP)-clang++
 ifeq ($(CC),clang)
-CC=$(CX)
+CC=$(CY)
 else
 CC:=$(CP)-gcc
-CXX:=$(CP)-g++
+#CXX:=$(CP)-g++
 endif
 else
 CC:=$(CP)-gcc
-CX=$(CC)
+CY=$(CC)
 endif
 #CROSS:=$(CC)
 endif
@@ -359,7 +359,7 @@ ifneq ($(OS),Windows)
 PLG_FLAGS += -D_IGUANA
 IGUANA_DIR := iguana/iguana
 IGUANA_BD := $(BUILD)/iguana
-IGUANA_CC := $(CX)
+IGUANA_CC := $(CY)
 ifeq ($(OS),Windows)
 IGUANA_CC := clang
 endif
