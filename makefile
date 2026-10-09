@@ -140,10 +140,8 @@ HAVE_OPENMP := 0
 OMP_CFLAGS  :=
 OMP_LDFLAGS :=
 ifneq ($(OPENMP),0)
-  # Helper: compile a trivial program and return 1 on success, 0 on failure
   define test_openmp
-  $(shell echo 'int main(void){return 0;}' | \
-    $(CC) $(1) $(2) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
+  $(shell echo 'int main(void){return 0;}' | $(CC) $(1) $(2) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
   endef
   ifeq ($(OS),Darwin)
     # macOS – prefer Homebrew libomp
@@ -190,7 +188,7 @@ ifneq ($(HAVE_OPENMP),0)
   $(info OpenMP enabled with $(OMP_LDFLAGS))
   LDFLAGS += $(OMP_LDFLAGS)
 #  ifeq ($(CXX),g++)
-#    OMP_LDFLAGS := -fopenmp
+#       OMP_LDFLAGS := -fopenmp
 #  else
 #    OMP_LDFLAGS := $(FOPENMP)
 #  endif
