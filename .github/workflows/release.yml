@@ -301,8 +301,6 @@ jobs:
           {
             echo "# TurboBench Silesia Corpus Results"
             echo ""
-            echo "Generated automatically by the Release workflow."
-            echo ""
             echo "---"
             echo ""
           } > benchmark.md
