@@ -96,7 +96,7 @@ ifeq ($(ARCH),aarch64)
 else ifeq ($(ARCH),riscv64)
 #  CFLAGS=-march=rv64gc_zba_zbb_zbs
 #  CFLAGS=-mabi=lp64d -mno-strict-align
-  CFLAGS=-march=rv64gc -mabi=lp64d
+  CFLAGS=-march=rv64gc -mabi=lp64d -fno-tree-vectorize  -fno-tree-loop-vectorize
   _SSE=-march=rv64gcv_zvbb
 else ifeq ($(ARCH),ppc64le)
   _SSE=-D__SSE4_1__
@@ -1431,7 +1431,7 @@ $(BUILD)/plugin.o: plugin.cc | $(LIBS)
 
 $(BUILD)/turbobench.o: turbobench.c | $(LIBS) 
 	@mkdir -p $(dir $@)
-	$(CC) -O3 $(MARCH) $(CFLAGS) -fno-tree-vectorize -fno-tree-loop-vectorize $< -c -o $@
+	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
 	$(CXX) $(filter-out $(LIBS),$^) $(LDFLAGS) $(LIBS) -o turbobench
