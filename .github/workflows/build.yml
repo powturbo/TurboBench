@@ -13,9 +13,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, ubuntu-26.04-arm]
-        compiler: ["gcc", "clang"]
+        include:
+          - compiler: gcc
+            cxx: g++
+          - compiler: clang
+            cxx: clang++
     env:
       CC: ${{ matrix.compiler }}
+      CXX: ${{ matrix.cxx }}   
     steps:
       - uses: actions/checkout@v7
         with:
