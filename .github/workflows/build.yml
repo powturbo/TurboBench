@@ -92,17 +92,19 @@ jobs:
           cargo --version
       - name: make 
         run: make AOCL=0 BLOSC=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0 
-      - name: Download silesia.tar.gz and gunzip → silesia.tar
-        run: |
-          curl -L -o silesia.tar.gz \
-            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-          gunzip silesia.tar.gz
+#      - name: Download silesia.tar.gz and gunzip → silesia.tar
+#        run: |
+#          curl -L -o silesia.tar.gz \
+#            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+#          gunzip silesia.tar.gz
       - name: benchmark
         if: matrix.compiler == 'gcc' 
         run: |
           ./turbobench -l2
-          ./turbobench silesia.tar -U -V0
-          ./turbobench silesia.tar -U -V0 -eBWT -abwt
+          ./turbobench turbobench -U -i0,0
+          ./turbobench turbobench -U -eBWT -abwt -i0,0
+#          ./turbobench silesia.tar -U -i0,0
+#          ./turbobench silesia.tar -U -eBWT -abwt -i0,0
 
   macos:
     runs-on: '${{ matrix.os }}'
