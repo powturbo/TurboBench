@@ -2046,6 +2046,7 @@ void usage(char *pgm, int bsize) {
   fprintf(stderr, " -S#      Plot transfer speed: #=1 Comp        speedup #=2 Decomp speedup #=3 Comp        'MB/s' #=4 Decomp 'MB/s'\n");
   fprintf(stderr, "                               #=4 Comp+Decomp speedup                    #=5 Comp+Decomp 'MB/s'\n");
   fprintf(stderr, " -p#      #='print format' 1=text 2=html 3=htm 4=markdown 5/6:vBulletin 7:csv(comma) 8=tsv(tab)\n");
+  fprintf(stderr, " -H       print SVG charts\n");
   fprintf(stderr, " -Q#      # Plot window 0:1920x1080, 1:1600x900, 2:1280x720, 3:800x600 {1}\n");
   fprintf(stderr, " -g       -g:no merge w/ old result 'file.tbb', -gg:process w/o output (use for fuzzing)\n");
   fprintf(stderr, " -o       print on standard output\n");
@@ -2087,7 +2088,7 @@ extern int _CRT_glob = 1;
 
 int main(int argc, char* argv[]) {
   int xstdout=-1,xstdin=-1;
-  int                recurse  = 0, xplug = 0,tm_Repk=1,plot=-1,fmt=0,fno,merge=0,rprio=1;
+  int                recurse  = 0, xplug = 0,tm_Repk=1,plot=-1,fmt=0,fno,merge=0,rprio=1, printchart=0;
   unsigned           bsize    = 1u<<30, bsizex=0;
   unsigned long long filenmax = 0;
   char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049], fsuffix[17]="";
@@ -2115,7 +2116,7 @@ int main(int argc, char* argv[]) {
       { "help",     0, 0, 'h'},
       { 0,          0, 0, 0}
     };
-    if((c = getopt_long(argc, argv, "0:1:2:3:4:5:6:7:8:9:a:b:B:C:d:De:E:F:f:gGi:I:j:J:k:K:l:L:mM:N:oO:Pp:Q:r:Rs:S:t:T:Uv:V:W:w:X:x:Y:y:Z:z:", long_options, &option_index)) == -1) break;
+    if((c = getopt_long(argc, argv, "0:1:2:3:4:5:6:7:8:9:a:b:B:C:d:De:E:F:f:gGHi:I:j:J:k:K:l:L:mM:N:oO:Pp:Q:r:Rs:S:t:T:Uv:V:W:w:X:x:Y:y:Z:z:", long_options, &option_index)) == -1) break;
     switch(c) {
       case 0:
         printf("Option %s", long_options[option_index].name);
@@ -2134,7 +2135,7 @@ int main(int argc, char* argv[]) {
       case 'F': fac        = strtod(optarg, NULL);    break;
       case 'g': merge++;                              break;
       case 'G': plotmcpy++;                           break;
-
+      case 'H': printchart++;
       case 'i':
       case 'I': { char *q = strchr(optarg,','); if((tm_Rep  = atoi(optarg))<=0) tm_rep=tm_Rep=1; if(q && (tm_Rep2 = atoi(q+1))<=0) tm_rep=tm_Rep2=1;}  break;
       case 'J': if((tm_Rep2 = atoi(optarg))<=0) tm_rep=tm_Rep2=1; break;
@@ -2306,7 +2307,7 @@ int main(int argc, char* argv[]) {
       plugprts(plugt, k, s, 1, totinlen, FMT_TEXT, rem);
     exit(0);
   }
-
+  printf("build .tab file\n"); fflush(stdout);
   long long _totinlen;
   int       gk = plugread(plug, s, &_totinlen); 
   if(_totinlen != totinlen)
@@ -2341,15 +2342,21 @@ int main(int argc, char* argv[]) {
       fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
                  finame, totinlen, p->len,    p->td,p->tc,p->s,p->lev,p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
     }
+    printf("write .tab file\n"); fflush(stdout);
     for(g = plug; g < plug+gk; g++)
       if(g->id >= 0 /*&& g->tc > 1e-10 && g->td > 1e-10 && !plug->err*/) fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
                                  finame, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms);
     fclose(fo);
+    printf("print.tab file\n"); fflush(stdout);
+
     printfile(s, 0, FMT_TEXT, rem);
-    plug_t plugv[SVG_PLUGMAX],*vp=plugv; int x = 0;
-    for(g = plug; g < plug+gk; g++)
-      if(g->id >= 0) { *vp = *g; vp->tc = TMBS(totinlen, vp->tc); vp->td = TMBS(totinlen, vp->td);  vp++; if(vp-plugv >= SVG_PLUGMAX) break; }
-    chart(plugv, vp - plugv, finame, totinlen);
+    printf("generate charts .tab file\n"); fflush(stdout);
+    if(printchart) {
+      plug_t plugv[SVG_PLUGMAX],*vp=plugv; int x = 0;
+      for(g = plug; g < plug+gk; g++)
+        if(g->id >= 0) { *vp = *g; vp->tc = TMBS(totinlen, vp->tc); vp->td = TMBS(totinlen, vp->td);  vp++; if(vp-plugv >= SVG_PLUGMAX) break; }
+      chart(plugv, vp - plugv, finame, totinlen);
+    }
   }
 
     #ifdef _WIN32          // Finish!
