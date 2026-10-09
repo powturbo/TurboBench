@@ -454,7 +454,7 @@ KANZI_DIR = kanzi-cpp/src
 KANZI_SRCS := $(wildcard $(KANZI_DIR)/io/*.cpp) $(wildcard $(KANZI_DIR)/entropy/*.cpp) $(wildcard $(KANZI_DIR)/bitstream/*.cpp) $(wildcard $(KANZI_DIR)/*.cpp) $(wildcard $(KANZI_DIR)/transform/*.cpp)
 OB += $(call obj,$(KANZI_SRCS))
 endif
-#---- L -----------------------------------------------------------------------------------------------------------------------
+#---- L ------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard lib/.),)
 PLG_FLAGS+=-D_LIB
 endif
