@@ -166,7 +166,7 @@ jobs:
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-clang
             mingw-w64-x86_64-libgomp
-            mingw-w64-x86_64-llvm-openmp
+#           mingw-w64-x86_64-llvm-openmp
       - run: git submodule update --init --recursive
       - run: make OPENZL=0 PIVCO=0 RUST=0
       - name: Download silesia.tar.gz and gunzip → silesia.tar
