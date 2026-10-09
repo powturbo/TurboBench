@@ -8,19 +8,24 @@ on:
       - master
 jobs:
   linux:
+    name: ${{ matrix.os }}-${{ matrix.compiler }}
     runs-on: '${{ matrix.os }}'
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, ubuntu-26.04-arm]
         include:
-          - compiler: gcc
-            cxx: g++
-          - compiler: clang
-            cxx: clang++
-    env:
-      CC: ${{ matrix.compiler }}
-      CXX: ${{ matrix.cxx }}   
+          - os: ubuntu-latest
+          compiler: gcc
+          cxx: g++
+          - os: ubuntu-latest
+          compiler: clang
+          cxx: clang++
+          - os: ubuntu-26.04-arm
+          compiler: gcc
+          cxx: g++
+          - os: ubuntu-26.04-arm
+          compiler: clang
+          cxx: clang++
     steps:
       - uses: actions/checkout@v7
         with:
@@ -33,6 +38,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y nasm 
           sudo apt-get install libomp-dev
+      - run: make BLOSC=0 OPENZL=0 PIVCO=0 RUST=0
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
           curl -L -o silesia.tar.gz \
@@ -44,7 +50,6 @@ jobs:
           clang --version || true
           rustc --version
           cargo --version
-      - run: make BLOSC=0 OPENZL=0 PIVCO=0 RUST=0
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
       - run: ./turbobench silesia.tar -V0 -U
