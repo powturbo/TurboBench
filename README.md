@@ -202,6 +202,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Tornado](http://freearc.org) |  |c++  |  |
 | [Unishox](https://github.com/siara-cc/Unishox) |  |c  |short strings|
 | [wfLZ](https://github.com/ShaneWF/wflz) |  |c  |  |
+| [wzip](https://github.com/icodywu/WZIP) |  |c  |  |
 | [yalz77](https://github.com/ivan-tkatchev/yalz77) |  |c  |  |
 | [yappy v2011]() |  |c  |  |
 | [xpack](https://github.com/ebiggers/xpack) |  |  |  |
@@ -358,5 +359,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -eFAST -aFAST
 ```
 
-Last update: 01 OCT 2026
+Last update: 09 OCT 2026
 
