@@ -229,12 +229,12 @@ $(AOCL_ALIB): $(AOCL_SRCS)
 	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 BUILD_DIR=$(abspath $(AOCL_BDIR)) LIB_DIR=$(abspath $(AOCL_BDIR))/lib
 else
 ifneq ($(HAVE_OPENMP),0)
-  AOCL_OMP = -DAOCL_ENABLE_THREADS=1 -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ $(OMP_CFLAGS)       #-DOpenMP_CXX_FLAGS="-fopenmp" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=/usr/lib/llvm-*/lib/libomp.so 
+  AOCL_OMP = -DAOCL_ENABLE_THREADS=1 -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -D$(OMP_CFLAGS)       #-DOpenMP_CXX_FLAGS="-fopenmp" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=/usr/lib/llvm-*/lib/libomp.so 
   $(info OpenMP enabled for aocl)
 endif
 AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
 $(AOCL_ALIB): $(AOCL_SRCS)
-	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1 $(AOCL_OMP)
+	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1
 	$(CMAKE) --build $(AOCL_BDIR) --target install -j
 	@test -f $@ || (echo "ERROR: $@ was not produced by the install step"; exit 1)
 endif
@@ -531,18 +531,18 @@ endif
 ifneq ($(wildcard lzham_codec_devel/.),)
 ifneq ($(OS),Darwin)
 PLG_FLAGS+=-D_LZHAM 
-LZHAM_FLAGS :=-D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp
+LZHAM_FLAGS :=-D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -Wno-deprecated-enum-enum-conversion
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
 LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
 LZHAM_OBJS := $(call obj,$(LZHAM_SRCS))
 ifeq ($(OS), Windows)
 OB += $(call obj,lzham_codec_devel/lzhamcomp/lzham_win32_threading.o)
 else
-CXXFLAGS+=-DTHREAD_MODEL_POSIX
+LZHAM_FLAGS+=-DTHREAD_MODEL_POSIX
 endif
 $(LZHAM_OBJS): $(BUILD)/%.o: %.cpp | $(BUILD)
 	@mkdir -p $(dir $@)
-	$(CXX) -O3 $(LZHAM_FLAGS) -c $< -o $@
+	$(CXX) -O3 $(LZHAM_FLAGS)  -c $< -o $@
 OB+=$(LZHAM_OBJS)
 endif
 endif
