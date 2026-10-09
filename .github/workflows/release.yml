@@ -149,7 +149,10 @@ jobs:
           ./turbobench silesia.tar -U -V0
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
-          ls -la silesia.*.tar.md
+          ./turbobench silesia.tar -V0 -U -eBWT -abwt
+          ./turbobench silesia.tar -V0 -U -ebwtsatan,7x,8x,9x -b68m -abwt
+          ./turbobench silesia.tar@bwt.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
 
       # ------------------ Windows (MSYS2) ------------------
       - name: Set git to use LF
@@ -183,7 +186,11 @@ jobs:
           ./turbobench.exe silesia.tar -U -V0
           ./turbobench.exe silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
-          ls -la silesia.*.tar.md
+          ./turbobench silesia.tar -V0 -U -eBWT -abwt
+          ./turbobench silesia.tar -V0 -U -ebwtsatan,7x,8x,9x -b68m -abwt
+          ./turbobench silesia.tar@bwt.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
+#          ls -la silesia.*.tar.md
 
       # ------------------ Package (Linux / macOS) ------------------
       - name: Package artifact (Linux/macOS)
@@ -237,6 +244,7 @@ jobs:
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
             silesia.${{ matrix.name }}.tar.md
+            silesia.${{ matrix.name }}.tar@bwt.md
           if-no-files-found: ignore
 
   # ------------------------------------------------------------------
@@ -299,8 +307,8 @@ jobs:
             echo ""
           } > benchmark.md
 
-          for f in $(find artifacts -name 'silesia.*.tar.md' | sort); do
-            platform=$(basename "$f" | sed 's/^silesia\.//;s/\.tar\.md$//')
+          for f in $(find artifacts -name 'silesia.*.tar*.md' | sort); do
+            platform=$(basename "$f" | sed 's/^silesia\.//;s/\.tar.*\.md$//')
             echo "## Platform: ${platform}" >> benchmark.md
             echo "" >> benchmark.md
             cat "$f" >> benchmark.md
