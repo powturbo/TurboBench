@@ -98,7 +98,7 @@ jobs:
 #            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
 #          gunzip silesia.tar.gz
       - name: benchmark
-        if: matrix.compiler == 'gcc' 
+#        if: matrix.compiler == 'gcc' 
         run: |
           ./turbobench -l2
           ./turbobench turbobench -U -i0,0
