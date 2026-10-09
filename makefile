@@ -96,6 +96,7 @@ ifeq ($(ARCH),aarch64)
 else ifeq ($(ARCH),riscv64)
 #  CFLAGS=-march=rv64gc_zba_zbb_zbs
 #  CFLAGS=-mabi=lp64d -mno-strict-align
+  CFLAGS=-march=rv64gc -mabi=lp64d
   _SSE=-march=rv64gcv_zvbb
 else ifeq ($(ARCH),ppc64le)
   _SSE=-D__SSE4_1__
@@ -133,9 +134,6 @@ LDFLAGS += -ldl
 endif
 
 # ---------- OpenMP detection ----------
-# ---------------------------------------------------------------------------
-# OpenMP detection
-# ---------------------------------------------------------------------------
 HAVE_OPENMP := 0
 OMP_CFLAGS  :=
 OMP_LDFLAGS :=
@@ -187,17 +185,11 @@ endif
 ifneq ($(HAVE_OPENMP),0)
   $(info OpenMP enabled with $(OMP_LDFLAGS))
   LDFLAGS += $(OMP_LDFLAGS)
-#  ifeq ($(CXX),g++)
-#        OMP_LDFLAGS := -fopenmp
-#  else
-#    OMP_LDFLAGS := $(FOPENMP)
-#  endif
 endif
 
 $(info CC="$(CC)")
 $(info CXX="$(CXX)")
-LIBS :=
-#------------------------------------------------------------------------------------------------
+
 all: turbobench 
  
 # ***************************************************************** codecs *****************************************************************************
@@ -414,7 +406,6 @@ endif
 
 $(IGUANA_BD)/iguana:
 	mkdir -p $@
-#IGUANA_OBJS := $(OBJS_CX) $(OBJS_CX512)
 IGUANA_LIB  := $(IGUANA_BD)/libiguana.a
 $(IGUANA_LIB): $(OBJS_CX) $(OBJS_CX512) | $(IGUANA_BD)/iguana
 	$(AR) rcs $@ $^
@@ -438,9 +429,7 @@ PLG_FLAGS += -D_ISA_L
 ISAL_SRCS := $(shell find isa-l -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.cc' -o -name '*.asm' \))
 ISAL_LIB := $(BUILD)/bin/isa-l.a 
 $(ISAL_LIB): $(ISAL_SRCS)
-	@mkdir -p $(BUILD)/isa-l
-	@mkdir -p $(BUILD)/bin
-	@mkdir -p isa-l/bin
+	@mkdir -p $(BUILD)/isa-l $(BUILD)/bin isa-l/bin
 	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILD)/isa-l)
 	@mv isa-l/bin/isa-l.a $@
 endif
@@ -1439,6 +1428,10 @@ OB+=$(BUILD)/plugin.o
 $(BUILD)/plugin.o: plugin.cc | $(LIBS) 
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(MARCH) $(PLG_FLAGS) $(CXXFLAGS) -std=c++20  $< -c -o $@
+
+$(BUILD)/turbobench.o: turbobench.c | $(LIBS) 
+	@mkdir -p $(dir $@)
+	$(CC) -O3 $(MARCH) $(CFLAGS) -fno-tree-vectorize -fno-tree-loop-vectorize $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
 	$(CXX) $(filter-out $(LIBS),$^) $(LDFLAGS) $(LIBS) -o turbobench
