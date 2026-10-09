@@ -529,22 +529,20 @@ OB+=$(call obj,lzfse/src/lzfse_decode_base.o lzfse/src/lzfse_decode.o lzfse/src/
 endif
 
 ifneq ($(wildcard lzham_codec_devel/.),)
-ifneq ($(OS),Darwin)
+#ifneq ($(OS),Darwin)
 PLG_FLAGS+=-D_LZHAM 
 LZHAM_FLAGS :=-D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -Wno-deprecated-enum-enum-conversion
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
+ifneq ($(OS), Windows)
 LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
-LZHAM_OBJS := $(call obj,$(LZHAM_SRCS))
-ifeq ($(OS), Windows)
-OB += $(BUILD)/lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
-else
 LZHAM_FLAGS+=-DTHREAD_MODEL_POSIX
 endif
+LZHAM_OBJS := $(call obj,$(LZHAM_SRCS))
 $(LZHAM_OBJS): $(BUILD)/%.o: %.cpp | $(BUILD)
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(LZHAM_FLAGS)  -c $< -o $@
 OB+=$(LZHAM_OBJS)
-endif
+#endif
 endif
 
 LZ_LIB :=
