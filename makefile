@@ -133,63 +133,71 @@ LDFLAGS += -ldl
 endif
 
 # ---------- OpenMP detection ----------
+# ---------------------------------------------------------------------------
+# OpenMP detection
+# ---------------------------------------------------------------------------
 HAVE_OPENMP := 0
-FOPENMP     :=
 OMP_CFLAGS  :=
 OMP_LDFLAGS :=
-ifneq ($(OPENMP),0) 
+ifneq ($(OPENMP),0)
+  # Helper: compile a trivial program and return 1 on success, 0 on failure
+  define test_openmp
+  $(shell echo 'int main(void){return 0;}' | \
+    $(CC) $(1) $(2) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
+  endef
   ifeq ($(OS),Darwin)
+    # macOS – prefer Homebrew libomp
     LIBOMP_PREFIX := $(shell brew --prefix libomp 2>/dev/null)
     ifneq ($(LIBOMP_PREFIX),)
-      FOPENMP     := -Xpreprocessor -fopenmp
-      OMP_CFLAGS  := -I$(LIBOMP_PREFIX)/include
+      OMP_CFLAGS  := -Xpreprocessor -fopenmp -I$(LIBOMP_PREFIX)/include
       OMP_LDFLAGS := -L$(LIBOMP_PREFIX)/lib -lomp
-      ifneq ($(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) $(OMP_CFLAGS) $(OMP_LDFLAGS) -x c - -o /dev/null 2>/dev/null && echo ok),)
-        HAVE_OPENMP := 1
-      endif
+      HAVE_OPENMP := $(call test_openmp,$(OMP_CFLAGS),$(OMP_LDFLAGS))
     endif
   else ifneq (,$(filter MINGW% MSYS% UCRT% CLANG%,$(MSYSTEM)))
-    # Windows / MSYS2 – test whether -fopenmp actually works
-    FOPENMP     := -fopenmp
-    ifeq ($(findstring clang,$(CC)),clang)
+    # Windows / MSYS2
+    OMP_CFLAGS := -fopenmp
+    ifeq ($(findstring clang,$(CXX)),clang)
       OMP_LDFLAGS := -lomp
     else
       OMP_LDFLAGS := -lgomp
     endif
-    HAVE_OPENMP := $(shell \
-      echo '#include <omp.h>' > _omp_test.c && \
-      echo 'int main(){return omp_get_max_threads();}' >> _omp_test.c && \
-      $(CC) $(FOPENMP) _omp_test.c -o _omp_test $(OMP_LDFLAGS) 2>/dev/null && \
-      echo 1 || echo 0; \
-      rm -f _omp_test.c _omp_test _omp_test.exe)
+    HAVE_OPENMP := $(call test_openmp,$(OMP_CFLAGS),$(OMP_LDFLAGS))
   else
-    # Linux
-    ifeq ($(findstring clang,$(CC)),clang)
-      FOPENMP := -fopenmp=libgomp
-    else
-      FOPENMP := -fopenmp
+    # Linux and other Unix-like systems
+    OMP_CFLAGS  := -fopenmp
+    OMP_LDFLAGS := -fopenmp
+    HAVE_OPENMP := $(call test_openmp,$(OMP_CFLAGS),$(OMP_LDFLAGS))
+    # Fallback for some Clang installations that need an explicit runtime
+    ifeq ($(HAVE_OPENMP),0)
+      ifeq ($(findstring clang,$(CXX)),clang)
+        OMP_LDFLAGS := -fopenmp=libomp
+        HAVE_OPENMP := $(call test_openmp,$(OMP_CFLAGS),$(OMP_LDFLAGS))
+        ifeq ($(HAVE_OPENMP),0)
+          OMP_LDFLAGS := -fopenmp=libgomp
+          HAVE_OPENMP := $(call test_openmp,$(OMP_CFLAGS),$(OMP_LDFLAGS))
+        endif
+      endif
     endif
-    HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CC) $(FOPENMP) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
+  endif
+  ifeq ($(HAVE_OPENMP),0)
+    $(warning OpenMP not available)
+    OMP_CFLAGS  :=
+    OMP_LDFLAGS :=
   endif
 endif
 
-ifeq ($(HAVE_OPENMP),0)
-  $(warning OpenMP not available)
-  FOPENMP :=
-else
-  $(info OpenMP enabled with $(FOPENMP))
-  CFLAGS_BWT += -DLIBSAIS_OPENMP $(OMP_CFLAGS)
-  CFLAGS     += -DLIBSAIS_OPENMP
+ifneq ($(HAVE_OPENMP),0)
+  $(info OpenMP enabled with $(OMP_LDFLAGS))
   LDFLAGS += $(OMP_LDFLAGS)
+#  ifeq ($(CXX),g++)
+#    OMP_LDFLAGS := -fopenmp
+#  else
+#    OMP_LDFLAGS := $(FOPENMP)
+#  endif
 endif
 
 $(info CC="$(CC)")
 $(info CXX="$(CXX)")
-ifeq ($(CXX),g++)
-  LFOPENMP := -fopenmp
-else
-  LFOPENMP := $(FOPENMP)
-endif
 
 #------------------------------------------------------------------------------------------------
 all: turbobench 
@@ -455,27 +463,26 @@ endif
 
 ifneq ($(wildcard libbsc/.),)
 PLG_FLAGS+=-D_LIBBSC
-LIBBSC_CXXFLAGS = -DLIBBSC_SORT_TRANSFORM_SUPPORT -DLIBBSC_OPENMP_SUPPORT -ICSC/src/libcsc
-LIBBSC_CFLAGS := 
-LIBBSC_LDFLAGS :=
 ifneq ($(HAVE_OPENMP),0)
-  LIBBSC_CFLAGS  = -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP $(OMP_CFLAGS) $(FOPENMP) -Wno-deprecated-openmp
+  LIBBSC_FLAGS   := -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP $(OMP_CFLAGS)
+  LIBSAIS_CFLAGS := -DLIBSAIS_OPENMP $(OMP_CFLAGS) -Wno-deprecated-openmp
   $(info OpenMP enabled for libbsc)
 endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
       $(BUILD)/libbsc/libbsc/filters/preprocessing.o $(BUILD)/libbsc/libbsc/adler32/adler32.o $(BUILD)/libbsc/libbsc/bwt/bwt.o $(BUILD)/libbsc/libbsc/st/st.o $(BUILD)/libbsc/libbsc/lzp/lzp.o \
       $(BUILD)/libbsc/libbsc/platform/platform.o $(BUILD)/libbsc/libbsc/bwt/libsais/libsais.o
+
 $(BUILD)/libbsc/%.o: libbsc/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) -O3 $(LIBBSC_CXXFLAGS)  -c $< -o $@
+	$(CXX) -O3 $(LIBBSC_FLAGS) -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc -c $< -o $@
 
 $(BUILD)/libbsc/%.o: libbsc/%.c
 	@mkdir -p $(dir $@)
-	$(CC) -O3 $(LIBBSC_CFLAGS) -Wno-deprecated-openmp -c $< -o $@
+	$(CC) -O3 $(LIBSAIS_CFLAGS) -c $< -o $@
 LIBSAIS = 1
 endif
 
-ifneq ($(wildcard libbsc000/.),)
+ifneq ($(wildcard libbsc_cmake/.),)
 PLG_FLAGS+=-D_LIBBSC
 LIBBSC_SRCS := $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
       $(BUILD)/libbsc/libbsc/filters/preprocessing.o $(BUILD)/libbsc/libbsc/adler32/adler32.o $(BUILD)/libbsc/libbsc/bwt/bwt.o $(BUILD)/libbsc/libbsc/st/st.o $(BUILD)/libbsc/libbsc/lzp/lzp.o \
@@ -541,13 +548,6 @@ $(LZHAM_OBJS): $(BUILD)/%.o: %.cpp | $(BUILD)
 OB+=$(LZHAM_OBJS)
 endif
 endif
-
-
-CXXFLAGS+=-D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp
-LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
-LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
-
-
 
 LZ_LIB :=
 LZ_DIR=../lz
@@ -856,15 +856,15 @@ $(RC_LIB): $(RC_SRCS)
 	@mkdir -p $(RC_BDIR)
 	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT" $(abspath $(RC_BDIR))/librc.a
 LIBS += $(RC_LIB)
-# libsais16 is not included in libbsc 
+# libsais16 is not included in libbsc
 ifneq ($(HAVE_OPENMP),0)
-LIBSAIS16_FLAGS = -DLIBSAIS_OPENMP $(OMP_CFLAGS) $(FOPENMP) -Wno-deprecated-openmp
+LIBSAIS_FLAGS = -DLIBSAIS_OPENMP $(OMP_CFLAGS) -Wno-deprecated-openmp
 $(info OpenMP enabled for Turbo-Range-Coder/libsais16)
 endif
 LIBSAIS16 := $(RC_BDIR)/libsais/src/libsais16.o
 $(LIBSAIS16) : $(RC_DIR)/libsais/src/libsais16.c
 	@mkdir -p $(dir $@)
-	$(CC) -O3 -I$(RC_DIR)/libsais/include $(FOPENMP) $(LIBSAIS16_FLAGS) $< -c -o $@
+	$(CC) -O3 -I$(RC_DIR)/libsais/include $(LIBSAIS_FLAGS) $< -c -o $@
 OB += $(LIBSAIS16)
 endif
 endif
@@ -1445,7 +1445,7 @@ $(BUILD)/plugin.o: plugin.cc | $(LIBS)
 	$(CXX) -O3 $(MARCH) $(PLG_FLAGS) $(CXXFLAGS) -std=c++20  $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
-	$(CXX) $^ $(LDFLAGS) $(LIBS) $(LFOPENMP) -o turbobench
+	$(CXX) $^ $(LDFLAGS) $(LIBS) -o turbobench
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
