@@ -196,7 +196,7 @@ endif
 
 $(info CC="$(CC)")
 $(info CXX="$(CXX)")
-
+LIBS :=
 #------------------------------------------------------------------------------------------------
 all: turbobench 
  
@@ -536,7 +536,7 @@ LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_cod
 LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
 LZHAM_OBJS := $(call obj,$(LZHAM_SRCS))
 ifeq ($(OS), Windows)
-OB += $(call obj,lzham_codec_devel/lzhamcomp/lzham_win32_threading.o)
+OB += $(BUILD)/lzham_codec_devel/lzhamcomp/lzham_win32_threading.o
 else
 LZHAM_FLAGS+=-DTHREAD_MODEL_POSIX
 endif
@@ -1443,7 +1443,7 @@ $(BUILD)/plugin.o: plugin.cc | $(LIBS)
 	$(CXX) -O3 $(MARCH) $(PLG_FLAGS) $(CXXFLAGS) -std=c++20  $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
-	$(CXX) $^ $(LDFLAGS) $(LIBS) -o turbobench
+	$(CXX) $(filter-out $(LIBS),$^) $(LDFLAGS) $(LIBS) -o turbobench
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
