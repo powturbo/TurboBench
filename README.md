@@ -147,73 +147,73 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | Compressor | Added | Language | Comment |
 |---|---|---|---|
 | [LzTurbo](https://sites.google.com/site/powturbo) |  |c  |  |
-| [aceapex](https://github.com/yasha1971-coder/aceapex) |2026/10|c++/cuda  |  |
+| [aceapex](https://github.com/yasha1971-coder/aceapex) |2026/10|c++/cuda  |lz  |
 | [AMD AOCL](https://github.com/amd/aocl-compression) | 2026/09 |c++  |tuned lz4,zstd,bzip2 for amd64  |
-| [BriefLz](https://github.com/jibsen/brieflz) |  |c  |  |
-| [Brotli](https://github.com/google/brotli) |  |c  |  |
-| [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) |  |c  |  |
-| [CSC](https://github.com/fusiyuan2010/CSC) |  |c  |  |
-| [Density](https://github.com/g1mv/density) | 2026/09 | rust |  |
-| [Doboz](https://bitbucket.org/attila_afra) |  |c  |  |
-| [FastLz](http://fastlz.org) |  |c  |  |
-| [Fast-lzma](https://github.com/conor42/fast-lzma2) |  |c  |  |
-| [glza](https://github.com/kidq330/GLZA) |  |c  |  |
-| [Glyd](https://github.com/surya-koritala/Glyd) | 2026/09 | rust |  |
+| [BriefLz](https://github.com/jibsen/brieflz) |  |c  |lz  |
+| [Brotli](https://github.com/google/brotli) |  |c  |lz+huffman  |
+| [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) |  |c  |lz  |
+| [CSC](https://github.com/fusiyuan2010/CSC) |  |c  |lz  |
+| [Density](https://github.com/g1mv/density) | 2026/09 | rust |lz  |
+| [Doboz](https://bitbucket.org/attila_afra) |  |c  |lz  |
+| [FastLz](http://fastlz.org) |  |c  |lz  |
+| [Fast-lzma](https://github.com/conor42/fast-lzma2) |  |c  |lz+range coder  |
+| [glza](https://github.com/kidq330/GLZA) |  |c  |lz+huffman  |
+| [Glyd](https://github.com/surya-koritala/Glyd) | 2026/09 | rust |lz+huffman/tans  |
 | [heatshrink](https://github.com/atomicobject/heatshrink) |  |c  |short strings|
 | [Iguana](https://github.com/ClickHouse/iguana) | 2026/09 |c++  |Not reliable|
-| [Intel(R) ISA-L](https://github.com/01org/isa-l) |  |c  |  |
+| [Intel(R) ISA-L](https://github.com/01org/isa-l) |  |c  |lz+huffman, zlib compatible|
 | [kanzi](https://github.com/flanglet/kanzi-cpp) | 2026/07 |c++  |lz,bwt,paq|
 | [lib](https://github.com/vurtun/lib) | 2026/09 |c  |  |
-| [Libdeflate](https://github.com/ebiggers/libdeflate) |  |c  |  |
-| [LibLZF](http://oldhome.schmorp.de/marc/liblzf.html) |  |c  |  |
-| [LibLz](https://github.com/mbitsnbites/liblzg) |  |c  |  |
-| [LibSLZ](https://github.com/wtarreau/libslz) |  |c  |  |
-| [Lz4](https://github.com/Cyan4973/lz4) |  |c  |  |
-| [Lz4ultra](https://github.com/emmanuel-marty/lz4ultra) |  |c  |  |
-| [lzjody](https://github.com/deep-soft/lzjody) |  |c  |  |
-| [lizard](https://github.com/inikep/lz5) |  |c  |  |
-| [Lzfse](https://github.com/lzfse/lzfse) |  |c  |  |
-| [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) |  |c++  |  |
-| [Lzlib](https://github.com/aonez/lzlib) | 2026/09 |c  |  |
-| [Lzmat](https://github.com/nemequ/lzmat) |  |c  |  |
-| [Lzma](http://7-zip.org) |  |c  |  |
-| [Lzo](http://www.oberhumer.com/opensource/lzo) |  |c  |  |
-| [Lzoma](https://github.com/alef78/lzoma) |  |c  |  |
-| [lzraven](https://github.com/anat0m1a/liblzraven) | 2026/09 |c  |Apple's lzraven reimplementation|
-| [LZSSE](https://github.com/ConorStokes/LZSSE) |  |c  |  |
-| [LZSA](https://github.com/emmanuel-marty/lzsa) |  |c  |  |
+| [Libdeflate](https://github.com/ebiggers/libdeflate) |  |c  |lz+huffman  |
+| [LibLZF](http://oldhome.schmorp.de/marc/liblzf.html) |  |c  |lz  |
+| [LibLz](https://github.com/mbitsnbites/liblzg) |  |c  |lz  |
+| [LibSLZ](https://github.com/wtarreau/libslz) |  |c  |lz+huffman, zlib |
+| [Lz4](https://github.com/Cyan4973/lz4) |  |c  |lz  |
+| [Lz4ultra](https://github.com/emmanuel-marty/lz4ultra) |  |c  |lz  |
+| [lzjody](https://github.com/deep-soft/lzjody) |  |c  |lz |
+| [lizard](https://github.com/inikep/lz5) |  |c  |lz+byte+huffman |
+| [Lzfse](https://github.com/lzfse/lzfse) |  |c  |lz+tans  |
+| [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) |  |c++  |lz+huffman  |
+| [Lzlib](https://github.com/aonez/lzlib) | 2026/09 |c  |lz+range coder  |
+| [Lzmat](https://github.com/nemequ/lzmat) |  |c  |lz  |
+| [Lzma](http://7-zip.org) |  |c  |lz+range coder |
+| [Lzo](http://www.oberhumer.com/opensource/lzo) |  |c  |lz  |
+| [Lzoma](https://github.com/alef78/lzoma) |  |c  |lz  |
+| [lzraven](https://github.com/anat0m1a/liblzraven) | 2026/09 |c  |Apple's reimplementation|
+| [LZSSE](https://github.com/ConorStokes/LZSSE) |  |c  |lz  |
+| [LZSA](https://github.com/emmanuel-marty/lzsa) |  |c  |lz  |
 | [mbrotli](https://github.com/Mnwa/mbrotli) | 2026/09 | rust |Brotli reimplementation|
-| [Memlz](https://github.com/rrrlasse/memlz) | 2026/07 |c  |  |
-| [Miniz](https://github.com/richgel999/miniz) |  |c  |  |
-| [misa77](https://github.com/welcome-to-the-sunny-side/misa77) | 2026/07 |c++ |  |
-| [ms-compress](https://github.com/coderforlife/ms-compress) |  |c++  |  |
+| [Memlz](https://github.com/rrrlasse/memlz) | 2026/07 |c  |lz  |
+| [Miniz](https://github.com/richgel999/miniz) |  |c  |lz+huffman  |
+| [misa77](https://github.com/welcome-to-the-sunny-side/misa77) | 2026/07 |c++ |lz  |
+| [ms-compress](https://github.com/coderforlife/ms-compress) |  |c++  |lz  |
 | [mzip](https://github.com/Cranot/mzip) |2026/09  |c  |too slow|
 | [Oodle](http://www.radgametools.com/oodle.htm) |  |c++  |windows/linux/macos x86_64/arm64|
-| [Pithy](https://github.com/johnezang/pithy) |  |c  |  |
-| [Quicklz](https://github.com/robottwo/quicklz) |  |c  |  |
-| [sap](https://github.com/CoreSecurity/pysap) |  |c++|  |
+| [Pithy](https://github.com/johnezang/pithy) |  |c  |lz  |
+| [Quicklz](https://github.com/robottwo/quicklz) |  |c  |lz  |
+| [sap](https://github.com/CoreSecurity/pysap) |  |c++|lz+huffman  |
 | [shoco](https://github.com/Ed-von-Schleck/shoco) |  |c  |short strings|
-| [Shrinker](https://code.google.com/p/data-shrinker) |  |c  |  |
-| [Smallz4](https://github.com/stbrumme/smallz4) |  |c  |  |
+| [Shrinker](https://code.google.com/p/data-shrinker) |  |c  |lz  |
+| [Smallz4](https://github.com/stbrumme/smallz4) |  |c  |lz  |
 | [smaz](https://github.com/antirez/smaz) |  |c  |short strings  |
-| [Snappy](https://github.com/google/snappy) |  |c++ |  |
-| [Snappy-c](https://github.com/andikleen/snappy-c) |  |c  |  |
+| [Snappy](https://github.com/google/snappy) |  |c++ |lz  |
+| [Snappy-c](https://github.com/andikleen/snappy-c) |  |c  |lz  |
 | [Tamp](https://github.com/BrianPugh/tamp) | 2026/07 |c |  |
-| [Tornado](http://freearc.org) |  |c++  |  |
+| [Tornado](http://freearc.org) |  |c++  |lz+huffman  |
 | [Unishox](https://github.com/siara-cc/Unishox) |  |c  |short strings|
-| [wfLZ](https://github.com/ShaneWF/wflz) |  |c  |  |
-| [wzip](https://github.com/icodywu/WZIP) |  |c  |  |
-| [yalz77](https://github.com/ivan-tkatchev/yalz77) |  |c  |  |
-| [yappy v2011]() |  |c  |  |
-| [xpack](https://github.com/ebiggers/xpack) |  |  |  |
-| [xz](https://github.com/tukaani-project/xz) | 2026/05 |c  |  |
-| [zlib](http://zlib.net) |  |c  |  |
-| [zlib-ng](https://github.com/Dead2/zlib-ng) |  |c  |  |
-| [zlib cloudflare](https://github.com/cloudflare/zlib) |  |  |  |
-| [zopfli](https://code.google.com/p/zopfli) |  |c  |  |
-| [zstd](https://github.com/facebook/zstd) |  |c  |  |
-| [zpaq](https://github.com/zpaq/zpaq) |  |c++  |  |
-| [zxc](https://github.com/hellobertrand/zxc) | 2026/05 |c  |  |
+| [wfLZ](https://github.com/ShaneWF/wflz) |  |c  |lz  |
+| [wzip](https://github.com/icodywu/WZIP) |26/10  |c  |wlz4:lz  wzip:lz+huffman  |
+| [yalz77](https://github.com/ivan-tkatchev/yalz77) |  |c  |lz  |
+| [yappy v2011]() |  |c  |lz  |
+| [xpack](https://github.com/ebiggers/xpack) |  |  |lz+huffman  |
+| [xz](https://github.com/tukaani-project/xz) | 2026/05 |c  |lz+range coder  |
+| [zlib](http://zlib.net) |  |c  |lz+huffman  |
+| [zlib-ng](https://github.com/Dead2/zlib-ng) |  |c  |lz+huffman  |
+| [zlib cloudflare](https://github.com/cloudflare/zlib) |c  |  |lz+huffman  |
+| [zopfli](https://code.google.com/p/zopfli) |  |c  |lz+huffman  |
+| [zstd](https://github.com/facebook/zstd) |  |c  |lz+huffman/tans  |
+| [zpaq](https://github.com/zpaq/zpaq) |  |c++  |paq+range coder  |
+| [zxc](https://github.com/hellobertrand/zxc) | 2026/05 |c  |lz  |
 
 #### BWT - Burrows–Wheeler transform:
 | Compressor | Added | Language | Comment |
