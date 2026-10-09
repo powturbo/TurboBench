@@ -188,7 +188,7 @@ ifneq ($(HAVE_OPENMP),0)
   $(info OpenMP enabled with $(OMP_LDFLAGS))
   LDFLAGS += $(OMP_LDFLAGS)
 #  ifeq ($(CXX),g++)
-#       OMP_LDFLAGS := -fopenmp
+#        OMP_LDFLAGS := -fopenmp
 #  else
 #    OMP_LDFLAGS := $(FOPENMP)
 #  endif
