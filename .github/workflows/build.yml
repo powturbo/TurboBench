@@ -68,17 +68,12 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq build-essential nasm make gcc-14 g++-14 clang-20
-          sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-15  100
-          sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-15  100
-          sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-15  100
-          sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-15  100
+          sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
+          sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
+          sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
+          sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
           sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
           sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
-      - name: Download silesia.tar.gz and gunzip → silesia.tar
-        run: |
-          curl -L -o silesia.tar.gz \
-            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-          gunzip silesia.tar.gz
       - name: Show environment
         run: |
           uname -m
@@ -92,6 +87,11 @@ jobs:
           cargo --version
       - name: make 
         run: make AOCL=0 BLOSC=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0 
+      - name: Download silesia.tar.gz and gunzip → silesia.tar
+        run: |
+          curl -L -o silesia.tar.gz \
+            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+          gunzip silesia.tar.gz
       - name: benchmark
         if: matrix.compiler == 'gcc' 
         run: |
@@ -117,6 +117,7 @@ jobs:
         run: |
           brew install nasm libomp
           cc -v
+      - run: make OPENZL=0 PIVCO=0 RUST=0
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
           curl -L -o silesia.tar.gz https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
@@ -125,7 +126,6 @@ jobs:
           gunzip NASA_access_log_Jul95.gz
           wget https://codeberg.org/pbm/former/raw/branch/master/data/enwik8.gz
           gunzip enwik8.gz
-      - run: make OPENZL=0 PIVCO=0 RUST=0
       - run: sysctl -n machdep.cpu.brand_string
       - run: ./turbobench -l2
       - run: ./turbobench turbobench -V0 -U
@@ -163,6 +163,7 @@ jobs:
             mingw-w64-x86_64-libgomp
             mingw-w64-x86_64-llvm-openmp
       - run: git submodule update --init --recursive
+      - run: make OPENZL=0 PIVCO=0 RUST=0
       - name: Download silesia.tar.gz and gunzip → silesia.tar
         run: |
           curl -L -o silesia.tar.gz \
@@ -172,7 +173,6 @@ jobs:
           gunzip NASA_access_log_Jul95.gz
           wget https://codeberg.org/pbm/former/raw/branch/master/data/enwik8.gz 
           gunzip enwik8.gz
-      - run: make OPENZL=0 PIVCO=0 RUST=0
       - run: ./turbobench -l2
       - run: ./turbobench turbobench.exe -U -V0
       - run: ./turbobench.exe silesia.tar -U -V0
