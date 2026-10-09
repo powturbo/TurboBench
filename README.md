@@ -202,7 +202,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Tornado](http://freearc.org) |  |c++  |lz+huffman  |
 | [Unishox](https://github.com/siara-cc/Unishox) |  |c  |short strings|
 | [wfLZ](https://github.com/ShaneWF/wflz) |  |c  |lz  |
-| [wzip](https://github.com/icodywu/WZIP) |26/10  |c  |wlz4:lz  wzip:lz+huffman  |
+| [wzip](https://github.com/icodywu/WZIP) |2026/10  |c  |wlz4:lz  wzip:lz+huffman  |
 | [yalz77](https://github.com/ivan-tkatchev/yalz77) |  |c  |lz  |
 | [yappy v2011]() |  |c  |lz  |
 | [xpack](https://github.com/ebiggers/xpack) |  |  |lz+huffman  |
