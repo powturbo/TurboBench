@@ -102,9 +102,7 @@ jobs:
         run: |
           ./turbobench -l2
           ./turbobench turbobench -U -i0,0
-          ./turbobench turbobench -U -eBWT -abwt -i0,0
-#          ./turbobench silesia.tar -U -i0,0
-#          ./turbobench silesia.tar -U -eBWT -abwt -i0,0
+#         ./turbobench silesia.tar -U -i0,0
 
   macos:
     runs-on: '${{ matrix.os }}'
