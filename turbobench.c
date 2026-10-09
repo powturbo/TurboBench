@@ -2282,6 +2282,7 @@ int main(int argc, char* argv[]) {
       if(g->tdk < g->td) g->td = g->tdk;
     }
   }
+  printf("end beench\n"); fflush(stdout);
     BENCHSTA;
   if(argc - optind > 1) {
     unsigned clen = strpref(&argvx[optind], argc-optind, '\\', '/');
@@ -2300,6 +2301,7 @@ int main(int argc, char* argv[]) {
     if((p = strrchr(finame, '\\')) || (p = strrchr(finame, '/')))
       finame = p+1;
   }
+  printf("end bench2\n"); fflush(stdout);
   if(!totinlen) exit(0);
   sprintf(s, "%s%s.tbb", finame, fsuffix);
   if(merge /*|| tm_rep <= 1 && tm_rep2 <= 1*/) {
@@ -2307,7 +2309,6 @@ int main(int argc, char* argv[]) {
       plugprts(plugt, k, s, 1, totinlen, FMT_TEXT, rem);
     exit(0);
   }
-  printf("build .tab file\n"); fflush(stdout);
   long long _totinlen;
   int       gk = plugread(plug, s, &_totinlen); 
   if(_totinlen != totinlen)
