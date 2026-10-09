@@ -528,14 +528,16 @@ ifneq ($(OS),Darwin)
 PLG_FLAGS+=-D_LZHAM 
 LZHAM_FLAGS :=-D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
-ifneq ($(OS), Windows)
 LZHAM_FLAGS +=-DTHREAD_MODEL_POSIX
 LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
-else
-ifeq ($(OS),Darwin)
-LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
-endif
-endif
+#ifneq ($(OS), Windows)
+#LZHAM_FLAGS +=-DTHREAD_MODEL_POSIX
+#LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
+#else
+#ifeq ($(OS),Darwin)
+#LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
+#endif
+#endif
 LZHAM_OBJS += $(call obj,$(LZHAM_SRCS))
 $(LZHAM_OBJS): $(BUILD)/%.o: %.cpp | $(BUILD)
 	@mkdir -p $(dir $@)
@@ -874,7 +876,7 @@ $(TSQ_LIB): $(TSQ_SRCS)
 LIBS += $(TSQ_LIB)
 endif
 
-#--- W -------------------------
+#--- W ------------------------------------------------------------------------------------------------------------------
 # wzip: WLZ4 and WZIP (plain C); WZIP's levels 7-13 find matches in threads of their own (t#)
 ifneq ($(wildcard wzip/.),)
 PLG_FLAGS += -D_WZIP
@@ -885,7 +887,7 @@ $(BUILD)/$(WZIP_SRC)/%.o: $(WZIP_SRC)/%.c
 OB += $(call obj,$(addprefix $(WZIP_SRC)/,WLZ4.c WZIP_L.c WZIP_M.c WZIP_wrapper.c Huffman_Compress.c Huffman_Decompress.c))
 endif
 
-#--- X -------------------------
+#--- X --------------------------------------------------------------------------------------------------------------------
 XZ_LIB :=
 ifneq ($(wildcard xz/.),)
 PLG_FLAGS += -D_XZ
@@ -901,7 +903,7 @@ endif
 LIBS += $(XZ_LIB)
 endif
 
-#--- Z -------------------------
+#--- Z --------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard zlib/.),)
 PLG_FLAGS+=-D_ZLIB
 ZD=zlib/
