@@ -528,16 +528,8 @@ ifneq ($(OS),Darwin)
 PLG_FLAGS+=-D_LZHAM 
 LZHAM_FLAGS :=-D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
-LZHAM_FLAGS +=-DTHREAD_MODEL_POSIX
 LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
-#ifneq ($(OS), Windows)
-#LZHAM_FLAGS +=-DTHREAD_MODEL_POSIX
-#LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
-#else
-#ifeq ($(OS),Darwin)
-#LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
-#endif
-#endif
+LZHAM_FLAGS +=-DTHREAD_MODEL_POSIX
 LZHAM_OBJS += $(call obj,$(LZHAM_SRCS))
 $(LZHAM_OBJS): $(BUILD)/%.o: %.cpp | $(BUILD)
 	@mkdir -p $(dir $@)
