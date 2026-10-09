@@ -15,17 +15,17 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-          compiler: gcc
-          cxx: g++
+            compiler: gcc
+            cxx: g++
           - os: ubuntu-latest
-          compiler: clang
-          cxx: clang++
+            compiler: clang
+            cxx: clang++
           - os: ubuntu-26.04-arm
-          compiler: gcc
-          cxx: g++
+            compiler: gcc
+            cxx: g++
           - os: ubuntu-26.04-arm
-          compiler: clang
-          cxx: clang++
+            compiler: clang
+            cxx: clang++
     steps:
       - uses: actions/checkout@v7
         with:
