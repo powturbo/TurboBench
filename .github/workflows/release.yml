@@ -140,7 +140,6 @@ jobs:
           update: true
           install: >-
             git zip make cmake rsync
-#            ${{ matrix.mingw_pkg }}
             mingw-w64-ucrt-x86_64-gcc
             mingw-w64-ucrt-x86_64-clang
             mingw-w64-ucrt-x86_64-libgomp
@@ -150,10 +149,10 @@ jobs:
         shell: msys2 {0}
         run: |
           gcc --version
-          g++ --version
-          clang --version
-          clang++ --version          
-          make STATIC=1 PHAZ=0 RUST=0
+          clang --version || true
+#          rustc --version
+#          cargo --version
+          make STATIC=1 PHAZ=0
       - name: Generate silesia.tar.md (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
