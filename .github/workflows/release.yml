@@ -88,7 +88,6 @@ jobs:
       - name: Show environment
         run: |
           uname -m
-          lscpu
           echo "=== Using CC=$CC ==="
           make -p -f /dev/null | grep '^CXX'
           $CC --version
