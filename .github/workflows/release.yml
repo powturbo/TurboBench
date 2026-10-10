@@ -146,7 +146,14 @@ jobs:
       - name: Build (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
-        run: make STATIC=1 PHAZ=0
+        run: |
+          make -p -f /dev/null | grep '^CXX'
+          $CC --version
+          gcc --version
+          clang --version || true
+          rustc --version
+          cargo --version
+          make STATIC=1 PHAZ=0
       - name: Generate silesia.tar.md (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
