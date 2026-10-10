@@ -520,27 +520,29 @@ endif
 
 ifneq ($(wildcard lzham_codec_devel/.),)
 ifneq ($(OS),Darwin)
-PLG_FLAGS+=-D_LZHAM 
-LZHAM_FLAGS :=-D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -Wno-deprecated-enum-enum-conversion
+PLG_FLAGS += -D_LZHAM
+LZHAM_FLAGS := -D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -Wno-deprecated-enum-enum-conversion
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
-ifeq ($(OS), Windows)
-$(BUILD)/lzham_codec_devel/lzhamdecomp/lzham_platform.o: lzham_codec_devel/lzhamdecomp/lzham_platform.cpp | $(BUILD)
+ifneq (,$(filter Windows%,$(OS)))
+  # Special rule required for lzham_platform.cpp – force MSVC-style path
+  $(BUILD)/lzham_codec_devel/lzhamdecomp/lzham_platform.o: \
+      lzham_codec_devel/lzhamdecomp/lzham_platform.cpp | $(BUILD)
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(LZHAM_FLAGS) -D_MSC_VER -c $< -o $@
 else
-LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp, $(LZHAM_SRCS))
-LZHAM_FLAGS+=-DTHREAD_MODEL_POSIX
+  LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp,$(LZHAM_SRCS))
+  LZHAM_FLAGS += -DTHREAD_MODEL_POSIX
 endif
 LZHAM_OBJS := $(call obj,$(LZHAM_SRCS))
 $(LZHAM_OBJS): $(BUILD)/%.o: %.cpp | $(BUILD)
 	@mkdir -p $(dir $@)
-	$(CXX) -O3 $(LZHAM_FLAGS)  -c $< -o $@
-OB+=$(LZHAM_OBJS)
+	$(CXX) -O3 $(LZHAM_FLAGS) -c $< -o $@
+OB += $(LZHAM_OBJS)
 endif
 endif
 
 LZ_LIB :=
-LZ_DIR=../lz
+LZ_DIR=../lz0
 ifneq ($(wildcard $(LZ_DIR)/.),)
 PLG_FLAGS+=-D_LZ
 LZ_SRCS := $(shell find $(LZ_DIR)/lib -type f -name '*.[c]')
@@ -723,7 +725,7 @@ OODLE_STATIC_LIB := $(OODLE_DIR)/lib/Linux/liboo2corelinux64.a
 else
 OODLE_STATIC_LIB := pivco-huffman/ext/oodle/build-out/ar/liboodle-data-static.a
 endif 
-OB += $(call obj,$(LZHAM_SRCS)) pivco-huffman/extras/bench/bench_oodle_wrapper.o
+OB += $(BUILD)/pivco-huffman/extras/bench/bench_oodle_wrapper.o
 LIBS+=$(OODLE_STATIC_LIB)
 endif
 
