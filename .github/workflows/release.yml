@@ -95,7 +95,8 @@ jobs:
             make STATIC=1 PHAZ=0
           fi
       - name: Generate silesia.tar.md (Linux)
-        if: matrix.platform == 'linux' && matrix.os != 'ubuntu-24.04-riscv'
+        if: matrix.platform == 'linux' 
+#           && matrix.os != 'ubuntu-24.04-riscv'
         run: |
           curl -L -o silesia.tar.gz \
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
