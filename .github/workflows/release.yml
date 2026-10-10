@@ -2,7 +2,7 @@ name: Build & Release
 
 on:
   push:
-    branches: [main, master]
+#    branches: [main, master]
     tags: ['v*']
   pull_request:
   workflow_dispatch:
@@ -18,70 +18,38 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # ---------- Linux (both gcc + clang) ----------
-          - name: linux-x86_64-gcc
+          - name: linux-x86_64
             os: ubuntu-latest
             platform: linux
             arch: x86_64
-            compiler: gcc
-
-          - name: linux-x86_64-clang
-            os: ubuntu-latest
-            platform: linux
-            arch: x86_64
-            compiler: clang
-
-          - name: linux-aarch64-gcc
+          - name: linux-aarch64
             os: ubuntu-24.04-arm
             platform: linux
             arch: aarch64
-            compiler: gcc
-
-          - name: linux-aarch64-clang
-            os: ubuntu-24.04-arm
-            platform: linux
-            arch: aarch64
-            compiler: clang
-
-          - name: linux-riscv64-gcc
+          - name: linux-riscv64
             os: ubuntu-24.04-riscv
             platform: linux
             arch: riscv64
-            compiler: gcc
-
-          # clang on riscv is often problematic / not needed
-          # - name: linux-riscv64-clang
-          #   os: ubuntu-24.04-riscv
-          #   platform: linux
-          #   arch: riscv64
-          #   compiler: clang
-
-          # ---------- macOS ----------
-          # - name: macos-x86_64
-          #   os: macos-13
-          #   platform: macos
-          #   arch: x86_64
-
+#          - name: macos-x86_64
+#            os: macos-13
+#            platform: macos
+#            arch: x86_64
           - name: macos-aarch64
             os: macos-26
             platform: macos
             arch: aarch64
-            compiler: clang
-
-          # ---------- Windows ----------
           - name: windows-x86_64
             os: windows-latest
             platform: windows
             arch: x86_64
             msystem: UCRT64
             mingw_pkg: mingw-w64-ucrt-x86_64-gcc
-
-          # - name: windows-aarch64
-          #   os: windows-11-arm
-          #   platform: windows
-          #   arch: aarch64
-          #   msystem: CLANGARM64
-          #   mingw_pkg: mingw-w64-clang-aarch64-gcc-compat
+ #         - name: windows-aarch64
+ #           os: windows-11-arm
+ #           platform: windows
+ #           arch: aarch64
+ #           msystem: CLANGARM64
+ #           mingw_pkg: mingw-w64-clang-aarch64-gcc-compat
     env:
       CC:  ${{ matrix.compiler || 'gcc' }}
       CXX: ${{ matrix.compiler == 'clang' && 'clang++' || 'g++' }}
