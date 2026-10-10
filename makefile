@@ -524,7 +524,6 @@ PLG_FLAGS+=-D_LZHAM
 LZHAM_FLAGS :=-D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -Wno-deprecated-enum-enum-conversion
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
 ifeq ($(OS), Windows)
-#LZHAM_FLAGS := -Dsprintf_s=sprintf_s_disabled -Dvsprintf_s=vsprintf_s_disabled
 $(BUILD)/lzham_codec_devel/lzhamdecomp/lzham_platform.o: lzham_codec_devel/lzhamdecomp/lzham_platform.cpp | $(BUILD)
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(LZHAM_FLAGS) -D_MSC_VER -c $< -o $@
