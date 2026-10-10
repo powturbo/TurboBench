@@ -2282,7 +2282,6 @@ int main(int argc, char* argv[]) {
       if(g->tdk < g->td) g->td = g->tdk;
     }
   }
-  printf("end beench\n"); fflush(stdout);
     BENCHSTA;
   if(argc - optind > 1) {
     unsigned clen = strpref(&argvx[optind], argc-optind, '\\', '/');
@@ -2301,7 +2300,6 @@ int main(int argc, char* argv[]) {
     if((p = strrchr(finame, '\\')) || (p = strrchr(finame, '/')))
       finame = p+1;
   }
-  printf("end bench2\n"); fflush(stdout);
   if(!totinlen) exit(0);
   sprintf(s, "%s%s.tbb", finame, fsuffix);
   if(merge /*|| tm_rep <= 1 && tm_rep2 <= 1*/) {
@@ -2343,15 +2341,12 @@ int main(int argc, char* argv[]) {
       fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
                  finame, totinlen, p->len,    p->td,p->tc,p->s,p->lev,p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
     }
-    printf("write .tab file\n"); fflush(stdout);
     for(g = plug; g < plug+gk; g++)
       if(g->id >= 0 /*&& g->tc > 1e-10 && g->td > 1e-10 && !plug->err*/) fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
                                  finame, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms);
     fclose(fo);
-    printf("print.tab file\n"); fflush(stdout);
 
     printfile(s, 0, FMT_TEXT, rem);
-    printf("generate charts .tab file\n"); fflush(stdout);
     if(printchart) {
       plug_t plugv[SVG_PLUGMAX],*vp=plugv; int x = 0;
       for(g = plug; g < plug+gk; g++)
