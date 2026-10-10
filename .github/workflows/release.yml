@@ -147,8 +147,6 @@ jobs:
         if: matrix.platform == 'windows'
         shell: msys2 {0}
         run: |
-          make -p -f /dev/null | grep '^CXX'
-          $CC --version
           gcc --version
           clang --version || true
           rustc --version
