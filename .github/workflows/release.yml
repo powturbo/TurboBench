@@ -88,9 +88,8 @@ jobs:
       - name: Show environment
         run: |
           uname -m
-          echo "=== Using CC=$CC ==="
-          make -p -f /dev/null | grep '^CXX'
-          $CC --version
+#          echo "=== Using CC=$CC ==="
+#          make -p -f /dev/null | grep '^CXX'
           gcc --version
           clang --version || true
           rustc --version
