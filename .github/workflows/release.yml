@@ -85,15 +85,6 @@ jobs:
             sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
           fi
-      - name: Show environment
-        run: |
-          uname -m
-#          echo "=== Using CC=$CC ==="
-#          make -p -f /dev/null | grep '^CXX'
-          gcc --version
-          clang --version || true
-          rustc --version
-          cargo --version
       - name: Build (Linux)
         if: matrix.platform == 'linux'
         run: |
