@@ -150,8 +150,6 @@ jobs:
         run: |
           gcc --version
           clang --version || true
-#          rustc --version
-#          cargo --version
           make STATIC=1 PHAZ=0
       - name: Generate silesia.tar.md (Windows)
         if: matrix.platform == 'windows'
