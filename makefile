@@ -523,12 +523,13 @@ ifneq ($(OS),Darwin)
 PLG_FLAGS += -D_LZHAM
 LZHAM_FLAGS := -D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -Wno-deprecated-enum-enum-conversion
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
-ifneq (,$(filter Windows%,$(OS)))
-  # Special rule required for lzham_platform.cpp – force MSVC-style path
-  $(BUILD)/lzham_codec_devel/lzhamdecomp/lzham_platform.o: \
-      lzham_codec_devel/lzhamdecomp/lzham_platform.cpp | $(BUILD)
+ifeq ($(OS), Windows)
+  LZHAM_SRCS := $(filter-out %/lzhamdecomp/lzham_platform.cpp,$(LZHAM_SRCS))
+  PLATFORM = lzham_codec_devel/lzhamdecomp/lzham_platform
+$(BUILD)/$(PLATFORM).o: $(PLATFORM).cpp
 	@mkdir -p $(dir $@)
-	$(CXX) -O3 $(LZHAM_FLAGS) -D_MSC_VER -c $< -o $@
+	$(CXX) -O3 -D_MSC_VER $(LZHAM_FLAGS) -c $< -o $@
+OB += $(BUILD)/$(PLATFORM).o
 else
   LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp,$(LZHAM_SRCS))
   LZHAM_FLAGS += -DTHREAD_MODEL_POSIX
