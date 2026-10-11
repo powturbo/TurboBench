@@ -1456,13 +1456,13 @@ int64_t _xz_decompress(char *in, size_t insize, char *out, size_t outsize, int t
 //------  Z -------------------------------------
   #if _ZSTD
 #include "zstd/lib/zstd.h"
-#include "zstd/examples/common.h"
+//#include "zstd/examples/common.h"
 #include "zstd/lib/common/fse.h"
 #include "zstd/lib/common/huf.h"
 
 static ZSTD_CDict* createCDict_orDie(const char* dictFileName, int cLevel) {
   size_t dictSize;
-  void* const dictBuffer = mallocAndLoadFile_orDie(dictFileName, &dictSize);
+  void* const dictBuffer = malloc(dictSize); if(!dictBuffer) die("malloc error: size=%zu\n", dictSize); //mallocAndLoadFile_orDie(dictFileName, &dictSize);
   ZSTD_CDict* const cdict = ZSTD_createCDict(dictBuffer, dictSize, cLevel);
   free(dictBuffer);
   return cdict;
@@ -1470,7 +1470,7 @@ static ZSTD_CDict* createCDict_orDie(const char* dictFileName, int cLevel) {
 
 static ZSTD_DDict* createDDict_orDie(const char* dictFileName) {
   size_t dictSize;
-  void* const dictBuffer = mallocAndLoadFile_orDie(dictFileName, &dictSize);
+  void* const dictBuffer = malloc(dictSize); if(!dictBuffer) die("malloc error: size=%zu\n", dictSize); //mallocAndLoadFile_orDie(dictFileName, &dictSize);
   ZSTD_DDict* const ddict = ZSTD_createDDict(dictBuffer, dictSize);
   free(dictBuffer);
   return ddict;
@@ -2108,8 +2108,8 @@ NOINLINE void libmemcpy(unsigned char *dst, unsigned char *src, size_t len) {
   memcpy_ptr(dst, src, len);
 }
 
-static int dicsize;
-int coddicsize(int _dicsize) { dicsize = _dicsize; }
+static size_t dicsize;
+int coddicsize(size_t _dicsize) { dicsize = _dicsize; }
 
   #if _ZSTD
 static ZSTD_CDict *cdictPtr;
@@ -2571,8 +2571,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       //int bsc_compress_mt(const unsigned char * input, unsigned char * output, int n, int lzpHashSize, int lzpMinLen, int blockSorter, int coder, int features, int threads);
     }
     case P_LIBBSCC: return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
-    case P_LIBBSCBWT: { int bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, 0); *(unsigned *)out = bwtidx; return inlen+4; }
-    case P_ST: { memcpy(out+4,in, inlen); *(unsigned *)(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
+    case P_LIBBSCBWT: { unsigned bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, 0); ctou32(out) = bwtidx; return inlen+4; }
+    case P_ST: { memcpy(out+4,in, inlen); ctou32(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
       #endif
 
       #if _LIBDEFLATE
