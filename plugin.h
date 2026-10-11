@@ -37,7 +37,7 @@ typedef struct plugs {
 extern "C" {
   #endif
 extern struct plugs plugs[];
-int  coddicsize(size_t _dicsize);
+int  coddicsize(int _dicsize);
 int  codini(  size_t insize, int codec, int lev, char *prm);
 void codexit( int codec,int lev);
 int  codstart(size_t insize, int codec, int lev, char *prm, int mode);
