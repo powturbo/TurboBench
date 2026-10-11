@@ -575,6 +575,7 @@ OB += $(call obj,$(LZO_SRCS))
 endif
 
 ifneq ($(wildcard lzsa/.),)
+ifneq ($(OS),Darwin)
 PLG_FLAGS+=-D_LZSA
 LZSA_SRCS := $(wildcard lzsa/src/*.c)
 LZSA_SRCS := $(filter-out lzsa/src/lzsa.c,$(LZSA_SRCS))
@@ -588,6 +589,7 @@ $(LZSA_OBJS): $(BUILD)/%.o: %.c | $(BUILD)
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 -w -fpermissive -Ilzsa/src -Ilzsa/src/libdivsufsort/include -c $< -o $@
 OB += $(LZSA_OBJS)
+endif
 endif
 
 ifneq ($(and $(wildcard LZSSE/.),$(filter x86_64,$(ARCH))),)
