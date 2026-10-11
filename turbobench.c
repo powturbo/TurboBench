@@ -2089,7 +2089,7 @@ extern int _CRT_glob = 1;
 int main(int argc, char* argv[]) {
   int xstdout=-1,xstdin=-1;
   int                recurse  = 0, xplug = 0,tm_Repk=1,plot=-1,fmt=0,fno,merge=0,rprio=1, printchart=0;
-  unsigned           bsize    = 1u<<30, bsizex=0;
+  unsigned           bsize    = 1u<<30, bsizex = 0;
   unsigned long long filenmax = 0;
   char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049], fsuffix[17]="";
   char               *_argvx[1], **argvx=_argvx;                                          if(verbose > 5) printf("START1\n");fflush(stdout);
