@@ -524,11 +524,11 @@ PLG_FLAGS += -D_LZHAM
 LZHAM_FLAGS := -D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -Wno-deprecated-enum-enum-conversion
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
 ifeq ($(OS), Windows)
-  LZHAM_SRCS := $(filter-out %/lzhamdecomp/lzham_platform.cpp,$(LZHAM_SRCS))
-  $(BUILD)/$(lzham_codec_devel/lzhamdecomp/lzham_platform).o: $(lzham_codec_devel/lzhamdecomp/lzham_platform).cpp
+LZHAM_SRCS := $(filter-out %/lzhamdecomp/lzham_platform.cpp,$(LZHAM_SRCS))
+$(BUILD)/lzham_codec_devel/lzhamdecomp/lzham_platform.o: lzham_codec_devel/lzhamdecomp/lzham_platform.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 -D_MSC_VER $(LZHAM_FLAGS) -c $< -o $@
-OB += $(BUILD)/$(lzham_codec_devel/lzhamdecomp/lzham_platform).o
+OB += $(BUILD)/lzham_codec_devel/lzhamdecomp/lzham_platform.o
 else
   LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp,$(LZHAM_SRCS))
   LZHAM_FLAGS += -DTHREAD_MODEL_POSIX
@@ -953,11 +953,11 @@ ifneq ($(wildcard zstd/.),)
 PLG_FLAGS += -D_ZSTD
 ZSTD_C_SRCS := $(wildcard zstd/lib/common/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/*.c) $(wildcard zstd/lib/dictBuilder/*.c)
 ZSTD_S_SRCS := $(wildcard zstd/lib/decompress/*.S)
-ZSTD_OBJS := $(call obj,$(ZSTD_C_SRCS)) $(ZSTD_S_SRCS)
+ZSTD_OBJS := $(call obj,$(ZSTD_C_SRCS))
 $(ZSTD_OBJS): $(BUILD)/%.o: %.c | $(BUILD)
 	@mkdir -p $(dir $@)
 	$(CC) -O3 -w -Izstd/lib -Izstd/lib/common -c $< -o $@
-OB += $(ZSTD_OBJS)
+OB += $(ZSTD_OBJS)  $(ZSTD_S_SRCS)
 endif
 
 ifneq ($(wildcard zpaq/.),)
