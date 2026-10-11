@@ -525,11 +525,10 @@ LZHAM_FLAGS := -D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_de
 LZHAM_SRCS := $(wildcard lzham_codec_devel/lzhamcomp/*.cpp) $(wildcard lzham_codec_devel/lzhamdecomp/*.cpp) $(wildcard lzham_codec_devel/lzhamlib/*.cpp)
 ifeq ($(OS), Windows)
   LZHAM_SRCS := $(filter-out %/lzhamdecomp/lzham_platform.cpp,$(LZHAM_SRCS))
-  PLATFORM = lzham_codec_devel/lzhamdecomp/lzham_platform
-$(BUILD)/$(PLATFORM).o: $(PLATFORM).cpp
+  $(BUILD)/$(lzham_codec_devel/lzhamdecomp/lzham_platform).o: $(lzham_codec_devel/lzhamdecomp/lzham_platform).cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 -D_MSC_VER $(LZHAM_FLAGS) -c $< -o $@
-OB += $(BUILD)/$(PLATFORM).o
+OB += $(BUILD)/$(lzham_codec_devel/lzhamdecomp/lzham_platform).o
 else
   LZHAM_SRCS := $(filter-out %/lzham_win32_threading.cpp,$(LZHAM_SRCS))
   LZHAM_FLAGS += -DTHREAD_MODEL_POSIX
@@ -573,6 +572,22 @@ CXXFLAGS+=-Ilzo/include
 CFLAGS+=-Ilzo/include
 LZO_SRCS := $(wildcard lzo/src/*.c)
 OB += $(call obj,$(LZO_SRCS))
+endif
+
+ifneq ($(wildcard lzsa/.),)
+PLG_FLAGS+=-D_LZSA
+LZSA_SRCS := $(wildcard lzsa/src/*.c)
+LZSA_SRCS := $(filter-out lzsa/src/lzsa.c,$(LZSA_SRCS))
+ifneq ($(DIVSORT), 1)
+LZSA_SRCS += $(wildcard lzsa/src/libdivsufsort/lib/*.c)
+#$(call obj,lzsa/src/libdivsufsort/lib/divsufsort.o lzsa/src/libdivsufsort/lib/sssort.o lzsa/src/libdivsufsort/lib/trsort.o)
+DIVSORT=1
+endif
+LZSA_OBJS := $(call obj,$(LZSA_SRCS))
+$(LZSA_OBJS): $(BUILD)/%.o: %.c | $(BUILD)
+	@mkdir -p $(dir $@)
+	$(CXX) -O3 -w -fpermissive -Ilzsa/src -Ilzsa/src/libdivsufsort/include -c $< -o $@
+OB += $(LZSA_OBJS)
 endif
 
 ifneq ($(and $(wildcard LZSSE/.),$(filter x86_64,$(ARCH))),)
@@ -933,13 +948,13 @@ OB += $(call obj,$(ZOPFLI_SRCS))
 endif
 
 ifneq ($(wildcard zstd/.),)
-PLG_FLAGS+=-D_ZSTD
-CXXFLAGS+=-Izstd/lib -Izstd/lib/common
-CFLAGS+=-Izstd/lib -Izstd/lib/common
-ZSTD_SRCS := $(wildcard zstd/lib/common/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/*.c) $(wildcard zstd/lib/decompress/*.S) $(wildcard zstd/lib/dictBuilder/*.c)
-ZSTD_C_SRCS := $(filter %.c,$(ZSTD_SRCS))
-ZSTD_S_SRCS := $(filter %.S,$(ZSTD_SRCS))
+PLG_FLAGS += -D_ZSTD
+ZSTD_C_SRCS := $(wildcard zstd/lib/common/*.c) $(wildcard zstd/lib/compress/*.c) $(wildcard zstd/lib/decompress/*.c) $(wildcard zstd/lib/dictBuilder/*.c)
+ZSTD_S_SRCS := $(wildcard zstd/lib/decompress/*.S)
 ZSTD_OBJS := $(call obj,$(ZSTD_C_SRCS)) $(ZSTD_S_SRCS)
+$(ZSTD_OBJS): $(BUILD)/%.o: %.c | $(BUILD)
+	@mkdir -p $(dir $@)
+	$(CC) -O3 -w -Izstd/lib -Izstd/lib/common -c $< -o $@
 OB += $(ZSTD_OBJS)
 endif
 
@@ -1239,18 +1254,6 @@ OB+=$(call obj,lz4ultra/src/shrink_inmem.o lz4ultra/src/expand_inmem.o lz4ultra/
 ifeq ($(DIVSORT), 1)
 else
 OB+=$(call obj,lz4ultra/src/libdivsufsort/lib/divsufsort.o lz4ultra/src/libdivsufsort/lib/sssort.o lz4ultra/src/libdivsufsort/lib/trsort.o)
-DIVSORT=1
-endif
-endif
-
-ifneq ($(wildcard lzsa/.),)
-PLG_FLAGS+=-D_LZSA
-CFLAGS+=-Ilzsa/src -Ilzsa/src/libdivsufsort/include
-OB+=$(call obj,lzsa/src/expand_block_v1.o lzsa/src/expand_block_v2.o lzsa/src/expand_context.o lzsa/src/expand_inmem.o lzsa/src/shrink_block_v1.o lzsa/src/shrink_block_v2.o lzsa/src/shrink_inmem.o lzsa/src/shrink_context.o \
-    lzsa/src/matchfinder.o lzsa/src/frame.o)
-ifeq ($(DIVSORT), 1)
-else
-OB+=$(call obj,lzsa/src/libdivsufsort/lib/divsufsort.o lzsa/src/libdivsufsort/lib/sssort.o lzsa/src/libdivsufsort/lib/trsort.o)
 DIVSORT=1
 endif
 endif
