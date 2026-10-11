@@ -2108,7 +2108,7 @@ NOINLINE void libmemcpy(unsigned char *dst, unsigned char *src, size_t len) {
 }
 
 static size_t dicsize;
-int coddicsize(size_t _dicsize) { dicsize = _dicsize; }
+int coddicsize(int _dicsize) { dicsize = _dicsize; }
 
   #if _ZSTD
 static ZSTD_CDict *cdictPtr;
@@ -2565,10 +2565,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
       #if _LIBBSC
     #define BSC_MODE LIBBSC_FEATURE_FASTMODE | (strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0) | (strchr(prm,'t')?LIBBSC_FEATURE_MULTITHREADING:0)      
-    case P_LIBBSC: { int ec = (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1; ec = ec==0?3:(ec>3?3:ec);  
-      int rc = bsc_compress(in, out, inlen, strchr(prm,'p')?0:15,strchr(prm,'p')?0:128, lev<3?1:lev, ec, BSC_MODE);
-      if(rc <=0) die("bsc_compress rc=%d ", rc);
-      //int bsc_compress_mt(const unsigned char * input, unsigned char * output, int n, int lzpHashSize, int lzpMinLen, int blockSorter, int coder, int features, int threads);
+    case P_LIBBSC: {  if(inlen > 1024*1024*1024) die("bsc max. blocksize = 1024m\n"); 
+      int ec = (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1; ec = ec==0?3:(ec>3?3:ec);  
+      return bsc_compress(in, out, inlen, strchr(prm,'p')?0:15,strchr(prm,'p')?0:128, lev<3?1:lev, ec, BSC_MODE);   //int bsc_compress_mt(const unsigned char * input, unsigned char * output, int n, int lzpHashSize, int lzpMinLen, int blockSorter, int coder, int features, int threads);
     }
     case P_LIBBSCC: return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
     case P_LIBBSCBWT: { unsigned bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, 0); ctou32(out) = bwtidx; return inlen+4; }
