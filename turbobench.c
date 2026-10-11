@@ -760,7 +760,7 @@ static int  cmp = 2,trans;
 int         verbose=1;
 double      fac = 1.3;
 
-int plugins(plug_t *plug, plugs_t *gs, int *pk, size_t bsize, unsigned bsizex, int lev, char *prm) {
+int plugins(plug_t *plug, plugs_t *gs, int *pk, unsigned bsize, unsigned bsizex, int lev, char *prm) {
   int i,k = *pk;
   for(i = 0; i < k; i++)
     if(plug[i].id == gs->id && plug[i].lev == lev && !strcmp(plug[i].prm,prm))
@@ -783,7 +783,7 @@ int plugins(plug_t *plug, plugs_t *gs, int *pk, size_t bsize, unsigned bsizex, i
   return 0;
 }
 
-int plugreg(plug_t *plug, char *cmd, int k, size_t bsize, unsigned bsizex) {
+int plugreg(plug_t *plug, char *cmd, int k, unsigned bsize, unsigned bsizex) {
   static char *cempty="";
   int ignore = 0; char *q;
   //if(q = strchr(cmd,'/')) *q = 0;
@@ -1757,13 +1757,13 @@ int plugread(plug_t *plug, char *finame, unsigned long long *totinlen) {
 
 static int mcpy = 0, mode, tincx, fuzz;
 
-unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t outsize, size_t bsize, int id, int lev, char *prm, char *name, char *fname) {
+unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t outsize, unsigned bsize, int id, int lev, char *prm, char *name, char *fname) {
   unsigned char *op,*oe = _out + outsize;
   codstart(bsize, id, lev, prm, 0);
   TMBEG(tm_Rep);//    mempeakinit();
     unsigned char *in,*ip;
     for(op = _out, in = _in; in < _in+_inlen; ) {
-      size_t inlen, bs;
+      unsigned inlen, bs;
       if(mode) {                                                         blknum++;
         inlen      = ctou32(in); in += 4;
         ctou32(op) = inlen; op += 4; //vbput32(op, inlen);
@@ -1790,7 +1790,7 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
   return op - _out;
 }
 
-int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned _outlen, size_t bsize, int id, int lev, char *prm) {
+int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm) {
   unsigned char *ip;
   codstart(_inlen, id, lev, prm, 1);
   TMBEG(tm_Rep2);     //mempeakinit();
@@ -1803,7 +1803,7 @@ int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned 
         outlen = (_out+_outlen)-out;
     } else outlen = _outlen;
     for(op = out, out += outlen; op < out; ) {
-      size_t oplen = out - op; oplen = min(oplen, bsize);
+      unsigned oplen = out - op; oplen = min(oplen, bsize);
       bs = (mode || bsize < outlen)?((min(bsize, oplen)<(1<<16))?2:4):0;
       int l, iplen = (mode || bsize < outlen)?(bs==2?ctou16(ip):ctou32(ip)):_inlen; ip += bs;
       if(mcpy && iplen==oplen)
@@ -2003,7 +2003,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
   return totinlen;
 }
 
-void usage(char *pgm, size_t bsize) {
+void usage(char *pgm, int bsize) {
   char s[50] = "Unkown Compiler";
     #if defined(__clang__)
   sprintf(s, "Clang %d.%d.%d",  __clang_major__, __clang_minor__, __clang_patchlevel__);
@@ -2088,8 +2088,8 @@ extern int _CRT_glob = 1;
 
 int main(int argc, char* argv[]) {
   int xstdout=-1,xstdin=-1;
-  int                recurse  = 0, xplug = 0,tm_Repk=1,plot=-1,fmt=0,fno,merge=0,rprio=1, printchart=0, bsizex = 0;
-  size_t             bsize    = 1u<<30;
+  int                recurse  = 0, xplug = 0,tm_Repk=1,plot=-1,fmt=0,fno,merge=0,rprio=1, printchart=0;
+  unsigned           bsize    = 1u<<30, bsizex=0;
   unsigned long long filenmax = 0;
   char               *scmd = NULL, *xcmd = NULL, *trans=NULL,*beb=NULL,*rem="",s[2049], fsuffix[17]="";
   char               *_argvx[1], **argvx=_argvx;                                          if(verbose > 5) printf("START1\n");fflush(stdout);
@@ -2107,6 +2107,7 @@ int main(int argc, char* argv[]) {
     #endif
 
   cpubrand(_cpubrand, 64); 
+  
   int c, digit_optind = 0;                                              
   for(;;) {
     int this_option_optind = optind ? optind : 1;
