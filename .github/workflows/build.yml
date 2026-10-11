@@ -101,7 +101,7 @@ jobs:
         if: matrix.compiler == 'gcc' 
         run: |
           ./turbobench -l2
-          ./turbobench turbobench -U -i0,0
+          ./turbobench turbobench -U -V0 -i0,0
 #         ./turbobench silesia.tar -U -i0,0
 
   macos:
