@@ -156,7 +156,7 @@ jobs:
           submodules: 'true'
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{ matrix.msystem }}
+          msystem: UCRT64
           update: true
           install: >-
             git zip make cmake rsync
