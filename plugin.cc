@@ -1897,7 +1897,7 @@ struct plugs plugs[] = {
   { P_KANZI,         "kanzi",         _KANZI,     "kanzi",                       "0,1,2,3,4,5,6,7,8,9/T#" }, //0:none|none 1:lzx|none 2:dna+lz|huffman 3: 4:text+utf+exe+pack+mm+rolz|none 5:text+utf+bwt+rank+zrlt|ans0 6:text+utf+bwt+srt+zrlt|fpaq 7:lzp+text+utf+bwt+lzp|cm 8:exe+rlt+text+utf+dna|tpaq 9:exe+rlt+text+utf+dna|tpaqx",
   
   { P_LIB,           "sdefl",         _LIB,       "lib:sdefl/sinfl",             "0,1,2,3,4,6,7,8"},
-  { P_LIBBSC,        "bsc",           _LIBBSC,    "libbsc/bsc",                  "0,3,4,5,6,7,8/P:t:e# encoder"}, // Multithreading w. parameter t
+  { P_LIBBSC,        "bsc",           _LIBBSC,    "libbsc/bsc",                  "0,3,4,5,6,7,8/H:Hashsize M:Minlen P:Disable preprocessing t:Multithreading e# encoder (e0,e1,e2)"}, // Multithreading w. parameter t
   { P_LIBBSCC,       "bscqlfc",       _LIBBSC,    "libbsc/bsc",                  "1,2"},
   { P_LIBDEFLATE,    "libdeflate",    _LIBDEFLATE,"libdeflate",                  "1,2,3,4,5,6,7,8,9,12/dg"},
   { P_LIBLZF,        "lzf",           _LIBLZF,    "LibLZF",                      "" },
@@ -2567,7 +2567,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     #define BSC_MODE LIBBSC_FEATURE_FASTMODE | (strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0) | (strchr(prm,'t')?LIBBSC_FEATURE_MULTITHREADING:0)      
     case P_LIBBSC: {  if(inlen > 1024*1024*1024) die("bsc max. blocksize = 1024m\n"); 
       int ec = (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1; ec = ec==0?3:(ec>3?3:ec);  
-      return bsc_compress(in, out, inlen, strchr(prm,'p')?0:15,strchr(prm,'p')?0:128, lev<3?1:lev, ec, BSC_MODE);   //int bsc_compress_mt(const unsigned char * input, unsigned char * output, int n, int lzpHashSize, int lzpMinLen, int blockSorter, int coder, int features, int threads);
+      return bsc_compress(in, out, inlen, strchr(prm,'H')?atoi(q+(q[1]=='='?2:1)):15, strchr(prm,'M')?atoi(q+(q[1]=='='?2:1)):72, lev<3?1:lev, ec, BSC_MODE);   //int bsc_compress_mt(const unsigned char * input, unsigned char * output, int n, int lzpHashSize, int lzpMinLen, int blockSorter, int coder, int features, int threads);
     }
     case P_LIBBSCC: return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
     case P_LIBBSCBWT: { unsigned bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, 0); ctou32(out) = bwtidx; return inlen+4; }
