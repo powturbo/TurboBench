@@ -1115,7 +1115,7 @@ $(PHAZ_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
 	$(CMAKE) -S $(PIVCODIR) -B $(PHAZ_BDIR) -DCMAKE_BUILD_TYPE=Release 
 #-DCMAKE_C_FLAGS="-Wno-format -Wno-error=unused-variable" -DCMAKE_CXX_FLAGS="-Wno-format -Wno-error=unused-variable"
 	$(CMAKE) --build $(PHAZ_BDIR) --target pivco_huffman_local -j 
-	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) PH=$(PIVCODIR) bash $(PHAZ_DIR)/tools/build.sh
+	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) PH=$(PIVCODIR) CFLAGS="$(CFLAGS) -Wno-error=unused-variable" bash $(PHAZ_DIR)/tools/build.sh
 	cp $(PHAZ_DIR)/build/phaz_local.o $(PIVCO_BDIR)
 OB += $(PHAZ_LIB)
 endif
