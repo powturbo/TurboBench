@@ -200,7 +200,6 @@ ifneq ($(wildcard aceapex/.),)
 ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
 PLG_FLAGS += -D_ACEAPEX
 ACEAPEX_DIR := aceapex/src
-
 $(BUILD)/$(ACEAPEX_DIR)/aceapex_api.o: $(ACEAPEX_DIR)/aceapex_api.cpp $(wildcard $(ACEAPEX_DIR)/*.cpp) $(wildcard $(ACEAPEX_DIR)/*.h) 
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(CXXFLAGS) -std=c++17 -DXXH_INLINE_ALL -Izstd/lib -I$(ACEAPEX_DIR) -c $< -o $@
@@ -250,7 +249,7 @@ endif
 ifneq ($(wildcard brotli/.),)
 PLG_FLAGS+=-D_BROTLI -Ibrotli/c/include
 BROTLI_SRCS := $(wildcard brotli/c/common/*.c) $(wildcard brotli/c/dec/*.c) $(wildcard brotli/*.c) $(wildcard brotli/c/enc/*.c)
-BROTLI_LIB = $(BUILD)/brotli/libbrotlienc.a $(BUILD)/brotli/libbrotlidec.a $(BUILD)/brotli/libbrotlicommon.a
+BROTLI_LIB := $(BUILD)/brotli/libbrotlienc.a $(BUILD)/brotli/libbrotlidec.a $(BUILD)/brotli/libbrotlicommon.a
 $(BROTLI_LIB): $(BROTLI_SRCS)
 	$(CMAKE) -S brotli -B $(BUILD)/brotli -DBUILD_SHARED_LIBS=OFF -DBROTLI_BUILD_TOOLS=OFF -DBROTLI_BUNDLED_MODE=ON 
 	$(CMAKE) --build $(BUILD)/brotli --parallel 4
@@ -437,6 +436,7 @@ endif
 LIBS += $(ISAL_LIB)
 endif
 endif
+
 #--- K ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard kanzi-cpp/.),)
 PLG_FLAGS+=-D_KANZI
@@ -444,6 +444,7 @@ KANZI_DIR = kanzi-cpp/src
 KANZI_SRCS := $(wildcard $(KANZI_DIR)/io/*.cpp) $(wildcard $(KANZI_DIR)/entropy/*.cpp) $(wildcard $(KANZI_DIR)/bitstream/*.cpp) $(wildcard $(KANZI_DIR)/*.cpp) $(wildcard $(KANZI_DIR)/transform/*.cpp)
 OB += $(call obj,$(KANZI_SRCS))
 endif
+
 #---- L ------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard lib/.),)
 PLG_FLAGS+=-D_LIB
@@ -911,7 +912,7 @@ $(XZ_LIB): $(XZ_SRCS)
 	export CC=$(CROSS)-linux-gnu-gcc && $(CMAKE) -S xz -B $(BUILD)/xz && $(MAKE) -C $(BUILD)/xz
 else
 $(XZ_LIB): $(XZ_SRCS)
-	$(CMAKE) -S xz -B $(BUILD)/xz && $(MAKE) -C $(BUILD)/xz
+	$(CMAKE) -S xz -B $(BUILD)/xz -DXZ_TOOL_XZDEC=OFF -DXZ_TOOL_LZMADEC=OFF -DXZ_TOOL_LZMAINFO=OFF -DXZ_TOOL_XZ=OFF -DXZ_TOOL_SCRIPTS=OFF -DXZ_DOC=OFF && $(MAKE) -C $(BUILD)/xz 
 endif
 LIBS += $(XZ_LIB)
 endif
