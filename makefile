@@ -10,6 +10,7 @@
 # qemu-aarch64 -L /usr/aarch64-linux-gnu ./turbobench -l2
 # qemu-riscv64 -L /usr/riscv64-linux-gnu ./turbobench -l2
 # qemu-ppc64le -L /usr/powerpc64le-linux-gnu
+PHAZ ?=0
 OPENMP ?= 1 
 
 CC ?= gcc
@@ -202,7 +203,7 @@ PLG_FLAGS += -D_ACEAPEX
 ACEAPEX_DIR := aceapex/src
 $(BUILD)/$(ACEAPEX_DIR)/aceapex_api.o: $(ACEAPEX_DIR)/aceapex_api.cpp $(wildcard $(ACEAPEX_DIR)/*.cpp) $(wildcard $(ACEAPEX_DIR)/*.h) 
 	@mkdir -p $(dir $@)
-	$(CXX) -O3 $(CXXFLAGS) -std=c++17 -DXXH_INLINE_ALL -Izstd/lib -I$(ACEAPEX_DIR) -c $< -o $@
+	$(CXX) -O3 -std=c++17 -DXXH_INLINE_ALL -Izstd/lib -I$(ACEAPEX_DIR) -c $< -o $@
 OB += $(BUILD)/$(ACEAPEX_DIR)/aceapex_api.o
 endif
 endif
@@ -222,7 +223,6 @@ $(AOCL_ALIB): $(AOCL_SRCS)
 else
 ifneq ($(HAVE_OPENMP),0)
   AOCL_OMP = -DAOCL_ENABLE_THREADS=1 -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -D$(OMP_CFLAGS)       #-DOpenMP_CXX_FLAGS="-fopenmp" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=/usr/lib/llvm-*/lib/libomp.so 
-  $(info OpenMP enabled for aocl)
 endif
 AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
 $(AOCL_ALIB): $(AOCL_SRCS)
@@ -438,11 +438,22 @@ endif
 endif
 
 #--- K ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ifneq ($(wildcard kanzi-cpp/.),)
+ifneq ($(wildcard kanzi-cpp0/.),)
 PLG_FLAGS+=-D_KANZI
 KANZI_DIR = kanzi-cpp/src
 KANZI_SRCS := $(wildcard $(KANZI_DIR)/io/*.cpp) $(wildcard $(KANZI_DIR)/entropy/*.cpp) $(wildcard $(KANZI_DIR)/bitstream/*.cpp) $(wildcard $(KANZI_DIR)/*.cpp) $(wildcard $(KANZI_DIR)/transform/*.cpp)
 OB += $(call obj,$(KANZI_SRCS))
+endif
+
+KANZI_LIB =
+ifneq ($(wildcard kanzi-cpp/.),)
+PLG_FLAGS += -D_KANZI 
+KANZI_DIR = kanzi-cpp/src
+KANZI_SRCS := $(wildcard $(KANZI_DIR)/io/*.cpp) $(wildcard $(KANZI_DIR)/entropy/*.cpp) $(wildcard $(KANZI_DIR)/bitstream/*.cpp) $(wildcard $(KANZI_DIR)/*.cpp) $(wildcard $(KANZI_DIR)/transform/*.cpp)
+KANZI_LIB = $(BUILD)/kanzi-cpp/libkanzi.a
+$(KANZI_LIB): $(KANZI_SRCS)
+	$(CMAKE) -S kanzi-cpp -B $(BUILD)/kanzi-cpp && make -C $(BUILD)/kanzi-cpp
+LIBS += $(KANZI_LIB)
 endif
 
 #---- L ------------------------------------------------------------------------------------------------------------------------
@@ -455,7 +466,6 @@ PLG_FLAGS+=-D_LIBBSC
 ifneq ($(HAVE_OPENMP),0)
   LIBBSC_FLAGS   := -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP $(OMP_CFLAGS)
   LIBSAIS_CFLAGS := -DLIBSAIS_OPENMP $(OMP_CFLAGS) -Wno-deprecated-openmp
-  $(info OpenMP enabled for libbsc)
 endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
       $(BUILD)/libbsc/libbsc/filters/preprocessing.o $(BUILD)/libbsc/libbsc/adler32/adler32.o $(BUILD)/libbsc/libbsc/bwt/bwt.o $(BUILD)/libbsc/libbsc/st/st.o $(BUILD)/libbsc/libbsc/lzp/lzp.o \
@@ -498,7 +508,6 @@ OB+=$(call obj,$(LIBSLZ_SRCS))
 endif
 
 ifneq ($(wildcard lizard/.),)
-CFLAGS+=-Ilizard/lib
 LIZARD_SRCS := $(wildcard lizard/lib/*.c) $(wildcard lizard/lib/entropy/*.c) 
 LIZARD_SRCS := $(filter-out %/debug.c, $(LIZARD_SRCS))
 OB += $(call obj,$(LIZARD_SRCS))
@@ -506,7 +515,6 @@ endif
 
 ifneq ($(wildcard lz4/.),)
 PLG_FLAGS+=-D_LZ4
-CFLAGS+=-Ilz4/lib
 OB+=$(call obj,lz4/lib/lz4hc.o lz4/lib/lz4.o lz4/lib/lz4frame.o lz4/lib/xxhash.o)
 endif
 
@@ -561,18 +569,18 @@ endif
 
 ifneq ($(wildcard lzma/.),)
 PLG_FLAGS+=-D_LZMA
-CFLAGS+=-D_7ZIP_ST
-CXXFLAGS+=-D_7Z_TYPES_
 LZMA_SRCS := lzma/C/Alloc.c lzma/C/CpuArch.c lzma/C/LzFind.c lzma/C/LzmaDec.c lzma/C/LzmaEnc.c lzma/C/LzmaLib.c lzma/C/Threads.c lzma/C/LzFindMt.c lzma/C/LzFindOpt.c
 OB += $(call obj,$(LZMA_SRCS))
 endif
 
+LZO_LIB =
 ifneq ($(wildcard lzo/.),)
-PLG_FLAGS+=-D_LZO
-CXXFLAGS+=-Ilzo/include
-CFLAGS+=-Ilzo/include
+PLG_FLAGS+=-D_LZO -Ilzo/include
 LZO_SRCS := $(wildcard lzo/src/*.c)
-OB += $(call obj,$(LZO_SRCS))
+LZO_LIB = $(BUILD)/lzo/liblzo2.a
+$(LZO_LIB): $(LZO_SRCS)
+	$(CMAKE) -S lzo -B $(BUILD)/lzo -DCMAKE_INSTALL_PREFIX=$(BUILD) -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && make -C $(BUILD)/lzo
+LIBS += $(LZO_LIB)
 endif
 
 ifneq ($(wildcard lzsa/.),)
@@ -644,14 +652,15 @@ PLG_FLAGS += -D_MISA77
 MISA77_DIR  := misa77
 MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp)
 MISA77_OBJS := $(MISA77_DIR)/src/isa/target_portable.o
-MISA77_BUILD = $(CXX) -O3 $(CXXFLAGS) -std=c++20 -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src $< -c -o $@
+MISA77_FLAGS := 
+MISA77_BUILD = $(CXX) -O3 $(MISA77_FLAGS) -std=c++20 -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src $< -c -o $@
 ifeq ($(ARCH),x86_64)
 MISA77_BASE := -march=x86-64
 MISA77_AVX2 := -mavx2
 endif
-$(BUILD)/$(MISA77_DIR)/src/%_portable.o: CXXFLAGS += $(MISA77_BASE)
-$(BUILD)/$(MISA77_DIR)/src/%_sse2.o: CXXFLAGS += $(MISA77_BASE)
-$(BUILD)/$(MISA77_DIR)/src/%_avx2.o: CXXFLAGS += $(MISA77_AVX2)
+$(BUILD)/$(MISA77_DIR)/src/%_portable.o: MISA77_FLAGS += $(MISA77_BASE)
+$(BUILD)/$(MISA77_DIR)/src/%_sse2.o: MISA77_FLAGS += $(MISA77_BASE)
+$(BUILD)/$(MISA77_DIR)/src/%_avx2.o: MISA77_FLAGS += $(MISA77_AVX2)
 
 $(BUILD)/$(MISA77_DIR)/src/%.o: $(MISA77_DIR)/src/%.cpp
 	@mkdir -p $(dir $@)
@@ -667,8 +676,8 @@ ifneq ($(wildcard misa77),)
 PLG_FLAGS += -D_MISA77
 MISA77_SRC := misa77/src
 ifeq ($(ARCH),x86_64)
-  $(BUILD)/$(MISA77_SRC)/%_sse2.o: CXXFLAGS += -march=x86-64
-  $(BUILD)/$(MISA77_SRC)/%_avx2.o: CXXFLAGS += $(_AVX2)
+  $(BUILD)/$(MISA77_SRC)/%_sse2.o: MISA77_FLAGS += -march=x86-64
+  $(BUILD)/$(MISA77_SRC)/%_avx2.o: MISA77_FLAGS += $(_AVX2)
   MISA77_VOBJS := isa/target_sse2.o isa/target_avx2.o
 else ifeq ($(ARCH),aarch64)
   MISA77_VOBJS := isa/target_neon.o
@@ -676,7 +685,7 @@ endif
 
 $(BUILD)/$(MISA77_SRC)/%.o: $(MISA77_SRC)/%.cpp
 	@mkdir -p $(@D)
-	$(CXX) -O3 $(CXXFLAGS) -std=c++20 -Imisa77/include -I$(MISA77_SRC) -c $< -o $@
+	$(CXX) -O3 $(MISA77_FLAGS) -std=c++20 -Imisa77/include -I$(MISA77_SRC) -c $< -o $@
 
 MISA77_SRCS := $(wildcard $(MISA77_SRC)/*.cpp)
 OB += $(call obj,$(MISA77_SRCS) $(MISA77_SRC)/isa/target_portable.o) $(addprefix $(BUILD)/$(MISA77_SRC)/,$(MISA77_VOBJS))
@@ -699,8 +708,7 @@ ifdef CROSS  # NOTWORKING
 #	$(CMAKE) -S openzl -B $(BUILD)/openzl -DCMAKE_C_COMPILER=$(CROSS)-linux-gnu-gcc -DCMAKE_CXX_COMPILER=$(CROSS)-linux-gnu-g++
 #	$(CMAKE) --build $(BUILD)/openzl --config Release
 else
-PLG_FLAGS += -D_OPENZL
-CXXFLAGS  += -Iopenzl/include -Iopenzl/src
+PLG_FLAGS += -D_OPENZL -Iopenzl/include -Iopenzl/src
 OPENZL_BDIR := $(BUILD)/openzl
 OPENZL_LIB  := $(OPENZL_BDIR)/libopenzl.a
 OPENZL_CMAKE_FILES := $(shell find openzl -type f \( -name 'CMakeLists.txt' -o -name '*.cmake' \))
@@ -870,7 +878,6 @@ LIBS += $(RC_LIB)
 # libsais16 is not included in libbsc
 ifneq ($(HAVE_OPENMP),0)
 LIBSAIS_FLAGS = -DLIBSAIS_OPENMP $(OMP_CFLAGS) -Wno-deprecated-openmp
-$(info OpenMP enabled for Turbo-Range-Coder/libsais16)
 endif
 LIBSAIS16 := $(RC_BDIR)/libsais/src/libsais16.o
 $(LIBSAIS16) : $(RC_DIR)/libsais/src/libsais16.c
@@ -966,7 +973,6 @@ ifneq ($(OS),Darwin)
 PLG_FLAGS+=-D_ZPAQ
 CXXFLAGS+=-Izpaq
 ifneq ($(HAVE_OPENMP),0)
-$(info OpenMP enabled for libzpaq)
 $(BUILD)/libzpaq_omp.cpp: zpaq/libzpaq.cpp
 	(echo '#include <omp.h>'; cat $<) > $@
 CXXFLAGS+=$(OMP_CFLAGS) 
@@ -980,7 +986,7 @@ endif
 endif
 endif
 
-ifneq ($(wildcard zxc/.),)
+ifneq ($(wildcard zxc0/.),)
 PLG_FLAGS += -D_ZXC 
 ZXCDIR = zxc/src/lib
 ZXC_BUILD = $(CC) -O3 -DZXC_STATIC_DEFINE -DNDEBUG -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
@@ -1006,6 +1012,15 @@ endif
 OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))
 endif
 
+ZXC_LIB =
+ifneq ($(wildcard zxc/.),)
+PLG_FLAGS += -D_ZXC 
+ZXC_SRCS := $(wildcard zxc/*.c)
+ZXC_LIB = $(BUILD)/zxc/libzxc.a
+$(ZXC_LIB): $(ZXC_SRCS)
+	$(CMAKE) -S zxc -B $(BUILD)/zxc && make -C $(BUILD)/zxc
+LIBS += $(ZXC_LIB)
+endif
 
 #------------------------- Entropy coder -----------------------------------------
 # First download or clone aomedia (git clone https://aomedia.googlesource.com/aom) into TurboBench directory
@@ -1077,15 +1092,14 @@ ifneq ($(PIVCO), 0)
 ifneq ($(wildcard pivco-huffman/.),)
 ifndef CROSS
 PIVCODIR   = pivco-huffman
-CXXFLAGS  += -D_PIVCOHUF
-CXXFLAGS  += -I$(PIVCODIR)/include
+PLG_FLAGS  += -D_PIVCOHUF -I$(PIVCODIR)/include
 PIVCO_BDIR = $(BUILD)/$(PIVCODIR)
 PIVCO_SRCS := $(shell find $(PIVCODIR)/src -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.cc' \))
 PIVCO_CMAKE_FILES := $(shell find $(PIVCODIR) -maxdepth 2 -name 'CMakeLists.txt')
 PIVCO_LIB   = $(PIVCO_BDIR)/libpivco_huffman_local.o
 $(PIVCO_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
 	mkdir -p $(PIVCO_BDIR)
-	$(CMAKE) -S $(PIVCODIR) -B $(PIVCO_BDIR) -DCMAKE_BUILD_TYPE=Release
+	$(CMAKE) -S $(PIVCODIR) -B $(PIVCO_BDIR) -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-Wno-format"
 	$(CMAKE) --build $(PIVCO_BDIR) --target pivco_huffman_local -j
 OB += $(PIVCO_LIB)
 # PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor; level = zstd level). Built from the pivco-huffman submodule's extras/phaz via
@@ -1095,12 +1109,12 @@ ifneq ($(PHAZ), 0)
 PLG_FLAGS     += -D_PHAZ
 PHAZ_DIR      = $(PIVCODIR)/extras/phaz
 PHAZ_BDIR     = $(PIVCODIR)/build
-#PHAZ_LIB      = $(PHAZ_DIR)/build/phaz_local.o
 PHAZ_LIB      = $(PIVCO_BDIR)/phaz_local.o
 $(PHAZ_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
 	@mkdir -p $(PHAZ_BDIR)
-	$(CMAKE) -S $(PIVCODIR) -B $(PHAZ_BDIR) -DCMAKE_BUILD_TYPE=Release
-	$(CMAKE) --build $(PHAZ_BDIR) --target pivco_huffman_local -j
+	$(CMAKE) -S $(PIVCODIR) -B $(PHAZ_BDIR) -DCMAKE_BUILD_TYPE=Release 
+#-DCMAKE_C_FLAGS="-Wno-format -Wno-error=unused-variable" -DCMAKE_CXX_FLAGS="-Wno-format -Wno-error=unused-variable"
+	$(CMAKE) --build $(PHAZ_BDIR) --target pivco_huffman_local -j 
 	ZSTD_SRC=$(abspath zstd) MARCH="$(MARCH)" CC=$(CC) PH=$(PIVCODIR) bash $(PHAZ_DIR)/tools/build.sh
 	cp $(PHAZ_DIR)/build/phaz_local.o $(PIVCO_BDIR)
 OB += $(PHAZ_LIB)
@@ -1251,8 +1265,7 @@ PLG_FLAGS+=-D_LIBZLING
 endif
 
 ifneq ($(wildcard lz4ultra/.),)
-PLG_FLAGS+=-D_LZ4ULTRA
-CXXFLAGS+=-Ilz4ultra/src -Ilz4ultra/src/libdivsufsort/include
+PLG_FLAGS+=-D_LZ4ULTRA -Ilz4ultra/src -Ilz4ultra/src/libdivsufsort/include
 OB+=$(call obj,lz4ultra/src/shrink_inmem.o lz4ultra/src/expand_inmem.o lz4ultra/src/shrink_block.o lz4ultra/src/expand_block.o lz4ultra/src/shrink_context.o lz4ultra/src/matchfinder.o lz4ultra/src/frame.o)
 ifeq ($(DIVSORT), 1)
 else
@@ -1307,8 +1320,7 @@ PLG_FLAGS+=-DSMALLZ4
 endif
 
 ifneq ($(wildcard tcobs/.),)
-PLG_FLAGS+=-D_TCOBS
-CXXFLAGS+=-Drestrict=__restrict
+PLG_FLAGS+=-D_TCOBS -Drestrict=__restrict
 OB+=$(call obj,tcobs/v2/tcobsEncode.o tcobs/v2/tcobsDecode.o)
 endif
 
@@ -1448,6 +1460,7 @@ $(BUILD)/turbobench.o: turbobench.c | $(LIBS)
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
+#	@echo "Linking turbobench..."
 	$(CXX) $(filter-out $(LIBS),$^) $(LDFLAGS) $(LIBS) -o turbobench
 
 $(BUILD)/%.o: %.c
