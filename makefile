@@ -452,7 +452,7 @@ KANZI_DIR = kanzi-cpp/src
 KANZI_SRCS := $(wildcard $(KANZI_DIR)/io/*.cpp) $(wildcard $(KANZI_DIR)/entropy/*.cpp) $(wildcard $(KANZI_DIR)/bitstream/*.cpp) $(wildcard $(KANZI_DIR)/*.cpp) $(wildcard $(KANZI_DIR)/transform/*.cpp)
 KANZI_LIB = $(BUILD)/kanzi-cpp/libkanzi.a
 $(KANZI_LIB): $(KANZI_SRCS)
-	$(CMAKE) -S kanzi-cpp -B $(BUILD)/kanzi-cpp && make -C $(BUILD)/kanzi-cpp
+	$(CMAKE) -S kanzi-cpp -B $(BUILD)/kanzi-cpp -DKANZI_ENABLE_NATIVE_OPTIMIZATIONS=OFF && make -C $(BUILD)/kanzi-cpp
 LIBS += $(KANZI_LIB)
 endif
 
