@@ -995,7 +995,7 @@ $(ZXC_LIB): $(ZXC_SRCS)
 LIBS += $(ZXC_LIB)
 endif
 
-ifneq ($(wildcard zxc0/.),)
+ifneq ($(wildcard zxc/.),)
 PLG_FLAGS += -D_ZXC 
 ZXCDIR = zxc/src/lib
 ZXC_BUILD = $(CC) -O3 -DZXC_STATIC_DEFINE -DNDEBUG -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
