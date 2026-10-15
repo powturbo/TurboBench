@@ -313,6 +313,7 @@ $(FIRETRAIL_LIB): firetrail/src/root.zig
 	cd firetrail && zig build-lib -O ReleaseFast -femit-bin=libfiretrail.a src/root.zig -lc
 OB+=$(FIRETRAIL_LIB)	
 endif
+
 #--- G -----------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard GLZA/.),)
 PLG_FLAGS+=-D_GLZA
@@ -324,7 +325,7 @@ OB += $(GLZA_OBJS)
 endif
 
 GLYD_LIB := 
-ifneq ($(wildcard Glyd0/.),)
+ifneq ($(wildcard Glyd_RUST/.),)
 HAVE_CARGO := $(shell command -v cargo >/dev/null 2>&1 && echo 1 || echo 0)
 ifeq ($(HAVE_CARGO),1)
 PLG_FLAGS+=-D_GLYD
@@ -438,13 +439,6 @@ endif
 endif
 
 #--- K ---------------------------------------------------------------------------------------------------------------------------------------------------------
-ifneq ($(wildcard kanzi-cpp0/.),)
-PLG_FLAGS+=-D_KANZI
-KANZI_DIR = kanzi-cpp/src
-KANZI_SRCS := $(wildcard $(KANZI_DIR)/io/*.cpp) $(wildcard $(KANZI_DIR)/entropy/*.cpp) $(wildcard $(KANZI_DIR)/bitstream/*.cpp) $(wildcard $(KANZI_DIR)/*.cpp) $(wildcard $(KANZI_DIR)/transform/*.cpp)
-OB += $(call obj,$(KANZI_SRCS))
-endif
-
 KANZI_LIB =
 ifneq ($(wildcard kanzi-cpp/.),)
 PLG_FLAGS += -D_KANZI 
@@ -470,11 +464,9 @@ endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
       $(BUILD)/libbsc/libbsc/filters/preprocessing.o $(BUILD)/libbsc/libbsc/adler32/adler32.o $(BUILD)/libbsc/libbsc/bwt/bwt.o $(BUILD)/libbsc/libbsc/st/st.o $(BUILD)/libbsc/libbsc/lzp/lzp.o \
       $(BUILD)/libbsc/libbsc/platform/platform.o $(BUILD)/libbsc/libbsc/bwt/libsais/libsais.o
-
 $(BUILD)/libbsc/%.o: libbsc/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(LIBBSC_FLAGS) -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc -c $< -o $@
-
 $(BUILD)/libbsc/%.o: libbsc/%.c
 	@mkdir -p $(dir $@)
 	$(CC) -O3 $(LIBSAIS_CFLAGS) -c $< -o $@
@@ -590,7 +582,6 @@ LZSA_SRCS := $(wildcard lzsa/src/*.c)
 LZSA_SRCS := $(filter-out lzsa/src/lzsa.c,$(LZSA_SRCS))
 ifneq ($(DIVSORT), 1)
 LZSA_SRCS += $(wildcard lzsa/src/libdivsufsort/lib/*.c)
-#$(call obj,lzsa/src/libdivsufsort/lib/divsufsort.o lzsa/src/libdivsufsort/lib/sssort.o lzsa/src/libdivsufsort/lib/trsort.o)
 DIVSORT=1
 endif
 LZSA_OBJS := $(call obj,$(LZSA_SRCS))
@@ -631,7 +622,6 @@ MEMLZ_LIB := $(BUILD)/memlz/memlz.o
 $(BUILD)/memlz/memlz.c: memlz/memlz.h
 	@mkdir -p $(dir $@)
 	cp memlz/memlz.h $(BUILD)/memlz/memlz.c 
-
 $(MEMLZ_LIB) : $(BUILD)/memlz/memlz.c
 	$(CC) -O3 $(CFLAGS) $(MEMLZ_FLAGS) -DMEMLZ_IMPLEMENTATION $< -c -o $@
 OB += $(MEMLZ_LIB)
@@ -647,48 +637,15 @@ $(MINIZ_LIB): $(MINIZ_SRCS)
 LIBS += $(MINIZ_LIB)
 endif
 
+MISA77_LIB =
 ifneq ($(wildcard misa77/.),)
-PLG_FLAGS += -D_MISA77
-MISA77_DIR  := misa77
+PLG_FLAGS += -D_MISA77 
+MISA77_DIR = misa77
 MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp)
-MISA77_OBJS := $(MISA77_DIR)/src/isa/target_portable.o
-MISA77_FLAGS := 
-MISA77_BUILD = $(CXX) -O3 $(MISA77_FLAGS) -std=c++20 -I$(MISA77_DIR)/include -I$(MISA77_DIR)/src $< -c -o $@
-ifeq ($(ARCH),x86_64)
-MISA77_BASE := -march=x86-64
-MISA77_AVX2 := -mavx2
-endif
-$(BUILD)/$(MISA77_DIR)/src/%_portable.o: MISA77_FLAGS += $(MISA77_BASE)
-$(BUILD)/$(MISA77_DIR)/src/%_sse2.o: MISA77_FLAGS += $(MISA77_BASE)
-$(BUILD)/$(MISA77_DIR)/src/%_avx2.o: MISA77_FLAGS += $(MISA77_AVX2)
-
-$(BUILD)/$(MISA77_DIR)/src/%.o: $(MISA77_DIR)/src/%.cpp
-	@mkdir -p $(dir $@)
-	$(MISA77_BUILD)
-
-OB += $(call obj,$(MISA77_SRCS) $(MISA77_OBJS))
-MISA77_ARCH_OBJS.x86_64  := isa/target_sse2.o isa/target_avx2.o
-MISA77_ARCH_OBJS.aarch64 := isa/target_neon.o
-OB += $(addprefix $(BUILD)/$(MISA77_DIR)/src/,$(MISA77_ARCH_OBJS.$(ARCH)))
-endif
-
-ifneq ($(wildcard misa77),)
-PLG_FLAGS += -D_MISA77
-MISA77_SRC := misa77/src
-ifeq ($(ARCH),x86_64)
-  $(BUILD)/$(MISA77_SRC)/%_sse2.o: MISA77_FLAGS += -march=x86-64
-  $(BUILD)/$(MISA77_SRC)/%_avx2.o: MISA77_FLAGS += $(_AVX2)
-  MISA77_VOBJS := isa/target_sse2.o isa/target_avx2.o
-else ifeq ($(ARCH),aarch64)
-  MISA77_VOBJS := isa/target_neon.o
-endif
-
-$(BUILD)/$(MISA77_SRC)/%.o: $(MISA77_SRC)/%.cpp
-	@mkdir -p $(@D)
-	$(CXX) -O3 $(MISA77_FLAGS) -std=c++20 -Imisa77/include -I$(MISA77_SRC) -c $< -o $@
-
-MISA77_SRCS := $(wildcard $(MISA77_SRC)/*.cpp)
-OB += $(call obj,$(MISA77_SRCS) $(MISA77_SRC)/isa/target_portable.o) $(addprefix $(BUILD)/$(MISA77_SRC)/,$(MISA77_VOBJS))
+MISA77_LIB = $(BUILD)/misa77/libmisa77.a
+$(MISA77_LIB): $(MISA77_SRCS)
+	$(CMAKE) -S misa77 -B $(BUILD)/misa77 -DMISA77_BUILD_TESTS=OFF && make -C $(BUILD)/misa77
+LIBS += $(MISA77_LIB)
 endif
 
 ifneq ($(wildcard mzip0/.),)
@@ -721,12 +678,10 @@ OPENZL_CLIBS := $(OPENZL_BDIR)/custom_parsers/libcustom_parsers.a $(OPENZL_BDIR)
 else
 OPENZL_CMAKE_FLAGS := -DOPENZL_BUILD_CPP=OFF -DOPENZL_BUILD_CUSTOM_PARSERS=OFF -DOPENZL_BUILD_CLI=OFF
 endif
-
 LIBS += $(OPENZL_LIB) $(OPENZL_CLIBS)
 $(OPENZL_BDIR)/CMakeCache.txt: $(OPENZL_CMAKE_FILES)
 	$(CMAKE) -S openzl -B $(OPENZL_BDIR) -DCMAKE_BUILD_TYPE=Release -DOPENZL_ALLOW_INTROSPECTION=OFF -DOPENZL_INSTALL=OFF -DOPENZL_BUILD_TOOLS=OFF -DOPENZL_BUILD_EXAMPLES=OFF $(OPENZL_CMAKE_FLAGS)
 	@touch $@
-
 $(OPENZL_LIB) $(OPENZL_CLIBS): $(OPENZL_BDIR)/CMakeCache.txt $(OPENZL_SRCS)
 	$(CMAKE) --build $(OPENZL_BDIR) --config Release
 	@touch $(OPENZL_LIB) $(OPENZL_CLIBS)   # ensure Make sees them as up-to-date
@@ -758,7 +713,7 @@ endif
 
 #--- P --------------------------------------------------------------------------------------------------------------------
 PULSAR_LIB := 
-ifneq ($(wildcard pulsar-best0/.),)
+ifneq ($(wildcard pulsar-best_RUST/.),)
 HAVE_CARGO := $(shell command -v cargo >/dev/null 2>&1 && echo 1 || echo 0)
 ifeq ($(HAVE_CARGO),1)
 PLG_FLAGS+=-D_PULSAR
@@ -770,7 +725,6 @@ PULSAR_LIB := $(PULSAR_BDIR)/release/libpulsar.a
 $(PULSAR_LIB): $(PULSAR_SRCS)
 	mkdir -p $(PULSAR_BDIR) 
 	cargo rustc --manifest-path $(PULSAR_DIR)/Cargo.toml --lib --crate-type=staticlib --release --target-dir $(PULSAR_BDIR) -- --print=native-static-libs
-
 #cargo rustc --crate-type=$(DENSITY_BUILD_TYPE) --release -- --print=native-static-libs
 #	cd $(PULSAR_DIR) && cargo rustc --lib --crate-type=staticlib --release --target-dir $(PULSAR_BDIR) -- --print=native-static-libs
 LIBS += $(PULSAR_LIB)
@@ -856,6 +810,7 @@ LIBS += $(RUST_LIB)
 .PHONY: rustlib
 endif
 endif
+
 #--- T ----------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard tamp/.),)
 PLG_FLAGS+=-D_TAMP
@@ -984,32 +939,6 @@ ifneq ($(ARCH),x86_64)
   CXXFLAGS+= -DNOJIT
 endif
 endif
-endif
-
-ifneq ($(wildcard zxc0/.),)
-PLG_FLAGS += -D_ZXC 
-ZXCDIR = zxc/src/lib
-ZXC_BUILD = $(CC) -O3 -DZXC_STATIC_DEFINE -DNDEBUG -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
-
-define ZXC_RULE
-$$(BUILD)/$$(ZXCDIR)/%$(1).o: ZXC_FLAGS = $(2)
-$$(BUILD)/$$(ZXCDIR)/%$(1).o: $$(ZXCDIR)/%.c
-	@mkdir -p $$(dir $$@)
-	$$(ZXC_BUILD)
-endef
-$(eval $(call ZXC_RULE,,))
-$(eval $(call ZXC_RULE,_default,-DZXC_FUNCTION_SUFFIX=_default))
-$(eval $(call ZXC_RULE,_avx2,-mavx2 -mbmi -mbmi2 -mlzcnt -mno-avx512f -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2))
-$(eval $(call ZXC_RULE,_avx512,-mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512))
-$(eval $(call ZXC_RULE,_neon,$(_SSE) -DZXC_FUNCTION_SUFFIX=_neon -DZXC_USE_NEON64))
-ZXC_OBJS = common driver dispatch compress_default decompress_default dict_default huffman_default pivco_tables seekable 
-
-ifeq ($(ARCH),x86_64)
-  ZXC_OBJS += $(foreach e,avx2 avx512,compress_$(e) decompress_$(e) huffman_$(e)) 
-else ifeq ($(ARCH),aarch64)
-  ZXC_OBJS += $(foreach e,neon,compress_$(e) decompress_$(e) huffman_$(e))
-endif
-OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))
 endif
 
 ZXC_LIB =
