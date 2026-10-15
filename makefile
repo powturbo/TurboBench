@@ -986,13 +986,39 @@ endif
 endif
 
 ZXC_LIB =
-ifneq ($(wildcard zxc/.),)
+ifneq ($(wildcard zxc_CMAKE/.),)
 PLG_FLAGS += -D_ZXC 
 ZXC_SRCS := $(wildcard zxc/*.c)
 ZXC_LIB = $(BUILD)/zxc/libzxc.a
 $(ZXC_LIB): $(ZXC_SRCS)
 	$(CMAKE) -S zxc -B $(BUILD)/zxc && make -C $(BUILD)/zxc
 LIBS += $(ZXC_LIB)
+endif
+
+ifneq ($(wildcard zxc0/.),)
+PLG_FLAGS += -D_ZXC 
+ZXCDIR = zxc/src/lib
+ZXC_BUILD = $(CC) -O3 -DZXC_STATIC_DEFINE -DNDEBUG -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
+
+define ZXC_RULE
+$$(BUILD)/$$(ZXCDIR)/%$(1).o: ZXC_FLAGS = $(2)
+$$(BUILD)/$$(ZXCDIR)/%$(1).o: $$(ZXCDIR)/%.c
+	@mkdir -p $$(dir $$@)
+	$$(ZXC_BUILD)
+endef
+$(eval $(call ZXC_RULE,,))
+$(eval $(call ZXC_RULE,_default,-DZXC_FUNCTION_SUFFIX=_default))
+$(eval $(call ZXC_RULE,_avx2,-mavx2 -mbmi -mbmi2 -mlzcnt -mno-avx512f -DZXC_FUNCTION_SUFFIX=_avx2 -DZXC_USE_AVX2))
+$(eval $(call ZXC_RULE,_avx512,-mavx512bw -mbmi2 -DZXC_FUNCTION_SUFFIX=_avx512 -DZXC_USE_AVX512))
+$(eval $(call ZXC_RULE,_neon,$(_SSE) -DZXC_FUNCTION_SUFFIX=_neon -DZXC_USE_NEON64))
+ZXC_OBJS = common driver dispatch compress_default decompress_default dict_default huffman_default pivco_tables seekable 
+
+ifeq ($(ARCH),x86_64)
+  ZXC_OBJS += $(foreach e,avx2 avx512,compress_$(e) decompress_$(e) huffman_$(e)) 
+else ifeq ($(ARCH),aarch64)
+  ZXC_OBJS += $(foreach e,neon,compress_$(e) decompress_$(e) huffman_$(e))
+endif
+OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))
 endif
 
 #------------------------- Entropy coder -----------------------------------------
