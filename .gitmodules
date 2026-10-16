@@ -168,12 +168,7 @@
 [submodule "wzip"]
 	path = wzip
 	url = https://github.com/icodywu/WZIP
-<<<<<<< HEAD
 [submodule "mzstd"]
 	path = mzstd
 	url = https://github.com/M-Compressors/mzstd.git
-=======
-[submodule "zlib-turbo"]
-	path = zlib-turbo
-	url = https://github.com/icodywu/zlib-turbo
->>>>>>> d6dec56627b85dfe3f3b085a509b80ddbb0a6bce
+
