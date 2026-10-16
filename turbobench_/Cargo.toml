@@ -12,6 +12,7 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 density-rs = { path = "../density", optional = true }
 glyd    = { path = "../Glyd",        optional = true }
 mbrotli-ffi = { path = "../mbrotli/mbrotli-ffi", optional = true }
+mzstd-ffi = { path = "../mzstd/mzstd-ffi", optional = true }
 cpcodec  = { path = "../pcodec/pco_c", optional = true }
 pulsar  = { path = "../pulsar-best",  optional = true }
 
@@ -20,6 +21,7 @@ default = []
 density = ["dep:density-rs"]
 glyd    = ["dep:glyd"]
 mbrotli = ["dep:mbrotli-ffi"]
+mzstd   = ["dep:mzstd-ffi"]
 pcodec  = ["dep:cpcodec"]
 pulsar  = ["dep:pulsar"]
 
