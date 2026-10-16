@@ -284,6 +284,10 @@ enum {
 #define _MZIP 0
 #endif
  P_MZIP,
+#ifndef _MZSTD
+#define _MZSTD 0
+#endif
+ P_MZSTD,
 
 #ifndef _NZ1
 #define _NZ1 0
@@ -1119,6 +1123,10 @@ extern "C" size_t mzip_compress( char *in, size_t inlen, char *out, int lev);
 extern "C" size_t mzip_decompress( char *in, size_t inlen, char *out);
   #endif
 
+  #if _MZSTD
+#include "mzstd/mzstd-ffi/include/mzstd.h"
+  #endif
+
 //------  O -------------------------------------
   #if _OPENZL  // Adapted from lzbench
 #include "openzl/include/openzl/openzl.h"
@@ -1935,6 +1943,7 @@ struct plugs plugs[] = {
   { P_MSCOMPRESS,    "mscompress",    _MSCOMPRESS,"ms-compress",                 "2,3,4" },
   { P_MWLZ,          "mwlz",          _MWLZ,      "mwlz",                        "" },
   { P_MZIP,          "mzip",          _MZIP,      "mzip",                        "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },
+  { P_MZSTD,         "mzstd",         _MZSTD,     "mzstd",                       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/d#" },
 
   { P_NZ1,           "nz1",           _NZ1,       "nz1 nanozip 1",               "" },
  
@@ -2804,6 +2813,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _MZIP
     case P_MZIP: return mzip_compress(in, inlen, out, lev);
+      #endif
+
+      #if _MZSTD
+    case P_MZSTD: { size_t rc = outsize; return mzstd_compress((const uint8_t*)in, inlen, (uint8_t*)out, &rc, lev) == MZSTD_OK ? rc : 0; } break; 
       #endif
 
       #if _NZ1
@@ -3755,6 +3768,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         #endif
       #endif
 
+//------------------------------------------------------------------------------------------------------------------------------------
       #if _MBROTLI
     case P_MBROTLI: { size_t osize = outlen; int rc = mbrotli_decompress((const uint8_t*)in, inlen, (uint8_t*)out, &osize);
         return rc?0:osize;
@@ -3781,7 +3795,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #if _MZIP
     case P_MZIP: return mzip_decompress(in, inlen, out);
       #endif
-      
+
+      #if _MZSTD
+    case P_MZSTD: { size_t rc = outlen; return mzstd_decompress((const uint8_t*)in, inlen, (uint8_t*)out, &rc) == MZSTD_OK ? rc : 0; } break; 
+      #endif
+
+//-----------------------------------------------------------------------------------------------------------------------------      
       #if _NZ1
     case P_NZ1: return nanozip_decompress(in, inlen, out, outlen);
       #endif
@@ -4471,7 +4490,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
 
       #if _MBROTLI
-    case P_MBROTLI : return "v0.5.2";
+    case P_MBROTLI : return "v0.5.15";
       #endif
       #if _MINIZ
     case P_MINIZ : return "v11.3.2";
@@ -4485,6 +4504,9 @@ char *codver(int codec, char *v, char *s) {
       #endif
       #if _MSCOMPRESS
     case P_MSCOMPRESS: return "v2020.01.05";
+      #endif
+      #if _MZSTD
+    case P_MZSTD : return "v0.2.5";
       #endif
 
       #if _NZ1
