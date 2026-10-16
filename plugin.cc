@@ -1514,9 +1514,11 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
   #if _ZLIB_TURBO
 /* zlib-turbo for TurboBench: in a file of its own, as zlib-turbo is built with Z_PREFIX to link beside zlib,
    and its zlib.h cannot be included with zlib's in plugin.cc */
-#include <string.h>
-#include "zlib-turbo/zlib.h"
-#include "zlib-turbo/zturbo.h"
+//#include "zlib-turbo/zlib.h"
+//#include "zlib-turbo/zturbo.h"
+unsigned zlib_turbo_compress(const unsigned char *in, unsigned inlen, unsigned char *out, unsigned outsize, int lev, int threads);
+unsigned zlib_turbo_decompress(const unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen);
+const char *zlib_turbo_version(void);
   #endif
 
   #if _ZOPFLI
@@ -3067,18 +3069,19 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_ZLIB_NG:   { size_t outlen = outsize; int rc = zng_compress2(out, &outlen, in, inlen, lev); if(rc) printf("zlib compress2 rc=%d\n", rc);  return outlen; }
       #endif
 
-      #if _ZLIB_TURBO  // zlib format, as compress2(); levels 4-9 search on threads of their own, with the output of one thread
-    case P_ZLIB_TURBO: { z_stream strm; unsigned outlen; int rc;
+      #if _ZLIB_TURBO  
+    case P_ZLIB_TURBO: return zlib_turbo_compress(in, inlen, out, outsize, lev, threads);
+    /*case P_ZLIB_TURBO: { z_stream strm; unsigned outlen; int rc;
       memset(&strm, 0, sizeof(strm));
       if(deflateInit(&strm, lev) != Z_OK) return 0;
-      if(threads > 1) deflateSetThreads(&strm, threads);   /* without threads in the build, the stream stays on one */
+      if(threads > 1) deflateSetThreads(&strm, threads);   // without threads in the build, the stream stays on one
       strm.next_in  = (Bytef *)in;  strm.avail_in  = inlen;
       strm.next_out = out;          strm.avail_out = outsize;
       rc = deflate(&strm, Z_FINISH);
       outlen = (unsigned)strm.total_out;
       deflateEnd(&strm);
       return rc == Z_STREAM_END ? outlen : 0;
-    }
+    }*/
       #endif
 
       #if _ZLING
@@ -4062,7 +4065,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _ZLIB_TURBO
-    case P_ZLIB_TURBO: { uLongf n = outlen; return uncompress(out, &n, in, inlen) == Z_OK ? (unsigned)n : 0; }
+    case P_ZLIB_TURBO: return zlib_turbo_decompress(in, inlen, out, outlen) == outlen ? inlen : 0;
+    //case P_ZLIB_TURBO: { uLongf n = outlen; return uncompress(out, &n, in, inlen) == Z_OK ? (unsigned)n : 0; }
       #endif
 
       #if _ZLING
@@ -4603,9 +4607,12 @@ char *codver(int codec, char *v, char *s) {
       #if _ZLIB_NG
     case P_ZLIB_NG:  strcpy(s,zlibng_version()); break;
       #endif
-      #if _ZLIB_TURBO
-    case P_ZLIB_TURBO: sprintf(s, "v%s", zlibTurboVersion()); break;
+
+     #if _ZLIB_TURBO
+    case P_ZLIB_TURBO: sprintf(s, "v%s", zlib_turbo_version()); break;
+//    case P_ZLIB_TURBO: sprintf(s, "v%s", zlibTurboVersion()); break;
       #endif
+
       #if _ZOPFLI
     case P_ZOPFLI:  return "v1.0.3";
       #endif
