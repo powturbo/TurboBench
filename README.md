@@ -188,6 +188,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [misa77](https://github.com/welcome-to-the-sunny-side/misa77) | 2026/07 |c++ |lz  |
 | [ms-compress](https://github.com/coderforlife/ms-compress) |  |c++  |lz  |
 | [mzip](https://github.com/Cranot/mzip) |2026/09  |c  |too slow|
+| [mbrotli](https://github.com/M-Compressors/mzstd) | 2026/10 | rust |zstd reimplementation|
 | [Oodle](http://www.radgametools.com/oodle.htm) |  |c++  |windows/linux/macos x86_64/arm64|
 | [Pithy](https://github.com/johnezang/pithy) |  |c  |lz  |
 | [Quicklz](https://github.com/robottwo/quicklz) |  |c  |lz  |
@@ -359,5 +360,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -eFAST -aFAST
 ```
 
-Last update: 09 OCT 2026
+Last update: 16 OCT 2026
 
