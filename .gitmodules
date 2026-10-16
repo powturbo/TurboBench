@@ -172,3 +172,6 @@
 	path = mzstd
 	url = https://github.com/M-Compressors/mzstd.git
 
+[submodule "zlib-turbo"]
+	path = zlib-turbo
+	url = https://github.com/icodywu/zlib-turbo.git
