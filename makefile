@@ -812,6 +812,10 @@ ifneq ($(wildcard pulsar-best/.),)
   RUST_FEATURES += pulsar
   PLG_FLAGS += -D_PULSAR
 endif
+ifneq ($(wildcard mzstd/.),)
+  RUST_FEATURES += mzstd
+  PLG_FLAGS += -D_MZSTD
+endif
 
 comma := ,
 empty :=
@@ -840,6 +844,7 @@ $(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml $(PCO_C_BUILD)/Cargo.toml
 		-e 's|path\s*=\s*"\.\./density"|path = "$(abspath density)"|' \
 		-e 's|path\s*=\s*"\.\./Glyd"|path = "$(abspath Glyd)"|' \
 		-e 's|path\s*=\s*"\.\./mbrotli/mbrotli-ffi"|path = "$(abspath mbrotli/mbrotli-ffi)"|' \
+		-e 's|path\s*=\s*"\.\./mzstd/mzstd-ffi"|path = "$(abspath mzstd/mzstd-ffi)"|' \
 		-e 's|path\s*=\s*"\.\./pcodec/pco_c"|path = "$(abspath $(PCO_C_BUILD))"|' \
 		-e 's|path\s*=\s*"\.\./pulsar-best"|path = "$(abspath pulsar-best)"|' \
 		$@
