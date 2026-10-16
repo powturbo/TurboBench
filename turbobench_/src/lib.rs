@@ -12,3 +12,7 @@ pub use cpcodec;
 
 #[cfg(feature = "pulsar")]
 pub use pulsar::*;
+
+#[cfg(feature = "mzstd")]
+pub use mzstd_ffi;
+
