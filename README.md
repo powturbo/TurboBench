@@ -209,8 +209,9 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [xpack](https://github.com/ebiggers/xpack) |  |  |lz+huffman  |
 | [xz](https://github.com/tukaani-project/xz) | 2026/05 |c  |lz+range coder  |
 | [zlib](http://zlib.net) |  |c  |lz+huffman  |
-| [zlib-ng](https://github.com/Dead2/zlib-ng) |  |c  |lz+huffman  |
 | [zlib cloudflare](https://github.com/cloudflare/zlib) |c  |  |lz+huffman  |
+| [zlib-ng](https://github.com/Dead2/zlib-ng) |  |c  |lz+huffman  |
+| [zlib-turbo](https://github.com/icodywu/zlib-turbo) |  |c  |lz+huffman |
 | [zopfli](https://code.google.com/p/zopfli) |  |c  |lz+huffman  |
 | [zstd](https://github.com/facebook/zstd) |  |c  |lz+huffman/tans  |
 | [zpaq](https://github.com/zpaq/zpaq) |  |c++  |paq+range coder  |
