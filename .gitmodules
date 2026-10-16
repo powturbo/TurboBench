@@ -168,3 +168,6 @@
 [submodule "wzip"]
 	path = wzip
 	url = https://github.com/icodywu/WZIP
+[submodule "zlib-turbo"]
+	path = zlib-turbo
+	url = https://github.com/icodywu/zlib-turbo

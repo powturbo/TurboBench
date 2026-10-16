@@ -448,6 +448,10 @@ enum {
 #define _ZLIB_NG 0
 #endif
  P_ZLIB_NG,
+#ifndef _ZLIB_TURBO
+#define _ZLIB_TURBO 0
+#endif
+ P_ZLIB_TURBO,
 #ifndef _ZLING
 #define _ZLING 0
 #endif
@@ -1502,6 +1506,12 @@ Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const u
   #if _ZOPFLI
 #include "zopfli/src/zopfli/zopfli.h"
   #endif
+
+  #if _ZLIB_TURBO
+unsigned zlib_turbo_compress(const unsigned char *in, unsigned inlen, unsigned char *out, unsigned outsize, int lev, int threads);
+unsigned zlib_turbo_decompress(const unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen);
+const char *zlib_turbo_version(void);
+  #endif
 EXTERN_C_END
 
   #if _ZLING
@@ -2002,6 +2012,7 @@ struct plugs plugs[] = {
   
   { P_ZLIB,          "zlib",          _ZLIB,      "zlib",                        "1,2,3,4,5,6,7,8,9" },
   { P_ZLIB_NG,       "zlib-ng",       _ZLIB_NG,   "zlib-ng",                     "1,2,3,4,5,6,7,8,9" },
+  { P_ZLIB_TURBO,    "zlib-turbo",    _ZLIB_TURBO,"zlib-turbo",                  "1,2,3,4,5,6,7,8,9,10,11,12/t#" },
   { P_ZLING,         "zling",         _ZLING,     "Libzling",                    "0,1,2,3,4" },
   { P_ZOPFLI,        "zopfli",        _ZOPFLI,    "zopfli",                      ""},
   { P_ZSTD,          "zstd",          _ZSTD,      "zstd",                        "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/d#" },
@@ -3041,6 +3052,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_ZLIB_NG:   { size_t outlen = outsize; int rc = zng_compress2(out, &outlen, in, inlen, lev); if(rc) printf("zlib compress2 rc=%d\n", rc);  return outlen; }
       #endif
 
+      #if _ZLIB_TURBO
+    case P_ZLIB_TURBO: return zlib_turbo_compress(in, inlen, out, outsize, lev, threads);
+      #endif
+
       #if _ZLING
     case P_ZLING:    return zling_compress(lev, in, inlen, out, outsize);
       #endif
@@ -4015,6 +4030,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_ZLIB_NG: { size_t outsize = outlen; int rc = zng_uncompress(out, &outsize, in, inlen); } break;
       #endif
 
+      #if _ZLIB_TURBO
+    case P_ZLIB_TURBO: return zlib_turbo_decompress(in, inlen, out, outlen) == outlen ? inlen : 0;
+      #endif
+
       #if _ZLING
     case P_ZLING: zling_decompress(in, inlen, out, outlen); break;
       #endif
@@ -4549,6 +4568,9 @@ char *codver(int codec, char *v, char *s) {
       #endif     
       #if _ZLIB_NG
     case P_ZLIB_NG:  strcpy(s,zlibng_version()); break;
+      #endif
+      #if _ZLIB_TURBO
+    case P_ZLIB_TURBO: sprintf(s, "v%s", zlib_turbo_version()); break;
       #endif
       #if _ZOPFLI
     case P_ZOPFLI:  return "v1.0.3";
