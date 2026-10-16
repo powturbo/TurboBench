@@ -954,20 +954,6 @@ endif
 LIBS += $(ZLIB_NG_LIB)
 endif
 
-# zlib-turbo: zlib's output at levels 1-9, levels 4-9 searching on threads of their own (t#); built with Z_PREFIX, and
-# z_errmsg renamed, to link beside zlib, and wrapped in turbobench_/zlib_turbo.c (its zlib.h cannot go in plugin.cc)
-ifneq ($(wildcard zlib-turbo/.),)
-PLG_FLAGS += -D_ZLIB_TURBO
-ZLIB_TURBO_FLAGS := -DZ_PREFIX -Dz_errmsg=zlib_turbo_errmsg -DZ_TURBO_THREADS -DZ_TURBO_SIMD
-$(BUILD)/zlib-turbo/%.o: zlib-turbo/%.c
-	@mkdir -p $(dir $@)
-	$(CC) -O3 $(MARCH) $(CFLAGS) $(ZLIB_TURBO_FLAGS) $< -c -o $@
-$(BUILD)/turbobench_/zlib_turbo.o: turbobench_/zlib_turbo.c
-	@mkdir -p $(dir $@)
-	$(CC) -O3 $(MARCH) $(CFLAGS) $(ZLIB_TURBO_FLAGS) $< -c -o $@
-OB += $(call obj,$(addprefix zlib-turbo/,adler32.c compress.c crc32.c deflate.c infback.c inffast.c inflate.c inftrees.c trees.c uncompr.c zutil.c) turbobench_/zlib_turbo.c)
-endif
-
 ifneq ($(wildcard zopfli/.),)
 PLG_FLAGS+=-D_ZOPFLI
 ZOPFLI_SRCS := $(wildcard zopfli/src/zopfli/*.c) 

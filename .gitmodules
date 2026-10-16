@@ -168,7 +168,4 @@
 [submodule "wzip"]
 	path = wzip
 	url = https://github.com/icodywu/WZIP
-[submodule "mzstd"]
-	path = mzstd
-	url = https://github.com/M-Compressors/mzstd.git
 
