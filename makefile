@@ -962,10 +962,10 @@ ZLIB_TURBO_FLAGS := -DZ_PREFIX -Dz_errmsg=zlib_turbo_errmsg -DZ_TURBO_THREADS -D
 $(BUILD)/zlib-turbo/%.o: zlib-turbo/%.c
 	@mkdir -p $(dir $@)
 	$(CC) -O3 $(MARCH) $(CFLAGS) $(ZLIB_TURBO_FLAGS) $< -c -o $@
-#$(BUILD)/turbobench_/zlib_turbo.o: turbobench_/zlib_turbo.c
-#	@mkdir -p $(dir $@)
-#	$(CC) -O3 $(MARCH) $(CFLAGS) $(ZLIB_TURBO_FLAGS) $< -c -o $@
-OB += $(call obj,$(addprefix zlib-turbo/,adler32.c compress.c crc32.c deflate.c infback.c inffast.c inflate.c inftrees.c trees.c uncompr.c zutil.c) )
+$(BUILD)/turbobench_/zlib_turbo.o: turbobench_/zlib_turbo.c
+	@mkdir -p $(dir $@)
+	$(CC) -O3 $(MARCH) $(CFLAGS) $(ZLIB_TURBO_FLAGS) $< -c -o $@
+OB += $(call obj,$(addprefix zlib-turbo/,adler32.c compress.c crc32.c deflate.c infback.c inffast.c inflate.c inftrees.c trees.c uncompr.c zutil.c) turbobench_/zlib_turbo.c)
 endif
 
 ifneq ($(wildcard zopfli/.),)
