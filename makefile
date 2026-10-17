@@ -61,12 +61,12 @@ CP=$(CROSS)-linux-gnu
 endif
 ifeq ($(CY),clang)
 CY=clang --target=$(CP) --sysroot=/usr/$(CP) -fuse-ld=lld
-#CXX:=$(CP)-clang++
+CXX:=$(CP)-clang++
 ifeq ($(CC),clang)
 CC=$(CY)
 else
 CC:=$(CP)-gcc
-#CXX:=$(CP)-g++
+CXX:=$(CP)-g++
 endif
 else
 CC:=$(CP)-gcc
@@ -247,12 +247,19 @@ OB+=$(call obj,turbobench_/bcm/bcm.o)
 endif
 
 ifneq ($(wildcard brotli/.),)
+ifdef CROSS
+BROTLI_LIB := $(BUILD)/brotli/libbrotlienc.a $(BUILD)/brotli/libbrotlidec.a $(BUILD)/brotli/libbrotlicommon.a
+$(BROTLI_LIB): $(BROTLI_SRCS)
+	$(CMAKE) -S brotli -B $(BUILD)/brotli -DBUILD_SHARED_LIBS=OFF -DBROTLI_BUILD_TOOLS=OFF -DBROTLI_BUNDLED_MODE=ON -DCMAKE_C_COMPILER="$(CROSS)-linux-gnu-gcc"
+	$(CMAKE) --build $(BUILD)/brotli --parallel 4
+else
 PLG_FLAGS+=-D_BROTLI -Ibrotli/c/include
 BROTLI_SRCS := $(wildcard brotli/c/common/*.c) $(wildcard brotli/c/dec/*.c) $(wildcard brotli/*.c) $(wildcard brotli/c/enc/*.c)
 BROTLI_LIB := $(BUILD)/brotli/libbrotlienc.a $(BUILD)/brotli/libbrotlidec.a $(BUILD)/brotli/libbrotlicommon.a
 $(BROTLI_LIB): $(BROTLI_SRCS)
 	$(CMAKE) -S brotli -B $(BUILD)/brotli -DBUILD_SHARED_LIBS=OFF -DBROTLI_BUILD_TOOLS=OFF -DBROTLI_BUNDLED_MODE=ON 
 	$(CMAKE) --build $(BUILD)/brotli --parallel 4
+endif
 LIBS+=$(BROTLI_LIB)
 endif
 
@@ -266,7 +273,7 @@ PLG_FLAGS+=-D_BZIP3
 BZIP3_SRCS := bzip3/src/libbz3.c
 BZIP3_LIB = $(BUILD)/bzip3/libbzip3.a
 $(BZIP3_LIB): $(BZIP3_SRCS)
-	$(CMAKE) -S bzip3 -B $(BUILD)/bzip3 -DBZIP3_BUILD_APPS=OFF -DBUILD_SHARED_LIBS=OFF && make -C $(BUILD)/bzip3
+	$(CMAKE) -S bzip3 -B $(BUILD)/bzip3 -DBZIP3_BUILD_APPS=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_COMPILER="$(CC)" && make -C $(BUILD)/bzip3 
 LIBS+=$(BZIP3_LIB)
 endif
 
@@ -446,7 +453,7 @@ KANZI_DIR = kanzi-cpp/src
 KANZI_SRCS := $(wildcard $(KANZI_DIR)/io/*.cpp) $(wildcard $(KANZI_DIR)/entropy/*.cpp) $(wildcard $(KANZI_DIR)/bitstream/*.cpp) $(wildcard $(KANZI_DIR)/*.cpp) $(wildcard $(KANZI_DIR)/transform/*.cpp)
 KANZI_LIB = $(BUILD)/kanzi-cpp/libkanzi.a
 $(KANZI_LIB): $(KANZI_SRCS)
-	$(CMAKE) -S kanzi-cpp -B $(BUILD)/kanzi-cpp -DKANZI_ENABLE_NATIVE_OPTIMIZATIONS=OFF && make -C $(BUILD)/kanzi-cpp
+	$(CMAKE) -S kanzi-cpp -B $(BUILD)/kanzi-cpp -DKANZI_ENABLE_NATIVE_OPTIMIZATIONS=OFF -DCMAKE_CXX_COMPILER="$(CXX)" -DCMAKE_C_COMPILER="$(CC)" && make -C $(BUILD)/kanzi-cpp
 LIBS += $(KANZI_LIB)
 endif
 
@@ -489,7 +496,7 @@ PLG_FLAGS+=-D_LIBDEFLATE
 LIBDEFLATE_SRCS := $(wildcard libdeflate/lib/*.c) libdeflate/lib/arm/cpu_features.c libdeflate/lib/x86/cpu_features.c 
 LIBDEFLATE_LIB = $(BUILD)/libdeflate/libdeflate.a
 $(LIBDEFLATE_LIB): $(LIBDEFLATE_SRCS)
-	$(CMAKE) -S libdeflate -B $(BUILD)/libdeflate -DLIBDEFLATE_BUILD_SHARED_LIB=OFF -DLIBDEFLATE_BUILD_GZIP=OFF && make -C $(BUILD)/libdeflate
+	$(CMAKE) -S libdeflate -B $(BUILD)/libdeflate -DLIBDEFLATE_BUILD_SHARED_LIB=OFF -DLIBDEFLATE_BUILD_GZIP=OFF -DCMAKE_C_COMPILER="$(CC)" && make -C $(BUILD)/libdeflate
 LIBS+=$(LIBDEFLATE_LIB)
 endif
 
@@ -571,7 +578,7 @@ PLG_FLAGS+=-D_LZO -Ilzo/include
 LZO_SRCS := $(wildcard lzo/src/*.c)
 LZO_LIB = $(BUILD)/lzo/liblzo2.a
 $(LZO_LIB): $(LZO_SRCS)
-	$(CMAKE) -S lzo -B $(BUILD)/lzo -DCMAKE_INSTALL_PREFIX=$(BUILD) -DCMAKE_POLICY_VERSION_MINIMUM=3.5 && make -C $(BUILD)/lzo
+	$(CMAKE) -S lzo -B $(BUILD)/lzo -DCMAKE_INSTALL_PREFIX=$(BUILD) -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_C_COMPILER="$(CC)" && make -C $(BUILD)/lzo
 LIBS += $(LZO_LIB)
 endif
 
@@ -608,7 +615,7 @@ LZRAVEN_SRCS := $(shell find $(LZRAVEN_DIR)/src -type f -name '*.[ch]' )
 LZRAVEN_LIB = $(BUILD)/liblzraven/liblzraven.a
 $(LZRAVEN_LIB):  $(LZRAVEN_SRCS)
 	@mkdir -p $(BUILD)/liblzraven 
-	$(MAKE) -C $(LZRAVEN_DIR) WARN="-Wno-error=format-truncation" BUILD=$(abspath $(BUILD)/liblzraven) 
+	$(MAKE) -C $(LZRAVEN_DIR) WARN="-Wno-error=format-truncation" CC=$(CC) BUILD=$(abspath $(BUILD)/liblzraven) 
 LIBS += $(LZRAVEN_LIB)
 endif
 
@@ -633,7 +640,7 @@ PLG_FLAGS+=-D_MINIZ -I$(BUILD)/miniz
 MINIZ_SRCS := $(shell find miniz -type f -name '*.[ch]' -o -name 'CMakeLists.txt')
 MINIZ_LIB = $(BUILD)/miniz/libminiz.a
 $(MINIZ_LIB): $(MINIZ_SRCS)
-	$(CMAKE) -S miniz -B $(BUILD)/miniz -DCMAKE_INSTALL_PREFIX=$(BUILD) -DPROJECT_NAME=tb && make -C $(BUILD)/miniz
+	$(CMAKE) -S miniz -B $(BUILD)/miniz -DCMAKE_INSTALL_PREFIX=$(BUILD) -DPROJECT_NAME=tb -DCMAKE_C_COMPILER=$(CC) && make -C $(BUILD)/miniz
 LIBS += $(MINIZ_LIB)
 endif
 
@@ -737,6 +744,7 @@ endif
 # ONLY FOR BENCHMARKING: download corresponding library from https://github.com/WorkingRobot/OodleUE
 PLG_FLAGS+=-D_OODLE
 ifneq ($(and $(wildcard pivco-huffman/.),$(wildcard OodleUE/.)),)
+ifdef $(CROSS)
 OODLE_DIR := OodleUE/Engine/Source/Runtime/OodleDataCompression/Sdks/2.9.16
 CXXFLAGS += -I$(OODLE_DIR)/src/oodle2/core -I$(OODLE_DIR)/src/oodle2/core/public -DOODLE_IMPORT_LIB
 OODLE_SRCS := $(wildcard $(OODLE_DIR)src/oodle2/core/*.cpp) $(wildcard $(OODLE_DIR)src/oodle2/core/public/*.cpp) $(wildcard $(OODLE_DIR)src/oodle2/base/*.cpp) $(wildcard $(OODLE_DIR)include/*.cpp)
@@ -753,6 +761,7 @@ OODLE_STATIC_LIB := pivco-huffman/ext/oodle/build-out/ar/liboodle-data-static.a
 endif 
 OB += $(BUILD)/pivco-huffman/extras/bench/bench_oodle_wrapper.o
 LIBS+=$(OODLE_STATIC_LIB)
+endif
 endif
 
 #--- P --------------------------------------------------------------------------------------------------------------------
@@ -1004,13 +1013,13 @@ endif
 endif
 endif
 
-ZXC_LIB =
-ifneq ($(wildcard zxc_CMAKE/.),)
+ZXC_LIB :=
+ifneq ($(wildcard zxc0/.),)
 PLG_FLAGS += -D_ZXC 
 ZXC_SRCS := $(wildcard zxc/*.c)
 ZXC_LIB = $(BUILD)/zxc/libzxc.a
 $(ZXC_LIB): $(ZXC_SRCS)
-	$(CMAKE) -S zxc -B $(BUILD)/zxc && make -C $(BUILD)/zxc
+	$(CMAKE) -S zxc -B $(BUILD)/zxc -DCMAKE_C_COMPILER=$(CC) && make -C $(BUILD)/zxc
 LIBS += $(ZXC_LIB)
 endif
 
