@@ -91,7 +91,7 @@ jobs:
           rustc --version
           cargo --version
       - name: make 
-        run: make AOCL=0 BLOSC=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0 
+        run: make AOCL=0 BLOSC=0 OPENZL=0 PIVCO=0 OPENMP=0 
 #      - name: Download silesia.tar.gz and gunzip → silesia.tar
 #        run: |
 #          curl -L -o silesia.tar.gz \
