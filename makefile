@@ -792,8 +792,8 @@ ifneq ($(RUST), 0)
 ifeq ($(OS), Linux)
 RUST_DIR          := turbobench_
 RUST_PKG_NAME     := ruststatic
-RUST_TARGET       := $(BUILD)/rust
-RUST_LIB          := $(RUST_TARGET)/release/lib$(RUST_PKG_NAME).a
+RUST_TARGET_DIR   := $(BUILD)/rust
+RUST_LIB          := $(RUST_TARGET_DIR)/release/lib$(RUST_PKG_NAME).a
 RUST_MANIFEST_DIR := $(BUILD)/ruststatic_manifest
 RUST_MANIFEST     := $(RUST_MANIFEST_DIR)/Cargo.toml
 ifeq ($(ARCH),x86_64)
@@ -857,12 +857,23 @@ $(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml $(PCO_C_BUILD)/Cargo.toml
 		-e 's|path\s*=\s*"\.\./pcodec/pco_c"|path = "$(abspath $(PCO_C_BUILD))"|' \
 		-e 's|path\s*=\s*"\.\./pulsar-best"|path = "$(abspath pulsar-best)"|' \
 		$@
-	@echo "----- generated paths -----"
-	@grep -E 'path\s*=' $@ || true
-	@echo "----------------------------"
+#	@echo "----- generated paths -----"
+#	@grep -E 'path\s*=' $@ || true
+#	@echo "----------------------------"
+
+RUST_TARGET_DIR := $(BUILD)/rust
+ifdef CROSS
+RUST_TARGET     = --target $(CROSS)gc-unknown-linux-gnu
+RUST_LIB        = $(RUST_TARGET_DIR)/$(CROSS)gc-unknown-linux-gnu/release/lib$(RUST_PKG_NAME).a
+RUST_EXP        = CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER=riscv64-linux-gnu-gcc
+else
+RUST_TARGET     :=
+RUST_LIB        := $(RUST_TARGET_DIR)/release/lib$(RUST_PKG_NAME).a
+RUST_EXP        :=
+endif
 
 $(RUST_LIB): $(RUST_MANIFEST)
-	RUSTFLAGS="$(RUSTFLAGS_EXTRA)" cargo build --release --manifest-path=$(RUST_MANIFEST) --target-dir=$(RUST_TARGET) $(RUST_FEATURES_ARG)
+	$(RUST_EXP) RUSTFLAGS="$(RUSTFLAGS_EXTRA)" cargo build --release $(RUST_TARGET) --manifest-path=$(RUST_MANIFEST) --target-dir=$(RUST_TARGET_DIR) $(RUST_FEATURES_ARG)
 rustlib: $(RUST_LIB)
 LIBS += $(RUST_LIB)
 .PHONY: rustlib
@@ -1013,17 +1024,8 @@ endif
 endif
 endif
 
-ZXC_LIB :=
-ifneq ($(wildcard zxc0/.),)
-PLG_FLAGS += -D_ZXC 
-ZXC_SRCS := $(wildcard zxc/*.c)
-ZXC_LIB = $(BUILD)/zxc/libzxc.a
-$(ZXC_LIB): $(ZXC_SRCS)
-	$(CMAKE) -S zxc -B $(BUILD)/zxc -DCMAKE_C_COMPILER=$(CC) && make -C $(BUILD)/zxc
-LIBS += $(ZXC_LIB)
-endif
-
 ifneq ($(wildcard zxc/.),)
+ifeq ($(ARCH),riscv64)
 PLG_FLAGS += -D_ZXC 
 ZXCDIR = zxc/src/lib
 ZXC_BUILD = $(CC) -O3 -DZXC_STATIC_DEFINE -DNDEBUG -I$(ZXCDIR)/vendors $(ZXC_FLAGS) $< -c -o $@
@@ -1046,7 +1048,20 @@ ifeq ($(ARCH),x86_64)
 else ifeq ($(ARCH),aarch64)
   ZXC_OBJS += $(foreach e,neon,compress_$(e) decompress_$(e) huffman_$(e))
 endif
-OB += $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))
+ZXCOBJS := $(call obj,$(patsubst %,$(ZXCDIR)/zxc_%.o,$(ZXC_OBJS)))
+
+ZXC_LIB = $(BUILD)/zxc/libzxc.a
+$(ZXC_LIB): $(ZXCOBJS) | $(BUILD)/zxc
+	$(AR) rcs $@ $^
+LIBS += $(ZXC_LIB)
+else
+PLG_FLAGS += -D_ZXC 
+ZXC_SRCS := $(wildcard zxc/*.c)
+ZXC_LIB = $(BUILD)/zxc/libzxc.a
+$(ZXC_LIB): $(ZXC_SRCS)
+	$(CMAKE) -S zxc -B $(BUILD)/zxc -DCMAKE_C_COMPILER=$(CC) && make -C $(BUILD)/zxc
+LIBS += $(ZXC_LIB)
+endif
 endif
 
 #------------------------- Entropy coder -----------------------------------------
