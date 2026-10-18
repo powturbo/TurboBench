@@ -25,6 +25,9 @@ mzstd   = ["dep:mzstd-ffi"]
 pcodec  = ["dep:cpcodec"]
 pulsar  = ["dep:pulsar"]
 
+# INSTALL: rustup target add riscv64gc-unknown-linux-gnu
+[target.riscv64gc-unknown-linux-gnu]
+linker = "riscv64-linux-gnu-gcc"
 
 #[lib]
 #name = "ruststatic"
