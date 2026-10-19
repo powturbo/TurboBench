@@ -915,7 +915,7 @@ int64_t kanzi_compress(char *inbuf, size_t insize, char *outbuf, size_t outsize,
     default:  return -1;
   }
   ofixedbuf buf(outbuf, outsize);
-  std::iostream os(&buf);
+  std::iostream os(&buf);                      
   kanzi::CompressedOutputStream cos(os, threads, entropy, transform, szBlock);
   const size_t max_io_size = size_t(1) << 30;
         size_t remaining = insize;
@@ -2065,7 +2065,7 @@ struct plugs plugs[] = {
   { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",                  "", E_ANS },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",                     "" },
   { P_TORNADOHF,    "tornado_huff",_TORNADO,   "Tornado Huf",                    "" },
-  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",              "1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,20,56,100,101/e#s" }, 
+  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",              "1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,18,19,20,56,100,101/e#s" }, 
   { P_ZLIBH,        "zlibh",       _ZLIB,      "zlib Huffmann",                  "8,9,10,11,12,13,14,15,16,32" },
   { P_ZRLE,         "zlibrle",     _ZLIB,      "zlib rle",                       "" },
 
@@ -3429,6 +3429,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         case 13: return s==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
         case 14: return s==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
         case 17: return rcu3senc(   in, inlen, out);
+        case 18: return rcqlfc0senc( in, inlen, out);
+        case 19: return rcqlfc0ssenc(in, inlen, out, 4, 7);
         case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));  
         case 56: return anscdfenc(    in, inlen, out);
         //case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpenc( in, inlen, out, esize?esize:4); return inlen; }  
@@ -3493,7 +3495,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
 unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen, int codec, int lev, char *prm) {
   char *q;
-  int  threads = (q = strchr(prm,'t'))?atoi(q+(q[2]=='='?3:2)):1;
+  int  threads = (q = strchr(prm,'t'))?atoi(q+(q[1]=='='?2:1)):1;
 
   switch(codec) {
       #if _ACEAPEX
@@ -4347,7 +4349,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         case 12 : return rcmrrsdec( in, outlen, out);       
         case 13 : return z==2?rcrlesdec16(in, outlen, out):rcrlesdec(in, outlen, out);
         case 14 : return z==2?rcrle1sdec16(in, outlen, out):rcrle1sdec(in, outlen, out);
-        case 17 : return rcu3sdec( in, outlen, out);        
+        case 17 : return rcu3sdec(  in, outlen, out);        
+        case 18 : return rcqlfc0sdec(in, outlen, out);        
+        case 19 : return rcqlfc0ssdec(in, outlen, out, 4, 7);        
         case 20 : return rcbwtdec( in, outlen, out, bwtlev, 0);
         case 56 : return anscdfdec(in, outlen, out);
         //case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpdec( in, outlen, out, esize?esize:4); return inlen; }  
