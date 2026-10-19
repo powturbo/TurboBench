@@ -97,8 +97,9 @@ ifeq ($(ARCH),aarch64)
 else ifeq ($(ARCH),riscv64)
 #  CFLAGS=-march=rv64gc_zba_zbb_zbs
 #  CFLAGS=-mabi=lp64d -mno-strict-align
-  MARCH=rv64gc  
-  CFLAGS=$(MARCH)  
+  CFLAGS=-march=rv64gc -mabi=lp64d -fno-tree-vectorize  
+#  MARCH=rv64gc  
+#  CFLAGS=$(MARCH)  
 #-fno-tree-loop-vectorize
   _SSE=-march=rv64gcv_zvbb
 else ifeq ($(ARCH),ppc64le)
