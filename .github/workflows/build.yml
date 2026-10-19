@@ -120,7 +120,7 @@ jobs:
       - run: git submodule update --init --recursive
       - name: Install dependencies
         run: |
-          brew install nasm libomp llvm
+          brew install nasm libomp llvm-objcopy
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
           cc -v
       - run: make OPENZL=0 PIVCO=0 RUST=0
