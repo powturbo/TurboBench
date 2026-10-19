@@ -260,6 +260,22 @@ $(BROTLI_LIB): $(BROTLI_SRCS)
 LIBS+=$(BROTLI_LIB)
 endif
 
+ifneq ($(wildcard bz2-ng/.),)
+PLG_FLAGS += -D_BZ2_NG
+BZ2_NG_SRCS := $(wildcard bz2-ng/c/lib/*.c)
+BZ2_NG_ALIB  = $(BUILD)/bz2-ng/libbz2.a          
+BZ2_NG_LIB   = $(BUILD)/bz2-ng/libbz2_ng.a
+$(BZ2_NG_ALIB): $(BZ2_NG_SRCS)
+	$(CMAKE) -S bz2-ng/c -B $(BUILD)/bz2-ng -DCMAKE_BUILD_TYPE=Release -DBZ2NG_BUILD_PROGRAMS=OFF -DBZ2NG_BUILD_TESTS=OFF -DBZ2NG_BUILD_BENCH=OFF && $(MAKE) -C $(BUILD)/bz2-ng
+$(BZ2_NG_LIB): $(BZ2_NG_ALIB)
+	mkdir -p $(dir $@)
+	$(NM) -g --defined-only $< | awk '{print $$NF}' | grep -v ':$$' | grep -v '^bz2_ng_' | grep -v '^$$' | LC_ALL=C sort -u | awk 'NF{print $$1" bz2_ng_"$$1}' > $@.redef
+	$(OBJCOPY) --remove-section=".gnu.lto_*" --remove-section=".llvmcmd" --remove-section=".llvmbc" --redefine-syms=$@.redef $< $@
+	rm -f $@.redef
+	@test -f $@ || (echo "ERROR: failed to create $@"; exit 1)
+LIBS += $(BZ2_NG_LIB)
+endif
+
 ifneq ($(wildcard bzip2/.),)
 PLG_FLAGS+=-D_BZIP2
 BZIP2_OBJS = $(call obj,bzip2/blocksort.o bzip2/huffman.o bzip2/crctable.o bzip2/randtable.o bzip2/compress.o bzip2/decompress.o bzip2/bzlib.o)
@@ -268,6 +284,7 @@ $(BZIP2_LIB): $(BZIP2_OBJS) | $(BUILD)/bzip2
 	$(AR) rcs $@ $^
 LIBS += $(BZIP2_LIB)
 endif
+
 
 ifneq ($(wildcard bzip3/.),)
 PLG_FLAGS+=-D_BZIP3
