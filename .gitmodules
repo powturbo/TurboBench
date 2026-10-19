@@ -175,3 +175,6 @@
 [submodule "zlib-turbo"]
 	path = zlib-turbo
 	url = https://github.com/icodywu/zlib-turbo.git
+[submodule "bz2-ng"]
+	path = bz2-ng
+	url = https://github.com/tfenne/bz2-ng.git
