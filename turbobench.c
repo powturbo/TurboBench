@@ -1838,7 +1838,7 @@ void bebuild(char **files, int argc, int recurse, char *foname, unsigned long lo
 
   if(!filenmax) filenmax = FLENMAX;                                     fprintf(stdout,"number of files=%d. Max. file length=%llu\n", argc, filenmax); fflush(stdout);
   if(recurse) {
-    struct recur *recur = rdiropen(files);
+    rdir_t *recur = rdiropen(files);
     if(recur) {
       char finame[PATH_LENMAX+1]; finame[0] = 0; struct stat st;
       while(!rdirnext(recur, finame, &st)) {
