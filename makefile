@@ -1489,7 +1489,7 @@ $(BUILD)/turbobench.o: turbobench.c | $(LIBS)
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
 #	@echo "Linking turbobench..."
-	$(CXX) $(filter-out $(LIBS),$^) $(LDFLAGS) $(LIBS) -o turbobench
+	$(CXX) $(filter-out $(LIBS),$^) $(LIBS) $(LDFLAGS) -o turbobench
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
