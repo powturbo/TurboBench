@@ -967,9 +967,9 @@ ZSTD_OBJS := $(call obj,$(ZSTD_C_SRCS))
 $(ZSTD_OBJS): $(BUILD)/%.o: %.c | $(BUILD)
 	@mkdir -p $(dir $@)
 	$(CC) -O3 -w -Izstd/lib -Izstd/lib/common -c $< -o $@
-#OB += $(ZSTD_S_SRCS)
+OB += $(ZSTD_S_SRCS)
 ZSTD_LIB = $(BUILD)/zstd/libzstd.a
-$(ZSTD_LIB): $(ZSTD_OBJS) $(ZSTD_S_SRCS) | $(BUILD)/zstd
+$(ZSTD_LIB): $(ZSTD_OBJS) | $(BUILD)/zstd
 	$(AR) rcs $@ $^
 LIBS += $(ZSTD_LIB)
 endif
