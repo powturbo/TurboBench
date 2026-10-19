@@ -262,7 +262,7 @@ endif
 ifneq ($(wildcard bzip2/.),)
 PLG_FLAGS+=-D_BZIP2
 BZIP2_OBJS = $(call obj,bzip2/blocksort.o bzip2/huffman.o bzip2/crctable.o bzip2/randtable.o bzip2/compress.o bzip2/decompress.o bzip2/bzlib.o)
-BZIP2_LIB = $(BUILD)/libbzip2.a
+BZIP2_LIB = $(BUILD)/bzip2/libbzip2.a
 $(BZIP2_LIB): $(BZIP2_OBJS) | $(BUILD)/bzip2
 	$(AR) rcs $@ $^
 LIBS += $(BZIP2_LIB)
@@ -535,7 +535,7 @@ LZHAM_OBJS := $(call obj,$(LZHAM_SRCS))
 $(LZHAM_OBJS): $(BUILD)/%.o: %.cpp | $(BUILD)
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(LZHAM_FLAGS) -c $< -o $@
-LZHAM_LIB = $(BUILD)/liblzham.a
+LZHAM_LIB = $(BUILD)/lzham_codec_devel/liblzham.a
 $(LZHAM_LIB): $(LZHAM_OBJS) | $(BUILD)/lzham_codec_devel
 	$(AR) rcs $@ $^
 LIBS += $(LZHAM_LIB)
@@ -650,7 +650,7 @@ $(BUILD)/$(MISA77_SRC)/%.o: $(MISA77_SRC)/%.cpp
 
 MISA77_SRCS := $(wildcard $(MISA77_SRC)/*.cpp)
 MISA77_OBJS += $(call obj,$(MISA77_SRCS) $(MISA77_SRC)/isa/target_portable.o) $(addprefix $(BUILD)/$(MISA77_SRC)/,$(MISA77_VOBJS))
-MISA77_LIB = $(BUILD)/libmisa77.a
+MISA77_LIB = $(BUILD)/misa77/libmisa77.a
 $(MISA77_LIB): $(MISA77_OBJS) | $(BUILD)/misa77
 	$(AR) rcs $@ $^
 LIBS += $(MISA77_LIB)
@@ -967,7 +967,11 @@ ZSTD_OBJS := $(call obj,$(ZSTD_C_SRCS))
 $(ZSTD_OBJS): $(BUILD)/%.o: %.c | $(BUILD)
 	@mkdir -p $(dir $@)
 	$(CC) -O3 -w -Izstd/lib -Izstd/lib/common -c $< -o $@
-OB += $(ZSTD_OBJS)  $(ZSTD_S_SRCS)
+#OB += $(ZSTD_S_SRCS)
+ZSTD_LIB = $(BUILD)/zstd/libzstd.a
+$(ZSTD_LIB): $(ZSTD_OBJS) $(ZSTD_S_SRCS) | $(BUILD)/zstd
+	$(AR) rcs $@ $^
+LIBS += $(ZSTD_LIB)
 endif
 
 ifneq ($(wildcard zpaq/.),)
