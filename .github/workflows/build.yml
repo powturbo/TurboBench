@@ -121,6 +121,7 @@ jobs:
       - name: Install dependencies
         run: |
           brew install nasm libomp llvm
+          echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
           cc -v
       - run: make OPENZL=0 PIVCO=0 RUST=0
       - name: Download silesia.tar.gz and gunzip → silesia.tar
