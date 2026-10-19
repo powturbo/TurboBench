@@ -77,6 +77,10 @@ enum {
 #define _BROTLI 0
 #endif
  P_BROTLI,
+#ifndef _BZ2_NG
+#define _BZ2_NG 0
+#endif
+ P_BZ2_NG, 
 #ifndef _BZIP2
 #define _BZIP2 0
 #endif
@@ -672,7 +676,51 @@ int vsrc_reverse(unsigned char * src, unsigned char * dst, size_t src_size);
   #endif
 
   #if _BZIP2
+EXTERN_C_BEGIN
 #include "bzip2/bzlib.h"
+  #endif
+  #if _BZ2_NG
+//#define BZ_API(func) bz2_ng_##func
+//#include "bz2-ng/c/bzlib.h"
+#ifdef _WIN32
+#   ifdef small
+      /* windows.h define small to char */
+#      undef small
+#   endif
+#   ifdef BZ_EXPORT
+#   define BZ_API(func) WINAPI func
+#   define BZ_EXTERN extern
+#   else
+   /* import windows dll dynamically */
+#   define BZ_API(func) (WINAPI * func)
+#   define BZ_EXTERN
+#   endif
+#else
+#   define BZ_API(func) func
+#   define BZ_EXTERN extern
+#endif
+BZ_EXTERN int BZ_API(bz2_ng_BZ2_bzBuffToBuffCompress) ( 
+      char*         dest, 
+      unsigned int* destLen,
+      char*         source, 
+      unsigned int  sourceLen,
+      int           blockSize100k, 
+      int           verbosity, 
+      int           workFactor 
+   );
+
+BZ_EXTERN int BZ_API(bz2_ng_BZ2_bzBuffToBuffDecompress) ( 
+      char*         dest, 
+      unsigned int* destLen,
+      char*         source, 
+      unsigned int  sourceLen,
+      int           small, 
+      int           verbosity 
+   );
+BZ_EXTERN const char * BZ_API(bz2_ng_BZ2_bzlibVersion) (
+      void
+   );
+EXTERN_C_END
   #endif
 
   #if _BZIP3
@@ -1891,6 +1939,7 @@ struct plugs plugs[] = {
   { P_BRIEFLZ,       "brieflz",       _BRIEFLZ,   "BriefLz",                     "1,3,6,9" },
   { P_BROTLI,        "brotli",        _BROTLI,    "Brotli",                      "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
   { P_BWTSATAN,      "bwtsatan",      _BWTSATAN,  "BwtSatan",                    "0,3,4,5,6,7,8,9/m#:lzp length,P:utf8, V:verbose, Z:force lzp, s:bwt16" }, 
+  { P_BZ2_NG,        "bz2-ng",        _BZ2_NG,    "Bz2-ng",                       "" },
   { P_BZIP2,         "bzip2",         _BZIP2,     "Bzip2",                       "" },
   { P_BZIP3,         "bzip3",         _BZIP3,     "Bzip3",                       "0,16,32,64,128,256,512/b#:level 0 blocksize in Mib{16}" },
   
@@ -2471,6 +2520,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
       #endif
 
+      #if _BZ2_NG
+    case P_BZ2_NG:   { unsigned outlen = outsize; return bz2_ng_BZ2_bzBuffToBuffCompress((char *)out, &outlen, (char *)in, inlen, 9, 0, 0)==BZ_OK?outlen:-1; }
+      #endif
       #if _BZIP2
     case P_BZIP2:    { unsigned outlen = outsize; return BZ2_bzBuffToBuffCompress((char *)out, &outlen, (char *)in, inlen, 9, 0, 0)==BZ_OK?outlen:-1; }
       #endif
@@ -3537,6 +3589,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       }
       #endif
 
+      #if _BZ2_NG
+    case P_BZ2_NG: { unsigned outsize = outlen; return bz2_ng_BZ2_bzBuffToBuffDecompress((char *)out, &outsize, (char *)in, inlen, 0, 0)==BZ_OK?outlen:-1; }
+      #endif
+
       #if _BZIP2
     case P_BZIP2: { unsigned outsize = outlen; return BZ2_bzBuffToBuffDecompress((char *)out, &outsize, (char *)in, inlen, 0, 0)==BZ_OK?outlen:-1; }
       #endif
@@ -4426,6 +4482,9 @@ char *codver(int codec, char *v, char *s) {
     case P_BCM:
     case P_BCMEC: return "v1.65";
      #endif
+     #if _BZ2_NG
+    case P_BZ2_NG: return (char *)bz2_ng_BZ2_bzlibVersion();
+      #endif
      #if _BZIP2
     case P_BZIP2: return (char *)BZ2_bzlibVersion();
       #endif
