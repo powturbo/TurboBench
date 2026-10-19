@@ -247,19 +247,15 @@ OB+=$(call obj,turbobench_/bcm/bcm.o)
 endif
 
 ifneq ($(wildcard brotli/.),)
-ifdef CROSS
 BROTLI_LIB := $(BUILD)/brotli/libbrotlienc.a $(BUILD)/brotli/libbrotlidec.a $(BUILD)/brotli/libbrotlicommon.a
-$(BROTLI_LIB): $(BROTLI_SRCS)
-	$(CMAKE) -S brotli -B $(BUILD)/brotli -DBUILD_SHARED_LIBS=OFF -DBROTLI_BUILD_TOOLS=OFF -DBROTLI_BUNDLED_MODE=ON -DCMAKE_C_COMPILER="$(CROSS)-linux-gnu-gcc"
-	$(CMAKE) --build $(BUILD)/brotli --parallel 4
-else
 PLG_FLAGS+=-D_BROTLI -Ibrotli/c/include
 BROTLI_SRCS := $(wildcard brotli/c/common/*.c) $(wildcard brotli/c/dec/*.c) $(wildcard brotli/*.c) $(wildcard brotli/c/enc/*.c)
-BROTLI_LIB := $(BUILD)/brotli/libbrotlienc.a $(BUILD)/brotli/libbrotlidec.a $(BUILD)/brotli/libbrotlicommon.a
-$(BROTLI_LIB): $(BROTLI_SRCS)
-	$(CMAKE) -S brotli -B $(BUILD)/brotli -DBUILD_SHARED_LIBS=OFF -DBROTLI_BUILD_TOOLS=OFF -DBROTLI_BUNDLED_MODE=ON 
-	$(CMAKE) --build $(BUILD)/brotli --parallel 4
+ifdef CROSS
+BROTLI_CC=-DCMAKE_C_COMPILER=$(CC)
 endif
+$(BROTLI_LIB): $(BROTLI_SRCS)
+	$(CMAKE) -S brotli -B $(BUILD)/brotli -DBUILD_SHARED_LIBS=OFF -DBROTLI_BUILD_TOOLS=OFF -DBROTLI_BUNDLED_MODE=ON $(BROTLI_CC) 
+	$(CMAKE) --build $(BUILD)/brotli --parallel 4
 LIBS+=$(BROTLI_LIB)
 endif
 
@@ -284,20 +280,17 @@ ifneq ($(wildcard c-blosc2/.),)
 ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS #ERROR IN C_BLOSC BUILD  
-#PLG_FLAGS+=-D_C_BLOSC2
-#C_BLOSC2_LIB = $(BUILD)/c-blosc2/blosc/libblosc2.a
-#$(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
-#	export CC=$(CROSS)-linux-gnu-gcc
-#	export CXX=$(CROSS)-linux-gnu-g++
-#	$(CMAKE) -S c-blosc2 -B $(BUILD)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
-#	          -DPREFER_EXTERNAL_LZ4=ON -DPREFER_EXTERNAL_ZLIB=ON -DPREFER_EXTERNAL_ZSTD=ON  -DBUILD_SHARED=OFF -DBUILD_SHARED_LIBS=OFF
-#	$(CMAKE) --build $(BUILD)/c-blosc2
+ifeq ($(ARCH), riscv64) 
+BLOSC_CC := -DCMAKE_C_FLAGS="" 
+endif
+BLOSC_CC += -DCMAKE_C_COMPILER=$(CC) 
+BLOSC_EXP = export CMAKE_OSX_ARCHITECTURES=$(CROSS) &&
 else
 PLG_FLAGS+=-D_C_BLOSC2
 C_BLOSC2_LIB = $(BUILD)/c-blosc2/blosc/libblosc2.a
 $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
-	$(CMAKE) -S c-blosc2 -B $(BUILD)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
-	          -DPREFER_EXTERNAL_LZ4=ON -DPREFER_EXTERNAL_ZLIB=ON -DPREFER_EXTERNAL_ZSTD=ON  -DBUILD_SHARED=OFF -DBUILD_SHARED_LIBS=OFF 
+	$(BLOSC_EXP) $(CMAKE) -S c-blosc2 -B $(BUILD)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
+	          -DPREFER_EXTERNAL_LZ4=ON -DPREFER_EXTERNAL_ZLIB=ON -DPREFER_EXTERNAL_ZSTD=ON  -DBUILD_SHARED=OFF -DBUILD_SHARED_LIBS=OFF $(BLOSC_CC)
 	$(CMAKE) --build $(BUILD)/c-blosc2 --parallel 4
 endif
 LIBS += $(C_BLOSC2_LIB)
