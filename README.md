@@ -223,6 +223,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [bcm](https://github.com/FS-make-simple/bcm) |2026/10 |c++ |  |
 | [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc) |  |c++ |  |
 | [BwtSatan](https://github.com/powturbo/Turbo-Range-Coder) |2026/09 |c  |  |
+| [bz2-ng](https://github.com/tfenne/bz2-ng) |  |c  |bzip2 api-compatible|
 | [bzip2](http://www.bzip.org/downloads.html) |  |c  |  |
 | [bzip3](https://github.com/iczelia/bzip3) |  |c  |  |
 | [kanzi bwt (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) |2026/07  |c++ |  | 
@@ -361,5 +362,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -eFAST -aFAST
 ```
 
-Last update: 16 OCT 2026
+Last update: 19 OCT 2026
 
