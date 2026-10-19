@@ -115,7 +115,7 @@ jobs:
       - name: Build (macOS)
         if: matrix.platform == 'macos'
         run: |
-          brew install nasm libomp
+          brew install nasm libomp llvm
           make
       - name: Generate silesia.tar.md (macOS)
         if: matrix.platform == 'macos'
