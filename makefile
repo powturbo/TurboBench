@@ -261,6 +261,7 @@ LIBS+=$(BROTLI_LIB)
 endif
 
 ifneq ($(wildcard bz2-ng/.),)
+ifneq ($(OS), Darwin) 
 ifneq ($(OS), Windows) #cmake error
 PLG_FLAGS += -D_BZ2_NG
 BZ2_NG_SRCS := $(wildcard bz2-ng/c/lib/*.c)
@@ -281,6 +282,7 @@ $(BZ2_NG_LIB): $(BZ2_NG_ALIB)
 	rm -f $@.redef
 	@test -f $@ || (echo "ERROR: failed to create $@"; exit 1)
 LIBS += $(BZ2_NG_LIB)
+endif
 endif
 endif
 
