@@ -267,6 +267,11 @@ BZ2_NG_ALIB  = $(BUILD)/bz2-ng/libbz2.a
 BZ2_NG_LIB   = $(BUILD)/bz2-ng/libbz2_ng.a
 $(BZ2_NG_ALIB): $(BZ2_NG_SRCS)
 	$(CMAKE) -S bz2-ng/c -B $(BUILD)/bz2-ng -DCMAKE_BUILD_TYPE=Release -DBZ2NG_BUILD_PROGRAMS=OFF -DBZ2NG_BUILD_TESTS=OFF -DBZ2NG_BUILD_BENCH=OFF && $(MAKE) -C $(BUILD)/bz2-ng
+ifeq ($(OS),Darwin)
+  OBJCOPY ?= $(shell which llvm-objcopy || which gobjcopy || echo objcopy)
+else
+  OBJCOPY ?= objcopy
+endif
 $(BZ2_NG_LIB): $(BZ2_NG_ALIB)
 	mkdir -p $(dir $@)
 	$(NM) -g --defined-only $< | awk '{print $$NF}' | grep -v ':$$' | grep -v '^bz2_ng_' | grep -v '^$$' | LC_ALL=C sort -u | awk 'NF{print $$1" bz2_ng_"$$1}' > $@.redef
