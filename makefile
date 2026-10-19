@@ -485,14 +485,15 @@ ifneq ($(HAVE_OPENMP),0)
 endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
       $(BUILD)/libbsc/libbsc/filters/preprocessing.o $(BUILD)/libbsc/libbsc/adler32/adler32.o $(BUILD)/libbsc/libbsc/bwt/bwt.o $(BUILD)/libbsc/libbsc/st/st.o $(BUILD)/libbsc/libbsc/lzp/lzp.o \
-      $(BUILD)/libbsc/libbsc/platform/platform.o $(BUILD)/libbsc/libbsc/bwt/libsais/libsais.o
+      $(BUILD)/libbsc/libbsc/platform/platform.o 
+#$(BUILD)/libbsc/libbsc/bwt/libsais/libsais.o
 $(BUILD)/libbsc/%.o: libbsc/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(LIBBSC_FLAGS) -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc -c $< -o $@
 $(BUILD)/libbsc/%.o: libbsc/%.c
 	@mkdir -p $(dir $@)
 	$(CC) -O3 $(LIBSAIS_CFLAGS) -c $< -o $@
-LIBSAIS = 1
+#LIBSAIS = 1
 endif
 
 ifneq ($(wildcard libbsc_cmake/.),)
@@ -886,20 +887,11 @@ PLG_FLAGS += -D_TURBORC
 RC_DIR  := Turbo-Range-Coder
 RC_SRCS := $(shell find $(RC_DIR) -type f \( -name '*.[ch]' -o -name '*.cpp' -o -name '*.cc' \))
 RC_BDIR := $(BUILD)/$(RC_DIR)
-RC_LIB  := $(RC_BDIR)/librc.a
+RC_LIB  := $(RC_BDIR)/librc.a $(RC_BDIR)/libsais.o $(RC_BDIR)/libsais16.o
 $(RC_LIB): $(RC_SRCS)
 	@mkdir -p $(RC_BDIR)
-	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT" $(abspath $(RC_BDIR))/librc.a
+	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT" $(abspath $(RC_BDIR))/librc.a $(abspath $(RC_BDIR))/libsais.o $(abspath $(RC_BDIR))/libsais16.o
 LIBS += $(RC_LIB)
-# libsais16 is not included in libbsc
-ifneq ($(HAVE_OPENMP),0)
-LIBSAIS_FLAGS = -DLIBSAIS_OPENMP $(OMP_CFLAGS) -Wno-deprecated-openmp
-endif
-LIBSAIS16 := $(RC_BDIR)/libsais/src/libsais16.o
-$(LIBSAIS16) : $(RC_DIR)/libsais/src/libsais16.c
-	@mkdir -p $(dir $@)
-	$(CC) -O3 -I$(RC_DIR)/libsais/include $(LIBSAIS_FLAGS) $< -c -o $@
-OB += $(LIBSAIS16)
 endif
 endif
 
