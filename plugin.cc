@@ -676,10 +676,10 @@ int vsrc_reverse(unsigned char * src, unsigned char * dst, size_t src_size);
   #endif
 
   #if _BZIP2
-EXTERN_C_BEGIN
 #include "bzip2/bzlib.h"
   #endif
   #if _BZ2_NG
+EXTERN_C_BEGIN
 //#define BZ_API(func) bz2_ng_##func
 //#include "bz2-ng/c/bzlib.h"
 #ifdef _WIN32
