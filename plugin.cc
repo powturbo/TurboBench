@@ -3433,18 +3433,17 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _BWTSATAN
     case P_BWTSATAN: { 
       char *q;
-      unsigned lenmin=1, xprep8=0, nutf8=0, verbose=0, forcelzp=0, xsort=0, bwtmt = 0, itmax=0, lzpnrev=0, s=0;  
-      if(q = strchr(prm,'l')) lenmin    = atoi(q+(q[1]=='='?2:1)); //bwt options  
-      if(strchr(prm,'P')) xprep8    = BWT_PREP8;
-      if(strchr(prm,'N')) nutf8     = BWT_NUTF8;
-      if(strchr(prm,'V')) verbose   = BWT_VERBOSE;
-      if(strchr(prm,'Z')) forcelzp  = BWT_LZP;
-      if(strchr(prm,'X')) xsort     = 1;
-      if(strchr(prm,'R')) lzpnrev   = BWT_LZPNREV;
-      if(strchr(prm,'S')) s = 2; else if(q = strchr(prm,'U')) s = 4;
-      if(q = strchr(prm,'t')) threads   = atoi(q+(q[2]=='='?2:1)); threads = CLAMP(threads, 1, 64); 
-      #define bwtflag(s) (s==2?BWT_BWT16:0) | xprep8 | forcelzp | nutf8 | bwtmt | lzpnrev | (verbose?BWT_VERBOSE:0) | xsort <<14 | itmax <<10 | lenmin
-      return rcbwtenc(in, inlen, out, lev, threads, bwtflag(1)); 
+      unsigned bwt16 = 0, verbose = 0,  lzp_force = 0, lzp_nrev = 0, lzp_lenmin = 1,  utf8_o8=0, utf8_no = 0, utf8_sort = 0, usize=0;  
+      if(strchr(prm,'V')) verbose   = 1;
+      if(strchr(prm,'N')) utf8_no   = 1;
+      if(strchr(prm,'X')) utf8_sort = 1;
+      if(strchr(prm,'Z')) lzp_force = 1;
+      if(strchr(prm,'R')) lzp_nrev  = 1;
+      if(strchr(prm,'S')) usize = 2; else if(q = strchr(prm,'U')) usize = 4;
+      if(q = strchr(prm,'l')) lzp_lenmin = atoi(q+(q[1]=='='?2:1)); //bwt options  
+      if(q = strchr(prm,'t')) threads    = atoi(q+(q[2]=='='?2:1)); threads = CLAMP(threads, 0, 64); 
+      #define BWT_OPTIONS (bwt_flag(usize==2, verbose) | bwt_lzp(lzp_force, lzp_nrev, lzp_lenmin) | bwt_utf8(utf8_o8, utf8_no, utf8_sort, 0, 0)) 
+      return rcbwtenc(in, inlen, out, lev, threads, BWT_OPTIONS); 
     }
       #endif
 
@@ -3454,36 +3453,35 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       unsigned bwtlev = 9;
       if(q = strchr(prm,'e')) bwtlev    = atoi(q+(q[1]=='='?2:1)); 
 
-      unsigned lenmin=1, xprep8=0, nutf8=0, verbose=0, forcelzp=0, xsort=0, bwtmt = 0, itmax=0, lzpnrev=0, s=0;  
-      if(q = strchr(prm,'l')) lenmin    = atoi(q+(q[1]=='='?2:1)); //bwt options  
-      if(strchr(prm,'P')) xprep8    = BWT_PREP8;
-      if(strchr(prm,'N')) nutf8     = BWT_NUTF8;
-      if(strchr(prm,'V')) verbose   = BWT_VERBOSE;
-      if(strchr(prm,'Z')) forcelzp  = BWT_LZP;
-      if(strchr(prm,'X')) xsort     = 1;
-      if(strchr(prm,'R')) lzpnrev   = BWT_LZPNREV;
-      if(strchr(prm,'S')) s = 2; else if(q = strchr(prm,'U')) s = 4;
-      if(q = strchr(prm,'t')) threads   = atoi(q+(q[2]=='='?2:1)); threads = CLAMP(threads, 1, 64); 
-      #define bwtflag(s) (s==2?BWT_BWT16:0) | xprep8 | forcelzp | nutf8 | bwtmt | lzpnrev | (verbose?BWT_VERBOSE:0) | xsort <<14 | itmax <<10 | lenmin
+      unsigned bwt16 = 0, verbose = 0,  lzp_force = 0, lzp_nrev = 0, lzp_lenmin = 1,  utf8_o8=0, utf8_no = 0, utf8_sort = 0, usize=0;  
+      if(strchr(prm,'V')) verbose   = 1;
+      if(strchr(prm,'N')) utf8_no   = 1;
+      if(strchr(prm,'X')) utf8_sort = 1;
+      if(strchr(prm,'Z')) lzp_force = 1;
+      if(strchr(prm,'R')) lzp_nrev  = 1;
+      if(strchr(prm,'S')) usize = 2; else if(q = strchr(prm,'U')) usize = 4;
+      if(q = strchr(prm,'l')) lzp_lenmin = atoi(q+(q[1]=='='?2:1)); //bwt options  
+      if(q = strchr(prm,'t')) threads    = atoi(q+(q[2]=='='?2:1)); threads = CLAMP(threads, 0, 64); 
+      #define BWT_OPTIONS (bwt_flag(usize==2, verbose) | bwt_lzp(lzp_force, lzp_nrev, lzp_lenmin) | bwt_utf8(utf8_o8, utf8_no, utf8_sort, 0, 0)) 
       switch(lev) {
         case  1: return rcsenc(    in, inlen, out);
         case  2: return rccsenc(   in, inlen, out); 
         case  3: return rcc2senc(  in, inlen, out);
         case  4: return rcxsenc(   in, inlen, out);
         case  5: return rcx2senc(   in, inlen, out);
-        case  6: return s==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
-        case  7: return s==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
+        case  6: return usize==2?rcsenc16(in,inlen,out)  :rcsenc32(in,inlen,out);
+        case  7: return usize==2?rccsenc16(in,inlen,out) :rccsenc32(in,inlen,out);
         case  8: rcc2senc32(in,inlen,out);
         case  9: return rcmsenc(    in, inlen, out);
         case 10: return rcm2senc(   in, inlen, out);
         case 11: return rcmrsenc(   in, inlen, out);
         case 12: return rcmrrsenc(  in, inlen, out);
-        case 13: return s==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
-        case 14: return s==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
+        case 13: return usize==2?rcrlesenc16( in, inlen, out):rcrlesenc(in,inlen,out);
+        case 14: return usize==2?rcrle1senc16(in, inlen, out):rcrle1senc(in,inlen,out);
         case 17: return rcu3senc(   in, inlen, out);
         case 18: return rcqlfc0senc( in, inlen, out);
         case 19: return rcqlfc0ssenc(in, inlen, out, 4, 7);
-        case 20: return rcbwtenc( in, inlen, out, bwtlev, 0, bwtflag(1));  
+        case 20: return rcbwtenc( in, inlen, out, bwtlev, threads, BWT_OPTIONS);  
         case 56: return anscdfenc(    in, inlen, out);
         //case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpenc( in, inlen, out, esize?esize:4); return inlen; }  
         //case 101: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tp4enc(in, inlen, out, esize?esize:4); return inlen; }       
