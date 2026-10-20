@@ -248,12 +248,12 @@ OB+=$(call obj,turbobench_/bcm/bcm.o)
 endif
 
 ifneq ($(wildcard brotli/.),)
-BROTLI_LIB := $(BUILD)/brotli/libbrotlienc.a $(BUILD)/brotli/libbrotlidec.a $(BUILD)/brotli/libbrotlicommon.a
 PLG_FLAGS+=-D_BROTLI -Ibrotli/c/include
 BROTLI_SRCS := $(wildcard brotli/c/common/*.c) $(wildcard brotli/c/dec/*.c) $(wildcard brotli/*.c) $(wildcard brotli/c/enc/*.c)
 ifdef CROSS
 BROTLI_CC=-DCMAKE_C_COMPILER=$(CC)
 endif
+BROTLI_LIB := $(BUILD)/brotli/libbrotlienc.a $(BUILD)/brotli/libbrotlidec.a $(BUILD)/brotli/libbrotlicommon.a
 $(BROTLI_LIB): $(BROTLI_SRCS)
 	$(CMAKE) -S brotli -B $(BUILD)/brotli -DBUILD_SHARED_LIBS=OFF -DBROTLI_BUILD_TOOLS=OFF -DBROTLI_BUNDLED_MODE=ON $(BROTLI_CC) 
 	$(CMAKE) --build $(BUILD)/brotli --parallel 4
@@ -348,29 +348,9 @@ endif
 ifneq ($(wildcard GLZA/.),)
 PLG_FLAGS+=-D_GLZA
 GLZA_OBJS := $(call obj,GLZA/GLZAmodel.o GLZA/GLZAcomp.o GLZA/GLZAencode.o GLZA/GLZAcompress.o GLZA/GLZAformat.o GLZA/GLZAdecode.o)
-GLZA_BUILD = $(CC) -O2 $(CFLAGS) $< -c -o $@
 $(GLZA_DIR)/%.o: GLZA/%.c
-	$(GLZA_BUILD)
+	 $(CC) -O2 $(CFLAGS) $< -c -o $@
 OB += $(GLZA_OBJS) 
-endif
-
-ifneq ($(wildcard Glyd_RUST/.),)
-HAVE_CARGO := $(shell command -v cargo >/dev/null 2>&1 && echo 1 || echo 0)
-ifeq ($(HAVE_CARGO),1)
-PLG_FLAGS+=-D_GLYD
-GLYD_DIR := Glyd
-GLYD_BDIR := $(BUILD)/$(GLYD_DIR)
-GLYD_SRCS := $(shell find $(GLYD_DIR)/src -type f -name '*.rs' -o -name '*.toml' )
-GLYD_LIB := $(GLYD_BDIR)/release/libglyd.a 
-#  LDFLAGS += -L$(GLYD_DIR)target/release -lglyd -ldl -lpthread -lm
-$(GLYD_LIB): $(GLYD_SRCS)
-	mkdir -p $(GLYD_BDIR) 
-	cargo rustc --manifest-path $(GLYD_DIR)/Cargo.toml --lib --crate-type=staticlib --release --target-dir $(GLYD_BDIR) -- --print=native-static-libs
-LIBS += $(GLYD_LIB)
-#LDFLAGS+=-Wl,--allow-multiple-definition 
-else
-  $(info Cargo not found – skipping Pulsar build)
-endif
 endif
 
 #--- I -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -467,8 +447,7 @@ endif
 #--- K ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard kanzi-cpp/.),)
 PLG_FLAGS += -D_KANZI 
-KANZI_DIR = kanzi-cpp/src
-KANZI_SRCS := $(wildcard $(KANZI_DIR)/io/*.cpp) $(wildcard $(KANZI_DIR)/entropy/*.cpp) $(wildcard $(KANZI_DIR)/bitstream/*.cpp) $(wildcard $(KANZI_DIR)/*.cpp) $(wildcard $(KANZI_DIR)/transform/*.cpp)
+KANZI_SRCS := $(wildcard kanzi-cpp/src/io/*.cpp) $(wildcard kanzi-cpp/src/entropy/*.cpp) $(wildcard kanzi-cpp/src/bitstream/*.cpp) $(wildcard kanzi-cpp/src/*.cpp) $(wildcard kanzi-cpp/src/transform/*.cpp)
 KANZI_LIB = $(BUILD)/kanzi-cpp/libkanzi.a
 $(KANZI_LIB): $(KANZI_SRCS)
 	$(CMAKE) -S kanzi-cpp -B $(BUILD)/kanzi-cpp -DKANZI_ENABLE_NATIVE_OPTIMIZATIONS=OFF -DCMAKE_CXX_COMPILER="$(CXX)" -DCMAKE_C_COMPILER="$(CC)" && make -C $(BUILD)/kanzi-cpp
@@ -496,7 +475,6 @@ $(BUILD)/libbsc/%.o: libbsc/%.cpp
 $(BUILD)/libbsc/%.o: libbsc/%.c
 	@mkdir -p $(dir $@)
 	$(CC) -O3 $(LIBSAIS_CFLAGS) -c $< -o $@
-#LIBSAIS = 1
 endif
 
 ifneq ($(wildcard libbsc_cmake/.),)
@@ -895,6 +873,7 @@ $(RC_LIB): $(RC_SRCS)
 	@mkdir -p $(RC_BDIR)
 	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT" $(abspath $(RC_BDIR))/librc.a $(abspath $(RC_BDIR))/libsais.o $(abspath $(RC_BDIR))/libsais16.o
 LIBS += $(RC_LIB)
+LIBSAIS = 1
 endif
 endif
 
