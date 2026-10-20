@@ -166,9 +166,12 @@ ifneq ($(OPENMP),0)
     ifeq ($(findstring clang,$(CO)),clang)
       OMP_CFLAGS  := -fopenmp     
 #-fopenmp=libgomp -Xclang -fopenmp
-      OMP_LDFLAGS := -lomp
     else
       OMP_CFLAGS  := -fopenmp
+    endif
+    ifeq ($(findstring clang,$(CC)),clang)
+      OMP_LDFLAGS := -lomp
+    else
       OMP_LDFLAGS := -fopenmp
     endif
     HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CO) $(OMP_CFLAGS) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
