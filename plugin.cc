@@ -2133,7 +2133,7 @@ struct plugs plugs[] = {
 
   //----- Transform -----
   { P_DIVBWT,       "divbwt",      _DIVBWT,    "bwt libdivsufsort","" },
-  { P_LIBBSCBWT,    "bscbwt",      _LIBBSC,    "bwt libbsc",                     "" },
+  { P_LIBBSCBWT,    "bscbwt",      _LIBBSC,    "bwt libbsc",                     "0" },
   { P_ST,           "st",          _LIBBSC,    "st  libbsc",                     "3,4,5,6,7,8" },
   { P_BRC,          "brc",         _BRC,       "Behemoth-Rank-Coding",           "0,1" },
 //{ P_MYCODEC,   "mycodec",     _MYCODEC,  "0",        "My codec",             "           ",      "",        "" },   // Example for your codec
@@ -2505,7 +2505,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       else if(dsize)                       lgwin = bsr32(dsize)-powof2(dsize);  // window specified by global option -d
       else if(lev < 10 || strchr(prm,'W')) lgwin = BROTLI_DEFAULT_WINDOW;       // set default=24 for lev<10
       else                               { lgwin = bsr32(inlen)-powof2(inlen); lgwin = min(lgwin,BROTLI_LARGE_MAX_WINDOW_BITS); }// set large window brotli
-      if(q = strchr(prm,'m')) mode = atoi(q+(q[1]=='='?2:1));         
+      if(q = strchr(prm,'o')) mode = atoi(q+(q[1]=='='?2:1));         
                                                                             // Only for modified brotli by powturbo -------------------------------------
                                                                             brotlidic = brotlictx = brotlirep = 0;
                                                                             if(strchr(prm,'V'))      brotlidic = 1; // Disable builtin dictionary
@@ -2643,10 +2643,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     #define BSC_MODE LIBBSC_FEATURE_FASTMODE | (strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0) | (strchr(prm,'t')?LIBBSC_FEATURE_MULTITHREADING:0)      
     case P_LIBBSC: {  if(inlen > 1024*1024*1024) die("bsc max. blocksize = 1024m\n"); 
       int ec = (q=strchr(prm,'e'))?atoi(q+(q[1]=='='?2:1)):1; ec = ec==0?3:(ec>3?3:ec);  
-      return bsc_compress(in, out, inlen, strchr(prm,'H')?atoi(q+(q[1]=='='?2:1)):15, strchr(prm,'M')?atoi(q+(q[1]=='='?2:1)):72, lev<3?1:lev, ec, BSC_MODE);   //int bsc_compress_mt(const unsigned char * input, unsigned char * output, int n, int lzpHashSize, int lzpMinLen, int blockSorter, int coder, int features, int threads);
+      return bsc_compress(in, out, inlen, strchr(prm,'H')?atoi(q+(q[1]=='='?2:1)):15, strchr(prm,'l')?atoi(q+(q[1]=='='?2:1)):72, lev<3?1:lev, ec, BSC_MODE);   //int bsc_compress_mt(const unsigned char * input, unsigned char * output, int n, int lzpHashSize, int lzpMinLen, int blockSorter, int coder, int features, int threads);
     }
     case P_LIBBSCC: return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
-    case P_LIBBSCBWT: { unsigned bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, 0); ctou32(out) = bwtidx; return inlen+4; }
+    case P_LIBBSCBWT: { unsigned bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, BSC_MODE); ctou32(out) = bwtidx; return inlen+4; }
     case P_ST: { memcpy(out+4,in, inlen); ctou32(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
       #endif
 
@@ -2692,7 +2692,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_CLICKHOUSE:
         #endif
     case P_LZ4:
-      if(strchr(prm,'M')) { return !lev?LZ4_compress_fast((char *)in, (char *)out, inlen, outsize, 4):(lev<9?LZ4_compress_default((char *)in, (char *)out, inlen, outsize):LZ4_compress_HC((char *)in, (char *)out, inlen, outsize, lev)); }
+      if(strchr(prm,'F')) { return !lev?LZ4_compress_fast((char *)in, (char *)out, inlen, outsize, 4):(lev<9?LZ4_compress_default((char *)in, (char *)out, inlen, outsize):LZ4_compress_HC((char *)in, (char *)out, inlen, outsize, lev)); }
       else { char *q;
          LZ4F_preferences_t opts = LZ4F_INIT_PREFERENCES;
                               opts.compressionLevel      = lev;
@@ -2826,7 +2826,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       if(strchr(prm,'c')) nFlags |= LZSA_FLAG_FAVOR_RATIO;
       if(strchr(prm,'r')) nFlags |= LZSA_FLAG_RAW_BLOCK;
       if(q=strchr(prm,'f')) nFormatVersion = atoi(q+(q[1]=='='?2:1)); if(nFormatVersion < 1) nFormatVersion=1; if(nFormatVersion > 2) nFormatVersion=2;
-      if(q=strchr(prm,'m')) nMinMatchSize = atoi(q+(q[1]=='='?2:1));
+      if(q=strchr(prm,'l')) nMinMatchSize = atoi(q+(q[1]=='='?2:1));
       return lzsa_compress_inmem(in, out, inlen, outsize, nFlags, nMinMatchSize, nFormatVersion);
     }
      #endif
@@ -3434,7 +3434,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_BWTSATAN: { 
       char *q;
       unsigned lenmin=1, xprep8=0, nutf8=0, verbose=0, forcelzp=0, xsort=0, bwtmt = 0, itmax=0, lzpnrev=0, s=0;  
-      if(q = strchr(prm,'m')) lenmin    = atoi(q+(q[1]=='='?2:1)); //bwt options  
+      if(q = strchr(prm,'l')) lenmin    = atoi(q+(q[1]=='='?2:1)); //bwt options  
       if(strchr(prm,'P')) xprep8    = BWT_PREP8;
       if(strchr(prm,'N')) nutf8     = BWT_NUTF8;
       if(strchr(prm,'V')) verbose   = BWT_VERBOSE;
@@ -3455,7 +3455,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       if(q = strchr(prm,'e')) bwtlev    = atoi(q+(q[1]=='='?2:1)); 
 
       unsigned lenmin=1, xprep8=0, nutf8=0, verbose=0, forcelzp=0, xsort=0, bwtmt = 0, itmax=0, lzpnrev=0, s=0;  
-      if(q = strchr(prm,'m')) lenmin    = atoi(q+(q[1]=='='?2:1)); //bwt options  
+      if(q = strchr(prm,'l')) lenmin    = atoi(q+(q[1]=='='?2:1)); //bwt options  
       if(strchr(prm,'P')) xprep8    = BWT_PREP8;
       if(strchr(prm,'N')) nutf8     = BWT_NUTF8;
       if(strchr(prm,'V')) verbose   = BWT_VERBOSE;
@@ -3743,7 +3743,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
       #if _LZ4
     case P_LZ4:
-      if(strchr(prm,'M')) { LZ4_decompress_safe((const char *)in, (char *)out, inlen, outlen); break; }
+      if(strchr(prm,'F')) { LZ4_decompress_safe((const char *)in, (char *)out, inlen, outlen); break; }
       else {
         lz4: LZ4F_dctx *ctx; LZ4F_createDecompressionContext(&ctx, LZ4F_VERSION);
         size_t ilen = inlen, olen = outlen, rc = LZ4F_decompress(ctx, out, &olen, in, &ilen, NULL);
