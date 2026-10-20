@@ -16,7 +16,7 @@ OPENMP ?= 1
 CC ?= gcc
 CXX ?= clang++
 CG ?= clang
-CO := $(CG)
+CO := $(CC)
 
 MAKE    ?= make
 CMAKE   ?= cmake
