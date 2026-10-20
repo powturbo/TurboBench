@@ -15,10 +15,8 @@ OPENMP ?= 1
 
 CC ?= gcc
 CXX ?= clang++
-#CC ?= clang
-#CXX = clang++
-CY ?= clang
-#CY ?= gcc
+CG ?= clang
+CO := $(CG)
 
 MAKE    ?= make
 CMAKE   ?= cmake
@@ -42,8 +40,8 @@ ifneq (,$(filter Windows%,$(OS)))
   OS := Windows
   CC=gcc
 # CC=clang
-# CY=gcc
-  CY=clang
+# CG=gcc
+  CG=clang
   CXX=g++
   ARCH=x86_64
 else
@@ -59,18 +57,18 @@ CP=$(CROSS)-unknown-elf
 else
 CP=$(CROSS)-linux-gnu
 endif
-ifeq ($(CY),clang)
-CY=clang --target=$(CP) --sysroot=/usr/$(CP) -fuse-ld=lld
+ifeq ($(CG),clang)
+CG=clang --target=$(CP) --sysroot=/usr/$(CP) -fuse-ld=lld
 CXX:=$(CP)-clang++
 ifeq ($(CC),clang)
-CC=$(CY)
+CC=$(CG)
 else
 CC:=$(CP)-gcc
 CXX:=$(CP)-g++
 endif
 else
 CC:=$(CP)-gcc
-CY=$(CC)
+CG=$(CC)
 endif
 #CROSS:=$(CC)
 endif
@@ -139,60 +137,55 @@ endif
 
 # ---------- OpenMP detection ----------
 HAVE_OPENMP := 0
-OMP_CFLAGS  :=
-OMP_LDFLAGS :=
-ifneq ($(OPENMP),0)
-  define test_openmp
-  $(shell echo 'int main(void){return 0;}' | $(CC) $(1) $(2) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
-  endef
+ifneq ($(OPENMP),0) 
   ifeq ($(OS),Darwin)
-    # macOS – prefer Homebrew libomp
     LIBOMP_PREFIX := $(shell brew --prefix libomp 2>/dev/null)
     ifneq ($(LIBOMP_PREFIX),)
       OMP_CFLAGS  := -Xpreprocessor -fopenmp -I$(LIBOMP_PREFIX)/include
       OMP_LDFLAGS := -L$(LIBOMP_PREFIX)/lib -lomp
-      HAVE_OPENMP := $(call test_openmp,$(OMP_CFLAGS),$(OMP_LDFLAGS))
+      ifneq ($(shell echo 'int main(){return 0;}' | $(CC) $(OMP_CFLAGS) $(OMP_LDFLAGS) -x c - -o /dev/null 2>/dev/null && echo ok),)
+        HAVE_OPENMP := 1
+      endif
     endif
   else ifneq (,$(filter MINGW% MSYS% UCRT% CLANG%,$(MSYSTEM)))
-    # Windows / MSYS2
+    # Windows / MSYS2 – test whether -fopenmp actually works
     OMP_CFLAGS := -fopenmp
-    ifeq ($(findstring clang,$(CXX)),clang)
+    ifeq ($(findstring clang,$(CC)),clang)
       OMP_LDFLAGS := -lomp
     else
       OMP_LDFLAGS := -lgomp
     endif
-    HAVE_OPENMP := $(call test_openmp,$(OMP_CFLAGS),$(OMP_LDFLAGS))
+    HAVE_OPENMP := $(shell \
+      echo '#include <omp.h>' > _omp_test.c && \
+      echo 'int main(){return omp_get_max_threads();}' >> _omp_test.c && \
+      $(CC) $(OMP_CFLAGS) _omp_test.c -o _omp_test $(OMP_LDFLAGS) 2>/dev/null && \
+      echo 1 || echo 0; \
+      rm -f _omp_test.c _omp_test _omp_test.exe)
   else
-    # Linux and other Unix-like systems
-    OMP_CFLAGS  := -fopenmp
-    OMP_LDFLAGS := -fopenmp
-    HAVE_OPENMP := $(call test_openmp,$(OMP_CFLAGS),$(OMP_LDFLAGS))
-    # Fallback for some Clang installations that need an explicit runtime
-    ifeq ($(HAVE_OPENMP),0)
-      ifeq ($(findstring clang,$(CXX)),clang)
-        OMP_LDFLAGS := -fopenmp=libomp
-        HAVE_OPENMP := $(call test_openmp,$(OMP_CFLAGS),$(OMP_LDFLAGS))
-        ifeq ($(HAVE_OPENMP),0)
-          OMP_LDFLAGS := -fopenmp=libgomp
-          HAVE_OPENMP := $(call test_openmp,$(OMP_CFLAGS),$(OMP_LDFLAGS))
-        endif
-      endif
+    # Linux
+    ifeq ($(findstring clang,$(CO)),clang)
+      OMP_CFLAGS  := -fopenmp     
+#-fopenmp=libgomp -Xclang -fopenmp
+      OMP_LDFLAGS := -lomp
+    else
+      OMP_CFLAGS  := -fopenmp
+      OMP_LDFLAGS := -fopenmp
     endif
-  endif
-  ifeq ($(HAVE_OPENMP),0)
-    $(warning OpenMP not available)
-    OMP_CFLAGS  :=
-    OMP_LDFLAGS :=
+    HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CO) $(OMP_CFLAGS) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
   endif
 endif
 
-ifneq ($(HAVE_OPENMP),0)
-  $(info OpenMP enabled with $(OMP_LDFLAGS))
+ifeq ($(HAVE_OPENMP),0)
+  $(warning OpenMP not available)
+  OMP_CFLAGS  :=
+  OMP_LDFLAGS :=
+else
+  $(info OpenMP enabled with $(OMP_CFLAGS) and $(OMP_LDFLAGS))
+# OMP_CFLAGS += -DLIBSAIS_OPENMP
   LDFLAGS += $(OMP_LDFLAGS)
 endif
 
-$(info CC="$(CC)")
-$(info CXX="$(CXX)")
+$(info CC="$(CC)" CXX="$(CXX)"  CG="$(CG)" CO="$(CO)" )
 
 all: turbobench 
  
@@ -372,7 +365,7 @@ ifneq ($(OS),Windows)
 PLG_FLAGS += -D_IGUANA
 IGUANA_DIR := iguana/iguana
 IGUANA_BD := $(BUILD)/iguana
-IGUANA_CC := $(CY)
+IGUANA_CC := $(CG)
 ifeq ($(OS),Windows)
 IGUANA_CC := clang
 endif
