@@ -41,10 +41,8 @@ SRC ?= lib/
 ifneq (,$(filter Windows%,$(OS)))
   OS := Windows
   CC=gcc
-# CC=clang
-# CG=gcc
-  CG=clang
   CXX=g++
+  CXL=clang++
   ARCH=x86_64
 else
   OS := $(shell uname -s)
@@ -151,12 +149,8 @@ ifneq ($(OPENMP),0)
     endif
   else ifneq (,$(filter MINGW% MSYS% UCRT% CLANG%,$(MSYSTEM)))
     # Windows / MSYS2 – test whether -fopenmp actually works
-    OMP_CFLAGS := -fopenmp
-    ifeq ($(findstring clang,$(CC)),clang)
-      OMP_LDFLAGS := -lomp
-    else
-      OMP_LDFLAGS := -lgomp
-    endif
+    OMP_CFLAGS  := -fopenmp
+    OMP_LDFLAGS := -fopenmp
     HAVE_OPENMP := $(shell \
       echo '#include <omp.h>' > _omp_test.c && \
       echo 'int main(){return omp_get_max_threads();}' >> _omp_test.c && \
