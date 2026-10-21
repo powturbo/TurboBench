@@ -14,11 +14,13 @@ PHAZ ?=0
 OPENMP ?= 1 
 
 CC ?= gcc
-CXX ?= clang++
-CXL = clang++
-CG ?= clang
-CO := $(CG)
-
+CXL ?= $(CXX)   # linker
+CG ?= clang    # clang faster
+CCO ?= $(CC)   # openmp compiler
+ifeq ($(STATIC),1)
+CCO := gcc
+CXL := gcc
+endif
 
 MAKE    ?= make
 CMAKE   ?= cmake
@@ -149,16 +151,7 @@ ifneq ($(OPENMP),0)
     endif
   else ifneq (,$(filter MINGW% MSYS% UCRT% CLANG%,$(MSYSTEM)))
     OMP_CFLAGS  := -fopenmp
-  # ifeq ($(findstring clang,$(CXL)),clang)
-  #   OMP_LDFLAGS += -lomp
-  # else
-  #   OMP_LDFLAGS += -lgomp
-  # endif
-    ifeq ($(STATIC),1)
-      OMP_LDFLAGS := -fopenmp -static-openmp
-    else
-      OMP_LDFLAGS := -fopenmp -lgomp  
-    endif
+    OMP_LDFLAGS := -fopenmp
     HAVE_OPENMP := $(shell \
       echo '#include <omp.h>' > _omp_test.c && \
       echo 'int main(){return omp_get_max_threads();}' >> _omp_test.c && \
@@ -169,7 +162,7 @@ ifneq ($(OPENMP),0)
     # Linux
     OMP_CFLAGS  := -fopenmp     
     OMP_LDFLAGS := -fopenmp
-    HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CO) $(OMP_CFLAGS) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
+    HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CCO) $(OMP_CFLAGS) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
   endif
 endif
 
@@ -181,8 +174,7 @@ else
   $(info OpenMP enabled with $(OMP_CFLAGS) and $(OMP_LDFLAGS))
   LDFLAGS += $(OMP_LDFLAGS)
 endif
-
-$(info CC="$(CC)" CXX="$(CXX)"  CG="$(CG)" CO="$(CO)" )
+$(info CC="$(CC)" CXX="$(CXX)"  CXL="$(CXL)"  CG="$(CG)" CCO="$(CCO)" )
 
 all: turbobench 
  
