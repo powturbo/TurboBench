@@ -15,8 +15,10 @@ OPENMP ?= 1
 
 CC ?= gcc
 CXX ?= clang++
+CXL = clang++
 CG ?= clang
-CO := $(CC)
+CO := $(CG)
+
 
 MAKE    ?= make
 CMAKE   ?= cmake
@@ -163,17 +165,8 @@ ifneq ($(OPENMP),0)
       rm -f _omp_test.c _omp_test _omp_test.exe)
   else
     # Linux
-    ifeq ($(findstring clang,$(CO)),clang)
-      OMP_CFLAGS  := -fopenmp     
-#-fopenmp=libgomp -Xclang -fopenmp
-    else
-      OMP_CFLAGS  := -fopenmp
-    endif
-    ifeq ($(findstring clang,$(CC)),clang)
-      OMP_LDFLAGS := -lomp
-    else
-      OMP_LDFLAGS := -fopenmp
-    endif
+    OMP_CFLAGS  := -fopenmp     
+    OMP_LDFLAGS := -fopenmp
     HAVE_OPENMP := $(shell echo 'int main(){return 0;}' | $(CO) $(OMP_CFLAGS) -x c - -o /dev/null 2>/dev/null && echo 1 || echo 0)
   endif
 endif
@@ -184,7 +177,6 @@ ifeq ($(HAVE_OPENMP),0)
   OMP_LDFLAGS :=
 else
   $(info OpenMP enabled with $(OMP_CFLAGS) and $(OMP_LDFLAGS))
-# OMP_CFLAGS += -DLIBSAIS_OPENMP
   LDFLAGS += $(OMP_LDFLAGS)
 endif
 
@@ -1466,7 +1458,7 @@ $(BUILD)/turbobench.o: turbobench.c | $(LIBS)
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
 #	@echo "Linking turbobench..."
-	$(CXX) $(filter-out $(LIBS),$^) $(LIBS) $(LDFLAGS) -o turbobench
+	$(CXL) $(filter-out $(LIBS),$^) $(LIBS) $(LDFLAGS) -o turbobench
 
 $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
