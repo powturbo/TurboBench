@@ -68,13 +68,7 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update -qq
-#          if [ "${{ matrix.os }}" != "ubuntu-24.04-riscv" ]; then
-          sudo apt-get install -y -qq libomp-dev
-#          fi
-          sudo apt-get install -y -qq build-essential nasm make
-          if [ "${{ matrix.compiler }}" = "clang" ]; then
-            sudo apt-get install -y -qq clang
-          fi
+          sudo apt-get install -y -qq build-essential libomp-dev nasm make clang
           if [ "${{ matrix.os }}" = "ubuntu-24.04-riscv" ]; then
             sudo apt-get update -qq
             sudo apt-get install -y -qq build-essential nasm make gcc-14 g++-14 clang-20
