@@ -42,7 +42,7 @@ ifneq (,$(filter Windows%,$(OS)))
   OS := Windows
   CC=gcc
   CXX=g++
-  CXL=clang++
+  CXL=g++
   ARCH=x86_64
 else
   OS := $(shell uname -s)
@@ -1451,7 +1451,6 @@ $(BUILD)/turbobench.o: turbobench.c | $(LIBS)
 	$(CC) -O2 $(MARCH) $(CFLAGS) $< -c -o $@
 
 turbobench: $(OB) $(BUILD)/turbobench.o $(BUILD)/plugin.o $(BUILD)/turbobench_/cpu.o $(LIBS)
-#	@echo "Linking turbobench..."
 	$(CXL) $(filter-out $(LIBS),$^) $(LIBS) $(LDFLAGS) -o turbobench
 
 $(BUILD)/%.o: %.c
