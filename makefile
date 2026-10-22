@@ -19,7 +19,7 @@ CG ?= clang    # clang faster
 CCO ?= $(CC)   # openmp compiler
 ifeq ($(STATIC),1)
 CCO := gcc
-CXL := gcc
+CXL := g++
 endif
 
 MAKE    ?= make
