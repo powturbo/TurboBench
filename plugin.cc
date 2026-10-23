@@ -170,6 +170,7 @@ enum {
  P_LIBBSCC,   //QLFC
  P_ST,        //st 
  P_LIBBSCBWT, //bwt
+ P_LIBBSCLZP,
 #ifndef _DIVBWT
 #define _DIVBWT 0
 #endif
@@ -1436,7 +1437,7 @@ struct snappy_env env;
 #include "Turbo-Range-Coder/include/turborc.h"
 #include "Turbo-Range-Coder/include/anscdf.h"
 #include "Turbo-Range-Coder/include_/tp.h"
-//#include "Turbo-Range-Coder/rcutil.h"
+#include "Turbo-Range-Coder/include_/rcutil.h"
   #endif
 
 //------  W -------------------------------------
@@ -1763,6 +1764,7 @@ size_t lz4ultra_decompress_inmem(const unsigned char *pFileData, unsigned char *
   #if _LIBBSC
 #include "libbsc/libbsc/bwt/bwt.h"
 #include "libbsc/libbsc/coder/coder.h"
+#include "libbsc/libbsc/lzp/lzp.h"
   #endif
   
   #if _DIVBWT
@@ -2114,7 +2116,7 @@ struct plugs plugs[] = {
   { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",                  "", E_ANS },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",                     "" },
   { P_TORNADOHF,    "tornado_huff",_TORNADO,   "Tornado Huf",                    "" },
-  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",              "1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,18,19,20,56,100,101/e#s" }, 
+  { P_TURBORC,      "TurboRC",     _TURBORC,   "Turbo Range Coder",              "1,2,3,4,5,6,7,8,9,10,11,12,13,14,17,18,19,20,56,90,100,101/e#s" }, 
   { P_ZLIBH,        "zlibh",       _ZLIB,      "zlib Huffmann",                  "8,9,10,11,12,13,14,15,16,32" },
   { P_ZRLE,         "zlibrle",     _ZLIB,      "zlib rle",                       "" },
 
@@ -2134,6 +2136,7 @@ struct plugs plugs[] = {
   //----- Transform -----
   { P_DIVBWT,       "divbwt",      _DIVBWT,    "bwt libdivsufsort","" },
   { P_LIBBSCBWT,    "bscbwt",      _LIBBSC,    "bwt libbsc",                     "0" },
+  { P_LIBBSCLZP,    "bsclzp",      _LIBBSC,    "lzp libbsc",                     "0" },
   { P_ST,           "st",          _LIBBSC,    "st  libbsc",                     "3,4,5,6,7,8" },
   { P_BRC,          "brc",         _BRC,       "Behemoth-Rank-Coding",           "0,1" },
 //{ P_MYCODEC,   "mycodec",     _MYCODEC,  "0",        "My codec",             "           ",      "",        "" },   // Example for your codec
@@ -2647,6 +2650,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
     case P_LIBBSCC: return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
     case P_LIBBSCBWT: { unsigned bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, BSC_MODE); ctou32(out) = bwtidx; return inlen+4; }
+    case P_LIBBSCLZP: { int hashSize = (q = strchr(prm,'h'))?atoi(q+(q[2]=='='?2:1)):16, minLen = (q = strchr(prm,'l'))?atoi(q+(q[2]=='='?2:1)):32; 
+      return bsc_lzp_compress(in, out, inlen, hashSize, minLen, BSC_MODE); 
+   }
     case P_ST: { memcpy(out+4,in, inlen); ctou32(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
       #endif
 
@@ -3486,9 +3492,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         case 56: return anscdfenc(    in, inlen, out);
         //case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpenc( in, inlen, out, esize?esize:4); return inlen; }  
         //case 101: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tp4enc(in, inlen, out, esize?esize:4); return inlen; }       
-    default: return 0;
     //case 21: return utf8enc( in, inlen, out, bwtflag(1)|BWT_COPY|BWT_RATIO);
-    //case 90: return lzpenc( in, inlen, out, 1, 0);
+        case 90: { int hashsize = (q = strchr(prm,'h'))?atoi(q+(q[2]=='='?2:1)):16, lenmin = (q = strchr(prm,'l'))?atoi(q+(q[2]=='='?2:1)):32; return lzpenc( in, inlen, out, lenmin, hashsize); }
+        default: return 0;
       }
     }
       #endif
@@ -4231,6 +4237,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
       #if _LIBBSC
     case P_LIBBSCBWT: memcpy(out, in+4, outlen); bsc_bwt_decode(out, outlen, *(unsigned *)in, 1, NULL, 0); break;
+    case P_LIBBSCLZP: { int hashSize = (q = strchr(prm,'h'))?atoi(q+(q[2]=='='?2:1)):16, minLen = (q = strchr(prm,'l'))?atoi(q+(q[2]=='='?2:1)):32;
+      return bsc_lzp_decompress(in, out, inlen, hashSize, minLen, 0, BSC_MODE); 
+    }
     case P_ST: {   memcpy(out, in+4, inlen-4); bsc_st_decode(out, inlen-4, lev, *(unsigned *)(in), 0); break; }
       #endif
 
@@ -4411,9 +4420,11 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         case 56 : return anscdfdec(in, outlen, out);
         //case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpdec( in, outlen, out, esize?esize:4); return inlen; }  
         //case 101: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tp4dec(in, outlen, out, esize?esize:4); return inlen; }       
+        case 90: { int hashsize = (q = strchr(prm,'h'))?atoi(q+(q[2]=='='?2:1)):16, lenmin = (q = strchr(prm,'l'))?atoi(q+(q[2]=='='?2:1)):32; 
+          if(inlen==outlen) memcpy(out,in,outlen); else lzpdec(in, inlen, out, outlen, lenmin, hashsize); return outlen; 
+        }
         default: return 0;
         //case 21 : if(inlen==outlen) memcpy(out,in,outlen); else utf8dec( in, outlen, out); return outlen;
-        //case 90 : if(inlen==outlen) memcpy(out,in,outlen); else lzpdec(  in, outlen, out, 1, 0); return outlen;
       }   
     }
       #endif
