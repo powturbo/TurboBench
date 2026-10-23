@@ -451,7 +451,9 @@ endif
 OB += $(BUILD)/libbsc/libbsc/libbsc/libbsc.o $(BUILD)/libbsc/libbsc/coder/coder.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc.o $(BUILD)/libbsc/libbsc/coder/qlfc/qlfc_model.o $(BUILD)/libbsc/libbsc/filters/detectors.o \
       $(BUILD)/libbsc/libbsc/filters/preprocessing.o $(BUILD)/libbsc/libbsc/adler32/adler32.o $(BUILD)/libbsc/libbsc/bwt/bwt.o $(BUILD)/libbsc/libbsc/st/st.o $(BUILD)/libbsc/libbsc/lzp/lzp.o \
       $(BUILD)/libbsc/libbsc/platform/platform.o 
-#$(BUILD)/libbsc/libbsc/bwt/libsais/libsais.o
+ifeq ($(ARCH),x86_64)
+LIBBSC_FLAGS += $(_AVX2)
+endif
 $(BUILD)/libbsc/%.o: libbsc/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 $(LIBBSC_FLAGS) -DLIBBSC_SORT_TRANSFORM_SUPPORT -ICSC/src/libcsc -c $< -o $@
