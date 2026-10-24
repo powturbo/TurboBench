@@ -98,6 +98,10 @@ enum {
 #define _C_BLOSC2 0
 #endif
  P_C_BLOSC2,
+#ifndef _CRES
+#define _CRES 0
+#endif
+ P_CRLZP,
 #ifndef _CSC
 #define _CSC 0
 #endif
@@ -780,7 +784,14 @@ unsigned bloscdecomp(unsigned char *in, size_t inlen, unsigned char *out, unsign
   #if _CLICKHOUSE
 #include "Clickhouse/src/Compression/LZ4_decompress_faster.h"  
   #endif
-  
+
+  #if _CRES
+#include "Compression-Research/util/libbsc.h"
+extern int lzp_cpu_bsc(const unsigned char * input, const unsigned char * inputEnd, unsigned char * output, unsigned char * outputEnd, int hashSize, int minLen);
+extern int lzp_cpu_bsc_mod (const unsigned char * input, const unsigned char * inputEnd, unsigned char * output, unsigned char * outputEnd, int hashSize, int minLen);
+extern int lzp_cpu_rollhash (const unsigned char * input, const unsigned char * inputEnd, unsigned char * output, unsigned char * outputEnd, int hashSize, int minLen);
+  #endif
+
   #if _CSC
 #define __7Z_TYPES_H  
 #include "CSC/src/libcsc/csc_enc.h"
@@ -1947,6 +1958,8 @@ struct plugs plugs[] = {
   
   { P_C_BLOSC2,      "blosc",         _C_BLOSC2,  "c-blosc2",                    "0,1,2,3,4,5,6,7,8,9,100/SBDsd", 64*1024},
   { P_CHAMELEON,     "chameleon",     _CHAMELEON, "Chameleon",                   "1,2" },
+  { P_CRLZP,         "crlzp",         _CRES,        "CR lzp",                      "0,1,2" },
+
   { P_CSC,           "csc",           _CSC,       "CSC",                         "1,2,3,4,5" },
   { P_CLICKHOUSE,    "lz4_ch",        _CLICKHOUSE,"lz4 Clickhouse",              "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
   
@@ -2469,22 +2482,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_BCM: return bcmcompress(in, inlen, out); break;
       #endif
 
-      #if _C_BLOSC2
-    case P_C_BLOSC2: { char *q;
-      //  #if _C_BLOSC2LZ
-      //return blosclz_compress(lev, in, inlen, out, outsize);
-      //  #else
-      blosc2_set_nthreads(threads);
-      int codid = ICC_ZSTD;
-      if((q=strchr(prm,'E')) && strcasecmp(q+(q[1]=='='?2:1), "lz4")) codid = ICC_LZ4;
-      int filter0 = strchr(prm,'B')?BLOSC_BITSHUFFLE : strchr(prm,'S')?BLOSC_SHUFFLE : strchr(prm,'D')?BLOSC_FILTER_BYTEDELTA : 0;
-      int filter1 = strchr(prm,'d')?BLOSC_DELTA : strchr(prm,'b')?BLOSC_FILTER_BYTEDELTA : strchr(prm,'s')?BLOSC_SHUFFLE:0;
-      int typesize = (q=strchr(prm,'u'))?atoi(q+(q[1]=='='?2:1)):1;
-      if(lev == 100) return (filter0 & BLOSC_BITSHUFFLE) ? blosc2_bitshuffle(typesize, inlen, in, out) : blosc2_shuffle(typesize, inlen, in, out);
-      return blosccomp(in, inlen, out, outsize, codid, lev, typesize, filter0, filter1, 0);
-    }
-      #endif
-
       #if _BPC
     case P_BPC: {
       unsigned char *ip, *op=out;
@@ -2540,10 +2537,36 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
       #endif
 
+      #if _C_BLOSC2
+    case P_C_BLOSC2: { char *q;
+      //  #if _C_BLOSC2LZ
+      //return blosclz_compress(lev, in, inlen, out, outsize);
+      //  #else
+      blosc2_set_nthreads(threads);
+      int codid = ICC_ZSTD;
+      if((q=strchr(prm,'E')) && strcasecmp(q+(q[1]=='='?2:1), "lz4")) codid = ICC_LZ4;
+      int filter0 = strchr(prm,'B')?BLOSC_BITSHUFFLE : strchr(prm,'S')?BLOSC_SHUFFLE : strchr(prm,'D')?BLOSC_FILTER_BYTEDELTA : 0;
+      int filter1 = strchr(prm,'d')?BLOSC_DELTA : strchr(prm,'b')?BLOSC_FILTER_BYTEDELTA : strchr(prm,'s')?BLOSC_SHUFFLE:0;
+      int typesize = (q=strchr(prm,'u'))?atoi(q+(q[1]=='='?2:1)):1;
+      if(lev == 100) return (filter0 & BLOSC_BITSHUFFLE) ? blosc2_bitshuffle(typesize, inlen, in, out) : blosc2_shuffle(typesize, inlen, in, out);
+      return blosccomp(in, inlen, out, outsize, codid, lev, typesize, filter0, filter1, 0);
+    }
+      #endif
+
       #if _CHAMELEON
     case P_CHAMELEON:  { Chameleon_Reset((Chameleon *)workmem); return lev<2?Chameleon_Encode((Chameleon *)workmem,out,in, inlen):Chameleon2_Encode((Chameleon *)workmem,out,in, inlen); }
       #endif
 
+      #if _CRES
+    case P_CRLZP: {  int hashsize = (q = strchr(prm,'h'))?atoi(q+(q[2]=='='?2:1)):16, minlen = (q = strchr(prm,'l'))?atoi(q+(q[2]=='='?2:1)):32; 
+      switch(lev) {
+        case 0: //return lzp_cpu_bsc(in, in+inlen, out, out+outsize, hashsize, minlen);
+        case 1: 
+        case 2: return lzp_cpu_rollhash(in, in+inlen, out, out+outsize, hashsize, minlen);
+        default: die("fatal lev %d not found for P_CRLZP", lev);
+      }
+    }
+      #endif
   
       #if _CSC
     case P_CSC: {
@@ -2650,8 +2673,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
     case P_LIBBSCC: return bsc_coder_compress(in, out, inlen, lev, BSC_MODE);
     case P_LIBBSCBWT: { unsigned bwtidx; memcpy(out+sizeof(bwtidx), in, inlen); bwtidx = bsc_bwt_encode(out+sizeof(bwtidx), inlen, 0, NULL, BSC_MODE); ctou32(out) = bwtidx; return inlen+4; }
-    case P_LIBBSCLZP: { int hashSize = (q = strchr(prm,'h'))?atoi(q+(q[2]=='='?2:1)):16, minLen = (q = strchr(prm,'l'))?atoi(q+(q[2]=='='?2:1)):32; 
-      return bsc_lzp_compress(in, out, inlen, hashSize, minLen, BSC_MODE); 
+    case P_LIBBSCLZP: { int hashsize = (q = strchr(prm,'h'))?atoi(q+(q[2]=='='?2:1)):16, minlen = (q = strchr(prm,'l'))?atoi(q+(q[2]=='='?2:1)):32; 
+      return bsc_lzp_compress(in, out, inlen, hashsize, minlen, BSC_MODE); 
    }
     case P_ST: { memcpy(out+4,in, inlen); ctou32(out) = bsc_st_encode(out+4, inlen, lev, 0); return inlen+4; }
       #endif
@@ -3623,6 +3646,17 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_CHAMELEON:  { Chameleon_Reset((Chameleon *)workmem); lev<2?Chameleon_Decode((Chameleon *)workmem, out, outlen, in):Chameleon2_Decode((Chameleon *)workmem, out, outlen, in); return inlen; }
       #endif
 
+      #if _CRES
+    case P_CRLZP: {  int hashsize = (q = strchr(prm,'h'))?atoi(q+(q[2]=='='?2:1)):16, minlen = (q = strchr(prm,'l'))?atoi(q+(q[2]=='='?2:1)):32; 
+      switch(lev) {
+        case 0: //return lzp_cpu_bsc(in, in+inlen, out, out+outsize, hashsize, minlen);
+        case 1: 
+        case 2: 
+        default: die("fatal lev %d not found for P_CRLZP", lev);
+      }
+    }
+      #endif
+
       #if _CSC
     case P_CSC: {
         CSCProps prop; CSCDec_ReadProperties(&prop, (uint8_t*)in);
@@ -4237,8 +4271,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
       #if _LIBBSC
     case P_LIBBSCBWT: memcpy(out, in+4, outlen); bsc_bwt_decode(out, outlen, *(unsigned *)in, 1, NULL, 0); break;
-    case P_LIBBSCLZP: { int hashSize = (q = strchr(prm,'h'))?atoi(q+(q[2]=='='?2:1)):16, minLen = (q = strchr(prm,'l'))?atoi(q+(q[2]=='='?2:1)):32;
-      return bsc_lzp_decompress(in, out, inlen, hashSize, minLen, 0, BSC_MODE); 
+    case P_LIBBSCLZP: { int hashsize = (q = strchr(prm,'h'))?atoi(q+(q[2]=='='?2:1)):16, minlen = (q = strchr(prm,'l'))?atoi(q+(q[2]=='='?2:1)):32;
+      return bsc_lzp_decompress(in, out, inlen, hashsize, minlen, 0, BSC_MODE); 
     }
     case P_ST: {   memcpy(out, in+4, inlen-4); bsc_st_decode(out, inlen-4, lev, *(unsigned *)(in), 0); break; }
       #endif
