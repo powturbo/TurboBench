@@ -1366,6 +1366,13 @@ OB+=$(call obj,Behemoth-Rank-Coding/brc.o)
 endif
 
 #----------------------- GPL -------------------------
+ifneq ($(wildcard Compression-Research/.),)
+PLG_FLAGS+=-D_CRES
+CR_DIR := Compression-Research
+CR_SRCS := $(wildcard $(CR_DIR)/algo_lzp/*.cpp) 
+OB+=$(call obj,$(CR_SRCS))
+endif
+
 ifneq ($(wildcard lzmat/.),)
 PLG_FLAGS+=-DLZMAT
 $(BUILD)/lzmat/lzmat_dec.o: lzmat/lzmat_dec.c
