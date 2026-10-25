@@ -1449,6 +1449,7 @@ struct snappy_env env;
 #include "Turbo-Range-Coder/include/anscdf.h"
 #include "Turbo-Range-Coder/include_/tp.h"
 #include "Turbo-Range-Coder/include_/rcutil.h"
+#define BWT_OPTIONS (bwt_flag(usize==2, verbose) | bwt_lzp(lzp_force, lzp_nrev, lzp_lenmin) | bwt_utf8(utf8_o8, utf8_no, utf8_sort, 0, 0)) 
   #endif
 
 //------  W -------------------------------------
@@ -3472,7 +3473,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       if(strchr(prm,'S')) usize = 2; else if(q = strchr(prm,'U')) usize = 4;
       if(q = strchr(prm,'l')) lzp_lenmin = atoi(q+(q[1]=='='?2:1)); //bwt options  
       //threads = CLAMP(threads, 0, 64); 
-      #define BWT_OPTIONS (bwt_flag(usize==2, verbose) | bwt_lzp(lzp_force, lzp_nrev, lzp_lenmin) | bwt_utf8(utf8_o8, utf8_no, utf8_sort, 0, 0)) 
       return rcbwtenc(in, inlen, out, lev, threads, BWT_OPTIONS); 
     }
       #endif
@@ -3491,8 +3491,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       if(strchr(prm,'R')) lzp_nrev  = 1;
       if(strchr(prm,'S')) usize = 2; else if(q = strchr(prm,'U')) usize = 4;
       if(q = strchr(prm,'l')) lzp_lenmin = atoi(q+(q[1]=='='?2:1)); //bwt options  
-      //if(q = strchr(prm,'t')) threads    = atoi(q+(q[2]=='='?2:1)); threads = CLAMP(threads, 0, 64); 
-      #define BWT_OPTIONS (bwt_flag(usize==2, verbose) | bwt_lzp(lzp_force, lzp_nrev, lzp_lenmin) | bwt_utf8(utf8_o8, utf8_no, utf8_sort, 0, 0)) 
       switch(lev) {
         case  1: return rcsenc(    in, inlen, out);
         case  2: return rccsenc(   in, inlen, out); 
@@ -4454,9 +4452,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         case 56 : return anscdfdec(in, outlen, out);
         //case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpdec( in, outlen, out, esize?esize:4); return inlen; }  
         //case 101: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tp4dec(in, outlen, out, esize?esize:4); return inlen; }       
-        case 90: { int hashsize = (q = strchr(prm,'h'))?atoi(q+(q[2]=='='?2:1)):16, lenmin = (q = strchr(prm,'l'))?atoi(q+(q[2]=='='?2:1)):32; 
-          if(inlen==outlen) memcpy(out,in,outlen); else lzpdec(in, inlen, out, outlen, lenmin, hashsize); return outlen; 
-        }
+        case 90: return lzpdec(in, inlen, out, outlen); 
         default: return 0;
         //case 21 : if(inlen==outlen) memcpy(out,in,outlen); else utf8dec( in, outlen, out); return outlen;
       }   
@@ -4598,7 +4594,7 @@ char *codver(int codec, char *v, char *s) {
     case P_LIBDEFLATE:  strcpy(s, LIBDEFLATE_VERSION_STRING); break;
       #endif   
       #if _LIBSLZ
-    case P_LIBSLZ:  return "v1.3.0";
+    case P_LIBSLZ:  return "v1.4-dev3";
       #endif
  
       #if _ZPAQ
@@ -4717,7 +4713,6 @@ char *codver(int codec, char *v, char *s) {
 
      #if _ZLIB_TURBO
     case P_ZLIB_TURBO: sprintf(s, "v%s", zlib_turbo_version()); break;
-//    case P_ZLIB_TURBO: sprintf(s, "v%s", zlibTurboVersion()); break;
       #endif
 
       #if _ZOPFLI
