@@ -853,12 +853,12 @@ PLG_FLAGS += -D_TURBORC
 RC_DIR  := Turbo-Range-Coder
 RC_SRCS := $(shell find $(RC_DIR) -type f \( -name '*.[ch]' -o -name '*.cpp' -o -name '*.cc' \))
 RC_BDIR := $(BUILD)/$(RC_DIR)
-RC_LIB  := $(RC_BDIR)/librc.a $(RC_BDIR)/libsais.o $(RC_BDIR)/libsais16.o
+RC_LIB  := $(RC_BDIR)/librc.a 
 $(RC_LIB): $(RC_SRCS)
 	@mkdir -p $(RC_BDIR)
-	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT" $(abspath $(RC_BDIR))/librc.a $(abspath $(RC_BDIR))/libsais.o $(abspath $(RC_BDIR))/libsais16.o
-LIBS += $(RC_LIB)
-LIBSAIS = 1
+	$(MAKE) -C $(RC_DIR) BUILD=$(abspath $(RC_BDIR)) DEFS="-D_NQUANT" 
+LIBS += $(RC_LIB) $(RC_BDIR)/libsais.o $(RC_BDIR)/libsais16.o
+LIBSAIS := 1
 endif
 endif
 
