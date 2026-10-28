@@ -4520,10 +4520,11 @@ char *codver(int codec, char *v, char *s) {
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: sprintf(s, "%s MT", aocl_llc_version()); break;
       #endif
  
-     #if _BCMEC
+     #if _BCM
     case P_BCM:
     case P_BCMEC: return "v1.65";
      #endif
+
      #if _BZ2_NG
     case P_BZ2_NG: return (char *)bz2_ng_BZ2_bzlibVersion();
       #endif
@@ -4563,6 +4564,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
       #if _GLYD
     case P_GLYD:  return (char *)glyd_version();
+    case P_GLYDP: sprintf(s, "%s MT", (char *)glyd_version()); break;
       #endif
 
       #if _HEATSHRINK
@@ -4699,7 +4701,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
       #if _TURBORC
     case P_TURBORC: 
-    case P_BWTSATAN: return (char *)turborc_version();
+    case P_BWTSATAN: sprintf(s, "%s MT", (char *)turborc_version()); break;
       #endif
 
       #if _WZIP
