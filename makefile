@@ -477,7 +477,7 @@ ifneq ($(wildcard libdeflate/.),)
 PLG_FLAGS+=-D_LIBDEFLATE
 LIBDEFLATE_SRCS := $(wildcard libdeflate/lib/*.c) libdeflate/lib/arm/cpu_features.c libdeflate/lib/x86/cpu_features.c 
 LIBDEFLATE_LIB = $(BUILD)/libdeflate/libdeflate.a
-$(LIBDEFLATE_LIB): $(LIBDEFLATE_SRCS)
+$(LIBDEFLATE_LIB): $(LIBDEFLATE_SRCS) libdeflate/CMakeLists.txt
 	$(CMAKE) -S libdeflate -B $(BUILD)/libdeflate -DLIBDEFLATE_BUILD_SHARED_LIB=OFF -DLIBDEFLATE_BUILD_GZIP=OFF -DCMAKE_C_COMPILER="$(CC)" && make -C $(BUILD)/libdeflate
 LIBS+=$(LIBDEFLATE_LIB)
 endif
