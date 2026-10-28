@@ -4513,12 +4513,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
 char *codver(int codec, char *v, char *s) {
   switch(codec) { 
-      #if _WZIP
-    case P_WLZ4: case P_WLZ4FAST: case P_WLZ4HC: sprintf(s, "v%d.%d.%d", WLZ_VERSION_MAJOR, WLZ_VERSION_MINOR, WLZ_VERSION_RELEASE); break;
-    case P_WZIP:     sprintf(s, "v%s MT", WZIP_VERSION_STRING); break;
-      #endif
       #if _ACEAPEX
-    case P_ACE: sprintf(s, "v%s MT", ACEAPEX_VERSION_STRING); break;
+    case P_ACE: case P_ACEFAST: sprintf(s, "v%s MT", ACEAPEX_VERSION_STRING); break;
       #endif
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: sprintf(s, "%s MT", aocl_llc_version()); break;
@@ -4704,6 +4700,11 @@ char *codver(int codec, char *v, char *s) {
       #if _TURBORC
     case P_TURBORC: 
     case P_BWTSATAN: return (char *)turborc_version();
+      #endif
+
+      #if _WZIP
+    case P_WLZ4: case P_WLZ4FAST: case P_WLZ4HC: sprintf(s, "v%d.%d.%d", WLZ_VERSION_MAJOR, WLZ_VERSION_MINOR, WLZ_VERSION_RELEASE); break;
+    case P_WZIP:     sprintf(s, "v%s MT", WZIP_VERSION_STRING); break;
       #endif
 
       #if _XZ
