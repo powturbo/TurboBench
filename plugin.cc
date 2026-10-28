@@ -42,7 +42,9 @@ enum {
 #ifndef _ACEAPEX
 #define _ACEAPEX 0
 #endif
- P_ACEAPEX,
+ P_ACE,
+ P_ACEFAST,
+ P_ACECUDA,
 
 #ifndef _AOCL
 #define _AOCL 0
@@ -1941,7 +1943,9 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void
   
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
-  { P_ACEAPEX,       "aceapex",       _ACEAPEX,   "aceapex",                     "1,2,3" },
+  { P_ACE,           "aceapex",       _ACEAPEX,   "aceapex",                     "1,2,3/t#" },
+  { P_ACEFAST,       "aceapex_fast",  _ACEAPEX,   "aceapex fast",                "1,2,3,4,5,6,7,8/t#" },
+//{ P_ACECUDA,       "aceapex_cuda",  _ACEAPEX,   "aceapex cuda",                "1,2" },
   { P_AOCL_LZ4,      "aocl-lz4",      _AOCL,      "AMD aocl-compression lz4",    "0,1,2,3,4,5,6,7,8,9,10,11,12" },
   { P_AOCL_LZMA,     "aocl-lzma",     _AOCL,      "AMD aocl-compression lzma",   "1,2,3,4,5,6,7,8,9" },
   { P_AOCL_BZIP2,    "aocl-bzip2",    _AOCL,      "AMD aocl-compression bzip2",  "" },
@@ -2466,7 +2470,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
   
   switch(codec) {
       #if _ACEAPEX
-    case P_ACEAPEX: { int64_t r = aceapex_compress(in, inlen, out, outsize, lev, 1); return r > 0 ? (unsigned)r : 0; }
+    case P_ACE:     { int64_t r = aceapex_compress(in, inlen, out, outsize, lev, threads?threads:1);    return r > 0 ? (unsigned)r : 0; }
+    case P_ACEFAST: { int64_t r = aceapex_compress(in, inlen, out, outsize, lev+10, threads?threads:1); return r > 0 ? (unsigned)r : 0; }
       #endif
 
       #if _AOCL
@@ -3577,7 +3582,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
 
   switch(codec) {
       #if _ACEAPEX
-    case P_ACEAPEX: { int64_t r = aceapex_decompress_mt(in, inlen, out, outlen, 1); return r == (int64_t)outlen ? inlen : 0; }
+    case P_ACE:     { int64_t r = aceapex_decompress_mt(in, inlen, out, outlen, threads?threads:1); return r == (int64_t)outlen ? inlen : 0; }
+    case P_ACEFAST: { int64_t r = aceapex_decompress_mt(in, inlen, out, outlen, threads?threads:1); return r == (int64_t)outlen ? inlen : 0; }
       #endif
 
       #if _AOCL
@@ -4512,7 +4518,7 @@ char *codver(int codec, char *v, char *s) {
     case P_WZIP:     sprintf(s, "v%s MT", WZIP_VERSION_STRING); break;
       #endif
       #if _ACEAPEX
-    case P_ACEAPEX: sprintf(s, "v%s", ACEAPEX_VERSION_STRING); break;
+    case P_ACE: sprintf(s, "v%s MT", ACEAPEX_VERSION_STRING); break;
       #endif
       #if _AOCL
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: sprintf(s, "%s MT", aocl_llc_version()); break;
