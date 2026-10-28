@@ -183,14 +183,14 @@ all: turbobench
 #--- A ------------------------------------------------------------------------------------------------------------------------------------
 # aceapex: the library is one translation unit (src/aceapex_api.cpp includes the codec sources); zstd from the zstd submodule
 ifneq ($(wildcard aceapex/.),)
-ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
+#ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
 PLG_FLAGS += -D_ACEAPEX
 ACEAPEX_DIR := aceapex/src
 $(BUILD)/$(ACEAPEX_DIR)/aceapex_api.o: $(ACEAPEX_DIR)/aceapex_api.cpp $(wildcard $(ACEAPEX_DIR)/*.cpp) $(wildcard $(ACEAPEX_DIR)/*.h) 
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 -std=c++17 -DXXH_INLINE_ALL -Izstd/lib -I$(ACEAPEX_DIR) -c $< -o $@
 OB += $(BUILD)/$(ACEAPEX_DIR)/aceapex_api.o
-endif
+#endif
 endif
 
 ifneq ($(AOCL), 0) 
