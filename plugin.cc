@@ -1943,7 +1943,7 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void
   
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
-  { P_ACE,           "aceapex",       _ACEAPEX,   "aceapex",                     "1,2,3/t#" },
+  { P_ACE,           "aceapex",       _ACEAPEX,   "aceapex",                     "1,2,3,4/t#" },
   { P_ACEFAST,       "aceapex_fast",  _ACEAPEX,   "aceapex fast",                "1,2,3,4,5,6,7,8/t#" },
 //{ P_ACECUDA,       "aceapex_cuda",  _ACEAPEX,   "aceapex cuda",                "1,2" },
   { P_AOCL_LZ4,      "aocl-lz4",      _AOCL,      "AMD aocl-compression lz4",    "0,1,2,3,4,5,6,7,8,9,10,11,12" },
@@ -4542,7 +4542,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
 
       #if _C_BLOSC2
-    case P_C_BLOSC2: sprintf(s, "v%s MT", BLOSC2_VERSION_STRING);
+    case P_C_BLOSC2: sprintf(s, "v%s MT", BLOSC2_VERSION_STRING); break;
       #endif
 
       #if _DENSITY
@@ -4615,7 +4615,7 @@ char *codver(int codec, char *v, char *s) {
     case P_LZLIB:  sprintf(s,"v%d", LZ_API_VERSION); break;
       #endif
       #if _LZAV
-    case P_LZAV:  strcpy(s, LZAV_VER_STR); break;
+    case P_LZAV:  sprintf(s,"v%s", LZAV_VER_STR); break;
       #endif
       #if _LZMA
     case P_LZMA:  sprintf(s, "v%s MT", MY_VERSION_NUMBERS); break;
@@ -4627,8 +4627,11 @@ char *codver(int codec, char *v, char *s) {
      case P_LZO1b:case P_LZO1c: case P_LZO1f: case P_LZO1x: case P_LZO1y: case P_LZO1z: case P_LZO2a: strcpy(s, "v2.10 2017.03.01"); break;
       #endif
 
+      #if _LZRAVEN
+    case P_LZRAVEN:  return "v2026.07.30";
+      #endif
       #if _LZSSE
-    case P_LZSSE2: case P_LZSSE4: case P_LZSSE8: return "v2018.10.24"; break;
+    case P_LZSSE2: case P_LZSSE4: case P_LZSSE8: return "v2018.10.24";
       #endif
 
       #if _MBROTLI
@@ -4675,7 +4678,7 @@ char *codver(int codec, char *v, char *s) {
     case P_PCODECF32:
     case P_PCODECI64:
     case P_PCODECU64:
-    case P_PCODECF64: return "v1.0.2";  
+    case P_PCODECF64: return "v1.0.3";  
       #endif
       #if _PIVCOHUF
     case P_PIVCOHUF:  sprintf(s,"v%d.%d", PIVCOHUF_VERSION_MAJOR, PIVCOHUF_VERSION_MINOR); break;
