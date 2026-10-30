@@ -1,9 +1,0 @@
-# Performance baseline of the GPU decoder on Colab (scripts/colab_gpu_open.sh compares every run in its SUMMARY block): best
-# confirmed on-device ms, median of 3, bit-perfect; a row more than 5 % slower fails the run's verdict. Rows are replaced
-# only by a faster run, in a commit of their own with that run's log. Metrics: library = aceapex_gpu_decompress_async
-# full decode (APIROW 4), tool = aceapex_gpu on-device (ROW 10). gpu: name as nvidia-smi prints it.
-gpu	archive	metric	base_ms	commit	log	note
-NVIDIA RTX PRO 6000 Blackwell Server Edition	chr1.open	library	1.993	b024296	results/colab-2026-10-02-rtx-pro-6000-blackwell-server-edition-gpu.log	open archives with 16 KiB token chunks (seeded 02.10, gate on)
-NVIDIA RTX PRO 6000 Blackwell Server Edition	chr1.open	tool	2.109	b024296	results/colab-2026-10-02-rtx-pro-6000-blackwell-server-edition-gpu.log	open archives with 16 KiB token chunks (seeded 02.10, gate on)
-NVIDIA RTX PRO 6000 Blackwell Server Edition	t2t.open	library	18.388	b024296	results/colab-2026-10-02-rtx-pro-6000-blackwell-server-edition-gpu.log	open archives with 16 KiB token chunks (seeded 02.10, gate on)
-NVIDIA RTX PRO 6000 Blackwell Server Edition	t2t.open	tool	18.615	b024296	results/colab-2026-10-02-rtx-pro-6000-blackwell-server-edition-gpu.log	open archives with 16 KiB token chunks (seeded 02.10, gate on)
