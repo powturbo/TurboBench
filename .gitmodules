@@ -174,3 +174,6 @@
 [submodule "bz2-ng"]
 	path = bz2-ng
 	url = https://github.com/tfenne/bz2-ng.git
+[submodule "aceapex"]
+	path = aceapex
+	url = https://github.com/yasha1971-coder/aceapex.git
