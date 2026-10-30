@@ -1665,7 +1665,8 @@ int unishox2_decompressx(const char *in, int inlen, char *out, int lev);
 #include "unishox2/Unishox3_Alpha/unishox3.h"
   #endif
 EXTERN_C_END
-// ======================================== Encoding =====================================================
+
+//*** Encoding ***********************************************************************************************************************************
   #if _GANS
 #include "EC/rans.h"
   #endif
@@ -1752,10 +1753,7 @@ int neon_base64_decode(char *out, const char *src, size_t srclen);
 #include "hypersonic-rle-kit/src/rle.h"
   #endif
   
-  #if __cplusplus
-extern "C" {
-  #endif
-
+EXTERN_C_BEGIN
   #if _LZ4ULTRA
 #define LZ4ULTRA_FLAG_FAVOR_RATIO    (1<<0)           /**< 1 to compress with the best ratio, 0 to trade some compression ratio for extra decompression speed */
 #define LZ4ULTRA_FLAG_RAW_BLOCK      (1<<1)           /**< 1 to emit raw block */
@@ -1768,13 +1766,9 @@ extern "C" {
 size_t lz4ultra_compress_inmem(const unsigned char *pInputData, unsigned char *pOutBuffer, size_t nInputSize, size_t nMaxOutBufferSize, unsigned int nFlags,  int nBlockMaxCode);
 size_t lz4ultra_decompress_inmem(const unsigned char *pFileData, unsigned char *pOutBuffer, size_t nFileSize, size_t nMaxOutBufferSize, unsigned int nFlags);
   #endif
+EXTERN_C_END
 
-  #if __cplusplus
-}
-  #endif
-
-
-  //------------------------------------ Transform ----------------------------------
+//*** Transform *********************************************************************************************************************
   #if _LIBBSC
 #include "libbsc/libbsc/bwt/bwt.h"
 #include "libbsc/libbsc/coder/coder.h"
@@ -1785,7 +1779,7 @@ size_t lz4ultra_decompress_inmem(const unsigned char *pFileData, unsigned char *
 #include "Turbo-Range-Coder/libdivsufsort/include/divsufsort.h"
  #endif
   
-  //------------------------------------ Entropy Coder ------------------------------
+//*** Entropy Coder *********************************************************************************************************************
   #if _FASTAC
 #include "EC/fastac/arithmetic_codec.h"
   #endif
@@ -2469,9 +2463,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
   int      threads = 0; if(q = strchr(prm,'t')) threads = atoi(q+(q[1]=='='?2:1));
   
   switch(codec) {
+//=== A =============================================================================================================================
       #if _ACEAPEX
-    case P_ACE:     { int64_t r = aceapex_compress(in, inlen, out, outsize, lev, threads?threads:1);    return r > 0 ? (unsigned)r : 0; }
-    case P_ACEFAST: { int64_t r = aceapex_compress(in, inlen, out, outsize, lev+10, threads?threads:1); return r > 0 ? (unsigned)r : 0; }
+    case P_ACEFAST: lev+=10; 
+    case P_ACE:     { int64_t r = aceapex_compress(in, inlen, out, outsize, lev, threads?threads:1); return r > 0 ? (unsigned)r : 0; }
       #endif
 
       #if _AOCL
@@ -2480,6 +2475,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
       #endif
 
+//=== B =============================================================================================================================
       #if _BALZ
     case P_BALZ: return balzcompress(in, inlen, out,lev);
       #endif
@@ -2543,6 +2539,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
       #endif
 
+//=== C =============================================================================================================================
       #if _C_BLOSC2
     case P_C_BLOSC2: { char *q;
       //  #if _C_BLOSC2LZ
@@ -2588,6 +2585,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_CRUSH: return crush_compress(lev, in, inlen, out);
       #endif
 
+//=== D =============================================================================================================================
       #if _DENSITY
     case P_DENSITY: 
       switch (lev) {
@@ -2601,10 +2599,20 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_DOBOZ:   { doboz::Compressor c; size_t rc; return c.compress(in,inlen, out, c.getMaxCompressedSize(inlen), rc) == doboz::RESULT_OK ? rc : -1; }
       #endif
 
+//=== F =============================================================================================================================
       #if _FASTLZ
     case P_FASTLZ:  return fastlz_compress_level(lev, in, inlen, out);
       #endif
 
+      #if _FLZMA2
+    case P_FLZMA2: return FL2_compressMt(out, outsize, in, inlen, lev, threads?threads:1);
+      #endif
+
+      #if _FIRETRAIL
+    case P_FIRETRAIL:  firetrail_encoder_reset(firetrail_encoder);  return firetrail_encoder_compress(firetrail_encoder, (const uint8_t*)in, inlen, (uint8_t*)out);
+      #endif
+
+//=== G =============================================================================================================================
       #if _GIPFELI
     case P_GIPFELI: {
         util::compression::Compressor *c = util::compression::NewGipfeliCompressor();
@@ -2634,10 +2642,12 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     //case P_GLYD: { uint8_t *pout; size_t cs=0; glyd_compress2((const uint8_t*)in, inlen, lev, 0, threads, &pout, &cs); return cs; 
       #endif
 
+//=== H =============================================================================================================================
       #if _HEATSHRINK
     case P_HEATSHRINK:   return hscompress(in, inlen, out);
       #endif
 
+//=== I =============================================================================================================================
       #if _IGUANA
         #ifdef __x86_64__
     case P_IGUANA:  return (isa >= (IS_AVX512|AVX512VL) )?IguanaComp(in, inlen, out):0;
@@ -2664,13 +2674,16 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       return s.total_out;
       #endif
 
+//=== K =============================================================================================================================
       #if _KANZI
     case P_KANZI: return kanzi_compress((char *)in, inlen, (char *)out, outsize, threads?threads:1, lev);
       #endif
       
+//=== L =============================================================================================================================
       #if _LIB
     case P_LIB: { struct sdefl sdefl = {0}; return sdeflate(&sdefl, out, in, inlen, lev); }
       #endif
+
       #if _LIBBSC
     #define BSC_MODE LIBBSC_FEATURE_FASTMODE | (strchr(prm,'P')?LIBBSC_FEATURE_LARGEPAGES:0) | (strchr(prm,'t')?LIBBSC_FEATURE_MULTITHREADING:0)      
     case P_LIBBSC: {  if(inlen > 1024*1024*1024) die("bsc max. blocksize = 1024m\n"); 
@@ -2700,8 +2713,30 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_LIBLZF:    return lzf_compress(in, inlen, out, outsize);
       #endif
 
-      #if _ZPAQ
-    case P_ZPAQ: { zin = in; zin_ = in+inlen; zout = out; char s[3]; s[0]=lev+'0'; s[1]=0; libzpaq::compress(&zmemin, &zmemout, s); return zout - out; }
+      #if _LIBSLZ
+    case P_LIBSLZ: { if(lev > 7) lev = 7;
+      unsigned blk = 16384 << lev;
+      struct slz_stream strm;
+            if(strchr(prm,'d')) slz_init(&strm, !!lev, SLZ_FMT_DEFLATE);
+       else if(strchr(prm,'g')) slz_init(&strm, !!lev, SLZ_FMT_GZIP);
+       else                     slz_init(&strm, !!lev, SLZ_FMT_ZLIB);
+      unsigned char *ip, *op=out;
+      for(ip = in, in += inlen; ip < in; ) {
+        unsigned iplen = in - ip; iplen = iplen>blk?blk:iplen;
+        op += slz_encode(&strm, op, ip, iplen, in-ip > blk);
+        ip += iplen;
+      }
+      op += slz_finish(&strm, op);
+      return op - out;
+    }
+      #endif
+
+      #if _LIBLZG
+    case P_LIBLZG: { lzg_encoder_config_t cfg; LZG_InitEncoderConfig(&cfg); cfg.fast = LZG_TRUE; cfg.level = lev; return LZG_Encode(in, inlen, out, outsize, &cfg); }
+      #endif
+
+      #if _LIZARD
+    case P_LIZARD: return Lizard_compress((const char*)in, (char*)out, inlen, outsize, lev);
       #endif
 
       #if _LZ4ULTRA
@@ -2715,11 +2750,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         if(lev>9) lev = 9; lev -= 2; lev = max(lev,7); //lz4 levels 9..12 -> lzultra 4..7
         return lz4ultra_compress_inmem(in, out, inlen, outsize, nFlags, lev);
       } // else fall through to compression with lz4
-      #endif
-
-      #if _SMALLZ4
-    case P_SMALLZ4:
-      if(!strchr(prm,'Z')) { gip = in; giend = in+inlen; gop = out; if(lev>9) lev=9; if(lev<4) lev=4; smallz4::lz4(getbytes,sendbytes,((1<<(7+lev))-1),false); return gop-out; }
       #endif
 
       #if _LZ4
@@ -2773,13 +2803,13 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_LZJODY : return lzjody_compress(in, out, 0, inlen);
       #endif
 
-      #if _LIZARD
-    case P_LIZARD: return Lizard_compress((const char*)in, (char*)out, inlen, outsize, lev);
+      #if _LZLIB
+    case P_LZLIB:  { long outlen=outsize; unsigned ds = dsize?dsize:option_mapping[lev].dictionary_size, mlen=option_mapping[lev].match_len_limit;
+      if(q=strstr(prm,"fb")) mlen = atoi(q+(q[2]=='='?3:2)); if(ds > inlen) ds = inlen; //printf("(%u,%d,%u)", ds, mlen, inlen);
+      bbcompress( (const uint8_t *)in, inlen, (uint8_t *)out, &outlen,  ds, mlen); return outlen;
+    }
       #endif
 
-      #if _FLZMA2
-    case P_FLZMA2: return FL2_compressMt(out, outsize, in, inlen, lev, threads?threads:1);
-      #endif
       #if _LZMA
         #if __x86_64__
            #define DICSIZE (1<<30)
@@ -2804,23 +2834,8 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
       #endif
 
-      #if _LZLIB
-    case P_LZLIB:  { long outlen=outsize; unsigned ds = dsize?dsize:option_mapping[lev].dictionary_size, mlen=option_mapping[lev].match_len_limit;
-      if(q=strstr(prm,"fb")) mlen = atoi(q+(q[2]=='='?3:2)); if(ds > inlen) ds = inlen; //printf("(%u,%d,%u)", ds, mlen, inlen);
-      bbcompress( (const uint8_t *)in, inlen, (uint8_t *)out, &outlen,  ds, mlen); return outlen;
-    }
-      #endif
-
-      #if _LIBLZG
-    case P_LIBLZG: { lzg_encoder_config_t cfg; LZG_InitEncoderConfig(&cfg); cfg.fast = LZG_TRUE; cfg.level = lev; return LZG_Encode(in, inlen, out, outsize, &cfg); }
-      #endif
-
       #if _LZMAT
     case P_LZMAT:   { MP_U32 outs=outsize; int rc = lzmat_encode(out, &outs, in, inlen); return rc == LZMAT_STATUS_OK ? outs : 0; }
-      #endif
-
-      #if _LZOMA
-    case P_LZOMA:   return lzomapack(in, inlen, out, lev);
       #endif
 
       #if _LZO
@@ -2852,6 +2867,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_LZO2a:   { lzo_uint out_len; lzo2a_999_compress(in, inlen, out, &out_len, workmem); return out_len; }
       #endif
 
+      #if _LZOMA
+    case P_LZOMA:   return lzomapack(in, inlen, out, lev);
+      #endif
+
       #if _LZRAVEN
     case P_LZRAVEN: { return lzraven_encode_buffer(out, outsize, in, inlen, workmem); }
       #endif
@@ -2881,6 +2900,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #endif
 
+//=== M =============================================================================================================================
       #if _MBROTLI
     case P_MBROTLI: { 
       unsigned lgwin = BROTLI_DEFAULT_WINDOW, mode = BROTLI_DEFAULT_MODE; size_t esize = outsize;
@@ -2922,10 +2942,12 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_MZSTD: { size_t rc = outsize; return mzstd_compress((const uint8_t*)in, inlen, (uint8_t*)out, &rc, lev) == MZSTD_OK ? rc : 0; } break; 
       #endif
 
+//=== N =============================================================================================================================
       #if _NZ1
     case P_NZ1: return nanozip_compress(in, inlen, out, outsize, ((1 << 16) - 1));
       #endif
 
+//=== O =============================================================================================================================
       #if _OPENZL
     case P_OPENZL_U8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >(inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;}
     case P_OPENZL_I8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >(inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;}
@@ -2968,6 +2990,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_OODLE_ANS: return oodle_tans_encode((const unsigned char *)in, inlen, out, outsize);
       #endif     
 
+//=== P =============================================================================================================================
       #if _PCODEC
     case P_PCODECI8:  { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_I8,  &config, out, outsize, &w); return w; } break;
     case P_PCODECU8:  { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_U8,  &config, out, outsize, &w); return w; } break;
@@ -3011,28 +3034,12 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       }
       #endif
 
+//=== Q =============================================================================================================================
       #if _QUICKLZ
     case P_QUICKLZ: { memset(workmem,0,workmemsize); return lev<=1?qlz_compress1((char *)in, (char *)out, inlen, workmem):(lev<=2?qlz_compress2((char *)in, (char *)out, inlen, workmem):qlz_compress3((char *)in, (char *)out, inlen, workmem)); }
       #endif
-
-      #if _LIBSLZ
-    case P_LIBSLZ: { if(lev > 7) lev = 7;
-      unsigned blk = 16384 << lev;
-      struct slz_stream strm;
-            if(strchr(prm,'d')) slz_init(&strm, !!lev, SLZ_FMT_DEFLATE);
-       else if(strchr(prm,'g')) slz_init(&strm, !!lev, SLZ_FMT_GZIP);
-       else                     slz_init(&strm, !!lev, SLZ_FMT_ZLIB);
-      unsigned char *ip, *op=out;
-      for(ip = in, in += inlen; ip < in; ) {
-        unsigned iplen = in - ip; iplen = iplen>blk?blk:iplen;
-        op += slz_encode(&strm, op, ip, iplen, in-ip > blk);
-        ip += iplen;
-      }
-      op += slz_finish(&strm, op);
-      return op - out;
-    }
-      #endif
       
+//=== S =============================================================================================================================
       #if _SHOCO
     case P_SHOCO:    return shoco_compress((const char *)in, inlen, (char *)out, outsize);
       #endif
@@ -3045,10 +3052,11 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_SHRINKER: return shrinker_compress((char *)in, (char *)out, inlen);
       #endif
 
-      #if _FIRETRAIL
-    case P_FIRETRAIL:  firetrail_encoder_reset(firetrail_encoder);  return firetrail_encoder_compress(firetrail_encoder, (const uint8_t*)in, inlen, (uint8_t*)out);
+      #if _SMALLZ4
+    case P_SMALLZ4:
+      if(!strchr(prm,'Z')) { gip = in; giend = in+inlen; gop = out; if(lev>9) lev=9; if(lev<4) lev=4; smallz4::lz4(getbytes,sendbytes,((1<<(7+lev))-1),false); return gop-out; }
       #endif
-    
+
       #if _SNAPPY
         #if __cplusplus
     case P_SNAPPY:    { size_t outlen=outsize; snappy::RawCompress((char *)in, inlen, (char*)out, &outlen); return outlen;}
@@ -3061,6 +3069,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_SNAPPY_C:   { size_t outlen=outsize; int rc = snappy_compress(&env, (const char *)in, inlen, (char *)out, &outlen); return outlen;}
       #endif
 
+//=== T =============================================================================================================================
       #if _TAMP
     case P_TAMP: { int64_t rc = 0;
       TampConf conf = {
@@ -3092,6 +3101,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
       #endif
 
+//=== U =============================================================================================================================
       #if _UNISHOX2
     case P_UNISHOX2:  return unishox2_compressx(in, inlen, out, lev);
       #endif
@@ -3099,6 +3109,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_UNISHOX3:  { unishox3 usx3; return usx3.compress(in, inlen, USX3_API_OUT_AND_LEN(out,outsize) ); }
       #endif
 
+//=== W =============================================================================================================================
       #if _WFLZ
     case P_WFLZ:    return lev<=1?wfLZ_CompressFast( (const uint8_t* WF_RESTRICT const)in, inlen, (uint8_t* WF_RESTRICT const)out, (const uint8_t* WF_RESTRICT)workmem, 0 ):
                                       wfLZ_Compress( (const uint8_t* WF_RESTRICT const)in, inlen, (uint8_t* WF_RESTRICT const)out, (const uint8_t* WF_RESTRICT)workmem, 0 );
@@ -3125,6 +3136,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_WKDM:    return WKdm_compress ((WK_word*)in, (WK_word*)out, inlen);
       #endif
 
+//=== X =============================================================================================================================
       #if _XPACK
     case P_XPACK:  { struct xpack_compressor *dc = xpack_alloc_compressor(inlen,lev);
        outlen = xpack_compress(dc,in, inlen,out, outsize);
@@ -3141,6 +3153,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_XZ: if(q=strstr(prm,"mt")) threads = atoi(q+(q[2]=='='?3:2)); return _xz_compress((char *)in, inlen, (char *)out, outsize, lev, threads?threads:1);
       #endif
 
+//=== Y =============================================================================================================================
       #if _YALZ77
     case P_YALZ77: { lz77::compress_t c(lev, lz77::DEFAULT_BLOCKSIZE); std::string os = c.feed(in,in+inlen); memcpy(out, os.c_str(), os.size()); return os.size(); }
       #endif
@@ -3149,6 +3162,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_YAPPY:    return YappyCompress(in, out, inlen, 10)-out;
       #endif
 
+//=== Z =============================================================================================================================
       #if _ZLIB
     case P_ZLIB:     { uLongf outlen = outsize; int rc = compress2(out, &outlen, in, inlen, lev); if(rc != Z_OK) printf("zlib compress2 rc=%d\n", rc);  return outlen; }
       #endif
@@ -3184,6 +3198,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
           memcpy(out, pout, outlen);
         return outlen;
      }
+      #endif
+
+      #if _ZPAQ
+    case P_ZPAQ: { zin = in; zin_ = in+inlen; zout = out; char s[3]; s[0]=lev+'0'; s[1]=0; libzpaq::compress(&zmemin, &zmemout, s); return zout - out; }
       #endif
 
       #if _ZSTD
@@ -3225,7 +3243,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     }
       #endif
 
-    //------------------------- Encoding
+//*** Encoding **********************************************************************************************************************************************************
      #if _TURBORLE
           #define _ESC8  0x5 //0xda
           #define _ESC16 0xdad5
@@ -3319,7 +3337,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_TB64SSE: return tb64sseenc(in, inlen, out);
      #endif
 
-    //------------------------- Transform -----------------------------
+//*** Transform *************************************************************************************************************************************************************
       #if _DIVBWT
     case P_DIVBWT: { int *sa = (int *)malloc((inlen + 1) * sizeof(int)); if(!sa) return -1;
       unsigned bwtidx = divbwt(in, out+sizeof(bwtidx), sa, inlen, NULL, NULL, 0); free(sa); *(unsigned *)out = bwtidx; return inlen+4; }
@@ -3581,8 +3599,9 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
   int  threads = 0; if(q = strchr(prm,'t')) threads = atoi(q+(q[1]=='='?2:1));
 
   switch(codec) {
+//=== A =============================================================================================================================
       #if _ACEAPEX
-    case P_ACE:     { int64_t r = aceapex_decompress_mt(in, inlen, out, outlen, threads?threads:1); return r == (int64_t)outlen ? inlen : 0; }
+    case P_ACE:     
     case P_ACEFAST: { int64_t r = aceapex_decompress_mt(in, inlen, out, outlen, threads?threads:1); return r == (int64_t)outlen ? inlen : 0; }
       #endif
 
@@ -3595,6 +3614,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_AOM: aomdec(in, inlen, out, outlen); return outlen;
       #endif
 
+//=== B =============================================================================================================================
       #if _BALZ
     case P_BALZ: return balzdecompress(in, inlen, out, outlen);
       #endif
@@ -3633,6 +3653,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_BZIP3: { size_t ds = outlen;  int rc = bz3_decompress((uint8_t*)in, (uint8_t*)out, inlen, &ds); return rc == BZ3_OK?ds:rc;  return ds;  }
       #endif
 
+//=== C =============================================================================================================================
       #if _C_BLOSC2
     case P_C_BLOSC2: { //return blosc1_decompress(in, out, outlen);
       int filter0 = strchr(prm,'B')?BLOSC_BITSHUFFLE : strchr(prm,'S')?BLOSC_SHUFFLE : strchr(prm,'D')?BLOSC_FILTER_BYTEDELTA : 0;
@@ -3679,6 +3700,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_CRUSH: crush_decompress(in, out, outlen); break;
       #endif
 
+//=== D =============================================================================================================================
       #if _DAALA
     case P_DAALA:   daaladec(in, inlen, out, outlen); return outlen;
       #endif
@@ -3696,6 +3718,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_DOBOZ:   { doboz::Decompressor d; return d.decompress(in, inlen, out, outlen) == doboz::RESULT_OK ? outlen : -1; }
       #endif
 
+//=== F =============================================================================================================================
       #if _FASTARI
     case P_FASTARI:  { size_t outsize = outlen; return fa_decompress((const unsigned char *)in, out, inlen, &outsize, workmem)?0:inlen; }
       #endif
@@ -3708,6 +3731,15 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_FLZMA2: { return FL2_decompress(out, outlen,  in, inlen); }
       #endif
 
+      #if _FIRETRAIL
+    case P_FIRETRAIL: {
+      firetrail_decoder_reset(firetrail_decoder); 
+      size_t rc = firetrail_decoder_decompress(firetrail_decoder, (const uint8_t*)in, inlen, (uint8_t*)out, outlen);
+      if(!rc) return 0;
+      return firetrail_decoder_exact_output_length((const uint8_t*)in, inlen);
+      #endif
+
+//=== G =============================================================================================================================
       #if _GIPFELI
     case P_GIPFELI: {
         util::compression::Compressor *c = util::compression::NewGipfeliCompressor();
@@ -3727,10 +3759,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_GLYDP: return glyd_decompress_parallel((const uint8_t*)in, inlen, out, outlen);
       #endif
 
+//=== H =============================================================================================================================
       #if _HEATSHRINK
     case P_HEATSHRINK: return hsdecompress(in, inlen, out, outlen);
       #endif
 
+//=== I =============================================================================================================================
       #if _IGUANA
         #ifdef __x86_64__
     case P_IGUANA:  return (isa >= (IS_AVX512|AVX512VL) )?IguanaComp(in, inlen, out):0;
@@ -3750,10 +3784,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       } break;
       #endif
 
+//=== K =============================================================================================================================
      #if _KANZI
     case P_KANZI: return kanzi_decompress((char *)in, inlen, (char *)out, outlen, threads?threads:1);
       #endif
 
+//=== L =============================================================================================================================
       #if _LIB
     case P_LIB: { return sinflate(out, outlen, in, inlen); }
       #endif
@@ -3834,10 +3870,6 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       return rc; }
       #endif
 
-      #if _MEMLZ
-    case P_MEMLZ: return (int64_t)memlz_decompress(out, in); //memlz_reset((memlz_state*)workmem); return (int64_t)memlz_stream_decompress(out, in, (memlz_state*)workmem);
-      #endif
-
       #if _LZHAM
     case P_LZHAM: { lzham_decompress_params p; memset(&p, 0, sizeof(p)); p.m_struct_size = sizeof(p);
       p.m_dict_size_log2    = in[0];
@@ -3845,6 +3877,25 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       lzham_uint32 adler32  = 0;
       return lzham_decompress_memory(&p, (lzham_uint8*)out, &outl, in+1, inlen, &adler32) == LZHAM_COMP_STATUS_SUCCESS?outlen:-1;
     }
+      #endif
+
+      #if _LIBSLZ
+    case P_LIBSLZ: {
+      struct slz_stream strm;
+      int fmt=15;
+            if(prm && *prm == 'd') fmt=-15;
+       else if(prm && *prm == 'g') fmt=15|32;
+       z_stream z;
+       memset(&z, 0, sizeof(z));
+       z.next_in   = in;
+       z.avail_in  = inlen;
+       z.next_out  = out;
+       z.avail_out = outlen;
+       if(inflateInit2(&z, fmt) == Z_OK) {
+         if(inflate(&z, Z_SYNC_FLUSH) == Z_STREAM_END)
+           inflateEnd(&z);
+       }
+    } break;
       #endif
 
       #if _LZLIB
@@ -3899,11 +3950,15 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         #endif
       #endif
 
-//------------------------------------------------------------------------------------------------------------------------------------
+//=== M =============================================================================================================================
       #if _MBROTLI
     case P_MBROTLI: { size_t osize = outlen; int rc = mbrotli_decompress((const uint8_t*)in, inlen, (uint8_t*)out, &osize);
         return rc?0:osize;
     }
+      #endif
+
+      #if _MEMLZ
+    case P_MEMLZ: return (int64_t)memlz_decompress(out, in); //memlz_reset((memlz_state*)workmem); return (int64_t)memlz_stream_decompress(out, in, (memlz_state*)workmem);
       #endif
 
       #if _MINIZ
@@ -3931,11 +3986,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_MZSTD: { size_t rc = outlen; return mzstd_decompress((const uint8_t*)in, inlen, (uint8_t*)out, &rc) == MZSTD_OK ? rc : 0; } break; 
       #endif
 
-//-----------------------------------------------------------------------------------------------------------------------------      
+//=== N =============================================================================================================================
       #if _NZ1
     case P_NZ1: return nanozip_decompress(in, inlen, out, outlen);
       #endif
 
+//=== O =============================================================================================================================
       #if _OODLE
     case P_OODLE: { 
       int nodll = strchr(prm,'d')?1:0;  
@@ -3976,6 +4032,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
          #endif  
        #endif
 
+//=== P =============================================================================================================================
       #if _PCODEC
     case P_PCODECI8:  { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_I8,  out, outlen, &w); return w; } break;
     case P_PCODECU8:  { size_t w=0; pco_decompress(in, inlen, PCO_TYPE_U8,  out, outlen, &w); return w; } break;
@@ -4018,37 +4075,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       }
       #endif
 
+//=== Q =============================================================================================================================
       #if _QUICKLZ
     case P_QUICKLZ: { lev= (in[0]>>2)&3; outlen = lev<=1?qlz_decompress1((char*)in, out, workmem):(lev<=2?qlz_decompress2((char*)in, out, workmem):qlz_decompress3((char*)in, out, workmem)); } break;
       #endif
 
-      #if _FIRETRAIL
-    case P_FIRETRAIL: {
-      firetrail_decoder_reset(firetrail_decoder); 
-      size_t rc = firetrail_decoder_decompress(firetrail_decoder, (const uint8_t*)in, inlen, (uint8_t*)out, outlen);
-      if(!rc) return 0;
-      return firetrail_decoder_exact_output_length((const uint8_t*)in, inlen);
-      #endif
-
-      #if _LIBSLZ
-    case P_LIBSLZ: {
-      struct slz_stream strm;
-      int fmt=15;
-            if(prm && *prm == 'd') fmt=-15;
-       else if(prm && *prm == 'g') fmt=15|32;
-       z_stream z;
-       memset(&z, 0, sizeof(z));
-       z.next_in   = in;
-       z.avail_in  = inlen;
-       z.next_out  = out;
-       z.avail_out = outlen;
-       if(inflateInit2(&z, fmt) == Z_OK) {
-         if(inflate(&z, Z_SYNC_FLUSH) == Z_STREAM_END)
-           inflateEnd(&z);
-       }
-    } break;
-      #endif
-
+//=== S =============================================================================================================================
       #if _SMALLZ4
     case P_SMALLZ4:
       if(!strchr(prm,'z')) { gip = in; giend = in+inlen; gop = out; unlz4(getbyte,sendbytes,NULL); break; }
@@ -4078,6 +4110,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_SNAPPY_C: return snappy_uncompress((const char *)in, inlen, (char *)out);
       #endif
 
+//=== T =============================================================================================================================
       #if _TAMP
     case P_TAMP: { int64_t rc = 0;
       TampConf conf;
@@ -4104,6 +4137,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     } break;
       #endif
 
+//=== U =============================================================================================================================
       #if _UNISHOX2
     case P_UNISHOX2: return unishox2_decompressx(in, inlen, out, lev);
       #endif
@@ -4111,6 +4145,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_UNISHOX3: { unishox3 usx3; return usx3.decompress(in, inlen, USX3_API_OUT_AND_LEN(out,outlen) ); }
       #endif
 
+//=== W =============================================================================================================================
       #if _WFLZ
     case P_WFLZ:    wfLZ_Decompress( in, out); return inlen;
       #endif
@@ -4131,6 +4166,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_WKDM:    WKdm_decompress ((WK_word*)in, (WK_word*)out, outlen);
       #endif
 
+//=== X =============================================================================================================================
       #if _XPACK
     case P_XPACK:  { size_t rc; struct xpack_decompressor *dd = xpack_alloc_decompressor();
         outlen = xpack_decompress(dd, in, inlen,out, outlen, &rc);
@@ -4138,20 +4174,22 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       }
       #endif
 
+      #if _XZ
+    case P_XZ: if(q=strstr(prm,"mt")) threads = atoi(q+(q[2]=='='?3:2)); return _xz_decompress((char *)in, inlen, (char *)out, outlen, threads?threads:1);
+      #endif
+
+//=== Y =============================================================================================================================
       #if _YALZ77
     case P_YALZ77: { lz77::decompress_t d; std::string extra; if(!d.feed(in,in+inlen,extra) || extra.size() > 0) return 0;
         const std::string& os = d.result(); memcpy(out, os.c_str(), os.size()); return os.size();
       }
       #endif
 
-      #if _XZ
-    case P_XZ: if(q=strstr(prm,"mt")) threads = atoi(q+(q[2]=='='?3:2)); return _xz_decompress((char *)in, inlen, (char *)out, outlen, threads?threads:1);
-      #endif
-
       #if _YAPPY
     case P_YAPPY:    return YappyUnCompress(in, in+inlen, out)-out;
       #endif
 
+//=== Z =============================================================================================================================
       #if _ZLIB
     //case P_ISA_L: case P_LIBDEFLATE:
         #if _ZLIB_NG == 0
@@ -4200,7 +4238,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_ZPAQ: { zin = in; zin_ = in+inlen; zout = out; libzpaq::decompress(&zmemin, &zmemout); return zin - in; }
       #endif
 
-      //------------ Encoding -----------------------------------------------------------------------
+//*** Encoding ***************************************************************************************************************************************
       #if _TURBORLE
     case P_RLES:
       switch(lev) {
@@ -4254,7 +4292,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_B64_NEON64: { size_t outlen; base64_decode(in, inlen, out, &outlen, BASE64_FORCE_NEON64); return inlen; }
       #endif
 
-      //------------ Transform -----------------------------------------------------------------------
+//*** Transform *******************************************************************************************************************************************************
       #if _TB64
     case P_TB64:    return tb64dec(     in, inlen, out);
     case P_TB64S:   return tb64sdec(    in, inlen, out);
@@ -4303,7 +4341,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_SB64SSE:  base64::sse::decode(base64::sse::lookup_base, in, inlen, out); return inlen;
       #endif
 
-      //------------ Entropy Coders ------------------------------------------------------------------
+//*** Entropy Coder ****************************************************************************************************************************************
       #if _MEMCPY
     case P_MCPY:     memcpy(out, in, inlen);  break;
     case P_LMCPY: libmemcpy(out, in, outlen); break;
