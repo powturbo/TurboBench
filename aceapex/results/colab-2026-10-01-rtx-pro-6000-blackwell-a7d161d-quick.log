@@ -1,0 +1,40 @@
+MODE QUICK (open profile on chr1 and t2t, tool + library; FULL=1 for the rest)
+== provenance 2026-10-01
+gpu NVIDIA RTX PRO 6000 Blackwell Server Edition | cc 12.0 | driver 580.82.07
+host AMD EPYC 9B45, 48 threads, RAM 176 GB, drive 1
+Build cuda_12.8.r12.8/compiler.35583870_0
+commit a7d161d
+libzstd 1.5.5
+nvcomp Version: 5.3.0.16
+[log as received from the Colab terminal, shortened: emulators 5/5 pass, builds, fixtures 5/5, corpora md5 OK - as in ddd97f9]
+== gpu_api_test chr1.open
+[api] full decode on-device 1.928 ms (median of 3) -> 131.7 GB/s
+[api] full decode + XXH3 check on-device 6.337 ms (median of 3; check adds 4.409 ms, +228.7 %): return 0, status 0, output MATCHES OK
+[api] ranges: 200 of 200 windows == original (MATCHES OK); 16 KiB window 0.652 ms (median of 33)
+example gpu_decode chr1.open (no nvCOMP): bit-perfect
+example gpu_decode chr1.open via libaceapex_gpu.so.1 (nvCOMP inside): bit-perfect
+== aceapex_gpu chr1.open
+[open variants] seq pieces 0.562 -> 0.442 ms (AX_OPEN_SEQ 0 -> 1, windowed refill, bit-perfect); unpack 0.632 ms (case 0.039 + bases 0.355 + exceptions 0.287) -> 0.605 ms (AX_OPEN_EXC 0 -> 1: case+exception positions 0.065 + bases with exceptions 0.571, bit-perfect) -> 0.583 ms (AX_OPEN_SHB=1: bases from shared 0.550, bit-perfect)
+ROW	/content/work/chr1.open.aet	63083287	rANS	open	0.363	0.854	0.593	0.479	2.289	3.382	110.96	bit-perfect
+== gpu_api_test t2t.open
+[api] full decode on-device 19.720 ms (median of 3) -> 160.1 GB/s
+[api] full decode + XXH3 check on-device 86.925 ms (median of 3; check adds 67.205 ms, +340.8 %): return 0, status 0, output MATCHES OK
+[api] ranges: 60 of 60 windows == original (MATCHES OK); 16 KiB window 0.670 ms (median of 10)
+example gpu_decode t2t.open (no nvCOMP): bit-perfect
+example gpu_decode t2t.open via libaceapex_gpu.so.1 (nvCOMP inside): bit-perfect
+== aceapex_gpu t2t.open   (took ~10 min: ~9 output checks, each FNV of 3.1 GB on one GPU thread)
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=1 AX_OPEN_SHB=1] FNV out=b4380f15fd9480a3 orig=b4380f15fd9480a3 MATCHES OK
+[open variants] seq pieces 4.542 -> 3.531 ms (AX_OPEN_SEQ 0 -> 1, windowed refill, bit-perfect); unpack 10.008 ms (case 0.382 + bases 5.595 + exceptions 4.025) -> 8.948 ms (AX_OPEN_EXC 0 -> 1: case+exception positions 0.573 + bases with exceptions 8.349, bit-perfect) -> 7.458 ms (AX_OPEN_SHB=1: bases from shared 6.880, bit-perfect)
+[stream-pipeline] 8 batches (largest 106.4 MB), copy stream + decode stream: 23.776 ms -> 132.8 GB/s delivered; sequential 35.115 (H2D 14.748 + on-device 20.367), gain 32.3%
+ROW	/content/work/t2t.open.aet	853264869	rANS	open	0.676	5.647	8.949	5.094	20.367	35.115	154.97	bit-perfect
+api chr1.open: library 1.928 ms vs tool 2.289 ms on-device (-15.8 %), bit-perfect, ranges 200/200 == original
+api t2t.open: library 19.720 ms vs tool 20.367 ms on-device (-3.2 %), bit-perfect, ranges 60/60 == original
+archives on the GPU: bit-perfect 2 of 2 (exit 0: 2); emulators 2/2, fixtures 5/5
+C ABI: 2 of 2 archives bit-perfect with every range; plan emulator 1/1
+steps over the time limit: 0
+RESULT: all passes bit-perfect on NVIDIA RTX PRO 6000 Blackwell Server Edition
+== SUMMARY == 2026-10-01T14:08:31Z
+commit a7d161d | MODE QUICK | NVIDIA RTX PRO 6000 Blackwell Server Edition
+chr1.open: library 1.928 ms (131.7 GB/s), tool 2.289 ms; seq 0.445, unpack 0.593, match 0.479 ms; bit-perfect; variants seq 0.562->0.442, unpack 0.632->0.605 (EXC)->0.583 (SHB)
+t2t.open: library 19.720 ms (160.1 GB/s), tool 20.367 ms; seq 3.532, unpack 8.949, match 5.094 ms; bit-perfect; variants seq 4.542->3.531, unpack 10.008->8.948 (EXC)->7.458 (SHB)
+verdict PASSED

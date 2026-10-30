@@ -1,0 +1,7 @@
+# T-H3 rows measured on ace-core without a card (gpu_h100_tests ra-cpu, t2t.open, 10 000 regions x 5 000 bases, seed 20261002), 2026-10-02
+# samtools 1.13, bgzip -@16 of t2t.fa; every result compared with the FASTA
+[ra] t2t.fa: 10000 regions of 5000 bases over 25 records (byte length <= 5063)
+[ra] CPU aceapex_decompress_region, 1 thread p50    131.3 us  p99    261.2 us  mean    146.0 us  == FASTA
+[ra] samtools faidx bgzip, process per region p50   1929.4 us  p99   2253.4 us  mean   1894.0 us  == FASTA
+[ra] samtools faidx bgzip, 10000 regions in one call (-r): 1.10 s = 110.3 us per region
+H3ROW	t2t.open.aet	10000	5000	0.0/0.0	0.0/0.0	131.3/261.2	1929.4/2253.4	110.3	ok

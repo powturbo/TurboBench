@@ -1,0 +1,22 @@
+name, memory.total [MiB], clocks.max.sm [MHz], driver_version
+NVIDIA L4, 23034 MiB, 2040 MHz, 580.82.07
+Build cuda_13.0.r13.0/compiler.36424714_0
+94bba77
+12
+nvcomp: nvidia-libnvcomp-cu13 at /usr/local/lib/python3.13/dist-packages/nvidia/libnvcomp
+/content/work/chr1.fa: OK
+archive chr1.open.aet 62041847 B, sha256 bb667b541357e8d3
+== gpu_hash_ab
+archive /content/work/chr1.open.aet: 62041847 B -> 253935557 B, 243 blocks of 1048576, NVIDIA L4, runs 10 per mode; nvCOMP CRC32 conf: heuristic(max chunk)
+mode | device ms med / p90 | host combine ms med | total ms med | GB/s (total) | x decode
+a    | 12.828 / 12.915 | 0.000 | 12.828 (p90 12.915) | 19.8 | x1.00
+b    | 20.256 / 20.313 | 0.000 | 20.256 (p90 20.313) | 12.5 | x1.58
+c    | 14.501 / 14.548 | 0.023 | 14.525 (p90 14.571) | 17.5 | x1.13
+file CRC-32 (mode c, crc32_combine of 243 block CRCs): 5963ec1b
+XXH3 check (mode b): status 0 = match
+CPU decode bit-perfect
+CRC check: GPU 5963ec1b == zlib.crc32(CPU decode) 5963ec1b  OK
+ncu: rc=0 ==PROF== Disconnected from process 1119 ==PROF== Report: /content/aceapex_src/results/nvcomp-crc/kg_xxh-2026-10-26.ncu-rep 
+-rw-r--r-- 1 root root 5999295 Oct 26 15:31 results/nvcomp-crc/kg_xxh-2026-10-26.ncu-rep
+f7e102e2af563a2ad5827b052aeb411677ddc35455f7af9823faa9fb7f5b56de  colab-2026-10-26-hash-ab.log
+4dc0121d668da3f1ab7ede4670cd29bb4d06d3363bd037502ab5bcd7feea6488  kg_xxh-2026-10-26.ncu-rep

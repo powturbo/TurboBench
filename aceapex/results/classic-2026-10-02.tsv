@@ -1,0 +1,74 @@
+# Classic table, ace-core (AMD EPYC 4344P 8c/16t), 2026-10-02. lzbench 2.4.1 (GCC 11.4) built once with ACEAPEX 7bb790f: its aceapex object is byte-identical to the one built from 946591a (md5 a9173738..., lzbench reads no environment, the open profile is not reachable there), so default and l1 are the same before and after. Median of 5 (-i5,5 -p3); -I = codec threads (lz4 has none).
+# silesia.tar 211 957 760 B and enwik8 100 000 000 B from ~/golden (the ~/CORPORA links point to /tmp copies that disappeared during the run; silesia 1 and 8 threads were measured on the /tmp copy of the same size before it vanished). Published numbers of the papers are not in this file.
+section	corpus	codec	threads	ratio	encode_MBps	decode_MBps	compressed_B	note
+lzbench	silesia	aceapex default (level 2)	1	3.088	63.22	1573.46	68633898	
+lzbench	silesia	aceapex l1 (level 3)	1	3.181	199.07	1615.30	66631299	
+lzbench	silesia	zstd 1.5.7 -1	1	2.896	679.66	2123.68	73191361	
+lzbench	silesia	zstd 1.5.7 -3	1	3.205	395.50	1877.71	66132659	
+lzbench	silesia	zstd 1.5.7 -19	1	4.011	4.77	1897.11	52844782	
+lzbench	silesia	lz4 1.10.0	1	2.101	972.85	6132.48	100881100	
+lzbench	silesia	xz 5.8.4 -6	1	4.282	5.10	216.60	49495340	
+lzbench	silesia	aceapex default (level 2)	8	3.088	318.35	6419.05	68633898	
+lzbench	silesia	aceapex l1 (level 3)	8	3.181	624.81	4784.89	66631299	
+lzbench	silesia	zstd 1.5.7 -1	8	2.892	3652.22	2083.45	73292319	
+lzbench	silesia	zstd 1.5.7 -3	8	3.201	1824.27	1885.83	66218106	
+lzbench	silesia	zstd 1.5.7 -19	8	4.010	15.14	1913.14	52850860	
+lzbench	silesia	lz4 1.10.0	8	2.101	979.49	6148.40	100881100	
+lzbench	silesia	xz 5.8.4 -6	8	4.282	22.21	214.15	49495340	
+lzbench	silesia	aceapex default (level 2)	16	3.088	303.88	6335.00	68633898	
+lzbench	silesia	aceapex l1 (level 3)	16	3.181	668.25	4696.62	66631299	
+lzbench	silesia	zstd 1.5.7 -1	16	2.892	5189.40	2096.82	73292319	
+lzbench	silesia	zstd 1.5.7 -3	16	3.201	2170.88	1873.71	66218106	
+lzbench	silesia	zstd 1.5.7 -19	16	4.010	15.28	1871.04	52850860	
+lzbench	silesia	lz4 1.10.0	16	2.101	955.99	6031.93	100881100	
+lzbench	silesia	xz 5.8.4 -6	16	4.282	21.62	211.98	49495340	
+lzbench	enwik8	aceapex default (level 2)	1	2.643	61.76	1061.14	37834611	
+lzbench	enwik8	aceapex l1 (level 3)	1	2.815	186.44	1347.48	35525349	
+lzbench	enwik8	zstd 1.5.7 -1	1	2.459	510.81	1904.87	40662735	
+lzbench	enwik8	zstd 1.5.7 -3	1	2.823	285.71	1624.51	35419425	
+lzbench	enwik8	zstd 1.5.7 -19	1	3.712	3.31	1770.15	26936936	
+lzbench	enwik8	lz4 1.10.0	1	1.746	706.97	5936.18	57262281	
+lzbench	enwik8	xz 5.8.4 -6	1	3.750	3.12	223.46	26665124	
+lzbench	enwik8	aceapex default (level 2)	8	2.643	306.15	3764.24	37834611	
+lzbench	enwik8	aceapex l1 (level 3)	8	2.815	515.50	4173.00	35525349	
+lzbench	enwik8	zstd 1.5.7 -1	8	2.458	3013.42	1868.40	40675943	
+lzbench	enwik8	zstd 1.5.7 -3	8	2.821	1488.00	1612.96	35445331	
+lzbench	enwik8	zstd 1.5.7 -19	8	3.711	6.61	1697.37	26944223	
+lzbench	enwik8	lz4 1.10.0	8	1.746	700.81	5880.29	57262281	
+lzbench	enwik8	xz 5.8.4 -6	8	3.750	9.27	223.58	26665124	
+lzbench	enwik8	aceapex default (level 2)	16	2.643	355.24	3754.35	37834611	
+lzbench	enwik8	aceapex l1 (level 3)	16	2.815	554.59	4071.09	35525349	
+lzbench	enwik8	zstd 1.5.7 -1	16	2.458	3652.02	1888.04	40675943	
+lzbench	enwik8	zstd 1.5.7 -3	16	2.821	1812.32	1595.56	35445331	
+lzbench	enwik8	zstd 1.5.7 -19	16	3.711	6.69	1735.12	26944223	
+lzbench	enwik8	lz4 1.10.0	16	1.746	698.60	5853.84	57262281	
+lzbench	enwik8	xz 5.8.4 -6	16	3.750	9.32	223.98	26665124	
+genome_open	chr1	aceapex open before (946591a, token chunk 64 KiB)	1	4.0254	104.2	2179.9	63083287	region 10000 x 5000 b, 1 thread: p50 69.2 us, p99 109.5 us
+genome_open	chr1	aceapex open before (946591a, token chunk 64 KiB)	8	4.0254	475.1	14639.2	63083287	region 10000 x 5000 b, 1 thread: p50 69.2 us, p99 109.5 us
+genome_open	chr1	aceapex open before (946591a, token chunk 64 KiB)	16	4.0254	548.1	17486.6	63083287	region 10000 x 5000 b, 1 thread: p50 69.2 us, p99 109.5 us
+genome_open	chr1	aceapex open after (7bb790f, token chunk 16 KiB)	1	4.0249	101.2	2139.8	63091473	region 10000 x 5000 b, 1 thread: p50 44.3 us, p99 82.6 us
+genome_open	chr1	aceapex open after (7bb790f, token chunk 16 KiB)	8	4.0249	474.4	14451.3	63091473	region 10000 x 5000 b, 1 thread: p50 44.3 us, p99 82.6 us
+genome_open	chr1	aceapex open after (7bb790f, token chunk 16 KiB)	16	4.0249	536.9	17415.5	63091473	region 10000 x 5000 b, 1 thread: p50 44.3 us, p99 82.6 us
+genome_open	t2t	aceapex open before (946591a, token chunk 64 KiB)	1	3.6990	96.4	2011.7	853264869	region 10000 x 5000 b, 1 thread: p50 114.6 us, p99 242.4 us
+genome_open	t2t	aceapex open before (946591a, token chunk 64 KiB)	8	3.6990	456.4	14252.4	853264869	region 10000 x 5000 b, 1 thread: p50 114.6 us, p99 242.4 us
+genome_open	t2t	aceapex open before (946591a, token chunk 64 KiB)	16	3.6990	521.8	17593.1	853264869	region 10000 x 5000 b, 1 thread: p50 114.6 us, p99 242.4 us
+genome_open	t2t	aceapex open after (7bb790f, token chunk 16 KiB)	1	3.6990	97.2	2015.6	853265321	region 10000 x 5000 b, 1 thread: p50 91.2 us, p99 160.9 us
+genome_open	t2t	aceapex open after (7bb790f, token chunk 16 KiB)	8	3.6990	453.7	14266.2	853265321	region 10000 x 5000 b, 1 thread: p50 91.2 us, p99 160.9 us
+genome_open	t2t	aceapex open after (7bb790f, token chunk 16 KiB)	16	3.6990	514.4	17450.2	853265321	region 10000 x 5000 b, 1 thread: p50 91.2 us, p99 160.9 us
+# l1 against default on the silesia files (one thread, archive bytes; lit = literal stream compressed / raw, tok = token streams compressed / raw)
+section	file	size_B	default_B	l1_B	l1_vs_default	default_lit_z/raw	default_tok_z/raw	l1_lit_z/raw	l1_tok_z/raw
+l1_why	dickens	10192446	3935592	3704703	-5.9 %	3261452/7960583	673432/823429	3703728/10183431	267/79640
+l1_why	mozilla	51220480	19017351	18664356	-1.9 %	15241061/19430235	3773086/5878010	18461940/45211846	199212/573139
+l1_why	mr	9970564	3541364	3488301	-1.5 %	3027102/5770105	513554/708109	3475433/7224575	12160/88546
+l1_why	nci	33553445	2916950	3023283	+3.6 %	816625/1694801	2098209/2600973	2227322/11233761	793845/1239949
+l1_why	ooffice	6152192	3274816	3160618	-3.5 %	2931501/4226814	342863/443487	3153287/5924889	6879/52795
+l1_why	osdb	10085684	3931279	3585291	-8.8 %	2966896/4335334	963675/1216693	3521460/9488251	63123/126248
+l1_why	reymont	6627202	2228694	1971877	-11.5 %	1378274/3244759	849904/1076969	1963398/6515751	7963/58301
+l1_why	samba	21606400	5257082	5087988	-3.2 %	3462617/5838527	1793053/2267518	4855874/15598282	230702/358786
+l1_why	sao	7251944	5593199	5560579	-0.6 %	5529043/7094472	63640/115663	5559989/7251944	74/56663
+l1_why	webster	41458703	12992435	12263060	-5.6 %	8218705/17451764	4771102/5662586	12130361/40362459	130071/417064
+l1_why	x-ray	8474240	6103553	6108305	+0.1 %	6097544/8465992	5365/69552	6107525/8474132	136/66222
+l1_why	xml	5345280	698062	712070	+2.0 %	348248/678082	349362/422283	612955/2709148	98663/125849
+l1_why	all 12 files	211938580	69490377	67330431	-3.1 %				
+# why: l1 takes only matches >= 32 bytes (ADR-020), so on text most bytes stay literals (dickens 99.9 %, webster 97.4 %, mozilla 88 %; nci 33 %, xml 51 %) and the literal stage - zstd frames per chunk - does the short matches with its own LZ and entropy coder; the default chain matcher takes 6-31-byte matches into the token streams, which cost more than inside zstd. l1 loses where long exact repeats dominate: nci (+3.6 %), xml (+2.0 %).
+# changed between before and after: only the genome_open rows (archive bytes, encode / decode within run-to-run noise, region p50 / p99); lzbench rows identical by construction (same object code).

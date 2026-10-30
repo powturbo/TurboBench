@@ -1,0 +1,23 @@
+# colab a100-sxm4-80gb, 2026-09-29, aceapex gpu-pipeline bfdfde5, scripts/colab_gpu_open.sh --pipeline=8, median of 3
+# (excerpt of the log pasted from Colab: provenance, verdict lines, stage lines, tables; per-pass FNV lines omitted)
+gpu NVIDIA A100-SXM4-80GB | cc 8.0 | driver 580.82.07 | clocks max sm/mem 1410/1593 MHz | 81920 MiB | 400 W
+host Intel Xeon @ 2.20GHz, 12 threads, RAM 167 GB; CUDA 12.8, libzstd 1.5.5, nvCOMP 5.3.0.16, sm_80
+emulators 2/2 pass; fixtures 5/5 exit 0, 5 MATCHES OK each (warm-up, sequential, old pipeline, stream pipeline cold on cleared buffers, stream pipeline)
+chr1/t2t archives == pinned, CPU round-trip bit-perfect; all 6 GPU runs bit-perfect (every pass, incl. the cold stream-pipeline pass)
+
+[h2d] chr1 ~68 MB: pageable 15.1-15.5 ms (4.4 GB/s), pinned 5.42-5.54 ms (12.3 GB/s)
+[h2d] t2t ~880 MB: pageable 197.3-201.0 ms (4.4 GB/s), pinned 70.7-71.9 ms (12.4 GB/s)
+
+chr1, ms           H2D    on-device  sequential  old pipeline (H2D||zstd, 4)  stream pipeline (8 batches)
+chr1.zstd          5.536  9.920      15.457      14.507                       26.966  (-74.5 %)
+chr1.rans          5.515  10.045     15.560      15.716                       34.627  (-122.5 %)
+chr1.open          5.422  6.072      11.494      10.509                       17.492  (-52.2 %)
+t2t, ms
+t2t.zstd           71.865 77.543     149.408     123.088                      109.785 (+26.5 %)
+t2t.rans           71.617 70.133     141.750     123.200                      110.921 (+21.7 %)
+t2t.open           70.734 55.174     125.907     122.099                      78.579  (+37.6 %, 40.2 GB/s delivered)
+
+t2t.open stages: tok 2.769, lit 11.140 (seq 5.077, cse 1.554, gap 1.394, val 1.187, plain 0.696), unpack 10.887
+(bases 7.362, case 0.718, exceptions 2.189), match 30.377; batches 8, largest 112.6 MB compressed.
+Floor for any overlap: pinned H2D 70.7 ms (PCIe of this VM, 12.4 GB/s) -> 78.6 ms is 1.11x the copy alone.
+chr1: per-batch cost (8 x nvCOMP calls / kernel sets on 1.9K blocks each) exceeds the 5.4 ms copy it hides.

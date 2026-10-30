@@ -1,0 +1,19 @@
+== SUMMARY == 2026-10-02T21:36:09Z
+commit 834d5d1 | MODE ONE | NVIDIA H100 80GB HBM3
+chr1.open: library 2.120 ms (119.8 GB/s), tool 2.243 ms; seq 0.315, unpack 0.629, match 0.519 ms; bit-perfect; variants seq 0.332->0.316, unpack 0.557->0.755 (EXC)->0.626 (SHB); tile 1.143->2.642
+t2t.open: library 19.029 ms (165.9 GB/s), tool 19.330 ms; seq 2.853, unpack 7.832, match 5.390 ms; bit-perfect; variants seq 2.949->2.857, unpack 7.262->9.759 (EXC)->7.831 (SHB); tile 13.223->31.533
+grch38.open: library 19.587 ms (167.1 GB/s), tool 19.687 ms; seq 2.846, unpack 8.311, match 5.185 ms; bit-perfect; variants seq 2.946->2.846, unpack 7.654->10.365 (EXC)->8.312 (SHB); tile 13.495->32.910
+HPRC GPU library: 9 assemblies, 142.879 ms total full decode, 9 bit-perfect
+HPRC ACEAPEX open: 30478715428 B -> 7706818343 B (ratio 3.95), one archive per assembly
+HPRC AGC: no Linux x64 release binary found - skipped
+HPRC MBGC: no Linux release binary found - skipped
+stream grch38.open.aet: 1 batches of 199798 blocks (slot 8175 MB), 1.75 GB/s with D2H + host XXH3, hash match, batches match
+stream t2t.open.aet (capped): 36 batches of 5463 blocks (slot 226 MB), 2.14 GB/s with D2H + host XXH3, hash match, batches match
+T-H1 saturation t2t.open.aet: peak 165.9 GB/s with 1 decodes at once (K: GB/s 1:165.9,2:164.9,4:165.2,8:165.4,9:165.7), XXH3 ok
+T-H2 PCIe: H2D 45.7 GB/s; pieces: output GB/s / with D2H / output over bus 4MB:79.0/36.8/1.73x,8MB:109.6/37.8/2.40x; ok
+T-H3 10000 regions x 5000 b, p50/p99 us: GPU 537.2/1059.4 (p50 launch/kernels/D2H/wait 33.8/517.4/10.9/0.0), GPU graph 529.4/1078.1, CPU 137.3/231.6, samtools bgzip - (one call: -); ok
+T-H4 10000 corrupt archives: refused 2768, caught 13948, harmless 199, silent 119 (no hash) / 0 (XXH3), hangs 0; ok
+T-H5 data loader t2t.open (x = GPU / CPU 16 threads + H2D): 1K x 256: 0.24M w/s 0.25 GB/s p50 1.10 ms host 42 us (CPU+H2D 16k w/s, x14.8); 1K x 4096: 1.58M w/s 1.62 GB/s p50 2.60 ms host 56 us (CPU+H2D 42k w/s, x37.6); 1K x 65536: 4.63M w/s 4.74 GB/s p50 14.10 ms host 62 us (CPU+H2D 44k w/s, x105.9); 8K x 256: 0.23M w/s 1.92 GB/s p50 1.13 ms host 43 us (CPU+H2D 17k w/s, x13.9); 8K x 4096: 1.49M w/s 12.19 GB/s p50 2.81 ms host 56 us (CPU+H2D 42k w/s, x35.5); 8K x 65536: 4.15M w/s 34.02 GB/s p50 15.79 ms host 61 us (CPU+H2D 44k w/s, x95.4); 32K x 256: 0.23M w/s 7.52 GB/s p50 1.19 ms host 39 us (CPU+H2D 21k w/s, x11.0); 32K x 4096: 1.19M w/s 38.96 GB/s p50 3.46 ms host 41 us (CPU+H2D 41k w/s, x29.0); 32K x 65536: 3.16M w/s 103.60 GB/s p50 20.79 ms host 44 us (CPU+H2D 36k w/s, x86.8); 9/9 ok, 1 % checked == original
+paper rows (README, H100 SXM, June 2026, not re-measured): FASTQ ERR194147 5 GB 168.9 GB/s ratio 3.31; 50 GB range decode 165.7 GB/s ratio 3.99; 5 GB genome full decode 29.71 ms
+gate: no baseline rows for NVIDIA H100 80GB HBM3 (results/baseline_h100.tsv) - this run can seed it
+verdict FAILED (a failure line in the log; speed gate: slower than results/baseline_h100.tsv by > 5 %; a card test (T-H) failed)

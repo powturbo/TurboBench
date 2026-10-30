@@ -1,0 +1,17 @@
+# C99 decoder (c/) and Python reader (python/csrc, persistent handle): region and full decode before / after - ace-core (AMD EPYC 4344P 8c/16t), 2026-10-03
+# T2T open archive t16 (853 265 321 B), the T-H3 list: 10 000 x 5000 b, seed 20261002; 1 thread, archive in memory; every region == FASTA
+# before = main (68b679c line); after = branch c99-region-table (43e0319 + e902934). cc -O3 -march=native (scripts/region_c99.c); Python: libaceapex_decode.so as the Makefile builds it (-O2)
+## region p50 / p99 us
+C99 one-shot aceapex_decompress_region: before 123.1-125.6 / 361.4-370.9, after 48.8 / 134.2
+C99 handle aceapex_dec_region:          before 103.7-104.9 / 330.4-331.7, after 41.8 / 111.2
+Python aceapex.Archive.read (handle):    before 111.2-111.6 / 348.4-351.1, after 49.7 / 123.9
+C++ aceapex_decompress_region (68b679c, unchanged here): 49.7-50.8 / 125.1-127.5; htslib faidx_fetch_seq64 101.1 / 193.6
+## where it came from (C99 one-shot / handle p50 us)
+profile before (handle path): axr_decode_scalar 58.6 % - ax_rans.h built its AVX2 decoder only for C++ (lambda, static constructor)
+table change only (scalar rANS):   113.3 / 106.5
+AVX2 only (old table walk):         64.7 / 43.4
+both:                               48.8 / 41.8
+## C99 full decode, chr1 open (scripts/region_bench.c, best of 3, 1 thread): before 0.313 s (811 MB/s), after 0.119 s (2143 MB/s); 200 x 5000 B regions p50 114.6 -> 51.9 us
+## C++ check: byte permutation table + widening cost the C++ open decode +6-8 % on 1 thread (perf gate FAIL chr1 +8.3 %, t2t +7.6 %); back to 32-bit entries: gate PASS
+judge 66 pass / 0 fail (incl. head_python_csrc_in_sync, cdec claims); perf gate PASS
+note: python Archive.close() on a mapped file raises BufferError (exported pointers) - pre-existing, not touched here

@@ -1,0 +1,9 @@
+# claim_id	level	expected	tolerance	needs	command   (README of tag v3.0 (same figures as v4.0); GPU H100 SXM, 16 KB blocks)
+# NA12878 1 GB ratio 11.19 withdrawn in the v4.0 release notes (degenerate quality strings); not a claim.
+v3.0_gpu_err194147_5gb_gbps	M	168.9	-	gpu	e2e_full, 5 GB ERR194147, device-resident, H2D/D2H excluded
+v3.0_gpu_err194147_50gb_gbps	M	165.7	-	gpu	v7-RA range-decode, 50 GB ERR194147 in 3 chunks
+v3.0_ratio_err194147_5gb	R	3.31	0.01	corpus:genome/ERR194147_5gb.fastq	aceapex c, 5 GB ERR194147, 16 KB blocks
+v3.0_ratio_err194147_50gb	R	3.99	0.01	corpus:genome/ERR194147_50gb.fastq	aceapex c, 50 GB ERR194147, 16 KB blocks
+v3.0_full_decode_5gb_ms	M	29.71	-	gpu	e2e_full, 5 GB genome, H100
+v3.0_seek_1block_ms	M	0.365	-	gpu	e2e_seek, 1 block of 16 KB, 5 GB genome
+v3.0_seek_100blocks_ms	M	0.394	-	gpu	e2e_seek, 100 blocks (1.6 MB), 5 GB genome

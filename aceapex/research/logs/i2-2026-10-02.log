@@ -1,0 +1,4 @@
+[selfheal] .wk/th4/stress.open.aet: 1000 copies x 1 flip(s): harmless 0, found 990, false 0, not found 0 (+ 10 with no locator: only the oracle failed); probes 72142 per repaired-or-tried copy, oracle calls 2028; CPU 1331.2 s in all, 1.331 s per copy
+SHROW	1000	1	0	990	0	0	10	72142	1.331
+[selfheal] .wk/th4/stress.open.aet: 100 copies x 2 flip(s): harmless 0, found 93, false 0, not found 7 (+ 0 with no locator: only the oracle failed); probes 148579 per repaired-or-tried copy, oracle calls 199; CPU 262.4 s in all, 2.624 s per copy
+SHROW	100	2	0	93	0	7	0	148579	2.624

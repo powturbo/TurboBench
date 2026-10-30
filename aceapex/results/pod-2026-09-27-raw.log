@@ -1,0 +1,165 @@
+== provenance 2026-09-27
+GPU 0: NVIDIA H100 80GB HBM3 (UUID: GPU-220c576e-fcfc-1acc-b0c4-9b195d79bb16)
+Build cuda_12.4.r12.4/compiler.34097967_0
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+1.4.8
+a833414
+160
+overlay         100G  110M  100G   1% /
+BUILD FAILED e2e_full
+BUILD FAILED e2e_seek
+BUILD FAILED dense
+built full_gpu_decode_v7_ra
+/root/golden/genome/chr1.fa: OK
+default: CPU decode bit-perfect, archive 68127499 B
+interactive: CPU decode bit-perfect, archive 68398886 B
+default run1: orig=253935557 blocks=243 block_size=1048576 G=16  rawL/O/N/C=190.4/6.3/0.1/10.8 MB
+default run1: [timed] v7-RA G=16 blocks[0..243): 45.625 ms (45625.2 us) -> 5.6 GB/s of range
+default run1:     orig FNV=c7c57a32936c3d67  MATCHES OK
+default run2: orig=253935557 blocks=243 block_size=1048576 G=16  rawL/O/N/C=190.4/6.3/0.1/10.8 MB
+default run2: [timed] v7-RA G=16 blocks[0..243): 46.445 ms (46444.7 us) -> 5.5 GB/s of range
+default run2:     orig FNV=c7c57a32936c3d67  MATCHES OK
+default run3: orig=253935557 blocks=243 block_size=1048576 G=16  rawL/O/N/C=190.4/6.3/0.1/10.8 MB
+default run3: [timed] v7-RA G=16 blocks[0..243): 46.489 ms (46488.8 us) -> 5.5 GB/s of range
+default run3:     orig FNV=c7c57a32936c3d67  MATCHES OK
+default run4: orig=253935557 blocks=243 block_size=1048576 G=16  rawL/O/N/C=190.4/6.3/0.1/10.8 MB
+default run4: [timed] v7-RA G=16 blocks[0..243): 45.638 ms (45638.3 us) -> 5.6 GB/s of range
+default run4:     orig FNV=c7c57a32936c3d67  MATCHES OK
+interactive run1: orig=253935557 blocks=243 block_size=1048576 G=16  rawL/O/N/C=190.4/6.3/0.1/10.8 MB
+interactive run1: [timed] v7-RA G=16 blocks[0..243): 46.410 ms (46409.9 us) -> 5.5 GB/s of range
+interactive run1:     orig FNV=c7c57a32936c3d67  MATCHES OK
+interactive run2: orig=253935557 blocks=243 block_size=1048576 G=16  rawL/O/N/C=190.4/6.3/0.1/10.8 MB
+interactive run2: [timed] v7-RA G=16 blocks[0..243): 46.028 ms (46028.0 us) -> 5.5 GB/s of range
+interactive run2:     orig FNV=c7c57a32936c3d67  MATCHES OK
+interactive run3: orig=253935557 blocks=243 block_size=1048576 G=16  rawL/O/N/C=190.4/6.3/0.1/10.8 MB
+interactive run3: [timed] v7-RA G=16 blocks[0..243): 45.615 ms (45615.4 us) -> 5.6 GB/s of range
+interactive run3:     orig FNV=c7c57a32936c3d67  MATCHES OK
+interactive run4: orig=253935557 blocks=243 block_size=1048576 G=16  rawL/O/N/C=190.4/6.3/0.1/10.8 MB
+interactive run4: [timed] v7-RA G=16 blocks[0..243): 46.237 ms (46236.6 us) -> 5.5 GB/s of range
+interactive run4:     orig FNV=c7c57a32936c3d67  MATCHES OK
+default 16K: CPU bit-perfect, 69193985 B
+default 16K run1: [timed] v7-RA G=16 blocks[0..15499): 1.862 ms (1862.2 us) -> 136.4 GB/s of range
+default 16K run1:     orig FNV=c7c57a32936c3d67  MATCHES OK
+default 16K run2: [timed] v7-RA G=16 blocks[0..15499): 1.895 ms (1894.9 us) -> 134.0 GB/s of range
+default 16K run2:     orig FNV=c7c57a32936c3d67  MATCHES OK
+default 16K run3: [timed] v7-RA G=16 blocks[0..15499): 1.908 ms (1908.3 us) -> 133.1 GB/s of range
+default 16K run3:     orig FNV=c7c57a32936c3d67  MATCHES OK
+default 16K run4: [timed] v7-RA G=16 blocks[0..15499): 1.867 ms (1867.1 us) -> 136.0 GB/s of range
+default 16K run4:     orig FNV=c7c57a32936c3d67  MATCHES OK
+interactive 16K: CPU bit-perfect, 69473882 B
+interactive 16K run1: [timed] v7-RA G=16 blocks[0..15499): 1.880 ms (1880.1 us) -> 135.1 GB/s of range
+interactive 16K run1:     orig FNV=c7c57a32936c3d67  MATCHES OK
+interactive 16K run2: [timed] v7-RA G=16 blocks[0..15499): 1.854 ms (1853.9 us) -> 137.0 GB/s of range
+interactive 16K run2:     orig FNV=c7c57a32936c3d67  MATCHES OK
+interactive 16K run3: [timed] v7-RA G=16 blocks[0..15499): 1.885 ms (1885.0 us) -> 134.7 GB/s of range
+interactive 16K run3:     orig FNV=c7c57a32936c3d67  MATCHES OK
+interactive 16K run4: [timed] v7-RA G=16 blocks[0..15499): 1.875 ms (1875.0 us) -> 135.4 GB/s of range
+interactive 16K run4:     orig FNV=c7c57a32936c3d67  MATCHES OK
+t2t e2e run1: F20260927 23:23:07.197282 125393835204608 GpuANSStatistics.cuh:401] Check failed: err__ == cudaSuccess (2 vs. 0) CUDA error cudaErrorMemoryAllocation out of memory
+t2t e2e run2: F20260927 23:23:23.872132 138708725981184 GpuANSStatistics.cuh:401] Check failed: err__ == cudaSuccess (2 vs. 0) CUDA error cudaErrorMemoryAllocation out of memory
+t2t e2e run3: F20260927 23:23:41.882923 132799128879104 GpuANSStatistics.cuh:401] Check failed: err__ == cudaSuccess (2 vs. 0) CUDA error cudaErrorMemoryAllocation out of memory
+t2t e2e run4: F20260927 23:23:58.734191 127562475208704 GpuANSStatistics.cuh:401] Check failed: err__ == cudaSuccess (2 vs. 0) CUDA error cudaErrorMemoryAllocation out of memory
+chr1 e2e run1: [E2E] ANS round-trip on streams (blocks 0..15499):
+chr1 e2e run1: [E2E] streams ANS-decoded in-place, now running match-decode on them...
+chr1 e2e run1: [timed] v7-RA G=16 blocks[0..15499): 1.957 ms (1957.1 us) -> 129.8 GB/s of range
+chr1 e2e run1:     orig FNV=c7c57a32936c3d67  MATCHES OK
+chr1 e2e run2: [E2E] ANS round-trip on streams (blocks 0..15499):
+chr1 e2e run2: [E2E] streams ANS-decoded in-place, now running match-decode on them...
+chr1 e2e run2: [timed] v7-RA G=16 blocks[0..15499): 1.901 ms (1901.4 us) -> 133.6 GB/s of range
+chr1 e2e run2:     orig FNV=c7c57a32936c3d67  MATCHES OK
+chr1 e2e run3: [E2E] ANS round-trip on streams (blocks 0..15499):
+chr1 e2e run3: [E2E] streams ANS-decoded in-place, now running match-decode on them...
+chr1 e2e run3: [timed] v7-RA G=16 blocks[0..15499): 1.971 ms (1970.6 us) -> 128.9 GB/s of range
+chr1 e2e run3:     orig FNV=c7c57a32936c3d67  MATCHES OK
+chr1 e2e run4: [E2E] ANS round-trip on streams (blocks 0..15499):
+chr1 e2e run4: [E2E] streams ANS-decoded in-place, now running match-decode on them...
+chr1 e2e run4: [timed] v7-RA G=16 blocks[0..15499): 1.901 ms (1901.0 us) -> 133.6 GB/s of range
+chr1 e2e run4:     orig FNV=c7c57a32936c3d67  MATCHES OK
+chr1 e2e+ans run1: [timed] ANS decode of 4 streams: 2.177 ms
+chr1 e2e+ans run1: [timed] v7-RA G=16 blocks[0..15499): 1.914 ms (1914.2 us) -> 132.7 GB/s of range
+chr1 e2e+ans run1:     orig FNV=c7c57a32936c3d67  MATCHES OK
+chr1 e2e+ans run2: [timed] ANS decode of 4 streams: 2.057 ms
+chr1 e2e+ans run2: [timed] v7-RA G=16 blocks[0..15499): 1.901 ms (1901.1 us) -> 133.6 GB/s of range
+chr1 e2e+ans run2:     orig FNV=c7c57a32936c3d67  MATCHES OK
+chr1 e2e+ans run3: [timed] ANS decode of 4 streams: 2.044 ms
+chr1 e2e+ans run3: [timed] v7-RA G=16 blocks[0..15499): 1.926 ms (1926.1 us) -> 131.8 GB/s of range
+chr1 e2e+ans run3:     orig FNV=c7c57a32936c3d67  MATCHES OK
+chr1 e2e+ans run4: [timed] ANS decode of 4 streams: 2.069 ms
+chr1 e2e+ans run4: [timed] v7-RA G=16 blocks[0..15499): 1.919 ms (1919.0 us) -> 132.3 GB/s of range
+chr1 e2e+ans run4:     orig FNV=c7c57a32936c3d67  MATCHES OK
+off: orig=6026221 chunk=4096 frames=1472 raw=0 nvCOMP-zstd RAW decode 26.51 ms -> 0.2 GB/s  bit-perfect=True
+len: orig=65600 chunk=4096 frames=17 raw=0 nvCOMP-zstd RAW decode 1.32 ms -> 0.0 GB/s  bit-perfect=True
+cmd: orig=10566105 chunk=4096 frames=2580 raw=0 nvCOMP-zstd RAW decode 7.67 ms -> 1.4 GB/s  bit-perfect=True
+lit: size=192845679 chunked=True tagged=True CH=65536 NW=2943 (ref 192845679)
+lit: 11748 zstd frames (2935 DNA chunks of 2943) nvCOMP RAW decode 67.6 ms; unpack in numpy; bit-perfect=True
+chr1 seek 1 blk run1: [timed] v7-RA G=16 blocks[8000..8001): 0.077 ms (76.6 us) -> 0.2 GB/s of range
+chr1 seek 1 blk run2: [timed] v7-RA G=16 blocks[8000..8001): 0.076 ms (76.4 us) -> 0.2 GB/s of range
+chr1 seek 1 blk run3: [timed] v7-RA G=16 blocks[8000..8001): 0.077 ms (76.6 us) -> 0.2 GB/s of range
+chr1 seek 1 blk run4: [timed] v7-RA G=16 blocks[8000..8001): 0.076 ms (76.3 us) -> 0.2 GB/s of range
+chr1 seek 100 blk run1: [timed] v7-RA G=16 blocks[8000..8100): 0.142 ms (142.1 us) -> 11.5 GB/s of range
+chr1 seek 100 blk run2: [timed] v7-RA G=16 blocks[8000..8100): 0.142 ms (142.5 us) -> 11.5 GB/s of range
+chr1 seek 100 blk run3: [timed] v7-RA G=16 blocks[8000..8100): 0.142 ms (142.2 us) -> 11.5 GB/s of range
+chr1 seek 100 blk run4: [timed] v7-RA G=16 blocks[8000..8100): 0.142 ms (142.0 us) -> 11.5 GB/s of range
+chr1 full G=8 run1: [timed] v7-RA G=8 blocks[0..15499): 2.019 ms (2018.7 us) -> 125.8 GB/s of range
+chr1 full G=8 run2: [timed] v7-RA G=8 blocks[0..15499): 2.038 ms (2038.0 us) -> 124.6 GB/s of range
+chr1 full G=8 run3: [timed] v7-RA G=8 blocks[0..15499): 2.036 ms (2036.2 us) -> 124.7 GB/s of range
+chr1 full G=8 run4: [timed] v7-RA G=8 blocks[0..15499): 2.053 ms (2052.7 us) -> 123.7 GB/s of range
+chr1 full G=16 run1: [timed] v7-RA G=16 blocks[0..15499): 1.918 ms (1917.6 us) -> 132.4 GB/s of range
+chr1 full G=16 run2: [timed] v7-RA G=16 blocks[0..15499): 1.916 ms (1916.2 us) -> 132.5 GB/s of range
+chr1 full G=16 run3: [timed] v7-RA G=16 blocks[0..15499): 1.875 ms (1875.4 us) -> 135.4 GB/s of range
+chr1 full G=16 run4: [timed] v7-RA G=16 blocks[0..15499): 1.846 ms (1845.6 us) -> 137.6 GB/s of range
+chr1 full G=32 run1: [timed] v7-RA G=32 blocks[0..15499): 1.787 ms (1787.5 us) -> 142.1 GB/s of range
+chr1 full G=32 run2: [timed] v7-RA G=32 blocks[0..15499): 1.852 ms (1852.4 us) -> 137.1 GB/s of range
+chr1 full G=32 run3: [timed] v7-RA G=32 blocks[0..15499): 1.775 ms (1774.6 us) -> 143.1 GB/s of range
+chr1 full G=32 run4: [timed] v7-RA G=32 blocks[0..15499): 1.781 ms (1781.2 us) -> 142.6 GB/s of range
+chr1 seek 1 blk run1: [timed] v7-RA G=16 blocks[15499..15499): 0.008 ms (7.5 us) -> 2453024482893490.5 GB/s of range
+chr1 seek 1 blk run2: [timed] v7-RA G=16 blocks[15499..15499): 0.008 ms (7.6 us) -> 2442630232523700.5 GB/s of range
+chr1 seek 1 blk run3: [timed] v7-RA G=16 blocks[15499..15499): 0.007 ms (7.4 us) -> 2484744560085400.0 GB/s of range
+chr1 seek 1 blk run4: [timed] v7-RA G=16 blocks[15499..15499): 0.008 ms (7.6 us) -> 2422104069867058.5 GB/s of range
+chr1 seek 100 blk run1: [timed] v7-RA G=16 blocks[15499..15499): 0.008 ms (7.5 us) -> 2453024482893490.5 GB/s of range
+chr1 seek 100 blk run2: [timed] v7-RA G=16 blocks[15499..15499): 0.008 ms (7.5 us) -> 2453024482893490.5 GB/s of range
+chr1 seek 100 blk run3: [timed] v7-RA G=16 blocks[15499..15499): 0.007 ms (7.5 us) -> 2474080494271240.0 GB/s of range
+chr1 seek 100 blk run4: [timed] v7-RA G=16 blocks[15499..15499): 0.008 ms (7.6 us) -> 2442630232523700.5 GB/s of range
+t2t full G=8 run1: [timed] v7-RA G=8 blocks[0..192643): 17.509 ms (17508.5 us) -> 180.3 GB/s of range
+t2t full G=8 run2: [timed] v7-RA G=8 blocks[0..192643): 17.611 ms (17611.1 us) -> 179.2 GB/s of range
+t2t full G=8 run3: [timed] v7-RA G=8 blocks[0..192643): 17.502 ms (17502.3 us) -> 180.3 GB/s of range
+t2t full G=8 run4: [timed] v7-RA G=8 blocks[0..192643): 17.612 ms (17612.2 us) -> 179.2 GB/s of range
+t2t full G=16 run1: [timed] v7-RA G=16 blocks[0..192643): 16.023 ms (16022.9 us) -> 197.0 GB/s of range
+t2t full G=16 run2: [timed] v7-RA G=16 blocks[0..192643): 15.994 ms (15993.8 us) -> 197.3 GB/s of range
+t2t full G=16 run3: [timed] v7-RA G=16 blocks[0..192643): 16.049 ms (16048.7 us) -> 196.7 GB/s of range
+t2t full G=16 run4: [timed] v7-RA G=16 blocks[0..192643): 16.031 ms (16030.9 us) -> 196.9 GB/s of range
+t2t full G=32 run1: [timed] v7-RA G=32 blocks[0..192643): 17.076 ms (17075.6 us) -> 184.8 GB/s of range
+t2t full G=32 run2: [timed] v7-RA G=32 blocks[0..192643): 17.069 ms (17069.4 us) -> 184.9 GB/s of range
+t2t full G=32 run3: [timed] v7-RA G=32 blocks[0..192643): 17.060 ms (17059.5 us) -> 185.0 GB/s of range
+t2t full G=32 run4: [timed] v7-RA G=32 blocks[0..192643): 17.064 ms (17063.7 us) -> 185.0 GB/s of range
+t2t seek 1 blk run1: [timed] v7-RA G=16 blocks[50000..50001): 0.363 ms (363.3 us) -> 0.0 GB/s of range
+t2t seek 1 blk run2: [timed] v7-RA G=16 blocks[50000..50001): 0.362 ms (362.3 us) -> 0.0 GB/s of range
+t2t seek 1 blk run3: [timed] v7-RA G=16 blocks[50000..50001): 0.363 ms (362.8 us) -> 0.0 GB/s of range
+t2t seek 1 blk run4: [timed] v7-RA G=16 blocks[50000..50001): 0.363 ms (363.2 us) -> 0.0 GB/s of range
+t2t seek 100 blk run1: [timed] v7-RA G=16 blocks[50000..50100): 0.663 ms (663.4 us) -> 2.5 GB/s of range
+t2t seek 100 blk run2: [timed] v7-RA G=16 blocks[50000..50100): 0.663 ms (662.6 us) -> 2.5 GB/s of range
+t2t seek 100 blk run3: [timed] v7-RA G=16 blocks[50000..50100): 0.674 ms (673.6 us) -> 2.4 GB/s of range
+t2t seek 100 blk run4: [timed] v7-RA G=16 blocks[50000..50100): 0.662 ms (662.1 us) -> 2.5 GB/s of range
+t2t 1blk G=8 start=8000: [timed] v7-RA G=8 blocks[8000..8001): 0.450 ms (449.8 us) -> 0.0 GB/s of range
+t2t 1blk G=8 start=150000: [timed] v7-RA G=8 blocks[150000..150001): 0.341 ms (341.5 us) -> 0.0 GB/s of range
+t2t 1blk G=16 start=8000: [timed] v7-RA G=16 blocks[8000..8001): 0.417 ms (417.0 us) -> 0.0 GB/s of range
+t2t 1blk G=16 start=150000: [timed] v7-RA G=16 blocks[150000..150001): 0.307 ms (307.0 us) -> 0.1 GB/s of range
+t2t 1blk G=32 start=8000: [timed] v7-RA G=32 blocks[8000..8001): 0.387 ms (386.9 us) -> 0.0 GB/s of range
+t2t 1blk G=32 start=150000: [timed] v7-RA G=32 blocks[150000..150001): 0.285 ms (284.7 us) -> 0.1 GB/s of range
+chr1.fa LZ4 chunk=16K: ERROR Unsupported argument: "chunk_size". Did you mean "uncomp_chunk_size"?
+chr1.fa LZ4 chunk=64K: ERROR Unsupported argument: "chunk_size". Did you mean "uncomp_chunk_size"?
+chr1.fa LZ4 chunk=1024K: ERROR Unsupported argument: "chunk_size". Did you mean "uncomp_chunk_size"?
+chr1.fa Deflate chunk=16K: ERROR Unsupported argument: "chunk_size". Did you mean "uncomp_chunk_size"?
+chr1.fa Deflate chunk=64K: ERROR Unsupported argument: "chunk_size". Did you mean "uncomp_chunk_size"?
+chr1.fa Deflate chunk=1024K: ERROR Unsupported argument: "chunk_size". Did you mean "uncomp_chunk_size"?
+chr1.fa LZ4 chunk=16K: size=167640254 ratio=1.5148 decode=53.7 GB/s (median-ish of 4) bitperfect=True
+chr1.fa LZ4 chunk=64K: size=165308872 ratio=1.5361 decode=43.2 GB/s (median-ish of 4) bitperfect=True
+chr1.fa LZ4 chunk=1024K: size=164917112 ratio=1.5398 decode=5.1 GB/s (median-ish of 4) bitperfect=True
+chr1.fa Deflate chunk=16K: size=107579560 ratio=2.3604 decode=17.8 GB/s (median-ish of 4) bitperfect=True
+chr1.fa Deflate chunk=64K: size=111636134 ratio=2.2747 decode=16.6 GB/s (median-ish of 4) bitperfect=True
+chr1.fa Deflate chunk=1024K: size=111733530 ratio=2.2727 decode=3.6 GB/s (median-ish of 4) bitperfect=True
+chr1.fa Zstd chunk=16K: size=80929265 ratio=3.1377 decode=35.0 GB/s (median-ish of 4) bitperfect=True
+chr1.fa Zstd chunk=64K: size=80105109 ratio=3.1700 decode=30.5 GB/s (median-ish of 4) bitperfect=True
+t2t.fa LZ4 chunk=16K: size=2194000583 ratio=1.4386 decode=57.1 GB/s (median-ish of 4) bitperfect=True
+t2t.fa Deflate chunk=16K: size=1407394386 ratio=2.2426 decode=17.5 GB/s (median-ish of 4) bitperfect=True
+t2t.fa Zstd chunk=16K: size=1063300990 ratio=2.9684 decode=38.0 GB/s (median-ish of 4) bitperfect=True

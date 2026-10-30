@@ -1,0 +1,5 @@
+# DM check (26.10): axf min match sweep, silesia 1 MiB blocks level 3, median 9, ace-core - fewer tokens vs ratio
+MIN_MATCH=5 40.68 % 61362 tokens/block, literals 17.0 % 1 thread(s): 0.0273 s =   7775 MB/s  bit-perfect 8 thread(s): 0.0122 s =  17384 MB/s  bit-perfect 
+MIN_MATCH=8 44.95 % 35815 tokens/block, literals 31.0 % 1 thread(s): 0.0224 s =   9468 MB/s  bit-perfect 8 thread(s): 0.0122 s =  17318 MB/s  bit-perfect 
+MIN_MATCH=12 54.13 % 18028 tokens/block, literals 47.0 % 1 thread(s): 0.0192 s =  11034 MB/s  bit-perfect 8 thread(s): 0.0125 s =  16900 MB/s  bit-perfect 
+MIN_MATCH=16 61.34 % 11133 tokens/block, literals 56.8 % 1 thread(s): 0.0182 s =  11614 MB/s  bit-perfect 8 thread(s): 0.0128 s =  16545 MB/s  bit-perfect 

@@ -1,0 +1,6 @@
+# #F1 step 1 (26.10): MIN_DIST 64 + AVX2 32-byte copies; tried and dropped: 2 tokens/iteration (6431-6612 MB/s, slower), 64 B unconditional literal copy (neutral), MIN_DIST 128/256 (+0.8/+1.4 pp for +1 %), window 64 KiB (8085 MB/s but 44.70 %)
+/home/aeterna/golden/mixed/silesia.tar: 211957760 B, 203 blocks of 1048576, decode pool: contiguous ranges, median of 7
+engine            ratio     1T MB/s     8T MB/s
+axf L3 (ours)    40.68%        7637       17502  bit-perfect
+misa77 -1        42.86%        9301       17086  bit-perfect
+lz4 1.10.0       47.68%        6109       16395  bit-perfect

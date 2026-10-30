@@ -1,0 +1,25 @@
+# T-H3 (random access on the GPU, Colab Blackwell 02.10: p50 660 us) - where the time goes, ace-core 2026-10-02
+# Measured here (no card): the host side and the work one region asks for; the GPU phases come from the next card run
+# (gpu_h100_tests ra now prints launch / kernels / D2H / wait per region, rows H3ROW and H3BROW).
+phase (one region of 5000 bases, t2t.open, archive resident, plan once, pooled buffers)   p50
+  H2D                                   0 (the archive stays on the device)
+  plan                                  0 per region (plan_create once: agp::build 34 ms on the host)
+  job selection (agp::select, host)     0.5 us (p99 0.9) - not the cost
+  launches                              ~12 kernels per range call (init, fix-ups, rANS pieces per class, open DNA pack,
+                                        match, copy, status): on the card, row "launch"
+  kernels                               7 jobs: the 4 pieces of one 64 KiB literal chunk (seq: 16 384 symbols = 512
+                                        warp steps) and 3 token chunks of 64 KiB (2048 warp steps each). rANS has 32
+                                        interleaved states: one warp per chunk, the steps are sequential - 2048
+                                        dependent steps are the critical path (660 us / 2048 = ~0.3 us per step)
+  D2H, sync                             ~5 kB: on the card, rows "D2H" and "wait"
+Lever without a format change - the token chunk size at encode time (FSE_CHUNK; default bytes and the t2t.open pin
+unchanged, an encoder choice for random-access archives):
+  FSE_CHUNK   T2T open archive      CPU region p50 / p99 (1 thread)   GPU critical path
+  65 536      853 264 869 (as now)  121 / 248 us                      2048 warp steps (token chunk)
+  16 384      853 265 321 (+452 B)   90 / 158 us                       512 (token) = 512 (seq piece of the literal chunk)
+  4 096       853 939 717 (+0.08 %)  87 / 140 us                       512 (the seq piece now bounds it)
+Estimate for the card: 16 KiB token chunks cut the kernel part ~4x (660 -> ~170-200 us); below that the 64 KiB literal
+chunk's seq piece (512 steps) bounds a region, and LIT_CHUNK cannot go below 64 KiB (smaller values select the
+pre-2.1 layout). Tens of microseconds need more than 32 rANS states per piece (a format item) or a fused range
+kernel (launch overhead); CUDA Graph capture per region is rebuilt for every new range (different job sets).
+gpu_run.sh: T-H3b runs the same 10 000 regions on a 16 KiB-token-chunk archive.

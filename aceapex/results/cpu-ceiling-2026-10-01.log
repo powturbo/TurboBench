@@ -1,0 +1,45 @@
+# ace-core (OVH): CPU decode against the silicon. 2026-10-01
+## passport
+CPU AMD EPYC 4344P (Zen 4, AM5), 8 cores / 16 threads, boost to 5.39 GHz (governor schedutil), 1 socket, 1 NUMA node
+caches: L1d 32 KiB/core, L2 1 MiB/core, L3 32 MiB shared; RAM 125 GB (DDR5, AM5 = 2 channels; channel count/speed need dmidecode = root)
+ISA: AVX2, BMI2, AVX-512 F/DQ/CD/BW/VL/IFMA/VBMI/VBMI2/VNNI/BITALG/VPOPCNTDQ/BF16 (Zen 4: 512-bit ops on 256-bit units)
+THP: enabled=madvise, defrag=madvise
+## ceiling (.wk/hw/bw.cpp: 2 GiB buffers, pre-faulted, best of 5)
+threads  memcpy GB/s (traffic)  read GB/s  write GB/s
+1        17.7 (35.4)            48.8       28.7
+2        19.9 (39.9)            49.7       28.7
+4        21.3 (42.6)            48.3       28.8
+8        20.6 (41.2)            45.9       28.9
+16       20.0 (40.0)            44.8       28.9
+=> "% of ceiling" below = output GB/s / 21 GB/s (memcpy of the output size at full load)
+## phases, t2t.open (AX_PHASE_TIMES=1), before
+threads  copy+alloc  entropy  match  free   total
+1        0.296       2.129    0.234  0.117  2.808
+2        0.298       2.105    0.227  0.117  2.780   (literals on 1 thread: the token streams took the other)
+16       0.303       0.253    0.245  0.123  0.959   (serial copy of the archive + faults + munmap = 0.42 s)
+## changes (bytes of the archives unchanged; every run compared with the original)
+- compressed streams read in place (no 853 MB copy of the archive): t2t 16 threads 0.959 -> 0.622 s
+- literal stream on all threads when the token streams are < 1/2 thread's share (2 threads: lit 1 -> 2)
+- buffers >= 64 MiB 2 MiB aligned + MADV_HUGEPAGE (AX_HUGE, default 1): free 0.12 -> 0.004 s, faults per 2 MiB
+- parallel prefault of buffers >= 1 GiB when lanes > cores (AX_PREFAULT): t2t 16 threads 0.729 -> 0.608 s
+- AVX-512 rANS (AX_RANS_SIMD=512, 16 lanes/vector, vpexpandw renormalisation): t2t entropy 1 thread 1.521 -> 1.502 s,
+  16 threads 0.352 -> 0.353 s - no gain on Zen 4; kept off by default
+- bounds once per token in the match fast zone: noise (silesia 0.194 -> 0.193 s); not kept (earlier commit)
+## scaling, seconds (before = main 374e4f0 with AVX2 rANS, after = this commit); output GB/s and % of 21 GB/s for after
+archive          1        2        4        8        16       after GB/s at best (threads)
+t2t.open before  2.909    2.866    1.444    1.039    0.955
+t2t.open after   1.849    1.076    0.716    0.557    0.608    5.67 GB/s = 27 % (8)
+chr1.open before 0.221    0.224    0.112    0.085    0.086
+chr1.open after  0.142    0.084    0.057    0.048    0.069    5.29 GB/s = 25 % (8)
+chr1 before      0.268    0.265    0.131    0.094    0.094
+chr1 after       0.159    0.093    0.061    0.050    0.069    5.08 GB/s = 24 % (8)
+silesia before   0.190    0.145    0.092    0.074    0.078
+silesia after    0.141    0.067    0.053    0.039    0.043    5.43 GB/s = 26 % (8)
+16 threads (SMT) are slower than 8 on chr1 (0.058-0.069 vs 0.048-0.050 s): the 8 physical cores are the best budget here.
+## what is left (t2t.open, 16 threads, after): entropy 0.35 s (rANS 31 %, axo_dna_decode bases 23 % of 1-thread CPU),
+match 0.25 s (3.1 GB literals read + 3.1 GB written = 25 GB/s, ~60 % of the 42 GB/s traffic ceiling; does not scale
+past 1 thread), first touch of fresh buffers. Next: write the literal stream straight into the output (no 3.1 GB
+intermediate), SIMD base expansion in axo_dna_decode.
+## default profile (zstd literals, what lzbench measures): libzstd 1.4.8 (system) vs 1.5.5 (static, asm Huffman, BMI2)
+chr1 1 thread 0.184 -> 0.154 s, 8 threads 0.052 -> 0.050, 16 threads 0.065 -> 0.059; silesia 0.138 -> 0.138 / 0.040 -> 0.039
+lzbench and TurboBench build their own zstd 1.5.x; the CLI on ace-core links the system 1.4.8 (make ZSTD_CFLAGS/ZSTD_LIBS to override).

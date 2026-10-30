@@ -1,0 +1,63 @@
+{
+  "task_id": "ACEAPEX-ENCODE-BOTTLENECK-2026-07",
+  "one_line": "Speed up parallel LZ77 factorization with GLOBAL (absolute) match offsets; the suffix-array build is the dominant bottleneck (80-96% of time) and absolute offsets cost ~3 bytes/match hurting ratio. Find a faster and/or ratio-preserving factorization.",
+
+  "context": {
+    "project": "ACEAPEX — a parallel LZ77 codec whose ONE defining design choice is that back-references are stored as ABSOLUTE positions in the decompressed output (not relative sliding-window distances). This makes every block self-contained and enables block-parallel GPU/CPU decode and position-invariant random access. Decode side is already solved and fast (device-resident 221 GB/s on H100, bit-perfect). The ENCODE side is the open problem.",
+    "why_absolute_offsets": "Relative offsets force sequential decode (position i depends on decoder state from i-1). Absolute offsets break that dependency, enabling parallel decode and random access. This is the project's unique value. It must be preserved.",
+    "decode_is_done": "Not part of this task. Do not optimize decode.",
+    "hardware_available": "NVIDIA H100 80GB HBM3, CUDA 12.4; also multi-core CPU (AMD EPYC, 8+ cores, OpenMP).",
+    "must_stay_lossless": "Reconstruction must be BIT-PERFECT (verified by byte-compare / FNV / md5 against original)."
+  },
+
+  "the_problem": {
+    "goal": "Given an input byte string T[0..n-1], produce an LZ77 factorization where each match is (absolute_source_position, length) and each literal is a byte, such that greedily copying from absolute_source_position reconstructs T exactly. Optimize for BOTH: (a) encode throughput (MB/s), and (b) compression ratio (n / encoded_size).",
+    "current_pipeline": [
+      "1. Build suffix array SA of T (currently the bottleneck).",
+      "2. Compute rank = inverse SA.",
+      "3. For each position i, look at +/- W neighbors in rank order; among candidate source positions src<i, pick the one giving the longest common prefix. Emit (src, len) as ABSOLUTE offset.",
+      "4. Greedy: if best match length >= 4 emit match, else emit literal. Advance."
+    ],
+    "measured_facts_on_our_pod": {
+      "dataset": "enwik9 first 2,000,000 bytes (English text), also NA12878 fastq (genomic).",
+      "full_SA_build_libsais_CPU": "enwik9 2MB: ~39 ms (51 MB/s); fastq 2MB: ~25 ms (79 MB/s). libsais = linear-time induced sorting, single-thread.",
+      "full_SA_build_naive_thrust_GPU": "~10 ms for 500KB = 47 MB/s FLOOR (thrust comparison-sort of suffixes, O(n log n * byte-compare), deliberately naive).",
+      "SA_is_dominant": "In Shun/Zhao parallel LZ77 (OpenMP, MIT DCC2013): suffix array = 0.631s of 0.788s total (80%) single-thread; parallelizes 5.3x on 8 threads. ANSV (candidate finding) = only 5% and parallelizes 7.6x. So SA build dominates on every platform.",
+      "our_candidates_layer_parallelizes_well": "On GPU our per-position candidate scan was only 3% of time (data-parallel, each position independent). On naive CPU single-thread it was 95% (not parallelized). It IS parallelizable.",
+      "ratio_problem": "With W=64 window on enwik9 2MB: coverage 97% but ratio only ~2.23. Absolute offsets cost 2.97 bytes/match (positions span whole file, need 3-byte varints). Delta-coding consecutive absolute offsets saved only 3.5% (offsets are scattered, no local correlation). So absolute offsets are inherently bulky, hurting ratio.",
+      "reference_ratio": "Shun/Zhao with a LOCAL window (max offset ~731 on same data) produced 240423 factors on 2MB (denser factorization). Their offsets are small (local) so cheaper to code, but they LOSE global matches and cannot decode in parallel."
+    }
+  },
+
+  "the_core_tension": "Absolute offsets = parallel decode + random access (our value) BUT bulky to encode (~3 bytes each) AND require a full suffix array to find global matches (the bottleneck). Local/relative offsets = cheap to code + smaller structures needed BUT sequential decode + lost global matches. We want the benefits of BOTH: keep absolute offsets (for parallel decode) while making encode fast and ratio competitive.",
+
+  "open_questions_we_could_not_crack": [
+    "Q1: Can we AVOID building a full suffix array? Our candidate search only looks at +/-W neighbors in sorted order. Is a PARTIAL ordering (e.g. radix-sort by first k bytes, or an LCP-bounded structure) sufficient to find the same matches at much lower build cost? What k / structure preserves >95% of the coverage of a full SA?",
+    "Q2: Can absolute offsets be encoded cheaply WITHOUT losing their parallel-decode property? Delta-coding failed (3.5%). Is there a transform (e.g. reference-into-a-small-set-of-anchors, or a two-level offset = block_id + in_block_offset) that keeps offsets globally valid yet small?",
+    "Q3: What is the theoretically best encode throughput achievable on H100 for global LZ factorization at n=2MB..1GB, given SA build is memory-bound (GPU-SA literature says input sizes must stay low due to ~20n bytes memory)? Is block-splitting the input (build SA per block, factorize globally across blocks) a valid path, and what is the ratio cost of block boundaries?",
+    "Q4: Is there a fundamentally different match-finding structure (FM-index, BWT-based, hashing with global positions, minimizer-based) that yields ABSOLUTE-position matches faster than suffix-array, while staying bit-perfect and parallelizable?"
+  ],
+
+  "hard_constraints": [
+    "Matches MUST be absolute positions (not relative distances). This is non-negotiable — it is the project's identity.",
+    "Reconstruction MUST be bit-perfect lossless.",
+    "Must be parallelizable (CPU multi-core or GPU) — no inherently sequential match-finding.",
+    "Must work on real data: English text (enwik9), genomic (fastq), binary (silesia). Not synthetic-only.",
+    "Prefer using or adapting EXISTING open libraries (libsais CPU-SA, libcubwt GPU-BWT/SA, Shun/Zhao Parallel-LZ77 ANSV+LPF) over inventing from scratch."
+  ],
+
+  "success_criteria": {
+    "primary": "Encode throughput on H100 significantly above the 47 MB/s naive floor (target: is 500+ MB/s or 1+ GB/s reachable? justify with measured or well-argued numbers), while staying bit-perfect.",
+    "secondary": "Compression ratio competitive with local-window LZ (approach Shun/Zhao factor density) WHILE keeping offsets absolute. Quantify the ratio cost of globality.",
+    "deliverable": "An algorithm description + reference implementation (CUDA and/or C++/OpenMP) that (1) builds whatever match structure it needs, (2) emits absolute-offset factorization, (3) reconstructs bit-perfect, (4) reports MB/s and ratio on enwik9-2MB and fastq-2MB. Plus a clear statement of which of Q1-Q4 it answers and which remain open."
+  },
+
+  "what_we_already_ruled_out": [
+    "Delta-coding of absolute offsets: only 3.5% saving, offsets too scattered.",
+    "Naive thrust suffix-sort: works, bit-perfect, but 47 MB/s floor (O(n log n * byte-compare)).",
+    "Assuming SA is not the bottleneck: measured false — SA dominates 80-96% everywhere.",
+    "Small window W=8 vs W=64: coverage 95%->97%, ratio 2.19->2.23 — window width is NOT the main ratio lever."
+  ],
+
+  "note_to_solver": "We value HONESTY over optimism. If a path is memory-bound or ratio-lossy, say so with numbers. Negative results with clear measurement are valuable. Do not claim speedups without a bit-perfect check on real data. State assumptions explicitly."
+}

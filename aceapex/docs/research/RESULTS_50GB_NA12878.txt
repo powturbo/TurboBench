@@ -1,0 +1,12 @@
+=== 50GB NA12878 (ERR194147), range-decode v7-RA, H100, 2026-06-14 ===
+Полные 50,000,000,000 байт, 3051758 блоков x 16KB, ratio 3.99, bit-perfect (FNV x3).
+v4 целиком -> OUT OF MEMORY (50GB выход > 80GB VRAM при device-resident).
+v7-RA по диапазонам (обход VRAM-лимита):
+  chunk 0..1M    (16.4GB): 99.0 ms -> 165.5 GB/s
+  chunk 1M..2M   (16.4GB): 99.3 ms -> 165.0 GB/s
+  chunk 2M..3.05M(17.2GB): 103.7ms -> 166.2 GB/s
+  ИТОГО: 50GB за 301.7 ms -> 165.7 GB/s средняя, скорость position-invariant.
+ВЫВОД: range-decode обходит потолок VRAM single-GPU. 50GB генома на одном H100,
+стабильная скорость на всех участках. Доказывает ценность seek/chunked-архитектуры:
+файлы БОЛЬШЕ VRAM декодируются диапазонами без падения, в отличие от device-resident v4.
+4GB-fix подтверждён на максимуме (50GB сжато+декодировано bit-perfect).

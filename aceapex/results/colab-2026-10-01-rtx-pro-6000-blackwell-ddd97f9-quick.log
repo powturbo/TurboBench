@@ -1,0 +1,151 @@
+MODE QUICK (open profile on chr1 and t2t, tool + library; FULL=1 for the rest)
+== provenance 2026-10-01
+gpu NVIDIA RTX PRO 6000 Blackwell Server Edition | cc 12.0 | driver 580.82.07
+clocks max sm/mem 2430 MHz, 12481 MHz | memory 97887 MiB | power limit 600.00 W
+host AMD EPYC 9B45, 48 threads, RAM 176 GB, drive 1
+Build cuda_12.8.r12.8/compiler.35583870_0
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+commit ddd97f9
+libzstd 1.5.5
+nvcomp Version: 5.3.0.16
+head_rans_warp_emu	pass	GPU rANS warp steps (ax_rans_warp.h) == axr_decode, refill from global and from the register window (AX_OPEN_SEQ, 0 words outside it): 85 round-trips, 12 archive chunks, 245 crafted tables, 3496 mutations (127 accepted, 3626 rejected by both), 2457904 bytes, 0 mismatches
+head_open_warp_emu	pass	GPU open-pack steps (ax_open_warp.h, block rounds of 256) == axo_dna_decode, old path (cse, bases, exc) and the default k_open_cg + k_open_bases_x (3143 decodes of the latter): 40 round-trips, 38 archive chunks, 437 crafted streams, 2628 mutations (986 accepted, 2157 rejected by both), 22351557 bytes, 0 mismatches
+head_gpu_zstd_validate	pass	25 archives with zstd frames (1761 frames) pass the validation (0 refused); the saved T2T frame (verify/repro, nvCOMP 5.3 does not finish on it) passes the header check and is refused; 400 byte flips inside zstd frames: 212 archives refused, 188 accepted, 0 of them with a frame that does not decode to its size
+head_gpu_plan_emu	pass	33 archives decoded through the plan bit-perfect (0 bad; AX_VEC 16-byte paths: 1516490 unpack stores, 265779 match copies), 1320 ranges on a zeroed temp (0 bad), 0 refused by the planner, 1980 mutations (266 refused, the rest ran inside their buffers)
+head_gpu_flip_emu	pass	1000 byte flips of the streams under the plan of the intact archive (as on the device), a failed zstd frame leaving random bytes: 38165629 match steps of 43025802 allowed, 0 over the step limit, 0 copies outside a block; 464 flagged by status, 445 more by XXH3, 91 decoded to the original, 0 silent; length 2^32-16 after 100 bytes refused
+built aceapex_gpu -arch=sm_120
+built gpu_api_test (nvCOMP) and examples/gpu_decode (no nvCOMP), -arch=sm_120
+shared library libaceapex_gpu.so.1: soname: [libaceapex_gpu.so.1], API version 2.3; examples/gpu_decode linked against it
+fixture dna_open_2MiB on the GPU: exit 0, 8 MATCHES OK, 0 DIFFERS
+fixture dna_open_mixed_300K on the GPU: exit 0, 8 MATCHES OK, 0 DIFFERS
+fixture dna_open_4097B on the GPU: exit 0, 5 MATCHES OK, 0 DIFFERS
+fixture dna_openlit_300K on the GPU: exit 0, 8 MATCHES OK, 0 DIFFERS
+fixture text_open_200K on the GPU: exit 0, 5 MATCHES OK, 0 DIFFERS
+chr1.fa: from Drive
+chr1.fa: md5 9465e0f0df6e2c6eb39729c39cee5465 OK
+t2t.fa: from Drive (t2t.fa.gz)
+t2t.fa: md5 cd1e52ce400c027ed0b7ab4b9d613f5a OK
+chr1.open (AX_PROFILE=open): archive 63083287 B (== pinned), from Drive cache, CPU round-trip bit-perfect
+== gpu_api_test chr1.open
+[+0.0 s] read archive and original
+[+0.1 s] plan_create
+[+0.2 s] plan_create with ACEAPEX_GPU_VALIDATE_ZSTD
+[api] plan with ACEAPEX_GPU_VALIDATE_ZSTD 1.4 ms (+-160.5 ms: every zstd frame decoded by libzstd on 48 host threads): accepted
+[api] plan 161.8 ms on the host; temp 372.5 MB (full 371.4 MB), output 253.9 MB
+[+0.2 s] allocate and upload
+[+0.3 s] full decode
+[api] full decode: return 0, status 0, output MATCHES OK
+[+0.3 s] full decode timed
+[api] full decode on-device 1.931 ms (median of 3) -> 131.5 GB/s
+[+0.3 s] full decode + XXH3
+[+0.3 s] full decode + XXH3 timed
+[api] full decode + XXH3 check on-device 6.237 ms (median of 3; check adds 4.306 ms, +223.0 %): return 0, status 0, output MATCHES OK
+[+0.4 s] ranges
+[api] ranges: 200 of 200 windows == original (MATCHES OK); 16 KiB window 0.636 ms (median of 33)
+[api] flips refused by the plan of the flipped archive: 0 of 0
+[api] 0 byte flips in the stream half of the archive: without the hash check 0 caught by status, 0 decoded wrong with status 0, 0 harmless; with ACEAPEX_GPU_VERIFY_XXH3 0 caught, 0 silent, 0 harmless; no CUDA error
+APIROW	/content/work/chr1.open.aet	63083287	1.931	bit-perfect	200	200	0.636	0	0	0	161.8	6.237	bit-perfect	0	0	0	1.4	0
+exitapi 0 chr1.open
+example gpu_decode chr1.open (no nvCOMP): bit-perfect
+example gpu_decode chr1.open via libaceapex_gpu.so.1 (nvCOMP inside): bit-perfect
+== aceapex_gpu chr1.open
+archive /content/work/chr1.open.aet: orig=253935557 block=16384 nb=15499; 0 zstd frames (0 token, 0 literal; 0.0 MB), pieces 61.9 MB: 31 token rANS chunks, open pack seq/cse/gap/val 3585/3585/3585/3585, open plain 1; 0 raw chunks, 0 DNA chunks (zstd), 3585 open DNA chunks; streams lit/off/len/cmd = 235.0/0.0/0.0/1.9 MB
+frames: 0 bad of 0
+[warm-up] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+probe G=8: 0.365 ms on 2048 blocks
+probe G=16: 0.131 ms on 2048 blocks
+probe G=32: 0.100 ms on 2048 blocks
+chosen G=32 on NVIDIA RTX PRO 6000 Blackwell Server Edition (188 SMs)
+[sequential] H2D 1.093 + tok(rANS: 0 frames, 31 chunks) 0.359 + lit(open: 0 frames, 14341 pieces) 0.835 + unpack 0.586 + match(G=32) 0.476 = 3.350 ms -> 75.8 GB/s delivered; on-device 2.257 ms -> 112.5 GB/s
+[lit parts] zstd frames 0.000 | open pieces: seq 0.440, cse 0.100, gap 0.075, val 0.084, plain 0.461 ms
+[unpack parts] zstd DNA pack 0.000 | open: bases 0.530, case runs 0.056, exceptions 0.000 ms
+[sequential] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[AX_OPEN_SEQ=0 AX_OPEN_EXC=0] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=0] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=1] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[open variants] seq pieces 0.569 -> 0.447 ms (AX_OPEN_SEQ 0 -> 1, windowed refill, bit-perfect); unpack 0.640 ms (case 0.041 + bases 0.354 + exceptions 0.289) -> 0.595 ms (AX_OPEN_EXC 0 -> 1: case+exception positions 0.066 + bases with exceptions 0.559, bit-perfect)
+OPENVAR	/content/work/chr1.open.aet	0.569	0.447	0.640	0.595	1
+[pipeline] 4 batches, H2D overlapped with zstd: 3.007 ms -> 84.5 GB/s delivered (sequential 3.350 ms, gain 10.2%)
+[pipeline] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[h2d] 61.9 MB: pageable 2.256 ms (27.5 GB/s), pinned 1.095 ms (56.6 GB/s)
+[auto] estimated H2D 1.095 ms (61.9 MB at 56.6 GB/s pinned), on-device 2.257 ms, batches of >= 64 MB: 0 -> sequential
+RESULT OK: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, G=32, bit-perfect on all passes
+ROW	/content/work/chr1.open.aet	63083287	rANS	open	0.359	0.835	0.586	0.476	2.257	3.350	112.53	bit-perfect	0.000	0.440	0.100	0.075	0.084	0.461	0.000	0.530	0.056	0.000	3.350	27.5	56.6	0	0.000	0.000	-1	-1.000	-1.000	-1.000	0.000	-1	-1.000	-1.000
+exit 0 chr1.open
+t2t.open (AX_PROFILE=open): archive 853264869 B (== pinned), from Drive cache, CPU round-trip bit-perfect
+== gpu_api_test t2t.open
+[+0.0 s] read archive and original
+[+0.9 s] plan_create
+[+1.1 s] plan_create with ACEAPEX_GPU_VALIDATE_ZSTD
+[api] plan with ACEAPEX_GPU_VALIDATE_ZSTD 19.2 ms (+-163.5 ms: every zstd frame decoded by libzstd on 48 host threads): accepted
+[api] plan 182.7 ms on the host; temp 4732.5 MB (full 4731.5 MB), output 3156.3 MB
+[+1.1 s] allocate and upload
+[+1.6 s] full decode
+[api] full decode: return 0, status 0, output MATCHES OK
+[+1.9 s] full decode timed
+[api] full decode on-device 19.577 ms (median of 3) -> 161.2 GB/s
+[+1.9 s] full decode + XXH3
+[+2.3 s] full decode + XXH3 timed
+[api] full decode + XXH3 check on-device 85.812 ms (median of 3; check adds 66.234 ms, +338.3 %): return 0, status 0, output MATCHES OK
+[+2.5 s] ranges
+[api] ranges: 60 of 60 windows == original (MATCHES OK); 16 KiB window 0.655 ms (median of 10)
+[api] flips refused by the plan of the flipped archive: 0 of 0
+[api] 0 byte flips in the stream half of the archive: without the hash check 0 caught by status, 0 decoded wrong with status 0, 0 harmless; with ACEAPEX_GPU_VERIFY_XXH3 0 caught, 0 silent, 0 harmless; no CUDA error
+APIROW	/content/work/t2t.open.aet	853264869	19.577	bit-perfect	60	60	0.655	0	0	0	182.7	85.812	bit-perfect	0	0	0	19.2	0
+exitapi 0 t2t.open
+example gpu_decode t2t.open (no nvCOMP): bit-perfect
+example gpu_decode t2t.open via libaceapex_gpu.so.1 (nvCOMP inside): bit-perfect
+== aceapex_gpu t2t.open
+archive /content/work/t2t.open.aet: orig=3156259565 block=16384 nb=192643; 0 zstd frames (0 token, 0 literal; 0.0 MB), pieces 839.0 MB: 413 token rANS chunks, open pack seq/cse/gap/val 47212/47212/47212/47212, open plain 195; 0 raw chunks, 0 DNA chunks (zstd), 47212 open DNA chunks; streams lit/off/len/cmd = 3106.9/0.2/0.8/26.0 MB
+frames: 0 bad of 0
+[warm-up] FNV out=b4380f15fd9480a3 orig=b4380f15fd9480a3 MATCHES OK
+probe G=8: 0.238 ms on 2048 blocks
+probe G=16: 0.215 ms on 2048 blocks
+probe G=32: 0.155 ms on 2048 blocks
+chosen G=32 on NVIDIA RTX PRO 6000 Blackwell Server Edition (188 SMs)
+[sequential] H2D 14.747 + tok(rANS: 0 frames, 413 chunks) 0.650 + lit(open: 0 frames, 189043 pieces) 5.427 + unpack 8.658 + match(G=32) 5.081 = 34.563 ms -> 91.3 GB/s delivered; on-device 19.815 ms -> 159.3 GB/s
+[lit parts] zstd frames 0.000 | open pieces: seq 3.493, cse 0.751, gap 0.575, val 0.585, plain 0.416 ms
+[unpack parts] zstd DNA pack 0.000 | open: bases 8.277, case runs 0.584, exceptions 0.000 ms
+[sequential] FNV out=b4380f15fd9480a3 orig=b4380f15fd9480a3 MATCHES OK
+[AX_OPEN_SEQ=0 AX_OPEN_EXC=0] FNV out=b4380f15fd9480a3 orig=b4380f15fd9480a3 MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=0] FNV out=b4380f15fd9480a3 orig=b4380f15fd9480a3 MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=1] FNV out=b4380f15fd9480a3 orig=b4380f15fd9480a3 MATCHES OK
+[open variants] seq pieces 4.508 -> 3.487 ms (AX_OPEN_SEQ 0 -> 1, windowed refill, bit-perfect); unpack 9.988 ms (case 0.377 + bases 5.552 + exceptions 4.054) -> 8.873 ms (AX_OPEN_EXC 0 -> 1: case+exception positions 0.582 + bases with exceptions 8.277, bit-perfect)
+OPENVAR	/content/work/t2t.open.aet	4.508	3.487	9.988	8.873	1
+[pipeline] 4 batches, H2D overlapped with zstd: 34.296 ms -> 92.0 GB/s delivered (sequential 34.563 ms, gain 0.8%)
+[pipeline] FNV out=b4380f15fd9480a3 orig=b4380f15fd9480a3 MATCHES OK
+[h2d] 839.0 MB: pageable 30.938 ms (27.1 GB/s), pinned 14.758 ms (56.9 GB/s)
+[auto] estimated H2D 14.758 ms (839.0 MB at 56.9 GB/s pinned), on-device 19.815 ms, batches of >= 64 MB: 8 -> stream pipeline
+[stream-pipeline cold] FNV out=b4380f15fd9480a3 orig=b4380f15fd9480a3 MATCHES OK
+[stream-pipeline] 8 batches (largest 106.4 MB), copy stream + decode stream: 23.594 ms -> 133.8 GB/s delivered; sequential 34.563 (H2D 14.747 + on-device 19.815), gain 31.7%
+[stream-pipeline] FNV out=b4380f15fd9480a3 orig=b4380f15fd9480a3 MATCHES OK
+RESULT OK: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, G=32, bit-perfect on all passes
+ROW	/content/work/t2t.open.aet	853264869	rANS	open	0.650	5.427	8.658	5.081	19.815	34.563	159.28	bit-perfect	0.000	3.493	0.751	0.575	0.585	0.416	0.000	8.277	0.584	0.000	23.594	27.1	56.9	8	0.000	0.000	-1	-1.000	-1.000	-1.000	0.000	-1	-1.000	-1.000
+exit 0 t2t.open
+
+chr1 on NVIDIA RTX PRO 6000 Blackwell Server Edition, ms, median of 3; pipeline = chosen path (auto: stream pipeline when H2D >= on-device/2 and >= 2 batches of 64 MB, else sequential); batches 0 = sequential
+archive        bytes     tokens  literals  tok    lit    unpack  match  on-device  +H2D   pipeline  batches  GB/s    check        H2D-pageable  H2D-pinned
+chr1.open.aet  63083287  rANS    open      0.359  0.835  0.586   0.476  2.257      3.350  3.350     0        112.53  bit-perfect  27.5 GB/s     56.6 GB/s
+parts, ms: lit = zstd frames + pieces by class; unpack = zstd-pack kernels + open kernels
+archive        lit.zstd  seq    cse    gap    val    plain  un.zstdpack  bases  case   exceptions
+chr1.open.aet  0.000     0.440  0.100  0.075  0.084  0.461  0.000        0.530  0.056  0.000
+
+t2t on NVIDIA RTX PRO 6000 Blackwell Server Edition, ms, median of 3; pipeline = chosen path (auto: stream pipeline when H2D >= on-device/2 and >= 2 batches of 64 MB, else sequential); batches 0 = sequential
+archive       bytes      tokens  literals  tok    lit    unpack  match  on-device  +H2D    pipeline  batches  GB/s    check        H2D-pageable  H2D-pinned
+t2t.open.aet  853264869  rANS    open      0.650  5.427  8.658   5.081  19.815     34.563  23.594    8        159.28  bit-perfect  27.1 GB/s     56.9 GB/s
+parts, ms: lit = zstd frames + pieces by class; unpack = zstd-pack kernels + open kernels
+archive       lit.zstd  seq    cse    gap    val    plain  un.zstdpack  bases  case   exceptions
+t2t.open.aet  0.000     3.493  0.751  0.575  0.585  0.416  0.000        8.277  0.584  0.000
+TSV	rtx-pro-6000-blackwell-server-edition	chr1.open.aet	63083287	rANS	open	0.359	0.835	0.586	0.476	2.257	3.350	112.53	bit-perfect	0.000	0.440	0.100	0.075	0.084	0.461	0.000	0.530	0.056	0.000	3.350	27.5	56.6	0	0.000	0.000	-1	-1.000	-1.000	-1.000	0.000	-1	-1.000	-1.000
+TSV	rtx-pro-6000-blackwell-server-edition	t2t.open.aet	853264869	rANS	open	0.650	5.427	8.658	5.081	19.815	34.563	159.28	bit-perfect	0.000	3.493	0.751	0.575	0.585	0.416	0.000	8.277	0.584	0.000	23.594	27.1	56.9	8	0.000	0.000	-1	-1.000	-1.000	-1.000	0.000	-1	-1.000	-1.000
+api chr1.open: library 1.931 ms vs tool 2.257 ms on-device (-14.4 %), bit-perfect, ranges 200/200 == original, 16 KiB window 0.636 ms, flips caught/silent/harmless 0/0/0; with XXH3 check 6.237 ms (+4.306 ms), bit-perfect, flips 0/0/0; plan with VALIDATE_ZSTD 1.4 ms, flips refused by the plan 0
+api t2t.open: library 19.577 ms vs tool 19.815 ms on-device (-1.2 %), bit-perfect, ranges 60/60 == original, 16 KiB window 0.655 ms, flips caught/silent/harmless 0/0/0; with XXH3 check 85.812 ms (+66.235 ms), bit-perfect, flips 0/0/0; plan with VALIDATE_ZSTD 19.2 ms, flips refused by the plan 0
+archives on the GPU: bit-perfect 2 of 2 (exit 0: 2); emulators 2/2, fixtures 5/5
+C ABI: 2 of 2 archives bit-perfect with every range; plan emulator 1/1
+steps over the time limit: 0
+RESULT: all passes bit-perfect on NVIDIA RTX PRO 6000 Blackwell Server Edition
+== SUMMARY == 2026-10-01T12:52:16Z
+commit ddd97f9 | MODE QUICK | NVIDIA RTX PRO 6000 Blackwell Server Edition
+chr1.open: library 1.931 ms (131.5 GB/s), tool 2.257 ms; seq 0.440, unpack 0.586, match 0.476 ms; bit-perfect; variants seq 0.569->0.447, unpack 0.640->0.595 (EXC)
+t2t.open: library 19.577 ms (161.2 GB/s), tool 19.815 ms; seq 3.493, unpack 8.658, match 5.081 ms; bit-perfect; variants seq 4.508->3.487, unpack 9.988->8.873 (EXC)
+verdict PASSED

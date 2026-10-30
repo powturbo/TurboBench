@@ -1,0 +1,8 @@
+HEAD	verify/judges/HEAD.sh	working tree: contract + 200-region judge (what CI runs)
+# tag	judge	note
+paper6-v1	verify/judges/paper6-v1.sh	Paper 6 contract, 32 checks
+paper5-v1	verify/judges/paper5-v1.sh	Paper 5 contract, 17 pass 6 skipped without GPU
+v4.0	verify/judges/v4.0.sh	Paper 4 tag: build, round-trips, GPU figures await a CUDA host
+v3.0	verify/judges/v3.0.sh	Paper 3 tag
+v2.0	verify/judges/v2.0.sh	Paper 2 tag; lzbench figures need ~/lzbench
+v1.0.0	verify/judges/v1.0.0.sh	Paper 1 tag (first stable release, lzbench PR 276/277)

@@ -1,0 +1,13 @@
+# F1-DM step log (26.10, ace-core, silesia 1 MiB blocks, median of 7; each line one step, negatives included)
+L3 greedy/lazy MIN_MATCH 5 MIN_DIST 64: 40.68 %, 61k tok/MiB, 1T 7637, 8T 17502 (fair harness)
+L4 optimal parse DEPTH 64, lambda 0/2/4/8 (machine idle): 38.97 %/61.6k/7706/15948 | 40.05 %/47.3k/8581/16105 | 43.52 %/33.3k/9435/15943 | 51.08 %/18.6k/10902/15781
+L4 DEPTH 64 lambda 2.5/3/3.5: 41.21 %/41.3k/8918 | 41.21 %/41.3k/9140 | 43.52 %/33.3k/6437 (noisy)
+MIN_DIST 32 vs 64 at L4 (DEPTH 64/256): 32 slightly denser (-0.2 pp) and slower (8452 vs 8585 at lambda 2) -> keep 64
+NOISY (verify.sh running, load 13, discarded): DEPTH 1024 lambda 2.25/2.5/2.75 identical archives 40.18 % gave 8794/8076/8923
+CLEAN standalone (load 0.04):
+MD64 DEPTH=256 lambda=2 39.36 % (encode 16 threads 14.30 s = 15 MB/s); 46466 tokens/block, literals 21.4 % 1 thread(s): 0.0233 s =   9088 MB/s   8 thread(s): 0.0130 s =  16360 MB/s   
+MD64 DEPTH=256 lambda=2.5 40.46 % (encode 16 threads 14.59 s = 15 MB/s); 40825 tokens/block, literals 24.6 % 1 thread(s): 0.0235 s =   9024 MB/s   8 thread(s): 0.0125 s =  17008 MB/s   
+MD64 DEPTH=512 lambda=2 39.20 % (encode 16 threads 24.21 s = 9 MB/s); 46212 tokens/block, literals 21.3 % 1 thread(s): 0.0233 s =   9088 MB/s   8 thread(s): 0.0127 s =  16666 MB/s   
+MD64 DEPTH=512 lambda=2.5 40.28 % (encode 16 threads 25.13 s = 8 MB/s); 40641 tokens/block, literals 24.5 % 1 thread(s): 0.0222 s =   9546 MB/s   8 thread(s): 0.0128 s =  16576 MB/s   
+MD64 DEPTH=1024 lambda=2 39.11 % (encode 16 threads 41.50 s = 5 MB/s); 46036 tokens/block, literals 21.3 % 1 thread(s): 0.0230 s =   9201 MB/s   8 thread(s): 0.0127 s =  16726 MB/s   
+MD64 DEPTH=1024 lambda=2.5 40.18 % (encode 16 threads 41.15 s = 5 MB/s); 40508 tokens/block, literals 24.5 % 1 thread(s): 0.0231 s =   9158 MB/s   8 thread(s): 0.0126 s =  16827 MB/s   

@@ -1,0 +1,23 @@
+# The exact change in aceapex_depth.cpp
+
+Function `min_match_len(dist)` — the minimum match length the encoder will emit,
+as a function of match distance. Longer required lengths for larger distances,
+because a far match needs a longer run to pay for its larger offset encoding.
+
+```diff
+ static inline uint32_t min_match_len(uint32_t dist) {
+-    if (dist < 128)     return 6;
+-    if (dist < 16384)   return 8;
+-    if (dist < 2097152) return 10;
+-    return 12;
++    if (dist < 128)     return 12;
++    if (dist < 16384)   return 16;
++    if (dist < 2097152) return 24;
++    return 32;
+ }
+```
+
+Nothing else changes. The decode kernel, the container format, and every other part
+of the pipeline are untouched. An old decoder reads the new stream bit-perfect
+(verified: `aceapex_depth` built from the baseline source decodes a `depth_v2`-encoded
+file with `cmp` returning identical).

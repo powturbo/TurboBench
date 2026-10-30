@@ -1,0 +1,138 @@
+Mounted at /content/drive
+== provenance 2026-10-01
+gpu NVIDIA RTX PRO 6000 Blackwell Server Edition | cc 12.0 | driver 580.82.07
+clocks max sm/mem 2430 MHz, 12481 MHz | memory 97887 MiB | power limit 600.00 W
+host AMD EPYC 9B45, 48 threads, RAM 176 GB, drive 1
+Build cuda_12.8.r12.8/compiler.35583870_0
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+commit f2e16b7
+libzstd 1.5.5
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+nvcomp Version: 5.3.0.16
+built aceapex_gpu sm_120
+head_rans_warp_emu	pass	GPU rANS warp steps (ax_rans_warp.h) == axr_decode: 85 round-trips, 12 archive chunks, 245 crafted tables, 3496 mutations (127 accepted, 3626 rejected by both), 2457904 bytes, 0 mismatches
+head_open_warp_emu	pass	GPU open-pack steps (ax_open_warp.h, block rounds of 256) == axo_dna_decode: 40 round-trips, 38 archive chunks, 437 crafted streams, 2628 mutations (986 accepted, 2157 rejected by both), 22351557 bytes, 0 mismatches
+head_gpu_plan_emu	pass	33 archives decoded through the plan bit-perfect (0 bad), 1320 ranges on a zeroed temp (0 bad), 0 refused by the planner, 1980 mutations (247 refused, the rest ran inside their buffers)
+built gpu_api_test (nvCOMP) and examples/gpu_decode (no nvCOMP), -arch=sm_120
+fixture dna_open_2MiB on the GPU: exit 0, 5 MATCHES OK, 0 DIFFERS
+fixture dna_open_mixed_300K on the GPU: exit 0, 5 MATCHES OK, 0 DIFFERS
+fixture dna_open_4097B on the GPU: exit 0, 5 MATCHES OK, 0 DIFFERS
+fixture dna_openlit_300K on the GPU: exit 0, 5 MATCHES OK, 0 DIFFERS
+fixture text_open_200K on the GPU: exit 0, 5 MATCHES OK, 0 DIFFERS
+chr1.fa: from Drive
+chr1.fa: md5 9465e0f0df6e2c6eb39729c39cee5465 OK
+t2t.fa: from Drive (t2t.fa.gz)
+t2t.fa: md5 cd1e52ce400c027ed0b7ab4b9d613f5a OK
+chr1.zstd (FSE_CHUNK=4096): archive 60442704 B (== pinned), from Drive cache, CPU round-trip bit-perfect
+chr1.rans (AX_TOK=rans): archive 60424124 B (== pinned), from Drive cache, CPU round-trip bit-perfect
+chr1.open (AX_PROFILE=open): archive 63083287 B (== pinned), from Drive cache, CPU round-trip bit-perfect
+chr1.chain (AX_PROFILE=open AX_ENC=chain): archive 67975888 B (== pinned), from Drive cache, CPU round-trip bit-perfect
+chr1.dense2 lane emulator: byte table: 3586 chunks (0 with K > 16 by binary search), 234967363 bytes, 0 differ, 0 framing errors -> MATCHES nibble table: 3586 chunks (0 with K > 16 by binary search), 234967363 bytes, 0 differ, 0 framing errors -> MATCHES cum compare: 3586 chunks (0 with K > 16 by binary search), 234967363 bytes, 0 differ, 0 framing errors -> MATCHES
+chr1.dense2 (open + rans1_seg order-1 literals, 32 segments/chunk, estimate = open - literal stream + AR2L file): 62859092 B, AR2L 61818303 B
+chr1.dense (open + rans1_v4 order-1 literals, estimate = open - literal stream + AR1L file): 62757195 B, AR1L 61716406 B
+== gpu_api_test chr1.zstd
+[api] plan 167.8 ms on the host; temp 810.8 MB (full 809.7 MB), output 253.9 MB
+[api] full decode: return 0, status 0, output MATCHES OK
+[api] full decode on-device 3.297 ms (median of 3) -> 77.0 GB/s
+[api] full decode + XXH3 check on-device 13.267 ms (median of 3; check adds 9.970 ms, +302.4 %): return 0, status 0, output MATCHES OK
+[api] ranges: 200 of 200 windows == original (MATCHES OK); 16 KiB window 1.105 ms (median of 33)
+[api] 20 byte flips in the stream half of the archive: without the hash check 0 caught by status, 20 decoded wrong with status 0, 0 harmless; with ACEAPEX_GPU_VERIFY_XXH3 20 caught, 0 silent, 0 harmless; no CUDA error
+APIROW	/content/work/chr1.zstd.aet	60442704	3.297	bit-perfect	200	200	1.105	0	20	0	167.8	13.267	bit-perfect	20	0	0
+exitapi 0 chr1.zstd
+== aceapex_gpu chr1.zstd
+archive /content/work/chr1.zstd.aet: orig=253935557 block=16384 nb=15499; 14715 zstd frames (458 token, 14257 literal; 59.3 MB), pieces 0.0 MB: 0 token rANS chunks, open pack seq/cse/gap/val 0/0/0/0, open plain 0; 0 raw chunks, 3557 DNA chunks (zstd), 0 open DNA chunks; streams lit/off/len/cmd = 235.0/0.0/0.0/1.9 MB
+frames: 0 bad of 14715
+[warm-up] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+probe G=8: 0.584 ms on 2048 blocks
+probe G=16: 0.275 ms on 2048 blocks
+probe G=32: 0.123 ms on 2048 blocks
+chosen G=32 on NVIDIA RTX PRO 6000 Blackwell Server Edition (188 SMs)
+[sequential] H2D 1.047 + tok(zstd: 458 frames, 0 chunks) 0.213 + lit(zstd: 14257 frames, 0 pieces) 1.892 + unpack 0.570 + match(G=32) 0.823 = 4.545 ms -> 55.9 GB/s delivered; on-device 3.498 ms -> 72.6 GB/s
+[lit parts] zstd frames 1.871 | open pieces: seq 0.000, cse 0.000, gap 0.000, val 0.000, plain 0.000 ms
+[unpack parts] zstd DNA pack 0.569 | open: bases 0.000, case runs 0.000, exceptions 0.000 ms
+[sequential] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[pipeline] 4 batches, H2D overlapped with zstd: 6.685 ms -> 38.0 GB/s delivered (sequential 4.545 ms, gain -47.1%)
+[pipeline] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[h2d] 59.3 MB: pageable 2.097 ms (28.3 GB/s), pinned 1.049 ms (56.6 GB/s)
+[auto] estimated H2D 1.049 ms (59.3 MB at 56.6 GB/s pinned), on-device 3.498 ms, batches of >= 64 MB: 0 -> sequential
+RESULT OK: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, G=32, bit-perfect on all passes
+ROW	/content/work/chr1.zstd.aet	60442704	zstd	zstd	0.213	1.892	0.570	0.823	3.498	4.545	72.60	bit-perfect	1.871	0.000	0.000	0.000	0.000	0.000	0.569	0.000	0.000	0.000	4.545	28.3	56.6	0	0.000	0.000	-1	-1.000	-1.000	-1.000	0.000	-1	-1.000	-1.000
+exit 0 chr1.zstd
+== aceapex_gpu chr1.rans
+archive /content/work/chr1.rans.aet: orig=253935557 block=16384 nb=15499; 14257 zstd frames (0 token, 14257 literal; 59.3 MB), pieces 0.0 MB: 31 token rANS chunks, open pack seq/cse/gap/val 0/0/0/0, open plain 0; 0 raw chunks, 3557 DNA chunks (zstd), 0 open DNA chunks; streams lit/off/len/cmd = 235.0/0.0/0.0/1.9 MB
+frames: 0 bad of 14257
+[warm-up] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+probe G=8: 0.587 ms on 2048 blocks
+probe G=16: 0.276 ms on 2048 blocks
+probe G=32: 0.122 ms on 2048 blocks
+chosen G=32 on NVIDIA RTX PRO 6000 Blackwell Server Edition (188 SMs)
+[sequential] H2D 1.046 + tok(rANS: 0 frames, 31 chunks) 0.293 + lit(zstd: 14257 frames, 0 pieces) 1.890 + unpack 0.567 + match(G=32) 0.832 = 4.628 ms -> 54.9 GB/s delivered; on-device 3.583 ms -> 70.9 GB/s
+[lit parts] zstd frames 1.887 | open pieces: seq 0.000, cse 0.000, gap 0.000, val 0.000, plain 0.000 ms
+[unpack parts] zstd DNA pack 0.568 | open: bases 0.000, case runs 0.000, exceptions 0.000 ms
+[sequential] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[pipeline] 4 batches, H2D overlapped with zstd: 7.031 ms -> 36.1 GB/s delivered (sequential 4.628 ms, gain -51.9%)
+[pipeline] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[h2d] 59.3 MB: pageable 2.064 ms (28.7 GB/s), pinned 1.048 ms (56.6 GB/s)
+[auto] estimated H2D 1.048 ms (59.3 MB at 56.6 GB/s pinned), on-device 3.583 ms, batches of >= 64 MB: 0 -> sequential
+RESULT OK: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, G=32, bit-perfect on all passes
+ROW	/content/work/chr1.rans.aet	60424124	rANS	zstd	0.293	1.890	0.567	0.832	3.583	4.628	70.88	bit-perfect	1.887	0.000	0.000	0.000	0.000	0.000	0.568	0.000	0.000	0.000	4.628	28.7	56.6	0	0.000	0.000	-1	-1.000	-1.000	-1.000	0.000	-1	-1.000	-1.000
+exit 0 chr1.rans
+== gpu_api_test chr1.open
+[api] plan 121.1 ms on the host; temp 353.9 MB (full 352.8 MB), output 253.9 MB
+[api] full decode: return 0, status 0, output MATCHES OK
+[api] full decode on-device 2.454 ms (median of 3) -> 103.5 GB/s
+[api] full decode + XXH3 check on-device 12.304 ms (median of 3; check adds 9.850 ms, +401.3 %): return 0, status 0, output MATCHES OK
+[api] ranges: 200 of 200 windows == original (MATCHES OK); 16 KiB window 0.673 ms (median of 33)
+[api] 20 byte flips in the stream half of the archive: without the hash check 20 caught by status, 0 decoded wrong with status 0, 0 harmless; with ACEAPEX_GPU_VERIFY_XXH3 20 caught, 0 silent, 0 harmless; no CUDA error
+APIROW	/content/work/chr1.open.aet	63083287	2.454	bit-perfect	200	200	0.673	20	0	0	121.1	12.304	bit-perfect	20	0	0
+exitapi 0 chr1.open
+example gpu_decode chr1.open (no nvCOMP): bit-perfect
+== aceapex_gpu chr1.open
+archive /content/work/chr1.open.aet: orig=253935557 block=16384 nb=15499; 0 zstd frames (0 token, 0 literal; 0.0 MB), pieces 61.9 MB: 31 token rANS chunks, open pack seq/cse/gap/val 3585/3585/3585/3585, open plain 1; 0 raw chunks, 0 DNA chunks (zstd), 3585 open DNA chunks; streams lit/off/len/cmd = 235.0/0.0/0.0/1.9 MB
+frames: 0 bad of 0
+[warm-up] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+probe G=8: 0.597 ms on 2048 blocks
+probe G=16: 0.278 ms on 2048 blocks
+probe G=32: 0.123 ms on 2048 blocks
+chosen G=32 on NVIDIA RTX PRO 6000 Blackwell Server Edition (188 SMs)
+[sequential] H2D 1.093 + tok(rANS: 0 frames, 31 chunks) 0.350 + lit(open: 0 frames, 14341 pieces) 0.997 + unpack 0.619 + match(G=32) 0.834 = 3.893 ms -> 65.2 GB/s delivered; on-device 2.800 ms -> 90.7 GB/s
+[lit parts] zstd frames 0.000 | open pieces: seq 0.555, cse 0.098, gap 0.070, val 0.080, plain 0.570 ms
+[unpack parts] zstd DNA pack 0.000 | open: bases 0.314, case runs 0.033, exceptions 0.272 ms
+[sequential] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[pipeline] 4 batches, H2D overlapped with zstd: 3.543 ms -> 71.7 GB/s delivered (sequential 3.893 ms, gain 9.0%)
+[pipeline] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[h2d] 61.9 MB: pageable 2.160 ms (28.7 GB/s), pinned 1.091 ms (56.8 GB/s)
+[auto] estimated H2D 1.091 ms (61.9 MB at 56.8 GB/s pinned), on-device 2.800 ms, batches of >= 64 MB: 0 -> sequential
+[dense-lit] /content/work/chr1.r1: 61716406 B, 3586 chunks (0 raw), order-1 rANS 4 lines x checkpoints: lit 4.198 ms against this archive's lit 0.997 + unpack 0.619 ms; literal stream MATCHES (0 of 234967363 bytes differ, 0 framing errors); on-device estimate tok 0.350 + lit 4.198 + match 0.834 = 5.381 ms -> 47.2 GB/s
+[dense2-lit] /content/work/chr1.r2: 61818303 B, 3586 chunks (0 raw, 0 with K > 16 up to 0 via binary search), K max 14 in the rest; order-1 rANS 32 segments/chunk: lit byte table 7.314 ms (57344 B shared), nibble table 3.898 ms (28672 B), cum compare 1.279 ms (no table) against this archive's lit 0.997 + unpack 0.619 = 1.617 ms (-1 = does not fit this GPU's shared memory); literal stream MATCHES (differing bytes 0 / 0 / 0, framing errors 0 / 0 / 0); on-device estimate tok 0.350 + lit 1.279 + match 0.834 = 2.462 ms -> 103.1 GB/s
+RESULT OK: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, G=32, bit-perfect on all passes
+ROW	/content/work/chr1.open.aet	63083287	rANS	open	0.350	0.997	0.619	0.834	2.800	3.893	90.68	bit-perfect	0.000	0.555	0.098	0.070	0.080	0.570	0.000	0.314	0.033	0.272	3.893	28.7	56.8	0	4.198	5.381	0	7.314	3.898	1.279	2.462	0	-1.000	-1.000
+exit 0 chr1.open
+== aceapex_gpu chr1.chain
+archive /content/work/chr1.chain.aet: orig=253935557 block=16384 nb=15499; 0 zstd frames (0 token, 0 literal; 0.0 MB), pieces 66.9 MB: 255 token rANS chunks, open pack seq/cse/gap/val 2935/2935/2935/2935, open plain 8; 1 raw chunks, 0 DNA chunks (zstd), 2935 open DNA chunks; streams lit/off/len/cmd = 192.8/6.0/0.1/10.6 MB
+frames: 0 bad of 0
+[warm-up] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+probe G=8: 2.100 ms on 2048 blocks
+probe G=16: 1.043 ms on 2048 blocks
+probe G=32: 0.552 ms on 2048 blocks
+chosen G=32 on NVIDIA RTX PRO 6000 Blackwell Server Edition (188 SMs)
+[sequential] H2D 1.178 + tok(rANS: 0 frames, 255 chunks) 0.926 + lit(open: 0 frames, 11748 pieces) 0.953 + unpack 0.499 + match(G=32) 1.343 = 4.899 ms -> 51.8 GB/s delivered; on-device 3.721 ms -> 68.2 GB/s
+[lit parts] zstd frames 0.000 | open pieces: seq 0.307, cse 0.086, gap 0.068, val 0.047, plain 0.586 ms
+[unpack parts] zstd DNA pack 0.000 | open: bases 0.256, case runs 0.031, exceptions 0.217 ms
+[sequential] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[pipeline] 4 batches, H2D overlapped with zstd: 3.954 ms -> 64.2 GB/s delivered (sequential 4.899 ms, gain 19.3%)
+[pipeline] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[h2d] 66.9 MB: pageable 2.371 ms (28.2 GB/s), pinned 1.179 ms (56.7 GB/s)
+[auto] estimated H2D 1.179 ms (66.9 MB at 56.7 GB/s pinned), on-device 3.721 ms, batches of >= 64 MB: 0 -> sequential
+RESULT OK: NVIDIA RTX PRO 6000 Blackwell Server Edition, 188 SMs, G=32, bit-perfect on all passes
+ROW	/content/work/chr1.chain.aet	67975888	rANS	open	0.926	0.953	0.499	1.343	3.721	4.899	68.25	bit-perfect	0.000	0.307	0.086	0.068	0.047	0.586	0.000	0.256	0.031	0.217	4.899	28.2	56.7	0	0.000	0.000	-1	-1.000	-1.000	-1.000	0.000	-1	-1.000	-1.000
+exit 0 chr1.chain
+t2t.zstd (FSE_CHUNK=4096): archive 822393156 B (== pinned), from Drive cache, CPU round-trip bit-perfect
+t2t.rans (AX_TOK=rans): archive 822531418 B (== pinned), from Drive cache, CPU round-trip bit-perfect
+t2t.open (AX_PROFILE=open): archive 853264869 B (== pinned), from Drive cache, CPU round-trip bit-perfect
+t2t.chain (AX_PROFILE=open AX_ENC=chain): archive 887641942 B (== pinned), from Drive cache, CPU round-trip bit-perfect
+t2t.dense2 lane emulator: byte table: 47407 chunks (25 with K > 16 by binary search), 3106854363 bytes, 0 differ, 0 framing errors -> MATCHES nibble table: 47407 chunks (25 with K > 16 by binary search), 3106854363 bytes, 0 differ, 0 framing errors -> MATCHES cum compare: 47407 chunks (25 with K > 16 by binary search), 3106854363 bytes, 0 differ, 0 framing errors -> MATCHES
+t2t.dense2 (open + rans1_seg order-1 literals, 32 segments/chunk, estimate = open - literal stream + AR2L file): 834683940 B, AR2L 819713974 B
+t2t.dense (open + rans1_v4 order-1 literals, estimate = open - literal stream + AR1L file): 833384701 B, AR1L 818414735 B
+== gpu_api_test t2t.zstd
+[log as received ends here: the T2T part and the final verdict are missing]

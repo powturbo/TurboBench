@@ -1,0 +1,24 @@
+# T-H5 data loader - ace-core 2026-10-02 (no card): the GPU path judged on the CPU, the CPU rows measured
+# GPU emulator (scripts/gpu_windows_emu.cpp): the device selection replayed from the plan, jobs + blocks by the plan executor, every window == original
+## t2t.open (16 KiB token chunks, 853 265 321 B)
+[h5-emu] 256 x 1024: 270 blocks (4.4 MB of slots), 1566 rANS + 324 open + 0 stored jobs, selection 398 us, == original
+[h5-emu] 4096 x 1024: 4293 blocks (70.3 MB of slots), 20874 rANS + 4832 open + 0 stored jobs, selection 882 us, == original
+[h5-emu] 65536 x 1024: 58505 blocks (958.5 MB of slots), 157162 rANS + 38833 open + 0 stored jobs, selection 2738 us, == original
+[h5-emu] 256 x 8192: 392 blocks (6.4 MB of slots), 1684 rANS + 353 open + 0 stored jobs, selection 401 us, == original
+[h5-emu] 4096 x 8192: 6044 blocks (99.0 MB of slots), 22638 rANS + 5278 open + 0 stored jobs, selection 973 us, == original
+[h5-emu] 65536 x 8192: 76890 blocks (1259.8 MB of slots), 161794 rANS + 39992 open + 0 stored jobs, selection 2858 us, == original
+[h5-emu] 256 x 32768: 768 blocks (12.6 MB of slots), 2063 rANS + 447 open + 0 stored jobs, selection 403 us, == original
+[h5-emu] 4096 x 32768: 11887 blocks (194.8 MB of slots), 28003 rANS + 6609 open + 0 stored jobs, selection 1048 us, == original
+## chr1.open: claim head_gpu_windows_emu (same 8 batches)
+## CPU loader: aceapex_decompress_region per window (1 thread: one batch; 16 threads: median of 20 batches), 1 % compared; no card here, so no H2D
+[dl] W  1024 n   256: CPU 1 t     9455 w/s, 16 t     83253 w/s | 1 % checked == original
+[dl] W  1024 n  4096: CPU 1 t     9977 w/s, 16 t     87219 w/s | 1 % checked == original
+[dl] W  1024 n 65536: CPU 1 t     9913 w/s, 16 t     84996 w/s | 1 % checked == original
+[dl] W  8192 n   256: CPU 1 t     8911 w/s, 16 t     77246 w/s | 1 % checked == original
+[dl] W  8192 n  4096: CPU 1 t     9068 w/s, 16 t     82692 w/s | 1 % checked == original
+[dl] W  8192 n 65536: CPU 1 t     9434 w/s, 16 t     81994 w/s | 1 % checked == original
+[dl] W 32768 n   256: CPU 1 t     7902 w/s, 16 t     69995 w/s | 1 % checked == original
+[dl] W 32768 n  4096: CPU 1 t     7585 w/s, 16 t     73866 w/s | 1 % checked == original
+[dl] W 32768 n 65536: CPU 1 t     7651 w/s, 16 t     72925 w/s | 1 % checked == original
+# GPU rows (windows/s, GB/s, batch p50/p99, host time), CPU + H2D and the speed-up: T-H5 on the card (gpu_run.sh, HTESTS=1 or ONE)
+# Colab RTX PRO 6000 Blackwell, b024296 (verdict PASSED, T-H5 9/9 ok): host time of a windows call, per batch: 32-34 us (launches only)

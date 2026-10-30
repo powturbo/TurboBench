@@ -1,0 +1,15 @@
+# perf gate 2026-10-01T15:23:37Z, commit 0752427, AMD EPYC 4344P 8-Core Processor, median of 5, tolerance 5 %
+archive	profile	threads	base_s	now_s	change	GB/s	verdict
+chr1	default	1	0.1803	0.1806	+0.2%	1.41	OK
+chr1	default	0	0.0646	0.0640	-0.9%	3.97	OK
+chr1	open	1	0.1333	0.1340	+0.5%	1.90	OK
+chr1	open	0	0.0569	0.0570	+0.2%	4.46	OK
+t2t	default	1	2.4866	2.4966	+0.4%	1.26	OK
+t2t	default	0	0.6548	0.6535	-0.2%	4.83	OK
+t2t	open	1	1.7909	1.8044	+0.8%	1.75	OK
+t2t	open	0	0.6069	0.6093	+0.4%	5.18	OK
+silesia	default	1	0.1411	0.1403	-0.6%	1.51	OK
+silesia	default	0	0.0421	0.0420	-0.2%	5.05	OK
+silesia	open	1	0.1270	0.1274	+0.3%	1.66	OK
+silesia	open	0	0.0409	0.0403	-1.5%	5.26	OK
+perf gate: PASS; results/perf-gate-2026-10-01-0752427.log

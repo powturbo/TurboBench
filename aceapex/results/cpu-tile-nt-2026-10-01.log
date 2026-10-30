@@ -1,0 +1,24 @@
+# CPU decode: literal tiles (AX_LIT_TILE) + non-temporal output (AX_NT) on ace-core (EPYC 4344P, 8 cores / 16 threads), 2026-10-01
+# median of 5 (perf_bench), every run compared with the original; before = AX_LIT_TILE=0 AX_NT=0 (same binary), after = defaults
+# tau = bytes through memory per (archive + output) byte by the model (perf_bench header); dram_GB = L1D fills from DRAM (demand +
+# L1 HW prefetch, Zen 4 core counters) during one decode - a lower bound of the reads (L2-prefetcher fills are not in it)
+# silesia.default: literal chunks of 20 MB - not tiled (tiles only for chunks <= 256 KiB); its tau 'after' is the model's, not the path's
+archive threads | before s tau dram_GB | after s tau dram_GB | change
+t2t.open 1 | 1.8062 4.13 3.87 | 1.5871 1.81 2.92 | -12.1%
+t2t.open 8 | 0.5554 4.13 8.87 | 0.2286 1.02 0.44 | -58.8%
+t2t.default 1 | 2.2215 4.13 4.01 | 1.9648 1.82 2.32 | -11.6%
+t2t.default 8 | 0.5965 4.13 8.95 | 0.2840 1.02 0.62 | -52.4%
+chr1.open 1 | 0.1355 4.04 0.30 | 0.1177 1.82 0.21 | -13.1%
+chr1.open 8 | 0.0466 4.04 0.66 | 0.0237 1.02 0.05 | -49.1%
+chr1.default 1 | 0.1575 4.08 0.30 | 0.1391 1.83 0.16 | -11.7%
+chr1.default 8 | 0.0500 4.08 0.67 | 0.0256 1.02 0.07 | -48.8%
+silesia.open 1 | 0.1306 2.89 0.10 | 0.1227 1.90 0.06 | -6.0%
+silesia.open 8 | 0.0334 2.89 0.30 | 0.0264 1.19 0.09 | -21.0%
+silesia.default 1 | 0.1396 2.87 0.10 | 0.1487 2.00 0.12 | +6.5%
+silesia.default 8 | 0.0380 2.87 0.28 | 0.0381 1.24 0.25 | +0.3%
+# silesia.default 1 thread, repeated: before 0.1385/0.1399/0.1395 s, after 0.1392/0.1392/0.1394 s (the +6.5 % above is noise)
+# tiles per group AX_TILE_CHUNKS (8 threads, after the shared-chunk reuse): t2t.open 4/8/16/32 = 0.244/0.242/0.242/0.239 s - default 8 (0.5 MiB)
+# NT threshold (8 threads, tiles on): lit share >= 0 / 0.5 / 0.9: t2t.open 0.228/0.227/0.228 (off 0.241), silesia.open 0.0274/0.0276/0.0260 (off 0.0264)
+#   1 thread: NT cost up to +2.5 % (t2t.default) -> NT only for budgets >= 4 (AX_NT_THREADS), lit share >= 0.9, outputs >= 64 MiB
+# default budget: physical cores (chr1 8 vs 16 threads 0.028 vs 0.034 s, silesia 0.038 vs 0.042), all threads for outputs >= 1 GiB (T2T 0.238 vs 0.209)
+# floor by the model with NT (tau 1.02): T2T (0.85 + 3.16 GB) x 1.02 / 29 GB/s write ~ 0.14 s; now 0.229 s on 8 threads, 0.201 s on 16

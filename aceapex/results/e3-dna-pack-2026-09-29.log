@@ -1,0 +1,27 @@
+# E3 2026-09-29 ace-core (libzstd 1.4.8), scripts/e3_dna_pack_profile.cpp, gpu-rans
+# chr1 hg38 (md5 9465e0f0...); T4 profile = ACEAPEX_BS=16384 LIT_CHUNK=65536 FSE_CHUNK=4096; default = no env
+# rANS pieces carry ~170 B of header each (bitmap, 32 states, W, table): small per-chunk streams pay it 2935 times
+
+## T4 profile
+E3 chr1.zstd.aet: archive 69473882 B, literal stream 55690168 B, 2943 chunks of 65536 (DNA 2935, plain 8), exceptions 4429303
+stream         zstd          raw         rans         best    alt(best)   best-zstd  alt-zstd
+seq        47093356     48080348     47763388     47732615            -     +0.920% 
+cse         4137054     24040174      5902452      5902452      3373194     +2.541% -1.0994%
+gap         4143524     17717212      4378946      4378946      2621891     +0.339% -2.1902%
+val           55935      4429303       487232       487232            -     +0.621% 
+plain        175096       524288       160923       160923            -     -0.020% 
+exc.run (replaces gap+val): 3595104 vs zstd 4199459 (-0.870% of archive)
+zstd-free pack (seq best, cse.rle, exc.run, plain best): 54861836 vs zstd 55604965 (-1.070% of archive)
+all literal payload: zstd 55604965, best(raw,rans) 58662168 (+4.401% of archive), with cse.rle+gap.leb 54375855 (-1.769% of archive)
+
+## default
+E3 chr1.def.aet: archive 68127499 B, literal stream 55127285 B, 2906 chunks of 65536 (DNA 2903, plain 3), exceptions 4389147
+stream         zstd          raw         rans         best    alt(best)   best-zstd  alt-zstd
+seq        46583968     47562540     47244755     47214482            -     +0.925% 
+cse         4127532     23781270      5838698      5838698      3376311     +2.512% -1.1026%
+gap         4206125     17556588      4423487      4423487      2681630     +0.319% -2.2377%
+val           55284      4389147       481930       481930            -     +0.626% 
+plain         70146       196608        58457        58457            -     -0.017% 
+exc.run (replaces gap+val): 3644072 vs zstd 4261409 (-0.906% of archive)
+zstd-free pack (seq best, cse.rle, exc.run, plain best): 54293322 vs zstd 55043055 (-1.100% of archive)
+all literal payload: zstd 55043055, best(raw,rans) 58017054 (+4.365% of archive), with cse.rle+gap.leb 53812810 (-1.806% of archive)

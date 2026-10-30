@@ -1,0 +1,12 @@
+# open profile: token chunks 16 KiB by default (user's decision 02.10) - before (64 KiB) / after, ace-core (EPYC 4344P 8c/16t)
+# default, l1 and rANS-token profiles unchanged: chr1, silesia, enwik8 default archives == the speed-gate archives;
+# silesia AX_ENC=l1 and chr1 AX_TOK=rans byte-identical before / after.
+corpus  archive bytes before -> after (diff)        encode s (best of 3, 16 t)  full decode CPU, s (median of 7; 16 / 8 / 1 threads)            region 10 000 x 5000 b, CPU 1 thread, p50 / p99 us   GPU emulator
+chr1    63 083 287 -> 63 091 473 (+8 186, +0.013 %)  0.60 -> 0.61                0.0144 -> 0.0142 (-1.4 %) / 0.0172 -> 0.0176 (+2.3 %) / 0.1146 -> 0.1134 (-1.0 %)   67.7 / 108.0 -> 42.9 / 79.7 (-37 % / -26 %)          bit-perfect (1 plan; 4 batches)
+t2t     853 264 869 -> 853 265 321 (+452)              6.89 -> 6.89                0.1786 -> 0.1779 (-0.4 %) / 0.2167 -> 0.2155 (-0.6 %) / 1.5252 -> 1.5564 (+2.0 %)   112.5 / 238.9 -> 89.4 / 156.1 (-21 % / -35 %)       bit-perfect (1 plan; 48 batches)
+silesia 88 815 858 -> 88 926 073 (+110 215, +0.12 %)  -                           0.0223 -> 0.0228 (+2.2 %, all threads) / 0.1220 -> 0.1241 (+1.7 %, 1 thread)   -                                                     -
+reference row (gpu_run.sh pins): open with the chain matcher chr1 67 975 888 -> 68 178 789, t2t 887 641 942 -> 890 229 151.
+Full decode within the 5 % limit everywhere (worst +2.3 %, chr1 8 threads). Old open archives (64 KiB token chunks): claim
+head_open_compat - chr1 in the old open profile (md5 347ccd8b...) byte for byte with the C++ CLI, C99 axdec, the Python
+reader and the GPU plan + executor. GPU numbers of the open rows (results/baseline_blackwell.tsv, baseline_h100.tsv):
+marked "re-measure on the card", left out of the card's speed gate until then.

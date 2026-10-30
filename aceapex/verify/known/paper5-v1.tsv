@@ -1,0 +1,5 @@
+# claim_id	condition	reason   (applies only when the condition holds on the judging host)
+chr1_baseline_ratio	libzstd!=1.4.8	figure exact on libzstd 1.4.8; newer libzstd packs the literal stream differently (1.5.5: +0.58%)
+norep_ratio	libzstd!=1.4.8	same
+min_match16_ratio	libzstd!=1.4.8	same
+class_chr1_aceapex	libzstd!=1.4.8	same

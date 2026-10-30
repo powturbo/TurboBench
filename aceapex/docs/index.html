@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACEAPEX — Random-Access Compressed VRAM Layer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0E1A; --paper:#F5F3EE; --seek:#2D5BFF; --depth:#7B8794;
+    --proof:#00A676; --miss:#C4443A; --line:#D8D4CB; --dim:#5A6472;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Inter',sans-serif; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'JetBrains Mono',monospace}
+  .wrap{max-width:1100px; margin:0 auto; padding:0 24px}
+  header{border-bottom:1px solid var(--line); padding:20px 0; position:sticky; top:0;
+    background:rgba(245,243,238,.92); backdrop-filter:blur(8px); z-index:10}
+  header .wrap{display:flex; justify-content:space-between; align-items:center}
+  .logo{font-family:'Space Grotesk'; font-weight:700; font-size:20px; letter-spacing:-.02em}
+  .logo span{color:var(--seek)}
+  nav a{color:var(--dim); text-decoration:none; margin-left:24px; font-size:14px;
+    font-weight:500; transition:color .15s}
+  nav a:hover{color:var(--ink)}
+  .hero{padding:72px 0 40px}
+  .eyebrow{font-family:'JetBrains Mono'; font-size:12px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--seek); margin-bottom:20px}
+  .hero h1{font-family:'Space Grotesk'; font-weight:700; font-size:clamp(28px,5vw,46px);
+    line-height:1.08; letter-spacing:-.03em; max-width:16em; margin-bottom:20px}
+  .hero h1 em{font-style:normal; color:var(--seek)}
+  .pain{font-size:clamp(16px,2.2vw,20px); color:var(--dim); max-width:34em;
+    line-height:1.5}
+  .pain b{color:var(--ink); font-weight:600}
+  .matrix-sec{padding:24px 0 56px}
+  .matrix-label{font-family:'JetBrains Mono'; font-size:12px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--dim); margin-bottom:16px;
+    display:flex; align-items:center; gap:10px}
+  .matrix-label::after{content:''; flex:1; height:1px; background:var(--line)}
+  .matrix-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:2px;
+    background:#fff}
+  table.matrix{border-collapse:collapse; width:100%; font-size:13px; min-width:760px}
+  table.matrix th, table.matrix td{padding:11px 12px; text-align:center;
+    border-bottom:1px solid var(--line); border-right:1px solid var(--line)}
+  table.matrix thead th{font-family:'Space Grotesk'; font-weight:500; font-size:12px;
+    color:var(--dim); background:#FAF9F6; position:sticky; top:0;
+    white-space:nowrap; letter-spacing:.01em}
+  table.matrix thead th.us{color:var(--seek); font-weight:700}
+  table.matrix tbody th{font-family:'Inter'; font-weight:600; text-align:left;
+    color:var(--ink); background:#FAF9F6; white-space:nowrap; font-size:13px}
+  table.matrix td.us{background:rgba(45,91,255,.05)}
+  .yes{color:var(--proof); font-weight:700; font-size:15px}
+  .no{color:var(--line); font-size:15px}
+  .partial{color:var(--depth); font-size:12px; font-family:'JetBrains Mono'}
+  .val{font-family:'JetBrains Mono'; font-size:12px; color:var(--dim)}
+  .val.us{color:var(--seek); font-weight:500}
+  .matrix-foot{font-size:12.5px; color:var(--dim); margin-top:14px; line-height:1.55;
+    max-width:60em}
+  .matrix-foot b{color:var(--ink)}
+  .proofstrip{background:var(--ink); color:var(--paper); padding:40px 0}
+  .proofstrip .grid{display:grid; grid-template-columns:repeat(4,1fr); gap:28px}
+  .proofstrip .cell .n{font-family:'Space Grotesk'; font-weight:700; font-size:30px;
+    letter-spacing:-.02em; color:#fff; line-height:1}
+  .proofstrip .cell .n span{color:var(--seek); font-size:18px}
+  .proofstrip .cell .l{font-size:12.5px; color:#9AA4B2; margin-top:8px; line-height:1.4}
+  .proofstrip .cell .src{font-family:'JetBrains Mono'; font-size:10.5px; color:#5A6472;
+    margin-top:6px}
+  .losses{padding:48px 0}
+  .losses h2{font-family:'Space Grotesk'; font-weight:700; font-size:22px;
+    letter-spacing:-.02em; margin-bottom:6px}
+  .losses .sub{color:var(--dim); font-size:14px; margin-bottom:22px}
+  .loss-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+  .loss{border:1px solid var(--line); border-left:3px solid var(--miss);
+    border-radius:2px; padding:16px 18px; background:#fff}
+  .loss .t{font-weight:600; font-size:14px; margin-bottom:6px}
+  .loss .d{font-size:13px; color:var(--dim); line-height:1.5}
+  .cta-row{padding:8px 0 64px; display:flex; gap:14px; flex-wrap:wrap}
+  .btn{font-family:'Space Grotesk'; font-weight:500; font-size:15px; text-decoration:none;
+    padding:13px 26px; border-radius:2px; transition:all .15s; display:inline-block}
+  .btn.primary{background:var(--seek); color:#fff}
+  .btn.primary:hover{background:#1a48e8}
+  .btn.ghost{border:1px solid var(--ink); color:var(--ink)}
+  .btn.ghost:hover{background:var(--ink); color:var(--paper)}
+  footer{border-top:1px solid var(--line); padding:32px 0; font-size:13px; color:var(--dim)}
+  footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px}
+  footer a{color:var(--seek); text-decoration:none}
+  .papers a{margin-right:14px; font-family:'JetBrains Mono'; font-size:12px}
+  @media(max-width:720px){
+    .proofstrip .grid{grid-template-columns:repeat(2,1fr); gap:22px}
+    .loss-grid{grid-template-columns:1fr}
+    nav a:not(.nav-key){display:none}
+  }
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+  :focus-visible{outline:2px solid var(--seek); outline-offset:2px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="logo">ACE<span>APEX</span></div>
+  <nav>
+    <a href="#matrix">Class</a>
+    <a href="benchmarks.html">Benchmarks</a>
+    <a href="https://github.com/inikep/lzbench" class="nav-key">lzbench</a>
+    <a href="#research">Research</a>
+    <a href="https://github.com/yasha1971-coder/aceapex" class="nav-key">GitHub</a>
+  </nav>
+</div></header>
+<section class="hero"><div class="wrap">
+  <div class="eyebrow">Random-Access Compressed VRAM Layer</div>
+  <h1>Seek any tile in compressed data — with a <em>provable</em> bound on decode depth.</h1>
+  <p class="pain">Don't decompress <b>50&nbsp;GB</b> to read <b>16&nbsp;KB</b>. Any tile decodes
+  in <b>0.27&nbsp;ms</b> — from the start, middle, or end of the archive. One file,
+  both CPU and GPU. Back-references are <b>absolute output positions</b>, so every block
+  stands alone.</p>
+</div></section>
+<section class="matrix-sec" id="matrix"><div class="wrap">
+  <div class="matrix-label">The class, as one picture — where ACEAPEX is the only full column</div>
+  <div class="matrix-scroll">
+  <table class="matrix">
+    <thead><tr>
+      <th style="text-align:left">Property</th>
+      <th>lz4</th><th>zstd</th><th>Oodle</th><th>GDeflate</th>
+      <th>nvCOMP+DE</th><th>DietGPU</th><th>DFloat11</th>
+      <th class="us">ACEAPEX</th>
+    </tr></thead>
+    <tbody>
+      <tr><th>O(1) seek into compressed</th>
+        <td class="no">&mdash;</td><td class="partial">frame</td><td class="no">&mdash;</td>
+        <td class="no">&mdash;</td><td class="partial">chunk</td><td class="no">&mdash;</td>
+        <td class="no">&mdash;</td><td class="us"><span class="yes">&check;</span></td></tr>
+      <tr><th>One format, CPU + GPU decode</th>
+        <td class="partial">CPU</td><td class="partial">CPU</td><td class="no">&mdash;</td>
+        <td class="yes">&check;</td><td class="partial">GPU</td><td class="partial">GPU</td>
+        <td class="partial">GPU</td><td class="us"><span class="yes">&check;</span></td></tr>
+      <tr><th>Bounded tail (depth M &le; L)</th>
+        <td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td>
+        <td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td>
+        <td class="no">&mdash;</td><td class="us"><span class="yes">&check;</span></td></tr>
+      <tr><th>Position-invariant access</th>
+        <td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td>
+        <td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td>
+        <td class="partial">seq</td><td class="us"><span class="yes">&check;</span></td></tr>
+      <tr><th>Open source</th>
+        <td class="yes">&check;</td><td class="yes">&check;</td><td class="no">&mdash;</td>
+        <td class="yes">&check;</td><td class="no">&mdash;</td><td class="yes">&check;</td>
+        <td class="yes">&check;</td><td class="us"><span class="yes">&check;</span></td></tr>
+      <tr><th>Peak decode throughput</th>
+        <td class="val">fast</td><td class="val">fast</td><td class="val">fast</td>
+        <td class="val">~600&nbsp;GB/s</td><td class="val">~600&nbsp;GB/s</td>
+        <td class="val">592&nbsp;GB/s</td><td class="val">&mdash;</td>
+        <td class="val us">200&nbsp;GB/s</td></tr>
+      <tr><th>Compression ratio</th>
+        <td class="val">low</td><td class="val">high</td><td class="val">high</td>
+        <td class="val">mid</td><td class="val">mid</td><td class="val">1.3&times;</td>
+        <td class="val">1.4&times;</td><td class="val us">4.0&times;*</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="matrix-foot"><b>Read the top rows, not the bottom.</b> On peak throughput and
+  ratio the checkmarks belong to others &mdash; specialized decoders and fixed-function hardware
+  are faster in isolation. The point is the shape of the ACEAPEX column: it is the only one
+  filled across <em>seek + one-format + bounded-tail + position-invariance</em> at once.
+  That combination &mdash; random access into GPU-resident compressed data without decompressing
+  the whole file &mdash; is the class. <span class="mono" style="font-size:11px">*ratio is
+  data-dependent; 4.0&times; on genome, competitive on text, lower on vectors &mdash; see Research.</span></p>
+</div></section>
+<section class="proofstrip"><div class="wrap"><div class="grid">
+  <div class="cell">
+    <div class="n">0.27<span>&nbsp;ms</span></div>
+    <div class="l">One tile, any position. 1 block &asymp; 100 blocks (launch-bound &rarr; O(1)).</div>
+    <div class="src">ERR194147 &middot; FNV-verified</div>
+  </div>
+  <div class="cell">
+    <div class="n">4.53<span>&times;</span></div>
+    <div class="l">Self-overlapping matches are periodic fills, not dependency chains &mdash; fully parallel. 2.75&ndash;8.42&times; across four corpora.</div>
+    <div class="src">chr1 match layer &middot; bit-perfect &middot; Paper&nbsp;5</div>
+  </div>
+  <div class="cell">
+    <div class="n">0.081<span>&nbsp;ms</span></div>
+    <div class="l"><code>chr1:5000000-5016000</code> out of a 254 MB archive &mdash; a genomic coordinate, not a byte offset. Against bgzip with a fai index, the standard for compressed references: 1.73&times; faster on median, 2.03&times; at p99, and 11.8% denser. Verified against samtools faidx.</div>
+    <div class="src">byte-verified against the original &middot; aceapex faidx + r --range</div>
+  </div>
+  <div class="cell">
+    <div class="n">#1</div>
+    <div class="l">First row of the lzbench 2.3 table. Neutral third-party tool.</div>
+    <div class="src">aceapex 1.0.1</div>
+  </div>
+</div></div></section>
+<section class="losses"><div class="wrap">
+  <h2>Where ACEAPEX loses &mdash; stated first, in our own words</h2>
+  <p class="sub">A comparison built only from wins invites the reviewer to fill the gaps in public. These are ours to name.</p>
+  <div class="loss-grid">
+    <div class="loss">
+      <div class="t">zstd-19 packs tighter &mdash; when it is allowed a whole-file window</div>
+      <div class="d">On the same genome: ratio 4.04 (ours) vs 4.93 (zstd-19). Ratio is not our axis. But the comparison only means something once the constraint is equalised: under independent 16&nbsp;KB blocks, where every codec is equally seekable, ACEAPEX is first on 3 of 5 corpora against zstd-19 (enwik8 2.638, enwik9 2.981, silesia 3.005) and ahead of zstd-3 everywhere by 4.9&ndash;16.1%. Blocking itself costs 6.7% on genome and 24.2% on text; the match layer returns about three quarters of it. See Paper&nbsp;5.</div>
+    </div>
+    <div class="loss">
+      <div class="t">A single cold tile over PCIe is faster</div>
+      <div class="d">~10 &micro;s for a 16 KB PCIe fetch vs 272 &micro;s for one seek. The win is in aggregate and in residency &mdash; never staging the 50 GB at all.</div>
+    </div>
+    <div class="loss">
+      <div class="t">Peak throughput belongs to hardware</div>
+      <div class="d">Fixed-function decompression engines and DietGPU reach ~600 GB/s. Our 200 GB/s buys seekability, not raw rate.</div>
+    </div>
+  </div>
+</div></section>
+<section id="research"><div class="wrap cta-row">
+  <a class="btn primary" href="https://github.com/yasha1971-coder/aceapex">Quickstart on GitHub</a>
+  <a class="btn ghost" href="https://github.com/inikep/lzbench/releases/tag/v2.3">See lzbench 2.3</a>
+</div></section>
+<footer><div class="wrap">
+  <div class="papers">
+    <a href="https://arxiv.org/abs/2606.04268">2606.04268</a>
+    <a href="https://arxiv.org/abs/2606.18900">2606.18900</a>
+    <a href="https://arxiv.org/abs/2606.24531">2606.24531</a>
+    <a href="https://arxiv.org/abs/2607.18541">2607.18541</a>
+    <a href="https://arxiv.org/abs/2608.10188">2608.10188</a>
+    <a href="https://arxiv.org/abs/2609.16731">2609.16731</a>
+    <a href="https://arxiv.org/abs/2610.25149">2610.25149</a>
+  </div>
+  <div>MIT-licensed. Every number carries command &middot; hardware &middot; verification. <a href="https://github.com/yasha1971-coder/aceapex">Reproduce &rarr;</a></div>
+</div></footer>
+</body>
+</html>

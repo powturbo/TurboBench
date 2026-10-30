@@ -1,0 +1,29 @@
+=== ЗОНДЫ Закона Прорыва (clean.fastq + synthetic, H100, 2026-06-17) ===
+Три гипотезы измерены. Два тупика (ценно знать), один малый рычаг.
+
+ЗОНД 1 — compute-over-compressed через literal-пул: ТУПИК.
+- FASTQ: literal-пул 520M = 39% выхода 1339M (не "в разы меньше").
+- Synthetic ratio 28x: literal-пул 402M = 80% выхода 500M (!).
+- ПРИЧИНА (инсайт, нигде не задокументирован): chain flattening (статья 1) переписывает
+  matches на literal-источник напрямую → literals НЕ дедуплицируются между блоками →
+  раздуты. Сжатие идёт через малые cmd/offset (13.5M/7M), НЕ через компактный literal-словарь.
+  TRADE-OFF: независимость блоков куплена ценой раздутого literal-пула.
+- СЛЕДСТВИЕ: compute-over-compressed (поиск по literals) на ACEAPEX невыгоден,
+  в отличие от LZ77 self-index работ (Kreft&Navarro 2011, ICDE 2013) — у них общий словарь.
+
+ЗОНД 2 — sub-block byte-range decode: ТУПИК.
+- latency 1 блок 0.271ms, 8 блоков 0.296ms (+9%). Floor = launch overhead (~270us).
+- Декод блока тонет в launch. Достать <16KB не ускорит. 16KB = оптимальная гранулярность seek.
+
+ЗОНД 3 — per-stream adaptive block_size (content-adaptive blocking): РАБОТАЕТ, +1.1%.
+- seq: bs 16K→256K = 40.5M→37.2M (-8%, повторы тянутся далеко).
+- id:  bs 16K→256K = 57.4M→59.3M (мельче лучше, повторы локальны).
+- qual: плоско (шум, block_size не влияет).
+- adaptive (seq=256K,id=16K,qual=16K): 302.9M vs fixed 306.3M = +1.1% (ratio 4.37→4.42).
+- НОВИЗНА: content-adaptive block_size per-stream — нет ни у кого (у других bs фиксирован
+  sliding-window архитектурой; у ACEAPEX свободный из-за absolute offsets). Аналог Oodle
+  multi-codec (Kraken/Mermaid/Selkie), но одним бесплатным рычагом без смены кодека.
+- ОГРАНИЧЕНИЕ: на FASTQ эффект мал (qual=68% массы нечувствителен к bs).
+
+ИТОГ: закон прорыва отсёк 2 тупика + нашёл 1 малый рычаг. Главная находка — скрытая цена
+chain flattening (раздутые literals) — объясняет границы compute-over-compressed на ACEAPEX.

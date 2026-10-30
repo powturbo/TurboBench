@@ -1,0 +1,238 @@
+{
+ "provenance": {
+  "tag": "paper5-v1",
+  "commit": "22de9dc6910b2d505b8808960e441b077cdee958",
+  "date": "2026-09-22T08:44Z",
+  "host": "ace-core",
+  "machine": "x86_64",
+  "cores": 16,
+  "libzstd": "1.4.8",
+  "compiler": "g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0",
+  "pass": 17,
+  "fail": 0,
+  "skipped": 3,
+  "declared": 3,
+  "unjudged": 0,
+  "build_failed": 0
+ },
+ "result": {
+  "paper": "What Actually Serializes GPU LZ77 Decode",
+  "date": "2026-09-22T08:44:20Z",
+  "hardware": "x86_64 16 cores",
+  "corpus_md5_expected": "9465e0f0df6e2c6eb39729c39cee5465",
+  "summary": {
+   "pass": 17,
+   "fail": 0,
+   "skipped": 6
+  },
+  "claims": [
+   {
+    "claim_id": "chr1_md5",
+    "level": "R",
+    "expected": "9465e0f0df6e2c6eb39729c39cee5465",
+    "tolerance": "0",
+    "measured": "9465e0f0df6e2c6eb39729c39cee5465",
+    "verdict": "pass",
+    "command": "md5sum CHR1"
+   },
+   {
+    "claim_id": "chr1_baseline_ratio",
+    "level": "R",
+    "expected": "3.18065",
+    "tolerance": "1e-5",
+    "measured": "3.18065",
+    "verdict": "pass",
+    "command": "MIN_MATCH=0 t --in chr1"
+   },
+   {
+    "claim_id": "norep_ratio",
+    "level": "R",
+    "expected": "3.16347",
+    "tolerance": "1e-5",
+    "measured": "3.16347",
+    "verdict": "pass",
+    "command": "NO_REP=1 t --in chr1"
+   },
+   {
+    "claim_id": "norep_cost_percent",
+    "level": "R",
+    "expected": "0.540",
+    "tolerance": "0.02",
+    "measured": "0.543",
+    "verdict": "pass",
+    "command": "derived from the two ratios"
+   },
+   {
+    "claim_id": "min_match16_ratio",
+    "level": "R",
+    "expected": "3.22581",
+    "tolerance": "1e-5",
+    "measured": "3.22581",
+    "verdict": "pass",
+    "command": "MIN_MATCH=16 t --in chr1"
+   },
+   {
+    "claim_id": "class_chr1_aceapex",
+    "level": "R",
+    "expected": "3.18065",
+    "tolerance": "1e-5",
+    "measured": "3.18065",
+    "verdict": "pass",
+    "command": "t --in chr1"
+   },
+   {
+    "claim_id": "class_chr1_zstd3_16k",
+    "level": "R",
+    "expected": "3.03362",
+    "tolerance": "1e-3",
+    "measured": "3.03362",
+    "verdict": "pass",
+    "command": "zstd-3 over 16 KB chunks"
+   },
+   {
+    "claim_id": "class_enwik8_aceapex",
+    "level": "R",
+    "expected": "2.63791",
+    "tolerance": "1e-5",
+    "measured": "2.63791",
+    "verdict": "pass",
+    "command": "t --in enwik8"
+   },
+   {
+    "claim_id": "class_enwik8_zstd3_16k",
+    "level": "R",
+    "expected": "2.33351",
+    "tolerance": "1e-3",
+    "measured": "2.33351",
+    "verdict": "pass",
+    "command": "zstd-3 over 16 KB chunks"
+   },
+   {
+    "claim_id": "class_enwik9_aceapex",
+    "level": "R",
+    "expected": "2.98108",
+    "tolerance": "1e-5",
+    "measured": "2.98108",
+    "verdict": "pass",
+    "command": "t --in enwik9"
+   },
+   {
+    "claim_id": "class_enwik9_zstd3_16k",
+    "level": "R",
+    "expected": "2.56673",
+    "tolerance": "1e-3",
+    "measured": "2.56673",
+    "verdict": "pass",
+    "command": "zstd-3 over 16 KB chunks"
+   },
+   {
+    "claim_id": "class_silesia_aceapex",
+    "level": "R",
+    "expected": "3.00457",
+    "tolerance": "1e-5",
+    "measured": "3.00457",
+    "verdict": "pass",
+    "command": "t --in silesia"
+   },
+   {
+    "claim_id": "class_silesia_zstd3_16k",
+    "level": "R",
+    "expected": "2.67498",
+    "tolerance": "1e-3",
+    "measured": "2.67498",
+    "verdict": "pass",
+    "command": "zstd-3 over 16 KB chunks"
+   },
+   {
+    "claim_id": "class_fastq_aceapex",
+    "level": "R",
+    "expected": "3.96476",
+    "tolerance": "1e-5",
+    "measured": "3.96476",
+    "verdict": "pass",
+    "command": "t --in fastq"
+   },
+   {
+    "claim_id": "class_fastq_zstd3_16k",
+    "level": "R",
+    "expected": "3.62875",
+    "tolerance": "1e-3",
+    "measured": "3.62875",
+    "verdict": "pass",
+    "command": "zstd-3 over 16 KB chunks"
+   },
+   {
+    "claim_id": "parse_chained_percent",
+    "level": "R",
+    "expected": "5.46",
+    "tolerance": "0.05",
+    "measured": "5.47",
+    "verdict": "pass",
+    "command": "decompose chr1 command stream"
+   },
+   {
+    "claim_id": "parse_run_median",
+    "level": "R",
+    "expected": "4",
+    "tolerance": "0.30",
+    "measured": "4",
+    "verdict": "pass",
+    "command": "median dependency-free run"
+   },
+   {
+    "claim_id": "wf_build",
+    "level": "R",
+    "expected": "-",
+    "tolerance": "-",
+    "measured": "no nvcc or no CUDA device",
+    "verdict": "skipped-no-gpu",
+    "command": "install CUDA toolkit"
+   },
+   {
+    "claim_id": "wavefront_real_ms",
+    "level": "R",
+    "expected": "-",
+    "tolerance": "-",
+    "measured": "no nvcc or no CUDA device",
+    "verdict": "skipped-no-gpu",
+    "command": "install CUDA toolkit"
+   },
+   {
+    "claim_id": "wavefront_par_ms",
+    "level": "R",
+    "expected": "-",
+    "tolerance": "-",
+    "measured": "no nvcc or no CUDA device",
+    "verdict": "skipped-no-gpu",
+    "command": "install CUDA toolkit"
+   },
+   {
+    "claim_id": "seek_50gb_position_invariance",
+    "level": "M",
+    "expected": "292-387 us",
+    "tolerance": "-",
+    "measured": "original not on disk; FNV has nothing to compare against",
+    "verdict": "declared",
+    "command": "v7ra streams_50gb.bin"
+   },
+   {
+    "claim_id": "min_match_cost_probe",
+    "level": "M",
+    "expected": "1.291 -> 0.215 ms",
+    "tolerance": "-",
+    "measured": "tokens dropped without substituting literals",
+    "verdict": "declared",
+    "command": "wf_par, filtered tokens"
+   },
+   {
+    "claim_id": "scan_parser_speedup",
+    "level": "E",
+    "expected": "2.7x",
+    "tolerance": "-",
+    "measured": "parse 2.555 ms scaled by the 93.94 percent share; not verified on GPU",
+    "verdict": "declared",
+    "command": "no prototype yet"
+   }
+  ]
+ }
+}

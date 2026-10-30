@@ -1,0 +1,15 @@
+# Block table in superblocks - prototype (scripts/superblock.cpp; ACEPX2 unchanged), ace-core 2026-10-02
+# the 64-byte entries rewritten as superblocks (4 x u64 offsets per S blocks + 4 x u16 sizes per block) or as the 4 size
+# columns varint + zstd -19; both rebuild the original table byte for byte (all blocks + 10^7 random lookups)
+t2t.d16.aet: 192643 blocks; table 12329152 B -> superblocks of 64: 1640507 B (8.52 B/block, lookup 568 ns), size columns + zstd: 161378 B (0.84 B/block); archive 822099816 -> 811411171 (-1.30 %) / 809932074 (-1.48 %); tables rebuilt == original
+t2t.open.aet: 192643 blocks; table 12329152 B -> superblocks of 64: 1640507 B (8.52 B/block, lookup 568 ns), size columns + zstd: 161378 B (0.84 B/block); archive 853264869 -> 842576224 (-1.25 %) / 841097127 (-1.43 %); tables rebuilt == original
+chr1.d16.aet: 15499 blocks; table 991936 B -> superblocks of 64: 132011 B (8.52 B/block, lookup 568 ns), size columns + zstd: 6140 B (0.40 B/block); archive 60404884 -> 59544959 (-1.42 %) / 59419120 (-1.63 %); tables rebuilt == original
+t2t.default.aet: 3011 blocks; table 192704 B -> superblocks of 64: 49760 B (16.53 B/block, lookup 306 ns), size columns + zstd: 12460 B (4.14 B/block); archive 806458861 -> 806315917 (-0.02 %) / 806278649 (-0.02 %); tables rebuilt == original
+t2t.d16.aet: 192643 blocks; table 12329152 B -> superblocks of 16: 1938497 B (10.06 B/block, lookup 151 ns), size columns + zstd: 161378 B (0.84 B/block); archive 822099816 -> 811709161 (-1.26 %) / 809932074 (-1.48 %); tables rebuilt == original
+t2t.d16.aet: 192643 blocks; table 12329152 B -> superblocks of 256: 1565993 B (8.13 B/block, lookup 2241 ns), size columns + zstd: 161378 B (0.84 B/block); archive 822099816 -> 811336657 (-1.31 %) / 809932074 (-1.48 %); tables rebuilt == original
+T2T default profile, 16 KiB blocks against 256 MiB blocks (805 847 588 B, results/reality-2026-10-02.log T3):
+  64-byte table (today)                 822 099 816   +2.02 %
+  superblocks of 64, u16 sizes          811 411 171   +0.69 %   lookup 569 ns (S=16: 811 709 161, +0.73 %, 150 ns)
+  size columns, zstd -19                809 932 074   +0.51 %   the column decoded once (161 KB) per archive open
+=> the target (+2.02 % -> ~+0.7 %) is met by the superblock table with O(S) lookup; the rest is the reach (+0.32 %) and
+   the block starts (+0.17 %). A region read costs ~70-150 us on the CPU, so 0.15-0.6 us of lookup is noise. A v3 table.

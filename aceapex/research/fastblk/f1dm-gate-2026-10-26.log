@@ -1,0 +1,33 @@
+# F1-DM gate, ace-core EPYC 4344P, 2026-10-26 17:15, fair harness (same container, 1 MiB blocks, one pool, median of 7), axf L4 = optimal parse, MIN_DIST 64, DEPTH4 256, AXF_LAMBDA=2
+# build: g++ -O3 -march=native -std=c++20 -DMIN_DIST_V=64u -DDEPTH4=256 -I~/pubrepo/.wk/lzb-intmt/lz/misa77/include -I~/pubrepo/.wk/lzb-intmt/lz/lz4/lib -o fair fair.cpp ~/pubrepo/.wk/lzb-intmt/lz/misa77/src/compress.o ~/pubrepo/.wk/lzb-intmt/lz/misa77/src/decompress.o ~/pubrepo/.wk/lzb-intmt/lz/misa77/src/isa/*.o ~/pubrepo/.wk/lzb-intmt/lz/lz4/lib/lz4.o -lpthread
+/home/aeterna/golden/mixed/silesia.tar: 211957760 B, 203 blocks of 1048576, decode pool: contiguous ranges, median of 7
+engine            ratio     1T MB/s     8T MB/s
+axf L4 (ours)    39.36%        8627       17339  bit-perfect
+axf L3 (ours)    40.68%        7595       17295  bit-perfect
+misa77 -2        40.54%        8409       17093  bit-perfect
+misa77 -1        42.86%        9306       16912  bit-perfect
+lz4 1.10.0       47.68%        6005       16370  bit-perfect
+## repeat 2 17:19, load 0.19
+axf L4 (ours)    39.36%        8587       17459  bit-perfect
+misa77 -2        40.54%        8502       17044  bit-perfect
+misa77 -1        42.86%        9249       16972  bit-perfect
+## repeat 3 17:19, load 4.08
+axf L4 (ours)    39.36%        8631       17259  bit-perfect
+misa77 -2        40.54%        8523       17156  bit-perfect
+misa77 -1        42.86%        9728       16515  bit-perfect
+## DEPTH4=512 AXF_LAMBDA=2 17:25 load 0.14
+axf L4 (ours)    39.20%        9029       16652  bit-perfect
+misa77 -2        40.54%        8528       17163  bit-perfect
+## DEPTH4=512 AXF_LAMBDA=2.5 17:26 load 5.29
+axf L4 (ours)    40.28%        9029       17292  bit-perfect
+misa77 -2        40.54%        8474       17087  bit-perfect
+## DEPTH4=512 AXF_LAMBDA=2 repeat 2 17:28 load 1.81
+axf L4 (ours)    39.20%        8695       17279  bit-perfect
+misa77 -2        40.54%        8550       17098  bit-perfect
+misa77 -1        42.86%        9313       16956  bit-perfect
+lz4 1.10.0       47.68%        6012       16179  bit-perfect
+## DEPTH4=512 AXF_LAMBDA=2 repeat 3 17:28 load 7.15
+axf L4 (ours)    39.20%        9212       16830  bit-perfect
+misa77 -2        40.54%        8519       17109  bit-perfect
+misa77 -1        42.86%        9227       16900  bit-perfect
+lz4 1.10.0       47.68%        6010       16312  bit-perfect

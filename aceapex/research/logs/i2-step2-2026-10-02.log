@@ -1,0 +1,12 @@
+[selfheal] .wk/th4/stress.open.aet: 1000 copies x 1 flip(s): harmless 0, found 1000, false 0, not found 0 (+ 0 with no locator: only the oracle failed); probes 73018 per repaired-or-tried copy, oracle calls 2000; CPU 1324.9 s in all, 1.325 s per copy
+[selfheal] with the block-hash sidecar (8192 B)
+SHROW	1000	1	0	1000	0	0	0	73018	1.325
+[selfheal] .wk/th4/stress.open.aet: 100 copies x 3 flip(s): harmless 0, found 94, false 0, not found 6 (+ 0 with no locator: only the oracle failed); probes 222713 per repaired-or-tried copy, oracle calls 188; CPU 383.2 s in all, 3.832 s per copy
+[selfheal] with the block-hash sidecar (8192 B)
+SHROW	100	3	0	94	0	6	0	222713	3.832
+[selfheal] .wk/th4/stress.open.aet: 100 copies x 3 flip(s): harmless 0, found 84, false 0, not found 16 (+ 0 with no locator: only the oracle failed); probes 223274 per repaired-or-tried copy, oracle calls 185; CPU 371.4 s in all, 3.714 s per copy
+SHROW	100	3	0	84	0	16	0	223274	3.714
+[selfheal] .wk/th4/stress.open.aet: 1000 copies x 1 flip(s): harmless 0, found 1000, false 0, not found 0 (+ 0 with no locator: only the oracle failed); probes 73018 per repaired-or-tried copy, oracle calls 2000; CPU 1413.7 s in all, 1.414 s per copy
+[selfheal] with the block-hash sidecar (8192 B)
+[selfheal] GPU path: 69896219 literal-chunk probes in 17546 launches of 4096 (17.5 per copy); H100 estimate at 47 212 open chunks in 19.06 ms (t2t.open library decode, 946591a): 29.0 ms per copy (launches x batch probes)
+SHROW	1000	1	0	1000	0	0	0	73018	1.414

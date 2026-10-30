@@ -1,0 +1,12 @@
+ 17:23:20 up 323 days,  8:54,  7 users,  load average: 0.10, 0.22, 0.32
+# 2026-10-28 17:23 AMD EPYC 4344P 8-Core Processor; branch fast-enc2 3438a94; lzbench aee1d72 + synced aceapex
+## taskset -c 2 lzbench -ezxc,1/aceapex_fast,1 -t8,8 -o1c4 silesia.tar
+| zxc 0.15.0 -1           |  1034 MB/s | 10663 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.2 fast -1   |   618 MB/s | 11078 MB/s |   129730491 | 61.21 | /home/aeterna/golden/mixed/silesia.tar|
+## taskset -c 2 lzbench -ezxc,1/aceapex_fast,1 -t8,8 -o1c4 enwik8
+| zxc 0.15.0 -1           |  1282 MB/s | 11968 MB/s |    89232098 | 89.23 | /home/aeterna/golden/text/enwik8|
+| aceapex 2.4.2 fast -1   |   419 MB/s | 12515 MB/s |    82646694 | 82.65 | /home/aeterna/golden/text/enwik8|
+## taskset -c 2 lzbench -ezxc,1/aceapex_fast,1 -t8,8 -o1c4 chr1.fa
+| zxc 0.15.0 -1           |   582 MB/s |  8196 MB/s |   186733145 | 73.54 | /home/aeterna/golden/genome/chr1.fa|
+| aceapex 2.4.2 fast -1   |   481 MB/s | 10975 MB/s |   222622643 | 87.67 | /home/aeterna/golden/genome/chr1.fa|
+# end load 0.91 0.46 0.40

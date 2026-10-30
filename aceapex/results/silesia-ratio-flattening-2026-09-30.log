@@ -1,0 +1,13 @@
+# silesia -1/-2: 2.2.0 against 1.0.1 (the aceapex copy in lzbench master ad5b458), same bundled zstd 1.5.7, API, threads=1
+#            total      zlit      zoff      zlen    zcmd
+# L1 1.0.1   68549050   52281132  8998077   336323  6920458
+# L1 2.2.0   69013538   52271572  9458656   335273  6934977
+# L2 1.0.1   68212274   51260275  9663866   327325  6947748
+# L2 2.2.0   68633898   51272281  10072779  327048  6948730
+# The difference is the offset stream (+460 KB / +409 KB). FSE_CHUNK 512K -> 64M changes 12 KB: not the chunking.
+# 2.2.0 with AX_NOFLAT=1 (no offset flattening, origin[] redirect to the first occurrence): 68549050 / 68212274 -
+# the same sizes as 1.0.1, streams byte-identical; the files differ only in the chunk-size field of the stream
+# words (added 2026-09-19). 1.0.1 has no flattening (no origin[] in its encoder).
+# Cost of flattening on silesia: +0.68 % (L1), +0.62 % (L2) of the archive. CPU decode (ace-core, system zstd
+# 1.4.8, median of 9): lz77 / total s, 1 thread 0.084/0.187 flat against 0.083/0.185 without; 8 threads
+# 0.025/0.057 against 0.024/0.057 - no CPU gain. DNA is unaffected by default since ADR-020 (l1 has no flattening).

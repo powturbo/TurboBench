@@ -1,0 +1,25 @@
+# dense-open measurement, ace-core 2026-09-29 (format unchanged; measurement only)
+# Question: the open profile (ADR-019) with its literal stream coded by components/rans1_v4.c
+# (order-1 rANS, 4 lanes with own substreams, checkpoints every 4096 symbols, 64 KiB chunks,
+# on the RAW literal stream instead of the DNA pack) - archive size and CPU decode on chr1.
+# Method: aceapex c AX_PROFILE=open (main 845a469), aceapex d with ACEAPEX_DUMP=1 -> decoded
+# literal stream; rans1_v4 (gcc -O3 -march=native) t / c / d / r on it.
+# dense-open bytes = open archive - open literal stream + rans1_v4 file (the file carries its
+# own per-chunk framing; an archive chunk table would add 8 B x ~2 906 chunks = 23 KB, 0.04 %).
+
+profile         archive open  lit in open  raw lit      rans1_v4 file  dense-open    vs open
+default (1 MiB) 66 904 489    53 931 879   190 446 768  50 802 992     63 775 602    -4.68 %
+T4 (16K/64K)    67 975 888    54 496 286   192 845 679  51 443 590     64 923 192    -4.49 %
+chr1 ratio: default open 3.795 -> dense-open 3.982; T4 profile 3.736 -> 3.911.
+
+rans1_v4 on the literals (default profile): 2.1331 bits/byte (tables 0.0326, payload 2.1005),
+2 906 chunks; encode 292 MB/s, decode 564 MB/s single thread (best of 3); T4 profile 285 / 550.
+round-trip: in-memory MATCHES; file c -> d cmp bit-perfect (both profiles).
+region: 200 random 16 000-byte ranges, 0 differences against the full decode, work 27.5 % of a
+chunk's symbols (18 051 of 65 536).
+CPU decode, 8 threads: rans1_v4 literals as 8 parallel processes over 64 KiB-aligned parts:
+0.07 s wall (x3; includes process start and writing 190 MB to /dev/shm), 8/8 parts bit-perfect;
+open archive CLI (default): Phase entropy (all 4 streams) 0.070-0.071 s, lz77 0.025-0.026 s,
+algorithmic decode 2562-2584 MB/s. -> order-1 literal decode ~ the whole open entropy phase at 8 threads.
+Not measured: a GPU decoder for rans1_v4 (order-1 context is serial per lane: 4 lanes x 16K symbols
+per chunk; checkpoints give 16 entry points per lane = 64 per chunk).

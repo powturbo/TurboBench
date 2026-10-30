@@ -1,0 +1,71 @@
+# #F1 step 2: axf - our own fast engine (no misa77 code), ace-core EPYC 4344P, 2026-10-26, median of 7, CW=32, MIN_MATCH=5; block = independent unit of the ACEAPEX container
+
+/home/aeterna/golden/mixed/silesia.tar: 211957760 B, 3235 blocks of 65536, axf MIN_MATCH 5 level 1: 118477019 B = 55.90 % (encode 16 threads 0.08 s = 2593 MB/s); 4028 tokens/block, literals 31.2 %
+decode  1 thread(s): 0.0294 s =   7199 MB/s  bit-perfect
+decode  2 thread(s): 0.0171 s =  12399 MB/s  bit-perfect
+decode  4 thread(s): 0.0136 s =  15533 MB/s  bit-perfect
+decode  8 thread(s): 0.0133 s =  15968 MB/s  bit-perfect
+decode 16 thread(s): 0.0136 s =  15634 MB/s  bit-perfect
+
+/home/aeterna/golden/mixed/silesia.tar: 211957760 B, 3235 blocks of 65536, axf MIN_MATCH 5 level 2: 103911594 B = 49.02 % (encode 16 threads 0.13 s = 1573 MB/s); 3793 tokens/block, literals 25.7 %
+decode  1 thread(s): 0.0294 s =   7209 MB/s  bit-perfect
+decode  2 thread(s): 0.0171 s =  12383 MB/s  bit-perfect
+decode  4 thread(s): 0.0133 s =  15940 MB/s  bit-perfect
+decode  8 thread(s): 0.0128 s =  16507 MB/s  bit-perfect
+decode 16 thread(s): 0.0132 s =  16086 MB/s  bit-perfect
+
+/home/aeterna/golden/mixed/silesia.tar: 211957760 B, 3235 blocks of 65536, axf MIN_MATCH 5 level 3: 99910327 B = 47.14 % (encode 16 threads 0.25 s = 844 MB/s); 3657 tokens/block, literals 24.7 %
+decode  1 thread(s): 0.0292 s =   7259 MB/s  bit-perfect
+decode  2 thread(s): 0.0167 s =  12689 MB/s  bit-perfect
+decode  4 thread(s): 0.0132 s =  16031 MB/s  bit-perfect
+decode  8 thread(s): 0.0127 s =  16650 MB/s  bit-perfect
+decode 16 thread(s): 0.0130 s =  16325 MB/s  bit-perfect
+
+/home/aeterna/golden/mixed/silesia.tar: 211957760 B, 809 blocks of 262144, axf MIN_MATCH 5 level 1: 113582425 B = 53.59 % (encode 16 threads 0.08 s = 2598 MB/s); 17112 tokens/block, literals 27.4 %
+decode  1 thread(s): 0.0305 s =   6955 MB/s  bit-perfect
+decode  2 thread(s): 0.0174 s =  12205 MB/s  bit-perfect
+decode  4 thread(s): 0.0134 s =  15776 MB/s  bit-perfect
+decode  8 thread(s): 0.0131 s =  16146 MB/s  bit-perfect
+decode 16 thread(s): 0.0134 s =  15842 MB/s  bit-perfect
+
+/home/aeterna/golden/mixed/silesia.tar: 211957760 B, 809 blocks of 262144, axf MIN_MATCH 5 level 2: 97052594 B = 45.79 % (encode 16 threads 0.18 s = 1184 MB/s); 16062 tokens/block, literals 21.1 %
+decode  1 thread(s): 0.0309 s =   6865 MB/s  bit-perfect
+decode  2 thread(s): 0.0174 s =  12166 MB/s  bit-perfect
+decode  4 thread(s): 0.0131 s =  16119 MB/s  bit-perfect
+decode  8 thread(s): 0.0126 s =  16810 MB/s  bit-perfect
+decode 16 thread(s): 0.0130 s =  16365 MB/s  bit-perfect
+
+/home/aeterna/golden/mixed/silesia.tar: 211957760 B, 809 blocks of 262144, axf MIN_MATCH 5 level 3: 91645436 B = 43.24 % (encode 16 threads 0.43 s = 498 MB/s); 15204 tokens/block, literals 19.9 %
+decode  1 thread(s): 0.0303 s =   7004 MB/s  bit-perfect
+decode  2 thread(s): 0.0170 s =  12451 MB/s  bit-perfect
+decode  4 thread(s): 0.0128 s =  16516 MB/s  bit-perfect
+decode  8 thread(s): 0.0125 s =  16950 MB/s  bit-perfect
+decode 16 thread(s): 0.0128 s =  16596 MB/s  bit-perfect
+
+/home/aeterna/golden/mixed/silesia.tar: 211957760 B, 203 blocks of 1048576, axf MIN_MATCH 5 level 1: 111048246 B = 52.39 % (encode 16 threads 0.14 s = 1524 MB/s); 70112 tokens/block, literals 25.4 %
+decode  1 thread(s): 0.0323 s =   6567 MB/s  bit-perfect
+decode  2 thread(s): 0.0177 s =  12005 MB/s  bit-perfect
+decode  4 thread(s): 0.0135 s =  15744 MB/s  bit-perfect
+decode  8 thread(s): 0.0130 s =  16274 MB/s  bit-perfect
+decode 16 thread(s): 0.0133 s =  15934 MB/s  bit-perfect
+
+/home/aeterna/golden/mixed/silesia.tar: 211957760 B, 203 blocks of 1048576, axf MIN_MATCH 5 level 2: 92741234 B = 43.75 % (encode 16 threads 0.37 s = 574 MB/s); 66288 tokens/block, literals 18.2 %
+decode  1 thread(s): 0.0319 s =   6645 MB/s  bit-perfect
+decode  2 thread(s): 0.0179 s =  11844 MB/s  bit-perfect
+decode  4 thread(s): 0.0131 s =  16151 MB/s  bit-perfect
+decode  8 thread(s): 0.0125 s =  16920 MB/s  bit-perfect
+decode 16 thread(s): 0.0127 s =  16755 MB/s  bit-perfect
+
+/home/aeterna/golden/mixed/silesia.tar: 211957760 B, 203 blocks of 1048576, axf MIN_MATCH 5 level 3: 85442702 B = 40.31 % (encode 16 threads 1.37 s = 154 MB/s); 61678 tokens/block, literals 16.5 %
+decode  1 thread(s): 0.0313 s =   6770 MB/s  bit-perfect
+decode  2 thread(s): 0.0176 s =  12063 MB/s  bit-perfect
+decode  4 thread(s): 0.0128 s =  16596 MB/s  bit-perfect
+decode  8 thread(s): 0.0123 s =  17169 MB/s  bit-perfect
+decode 16 thread(s): 0.0124 s =  17055 MB/s  bit-perfect
+
+/home/aeterna/golden/genome/chr1.fa: 253935557 B, 969 blocks of 262144, axf MIN_MATCH 5 level 3: 129792304 B = 51.11 % (encode 16 threads 1.11 s = 229 MB/s); 31872 tokens/block, literals 2.4 %
+decode  1 thread(s): 0.0503 s =   5051 MB/s  bit-perfect
+decode  2 thread(s): 0.0271 s =   9381 MB/s  bit-perfect
+decode  4 thread(s): 0.0170 s =  14924 MB/s  bit-perfect
+decode  8 thread(s): 0.0154 s =  16523 MB/s  bit-perfect
+decode 16 thread(s): 0.0159 s =  16002 MB/s  bit-perfect

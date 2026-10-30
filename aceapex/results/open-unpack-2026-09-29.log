@@ -1,0 +1,16 @@
+# CPU-декод open: развёртка оснований таблицей (байт -> 4 основания словом) вместо цикла по основанию
+# (src/ax_lit_open.h == c/ax_lit_open.h). ace-core, chr1, scripts/region_bench.c (публичный one-shot API,
+# регионы 200 x 16 KiB случайно, сверка с оригиналом, 0 расхождений везде), полный декод best of 3.
+# archive: ia = v2.1 interactive (zstd, BS 16K, LIT_CHUNK 64K, FSE_CHUNK 4096) 69 473 882 B;
+#          io = open interactive (то же + AX_PROFILE=open) 68 998 725 B; do = open default (1 MiB) 66 904 489 B
+#                 region p50 / p90 us            full decode s (API)
+#                 before         after            before   after
+# C99  ia         80.2 / 115.2   79.0 / 113.2     0.190    0.197
+# C99  io        188.9 / 308.7  156.6 / 248.1     0.441    0.362
+# C99  do          -             -                0.465    0.392
+# C++  ia         78.4 / 121.8   79.2 / 123.6     0.092    0.094   (C++ full decode: all threads)
+# C++  io        175.0 / 293.0  146.1 / 238.1     0.113    0.112
+# C++  do          -             -                0.144    0.141
+# axdec CLI (with the output write), best of 3: open default 0.832 -> 0.753 s; zstd default 0.552 -> 0.577.
+# Region open against v2.1 interactive: 1.98x slower after (was 2.36x); perf C99 region open: axr_decode 52 %,
+# cur_chunk_get 13 % - the rANS pieces are what remains.

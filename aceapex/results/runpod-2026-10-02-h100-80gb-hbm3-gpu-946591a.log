@@ -1,0 +1,1322 @@
+MODE ONE (every profile, dense, flips, repro, corpus ladder + HPRC)
+platform runpod | store /workspace/aceapex_store | work /workspace/work
+== provenance 2026-10-02
+gpu NVIDIA H100 80GB HBM3 | cc 9.0 | driver 570.195.03
+clocks max sm/mem 1980 MHz, 2619 MHz | memory 81559 MiB | power limit 700.00 W
+host Intel(R) Xeon(R) Platinum 8468, 160 threads, RAM 1511 GB, disk free 191124G
+Build cuda_12.4.r12.4/compiler.34097967_0
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+commit 946591a
+libzstd 1.4.8
+nvcomp Version: 5.3.0.16
+head_rans_warp_emu	pass	GPU rANS warp steps (ax_rans_warp.h) == axr_decode, refill from global and from the register window (AX_OPEN_SEQ, 0 words outside it), CPU AVX2 decoder == scalar (AVX2 on, 3753 chunks), AVX-512 decoder == scalar (3753 chunks): 85 round-trips, 12 archive chunks, 245 crafted tables, 3496 mutations (127 accepted, 3626 rejected by both), 2457904 bytes, 0 mismatches
+head_open_warp_emu	pass	GPU open-pack steps (ax_open_warp.h, block rounds of 256) == axo_dna_decode, old path (cse, bases, exc), the default k_open_cg + k_open_bases_x and k_open_bases_s (AX_OPEN_SHB, 3143 decodes each, 5575 blocks from shared): 40 round-trips, 38 archive chunks, 437 crafted streams, 2628 mutations (985 accepted, 2158 rejected by both), 22286021 bytes, 0 mismatches
+head_gpu_zstd_validate	pass	25 archives with zstd frames (1761 frames) pass the validation (0 refused); the saved T2T frame (verify/repro, nvCOMP 5.3 does not finish on it) passes the header check and is refused; 400 byte flips inside zstd frames: 238 archives refused, 162 accepted, 0 of them with a frame that does not decode to its size
+head_gpu_plan_emu	pass	33 archives decoded through the plan bit-perfect (0 bad; AX_VEC 16-byte paths: 1516490 unpack stores, 265779 match copies; AX_GPU_TILE: 5 archives, 50 ranges, 308590 literal 16-byte steps, same bytes; block-range plans: 121 batches, windows == original), 1320 ranges on a zeroed temp (0 bad), 0 refused by the planner, 1980 mutations (270 refused, the rest ran inside their buffers)
+head_gpu_flip_emu	pass	1000 byte flips of the streams under the plan of the intact archive (as on the device), a failed zstd frame leaving random bytes: 37829788 match steps of 43025802 allowed, 0 over the step limit, 0 copies outside a block; 497 flagged by status, 399 more by XXH3, 104 decoded to the original, 0 silent; length 2^32-16 after 100 bytes refused
+built aceapex_gpu -arch=sm_90
+built gpu_api_test (nvCOMP) and examples/gpu_decode (no nvCOMP), -arch=sm_90
+shared library libaceapex_gpu.so.1: soname: [libaceapex_gpu.so.1], API version 2.3; examples/gpu_decode linked against it
+fixture dna_open_2MiB on the GPU: exit 0, 9 MATCHES OK, 0 DIFFERS
+fixture dna_open_mixed_300K on the GPU: exit 0, 11 MATCHES OK, 0 DIFFERS
+fixture dna_open_4097B on the GPU: exit 0, 5 MATCHES OK, 0 DIFFERS
+fixture dna_openlit_300K on the GPU: exit 0, 11 MATCHES OK, 0 DIFFERS
+fixture text_open_200K on the GPU: exit 0, 5 MATCHES OK, 0 DIFFERS
+chr1.fa: downloaded, kept in the store
+chr1.fa: md5 9465e0f0df6e2c6eb39729c39cee5465 OK
+t2t.fa: downloaded, kept in the store
+t2t.fa: md5 cd1e52ce400c027ed0b7ab4b9d613f5a OK
+grch38.fa: downloaded, kept in the store
+grch38.fa: md5 b2aee9f885accc00531e59c4736bee63 OK
+encode chr1.open: 1.1 s on 160 threads, 63083287 B
+chr1.open (AX_PROFILE=open): archive 63083287 B (== pinned), encoded, cached on Drive, CPU round-trip bit-perfect
+== gpu_api_test chr1.open
+[+0.0 s] read archive and original
+[+0.3 s] plan_create
+[+0.6 s] plan_create with ACEAPEX_GPU_VALIDATE_ZSTD
+[api] plan with ACEAPEX_GPU_VALIDATE_ZSTD 4.1 ms (+0.4 ms against a plain plan of 3.7 ms after the CUDA start: every zstd frame decoded by libzstd on 160 host threads): accepted
+[api] plan 375.5 ms on the host; temp 372.5 MB (full 371.4 MB), output 253.9 MB
+[+0.7 s] allocate and upload
+[+0.8 s] full decode
+[api] full decode: return 0, status 0, output MATCHES OK
+[+0.8 s] full decode timed
+[api] full decode on-device 2.104 ms (median of 3) -> 120.7 GB/s
+[+0.8 s] full decode + XXH3
+[+0.9 s] full decode + XXH3 timed
+[api] full decode + XXH3 check on-device 8.889 ms (median of 3; check adds 6.786 ms, +322.6 %): return 0, status 0, output MATCHES OK
+[+0.9 s] full decode AX_GPU_TILE=1
+[api] AX_GPU_TILE=1 full decode on-device 3.625 ms (default 2.104 ms, +72.3 %): return 0, status 0, output MATCHES OK
+[+1.0 s] ranges
+[api] ranges: 200 of 200 windows == original (MATCHES OK); 16 KiB window 0.777 ms (median of 33)
+[+1.2 s] flip 1/20 at 46914874 (literals stream), 0x97 -> 0x54: rANS piece 2681 of 14372 (class 1)
+[+1.3 s]   plan of the flipped archive: built (the damage is past the host checks) (0.004 s)
+[+1.3 s]   flip 1: init + fixups done (0.000 s)
+[+1.3 s]   flip 1: stored chunks done (0.000 s)
+[+1.3 s]   flip 1: nvCOMP zstd token frames done (0.000 s)
+[+1.3 s]   flip 1: nvCOMP zstd literal frames done (0.000 s)
+[+1.3 s]   flip 1: rANS pieces done (0.001 s)
+[+1.3 s]   flip 1: DNA unpack done (0.000 s)
+[+1.3 s]   flip 1: open DNA pack done (0.001 s)
+[+1.3 s]   flip 1: match done (0.001 s)
+[+1.3 s] flip 1/20 at 46914874 (literals stream): return 0, status 1, caught (0.02 s)
+[+1.3 s]   flip 1 + XXH3: init + fixups done (0.000 s)
+[+1.3 s]   flip 1 + XXH3: stored chunks done (0.000 s)
+[+1.3 s]   flip 1 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+1.3 s]   flip 1 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+1.3 s]   flip 1 + XXH3: rANS pieces done (0.001 s)
+[+1.3 s]   flip 1 + XXH3: DNA unpack done (0.000 s)
+[+1.3 s]   flip 1 + XXH3: open DNA pack done (0.001 s)
+[+1.3 s]   flip 1 + XXH3: match done (0.001 s)
+[+1.3 s]   flip 1 + XXH3: XXH3 block terms done (0.000 s)
+[+1.3 s]   flip 1 + XXH3: XXH3 chain done (0.007 s)
+[+1.3 s] flip 1/20 at 46914874 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+1.3 s] flip 2/20 at 55612763 (literals stream), 0x0e -> 0xf2: rANS piece 3187 of 14372 (class 1)
+[+1.4 s]   plan of the flipped archive: built (the damage is past the host checks) (0.003 s)
+[+1.4 s]   flip 2: init + fixups done (0.000 s)
+[+1.4 s]   flip 2: stored chunks done (0.000 s)
+[+1.4 s]   flip 2: nvCOMP zstd token frames done (0.000 s)
+[+1.4 s]   flip 2: nvCOMP zstd literal frames done (0.000 s)
+[+1.4 s]   flip 2: rANS pieces done (0.001 s)
+[+1.4 s]   flip 2: DNA unpack done (0.000 s)
+[+1.4 s]   flip 2: open DNA pack done (0.001 s)
+[+1.4 s]   flip 2: match done (0.001 s)
+[+1.4 s] flip 2/20 at 55612763 (literals stream): return 0, status 1, caught (0.02 s)
+[+1.4 s]   flip 2 + XXH3: init + fixups done (0.000 s)
+[+1.4 s]   flip 2 + XXH3: stored chunks done (0.000 s)
+[+1.4 s]   flip 2 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+1.4 s]   flip 2 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+1.4 s]   flip 2 + XXH3: rANS pieces done (0.001 s)
+[+1.4 s]   flip 2 + XXH3: DNA unpack done (0.000 s)
+[+1.4 s]   flip 2 + XXH3: open DNA pack done (0.001 s)
+[+1.4 s]   flip 2 + XXH3: match done (0.001 s)
+[+1.4 s]   flip 2 + XXH3: XXH3 block terms done (0.000 s)
+[+1.4 s]   flip 2 + XXH3: XXH3 chain done (0.007 s)
+[+1.4 s] flip 2/20 at 55612763 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+1.4 s] flip 3/20 at 61302128 (literals stream), 0x0f -> 0xc7: rANS piece 3515 of 14372 (class 1)
+[+1.4 s]   plan of the flipped archive: built (the damage is past the host checks) (0.002 s)
+[+1.4 s]   flip 3: init + fixups done (0.000 s)
+[+1.4 s]   flip 3: stored chunks done (0.000 s)
+[+1.4 s]   flip 3: nvCOMP zstd token frames done (0.000 s)
+[+1.4 s]   flip 3: nvCOMP zstd literal frames done (0.000 s)
+[+1.4 s]   flip 3: rANS pieces done (0.001 s)
+[+1.4 s]   flip 3: DNA unpack done (0.000 s)
+[+1.4 s]   flip 3: open DNA pack done (0.001 s)
+[+1.5 s]   flip 3: match done (0.001 s)
+[+1.5 s] flip 3/20 at 61302128 (literals stream): return 0, status 1, caught (0.02 s)
+[+1.5 s]   flip 3 + XXH3: init + fixups done (0.000 s)
+[+1.5 s]   flip 3 + XXH3: stored chunks done (0.000 s)
+[+1.5 s]   flip 3 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+1.5 s]   flip 3 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+1.5 s]   flip 3 + XXH3: rANS pieces done (0.001 s)
+[+1.5 s]   flip 3 + XXH3: DNA unpack done (0.000 s)
+[+1.5 s]   flip 3 + XXH3: open DNA pack done (0.001 s)
+[+1.5 s]   flip 3 + XXH3: match done (0.001 s)
+[+1.5 s]   flip 3 + XXH3: XXH3 block terms done (0.000 s)
+[+1.5 s]   flip 3 + XXH3: XXH3 chain done (0.007 s)
+[+1.5 s] flip 3/20 at 61302128 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+1.5 s] flip 4/20 at 48587823 (literals stream), 0xe3 -> 0x61: rANS piece 2780 of 14372 (class 1)
+[+1.5 s]   plan of the flipped archive: built (the damage is past the host checks) (0.002 s)
+[+1.5 s]   flip 4: init + fixups done (0.000 s)
+[+1.5 s]   flip 4: stored chunks done (0.000 s)
+[+1.5 s]   flip 4: nvCOMP zstd token frames done (0.000 s)
+[+1.5 s]   flip 4: nvCOMP zstd literal frames done (0.000 s)
+[+1.5 s]   flip 4: rANS pieces done (0.001 s)
+[+1.5 s]   flip 4: DNA unpack done (0.000 s)
+[+1.5 s]   flip 4: open DNA pack done (0.001 s)
+[+1.5 s]   flip 4: match done (0.001 s)
+[+1.6 s] flip 4/20 at 48587823 (literals stream): return 0, status 1, caught (0.02 s)
+[+1.6 s]   flip 4 + XXH3: init + fixups done (0.000 s)
+[+1.6 s]   flip 4 + XXH3: stored chunks done (0.000 s)
+[+1.6 s]   flip 4 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+1.6 s]   flip 4 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+1.6 s]   flip 4 + XXH3: rANS pieces done (0.001 s)
+[+1.6 s]   flip 4 + XXH3: DNA unpack done (0.000 s)
+[+1.6 s]   flip 4 + XXH3: open DNA pack done (0.001 s)
+[+1.6 s]   flip 4 + XXH3: match done (0.001 s)
+[+1.6 s]   flip 4 + XXH3: XXH3 block terms done (0.000 s)
+[+1.6 s]   flip 4 + XXH3: XXH3 chain done (0.007 s)
+[+1.6 s] flip 4/20 at 48587823 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+1.6 s] flip 5/20 at 36327687 (literals stream), 0x2d -> 0x87: rANS piece 2069 of 14372 (class 1)
+[+1.6 s]   plan of the flipped archive: built (the damage is past the host checks) (0.002 s)
+[+1.6 s]   flip 5: init + fixups done (0.000 s)
+[+1.6 s]   flip 5: stored chunks done (0.000 s)
+[+1.6 s]   flip 5: nvCOMP zstd token frames done (0.000 s)
+[+1.6 s]   flip 5: nvCOMP zstd literal frames done (0.000 s)
+[+1.6 s]   flip 5: rANS pieces done (0.001 s)
+[+1.6 s]   flip 5: DNA unpack done (0.000 s)
+[+1.6 s]   flip 5: open DNA pack done (0.001 s)
+[+1.6 s]   flip 5: match done (0.001 s)
+[+1.6 s] flip 5/20 at 36327687 (literals stream): return 0, status 1, caught (0.02 s)
+[+1.6 s]   flip 5 + XXH3: init + fixups done (0.000 s)
+[+1.6 s]   flip 5 + XXH3: stored chunks done (0.000 s)
+[+1.6 s]   flip 5 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+1.6 s]   flip 5 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+1.6 s]   flip 5 + XXH3: rANS pieces done (0.001 s)
+[+1.6 s]   flip 5 + XXH3: DNA unpack done (0.000 s)
+[+1.6 s]   flip 5 + XXH3: open DNA pack done (0.001 s)
+[+1.6 s]   flip 5 + XXH3: match done (0.001 s)
+[+1.6 s]   flip 5 + XXH3: XXH3 block terms done (0.000 s)
+[+1.6 s]   flip 5 + XXH3: XXH3 chain done (0.007 s)
+[+1.7 s] flip 5/20 at 36327687 (literals stream) + XXH3: return 0, status 17, caught (0.09 s)
+[+1.7 s] flip 6/20 at 52933371 (literals stream), 0x1d -> 0x9c: rANS piece 3031 of 14372 (class 1)
+[+1.8 s]   plan of the flipped archive: built (the damage is past the host checks) (0.003 s)
+[+1.8 s]   flip 6: init + fixups done (0.000 s)
+[+1.8 s]   flip 6: stored chunks done (0.000 s)
+[+1.8 s]   flip 6: nvCOMP zstd token frames done (0.000 s)
+[+1.8 s]   flip 6: nvCOMP zstd literal frames done (0.000 s)
+[+1.8 s]   flip 6: rANS pieces done (0.001 s)
+[+1.8 s]   flip 6: DNA unpack done (0.000 s)
+[+1.8 s]   flip 6: open DNA pack done (0.001 s)
+[+1.8 s]   flip 6: match done (0.001 s)
+[+1.8 s] flip 6/20 at 52933371 (literals stream): return 0, status 1, caught (0.02 s)
+[+1.8 s]   flip 6 + XXH3: init + fixups done (0.000 s)
+[+1.8 s]   flip 6 + XXH3: stored chunks done (0.000 s)
+[+1.8 s]   flip 6 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+1.8 s]   flip 6 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+1.8 s]   flip 6 + XXH3: rANS pieces done (0.001 s)
+[+1.8 s]   flip 6 + XXH3: DNA unpack done (0.000 s)
+[+1.8 s]   flip 6 + XXH3: open DNA pack done (0.001 s)
+[+1.8 s]   flip 6 + XXH3: match done (0.001 s)
+[+1.8 s]   flip 6 + XXH3: XXH3 block terms done (0.000 s)
+[+1.8 s]   flip 6 + XXH3: XXH3 chain done (0.007 s)
+[+1.8 s] flip 6/20 at 52933371 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+1.8 s] flip 7/20 at 56511254 (literals stream), 0x51 -> 0x30: rANS piece 3239 of 14372 (class 1)
+[+1.9 s]   plan of the flipped archive: built (the damage is past the host checks) (0.002 s)
+[+1.9 s]   flip 7: init + fixups done (0.000 s)
+[+1.9 s]   flip 7: stored chunks done (0.000 s)
+[+1.9 s]   flip 7: nvCOMP zstd token frames done (0.000 s)
+[+1.9 s]   flip 7: nvCOMP zstd literal frames done (0.000 s)
+[+1.9 s]   flip 7: rANS pieces done (0.001 s)
+[+1.9 s]   flip 7: DNA unpack done (0.000 s)
+[+1.9 s]   flip 7: open DNA pack done (0.001 s)
+[+1.9 s]   flip 7: match done (0.001 s)
+[+1.9 s] flip 7/20 at 56511254 (literals stream): return 0, status 1, caught (0.02 s)
+[+1.9 s]   flip 7 + XXH3: init + fixups done (0.000 s)
+[+1.9 s]   flip 7 + XXH3: stored chunks done (0.000 s)
+[+1.9 s]   flip 7 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+1.9 s]   flip 7 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+1.9 s]   flip 7 + XXH3: rANS pieces done (0.001 s)
+[+1.9 s]   flip 7 + XXH3: DNA unpack done (0.000 s)
+[+1.9 s]   flip 7 + XXH3: open DNA pack done (0.001 s)
+[+1.9 s]   flip 7 + XXH3: match done (0.001 s)
+[+1.9 s]   flip 7 + XXH3: XXH3 block terms done (0.000 s)
+[+1.9 s]   flip 7 + XXH3: XXH3 chain done (0.007 s)
+[+1.9 s] flip 7/20 at 56511254 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+1.9 s] flip 8/20 at 36733998 (literals stream), 0x21 -> 0xff: rANS piece 2092 of 14372 (class 1)
+[+1.9 s]   plan of the flipped archive: built (the damage is past the host checks) (0.002 s)
+[+1.9 s]   flip 8: init + fixups done (0.000 s)
+[+1.9 s]   flip 8: stored chunks done (0.000 s)
+[+1.9 s]   flip 8: nvCOMP zstd token frames done (0.000 s)
+[+1.9 s]   flip 8: nvCOMP zstd literal frames done (0.000 s)
+[+1.9 s]   flip 8: rANS pieces done (0.001 s)
+[+1.9 s]   flip 8: DNA unpack done (0.000 s)
+[+1.9 s]   flip 8: open DNA pack done (0.001 s)
+[+1.9 s]   flip 8: match done (0.001 s)
+[+2.0 s] flip 8/20 at 36733998 (literals stream): return 0, status 1, caught (0.02 s)
+[+2.0 s]   flip 8 + XXH3: init + fixups done (0.000 s)
+[+2.0 s]   flip 8 + XXH3: stored chunks done (0.000 s)
+[+2.0 s]   flip 8 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+2.0 s]   flip 8 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+2.0 s]   flip 8 + XXH3: rANS pieces done (0.001 s)
+[+2.0 s]   flip 8 + XXH3: DNA unpack done (0.000 s)
+[+2.0 s]   flip 8 + XXH3: open DNA pack done (0.001 s)
+[+2.0 s]   flip 8 + XXH3: match done (0.001 s)
+[+2.0 s]   flip 8 + XXH3: XXH3 block terms done (0.000 s)
+[+2.0 s]   flip 8 + XXH3: XXH3 chain done (0.007 s)
+[+2.0 s] flip 8/20 at 36733998 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+2.0 s] flip 9/20 at 39524377 (literals stream), 0xc1 -> 0x81: rANS piece 2253 of 14372 (class 1)
+[+2.0 s]   plan of the flipped archive: built (the damage is past the host checks) (0.002 s)
+[+2.0 s]   flip 9: init + fixups done (0.000 s)
+[+2.0 s]   flip 9: stored chunks done (0.000 s)
+[+2.0 s]   flip 9: nvCOMP zstd token frames done (0.000 s)
+[+2.0 s]   flip 9: nvCOMP zstd literal frames done (0.000 s)
+[+2.0 s]   flip 9: rANS pieces done (0.001 s)
+[+2.0 s]   flip 9: DNA unpack done (0.000 s)
+[+2.0 s]   flip 9: open DNA pack done (0.001 s)
+[+2.0 s]   flip 9: match done (0.001 s)
+[+2.1 s] flip 9/20 at 39524377 (literals stream): return 0, status 1, caught (0.02 s)
+[+2.1 s]   flip 9 + XXH3: init + fixups done (0.000 s)
+[+2.1 s]   flip 9 + XXH3: stored chunks done (0.000 s)
+[+2.1 s]   flip 9 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+2.1 s]   flip 9 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+2.1 s]   flip 9 + XXH3: rANS pieces done (0.001 s)
+[+2.1 s]   flip 9 + XXH3: DNA unpack done (0.000 s)
+[+2.1 s]   flip 9 + XXH3: open DNA pack done (0.001 s)
+[+2.1 s]   flip 9 + XXH3: match done (0.001 s)
+[+2.1 s]   flip 9 + XXH3: XXH3 block terms done (0.000 s)
+[+2.1 s]   flip 9 + XXH3: XXH3 chain done (0.007 s)
+[+2.1 s] flip 9/20 at 39524377 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+2.1 s] flip 10/20 at 47784049 (literals stream), 0xcc -> 0xa9: rANS piece 2733 of 14372 (class 1)
+[+2.1 s]   plan of the flipped archive: built (the damage is past the host checks) (0.002 s)
+[+2.1 s]   flip 10: init + fixups done (0.000 s)
+[+2.1 s]   flip 10: stored chunks done (0.000 s)
+[+2.1 s]   flip 10: nvCOMP zstd token frames done (0.000 s)
+[+2.1 s]   flip 10: nvCOMP zstd literal frames done (0.000 s)
+[+2.1 s]   flip 10: rANS pieces done (0.001 s)
+[+2.1 s]   flip 10: DNA unpack done (0.000 s)
+[+2.1 s]   flip 10: open DNA pack done (0.001 s)
+[+2.1 s]   flip 10: match done (0.001 s)
+[+2.1 s] flip 10/20 at 47784049 (literals stream): return 0, status 1, caught (0.02 s)
+[+2.1 s]   flip 10 + XXH3: init + fixups done (0.000 s)
+[+2.1 s]   flip 10 + XXH3: stored chunks done (0.000 s)
+[+2.1 s]   flip 10 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+2.1 s]   flip 10 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+2.1 s]   flip 10 + XXH3: rANS pieces done (0.001 s)
+[+2.1 s]   flip 10 + XXH3: DNA unpack done (0.000 s)
+[+2.1 s]   flip 10 + XXH3: open DNA pack done (0.001 s)
+[+2.1 s]   flip 10 + XXH3: match done (0.001 s)
+[+2.1 s]   flip 10 + XXH3: XXH3 block terms done (0.000 s)
+[+2.1 s]   flip 10 + XXH3: XXH3 chain done (0.007 s)
+[+2.2 s] flip 10/20 at 47784049 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+2.2 s] flip 11/20 at 59682981 (literals stream), 0x24 -> 0xdc: rANS piece 3421 of 14372 (class 1)
+[+2.2 s]   plan of the flipped archive: built (the damage is past the host checks) (0.002 s)
+[+2.2 s]   flip 11: init + fixups done (0.000 s)
+[+2.2 s]   flip 11: stored chunks done (0.000 s)
+[+2.2 s]   flip 11: nvCOMP zstd token frames done (0.000 s)
+[+2.2 s]   flip 11: nvCOMP zstd literal frames done (0.000 s)
+[+2.2 s]   flip 11: rANS pieces done (0.001 s)
+[+2.2 s]   flip 11: DNA unpack done (0.000 s)
+[+2.2 s]   flip 11: open DNA pack done (0.001 s)
+[+2.2 s]   flip 11: match done (0.001 s)
+[+2.2 s] flip 11/20 at 59682981 (literals stream): return 0, status 1, caught (0.03 s)
+[+2.2 s]   flip 11 + XXH3: init + fixups done (0.000 s)
+[+2.2 s]   flip 11 + XXH3: stored chunks done (0.000 s)
+[+2.2 s]   flip 11 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+2.2 s]   flip 11 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+2.2 s]   flip 11 + XXH3: rANS pieces done (0.001 s)
+[+2.2 s]   flip 11 + XXH3: DNA unpack done (0.000 s)
+[+2.2 s]   flip 11 + XXH3: open DNA pack done (0.001 s)
+[+2.2 s]   flip 11 + XXH3: match done (0.001 s)
+[+2.2 s]   flip 11 + XXH3: XXH3 block terms done (0.000 s)
+[+2.2 s]   flip 11 + XXH3: XXH3 chain done (0.007 s)
+[+2.3 s] flip 11/20 at 59682981 (literals stream) + XXH3: return 0, status 17, caught (0.04 s)
+[+2.3 s] flip 12/20 at 32099693 (literals stream), 0xc3 -> 0x70: rANS piece 1824 of 14372 (class 1)
+[+2.3 s]   plan of the flipped archive: built (the damage is past the host checks) (0.003 s)
+[+2.3 s]   flip 12: init + fixups done (0.000 s)
+[+2.3 s]   flip 12: stored chunks done (0.000 s)
+[+2.3 s]   flip 12: nvCOMP zstd token frames done (0.000 s)
+[+2.3 s]   flip 12: nvCOMP zstd literal frames done (0.000 s)
+[+2.3 s]   flip 12: rANS pieces done (0.001 s)
+[+2.3 s]   flip 12: DNA unpack done (0.000 s)
+[+2.3 s]   flip 12: open DNA pack done (0.001 s)
+[+2.3 s]   flip 12: match done (0.001 s)
+[+2.3 s] flip 12/20 at 32099693 (literals stream): return 0, status 1, caught (0.03 s)
+[+2.3 s]   flip 12 + XXH3: init + fixups done (0.000 s)
+[+2.3 s]   flip 12 + XXH3: stored chunks done (0.000 s)
+[+2.3 s]   flip 12 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+2.3 s]   flip 12 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+2.3 s]   flip 12 + XXH3: rANS pieces done (0.001 s)
+[+2.3 s]   flip 12 + XXH3: DNA unpack done (0.000 s)
+[+2.3 s]   flip 12 + XXH3: open DNA pack done (0.001 s)
+[+2.3 s]   flip 12 + XXH3: match done (0.001 s)
+[+2.3 s]   flip 12 + XXH3: XXH3 block terms done (0.000 s)
+[+2.4 s]   flip 12 + XXH3: XXH3 chain done (0.007 s)
+[+2.4 s] flip 12/20 at 32099693 (literals stream) + XXH3: return 0, status 17, caught (0.04 s)
+[+2.4 s] flip 13/20 at 37221158 (literals stream), 0x57 -> 0x03: rANS piece 5705 of 14372 (class 2)
+[+2.4 s]   plan of the flipped archive: built (the damage is past the host checks) (0.003 s)
+[+2.4 s]   flip 13: init + fixups done (0.000 s)
+[+2.4 s]   flip 13: stored chunks done (0.000 s)
+[+2.4 s]   flip 13: nvCOMP zstd token frames done (0.000 s)
+[+2.4 s]   flip 13: nvCOMP zstd literal frames done (0.000 s)
+[+2.4 s]   flip 13: rANS pieces done (0.001 s)
+[+2.4 s]   flip 13: DNA unpack done (0.000 s)
+[+2.4 s]   flip 13: open DNA pack done (0.001 s)
+[+2.4 s]   flip 13: match done (0.001 s)
+[+2.5 s] flip 13/20 at 37221158 (literals stream): return 0, status 3, caught (0.03 s)
+[+2.5 s]   flip 13 + XXH3: init + fixups done (0.000 s)
+[+2.5 s]   flip 13 + XXH3: stored chunks done (0.000 s)
+[+2.5 s]   flip 13 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+2.5 s]   flip 13 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+2.5 s]   flip 13 + XXH3: rANS pieces done (0.001 s)
+[+2.5 s]   flip 13 + XXH3: DNA unpack done (0.000 s)
+[+2.5 s]   flip 13 + XXH3: open DNA pack done (0.001 s)
+[+2.5 s]   flip 13 + XXH3: match done (0.001 s)
+[+2.5 s]   flip 13 + XXH3: XXH3 block terms done (0.000 s)
+[+2.5 s]   flip 13 + XXH3: XXH3 chain done (0.007 s)
+[+2.5 s] flip 13/20 at 37221158 (literals stream) + XXH3: return 0, status 3, caught (0.04 s)
+[+2.5 s] flip 14/20 at 49172623 (literals stream), 0xfb -> 0xf8: rANS piece 2814 of 14372 (class 1)
+[+2.5 s]   plan of the flipped archive: built (the damage is past the host checks) (0.003 s)
+[+2.5 s]   flip 14: init + fixups done (0.000 s)
+[+2.5 s]   flip 14: stored chunks done (0.000 s)
+[+2.5 s]   flip 14: nvCOMP zstd token frames done (0.000 s)
+[+2.5 s]   flip 14: nvCOMP zstd literal frames done (0.000 s)
+[+2.5 s]   flip 14: rANS pieces done (0.001 s)
+[+2.5 s]   flip 14: DNA unpack done (0.000 s)
+[+2.5 s]   flip 14: open DNA pack done (0.001 s)
+[+2.5 s]   flip 14: match done (0.001 s)
+[+2.6 s] flip 14/20 at 49172623 (literals stream): return 0, status 1, caught (0.03 s)
+[+2.6 s]   flip 14 + XXH3: init + fixups done (0.000 s)
+[+2.6 s]   flip 14 + XXH3: stored chunks done (0.000 s)
+[+2.6 s]   flip 14 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+2.6 s]   flip 14 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+2.6 s]   flip 14 + XXH3: rANS pieces done (0.001 s)
+[+2.6 s]   flip 14 + XXH3: DNA unpack done (0.000 s)
+[+2.6 s]   flip 14 + XXH3: open DNA pack done (0.001 s)
+[+2.6 s]   flip 14 + XXH3: match done (0.001 s)
+[+2.6 s]   flip 14 + XXH3: XXH3 block terms done (0.000 s)
+[+2.6 s]   flip 14 + XXH3: XXH3 chain done (0.007 s)
+[+2.6 s] flip 14/20 at 49172623 (literals stream) + XXH3: return 0, status 17, caught (0.04 s)
+[+2.6 s] flip 15/20 at 45592330 (literals stream), 0x99 -> 0x0b: rANS piece 2604 of 14372 (class 1)
+[+2.6 s]   plan of the flipped archive: built (the damage is past the host checks) (0.002 s)
+[+2.6 s]   flip 15: init + fixups done (0.000 s)
+[+2.6 s]   flip 15: stored chunks done (0.000 s)
+[+2.6 s]   flip 15: nvCOMP zstd token frames done (0.000 s)
+[+2.6 s]   flip 15: nvCOMP zstd literal frames done (0.000 s)
+[+2.6 s]   flip 15: rANS pieces done (0.001 s)
+[+2.6 s]   flip 15: DNA unpack done (0.000 s)
+[+2.6 s]   flip 15: open DNA pack done (0.001 s)
+[+2.6 s]   flip 15: match done (0.001 s)
+[+2.7 s] flip 15/20 at 45592330 (literals stream): return 0, status 1, caught (0.03 s)
+[+2.7 s]   flip 15 + XXH3: init + fixups done (0.000 s)
+[+2.7 s]   flip 15 + XXH3: stored chunks done (0.000 s)
+[+2.7 s]   flip 15 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+2.7 s]   flip 15 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+2.7 s]   flip 15 + XXH3: rANS pieces done (0.001 s)
+[+2.7 s]   flip 15 + XXH3: DNA unpack done (0.000 s)
+[+2.7 s]   flip 15 + XXH3: open DNA pack done (0.001 s)
+[+2.7 s]   flip 15 + XXH3: match done (0.001 s)
+[+2.7 s]   flip 15 + XXH3: XXH3 block terms done (0.000 s)
+[+2.7 s]   flip 15 + XXH3: XXH3 chain done (0.007 s)
+[+2.7 s] flip 15/20 at 45592330 (literals stream) + XXH3: return 0, status 17, caught (0.04 s)
+[+2.7 s] flip 16/20 at 45716544 (literals stream), 0xf9 -> 0x33: rANS piece 2611 of 14372 (class 1)
+[+2.8 s]   plan of the flipped archive: built (the damage is past the host checks) (0.004 s)
+[+2.8 s]   flip 16: init + fixups done (0.000 s)
+[+2.8 s]   flip 16: stored chunks done (0.000 s)
+[+2.8 s]   flip 16: nvCOMP zstd token frames done (0.000 s)
+[+2.8 s]   flip 16: nvCOMP zstd literal frames done (0.000 s)
+[+2.8 s]   flip 16: rANS pieces done (0.001 s)
+[+2.8 s]   flip 16: DNA unpack done (0.000 s)
+[+2.8 s]   flip 16: open DNA pack done (0.001 s)
+[+2.8 s]   flip 16: match done (0.001 s)
+[+2.8 s] flip 16/20 at 45716544 (literals stream): return 0, status 1, caught (0.02 s)
+[+2.8 s]   flip 16 + XXH3: init + fixups done (0.000 s)
+[+2.8 s]   flip 16 + XXH3: stored chunks done (0.000 s)
+[+2.8 s]   flip 16 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+2.8 s]   flip 16 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+2.8 s]   flip 16 + XXH3: rANS pieces done (0.001 s)
+[+2.8 s]   flip 16 + XXH3: DNA unpack done (0.000 s)
+[+2.8 s]   flip 16 + XXH3: open DNA pack done (0.001 s)
+[+2.8 s]   flip 16 + XXH3: match done (0.001 s)
+[+2.8 s]   flip 16 + XXH3: XXH3 block terms done (0.000 s)
+[+2.8 s]   flip 16 + XXH3: XXH3 chain done (0.007 s)
+[+2.8 s] flip 16/20 at 45716544 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+2.8 s] flip 17/20 at 41234359 (literals stream), 0x3f -> 0xda: rANS piece 2352 of 14372 (class 1)
+[+2.9 s]   plan of the flipped archive: built (the damage is past the host checks) (0.003 s)
+[+2.9 s]   flip 17: init + fixups done (0.000 s)
+[+2.9 s]   flip 17: stored chunks done (0.000 s)
+[+2.9 s]   flip 17: nvCOMP zstd token frames done (0.000 s)
+[+2.9 s]   flip 17: nvCOMP zstd literal frames done (0.000 s)
+[+2.9 s]   flip 17: rANS pieces done (0.001 s)
+[+2.9 s]   flip 17: DNA unpack done (0.000 s)
+[+2.9 s]   flip 17: open DNA pack done (0.001 s)
+[+2.9 s]   flip 17: match done (0.001 s)
+[+2.9 s] flip 17/20 at 41234359 (literals stream): return 0, status 1, caught (0.02 s)
+[+2.9 s]   flip 17 + XXH3: init + fixups done (0.000 s)
+[+2.9 s]   flip 17 + XXH3: stored chunks done (0.000 s)
+[+2.9 s]   flip 17 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+2.9 s]   flip 17 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+2.9 s]   flip 17 + XXH3: rANS pieces done (0.001 s)
+[+2.9 s]   flip 17 + XXH3: DNA unpack done (0.000 s)
+[+2.9 s]   flip 17 + XXH3: open DNA pack done (0.001 s)
+[+2.9 s]   flip 17 + XXH3: match done (0.001 s)
+[+2.9 s]   flip 17 + XXH3: XXH3 block terms done (0.000 s)
+[+2.9 s]   flip 17 + XXH3: XXH3 chain done (0.007 s)
+[+2.9 s] flip 17/20 at 41234359 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+2.9 s] flip 18/20 at 46936320 (literals stream), 0xfb -> 0x2a: rANS piece 2683 of 14372 (class 1)
+[+3.0 s]   plan of the flipped archive: built (the damage is past the host checks) (0.003 s)
+[+3.0 s]   flip 18: init + fixups done (0.000 s)
+[+3.0 s]   flip 18: stored chunks done (0.000 s)
+[+3.0 s]   flip 18: nvCOMP zstd token frames done (0.000 s)
+[+3.0 s]   flip 18: nvCOMP zstd literal frames done (0.000 s)
+[+3.0 s]   flip 18: rANS pieces done (0.001 s)
+[+3.0 s]   flip 18: DNA unpack done (0.000 s)
+[+3.0 s]   flip 18: open DNA pack done (0.001 s)
+[+3.0 s]   flip 18: match done (0.001 s)
+[+3.0 s] flip 18/20 at 46936320 (literals stream): return 0, status 1, caught (0.02 s)
+[+3.0 s]   flip 18 + XXH3: init + fixups done (0.000 s)
+[+3.0 s]   flip 18 + XXH3: stored chunks done (0.000 s)
+[+3.0 s]   flip 18 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+3.0 s]   flip 18 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+3.0 s]   flip 18 + XXH3: rANS pieces done (0.001 s)
+[+3.0 s]   flip 18 + XXH3: DNA unpack done (0.000 s)
+[+3.0 s]   flip 18 + XXH3: open DNA pack done (0.001 s)
+[+3.0 s]   flip 18 + XXH3: match done (0.001 s)
+[+3.0 s]   flip 18 + XXH3: XXH3 block terms done (0.000 s)
+[+3.0 s]   flip 18 + XXH3: XXH3 chain done (0.007 s)
+[+3.0 s] flip 18/20 at 46936320 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+3.0 s] flip 19/20 at 50724721 (literals stream), 0xca -> 0x24: rANS piece 2904 of 14372 (class 1)
+[+3.0 s]   plan of the flipped archive: built (the damage is past the host checks) (0.003 s)
+[+3.0 s]   flip 19: init + fixups done (0.000 s)
+[+3.0 s]   flip 19: stored chunks done (0.000 s)
+[+3.0 s]   flip 19: nvCOMP zstd token frames done (0.000 s)
+[+3.0 s]   flip 19: nvCOMP zstd literal frames done (0.000 s)
+[+3.0 s]   flip 19: rANS pieces done (0.001 s)
+[+3.0 s]   flip 19: DNA unpack done (0.000 s)
+[+3.0 s]   flip 19: open DNA pack done (0.001 s)
+[+3.0 s]   flip 19: match done (0.001 s)
+[+3.1 s] flip 19/20 at 50724721 (literals stream): return 0, status 1, caught (0.02 s)
+[+3.1 s]   flip 19 + XXH3: init + fixups done (0.000 s)
+[+3.1 s]   flip 19 + XXH3: stored chunks done (0.000 s)
+[+3.1 s]   flip 19 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+3.1 s]   flip 19 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+3.1 s]   flip 19 + XXH3: rANS pieces done (0.001 s)
+[+3.1 s]   flip 19 + XXH3: DNA unpack done (0.000 s)
+[+3.1 s]   flip 19 + XXH3: open DNA pack done (0.001 s)
+[+3.1 s]   flip 19 + XXH3: match done (0.001 s)
+[+3.1 s]   flip 19 + XXH3: XXH3 block terms done (0.000 s)
+[+3.1 s]   flip 19 + XXH3: XXH3 chain done (0.007 s)
+[+3.1 s] flip 19/20 at 50724721 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[+3.1 s] flip 20/20 at 58440547 (literals stream), 0xee -> 0x72: rANS piece 3350 of 14372 (class 1)
+[+3.1 s]   plan of the flipped archive: built (the damage is past the host checks) (0.003 s)
+[+3.1 s]   flip 20: init + fixups done (0.000 s)
+[+3.1 s]   flip 20: stored chunks done (0.000 s)
+[+3.1 s]   flip 20: nvCOMP zstd token frames done (0.000 s)
+[+3.1 s]   flip 20: nvCOMP zstd literal frames done (0.000 s)
+[+3.1 s]   flip 20: rANS pieces done (0.001 s)
+[+3.1 s]   flip 20: DNA unpack done (0.000 s)
+[+3.1 s]   flip 20: open DNA pack done (0.001 s)
+[+3.1 s]   flip 20: match done (0.001 s)
+[+3.2 s] flip 20/20 at 58440547 (literals stream): return 0, status 1, caught (0.02 s)
+[+3.2 s]   flip 20 + XXH3: init + fixups done (0.000 s)
+[+3.2 s]   flip 20 + XXH3: stored chunks done (0.000 s)
+[+3.2 s]   flip 20 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+3.2 s]   flip 20 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+3.2 s]   flip 20 + XXH3: rANS pieces done (0.001 s)
+[+3.2 s]   flip 20 + XXH3: DNA unpack done (0.000 s)
+[+3.2 s]   flip 20 + XXH3: open DNA pack done (0.001 s)
+[+3.2 s]   flip 20 + XXH3: match done (0.001 s)
+[+3.2 s]   flip 20 + XXH3: XXH3 block terms done (0.000 s)
+[+3.2 s]   flip 20 + XXH3: XXH3 chain done (0.007 s)
+[+3.2 s] flip 20/20 at 58440547 (literals stream) + XXH3: return 0, status 17, caught (0.03 s)
+[api] flips refused by the plan of the flipped archive: 0 of 20
+[api] 20 byte flips in the stream half of the archive: without the hash check 20 caught by status, 0 decoded wrong with status 0, 0 harmless; with ACEAPEX_GPU_VERIFY_XXH3 20 caught, 0 silent, 0 harmless; no CUDA error
+APIROW	/workspace/work/chr1.open.aet	63083287	2.104	bit-perfect	200	200	0.777	20	0	0	375.5	8.889	bit-perfect	20	0	0	4.1	0	3.625	bit-perfect
+exitapi 0 chr1.open
+example gpu_decode chr1.open (no nvCOMP): bit-perfect
+example gpu_decode chr1.open via libaceapex_gpu.so.1 (nvCOMP inside): bit-perfect
+== aceapex_gpu chr1.open
+archive /workspace/work/chr1.open.aet: orig=253935557 block=16384 nb=15499; 0 zstd frames (0 token, 0 literal; 0.0 MB), pieces 61.9 MB: 31 token rANS chunks, open pack seq/cse/gap/val 3585/3585/3585/3585, open plain 1; 0 raw chunks, 0 DNA chunks (zstd), 3585 open DNA chunks; streams lit/off/len/cmd = 235.0/0.0/0.0/1.9 MB
+frames: 0 bad of 0
+[warm-up] FNV out=1f01f931ee2dac7c orig=1f01f931ee2dac7c MATCHES OK
+probe G=8: 0.460 ms on 2048 blocks
+probe G=16: 0.198 ms on 2048 blocks
+probe G=32: 0.166 ms on 2048 blocks
+chosen G=32 on NVIDIA H100 80GB HBM3 (132 SMs)
+[sequential] H2D 1.633 + tok(rANS: 0 frames, 31 chunks) 0.451 + lit(open: 0 frames, 14341 pieces) 0.950 + unpack 0.629 + match(G=32) 0.518 = 4.182 ms -> 60.7 GB/s delivered; on-device 2.549 ms -> 99.6 GB/s
+[lit parts] zstd frames 0.003 | open pieces: seq 0.316, cse 0.099, gap 0.087, val 0.087, plain 0.553 ms
+[unpack parts] zstd DNA pack 0.003 | open: bases 0.549, case runs 0.081, exceptions 0.003 ms
+[sequential] FNV out=1f01f931ee2dac7c orig=1f01f931ee2dac7c MATCHES OK
+[AX_OPEN_SEQ=0 AX_OPEN_EXC=0] FNV out=1f01f931ee2dac7c orig=1f01f931ee2dac7c MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=0] FNV out=1f01f931ee2dac7c orig=1f01f931ee2dac7c MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=1] FNV out=1f01f931ee2dac7c orig=1f01f931ee2dac7c MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=1 AX_OPEN_SHB=1] FNV out=1f01f931ee2dac7c orig=1f01f931ee2dac7c MATCHES OK
+[open variants] seq pieces 0.332 -> 0.316 ms (AX_OPEN_SEQ 0 -> 1, windowed refill, bit-perfect); unpack 0.558 ms (case 0.049 + bases 0.394 + exceptions 0.130) -> 0.758 ms (AX_OPEN_EXC 0 -> 1: case+exception positions 0.082 + bases with exceptions 0.681, bit-perfect) -> 0.629 ms (AX_OPEN_SHB=1: bases from shared 0.551, bit-perfect)
+OPENVAR	/workspace/work/chr1.open.aet	0.332	0.316	0.558	0.758	0.629	1
+[tile base] FNV out=1f01f931ee2dac7c orig=1f01f931ee2dac7c MATCHES OK
+[AX_GPU_TILE=1] FNV out=1f01f931ee2dac7c orig=1f01f931ee2dac7c MATCHES OK
+[tile variants] case runs + bases + match 1.149 ms -> case runs + tile match 2.654 ms (AX_GPU_TILE=1: literals in shared memory, no literal stream, bit-perfect)
+TILEVAR	/workspace/work/chr1.open.aet	1.149	2.654	1
+[pipeline] 4 batches, H2D overlapped with zstd: 3.732 ms -> 68.0 GB/s delivered (sequential 4.182 ms, gain 10.8%)
+[pipeline] FNV out=1f01f931ee2dac7c orig=1f01f931ee2dac7c MATCHES OK
+[h2d] 61.9 MB: pageable 6.739 ms (9.2 GB/s), pinned 1.460 ms (42.4 GB/s)
+[auto] estimated H2D 1.460 ms (61.9 MB at 42.4 GB/s pinned), on-device 2.549 ms, batches of >= 64 MB: 0 -> sequential
+RESULT OK: NVIDIA H100 80GB HBM3, 132 SMs, G=32, bit-perfect on all passes
+ROW	/workspace/work/chr1.open.aet	63083287	rANS	open	0.451	0.950	0.629	0.518	2.549	4.182	99.63	bit-perfect	0.003	0.316	0.099	0.087	0.087	0.553	0.003	0.549	0.081	0.003	4.182	9.2	42.4	0	0.000	0.000	-1	-1.000	-1.000	-1.000	0.000	-1	-1.000	-1.000
+exit 0 chr1.open
+encode t2t.open: 17.4 s on 160 threads, 853264869 B
+t2t.open (AX_PROFILE=open): archive 853264869 B (== pinned), encoded, cached on Drive, CPU round-trip bit-perfect
+== gpu_api_test t2t.open
+[+0.0 s] read archive and original
+[+3.1 s] plan_create
+[+3.5 s] plan_create with ACEAPEX_GPU_VALIDATE_ZSTD
+[api] plan with ACEAPEX_GPU_VALIDATE_ZSTD 56.7 ms (+9.3 ms against a plain plan of 47.4 ms after the CUDA start: every zstd frame decoded by libzstd on 160 host threads): accepted
+[api] plan 432.4 ms on the host; temp 4732.5 MB (full 4731.5 MB), output 3156.3 MB
+[+3.6 s] allocate and upload
+[+5.1 s] full decode
+[api] full decode: return 0, status 0, output MATCHES OK
+[+5.9 s] full decode timed
+[api] full decode on-device 19.062 ms (median of 3) -> 165.6 GB/s
+[+6.0 s] full decode + XXH3
+[+6.7 s] full decode + XXH3 timed
+[api] full decode + XXH3 check on-device 103.713 ms (median of 3; check adds 84.651 ms, +444.1 %): return 0, status 0, output MATCHES OK
+[+7.1 s] full decode AX_GPU_TILE=1
+[api] AX_GPU_TILE=1 full decode on-device 37.238 ms (default 19.062 ms, +95.4 %): return 0, status 0, output MATCHES OK
+[+7.9 s] ranges
+[api] ranges: 60 of 60 windows == original (MATCHES OK); 16 KiB window 0.793 ms (median of 10)
+[+8.0 s] flip 1/6 at 468922483 (literals stream), 0x99 -> 0x60: rANS piece 26111 of 189456 (class 1)
+[+8.7 s]   plan of the flipped archive: built (the damage is past the host checks) (0.044 s)
+[+8.7 s]   flip 1: init + fixups done (0.000 s)
+[+8.7 s]   flip 1: stored chunks done (0.000 s)
+[+8.7 s]   flip 1: nvCOMP zstd token frames done (0.000 s)
+[+8.7 s]   flip 1: nvCOMP zstd literal frames done (0.000 s)
+[+8.7 s]   flip 1: rANS pieces done (0.006 s)
+[+8.7 s]   flip 1: DNA unpack done (0.000 s)
+[+8.7 s]   flip 1: open DNA pack done (0.008 s)
+[+8.7 s]   flip 1: match done (0.006 s)
+[+8.9 s] flip 1/6 at 468922483 (literals stream): return 0, status 1, caught (0.21 s)
+[+8.9 s]   flip 1 + XXH3: init + fixups done (0.000 s)
+[+8.9 s]   flip 1 + XXH3: stored chunks done (0.000 s)
+[+8.9 s]   flip 1 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+8.9 s]   flip 1 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+8.9 s]   flip 1 + XXH3: rANS pieces done (0.006 s)
+[+8.9 s]   flip 1 + XXH3: DNA unpack done (0.000 s)
+[+8.9 s]   flip 1 + XXH3: open DNA pack done (0.008 s)
+[+8.9 s]   flip 1 + XXH3: match done (0.006 s)
+[+8.9 s]   flip 1 + XXH3: XXH3 block terms done (0.002 s)
+[+9.0 s]   flip 1 + XXH3: XXH3 chain done (0.083 s)
+[+9.2 s] flip 1/6 at 468922483 (literals stream) + XXH3: return 0, status 17, caught (0.30 s)
+[+9.2 s] flip 2/6 at 821655131 (literals stream), 0xc6 -> 0xdc: rANS piece 45949 of 189456 (class 1)
+[+9.7 s]   plan of the flipped archive: built (the damage is past the host checks) (0.034 s)
+[+9.8 s]   flip 2: init + fixups done (0.000 s)
+[+9.8 s]   flip 2: stored chunks done (0.000 s)
+[+9.8 s]   flip 2: nvCOMP zstd token frames done (0.000 s)
+[+9.8 s]   flip 2: nvCOMP zstd literal frames done (0.000 s)
+[+9.8 s]   flip 2: rANS pieces done (0.006 s)
+[+9.8 s]   flip 2: DNA unpack done (0.000 s)
+[+9.8 s]   flip 2: open DNA pack done (0.008 s)
+[+9.8 s]   flip 2: match done (0.005 s)
+[+10.0 s] flip 2/6 at 821655131 (literals stream): return 0, status 1, caught (0.21 s)
+[+10.0 s]   flip 2 + XXH3: init + fixups done (0.000 s)
+[+10.0 s]   flip 2 + XXH3: stored chunks done (0.000 s)
+[+10.0 s]   flip 2 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+10.0 s]   flip 2 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+10.0 s]   flip 2 + XXH3: rANS pieces done (0.006 s)
+[+10.0 s]   flip 2 + XXH3: DNA unpack done (0.000 s)
+[+10.0 s]   flip 2 + XXH3: open DNA pack done (0.008 s)
+[+10.0 s]   flip 2 + XXH3: match done (0.005 s)
+[+10.0 s]   flip 2 + XXH3: XXH3 block terms done (0.002 s)
+[+10.1 s]   flip 2 + XXH3: XXH3 chain done (0.083 s)
+[+10.3 s] flip 2/6 at 821655131 (literals stream) + XXH3: return 0, status 17, caught (0.29 s)
+[+10.3 s] flip 3/6 at 781387827 (literals stream), 0x00 -> 0x4f: rANS piece 185331 of 189456 (class 4)
+[+10.8 s]   plan of the flipped archive: built (the damage is past the host checks) (0.042 s)
+[+10.8 s]   flip 3: init + fixups done (0.000 s)
+[+10.8 s]   flip 3: stored chunks done (0.000 s)
+[+10.8 s]   flip 3: nvCOMP zstd token frames done (0.000 s)
+[+10.8 s]   flip 3: nvCOMP zstd literal frames done (0.000 s)
+[+10.8 s]   flip 3: rANS pieces done (0.006 s)
+[+10.8 s]   flip 3: DNA unpack done (0.000 s)
+[+10.8 s]   flip 3: open DNA pack done (0.008 s)
+[+10.8 s]   flip 3: match done (0.005 s)
+[+11.0 s] flip 3/6 at 781387827 (literals stream): return 0, status 1, caught (0.20 s)
+[+11.0 s]   flip 3 + XXH3: init + fixups done (0.000 s)
+[+11.0 s]   flip 3 + XXH3: stored chunks done (0.000 s)
+[+11.0 s]   flip 3 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+11.0 s]   flip 3 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+11.0 s]   flip 3 + XXH3: rANS pieces done (0.006 s)
+[+11.0 s]   flip 3 + XXH3: DNA unpack done (0.000 s)
+[+11.0 s]   flip 3 + XXH3: open DNA pack done (0.008 s)
+[+11.0 s]   flip 3 + XXH3: match done (0.006 s)
+[+11.0 s]   flip 3 + XXH3: XXH3 block terms done (0.002 s)
+[+11.1 s]   flip 3 + XXH3: XXH3 chain done (0.083 s)
+[+11.3 s] flip 3/6 at 781387827 (literals stream) + XXH3: return 0, status 1, caught (0.29 s)
+[+11.3 s] flip 4/6 at 432636183 (literals stream), 0xa0 -> 0xf1: rANS piece 23981 of 189456 (class 1)
+[+11.8 s]   plan of the flipped archive: built (the damage is past the host checks) (0.045 s)
+[+11.9 s]   flip 4: init + fixups done (0.000 s)
+[+11.9 s]   flip 4: stored chunks done (0.000 s)
+[+11.9 s]   flip 4: nvCOMP zstd token frames done (0.000 s)
+[+11.9 s]   flip 4: nvCOMP zstd literal frames done (0.000 s)
+[+11.9 s]   flip 4: rANS pieces done (0.006 s)
+[+11.9 s]   flip 4: DNA unpack done (0.000 s)
+[+11.9 s]   flip 4: open DNA pack done (0.008 s)
+[+11.9 s]   flip 4: match done (0.006 s)
+[+12.1 s] flip 4/6 at 432636183 (literals stream): return 0, status 1, caught (0.21 s)
+[+12.1 s]   flip 4 + XXH3: init + fixups done (0.000 s)
+[+12.1 s]   flip 4 + XXH3: stored chunks done (0.000 s)
+[+12.1 s]   flip 4 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+12.1 s]   flip 4 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+12.1 s]   flip 4 + XXH3: rANS pieces done (0.006 s)
+[+12.1 s]   flip 4 + XXH3: DNA unpack done (0.000 s)
+[+12.1 s]   flip 4 + XXH3: open DNA pack done (0.008 s)
+[+12.1 s]   flip 4 + XXH3: match done (0.006 s)
+[+12.1 s]   flip 4 + XXH3: XXH3 block terms done (0.002 s)
+[+12.2 s]   flip 4 + XXH3: XXH3 chain done (0.084 s)
+[+12.4 s] flip 4/6 at 432636183 (literals stream) + XXH3: return 0, status 17, caught (0.29 s)
+[+12.4 s] flip 5/6 at 461905090 (literals stream), 0xbd -> 0x13: rANS piece 25716 of 189456 (class 1)
+[+12.9 s]   plan of the flipped archive: built (the damage is past the host checks) (0.045 s)
+[+12.9 s]   flip 5: init + fixups done (0.000 s)
+[+12.9 s]   flip 5: stored chunks done (0.000 s)
+[+12.9 s]   flip 5: nvCOMP zstd token frames done (0.000 s)
+[+12.9 s]   flip 5: nvCOMP zstd literal frames done (0.000 s)
+[+12.9 s]   flip 5: rANS pieces done (0.006 s)
+[+12.9 s]   flip 5: DNA unpack done (0.000 s)
+[+12.9 s]   flip 5: open DNA pack done (0.008 s)
+[+13.0 s]   flip 5: match done (0.006 s)
+[+13.1 s] flip 5/6 at 461905090 (literals stream): return 0, status 1, caught (0.21 s)
+[+13.1 s]   flip 5 + XXH3: init + fixups done (0.000 s)
+[+13.1 s]   flip 5 + XXH3: stored chunks done (0.000 s)
+[+13.1 s]   flip 5 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+13.1 s]   flip 5 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+13.1 s]   flip 5 + XXH3: rANS pieces done (0.006 s)
+[+13.1 s]   flip 5 + XXH3: DNA unpack done (0.000 s)
+[+13.2 s]   flip 5 + XXH3: open DNA pack done (0.008 s)
+[+13.2 s]   flip 5 + XXH3: match done (0.005 s)
+[+13.2 s]   flip 5 + XXH3: XXH3 block terms done (0.002 s)
+[+13.2 s]   flip 5 + XXH3: XXH3 chain done (0.084 s)
+[+13.4 s] flip 5/6 at 461905090 (literals stream) + XXH3: return 0, status 17, caught (0.29 s)
+[+13.4 s] flip 6/6 at 767453607 (literals stream), 0x75 -> 0xa8: rANS piece 42905 of 189456 (class 1)
+[+14.2 s]   plan of the flipped archive: built (the damage is past the host checks) (0.045 s)
+[+14.2 s]   flip 6: init + fixups done (0.000 s)
+[+14.2 s]   flip 6: stored chunks done (0.000 s)
+[+14.2 s]   flip 6: nvCOMP zstd token frames done (0.000 s)
+[+14.2 s]   flip 6: nvCOMP zstd literal frames done (0.000 s)
+[+14.2 s]   flip 6: rANS pieces done (0.006 s)
+[+14.2 s]   flip 6: DNA unpack done (0.000 s)
+[+14.2 s]   flip 6: open DNA pack done (0.008 s)
+[+14.2 s]   flip 6: match done (0.006 s)
+[+14.4 s] flip 6/6 at 767453607 (literals stream): return 0, status 1, caught (0.20 s)
+[+14.4 s]   flip 6 + XXH3: init + fixups done (0.000 s)
+[+14.4 s]   flip 6 + XXH3: stored chunks done (0.000 s)
+[+14.4 s]   flip 6 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+14.4 s]   flip 6 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+14.4 s]   flip 6 + XXH3: rANS pieces done (0.006 s)
+[+14.4 s]   flip 6 + XXH3: DNA unpack done (0.000 s)
+[+14.4 s]   flip 6 + XXH3: open DNA pack done (0.008 s)
+[+14.4 s]   flip 6 + XXH3: match done (0.005 s)
+[+14.4 s]   flip 6 + XXH3: XXH3 block terms done (0.002 s)
+[+14.5 s]   flip 6 + XXH3: XXH3 chain done (0.083 s)
+[+14.7 s] flip 6/6 at 767453607 (literals stream) + XXH3: return 0, status 17, caught (0.29 s)
+[api] flips refused by the plan of the flipped archive: 0 of 6
+[api] 6 byte flips in the stream half of the archive: without the hash check 6 caught by status, 0 decoded wrong with status 0, 0 harmless; with ACEAPEX_GPU_VERIFY_XXH3 6 caught, 0 silent, 0 harmless; no CUDA error
+APIROW	/workspace/work/t2t.open.aet	853264869	19.062	bit-perfect	60	60	0.793	6	0	0	432.4	103.713	bit-perfect	6	0	0	56.7	0	37.238	bit-perfect
+exitapi 0 t2t.open
+example gpu_decode t2t.open (no nvCOMP): bit-perfect
+example gpu_decode t2t.open via libaceapex_gpu.so.1 (nvCOMP inside): bit-perfect
+== aceapex_gpu t2t.open
+archive /workspace/work/t2t.open.aet: orig=3156259565 block=16384 nb=192643; 0 zstd frames (0 token, 0 literal; 0.0 MB), pieces 839.0 MB: 413 token rANS chunks, open pack seq/cse/gap/val 47212/47212/47212/47212, open plain 195; 0 raw chunks, 0 DNA chunks (zstd), 47212 open DNA chunks; streams lit/off/len/cmd = 3106.9/0.2/0.8/26.0 MB
+frames: 0 bad of 0
+[warm-up] FNV out=5ec7d2d14091039a orig=5ec7d2d14091039a MATCHES OK
+probe G=8: 0.311 ms on 2048 blocks
+probe G=16: 0.273 ms on 2048 blocks
+probe G=32: 0.202 ms on 2048 blocks
+chosen G=32 on NVIDIA H100 80GB HBM3 (132 SMs)
+[sequential] H2D 18.995 + tok(rANS: 0 frames, 413 chunks) 0.761 + lit(open: 0 frames, 189043 pieces) 5.843 + unpack 7.803 + match(G=32) 5.382 = 38.785 ms -> 81.4 GB/s delivered; on-device 19.790 ms -> 159.5 GB/s
+[lit parts] zstd frames 0.003 | open pieces: seq 2.844, cse 1.016, gap 0.891, val 0.861, plain 0.516 ms
+[unpack parts] zstd DNA pack 0.003 | open: bases 7.064, case runs 0.739, exceptions 0.003 ms
+[sequential] FNV out=5ec7d2d14091039a orig=5ec7d2d14091039a MATCHES OK
+[AX_OPEN_SEQ=0 AX_OPEN_EXC=0] FNV out=5ec7d2d14091039a orig=5ec7d2d14091039a MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=0] FNV out=5ec7d2d14091039a orig=5ec7d2d14091039a MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=1] FNV out=5ec7d2d14091039a orig=5ec7d2d14091039a MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=1 AX_OPEN_SHB=1] FNV out=5ec7d2d14091039a orig=5ec7d2d14091039a MATCHES OK
+[open variants] seq pieces 2.936 -> 2.842 ms (AX_OPEN_SEQ 0 -> 1, windowed refill, bit-perfect); unpack 7.237 ms (case 0.463 + bases 5.492 + exceptions 1.294) -> 9.716 ms (AX_OPEN_EXC 0 -> 1: case+exception positions 0.738 + bases with exceptions 8.979, bit-perfect) -> 7.799 ms (AX_OPEN_SHB=1: bases from shared 7.063, bit-perfect)
+OPENVAR	/workspace/work/t2t.open.aet	2.936	2.842	7.237	9.716	7.799	1
+[tile base] FNV out=5ec7d2d14091039a orig=5ec7d2d14091039a MATCHES OK
+[AX_GPU_TILE=1] FNV out=5ec7d2d14091039a orig=5ec7d2d14091039a MATCHES OK
+[tile variants] case runs + bases + match 13.163 ms -> case runs + tile match 31.346 ms (AX_GPU_TILE=1: literals in shared memory, no literal stream, bit-perfect)
+TILEVAR	/workspace/work/t2t.open.aet	13.163	31.346	1
+[pipeline] 4 batches, H2D overlapped with zstd: 37.975 ms -> 83.1 GB/s delivered (sequential 38.785 ms, gain 2.1%)
+[pipeline] FNV out=5ec7d2d14091039a orig=5ec7d2d14091039a MATCHES OK
+[h2d] 839.0 MB: pageable 92.086 ms (9.1 GB/s), pinned 18.572 ms (45.2 GB/s)
+[auto] estimated H2D 18.572 ms (839.0 MB at 45.2 GB/s pinned), on-device 19.790 ms, batches of >= 64 MB: 8 -> stream pipeline
+[stream-pipeline cold] FNV out=5ec7d2d14091039a orig=5ec7d2d14091039a MATCHES OK
+[stream-pipeline] 8 batches (largest 106.4 MB), copy stream + decode stream: 27.852 ms -> 113.3 GB/s delivered; sequential 38.785 (H2D 18.995 + on-device 19.790), gain 28.2%
+[stream-pipeline] FNV out=5ec7d2d14091039a orig=5ec7d2d14091039a MATCHES OK
+RESULT OK: NVIDIA H100 80GB HBM3, 132 SMs, G=32, bit-perfect on all passes
+ROW	/workspace/work/t2t.open.aet	853264869	rANS	open	0.761	5.843	7.803	5.382	19.790	38.785	159.49	bit-perfect	0.003	2.844	1.016	0.891	0.861	0.516	0.003	7.064	0.739	0.003	27.852	9.1	45.2	8	0.000	0.000	-1	-1.000	-1.000	-1.000	0.000	-1	-1.000	-1.000
+exit 0 t2t.open
+encode grch38.open: 18.1 s on 160 threads, 831221278 B
+grch38.open (AX_PROFILE=open): archive 831221278 B (no pin for libzstd 1.4.8), encoded, CPU round-trip bit-perfect
+== gpu_api_test grch38.open
+[+0.0 s] read archive and original
+[+3.4 s] plan_create
+[+3.9 s] plan_create with ACEAPEX_GPU_VALIDATE_ZSTD
+[api] plan with ACEAPEX_GPU_VALIDATE_ZSTD 58.5 ms (+8.7 ms against a plain plan of 49.9 ms after the CUDA start: every zstd frame decoded by libzstd on 160 host threads): accepted
+[api] plan 442.5 ms on the host; temp 4902.7 MB (full 4901.6 MB), output 3273.5 MB
+[+4.0 s] allocate and upload
+[+5.6 s] full decode
+[api] full decode: return 0, status 0, output MATCHES OK
+[+7.5 s] full decode timed
+[api] full decode on-device 19.542 ms (median of 3) -> 167.5 GB/s
+[+7.6 s] full decode + XXH3
+[+8.6 s] full decode + XXH3 timed
+[api] full decode + XXH3 check on-device 109.295 ms (median of 3; check adds 89.753 ms, +459.3 %): return 0, status 0, output MATCHES OK
+[+9.2 s] full decode AX_GPU_TILE=1
+[api] AX_GPU_TILE=1 full decode on-device 38.941 ms (default 19.542 ms, +99.3 %): return 0, status 0, output MATCHES OK
+[+10.9 s] ranges
+[api] ranges: 200 of 200 windows == original (MATCHES OK); 16 KiB window 0.792 ms (median of 33)
+[+11.2 s] flip 1/20 at 758920673 (literals stream), 0x3a -> 0xf9: rANS piece 43586 of 189806 (class 1)
+[+12.2 s]   plan of the flipped archive: built (the damage is past the host checks) (0.044 s)
+[+12.3 s]   flip 1: init + fixups done (0.000 s)
+[+12.3 s]   flip 1: stored chunks done (0.000 s)
+[+12.3 s]   flip 1: nvCOMP zstd token frames done (0.000 s)
+[+12.3 s]   flip 1: nvCOMP zstd literal frames done (0.000 s)
+[+12.3 s]   flip 1: rANS pieces done (0.006 s)
+[+12.3 s]   flip 1: DNA unpack done (0.000 s)
+[+12.3 s]   flip 1: open DNA pack done (0.008 s)
+[+12.3 s]   flip 1: match done (0.005 s)
+[+13.5 s] flip 1/20 at 758920673 (literals stream): return 0, status 0, SILENT (1.20 s)
+[+13.5 s]   flip 1 + XXH3: init + fixups done (0.000 s)
+[+13.5 s]   flip 1 + XXH3: stored chunks done (0.000 s)
+[+13.5 s]   flip 1 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+13.5 s]   flip 1 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+13.5 s]   flip 1 + XXH3: rANS pieces done (0.006 s)
+[+13.5 s]   flip 1 + XXH3: DNA unpack done (0.000 s)
+[+13.5 s]   flip 1 + XXH3: open DNA pack done (0.008 s)
+[+13.5 s]   flip 1 + XXH3: match done (0.005 s)
+[+13.5 s]   flip 1 + XXH3: XXH3 block terms done (0.002 s)
+[+13.6 s]   flip 1 + XXH3: XXH3 chain done (0.088 s)
+[+13.9 s] flip 1/20 at 758920673 (literals stream) + XXH3: return 0, status 16, caught (0.43 s)
+[+13.9 s] flip 2/20 at 592610750 (literals stream), 0x32 -> 0xce: rANS piece 33940 of 189806 (class 1)
+[+14.6 s]   plan of the flipped archive: built (the damage is past the host checks) (0.037 s)
+[+14.7 s]   flip 2: init + fixups done (0.000 s)
+[+14.7 s]   flip 2: stored chunks done (0.000 s)
+[+14.7 s]   flip 2: nvCOMP zstd token frames done (0.000 s)
+[+14.7 s]   flip 2: nvCOMP zstd literal frames done (0.000 s)
+[+14.7 s]   flip 2: rANS pieces done (0.006 s)
+[+14.7 s]   flip 2: DNA unpack done (0.000 s)
+[+14.7 s]   flip 2: open DNA pack done (0.008 s)
+[+14.7 s]   flip 2: match done (0.005 s)
+[+18.4 s] flip 2/20 at 592610750 (literals stream): return 0, status 1, caught (3.75 s)
+[+18.4 s]   flip 2 + XXH3: init + fixups done (0.000 s)
+[+18.4 s]   flip 2 + XXH3: stored chunks done (0.000 s)
+[+18.4 s]   flip 2 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+18.4 s]   flip 2 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+18.4 s]   flip 2 + XXH3: rANS pieces done (0.006 s)
+[+18.4 s]   flip 2 + XXH3: DNA unpack done (0.000 s)
+[+18.4 s]   flip 2 + XXH3: open DNA pack done (0.008 s)
+[+18.4 s]   flip 2 + XXH3: match done (0.005 s)
+[+18.4 s]   flip 2 + XXH3: XXH3 block terms done (0.002 s)
+[+18.5 s]   flip 2 + XXH3: XXH3 chain done (0.089 s)
+[+18.9 s] flip 2/20 at 592610750 (literals stream) + XXH3: return 0, status 17, caught (0.47 s)
+[+18.9 s] flip 3/20 at 438203473 (literals stream), 0x59 -> 0x91: rANS piece 24960 of 189806 (class 1)
+[+19.4 s]   plan of the flipped archive: built (the damage is past the host checks) (0.035 s)
+[+19.5 s]   flip 3: init + fixups done (0.000 s)
+[+19.5 s]   flip 3: stored chunks done (0.000 s)
+[+19.5 s]   flip 3: nvCOMP zstd token frames done (0.000 s)
+[+19.5 s]   flip 3: nvCOMP zstd literal frames done (0.000 s)
+[+19.5 s]   flip 3: rANS pieces done (0.006 s)
+[+19.5 s]   flip 3: DNA unpack done (0.000 s)
+[+19.5 s]   flip 3: open DNA pack done (0.008 s)
+[+19.5 s]   flip 3: match done (0.005 s)
+[+19.8 s] flip 3/20 at 438203473 (literals stream): return 0, status 1, caught (0.37 s)
+[+19.8 s]   flip 3 + XXH3: init + fixups done (0.000 s)
+[+19.8 s]   flip 3 + XXH3: stored chunks done (0.000 s)
+[+19.8 s]   flip 3 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+19.8 s]   flip 3 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+19.8 s]   flip 3 + XXH3: rANS pieces done (0.006 s)
+[+19.8 s]   flip 3 + XXH3: DNA unpack done (0.000 s)
+[+19.8 s]   flip 3 + XXH3: open DNA pack done (0.008 s)
+[+19.8 s]   flip 3 + XXH3: match done (0.005 s)
+[+19.8 s]   flip 3 + XXH3: XXH3 block terms done (0.002 s)
+[+19.9 s]   flip 3 + XXH3: XXH3 chain done (0.088 s)
+[+20.3 s] flip 3/20 at 438203473 (literals stream) + XXH3: return 0, status 17, caught (0.46 s)
+[+20.3 s] flip 4/20 at 446335017 (literals stream), 0x13 -> 0x91: rANS piece 25429 of 189806 (class 1)
+[+20.8 s]   plan of the flipped archive: built (the damage is past the host checks) (0.038 s)
+[+20.9 s]   flip 4: init + fixups done (0.000 s)
+[+20.9 s]   flip 4: stored chunks done (0.000 s)
+[+20.9 s]   flip 4: nvCOMP zstd token frames done (0.000 s)
+[+20.9 s]   flip 4: nvCOMP zstd literal frames done (0.000 s)
+[+20.9 s]   flip 4: rANS pieces done (0.006 s)
+[+20.9 s]   flip 4: DNA unpack done (0.000 s)
+[+20.9 s]   flip 4: open DNA pack done (0.008 s)
+[+20.9 s]   flip 4: match done (0.005 s)
+[+21.2 s] flip 4/20 at 446335017 (literals stream): return 0, status 1, caught (0.37 s)
+[+21.2 s]   flip 4 + XXH3: init + fixups done (0.000 s)
+[+21.2 s]   flip 4 + XXH3: stored chunks done (0.000 s)
+[+21.2 s]   flip 4 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+21.2 s]   flip 4 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+21.2 s]   flip 4 + XXH3: rANS pieces done (0.006 s)
+[+21.2 s]   flip 4 + XXH3: DNA unpack done (0.000 s)
+[+21.2 s]   flip 4 + XXH3: open DNA pack done (0.008 s)
+[+21.2 s]   flip 4 + XXH3: match done (0.005 s)
+[+21.2 s]   flip 4 + XXH3: XXH3 block terms done (0.002 s)
+[+21.3 s]   flip 4 + XXH3: XXH3 chain done (0.088 s)
+[+21.7 s] flip 4/20 at 446335017 (literals stream) + XXH3: return 0, status 17, caught (0.45 s)
+[+21.7 s] flip 5/20 at 463808501 (literals stream), 0x31 -> 0x9b: rANS piece 26441 of 189806 (class 1)
+[+22.4 s]   plan of the flipped archive: built (the damage is past the host checks) (0.051 s)
+[+22.4 s]   flip 5: init + fixups done (0.000 s)
+[+22.4 s]   flip 5: stored chunks done (0.000 s)
+[+22.4 s]   flip 5: nvCOMP zstd token frames done (0.000 s)
+[+22.4 s]   flip 5: nvCOMP zstd literal frames done (0.000 s)
+[+22.4 s]   flip 5: rANS pieces done (0.006 s)
+[+22.4 s]   flip 5: DNA unpack done (0.000 s)
+[+22.4 s]   flip 5: open DNA pack done (0.008 s)
+[+22.4 s]   flip 5: match done (0.005 s)
+[+22.8 s] flip 5/20 at 463808501 (literals stream): return 0, status 1, caught (0.41 s)
+[+22.8 s]   flip 5 + XXH3: init + fixups done (0.000 s)
+[+22.8 s]   flip 5 + XXH3: stored chunks done (0.000 s)
+[+22.8 s]   flip 5 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+22.8 s]   flip 5 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+22.8 s]   flip 5 + XXH3: rANS pieces done (0.006 s)
+[+22.8 s]   flip 5 + XXH3: DNA unpack done (0.000 s)
+[+22.8 s]   flip 5 + XXH3: open DNA pack done (0.008 s)
+[+22.8 s]   flip 5 + XXH3: match done (0.005 s)
+[+22.8 s]   flip 5 + XXH3: XXH3 block terms done (0.002 s)
+[+22.9 s]   flip 5 + XXH3: XXH3 chain done (0.089 s)
+[+23.3 s] flip 5/20 at 463808501 (literals stream) + XXH3: return 0, status 17, caught (0.51 s)
+[+23.3 s] flip 6/20 at 581172266 (literals stream), 0xe4 -> 0x65: rANS piece 33281 of 189806 (class 1)
+[+23.8 s]   plan of the flipped archive: built (the damage is past the host checks) (0.039 s)
+[+23.9 s]   flip 6: init + fixups done (0.000 s)
+[+23.9 s]   flip 6: stored chunks done (0.000 s)
+[+23.9 s]   flip 6: nvCOMP zstd token frames done (0.000 s)
+[+23.9 s]   flip 6: nvCOMP zstd literal frames done (0.000 s)
+[+23.9 s]   flip 6: rANS pieces done (0.006 s)
+[+23.9 s]   flip 6: DNA unpack done (0.000 s)
+[+23.9 s]   flip 6: open DNA pack done (0.009 s)
+[+23.9 s]   flip 6: match done (0.005 s)
+[+24.5 s] flip 6/20 at 581172266 (literals stream): return 0, status 1, caught (0.66 s)
+[+24.5 s]   flip 6 + XXH3: init + fixups done (0.000 s)
+[+24.5 s]   flip 6 + XXH3: stored chunks done (0.000 s)
+[+24.5 s]   flip 6 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+24.5 s]   flip 6 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+24.5 s]   flip 6 + XXH3: rANS pieces done (0.006 s)
+[+24.5 s]   flip 6 + XXH3: DNA unpack done (0.000 s)
+[+24.5 s]   flip 6 + XXH3: open DNA pack done (0.008 s)
+[+24.5 s]   flip 6 + XXH3: match done (0.005 s)
+[+24.5 s]   flip 6 + XXH3: XXH3 block terms done (0.002 s)
+[+24.6 s]   flip 6 + XXH3: XXH3 chain done (0.088 s)
+[+25.0 s] flip 6/20 at 581172266 (literals stream) + XXH3: return 0, status 17, caught (0.51 s)
+[+25.0 s] flip 7/20 at 512983141 (literals stream), 0x99 -> 0xf8: rANS piece 29303 of 189806 (class 1)
+[+25.5 s]   plan of the flipped archive: built (the damage is past the host checks) (0.039 s)
+[+25.6 s]   flip 7: init + fixups done (0.000 s)
+[+25.6 s]   flip 7: stored chunks done (0.000 s)
+[+25.6 s]   flip 7: nvCOMP zstd token frames done (0.000 s)
+[+25.6 s]   flip 7: nvCOMP zstd literal frames done (0.000 s)
+[+25.6 s]   flip 7: rANS pieces done (0.006 s)
+[+25.6 s]   flip 7: DNA unpack done (0.000 s)
+[+25.6 s]   flip 7: open DNA pack done (0.008 s)
+[+25.6 s]   flip 7: match done (0.005 s)
+[+26.2 s] flip 7/20 at 512983141 (literals stream): return 0, status 1, caught (0.63 s)
+[+26.2 s]   flip 7 + XXH3: init + fixups done (0.000 s)
+[+26.2 s]   flip 7 + XXH3: stored chunks done (0.000 s)
+[+26.2 s]   flip 7 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+26.2 s]   flip 7 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+26.2 s]   flip 7 + XXH3: rANS pieces done (0.006 s)
+[+26.2 s]   flip 7 + XXH3: DNA unpack done (0.000 s)
+[+26.2 s]   flip 7 + XXH3: open DNA pack done (0.008 s)
+[+26.2 s]   flip 7 + XXH3: match done (0.005 s)
+[+26.2 s]   flip 7 + XXH3: XXH3 block terms done (0.002 s)
+[+26.3 s]   flip 7 + XXH3: XXH3 chain done (0.088 s)
+[+26.7 s] flip 7/20 at 512983141 (literals stream) + XXH3: return 0, status 17, caught (0.46 s)
+[+26.7 s] flip 8/20 at 796413207 (literals stream), 0xd2 -> 0x0c: rANS piece 45749 of 189806 (class 1)
+[+27.3 s]   plan of the flipped archive: built (the damage is past the host checks) (0.036 s)
+[+27.4 s]   flip 8: init + fixups done (0.000 s)
+[+27.4 s]   flip 8: stored chunks done (0.000 s)
+[+27.4 s]   flip 8: nvCOMP zstd token frames done (0.000 s)
+[+27.4 s]   flip 8: nvCOMP zstd literal frames done (0.000 s)
+[+27.4 s]   flip 8: rANS pieces done (0.006 s)
+[+27.4 s]   flip 8: DNA unpack done (0.000 s)
+[+27.4 s]   flip 8: open DNA pack done (0.008 s)
+[+27.4 s]   flip 8: match done (0.005 s)
+[+27.8 s] flip 8/20 at 796413207 (literals stream): return 0, status 1, caught (0.37 s)
+[+27.8 s]   flip 8 + XXH3: init + fixups done (0.000 s)
+[+27.8 s]   flip 8 + XXH3: stored chunks done (0.000 s)
+[+27.8 s]   flip 8 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+27.8 s]   flip 8 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+27.8 s]   flip 8 + XXH3: rANS pieces done (0.006 s)
+[+27.8 s]   flip 8 + XXH3: DNA unpack done (0.000 s)
+[+27.8 s]   flip 8 + XXH3: open DNA pack done (0.008 s)
+[+27.8 s]   flip 8 + XXH3: match done (0.005 s)
+[+27.8 s]   flip 8 + XXH3: XXH3 block terms done (0.002 s)
+[+27.9 s]   flip 8 + XXH3: XXH3 chain done (0.088 s)
+[+28.3 s] flip 8/20 at 796413207 (literals stream) + XXH3: return 0, status 17, caught (0.55 s)
+[+28.3 s] flip 9/20 at 685697775 (literals stream), 0x67 -> 0x27: rANS piece 39342 of 189806 (class 1)
+[+28.8 s]   plan of the flipped archive: built (the damage is past the host checks) (0.042 s)
+[+28.9 s]   flip 9: init + fixups done (0.000 s)
+[+28.9 s]   flip 9: stored chunks done (0.000 s)
+[+28.9 s]   flip 9: nvCOMP zstd token frames done (0.000 s)
+[+28.9 s]   flip 9: nvCOMP zstd literal frames done (0.000 s)
+[+28.9 s]   flip 9: rANS pieces done (0.006 s)
+[+28.9 s]   flip 9: DNA unpack done (0.000 s)
+[+28.9 s]   flip 9: open DNA pack done (0.008 s)
+[+28.9 s]   flip 9: match done (0.005 s)
+[+29.4 s] flip 9/20 at 685697775 (literals stream): return 0, status 1, caught (0.54 s)
+[+29.4 s]   flip 9 + XXH3: init + fixups done (0.000 s)
+[+29.4 s]   flip 9 + XXH3: stored chunks done (0.000 s)
+[+29.4 s]   flip 9 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+29.4 s]   flip 9 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+29.4 s]   flip 9 + XXH3: rANS pieces done (0.006 s)
+[+29.4 s]   flip 9 + XXH3: DNA unpack done (0.000 s)
+[+29.4 s]   flip 9 + XXH3: open DNA pack done (0.008 s)
+[+29.4 s]   flip 9 + XXH3: match done (0.005 s)
+[+29.4 s]   flip 9 + XXH3: XXH3 block terms done (0.002 s)
+[+29.5 s]   flip 9 + XXH3: XXH3 chain done (0.088 s)
+[+30.0 s] flip 9/20 at 685697775 (literals stream) + XXH3: return 0, status 17, caught (0.57 s)
+[+30.0 s] flip 10/20 at 624306813 (literals stream), 0xc9 -> 0xac: rANS piece 35780 of 189806 (class 1)
+[+30.5 s]   plan of the flipped archive: built (the damage is past the host checks) (0.035 s)
+[+30.5 s]   flip 10: init + fixups done (0.000 s)
+[+30.5 s]   flip 10: stored chunks done (0.000 s)
+[+30.5 s]   flip 10: nvCOMP zstd token frames done (0.000 s)
+[+30.5 s]   flip 10: nvCOMP zstd literal frames done (0.000 s)
+[+30.5 s]   flip 10: rANS pieces done (0.006 s)
+[+30.5 s]   flip 10: DNA unpack done (0.000 s)
+[+30.5 s]   flip 10: open DNA pack done (0.008 s)
+[+30.5 s]   flip 10: match done (0.005 s)
+[+31.1 s] flip 10/20 at 624306813 (literals stream): return 0, status 1, caught (0.54 s)
+[+31.1 s]   flip 10 + XXH3: init + fixups done (0.000 s)
+[+31.1 s]   flip 10 + XXH3: stored chunks done (0.000 s)
+[+31.1 s]   flip 10 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+31.1 s]   flip 10 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+31.1 s]   flip 10 + XXH3: rANS pieces done (0.006 s)
+[+31.1 s]   flip 10 + XXH3: DNA unpack done (0.000 s)
+[+31.1 s]   flip 10 + XXH3: open DNA pack done (0.008 s)
+[+31.1 s]   flip 10 + XXH3: match done (0.005 s)
+[+31.1 s]   flip 10 + XXH3: XXH3 block terms done (0.002 s)
+[+31.2 s]   flip 10 + XXH3: XXH3 chain done (0.088 s)
+[+31.6 s] flip 10/20 at 624306813 (literals stream) + XXH3: return 0, status 17, caught (0.58 s)
+[+31.7 s] flip 11/20 at 568046995 (literals stream), 0x1a -> 0xe2: rANS piece 32514 of 189806 (class 1)
+[+32.2 s]   plan of the flipped archive: built (the damage is past the host checks) (0.034 s)
+[+32.2 s]   flip 11: init + fixups done (0.000 s)
+[+32.2 s]   flip 11: stored chunks done (0.000 s)
+[+32.2 s]   flip 11: nvCOMP zstd token frames done (0.000 s)
+[+32.2 s]   flip 11: nvCOMP zstd literal frames done (0.000 s)
+[+32.2 s]   flip 11: rANS pieces done (0.006 s)
+[+32.2 s]   flip 11: DNA unpack done (0.000 s)
+[+32.2 s]   flip 11: open DNA pack done (0.008 s)
+[+32.2 s]   flip 11: match done (0.005 s)
+[+32.6 s] flip 11/20 at 568046995 (literals stream): return 0, status 1, caught (0.40 s)
+[+32.6 s]   flip 11 + XXH3: init + fixups done (0.000 s)
+[+32.6 s]   flip 11 + XXH3: stored chunks done (0.000 s)
+[+32.6 s]   flip 11 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+32.6 s]   flip 11 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+32.6 s]   flip 11 + XXH3: rANS pieces done (0.006 s)
+[+32.6 s]   flip 11 + XXH3: DNA unpack done (0.000 s)
+[+32.6 s]   flip 11 + XXH3: open DNA pack done (0.008 s)
+[+32.6 s]   flip 11 + XXH3: match done (0.005 s)
+[+32.6 s]   flip 11 + XXH3: XXH3 block terms done (0.002 s)
+[+32.7 s]   flip 11 + XXH3: XXH3 chain done (0.088 s)
+[+33.1 s] flip 11/20 at 568046995 (literals stream) + XXH3: return 0, status 17, caught (0.46 s)
+[+33.1 s] flip 12/20 at 635456749 (literals stream), 0x15 -> 0xa6: rANS piece 36429 of 189806 (class 1)
+[+33.8 s]   plan of the flipped archive: built (the damage is past the host checks) (0.043 s)
+[+33.8 s]   flip 12: init + fixups done (0.000 s)
+[+33.8 s]   flip 12: stored chunks done (0.000 s)
+[+33.8 s]   flip 12: nvCOMP zstd token frames done (0.000 s)
+[+33.8 s]   flip 12: nvCOMP zstd literal frames done (0.000 s)
+[+33.8 s]   flip 12: rANS pieces done (0.006 s)
+[+33.8 s]   flip 12: DNA unpack done (0.000 s)
+[+33.8 s]   flip 12: open DNA pack done (0.008 s)
+[+33.8 s]   flip 12: match done (0.005 s)
+[+34.2 s] flip 12/20 at 635456749 (literals stream): return 0, status 1, caught (0.40 s)
+[+34.2 s]   flip 12 + XXH3: init + fixups done (0.000 s)
+[+34.2 s]   flip 12 + XXH3: stored chunks done (0.000 s)
+[+34.2 s]   flip 12 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+34.2 s]   flip 12 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+34.2 s]   flip 12 + XXH3: rANS pieces done (0.006 s)
+[+34.2 s]   flip 12 + XXH3: DNA unpack done (0.000 s)
+[+34.2 s]   flip 12 + XXH3: open DNA pack done (0.008 s)
+[+34.3 s]   flip 12 + XXH3: match done (0.005 s)
+[+34.3 s]   flip 12 + XXH3: XXH3 block terms done (0.002 s)
+[+34.3 s]   flip 12 + XXH3: XXH3 chain done (0.088 s)
+[+34.8 s] flip 12/20 at 635456749 (literals stream) + XXH3: return 0, status 17, caught (0.56 s)
+[+34.8 s] flip 13/20 at 656986660 (literals stream), 0xb2 -> 0xe6: rANS piece 37679 of 189806 (class 1)
+[+35.3 s]   plan of the flipped archive: built (the damage is past the host checks) (0.042 s)
+[+35.4 s]   flip 13: init + fixups done (0.000 s)
+[+35.4 s]   flip 13: stored chunks done (0.000 s)
+[+35.4 s]   flip 13: nvCOMP zstd token frames done (0.000 s)
+[+35.4 s]   flip 13: nvCOMP zstd literal frames done (0.000 s)
+[+35.4 s]   flip 13: rANS pieces done (0.006 s)
+[+35.4 s]   flip 13: DNA unpack done (0.000 s)
+[+35.4 s]   flip 13: open DNA pack done (0.008 s)
+[+35.4 s]   flip 13: match done (0.005 s)
+[+35.9 s] flip 13/20 at 656986660 (literals stream): return 0, status 1, caught (0.52 s)
+[+35.9 s]   flip 13 + XXH3: init + fixups done (0.000 s)
+[+35.9 s]   flip 13 + XXH3: stored chunks done (0.000 s)
+[+35.9 s]   flip 13 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+35.9 s]   flip 13 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+35.9 s]   flip 13 + XXH3: rANS pieces done (0.006 s)
+[+35.9 s]   flip 13 + XXH3: DNA unpack done (0.000 s)
+[+35.9 s]   flip 13 + XXH3: open DNA pack done (0.008 s)
+[+35.9 s]   flip 13 + XXH3: match done (0.005 s)
+[+35.9 s]   flip 13 + XXH3: XXH3 block terms done (0.002 s)
+[+36.0 s]   flip 13 + XXH3: XXH3 chain done (0.089 s)
+[+36.4 s] flip 13/20 at 656986660 (literals stream) + XXH3: return 0, status 17, caught (0.52 s)
+[+36.4 s] flip 14/20 at 724800975 (literals stream), 0x48 -> 0x4b: rANS piece 41612 of 189806 (class 1)
+[+36.9 s]   plan of the flipped archive: built (the damage is past the host checks) (0.039 s)
+[+37.0 s]   flip 14: init + fixups done (0.000 s)
+[+37.0 s]   flip 14: stored chunks done (0.000 s)
+[+37.0 s]   flip 14: nvCOMP zstd token frames done (0.000 s)
+[+37.0 s]   flip 14: nvCOMP zstd literal frames done (0.000 s)
+[+37.0 s]   flip 14: rANS pieces done (0.006 s)
+[+37.0 s]   flip 14: DNA unpack done (0.000 s)
+[+37.0 s]   flip 14: open DNA pack done (0.009 s)
+[+37.0 s]   flip 14: match done (0.005 s)
+[+37.5 s] flip 14/20 at 724800975 (literals stream): return 0, status 1, caught (0.54 s)
+[+37.5 s]   flip 14 + XXH3: init + fixups done (0.000 s)
+[+37.5 s]   flip 14 + XXH3: stored chunks done (0.000 s)
+[+37.5 s]   flip 14 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+37.5 s]   flip 14 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+37.5 s]   flip 14 + XXH3: rANS pieces done (0.006 s)
+[+37.5 s]   flip 14 + XXH3: DNA unpack done (0.000 s)
+[+37.5 s]   flip 14 + XXH3: open DNA pack done (0.008 s)
+[+37.5 s]   flip 14 + XXH3: match done (0.005 s)
+[+37.5 s]   flip 14 + XXH3: XXH3 block terms done (0.002 s)
+[+37.6 s]   flip 14 + XXH3: XXH3 chain done (0.088 s)
+[+38.0 s] flip 14/20 at 724800975 (literals stream) + XXH3: return 0, status 17, caught (0.51 s)
+[+38.0 s] flip 15/20 at 724320336 (literals stream), 0xc1 -> 0x53: rANS piece 41584 of 189806 (class 1)
+[+38.6 s]   plan of the flipped archive: built (the damage is past the host checks) (0.039 s)
+[+38.6 s]   flip 15: init + fixups done (0.000 s)
+[+38.6 s]   flip 15: stored chunks done (0.000 s)
+[+38.6 s]   flip 15: nvCOMP zstd token frames done (0.000 s)
+[+38.6 s]   flip 15: nvCOMP zstd literal frames done (0.000 s)
+[+38.6 s]   flip 15: rANS pieces done (0.006 s)
+[+38.6 s]   flip 15: DNA unpack done (0.000 s)
+[+38.6 s]   flip 15: open DNA pack done (0.008 s)
+[+38.6 s]   flip 15: match done (0.005 s)
+[+39.1 s] flip 15/20 at 724320336 (literals stream): return 0, status 1, caught (0.51 s)
+[+39.1 s]   flip 15 + XXH3: init + fixups done (0.000 s)
+[+39.1 s]   flip 15 + XXH3: stored chunks done (0.000 s)
+[+39.1 s]   flip 15 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+39.1 s]   flip 15 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+39.1 s]   flip 15 + XXH3: rANS pieces done (0.006 s)
+[+39.1 s]   flip 15 + XXH3: DNA unpack done (0.000 s)
+[+39.1 s]   flip 15 + XXH3: open DNA pack done (0.008 s)
+[+39.1 s]   flip 15 + XXH3: match done (0.005 s)
+[+39.1 s]   flip 15 + XXH3: XXH3 block terms done (0.002 s)
+[+39.2 s]   flip 15 + XXH3: XXH3 chain done (0.088 s)
+[+39.6 s] flip 15/20 at 724320336 (literals stream) + XXH3: return 0, status 17, caught (0.46 s)
+[+39.6 s] flip 16/20 at 553499188 (literals stream), 0x4a -> 0x80: rANS piece 31666 of 189806 (class 1)
+[+40.2 s]   plan of the flipped archive: built (the damage is past the host checks) (0.039 s)
+[+40.3 s]   flip 16: init + fixups done (0.000 s)
+[+40.3 s]   flip 16: stored chunks done (0.000 s)
+[+40.3 s]   flip 16: nvCOMP zstd token frames done (0.000 s)
+[+40.3 s]   flip 16: nvCOMP zstd literal frames done (0.000 s)
+[+40.3 s]   flip 16: rANS pieces done (0.006 s)
+[+40.3 s]   flip 16: DNA unpack done (0.000 s)
+[+40.3 s]   flip 16: open DNA pack done (0.008 s)
+[+40.3 s]   flip 16: match done (0.005 s)
+[+40.6 s] flip 16/20 at 553499188 (literals stream): return 0, status 1, caught (0.37 s)
+[+40.6 s]   flip 16 + XXH3: init + fixups done (0.000 s)
+[+40.6 s]   flip 16 + XXH3: stored chunks done (0.000 s)
+[+40.6 s]   flip 16 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+40.6 s]   flip 16 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+40.6 s]   flip 16 + XXH3: rANS pieces done (0.006 s)
+[+40.6 s]   flip 16 + XXH3: DNA unpack done (0.000 s)
+[+40.7 s]   flip 16 + XXH3: open DNA pack done (0.008 s)
+[+40.7 s]   flip 16 + XXH3: match done (0.005 s)
+[+40.7 s]   flip 16 + XXH3: XXH3 block terms done (0.002 s)
+[+40.7 s]   flip 16 + XXH3: XXH3 chain done (0.089 s)
+[+41.1 s] flip 16/20 at 553499188 (literals stream) + XXH3: return 0, status 17, caught (0.46 s)
+[+41.1 s] flip 17/20 at 793829309 (literals stream), 0xca -> 0x2f: rANS piece 45600 of 189806 (class 1)
+[+41.6 s]   plan of the flipped archive: built (the damage is past the host checks) (0.045 s)
+[+41.7 s]   flip 17: init + fixups done (0.000 s)
+[+41.7 s]   flip 17: stored chunks done (0.000 s)
+[+41.7 s]   flip 17: nvCOMP zstd token frames done (0.000 s)
+[+41.7 s]   flip 17: nvCOMP zstd literal frames done (0.000 s)
+[+41.7 s]   flip 17: rANS pieces done (0.006 s)
+[+41.7 s]   flip 17: DNA unpack done (0.000 s)
+[+41.7 s]   flip 17: open DNA pack done (0.008 s)
+[+41.7 s]   flip 17: match done (0.005 s)
+[+42.1 s] flip 17/20 at 793829309 (literals stream): return 0, status 1, caught (0.46 s)
+[+42.1 s]   flip 17 + XXH3: init + fixups done (0.000 s)
+[+42.1 s]   flip 17 + XXH3: stored chunks done (0.000 s)
+[+42.1 s]   flip 17 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+42.1 s]   flip 17 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+42.2 s]   flip 17 + XXH3: rANS pieces done (0.006 s)
+[+42.2 s]   flip 17 + XXH3: DNA unpack done (0.000 s)
+[+42.2 s]   flip 17 + XXH3: open DNA pack done (0.008 s)
+[+42.2 s]   flip 17 + XXH3: match done (0.005 s)
+[+42.2 s]   flip 17 + XXH3: XXH3 block terms done (0.002 s)
+[+42.3 s]   flip 17 + XXH3: XXH3 chain done (0.088 s)
+[+42.7 s] flip 17/20 at 793829309 (literals stream) + XXH3: return 0, status 17, caught (0.52 s)
+[+42.7 s] flip 18/20 at 543680296 (literals stream), 0x3b -> 0xea: rANS piece 31095 of 189806 (class 1)
+[+43.2 s]   plan of the flipped archive: built (the damage is past the host checks) (0.035 s)
+[+43.2 s]   flip 18: init + fixups done (0.000 s)
+[+43.2 s]   flip 18: stored chunks done (0.000 s)
+[+43.2 s]   flip 18: nvCOMP zstd token frames done (0.000 s)
+[+43.2 s]   flip 18: nvCOMP zstd literal frames done (0.000 s)
+[+43.2 s]   flip 18: rANS pieces done (0.006 s)
+[+43.2 s]   flip 18: DNA unpack done (0.000 s)
+[+43.2 s]   flip 18: open DNA pack done (0.008 s)
+[+43.2 s]   flip 18: match done (0.005 s)
+[+43.7 s] flip 18/20 at 543680296 (literals stream): return 0, status 1, caught (0.54 s)
+[+43.7 s]   flip 18 + XXH3: init + fixups done (0.000 s)
+[+43.7 s]   flip 18 + XXH3: stored chunks done (0.000 s)
+[+43.7 s]   flip 18 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+43.7 s]   flip 18 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+43.7 s]   flip 18 + XXH3: rANS pieces done (0.006 s)
+[+43.7 s]   flip 18 + XXH3: DNA unpack done (0.000 s)
+[+43.8 s]   flip 18 + XXH3: open DNA pack done (0.008 s)
+[+43.8 s]   flip 18 + XXH3: match done (0.005 s)
+[+43.8 s]   flip 18 + XXH3: XXH3 block terms done (0.002 s)
+[+43.9 s]   flip 18 + XXH3: XXH3 chain done (0.088 s)
+[+44.3 s] flip 18/20 at 543680296 (literals stream) + XXH3: return 0, status 17, caught (0.52 s)
+[+44.3 s] flip 19/20 at 681618755 (literals stream), 0xcf -> 0x21: rANS piece 39107 of 189806 (class 1)
+[+44.8 s]   plan of the flipped archive: built (the damage is past the host checks) (0.034 s)
+[+44.8 s]   flip 19: init + fixups done (0.000 s)
+[+44.8 s]   flip 19: stored chunks done (0.000 s)
+[+44.8 s]   flip 19: nvCOMP zstd token frames done (0.000 s)
+[+44.8 s]   flip 19: nvCOMP zstd literal frames done (0.000 s)
+[+44.8 s]   flip 19: rANS pieces done (0.006 s)
+[+44.8 s]   flip 19: DNA unpack done (0.000 s)
+[+44.8 s]   flip 19: open DNA pack done (0.008 s)
+[+44.8 s]   flip 19: match done (0.005 s)
+[+46.2 s] flip 19/20 at 681618755 (literals stream): return 0, status 0, SILENT (1.41 s)
+[+46.2 s]   flip 19 + XXH3: init + fixups done (0.000 s)
+[+46.2 s]   flip 19 + XXH3: stored chunks done (0.000 s)
+[+46.2 s]   flip 19 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+46.2 s]   flip 19 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+46.2 s]   flip 19 + XXH3: rANS pieces done (0.006 s)
+[+46.2 s]   flip 19 + XXH3: DNA unpack done (0.000 s)
+[+46.2 s]   flip 19 + XXH3: open DNA pack done (0.008 s)
+[+46.2 s]   flip 19 + XXH3: match done (0.005 s)
+[+46.2 s]   flip 19 + XXH3: XXH3 block terms done (0.002 s)
+[+46.3 s]   flip 19 + XXH3: XXH3 chain done (0.089 s)
+[+46.8 s] flip 19/20 at 681618755 (literals stream) + XXH3: return 0, status 16, caught (0.56 s)
+[+46.8 s] flip 20/20 at 421578550 (literals stream), 0x0e -> 0x92: rANS piece 23999 of 189806 (class 1)
+[+47.3 s]   plan of the flipped archive: built (the damage is past the host checks) (0.036 s)
+[+47.3 s]   flip 20: init + fixups done (0.000 s)
+[+47.3 s]   flip 20: stored chunks done (0.000 s)
+[+47.3 s]   flip 20: nvCOMP zstd token frames done (0.000 s)
+[+47.3 s]   flip 20: nvCOMP zstd literal frames done (0.000 s)
+[+47.3 s]   flip 20: rANS pieces done (0.006 s)
+[+47.3 s]   flip 20: DNA unpack done (0.000 s)
+[+47.3 s]   flip 20: open DNA pack done (0.008 s)
+[+47.3 s]   flip 20: match done (0.005 s)
+[+47.7 s] flip 20/20 at 421578550 (literals stream): return 0, status 1, caught (0.40 s)
+[+47.7 s]   flip 20 + XXH3: init + fixups done (0.000 s)
+[+47.7 s]   flip 20 + XXH3: stored chunks done (0.000 s)
+[+47.7 s]   flip 20 + XXH3: nvCOMP zstd token frames done (0.000 s)
+[+47.7 s]   flip 20 + XXH3: nvCOMP zstd literal frames done (0.000 s)
+[+47.7 s]   flip 20 + XXH3: rANS pieces done (0.006 s)
+[+47.7 s]   flip 20 + XXH3: DNA unpack done (0.000 s)
+[+47.7 s]   flip 20 + XXH3: open DNA pack done (0.008 s)
+[+47.7 s]   flip 20 + XXH3: match done (0.005 s)
+[+47.7 s]   flip 20 + XXH3: XXH3 block terms done (0.002 s)
+[+47.8 s]   flip 20 + XXH3: XXH3 chain done (0.088 s)
+[+48.2 s] flip 20/20 at 421578550 (literals stream) + XXH3: return 0, status 17, caught (0.46 s)
+[api] flips refused by the plan of the flipped archive: 0 of 20
+[api] 20 byte flips in the stream half of the archive: without the hash check 18 caught by status, 2 decoded wrong with status 0, 0 harmless; with ACEAPEX_GPU_VERIFY_XXH3 20 caught, 0 silent, 0 harmless; no CUDA error
+APIROW	/workspace/work/grch38.open.aet	831221278	19.542	bit-perfect	200	200	0.792	18	2	0	442.5	109.295	bit-perfect	20	0	0	58.5	0	38.941	bit-perfect
+exitapi 0 grch38.open
+example gpu_decode grch38.open (no nvCOMP): bit-perfect
+example gpu_decode grch38.open via libaceapex_gpu.so.1 (nvCOMP inside): bit-perfect
+== aceapex_gpu grch38.open
+archive /workspace/work/grch38.open.aet: orig=3273481150 block=16384 nb=199798; 0 zstd frames (0 token, 0 literal; 0.0 MB), pieces 816.5 MB: 381 token rANS chunks, open pack seq/cse/gap/val 47350/47350/47350/47350, open plain 25; 0 raw chunks, 0 DNA chunks (zstd), 47350 open DNA chunks; streams lit/off/len/cmd = 3104.7/0.0/0.1/24.7 MB
+frames: 0 bad of 0
+[warm-up] FNV out=283b79e299087359 orig=283b79e299087359 MATCHES OK
+probe G=8: 0.461 ms on 2048 blocks
+probe G=16: 0.201 ms on 2048 blocks
+probe G=32: 0.171 ms on 2048 blocks
+chosen G=32 on NVIDIA H100 80GB HBM3 (132 SMs)
+[sequential] H2D 21.466 + tok(rANS: 0 frames, 381 chunks) 0.709 + lit(open: 0 frames, 189425 pieces) 6.015 + unpack 8.353 + match(G=32) 5.216 = 41.759 ms -> 78.4 GB/s delivered; on-device 20.293 ms -> 161.3 GB/s
+[lit parts] zstd frames 0.003 | open pieces: seq 2.865, cse 1.050, gap 0.905, val 0.891, plain 0.569 ms
+[unpack parts] zstd DNA pack 0.003 | open: bases 7.457, case runs 0.896, exceptions 0.003 ms
+[sequential] FNV out=283b79e299087359 orig=283b79e299087359 MATCHES OK
+[AX_OPEN_SEQ=0 AX_OPEN_EXC=0] FNV out=283b79e299087359 orig=283b79e299087359 MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=0] FNV out=283b79e299087359 orig=283b79e299087359 MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=1] FNV out=283b79e299087359 orig=283b79e299087359 MATCHES OK
+[AX_OPEN_SEQ=1 AX_OPEN_EXC=1 AX_OPEN_SHB=1] FNV out=283b79e299087359 orig=283b79e299087359 MATCHES OK
+[open variants] seq pieces 2.967 -> 2.862 ms (AX_OPEN_SEQ 0 -> 1, windowed refill, bit-perfect); unpack 7.677 ms (case 0.490 + bases 5.702 + exceptions 1.495) -> 10.416 ms (AX_OPEN_EXC 0 -> 1: case+exception positions 0.895 + bases with exceptions 9.527, bit-perfect) -> 8.350 ms (AX_OPEN_SHB=1: bases from shared 7.459, bit-perfect)
+OPENVAR	/workspace/work/grch38.open.aet	2.967	2.862	7.677	10.416	8.350	1
+[tile base] FNV out=283b79e299087359 orig=283b79e299087359 MATCHES OK
+[AX_GPU_TILE=1] FNV out=283b79e299087359 orig=283b79e299087359 MATCHES OK
+[tile variants] case runs + bases + match 13.557 ms -> case runs + tile match 33.098 ms (AX_GPU_TILE=1: literals in shared memory, no literal stream, bit-perfect)
+TILEVAR	/workspace/work/grch38.open.aet	13.557	33.098	1
+[pipeline] 4 batches, H2D overlapped with zstd: 41.087 ms -> 79.7 GB/s delivered (sequential 41.759 ms, gain 1.6%)
+[pipeline] FNV out=283b79e299087359 orig=283b79e299087359 MATCHES OK
+[h2d] 816.5 MB: pageable 86.179 ms (9.5 GB/s), pinned 19.210 ms (42.5 GB/s)
+[auto] estimated H2D 19.210 ms (816.5 MB at 42.5 GB/s pinned), on-device 20.293 ms, batches of >= 64 MB: 8 -> stream pipeline
+[stream-pipeline cold] FNV out=283b79e299087359 orig=283b79e299087359 MATCHES OK
+[stream-pipeline] 8 batches (largest 106.9 MB), copy stream + decode stream: 28.373 ms -> 115.4 GB/s delivered; sequential 41.759 (H2D 21.466 + on-device 20.293), gain 32.1%
+[stream-pipeline] FNV out=283b79e299087359 orig=283b79e299087359 MATCHES OK
+RESULT OK: NVIDIA H100 80GB HBM3, 132 SMs, G=32, bit-perfect on all passes
+ROW	/workspace/work/grch38.open.aet	831221278	rANS	open	0.709	6.015	8.353	5.216	20.293	41.759	161.31	bit-perfect	0.003	2.865	1.050	0.905	0.891	0.569	0.003	7.457	0.896	0.003	28.373	9.5	42.5	8	0.000	0.000	-1	-1.000	-1.000	-1.000	0.000	-1	-1.000	-1.000
+exit 0 grch38.open
+== gpu_stream grch38.open (batches from the free memory)
+[stream] archive 831221278 B, output 3273481150 B, 199798 blocks of 16384; device 84.5 GB free: archive resident, batches of 199798 blocks (1 batches, slot ~8175 MB), 2 in flight
+[stream] 1 batch plans in 0.061 s; slot: window 3273.5 MB + temp 4901.6 MB
+[stream] 1 batches of 199798 blocks: decode 0.020 s (sum of batches), wall 1.839 s -> 1.78 GB/s with D2H and host hash; XXH3 0d4455e3b819e881 == header, every batch == the original
+STREAMROW	/workspace/work/grch38.open.aet	831221278	3273481150	1	199798	8175	0.020	1.839	1.78	match	match
+== gpu_stream t2t.open (slots capped at 256 MB: many batches)
+[stream] archive 853264869 B, output 3156259565 B, 192643 blocks of 16384; device 84.5 GB free: archive resident, batches of 5463 blocks (36 batches, slot ~224 MB), 2 in flight
+[stream] 36 batch plans in 0.091 s; slot: window 89.5 MB + temp 136.8 MB
+[stream] 36 batches of 5463 blocks: decode 0.049 s (sum of batches), wall 1.835 s -> 1.72 GB/s with D2H and host hash; XXH3 d1698293d098cc88 == header, every batch == the original
+STREAMROW_CAP	/workspace/work/t2t.open.aet	853264869	3156259565	36	5463	226	0.049	1.835	1.72	match	match
+== T-H1 saturation
+[sat] t2t.open.aet: output 3.16 GB + temp 4.73 GB per copy; 83.6 of 85.0 GB free: up to 9 copies at once
+[sat]  1 at once: 0.019 s for 3.2 GB -> 164.8 GB/s
+[sat]  2 at once: 0.039 s for 6.3 GB -> 163.9 GB/s
+[sat]  4 at once: 0.077 s for 12.6 GB -> 164.3 GB/s
+[sat]  8 at once: 0.154 s for 25.3 GB -> 164.4 GB/s
+[sat]  9 at once: 0.172 s for 28.4 GB -> 164.7 GB/s
+[sat] peak 164.8 GB/s with 1 decodes at once (3.2 GB of output); XXH3 check of 9 copies: all status 0
+H1ROW	t2t.open.aet	3156259565	9	164.8	1	1:164.8,2:163.9,4:164.3,8:164.4,9:164.7	ok
+== T-H2 PCIe pipeline
+[pcie] t2t.open.aet: archive 853.3 MB (literal stream 838.3 MB, the rest 15.0 MB) -> 3.16 GB; H2D pinned 42.5 GB/s (20.1 ms); decode resident 19.14 ms = 164.9 GB/s of output
+[pcie] the decode takes archive bytes 1.0x faster than the bus brings them: the bus bounds the pipeline at 157.3 GB/s of output
+[pcie] pieces of 4 MB (tables + token streams first, 15.3 MB), 248 batches (<= 17.1 MB of output), outputs in a ring of 4: H2D in these pieces 41.1 GB/s; H2D -> decode 0.067 s = 47.2 GB/s of output = 1.11x the bus (H2D 42.5 GB/s); + D2H 0.090 s = 35.2 GB/s; batches == original
+[pcie] pieces of 8 MB (tables + token streams first, 15.3 MB), 124 batches (<= 29.6 MB of output), outputs in a ring of 4: H2D in these pieces 41.4 GB/s; H2D -> decode 0.041 s = 77.9 GB/s of output = 1.83x the bus (H2D 42.5 GB/s); + D2H 0.087 s = 36.2 GB/s; batches == original
+H2ROW	t2t.open.aet	42.5	4MB:47.2/35.2/1.11x,8MB:77.9/36.2/1.83x	ok
+== T-H3 random access (samtools 1.13)
+bgzip t2t: 977981967 B
+[ra] t2t.fa: 10000 regions of 5000 bases over 25 records (byte length <= 5063)
+[ra] GPU phases p50 / p99, us: H2D 0 (archive resident), plan 0 (once: 698.0 ms), launch (host: selection + kernel launches) 38.8 / 53.7, kernels 787.2 / 2303.6, D2H 11.0 / 15.0, other wait 0.0 / 0.0; total 806.0 / 2334.6
+[ra] GPU range call + D2H + sync            p50    806.0 us  p99   2334.6 us  mean    986.8 us  == FASTA
+[ra] GPU CUDA Graph (6669 updated, 3331 built) p50    801.1 us  p99   2362.3 us  mean    988.1 us  == FASTA
+[ra] CPU aceapex_decompress_region, 1 thread p50    211.5 us  p99    398.3 us  mean    226.0 us  == FASTA
+[ra] samtools faidx bgzip, process per region p50   6518.5 us  p99  14778.1 us  mean   6994.8 us  == FASTA
+[ra] samtools faidx bgzip, 10000 regions in one call (-r): 1.81 s = 181.5 us per region
+H3ROW	t2t.open.aet	10000	5000	806.0/2334.6	801.1/2362.3	211.5/398.3	6518.5/14778.1	181.5	ok	38.8/787.2/11.0/0.0
+== T-H3b random access, 16 KiB token chunks (853265321 B)
+[ra] t2t.fa: 10000 regions of 5000 bases over 25 records (byte length <= 5063)
+[ra] GPU phases p50 / p99, us: H2D 0 (archive resident), plan 0 (once: 478.1 ms), launch (host: selection + kernel launches) 57.5 / 90.5, kernels 521.3 / 1037.5, D2H 10.9 / 15.0, other wait 0.0 / 0.0; total 540.3 / 1076.6
+[ra] GPU range call + D2H + sync            p50    540.3 us  p99   1076.6 us  mean    602.3 us  == FASTA
+[ra] GPU CUDA Graph (6669 updated, 3331 built) p50    533.3 us  p99   1089.8 us  mean    596.7 us  == FASTA
+[ra] CPU aceapex_decompress_region, 1 thread p50    178.7 us  p99    311.9 us  mean    189.5 us  == FASTA
+[ra] samtools faidx bgzip, process per region -
+H3BROW	t2t.ra16.aet	10000	5000	540.3/1076.6	533.3/1089.8	178.7/311.9	0.0/0.0	-1.0	ok	57.5/521.3/10.9/0.0
+== T-H4 stress (4469784 B archive of a 16 MB chr1 slice)
+[stress] stress.open.aet: 10000 corrupt copies in 35.9 s; per kind: refused by the plan / caught on the device / harmless / SILENT, then with XXH3
+[stress]   bit flip           20 /  1388 /     6 /  15   |  1403 /     6 /   0
+[stress]   random bytes       95 /  1330 /     2 /   2   |  1332 /     2 /   0
+[stress]   zeroed run         45 /  1373 /     1 /  10   |  1383 /     1 /   0
+[stress]   truncation       1429 /     0 /     0 /   0   |     0 /     0 /   0
+[stress]   header/table     1160 /    13 /   189 /  66   |    80 /   188 /   0
+[stress]   literal stream      5 /  1408 /     0 /  15   |  1423 /     0 /   0
+[stress]   token streams      26 /  1370 /     9 /  23   |  1393 /     9 /   0
+[stress] total: refused 2780, caught 6882, harmless 207, silent 131 (no hash: bytes stored raw carry no check of their own); with XXH3: caught 7014, harmless 206, silent 0; hangs 0
+H4ROW	stress.open.aet	10000	2780	13896	207	131	0	0	ok
+== HPRC: first 10 assemblies of the year-1 index
+HPRC: 10 of 10 assemblies (sha256 OK)
+HPRC HG00438.1 encode: 21.0 s
+APIROW_HPRC	/workspace/aceapex_store/hprc/HG00438.1.open.aet	775007922	16.002	bit-perfect	20	20	0.753	0	0	0	440.7	98.557	bit-perfect	0	0	0	55.4	0	26.457	bit-perfect
+HPRC HG00438.2 encode: 17.1 s
+APIROW_HPRC	/workspace/aceapex_store/hprc/HG00438.2.open.aet	777253274	16.020	bit-perfect	20	20	1.428	0	0	0	433.9	99.126	bit-perfect	0	0	0	55.5	0	26.561	bit-perfect
+HPRC HG00621.1 encode: 16.6 s
+APIROW_HPRC	/workspace/aceapex_store/hprc/HG00621.1.open.aet	743678286	15.454	bit-perfect	20	20	0.758	0	0	0	449.5	94.873	bit-perfect	0	0	0	73.1	0	25.507	bit-perfect
+HPRC HG00621.2 encode: 16.9 s
+APIROW_HPRC	/workspace/aceapex_store/hprc/HG00621.2.open.aet	774352814	15.966	bit-perfect	20	20	0.785	0	0	0	445.4	98.696	bit-perfect	0	0	0	66.6	0	26.424	bit-perfect
+HPRC HG00673.1 encode: 15.7 s
+APIROW_HPRC	/workspace/aceapex_store/hprc/HG00673.1.open.aet	747795487	15.354	bit-perfect	20	20	0.787	0	0	0	417.7	96.690	bit-perfect	0	0	0	50.5	0	25.465	bit-perfect
+HPRC HG00673.2 encode: 17.2 s
+APIROW_HPRC	/workspace/aceapex_store/hprc/HG00673.2.open.aet	780684839	16.028	bit-perfect	20	20	0.807	0	0	0	504.1	100.917	bit-perfect	0	0	0	54.0	0	26.610	bit-perfect
+HPRC HG00735.1 encode: 17.1 s
+APIROW_HPRC	/workspace/aceapex_store/hprc/HG00735.1.open.aet	777019340	15.938	bit-perfect	20	20	0.750	0	0	0	438.9	100.264	bit-perfect	0	0	0	66.4	0	26.426	bit-perfect
+HPRC HG00735.2 encode: 17.3 s
+APIROW_HPRC	/workspace/aceapex_store/hprc/HG00735.2.open.aet	777457603	15.906	bit-perfect	20	20	0.761	0	0	0	439.8	99.729	bit-perfect	0	0	0	52.9	0	26.444	bit-perfect
+HPRC HG00741.1 encode: 16.9 s
+APIROW_HPRC	/workspace/aceapex_store/hprc/HG00741.1.open.aet	776029031	15.954	bit-perfect	20	20	0.763	0	0	0	445.1	98.615	bit-perfect	0	0	0	57.7	0	26.447	bit-perfect
+HPRC HG00741.2 encode: 16.9 s
+APIROW_HPRC	/workspace/aceapex_store/hprc/HG00741.2.open.aet	777539747	16.173	bit-perfect	20	20	0.765	0	0	0	433.2	100.593	bit-perfect	0	0	0	55.7	0	26.673	bit-perfect
+HPRC GPU library: 10 assemblies, 158.795 ms total full decode, 10 bit-perfect
+HPRC ACEAPEX open: 30483472831 B -> 7706818343 B (ratio 3.96), one archive per assembly
+
+[219 NUL bytes here: lines lost on the network volume before the pod stopped - see the commit]
+chr1 on NVIDIA H100 80GB HBM3, ms, median of 3; pipeline = chosen path (auto: stream pipeline when H2D >= on-device/2 and >= 2 batches of 64 MB, else sequential); batches 0 = sequential
+parts, ms: lit = zstd frames + pieces by class; unpack = zstd-pack kernels + open kernels
+t2t on NVIDIA H100 80GB HBM3, ms, median of 3; pipeline = chosen path (auto: stream pipeline when H2D >= on-device/2 and >= 2 batches of 64 MB, else sequential); batches 0 = sequential
+parts, ms: lit = zstd frames + pieces by class; unpack = zstd-pack kernels + open kernels
+grch38 on NVIDIA H100 80GB HBM3, ms, median of 3; pipeline = chosen path (auto: stream pipeline when H2D >= on-device/2 and >= 2 batches of 64 MB, else sequential); batches 0 = sequential
+parts, ms: lit = zstd frames + pieces by class; unpack = zstd-pack kernels + open kernels
+api chr1.open: library 2.104 ms vs tool 2.549 ms on-device (-17.5 %), bit-perfect, ranges 200/200 == original, 16 KiB window 0.777 ms, flips caught/silent/harmless 20/0/0; with XXH3 check 8.889 ms (+6.785 ms), bit-perfect, flips 20/0/0; plan with VALIDATE_ZSTD 4.1 ms, flips refused by the plan 0
+api t2t.open: library 19.062 ms vs tool 19.790 ms on-device (-3.7 %), bit-perfect, ranges 60/60 == original, 16 KiB window 0.793 ms, flips caught/silent/harmless 6/0/0; with XXH3 check 103.713 ms (+84.651 ms), bit-perfect, flips 6/0/0; plan with VALIDATE_ZSTD 56.7 ms, flips refused by the plan 0
+api grch38.open: library 19.542 ms vs tool 20.293 ms on-device (-3.7 %), bit-perfect, ranges 200/200 == original, 16 KiB window 0.792 ms, flips caught/silent/harmless 18/2/0; with XXH3 check 109.295 ms (+89.753 ms), bit-perfect, flips 20/0/0; plan with VALIDATE_ZSTD 58.5 ms, flips refused by the plan 0
+archives on the GPU: bit-perfect 3 of 0 (exit 0: 0); emulators 2/2, fixtures 5/5
+C ABI: 3 of 3 archives bit-perfect with every range; plan emulator 1/1
+steps over the time limit: 0
+gate: no baseline rows for NVIDIA H100 80GB HBM3 (results/baseline_h100.tsv) - this run can seed it
+!!! NOT PASSED on NVIDIA H100 80GB HBM3 - valid figures only in bit-perfect rows
+== SUMMARY == 2026-10-02T11:55:43Z
+commit 946591a | MODE ONE | NVIDIA H100 80GB HBM3
+chr1.open: library 2.104 ms (120.7 GB/s), tool 2.549 ms; seq 0.316, unpack 0.629, match 0.518 ms; bit-perfect; variants seq 0.332->0.316, unpack 0.558->0.758 (EXC)->0.629 (SHB); tile 1.149->2.654
+t2t.open: library 19.062 ms (165.6 GB/s), tool 19.790 ms; seq 2.844, unpack 7.803, match 5.382 ms; bit-perfect; variants seq 2.936->2.842, unpack 7.237->9.716 (EXC)->7.799 (SHB); tile 13.163->31.346
+grch38.open: library 19.542 ms (167.5 GB/s), tool 20.293 ms; seq 2.865, unpack 8.353, match 5.216 ms; bit-perfect; variants seq 2.967->2.862, unpack 7.677->10.416 (EXC)->8.350 (SHB); tile 13.557->33.098
+stream grch38.open.aet: 1 batches of 199798 blocks (slot 8175 MB), 1.78 GB/s with D2H + host XXH3, hash match, batches match
+stream t2t.open.aet (capped): 36 batches of 5463 blocks (slot 226 MB), 1.72 GB/s with D2H + host XXH3, hash match, batches match
+T-H1 saturation t2t.open.aet: peak 164.8 GB/s with 1 decodes at once (K: GB/s 1:164.8,2:163.9,4:164.3,8:164.4,9:164.7), XXH3 ok
+T-H2 PCIe: H2D 42.5 GB/s; pieces: output GB/s / with D2H / output over bus 4MB:47.2/35.2/1.11x,8MB:77.9/36.2/1.83x; ok
+T-H3 10000 regions x 5000 b, p50/p99 us: GPU 806.0/2334.6 (launch/kernels/D2H/wait ), GPU graph 801.1/2362.3, CPU 211.5/398.3, samtools bgzip 6518.5/14778.1 (one call: 181.5 us/region); ok
+T-H3b (16 KiB token chunks) 10000 regions x 5000 b, p50/p99 us: GPU 540.3/1076.6 (launch/kernels/D2H/wait ), GPU graph 533.3/1089.8, CPU 178.7/311.9, samtools bgzip 0.0/0.0 (one call: -1.0 us/region); ok
+T-H4 10000 corrupt archives: refused 2780, caught 13896, harmless 207, silent 131 (no hash) / 0 (XXH3), hangs 0; ok
+paper rows (README, H100 SXM, June 2026, not re-measured): FASTQ ERR194147 5 GB 168.9 GB/s ratio 3.31; 50 GB range decode 165.7 GB/s ratio 3.99; 5 GB genome full decode 29.71 ms
+gate: no baseline rows for NVIDIA H100 80GB HBM3 (results/baseline_h100.tsv) - this run can seed it
+verdict FAILED (speed gate: slower than results/baseline_h100.tsv by > 5 %)

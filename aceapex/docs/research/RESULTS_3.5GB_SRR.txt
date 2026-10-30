@@ -1,0 +1,8 @@
+=== 3.5GB SRR1448774 (известный SRA), v4 16KB, H100, 2026-06-13 ===
+FULL 170.7 GB/s @ ratio 2.43 (A=5.17ms 490GB/s entropy + B=15.33ms decode), 213624 блоков
+orig=3.5GB. Ratio зависит от типа данных, не от размера.
+[CORRECTION 2026-07-12: this line previously compared against 'NA12878 11.19'. That figure came
+from a sample with degenerate quality strings and is withdrawn. Real NA12878 (ERR194147) gives
+ratio 3.97. This 3.5GB SRR1448774 result is unaffected and was always measured on real data.]
+Скорость стабильна на крупных файлах (entropy 490 GB/s на 2.5GB потоков).
+BUG: aceapex_depth падает на файлах >4GB (uint32 overflow в размере). Потолок без правки ~3.5GB. К починке: size_t/uint64.

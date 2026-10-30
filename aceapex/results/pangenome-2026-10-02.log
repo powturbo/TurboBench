@@ -1,0 +1,42 @@
+# Pangenome: what block-independent ACEAPEX loses on repeats between assemblies, and a reference-segment prototype
+# ace-core (EPYC 4344P 8c/16t, 16 threads), 2026-10-02. Format unchanged; AX_REFSEG is a prototype with its own container.
+
+## Inputs: HPRC year-1 (index Year1_assemblies_v2_genbank.index of human-pangenomics/HPP_Year1_Assemblies, first 3 rows),
+## downloaded from s3-us-west-2.amazonaws.com/human-pangenomics, sha256 of the .fa.gz == the index; md5 of the FASTA:
+HG00438.1  HG00438.paternal.f1_assembly_v2_genbank.fa  3 062 940 590 B  sha256(gz) a5840157a6995c5fbc08698e52b614fbdf6f57a7245db944edb328a0b3e23ff8  md5 5ecaf53828c71d428f9803753448aee6
+HG00438.2  HG00438.maternal.f1_assembly_v2_genbank.fa  3 073 690 027 B  sha256(gz) ca307e58dfba48336dd3a05d0ea59b87e3383a5a8c839e5b7c6e7ab6178d58ea  md5 6dff680c9d2710a55a631321537fc08a
+HG00621.1  HG00621.paternal.f1_assembly_v2_genbank.fa  2 942 281 822 B  sha256(gz) bb7d30232f423cabf8d2ebf7443d15aa42bdbfe826424e89ac5f0ee33b0bc780  md5 2bc6c21aa65a51e815999e836fbf14b4
+(contigs, 80 columns, soft-masked; 3 files = 9 078 912 439 B)
+
+## a) Today's tools (every archive decoded and compared: md5 of the output == md5 of the input)
+tool                                    HG00438.1    HG00438.2    HG00621.1    3 assemblies     ratio   compress           decompress
+ACEAPEX 2.3 default, one per file       723 766 510  724 459 211  692 343 369  2 140 569 090    4.24    5.0 s each         3.3 s each (CLI -c, 16 t)
+ACEAPEX default, the 3 files in one     -            -            -            2 705 974 278    3.36    15.2 s             (literal stream > 65535 chunks:
+                                                                                                                             pre-2.1 layout, no DNA transform)
+zstd 1.4.8 -19 --long=31 -T16, per file 728 922 741  729 211 667  696 800 064  2 154 934 472    4.21    ~315 s each        -
+zstd -19 --long=31, the 3 in one        -            -            -            2 152 323 273    4.22    918 s              10.4 s
+AGC 3.2.4 (refresh-bio), 1 / 2 / 3      699 679 459  +31 264 337  +23 116 005  754 060 801      12.04   46.9 s (3, 16 t)   4.2 s one assembly
+=> the repeats between assemblies are where block-independent ACEAPEX loses: AGC stores the 2nd and 3rd assembly in
+   31 and 23 MB, ACEAPEX in 724 and 692 MB - the 3 assemblies cost 2.84x AGC (1 386 MB more). zstd --long=31 sees no
+   more: its 2 GiB window is shorter than one assembly (3 GB). On the first assembly alone ACEAPEX is within 3.4 % of
+   AGC (723.8 vs 699.7 MB), and within 0.2 % with a line model (below).
+
+## b) AX_REFSEG prototype (scripts/refseg.cpp; tuning builds; container AXREFSG1 of its own, no ACEAPEX decoder reads it)
+Each FASTA -> line model (headers + run-length line lengths, zstd -19: 1.5-1.7 KB per assembly) + the sequence bytes.
+The first assembly is compressed alone; a block (1 MiB) of a later one may copy from a reference segment: up to 3
+blocks of an earlier assembly, forward or reverse-complemented, put before the block (compress_block wlo); the
+segment is found by voting sampled unique 20-mers (1/64) of the earlier assemblies in 64 KiB diagonal bins. Depth <= 2
+(assembly 2 -> 1, assembly 3 -> 1 or 2). The decoder (decompress_streams with the prefix as out0) rebuilds every
+assembly from the container alone; each FASTA compared byte for byte with the original: all bit-perfect.
+variant                                    HG00438.1    HG00438.2    HG00621.1    3 assemblies     ratio  encode (+ search)  decode + FASTA check
+line model, 4-byte key (default encoder)   704 558 487  704 509 651  672 676 479  2 081 744 633    4.36   15.2 s             43.8 s
+line model + 12-byte key (AX_HASH12)       698 060 143  697 935 618  666 616 149  2 062 611 926    4.40   18.3 s             44.0 s
++ reference segments (AX_REFSEG=1)         698 060 143  175 557 206   94 598 225    968 215 590    9.38   88.3 s (+28.7 s)   43.7 s
+references: HG00438.2 2456 of 2896 blocks (963 reverse-complemented), HG00621.1 2596 of 2772 (1129); random access: a
+block needs 3.32 blocks decoded on average (itself + its segment + the segment's segments), 12 at most; peak RSS 23 GB
+(all assemblies and their reverse complements in memory - a prototype). The per-block reference entry costs 11 B here.
+=> the 2nd assembly drops from 698 to 176 MB, the 3rd from 667 to 95 MB: 3 assemblies 2 141 -> 968 MB (2.21x), still
+   1.28x AGC (754 MB). Where the rest goes: blocks without a found segment (HG00438.2: 440 blocks = 15 %, stored alone at
+   ~0.24 B/B), one segment per block (a block spanning a breakpoint or a structural variant copies only one side), exact
+   matches only (each SNP or small indel ends a match: literal + new token), and 1 MiB blocks with their own history.
+   Not yet: several segments per block, a smaller block for the references, approximate matches (R2).

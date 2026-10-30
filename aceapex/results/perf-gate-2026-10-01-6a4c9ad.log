@@ -1,0 +1,16 @@
+# perf gate 2026-10-01T16:27:47Z, commit 6a4c9ad, AMD EPYC 4344P 8-Core Processor, median of 5, tolerance 5 %
+archive	profile	threads	base_s	now_s	change	GB/s	verdict
+chr1	default	1	0.1803	0.1373	-23.8%	1.85	FASTER
+chr1	default	0	0.0646	0.0254	-60.7%	10.00	FASTER
+chr1	open	1	0.1333	0.1170	-12.2%	2.17	FASTER
+chr1	open	0	0.0569	0.0237	-58.3%	10.71	FASTER
+t2t	default	1	2.4866	1.9628	-21.1%	1.61	FASTER
+t2t	default	0	0.6548	0.2575	-60.7%	12.26	FASTER
+t2t	open	1	1.7909	1.5901	-11.2%	1.98	FASTER
+t2t	open	0	0.6069	0.2022	-66.7%	15.61	FASTER
+silesia	default	1	0.1411	0.1402	-0.6%	1.51	OK
+silesia	default	0	0.0421	0.0378	-10.2%	5.61	FASTER
+silesia	open	1	0.1270	0.1256	-1.1%	1.69	OK
+silesia	open	0	0.0409	0.0262	-35.9%	8.09	FASTER
+perf gate: PASS; results/perf-gate-2026-10-01-6a4c9ad.log
+baseline: rows marked FASTER written into results/baseline_ace-core.tsv (commit it with results/perf-gate-2026-10-01-6a4c9ad.log)

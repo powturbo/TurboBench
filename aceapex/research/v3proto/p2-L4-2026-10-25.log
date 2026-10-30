@@ -1,0 +1,127 @@
+# P2 v3gpu, Colab NVIDIA L4 (58 SMs, CUDA 13.0), 2026-10-25, branch fast-probe; colab run --gpu L4 .wk/colab/v3gpu_run.py; match phase on the device, median of 9, FNV vs original
+
+## run1 (5252127 )
+== provenance 2026-10-25
+GPU 0: NVIDIA L4 (UUID: GPU-3eb91a7c-ac2b-a760-040d-25b017793a5a)
+Build cuda_13.0.r13.0/compiler.36424714_0
+5252127
+12
+/content/work/chr1.fa: OK
+silesia.tar 211957760 B
+== chr1.fa (16 KiB blocks)
+/content/work/chr1.fa on NVIDIA L4 (58 SMs): 253935557 B, 15499 blocks of 16384, 20586 v3 tokens, literals 234967363 B
+base v7-RA G= 8: 2.746 ms = 92.5 GB/s  bit-perfect
+base v7-RA G=16: 2.568 ms = 98.9 GB/s  bit-perfect
+base v7-RA G=32: 2.438 ms = 104.2 GB/s  bit-perfect
+v3 warp-scan   : 3.600 ms = 70.5 GB/s  bit-perfect  (x0.68 vs best base G=32)
+== silesia.tar (16 KiB blocks)
+/content/work/silesia.tar on NVIDIA L4 (58 SMs): 211957760 B, 12937 blocks of 16384, 6223766 v3 tokens, literals 99037754 B
+base v7-RA G= 8: 4.779 ms = 44.4 GB/s  bit-perfect
+base v7-RA G=16: 4.548 ms = 46.6 GB/s  bit-perfect
+base v7-RA G=32: 5.079 ms = 41.7 GB/s  bit-perfect
+v3 warp-scan   : 2.618 ms = 81.0 GB/s  bit-perfect  (x1.74 vs best base G=16)
+RESULT: all rows bit-perfect
+== provenance 2026-10-25
+GPU 0: NVIDIA L4 (UUID: GPU-3eb91a7c-ac2b-a760-040d-25b017793a5a)
+Build cuda_13.0.r13.0/compiler.36424714_0
+5252127
+12
+/content/work/chr1.fa: OK
+silesia.tar 211957760 B
+== chr1.fa (16 KiB blocks)
+/content/work/chr1.fa on NVIDIA L4 (58 SMs): 253935557 B, 15499 blocks of 16384, 20586 v3 tokens, literals 234967363 B
+base v7-RA G= 8: 2.746 ms = 92.5 GB/s  bit-perfect
+base v7-RA G=16: 2.568 ms = 98.9 GB/s  bit-perfect
+base v7-RA G=32: 2.438 ms = 104.2 GB/s  bit-perfect
+v3 warp-scan   : 3.600 ms = 70.5 GB/s  bit-perfect  (x0.68 vs best base G=32)
+== silesia.tar (16 KiB blocks)
+/content/work/silesia.tar on NVIDIA L4 (58 SMs): 211957760 B, 12937 blocks of 16384, 6223766 v3 tokens, literals 99037754 B
+base v7-RA G= 8: 4.779 ms = 44.4 GB/s  bit-perfect
+base v7-RA G=16: 4.548 ms = 46.6 GB/s  bit-perfect
+base v7-RA G=32: 5.079 ms = 41.7 GB/s  bit-perfect
+v3 warp-scan   : 2.618 ms = 81.0 GB/s  bit-perfect  (x1.74 vs best base G=16)
+RESULT: all rows bit-perfect
+
+## run-2 (0f96b29 )
+== provenance 2026-10-25
+GPU 0: NVIDIA L4 (UUID: GPU-036d0d7c-aaa1-e5e3-3914-5b255599eb4f)
+Build cuda_13.0.r13.0/compiler.36424714_0
+0f96b29
+12
+/content/work/chr1.fa: OK
+silesia.tar 211957760 B
+== chr1.fa (16 KiB blocks)
+/content/work/chr1.fa on NVIDIA L4 (58 SMs): 253935557 B, 15499 blocks of 16384, 20586 v3 tokens, literals 234967363 B
+base v7-RA G= 8: 2.757 ms = 92.1 GB/s  bit-perfect
+base v7-RA G=16: 2.601 ms = 97.6 GB/s  bit-perfect
+base v7-RA G=32: 2.423 ms = 104.8 GB/s  bit-perfect
+v3 warp-scan   : 2.297 ms = 110.6 GB/s  bit-perfect  (x1.05 vs best base G=32)
+== silesia.tar (16 KiB blocks)
+/content/work/silesia.tar on NVIDIA L4 (58 SMs): 211957760 B, 12937 blocks of 16384, 6223766 v3 tokens, literals 99037754 B
+base v7-RA G= 8: 4.937 ms = 42.9 GB/s  bit-perfect
+base v7-RA G=16: 4.690 ms = 45.2 GB/s  bit-perfect
+base v7-RA G=32: 5.248 ms = 40.4 GB/s  bit-perfect
+v3 warp-scan   : 2.470 ms = 85.8 GB/s  bit-perfect  (x1.90 vs best base G=16)
+RESULT: all rows bit-perfect
+== provenance 2026-10-25
+GPU 0: NVIDIA L4 (UUID: GPU-036d0d7c-aaa1-e5e3-3914-5b255599eb4f)
+Build cuda_13.0.r13.0/compiler.36424714_0
+0f96b29
+12
+/content/work/chr1.fa: OK
+silesia.tar 211957760 B
+== chr1.fa (16 KiB blocks)
+/content/work/chr1.fa on NVIDIA L4 (58 SMs): 253935557 B, 15499 blocks of 16384, 20586 v3 tokens, literals 234967363 B
+base v7-RA G= 8: 2.757 ms = 92.1 GB/s  bit-perfect
+base v7-RA G=16: 2.601 ms = 97.6 GB/s  bit-perfect
+base v7-RA G=32: 2.423 ms = 104.8 GB/s  bit-perfect
+v3 warp-scan   : 2.297 ms = 110.6 GB/s  bit-perfect  (x1.05 vs best base G=32)
+== silesia.tar (16 KiB blocks)
+/content/work/silesia.tar on NVIDIA L4 (58 SMs): 211957760 B, 12937 blocks of 16384, 6223766 v3 tokens, literals 99037754 B
+base v7-RA G= 8: 4.937 ms = 42.9 GB/s  bit-perfect
+base v7-RA G=16: 4.690 ms = 45.2 GB/s  bit-perfect
+base v7-RA G=32: 5.248 ms = 40.4 GB/s  bit-perfect
+v3 warp-scan   : 2.470 ms = 85.8 GB/s  bit-perfect  (x1.90 vs best base G=16)
+RESULT: all rows bit-perfect
+
+## run-3 (17ad8c8 )
+== provenance 2026-10-25
+GPU 0: NVIDIA L4 (UUID: GPU-a0e5fe8d-7590-1a9d-6ffd-23c54a457efd)
+Build cuda_13.0.r13.0/compiler.36424714_0
+17ad8c8
+12
+/content/work/chr1.fa: OK
+silesia.tar 211957760 B
+== chr1.fa (16 KiB blocks)
+/content/work/chr1.fa on NVIDIA L4 (58 SMs): 253935557 B, 15499 blocks of 16384, 20586 v3 tokens, literals 234967363 B
+base v7-RA G= 8: 2.755 ms = 92.2 GB/s  bit-perfect
+base v7-RA G=16: 2.587 ms = 98.2 GB/s  bit-perfect
+base v7-RA G=32: 2.437 ms = 104.2 GB/s  bit-perfect
+v3 warp-scan   : 2.338 ms = 108.6 GB/s  bit-perfect  (x1.04 vs best base G=32)
+== silesia.tar (16 KiB blocks)
+/content/work/silesia.tar on NVIDIA L4 (58 SMs): 211957760 B, 12937 blocks of 16384, 6223766 v3 tokens, literals 99037754 B
+base v7-RA G= 8: 4.900 ms = 43.3 GB/s  bit-perfect
+base v7-RA G=16: 4.599 ms = 46.1 GB/s  bit-perfect
+base v7-RA G=32: 5.456 ms = 38.8 GB/s  bit-perfect
+v3 warp-scan   : 2.411 ms = 87.9 GB/s  bit-perfect  (x1.91 vs best base G=16)
+RESULT: all rows bit-perfect
+== provenance 2026-10-25
+GPU 0: NVIDIA L4 (UUID: GPU-a0e5fe8d-7590-1a9d-6ffd-23c54a457efd)
+Build cuda_13.0.r13.0/compiler.36424714_0
+17ad8c8
+12
+/content/work/chr1.fa: OK
+silesia.tar 211957760 B
+== chr1.fa (16 KiB blocks)
+/content/work/chr1.fa on NVIDIA L4 (58 SMs): 253935557 B, 15499 blocks of 16384, 20586 v3 tokens, literals 234967363 B
+base v7-RA G= 8: 2.755 ms = 92.2 GB/s  bit-perfect
+base v7-RA G=16: 2.587 ms = 98.2 GB/s  bit-perfect
+base v7-RA G=32: 2.437 ms = 104.2 GB/s  bit-perfect
+v3 warp-scan   : 2.338 ms = 108.6 GB/s  bit-perfect  (x1.04 vs best base G=32)
+== silesia.tar (16 KiB blocks)
+/content/work/silesia.tar on NVIDIA L4 (58 SMs): 211957760 B, 12937 blocks of 16384, 6223766 v3 tokens, literals 99037754 B
+base v7-RA G= 8: 4.900 ms = 43.3 GB/s  bit-perfect
+base v7-RA G=16: 4.599 ms = 46.1 GB/s  bit-perfect
+base v7-RA G=32: 5.456 ms = 38.8 GB/s  bit-perfect
+v3 warp-scan   : 2.411 ms = 87.9 GB/s  bit-perfect  (x1.91 vs best base G=16)
+RESULT: all rows bit-perfect

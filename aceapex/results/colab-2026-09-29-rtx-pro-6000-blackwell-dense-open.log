@@ -1,0 +1,23 @@
+# colab rtx-pro-6000-blackwell-server-edition (G4), 2026-09-29, aceapex main 51c9655, scripts/colab_gpu_open.sh
+# (--pipeline=auto, --dense-lit on the open archives), median of 3. Excerpt of the log pasted from Colab.
+gpu NVIDIA RTX PRO 6000 Blackwell Server Edition | cc 12.0 | driver 580.82.07 | 2430/12481 MHz | 97887 MiB | 600 W
+host AMD EPYC 9B45, 48 threads, RAM 176 GB; CUDA 12.8, libzstd 1.5.5, nvCOMP 5.3.0.16, sm_120
+emulators 2/2; fixtures 5/5 (5 hashes each); archives == pinned; 6/6 GPU runs bit-perfect; dense literal stream MATCHES on both corpora
+H2D pageable 27.3-29.0 GB/s, pinned 56.6-56.9 GB/s
+
+chr1 (ms)         bytes       tok    lit    unpack match  on-device +H2D   chosen (auto)
+zstd              69 410 925  0.477  2.919  0.462  1.261  5.119     6.324  6.324 sequential
+rans              69 106 957  0.942  2.967  0.460  1.275  5.644     6.843  6.843 sequential
+open              67 975 888  0.939  0.958  0.505  1.265  3.666     4.844  4.844 sequential (0 batches of 64 MB)
+dense (est.)      64 923 192  0.939  3.894  0      1.265  6.098     -      -     (k_r1 lit; 0 of 192 845 679 bytes differ)
+
+t2t (ms)
+zstd              901 676 480 3.303  13.015 6.280  11.784 34.382    49.987 49.987 sequential (H2D 15.6 < on-device/2 17.2)
+rans              898 263 414 1.678  13.161 6.236  11.774 32.849    48.402 48.402 sequential
+open              887 641 942 1.675  5.335  7.884  11.820 26.713    42.071 33.353 stream pipeline, 8 batches (-20.7 %, 94.6 GB/s)
+dense (est.)      848 307 559 1.675  43.922 0      11.820 57.416    -      -      (k_r1 lit; 0 of 2 471 486 954 bytes differ; AR1L 667 037 887 B)
+
+old pipeline (H2D || zstd, 4 batches), for reference: chr1 zstd 7.660, rans 9.001, open 3.950; t2t zstd 42.349, rans 41.724, open 41.465
+dense-open vs open, literal stage (lit + unpack): chr1 3.894 vs 1.463 ms (2.66x slower), t2t 43.922 vs 13.219 (3.32x slower);
+archive -4.49 % (chr1) / -4.43 % (t2t). k_r1: 4 lines x 4 checkpoint segments = 16 serial lanes per 64 KiB chunk,
+binary search per symbol in a shared cumulative table - latency-bound (chr1 2 943 chunks = 47K lanes on 188 SMs).

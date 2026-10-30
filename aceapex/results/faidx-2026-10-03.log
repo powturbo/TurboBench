@@ -1,0 +1,20 @@
+# faidx -r and region in process, before / after the literal-table walk fix - ace-core (AMD EPYC 4344P 8c/16t), 2026-10-03
+# T2T open archives: t16 = token chunk 16 KiB (853 265 321 B, 7bb790f), t64 = 64 KiB (853 264 869 B, 946591a); 64 KiB literal chunks (12 800 per stream)
+# 10 000 regions x 5000 b, seed 20261002 (the T-H3 list, gpu_h100_tests ra); samtools 1.13 / libhts.so.3 (1.13) on bgzip -@16 of t2t.fa (977 981 967 B, .fai == ours)
+# before = main 1106217, after = branch faidx-batch; all outputs md5 90523a49 (== samtools), every region == FASTA
+## one call, all regions (-r), wall / 10 000, 5 runs interleaved
+before: t16 1.17-1.20 s (117-120 us), t64 1.51-1.56 s (151-156 us), samtools 1.06-1.10 s (106-110 us)
+after:  t16 0.70-0.72 s (70-72 us),   t64 1.06-1.08 s (106-108 us), samtools 1.03-1.04 s (103-104 us)
+## profile of faidx -r t16 (perf, self)
+before: lit_range 36.8 % (walk of the 12 800-entry literal table: check + pointer search), axr_decode_avx2 31.2 %, axo_dna_decode 13.8 %, string push_back 6.1 %, do_faidx 2.4 %
+after:  axr_decode_avx2 55.3 %, axo_dna_decode 24.0 %, lit_table_check 6.0 %, lit_range 2.0 %, fse_range 1.4 %
+## in process, one region per call, one thread (scripts/region_htslib.cpp, -O3 -march=native), p50 / p99 us
+old t16: RHROW	10000	90.9/167.9	92.4/169.7	100.5/192.0	ok
+old t64: RHROW	10000	120.8/270.2	123.0/273.8	99.0/189.3	ok
+new t16: RHROW	10000	49.8/125.2	51.0/126.5	99.8/191.1	ok
+new t64: RHROW	10000	78.9/230.0	80.3/232.6	101.8/194.8	ok
+# RHROW: n, aceapex_decompress_region, + line ends out, htslib faidx_fetch_seq64 (fai_load3 once, default cache), status
+## perf gate on the first version: chr1 default 1 thread +17 %, t2t default 1 thread +13 % (FAIL) - dna_decompress moved
+## (0x83b0 -> 0x8690), its own code unchanged; with __attribute__((aligned(64))) 0.137 s (main 0.139 s); gate PASS after
+final (aligned): faidx -r t16 0.71-0.72 s (71-72 us per region), md5 90523a49; RHROW 10000 49.7/125.1 50.8/126.7 102.1/193.1 ok
+judge 66 pass / 0 fail; perf gate PASS (results/perf-gate-2026-10-02-*.log of this branch)

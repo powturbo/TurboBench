@@ -1,0 +1,4 @@
+# encode cost, ace-core, 2026-09-28, chr1.fa 253935557 B, LIT_CHUNK=65536 FSE_CHUNK=4096, libzstd 1.4.8, aceapex HEAD fe8fdda
+threads=8 wall=0.94s user=7.43s sys=0.38s rss=873232kB
+threads=16 wall=0.84s user=8.50s sys=0.44s rss=934172kB
+archive 68398886 B both, cmp identical

@@ -1,0 +1,16 @@
+== N=1 3062940590 B md5 5ecaf53828c71d428f9803753448aee6
+open16k: cat1.fa: 3062940590 -> 775007922 B (ratio 3.9521), encode 5.83 s, decode median 0.1360 s (22.52 GB/s, 16 threads), 2000 regions: p50 128.9 us p99 228.2 us, all bit-perfect
+open16k: lmt 10.88 s 15090868 KB
+refs0: [pg] 1 assemblies in cat1.fa (3062940590 B)
+refs0: [pg] decode HG00438#1: FASTA bit-perfect
+refs0: [pg] refs 0: 3062940590 B FASTA, 1 assemblies -> 712666404 B (ratio 4.298); encode 6.5 s (reference search 0.0 s); decode 2.7 s (FASTA rebuild 1.1 s) = 1.15 GB/s; all bit-perfect
+refs0: [pg] k-mers (31, canonical, sampled 1/64): match bytes 5.34 % of the sequence; naive 3025110129 windows in 3.42 s (+ decode 2.7 s), tokens 2899306305 windows (125803824 skipped) in 3.42 s; sets identical (39009889 sampled distinct)
+refs0: PGROW	0	1	3062940590	712666404	712666388	6.5	2.7	1.15	ok	5.340	3.42	3.42	3025110129	2899306305	identical
+refs0: pg 19.60 s 13683284 KB
+refs1: [pg] 1 assemblies in cat1.fa (3062940590 B)
+refs1: [pg] decode HG00438#1: FASTA bit-perfect
+refs1: [pg] refs 1: 3062940590 B FASTA, 1 assemblies -> 712666404 B (ratio 4.298); encode 6.7 s (reference search 0.0 s); decode 2.6 s (FASTA rebuild 1.0 s) = 1.16 GB/s; all bit-perfect
+refs1: [pg] k-mers (31, canonical, sampled 1/64): match bytes 5.34 % of the sequence; naive 3025110129 windows in 3.49 s (+ decode 2.6 s), tokens 2899306305 windows (125803824 skipped) in 3.33 s; sets identical (39009889 sampled distinct)
+refs1: PGROW	1	1	3062940590	712666404	712666388	6.7	2.6	1.16	ok	5.340	3.49	3.33	3025110129	2899306305	identical
+refs1: pg 19.82 s 13682972 KB
+== N=2 6136630617 B md5 61b7d54860af989c45d0eae239203586

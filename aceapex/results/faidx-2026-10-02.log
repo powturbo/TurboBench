@@ -1,0 +1,14 @@
+# aceapex faidx against samtools faidx - ace-core, 2026-10-02, samtools 1.13; T2T (bgzip -@16 for samtools, .fai of both identical)
+# correctness: claim head_faidx (scripts/faidx_test.sh): 1000 regions incl. edge cases, byte for byte and exit code, -r, .fai
+per process, 1000 regions x 5000 b of T2T (Python subprocess around each call: process start included):
+  aceapex faidx, open archive      p50    1261 us  p99    1656 us  output == samtools
+  aceapex faidx, default archive   p50    3448 us  p99    5139 us  output == samtools
+  samtools faidx, bgzip            p50    1881 us  p99    2147 us  output == samtools
+one call, 10 000 regions x 5000 b: 1.579 s = 157.9 us per region, output md5 90523a49  [./aceapex faidx t2t.open.aet -r t2t.open.aet.regions.txt]
+one call, 10 000 regions x 5000 b: 12.305 s = 1230.5 us per region, output md5 90523a49  [./aceapex faidx t2t.default.aet -r t2t.open.aet.regions.txt]
+one call, 10 000 regions x 5000 b: 1.127 s = 112.7 us per region, output md5 90523a49  [samtools faidx t2t.fa.bgz -r t2t.open.aet.regions.txt]
+sizes: T2T open archive 853 264 869 B (default 806 458 861), bgzip 932 MB (.gzi 0.6 MB)
+=> one region per process: ACEAPEX open 1.26 ms p50 against samtools on bgzip 1.88 ms; in one call samtools is faster
+   per region (113 against 158 us: our region call decodes a 64 KiB literal chunk and its token chunks for 5 kB, the
+   region API keeps no chunk cache across calls). The default profile (1 MiB blocks) is the wrong archive for regions:
+   1.23 ms per region. GPU random access: T-H3 on the card.

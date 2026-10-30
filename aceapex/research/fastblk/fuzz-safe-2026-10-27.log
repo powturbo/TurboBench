@@ -1,0 +1,6 @@
+== fuzz_safe_5 silesia.tar 900 s, seed 115
+MIN_MATCH 5: 205749 valid blocks (both decoders exact), 13167936 mutants: 11149037 rejected, 2018899 decoded to n bytes; no ASan/UBSan report in 900 s
+== fuzz_safe_16 silesia.tar 900 s, seed 1116
+MIN_MATCH 16: 221176 valid blocks (both decoders exact), 14155264 mutants: 10504629 rejected, 3650635 decoded to n bytes; no ASan/UBSan report in 900 s
+== negative control: margin M -> 64 (MIN_MATCH 16), seed 3
+SUMMARY: AddressSanitizer: unknown-crash /usr/lib/gcc/x86_64-linux-gnu/11/include/avxintrin.h:935 in _mm256_storeu_si256(long long __vector(4)*, long long __vector(4))

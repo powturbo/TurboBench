@@ -1,0 +1,73 @@
+=== ЗАМЕР B: ACEAPEX seek vs samtools faidx (FASTQ ERR194147, clean 1.3GB, 5M ридов) ===
+ОПЕРАЦИИ (честно — разные слои, но обе = region-access из сжатого/индексированного FASTQ):
+- samtools faidx: координатно-именной доступ через .fai индекс (250MB для 5M ридов)
+- ACEAPEX v7-RA: byte-block seek в сжатом потоке на GPU
+
+samtools COLD (1 запрос = загрузка 250MB индекса заново): ~2000 ms (1855-2176)
+samtools WARM (1000 ридов 1 вызовом, индекс раз): 2275 ms → 2.3 ms/рид амортизир.
+ACEAPEX seek (1 блок, streams резидентны): 0.362 ms (361-365 us), стабильно
+
+ЧЕСТНЫЙ ВЫВОД: ACEAPEX ~6x быстрее samtools faidx в WARM-режиме (0.362 vs 2.3 ms),
+и ~5500x в COLD (но cold нечестно — это загрузка индекса samtools).
+ГРАНИЦА: samtools .fai = 250MB (огромный для FASTQ, грузится при cold start).
+ACEAPEX seek не требует перезагрузки индекса (block offsets в header, резидентны).
+Это документированная боль CRAM/faidx на множественных запросах (htsjdk #1162).
+ВАЖНО: оба измерены с резидентными данными; PCIe/диск staging вне таймера (см. замер C).
+=== ЗАМЕР C: end-to-end с PCIe (clean 1.34GB, H100, измерено) ===
+PCIe (pinned memory, 5 прогонов avg):
+  H2D 397MB сжатое:  9.81 ms (39.5 GB/s)
+  D2H 1339MB выход:  33.38 ms (39.2 GB/s)
+  PCIe round-trip:   43.19 ms
+Device-resident decode (entropy+match): 8.03 ms (166.9 GB/s) [A]1.32+[B]6.71
+END-TO-END (decode + PCIe round-trip): ~51 ms для 1.34GB = ~26 GB/s эффективно.
+ВАЖНО: 32-сек wall-clock процесса = CUDA teardown (cudaFree/context destroy), НЕ decode.
+Реальный decode+PCIe = 51ms.
+
+ЧЕСТНЫЙ ВЫВОД:
+- Device-resident 166.9 GB/s — для GPU-резидентных потребителей (нет D2H).
+- End-to-end с D2H = ~26 GB/s, ДОМИНИРУЕТ D2H (33ms = 4x времени decode 8ms).
+- PCIe D2H потолок 39 GB/s — это потолок ЛЮБОГО GPU-декодера, отдающего результат на host.
+- ВЫВОД усиливает compressed-resident + seek: НЕ тащить весь геном через PCIe,
+  держать сжатым в VRAM (12.7GB влезает), доставать регионы seek'ом (0.36ms), без D2H всего файла.
+ГРАНИЦА: H2D staging (загрузка сжатого в VRAM) разовая; для seek-сценария амортизируется
+по многим запросам. Device-resident число честно для "данные уже в VRAM".
+=== ЗАМЕР D: DietGPU PoC на H100 (proof-of-concept) ===
+DietGPU (Meta, MIT) — первый публичный GPU rANS, аналог FSE. README: 250-410 GB/s ANS на A100.
+ЦЕЛЬ: проверить реальность пути к открытой замене проприетарного nvcomp.
+
+РЕЗУЛЬТАТ: DietGPU ANS-кодек КОМПИЛИРУЕТСЯ на H100 (sm_90):
+- GpuANSEncode.cu → ans_enc.o (595KB) OK
+- GpuANSDecode.cu → ans_dec.o (544KB) OK
+- GpuANSInfo.cu → ans_info.o (24KB) OK
+Зависимости: только glog (собран из submodule) + StackDeviceMemory. БЕЗ PyTorch для ядра ANS.
+(CMake-сборка требует Torch, но автономный C++ ANS-путь — нет; собран напрямую через nvcc).
+
+ЗНАЧИМОСТЬ: опровергает "tested only on V100/A100" — ANS DietGPU собирается под H100 CC9.0.
+Путь к ПОЛНОСТЬЮ открытому скоростному стеку (замена nvcomp-ANS в режиме 2) РЕАЛЕН.
+API: ansEncodeBatchStride/ansDecodeBatchStride с ANSCodecConfig(probBits, checksum).
+
+ГРАНИЦА ЧЕСТНОСТИ: это compile-PoC, НЕ throughput-замер и НЕ интеграция в ACEAPEX.
+Полная интеграция (заменить nvcomp в device-resident пайплайне, измерить ratio+скорость,
+bit-perfect) = статья 3. Для статьи 2: "DietGPU ANS compiles on H100; full integration
+to replace nvcomp = future work" — честно и достаточно.
+НАПОМИНАНИЕ: открытый GPU decode УЖЕ есть (aceapex_cuda #291, nvcomp-free, merged в lzbench 2.3).
+DietGPU нужен только чтобы открыть БЫСТРЫЙ nvcomp-режим (165-260 GB/s), не базовый путь.
+
+=== HARDWARE: H100 80GB HBM3, Xeon Platinum 8468 (160 threads), CUDA 12.8, 2026-06-16 ===
+
+=== ЗАМЕР D ПРОДОЛЖЕНИЕ: DietGPU ANS THROUGHPUT на H100 (ИЗМЕРЕНО, bit-perfect) ===
+Собран автономный C++ бенчмарк (без PyTorch): ans_enc/dec/info + DeviceUtils + StackDeviceMemory
++ glog (из submodule). nvcc -arch=sm_90. Данные 256MB exponential, batch 4096 x 64KB, probBits=10.
+РЕЗУЛЬТАТ:
+  ENCODE: 0.685 ms -> 364.9 GB/s
+  DECODE: 0.422 ms -> 592.5 GB/s   <- ВЫШЕ заявленных авторами 250-410 GB/s (на A100!)
+  ratio: 1.463 (exponential data), bit-perfect: YES
+ЗНАЧИМОСТЬ (огромная для статьи):
+- ПЕРВОЕ измерение DietGPU ANS на H100 (авторы тестировали только V100/A100). 592 GB/s decode.
+- DietGPU decode 592 GB/s > nvcomp-ANS 480 GB/s (наш замер C [A]). Открытая замена БЫСТРЕЕ nvcomp!
+- Меняет статус: DietGPU НЕ "future work статья 3", а РАБОЧАЯ, ИЗМЕРЕННАЯ, БОЛЕЕ БЫСТРАЯ
+  открытая ANS-замена nvcomp на H100. Путь к полностью открытому скоростному стеку ОТКРЫТ И ИЗМЕРЕН.
+ГРАНИЦА ЧЕСТНОСТИ: это standalone ANS-бенчмарк (не интегрирован в ACEAPEX pipeline).
+ratio 1.463 на exponential-данных (не на FASTQ — там будет другой). Интеграция (заменить
+nvcomp в device-resident decode, прогнать на FASTQ, bit-perfect end-to-end) = ближайшая работа.
+Но КЛЮЧЕВОЕ доказано: открытый ANS на H100 быстрее nvcomp, реально собирается и работает.

@@ -1,0 +1,76 @@
+# colab-t4, 2026-09-29, aceapex gpu-rans 3383696, scripts/colab_gpu_rans.sh (log as printed)
+# The final "NOT PASSED" was a defect of the script's verdict: it grepped the whole log for
+# "rejected", which the emulator's pass line contains ("rejected by both"). All three rows
+# are bit-perfect, every aceapex_gpu exited 0. Verdict check fixed in the next commit; the
+# fixed check replayed on this log gives RESULT (see end of file).
+== provenance 2026-09-29
+GPU 0: Tesla T4 (UUID: GPU-d6f51d1c-1a92-cdd6-cba2-a8b50f10b0ce)
+580.82.07, 1590 MHz
+Build cuda_12.8.r12.8/compiler.35583870_0
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+3383696
+2
+libzstd 1.5.5
+libcudf-cu12 26.2.1 requires nvidia-libnvcomp-cu12==5.1.0.21, but you have nvidia-libnvcomp-cu12 5.3.0.16 which is incompatible.
+nvcomp Version: 5.3.0.16
+built aceapex_gpu sm_75
+head_rans_warp_emu	pass	GPU rANS warp steps (ax_rans_warp.h) == axr_decode: 85 round-trips, 6 archive chunks, 245 crafted tables, 3448 mutations (122 accepted, 3577 rejected by both), 2360834 bytes, 0 mismatches
+/content/work/chr1.fa: OK
+zstd (FSE_CHUNK=4096): archive 69410925 B, CPU round-trip bit-perfect
+rans (AX_TOK=rans): archive 69106957 B, CPU round-trip bit-perfect
+rans4k (AX_TOK=rans FSE_CHUNK=4096): archive 70129794 B, CPU round-trip bit-perfect
+== aceapex_gpu zstd
+archive /content/work/chr1.zstd.aet: orig=253935557 block=16384 nb=15499; 15817 zstd frames (4069 token, 11748 literal; 68.3 MB), 0 rANS token chunks (0.0 MB), 0 raw chunks, 2935 DNA chunks; streams lit/off/len/cmd = 192.8/6.0/0.1/10.6 MB
+frames: 0 bad of 15817
+[warm-up] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+probe G=8: 2.841 ms on 2048 blocks
+probe G=16: 2.064 ms on 2048 blocks
+probe G=32: 1.644 ms on 2048 blocks
+chosen G=32 on Tesla T4 (40 SMs)
+[sequential] H2D 5.530 + tok(zstd: 4069 frames, 0 chunks) 2.874 + lit(zstd: 11748 frames) 12.369 + unpack 4.246 + match(G=32) 10.891 = 35.910 ms -> 7.1 GB/s delivered; on-device 30.380 ms -> 8.4 GB/s
+[sequential] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[pipeline] 4 batches, H2D overlapped with zstd: 36.652 ms -> 6.9 GB/s delivered (sequential 35.910 ms, gain -2.1%)
+[pipeline] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+RESULT OK: Tesla T4, 40 SMs, G=32, bit-perfect on all passes
+ROW	/content/work/chr1.zstd.aet	69410925	zstd	2.874	12.369	4.246	10.891	30.380	35.910	8.36	bit-perfect
+exit 0
+== aceapex_gpu rans
+archive /content/work/chr1.rans.aet: orig=253935557 block=16384 nb=15499; 11748 zstd frames (0 token, 11748 literal; 55.5 MB), 255 rANS token chunks (12.5 MB), 1 raw chunks, 2935 DNA chunks; streams lit/off/len/cmd = 192.8/6.0/0.1/10.6 MB
+frames: 0 bad of 11748
+[warm-up] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+probe G=8: 2.892 ms on 2048 blocks
+probe G=16: 1.966 ms on 2048 blocks
+probe G=32: 1.617 ms on 2048 blocks
+chosen G=32 on Tesla T4 (40 SMs)
+[sequential] H2D 5.510 + tok(rANS: 0 frames, 255 chunks) 1.231 + lit(zstd: 11748 frames) 12.360 + unpack 4.334 + match(G=32) 11.426 = 34.861 ms -> 7.3 GB/s delivered; on-device 29.350 ms -> 8.7 GB/s
+[sequential] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[pipeline] 4 batches, H2D overlapped with zstd: 38.133 ms -> 6.7 GB/s delivered (sequential 34.861 ms, gain -9.4%)
+[pipeline] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+RESULT OK: Tesla T4, 40 SMs, G=32, bit-perfect on all passes
+ROW	/content/work/chr1.rans.aet	69106957	rANS	1.231	12.360	4.334	11.426	29.350	34.861	8.65	bit-perfect
+exit 0
+== aceapex_gpu rans4k
+archive /content/work/chr1.rans4k.aet: orig=253935557 block=16384 nb=15499; 11748 zstd frames (0 token, 11748 literal; 55.5 MB), 2687 rANS token chunks (7.8 MB), 1382 raw chunks, 2935 DNA chunks; streams lit/off/len/cmd = 192.8/6.0/0.1/10.6 MB
+frames: 0 bad of 11748
+[warm-up] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+probe G=8: 3.047 ms on 2048 blocks
+probe G=16: 1.990 ms on 2048 blocks
+probe G=32: 1.650 ms on 2048 blocks
+chosen G=32 on Tesla T4 (40 SMs)
+[sequential] H2D 5.130 + tok(rANS: 0 frames, 2687 chunks) 1.103 + lit(zstd: 11748 frames) 13.457 + unpack 4.395 + match(G=32) 11.787 = 35.873 ms -> 7.1 GB/s delivered; on-device 30.742 ms -> 8.3 GB/s
+[sequential] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+[pipeline] 4 batches, H2D overlapped with zstd: 38.568 ms -> 6.6 GB/s delivered (sequential 35.873 ms, gain -7.5%)
+[pipeline] FNV out=c7c57a32936c3d67 orig=c7c57a32936c3d67 MATCHES OK
+RESULT OK: Tesla T4, 40 SMs, G=32, bit-perfect on all passes
+ROW	/content/work/chr1.rans4k.aet	70129794	rANS	1.103	13.457	4.395	11.787	30.742	35.873	8.26	bit-perfect
+exit 0
+
+chr1 on Tesla T4, ms, median of 7 (tok = token entropy stage)
+archive          bytes     tokens  tok    lit     unpack  match   on-device  +H2D    GB/s  check
+chr1.zstd.aet    69410925  zstd    2.874  12.369  4.246   10.891  30.380     35.910  8.36  bit-perfect
+chr1.rans.aet    69106957  rANS    1.231  12.360  4.334   11.426  29.350     34.861  8.65  bit-perfect
+chr1.rans4k.aet  70129794  rANS    1.103  13.457  4.395   11.787  30.742     35.873  8.26  bit-perfect
+bit-perfect rows: 3 of 3
+!!! NOT PASSED - no figure from this run is valid
+# replay of the fixed verdict (scripts/colab_gpu_rans.sh after 3383696) on this log, ace-core 2026-09-29:
+RESULT: all three archives bit-perfect on the GPU

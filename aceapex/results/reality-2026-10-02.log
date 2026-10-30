@@ -1,0 +1,119 @@
+# Reality checks (measurements only, format unchanged) - ace-core (EPYC 4344P 8c/16t), 2026-10-02
+# tools: scripts/region_bits.cpp (+ .py), scripts/approx_est.cpp, scripts/block_times.py; archives of .wk/perf
+
+## T1. Approximate repeats
+### Where the archive bits go (byte level: a literal byte costs its block's literal bytes / literal count, a match byte
+### its block's token bytes / match bytes, + the block-table entry; "lower" = soft-masked by the assembly = repeats;
+### dense = the 1 MiB of blocks around it is >= half non-N with >= 10 % of the non-N bytes in matches: satellite arrays)
+t2t open (16 KiB blocks):
+class            bytes MB  bytes %  archive MB  archive %  bits/byte  in matches %
+upper              1844.3    58.43      507.21      59.53      2.200          0.09
+lower (masked)     1113.0    35.26      303.53      35.62      2.182          0.50
+N                     0.0     0.00        0.00       0.00      2.237          0.00
+other                37.0     1.17       10.15       1.19      2.197          0.02
+dense: upper         17.6     0.56        3.69       0.43      1.679         20.97
+dense: lower        142.4     4.51       26.98       3.17      1.516         26.97
+dense: N              0.0     0.00        0.00       0.00      2.219          0.00
+dense: other          2.0     0.06        0.48       0.06      1.911          4.30
+total              3156.3   100.00      852.03     100.00      2.160  (+ stream headers / chunk tables, once)
+t2t default (1 MiB blocks):
+class            bytes MB  bytes %  archive MB  archive %  bits/byte  in matches %
+upper              1822.4    57.74      485.41      60.22      2.131          0.08
+lower (masked)     1064.0    33.71      283.19      35.13      2.129          0.25
+N                     0.0     0.00        0.00       0.00      2.106          0.00
+other                36.1     1.14        9.61       1.19      2.130          0.02
+dense: upper         39.4     1.25        6.12       0.76      1.241         30.98
+dense: lower        191.5     6.07       21.23       2.63      0.887         42.78
+dense: N              0.0     0.00        0.00       0.00      1.750          0.00
+dense: other          2.9     0.09        0.49       0.06      1.369          8.82
+total              3156.3   100.00      806.05     100.00      2.043  (+ stream headers / chunk tables, once)
+chr1 default (1 MiB blocks; GRCh38, soft-masked):
+class            bytes MB  bytes %  archive MB  archive %  bits/byte  in matches %
+upper               111.3    43.82       28.29      47.62      2.034          0.04
+lower (masked)      118.2    46.54       29.81      50.19      2.018          0.18
+N                    18.5     7.28        0.00       0.01      0.002         99.98
+other                 5.0     1.95        1.16       1.96      1.875          7.49
+dense: upper          0.0     0.00        0.00       0.00      1.128          0.00
+dense: lower          1.0     0.40        0.13       0.22      1.020         10.70
+dense: N              0.0     0.00        0.00       0.00      0.311         81.00
+dense: other          0.0     0.01        0.00       0.00      1.083          4.43
+total               253.9   100.00       59.40     100.00      1.871  (+ stream headers / chunk tables, once)
+=> T2T: the soft-masked repeats are 34 % of the bytes and 35 % of the bits - 2.13 bits/byte, the same as unique
+   sequence: the copies are too diverged for exact matches >= 32. The dense arrays (satellites) are 7.3 % of the bytes
+   and 3.4 % of the bits (~1 bit/byte, 41 % of them in matches). chr1 (GRCh38) has almost no dense arrays (0.4 %).
+
+### Line ends (real encoder, not a model): the FASTA line ends break every match that crosses them at another phase
+corpus  archive (default)   same sequence, one line per record   + 12-byte head table (AX_HASH12=1, AX_HLOG=22)
+chr1    59 429 097          57 185 088 (-3.78 %)                  56 838 856 (-4.36 %)
+T2T     806 458 861         768 400 351 (-4.72 %)                 762 089 114 (-5.50 %)
+(a line model costs a few bytes per record: 25 records in T2T; refseg.cpp's line model of an HPRC assembly: 1.6 KB)
+The 12-byte key alone on the original FASTA: chr1 -0.18 % (59 324 307), T2T -0.88 % (799 346 376). Shorter matches do not
+pay in the real encoder: chr1 AX_MINL=16 +0.20 %, with the 12-byte key +1.01 %.
+
+### Offline estimate of a "match with k substitutions per 100 bases" token (scripts/approx_est.cpp; blocks independent;
+### bases only, line ends and headers out, N never matched; greedy, seeds = 12-mers (4 latest) + the last distance;
+### matches >= 32 bases as l1; costs: literal base 2.15 bits (the archives' literal stream), token 8 bits + distance
+### log2(d) + 2 (a repeated distance 2), a substitution c_sub bits + 4 per token that has any)
+corpus  blocks  c_sub  exact (k=0): covered / gain   k=1      k=2      k=4      k=6      k=8     (gain over k=0, MB; % of the default archive)
+chr1    1 MiB      10   5.46 % /   2.68 MB   +0.03 (0.06 %) +0.25 (0.41 %) +1.20 (2.01 %) +1.61 (2.71 %) +1.80 (3.03 %)
+chr1    1 MiB       6   5.46 % /   2.68 MB   +0.05 (0.08 %) +0.32 (0.53 %) +1.48 (2.49 %) +2.17 (3.65 %) +2.62 (4.40 %)
+chr1    16 KiB     10   1.95 % /   1.03 MB   +0.02 (0.03 %) +0.09 (0.15 %) +0.42 (0.70 %) +0.62 (1.05 %) +0.76 (1.28 %)
+t2t     1 MiB      10  10.23 % /  75.53 MB   +0.62 (0.08 %) +3.36 (0.42 %) +15.75 (1.95 %) +21.04 (2.61 %) +23.06 (2.86 %)
+t2t     1 MiB       6  10.23 % /  75.53 MB   +1.15 (0.14 %) +4.64 (0.58 %) +19.76 (2.45 %) +28.36 (3.52 %) +33.57 (4.16 %)
+t2t     16 KiB     10   5.87 % /  45.35 MB   +0.63 (0.08 %) +1.81 (0.22 %) +6.83 (0.85 %) +9.78 (1.21 %) +11.61 (1.44 %)
+calibration of the exact model against the real encoder on the same input without line ends and with a 12-byte head
+table (AX_HASH12=1, tuning builds): chr1 model 2.68 MB, real 59.43 -> 56.84 MB = 2.59 MB; T2T model 75.5 MB, real
+806.46 -> 762.09 MB = 44.4 MB (the model overrates T2T's exact matches 1.7x: its flat literal cost ignores what the
+literal coder already gets on satellite runs). The k > 0 gains are model figures; T2T scaled by 0.59: k=4 ~1.2 %, k=8 ~1.7 %.
+Split by 16 KiB block class (T2T, 16 KiB model, k=4 / k=8 over exact): mixed blocks +4.6 / +9.3 MB, masked +0.9 / +1.1,
+dense +1.3 / +1.2, unmasked 0: the gain is in the dispersed repeats, not in the satellite arrays (there the exact
+matcher already gets most; with 1 MiB blocks k>0 even loses a little on them, -0.05 / -1.1 MB, greedy parse).
+
+## T2. Cost of the blocks, CPU tile path (AX_BLOCK_TIMES dump, scripts/block_times.py; block time = its tokens and
+## copies from the tile, the literal chunks are timed per group; the dump itself is outside the decode)
+archive      threads  block time median / p99 / max   slowest 1 % / 10 % of blocks   thread finish first / mean / last   tail (last-first)/last
+t2t open     1        0.9 / 1.7 / 13 us               2.2 % / 15.3 % of the time      -                                   -
+t2t open     16       1.3 / 4.6 / 543 us              4.1 % / 22.7 %                  163.9 / 168.4 / 174.4 ms            6.0 %  (3.5 % vs mean)
+t2t default  1        46 / 103 / 137 us               2.4 % / 15.6 %                  -                                   -
+t2t default  16       153 / 347 / 764 us              3.1 % / 18.0 %                  223.4 / 231.9 / 238.0 ms            6.2 %  (2.6 %)
+chr1 open    1        0.9 / 1.4 / 3.4 us              1.9 % / 14.4 %                  -                                   -
+chr1 open    16       1.3 / 4.4 / 189 us              4.4 % / 23.1 %                  12.1 / 12.9 / 13.8 ms               12.8 % (6.6 %)
+Block time against its bytes: t = 33 us + 3.5 ns x command byte (t2t default, 1 thread, R^2 0.84); 16 KiB blocks: noise
+(R^2 < 0.2). The blocks are even: the slowest 1 % hold 2-4 % of the time; 16 threads pay memory contention (median 46 -> 153 us).
+Tail > 10 % only on chr1 open 16 threads (14 ms in all). AX_SCHED_COST (tuning builds; cost = literal bytes +
+AX_COST_CMD (4) x command bytes, known after the token streams): 1 = contiguous runs of equal cost, 2 = LPT (groups by
+cost to the least loaded thread, each in stream order). Median of 7, bit-perfect, quiet machine:
+archive      threads  equal groups (default)  1: equal cost       2: LPT
+t2t open     16       0.1824 s                0.1801 s (-1.3 %)   0.1942 s (+6.5 %)
+t2t open     8        0.2238                  0.2251 (+0.6 %)     -
+t2t default  16       0.2370                  0.2384 (+0.6 %)     0.2439 (+2.9 %)
+chr1 open    16       0.0147                  0.0145 (-1.4 %)     0.0158 (+7.5 %)
+chr1 default 16       0.0202                  0.0198 (-2.0 %)     0.0212 (+5.0 %)
+With the cost split the tail drops (chr1 open 12.8 -> 8.2 %, t2t open 6.0 -> 5.3 %) but the wall moves within the noise;
+LPT loses the shared literal chunk between neighbouring groups (decoded twice where a thread's groups are not adjacent)
+and is 3-8 % slower. Default unchanged (equal groups); AX_SCHED_COST stays a measurement knob.
+
+## T3. What 16 KiB blocks cost on T2T (default profile; archive bytes from the headers; every archive round-trips)
+archive                               bytes        block table  literal stream  off+len+cmd  chunk tables (in the streams)
+blocks 256 MiB (no reach limit)       805 847 588        768     803 320 011    2 526 741    lit 372 984
+blocks 256 MiB, AX_MAXDIST=16384      808 414 222        768     806 140 140    2 273 246    lit 375 312
+blocks 1 MiB (default)                806 458 861    192 704     803 728 833    2 537 256    lit 373 280
+blocks 16 KiB                         822 099 816 12 329 152     807 848 269    1 922 327    lit 379 272
+16 KiB against 256 MiB: +16 252 228 B = +2.02 %, of which
+  block table (64 B per block, 192 643 blocks)          +12 328 384  +1.53 %  (76 %)
+  reach 16 KiB (AX_MAXDIST inside 256 MiB blocks)       +2 566 634   +0.32 %  (lit +2 820 129, tokens -253 495)
+  block starts (no history at the start of each block)  +1 357 210   +0.17 %  (lit +1 708 129, tokens -350 919; the
+                                                                               BLOCK_MARKER and rep reset per block in it)
+  rANS / zstd restarts, chunk headers                   +6 288       +0.001 % (literal chunks of 64 KiB and token chunks
+                                                                               of 512 KiB are cut by stream offset, not
+                                                                               by block: no per-block entropy restart)
+Proposals for a v3 table (measured on the 16 KiB table of T2T, identical in the open and default profiles):
+  the slices are contiguous (offset = previous offset + size): store the 4 sizes only
+    - varint, by column:                       1 317 917 B (6.8 B/block)  -> saves 11.0 MB = 1.34 % of the archive
+    - by column + zstd -19:                      161 379 B (0.84 B/block) -> saves 12.2 MB = 1.48 %; random access
+      needs the column decoded (161 KB, < 1 ms) or a 2-level index
+    - superblocks of 64 blocks (4 x u64 offsets) + 4 x u16 sizes per block: 1 637 496 B (8.5 B/block) -> saves 10.7 MB
+      = 1.30 %, O(1) access to any block (one superblock entry + a prefix sum of <= 63 sizes, or 64 x u16 offsets)
+  chr1 (15 499 blocks of 16 KiB): table 991 936 B -> zstd column 6 098 B, superblock 131 768 B.
+With the superblock table 16 KiB blocks would cost about +0.7 % against 256 MiB instead of +2.0 % (zstd column: +0.5 %;
+the rest is the reach, +0.32, and the block starts, +0.17).

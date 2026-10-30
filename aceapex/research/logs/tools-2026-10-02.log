@@ -1,0 +1,9 @@
+== N=1
+AGC N=1: input 3062940590 B -> 699679459 B, create 42.3 s, getset all 4.5 s, regions p50/p99 us, bad, n: 15278 17346 0 200, bit-perfect 1
+MBGC N=1: input 3062940590 B -> 628003777 B, compress 104.6 s, decompress all 29.1 s, regions -, bit-perfect 1
+== N=2
+AGC N=2: input 6136630617 B -> 730943796 B, create 46.3 s, getset all 9.2 s, regions p50/p99 us, bad, n: 18952 21146 0 200, bit-perfect 1
+MBGC N=2: input 6136630617 B -> 712632876 B, compress 44.8 s, decompress all 36.5 s, regions -, bit-perfect 1
+== N=4
+AGC N=4: input 12139733805 B -> 767622696 B, create 53.1 s, getset all 18.3 s, regions p50/p99 us, bad, n: 22841 25625 0 200, bit-perfect 1
+MBGC N=4: input 12139733805 B -> 739520370 B, compress 47.7 s, decompress all 39.9 s, regions -, bit-perfect 1

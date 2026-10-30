@@ -1,0 +1,7 @@
+# #F1 step 0 fair comparison, ace-core EPYC 4344P, 2026-10-26, same container/pool/timing for all engines
+# build: g++ -O3 -march=native -std=c++20 -I~/pubrepo/.wk/lzb-intmt/lz/misa77/include -I~/pubrepo/.wk/lzb-intmt/lz/lz4/lib -o fair fair.cpp ~/pubrepo/.wk/lzb-intmt/lz/misa77/src/compress.o ~/pubrepo/.wk/lzb-intmt/lz/misa77/src/decompress.o ~/pubrepo/.wk/lzb-intmt/lz/misa77/src/isa/*.o ~/pubrepo/.wk/lzb-intmt/lz/lz4/lib/lz4.o -lpthread
+/home/aeterna/golden/mixed/silesia.tar: 211957760 B, 203 blocks of 1048576, decode pool: contiguous ranges, median of 7
+engine            ratio     1T MB/s     8T MB/s
+axf L3 (ours)    40.31%        6660       17239  bit-perfect
+misa77 -1        42.86%        9321       17004  bit-perfect
+lz4 1.10.0       47.68%        6056       16362  bit-perfect

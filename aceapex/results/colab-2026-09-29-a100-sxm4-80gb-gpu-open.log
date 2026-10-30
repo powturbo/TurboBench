@@ -1,0 +1,55 @@
+# colab a100-sxm4-80gb, 2026-09-29, aceapex main 5d9786a, scripts/colab_gpu_open.sh (excerpt of the log pasted from Colab; per-pass FNV lines omitted)
+# t2t.fa.gz = NCBI GCA_009914755.4 genomic.fna.gz (932696125 B, md5 9280657210e4161147cbe13b022225b9), downloaded to Drive in the same cell
+== provenance 2026-09-29
+gpu NVIDIA A100-SXM4-80GB | cc 8.0 | driver 580.82.07
+clocks max sm/mem 1410 MHz, 1593 MHz | memory 81920 MiB | power limit 400.00 W
+host Intel(R) Xeon(R) CPU @ 2.20GHz, 12 threads, RAM 167 GB, drive 1
+Build cuda_12.8.r12.8/compiler.35583870_0
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+commit 5d9786a
+libzstd 1.5.5
+nvcomp Version: 5.3.0.16
+built aceapex_gpu sm_80
+head_rans_warp_emu	pass	GPU rANS warp steps (ax_rans_warp.h) == axr_decode: 85 round-trips, 12 archive chunks, 245 crafted tables, 3496 mutations (127 accepted, 3626 rejected by both), 2457904 bytes, 0 mismatches
+head_open_warp_emu	pass	GPU open-pack steps (ax_open_warp.h, block rounds of 256) == axo_dna_decode: 40 round-trips, 38 archive chunks, 437 crafted streams, 2628 mutations (986 accepted, 2157 rejected by both), 22351557 bytes, 0 mismatches
+fixture dna_open_2MiB on the GPU: exit 0, 3 MATCHES OK, 0 DIFFERS
+fixture dna_open_mixed_300K on the GPU: exit 0, 3 MATCHES OK, 0 DIFFERS
+fixture dna_open_4097B on the GPU: exit 0, 3 MATCHES OK, 0 DIFFERS
+fixture dna_openlit_300K on the GPU: exit 0, 3 MATCHES OK, 0 DIFFERS
+fixture text_open_200K on the GPU: exit 0, 3 MATCHES OK, 0 DIFFERS
+chr1.fa: downloaded
+chr1.fa: md5 9465e0f0df6e2c6eb39729c39cee5465 OK
+t2t.fa: from Drive (t2t.fa.gz)
+t2t.fa: md5 cd1e52ce400c027ed0b7ab4b9d613f5a OK
+chr1.zstd (FSE_CHUNK=4096): archive 69410925 B (== pinned), encoded, CPU round-trip bit-perfect
+chr1.rans (AX_TOK=rans): archive 69106957 B (== pinned), encoded, CPU round-trip bit-perfect
+chr1.open (AX_PROFILE=open): archive 67975888 B (== pinned), encoded, CPU round-trip bit-perfect
+t2t.zstd (FSE_CHUNK=4096): archive 901676480 B (!= pinned 902319887), encoded, CPU round-trip bit-perfect
+t2t.rans (AX_TOK=rans): archive 898263414 B (!= pinned 898903131), encoded, CPU round-trip bit-perfect
+t2t.open (AX_PROFILE=open): archive 887641942 B (== pinned), encoded, cached on Drive, CPU round-trip bit-perfect
+# (the != pinned: pins were ace-core libzstd 1.4.8; pinned per libzstd since 047467f)
+== aceapex_gpu t2t.zstd
+archive /content/work/t2t.zstd.aet: orig=3156259565 block=16384 nb=192643; 203789 zstd frames (54285 token, 149504 literal; 887.8 MB), pieces 0.0 MB: 0 token rANS chunks, open pack seq/cse/gap/val 0/0/0/0, open plain 0; 0 raw chunks, 37264 DNA chunks (zstd), 0 open DNA chunks; streams lit/off/len/cmd = 2471.5/81.6/2.5/138.2 MB
+[sequential] H2D 71.868 + tok(zstd: 54285 frames, 0 chunks) 7.907 + lit(zstd: 149504 frames, 0 pieces) 30.789 + unpack 8.708 + match(G=32) 30.311 = 149.584 ms -> 21.1 GB/s delivered; on-device 77.715 ms -> 40.6 GB/s
+[pipeline] 4 batches, H2D overlapped with zstd: 123.056 ms -> 25.6 GB/s delivered (sequential 149.584 ms, gain 17.7%)
+RESULT OK: NVIDIA A100-SXM4-80GB, 108 SMs, G=32, bit-perfect on all passes
+== aceapex_gpu t2t.rans
+[sequential] H2D 71.615 + tok(rANS: 0 frames, 3394 chunks) 2.351 + lit(zstd: 149504 frames, 0 pieces) 28.922 + unpack 8.692 + match(G=32) 30.313 = 141.893 ms -> 22.2 GB/s delivered; on-device 70.278 ms -> 44.9 GB/s
+[pipeline] 4 batches, H2D overlapped with zstd: 123.135 ms -> 25.6 GB/s delivered (sequential 141.893 ms, gain 13.2%)
+RESULT OK: NVIDIA A100-SXM4-80GB, 108 SMs, G=32, bit-perfect on all passes
+== aceapex_gpu t2t.open
+archive /content/work/t2t.open.aet: orig=3156259565 block=16384 nb=192643; 0 zstd frames (0 token, 0 literal; 0.0 MB), pieces 873.7 MB: 3394 token rANS chunks, open pack seq/cse/gap/val 37577/37577/37577/37577, open plain 135; 0 raw chunks, 0 DNA chunks (zstd), 37577 open DNA chunks; streams lit/off/len/cmd = 2471.5/81.6/2.5/138.2 MB
+[sequential] H2D 70.729 + tok(rANS: 0 frames, 3394 chunks) 2.360 + lit(open: 0 frames, 150443 pieces) 9.378 + unpack 10.263 + match(G=32) 30.283 = 123.011 ms -> 25.7 GB/s delivered; on-device 52.283 ms -> 60.4 GB/s
+[lit parts] zstd frames 0.003 | open pieces: seq 5.085, cse 1.549, gap 1.402, val 1.188, plain 0.694 ms
+[unpack parts] zstd DNA pack 0.003 | open: bases 7.364, case runs 0.715, exceptions 2.165 ms
+[pipeline] 4 batches, H2D overlapped with zstd: 122.095 ms -> 25.9 GB/s delivered (sequential 123.011 ms, gain 0.7%)
+RESULT OK: NVIDIA A100-SXM4-80GB, 108 SMs, G=32, bit-perfect on all passes
+
+TSV	a100-sxm4-80gb	chr1.zstd.aet	69410925	zstd	zstd	0.937	5.537	0.691	2.835	10.000	15.536	25.39	bit-perfect	5.507	0.003	0.003	0.003	0.003	0.003	0.692	0.003	0.003	0.003
+TSV	a100-sxm4-80gb	chr1.rans.aet	69106957	rANS	zstd	1.002	5.489	0.693	2.843	10.026	15.542	25.33	bit-perfect	5.514	0.003	0.003	0.004	0.004	0.003	0.691	0.003	0.003	0.003
+TSV	a100-sxm4-80gb	chr1.open.aet	67975888	rANS	open	1.091	1.376	0.807	2.816	6.090	11.509	41.69	bit-perfect	0.003	0.486	0.153	0.136	0.113	0.668	0.003	0.558	0.071	0.184
+TSV	a100-sxm4-80gb	t2t.zstd.aet	901676480	zstd	zstd	7.907	30.789	8.708	30.311	77.715	149.584	40.61	bit-perfect	30.689	0.003	0.004	0.003	0.003	0.003	8.703	0.003	0.004	0.003
+TSV	a100-sxm4-80gb	t2t.rans.aet	898263414	rANS	zstd	2.351	28.922	8.692	30.313	70.278	141.893	44.91	bit-perfect	28.732	0.004	0.003	0.003	0.003	0.003	8.649	0.003	0.003	0.003
+TSV	a100-sxm4-80gb	t2t.open.aet	887641942	rANS	open	2.360	9.378	10.263	30.283	52.283	123.011	60.37	bit-perfect	0.003	5.085	1.549	1.402	1.188	0.694	0.003	7.364	0.715	2.165
+archives on the GPU: bit-perfect 6 of 6 (exit 0: 6); emulators 2/2, fixtures 5/5
+RESULT: all passes bit-perfect on NVIDIA A100-SXM4-80GB

@@ -1,0 +1,15 @@
+# Streaming decoder (aceapex_decompress_stream, CLI `d --out -`), ace-core (EPYC 4344P 8c/16t), 2026-10-02
+# archive read by pread, output to a hashing sink (no original compare unless noted); peak RSS = ru_maxrss of the process
+decode                              threads  time     GB/s   peak RSS
+full (aceapex_decompress_mt) t2t.open  16    0.183 s  17.3   ~10 GB (archive 853 MB + output 3.16 GB + perf_bench's original copy)
+stream t2t.open                        16    0.223 s  14.2   34.9 MB
+stream t2t.open + VERIFY (XXH3)        16    0.261 s  12.1   ~35 MB
+stream t2t.open                         8    0.318 s   9.9   20.2 MB
+stream t2t.open                         1    1.748 s   1.8    7.2 MB
+stream t2t.default (zstd literals)     16    0.660 s   4.8   140 MB   (token chunks of 512 KiB x 3 streams per worker window)
+CLI `aceapex d --in t2t.open.aet -c > /dev/null`  16  0.318 s  9.9 (write syscalls), hash OK
+claim head_stream: 64 MiB -> 512 MiB DNA, peak RSS 25.3 -> 29.8 MB (+4.4 MB: chunk tables + token windows filling up)
+# the thread_local arrays of the encoder (origin[1 Mi u32] = 4 MiB TLS, + decompress_adaptive's 4 MiB) were zeroed
+# at every thread start: 16 threads = +64..128 MiB RSS for any decode. Now heap buffers on first use: stream 16 threads
+# 103 -> 35 MB, full decode t2t.open 16 threads 0.202 -> 0.183 s.
+# not streamed: archives whose literal stream is not chunked (text in the default profile: 4 lanes of orig/4) -> ACEAPEX_ERR_DATA

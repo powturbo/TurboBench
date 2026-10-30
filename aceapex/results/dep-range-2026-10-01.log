@@ -1,0 +1,42 @@
+# Reach of the matches ("dependency range") - ace-core (EPYC 4344P), 2026-10-01, format unchanged
+## 1. Match bytes by block distance (dst_block - src_block) and by byte distance - scripts/dep_range.cpp
+archive          block    match share  own block  1 blk  2-8  9-64  >64  before own block | by bytes: <=64  <=1K  <=4K  <=16K  <=128K  <=1M  more
+chr1 default     1 MiB    7.57 %       100.00 %   0      0    0     0    0                |           97.6  0.8   0.8   0.7    0.1     0.0   0.0
+chr1 open        16 KiB   7.47 %       100.00 %   0      0    0     0    0                |           99.4  0.2   0.2   0.1    -       -     -
+t2t default      1 MiB    3.12 %       100.00 %   0      0    0     0    0                |           1.8   4.9   39.7  28.6   19.4    5.5   0.0
+t2t open         16 KiB   1.57 %       100.00 %   0      0    0     0    0                |           4.9   10.9  59.6  24.7   -       -     -
+silesia default  1 MiB    61.42 %      100.00 %   0      0    0     0    0                |           8.8   21.1  12.4  16.8   25.2    15.8  0.0
+silesia open     16 KiB   53.27 %      100.00 %   0      0    0     0    0                |           15.1  40.0  23.2  21.7   -       -     -
+enwik8 default   1 MiB    43.53 %      100.00 %   0      0    0     0    0                |           10.6  35.3  18.8  17.9   12.5    4.9   0.0
+=> within its own block: 100 % of the match bytes in every archive and profile; within 1 / 8 / 64 blocks: 100 %; farther: 0.
+## 2. Where it is guaranteed (all profiles, not only open/l1)
+- encoder, src/aceapex_main.cpp find_matches: candidates only from [bstart, pos) (cur >= bstart; rep distances skipped when
+  pos < bstart + d), lazy lookups (pos+1, pos+2) also require mp >= bstart; every block is compressed with its own bstart.
+- format + every decoder: a block decodes alone; a match with dist > out (its position in the block) stops the block -
+  C++ decompress_streams ("dist>out" break), C99 c/aceapex_decode.c, GPU decode_block (dist>out_pos -> STATUS_MATCH),
+  GPU plan emulator; docs/FORMAT_ACEPX2.md s1.3 (block independence). dep_range counts 0 such matches everywhere.
+## 3. Streaming decode with a window of whole blocks (the guarantee makes it exact)
+t2t open (3.16 GB, 16 KiB blocks), today's region API, one window after another into one buffer, 1 thread, compared with
+the original window by window (bit-perfect):
+window           windows  time     GB/s   peak RSS (archive 813.8 MiB in memory)
+16 KiB (1 block) 192643   23.97 s  0.13   821 MiB  (+7 MiB)
+1 MiB            3011     2.50 s   1.26   825 MiB  (+11 MiB)
+64 MiB           48       4.23 s   0.75   1078 MiB (+264 MiB)
+The 1-block window is slow only because each region call decodes the whole 64 KiB literal chunk (4 blocks) and its token
+chunks again. A dedicated streaming decoder on the tile path (AX_LIT_TILE: chunks of a group of blocks decoded once into an
+L2 tile, blocks out in order) needs the archive (or a read stream of it) + per thread one tile (0.5 MiB) and one block
+(16 KiB) + the token streams (t2t: 27 MB, or chunk by chunk) - about archive + 35 MB on 16 threads - at the speed of
+today's full tile decode (t2t open 0.20 s = 15.6 GB/s on 16 threads, 1.59 s on 1), the sink permitting. Estimate, not built.
+## 4. Density against the reach (default profile, l1 encoder, archive bytes; every archive round-trips bit-perfect)
+reach set by the block size (blocks of the given size; matches never leave the block):
+corpus  16 KiB       128 KiB      1 MiB        256 MiB ("infinite")
+chr1    60 404 884   59 532 449   59 429 097   59 411 813      16 KiB costs +1.67 % against 256 MiB
+t2t     822 099 816  809 246 558  806 458 861  805 847 588     16 KiB costs +2.02 %
+reach limited inside 256 MiB blocks (experimental encoder flag AX_MAXDIST, tuning builds only, default unchanged):
+corpus  16 KiB       128 KiB      1 MiB        infinite
+chr1    59 414 718   59 416 968   59 419 851   59 411 813      16 KiB costs +0.005 % (the l1 parse moves; not monotone)
+t2t     808 414 222  806 267 070  805 857 674  805 847 588     16 KiB costs +0.32 %, 128 KiB +0.05 %, 1 MiB +0.001 %
+=> on genomes the distance itself is nearly free: of the +2.0 % that 16 KiB blocks cost on T2T, 0.32 % is the shorter reach
+and ~1.7 % is per-block overhead (block table, token/literal restarts). Paper 5 era depth cap (aceapex_dl, H100, notes of
+July 2026): depth 10 cost 1.5 % of the ratio on enwik9, 3.6 % on silesia, 12.7 % on FASTQ 1 GB - limiting how far a match
+reaches costs far less on DNA than limiting how deep matches chain.

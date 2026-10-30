@@ -1,0 +1,73 @@
+[CORRECTION 2026-07-12] All FASTQ rows in this file were measured on a local NA12878 sample with
+degenerate quality strings (2 distinct symbols instead of ~40), which inflated its ratio ~3.4x.
+Those FASTQ ratios (10.6-12.2) are WITHDRAWN. On the real dataset (ENA ERR194147, md5 9af9ffaa)
+the ratio is ~3.97. The enwik9 and Silesia rows were always measured on real corpora and stand.
+The hybrid finding itself (Zstd literals + ANS for off/len/cmd raises ratio) holds on enwik9 and
+Silesia; its FASTQ magnitude must be re-measured before being cited.
+
+=== enwik9-256MiB, 1MiB блоки (256 блоков), H100, 2026-06-13 ===
+v4 (ANS all):       ratio 2.185, FULL 7.8 GB/s, A=0.45ms B=34.0ms, MATCHES
+hybrid (Zstd lit):  ratio 2.502, FULL 7.0 GB/s, A=4.34ms B=34.3ms, MATCHES
+-> Zstd-литералы: 91.6MB -> 75.5MB. ratio +14.5%. Цель (вернуть ratio) достигнута.
+-> Скорость B-bound (1MiB блоки, недогрузка). Цена Zstd-энтропии видна будет на 64KB.
+
+=== ВСЕ ТРИ ДАТАСЕТА, 1MiB блоки, H100, 2026-06-13 (bit-perfect x3) ===
+              v4 ratio | hybrid ratio | прирост | hybrid FULL GB/s
+enwik9-256      2.185  |    2.502     | +14.5%  | 7.0
+silesia         2.638  |    2.924     | +10.8%  | 4.7
+FASTQ-256      10.874[WITHDRAWN]  |   12.196[WITHDRAWN]     | +12.2%  | 13.5
+Гибрид (Zstd литералы + ANS off/len/cmd) поднимает ratio на всех трёх.
+Скорость B-bound (1MiB = недогрузка GPU). Полная скорость -> замер 64KB.
+
+=== ФИНАЛ 64KB, H100, 2026-06-13, все bit-perfect ===
+            v4_ratio v4_GBs | hyb_ratio hyb_GBs | nvcompZstd(ctx)
+enwik9-256    2.10   73.8   |  2.43     36.2    | 2.51@44
+silesia       2.49   45.7   |  2.82     21.4    | 2.51@44
+FASTQ-256    10.60[WITHDRAWN]  160.1   | 11.94[WITHDRAWN]     44.7    | 11.1@69[WITHDRAWN]
+ВЫВОД: hybrid (Zstd-lit + ANS-rest) поднимает ratio +12-15% на всех трёх.
+- silesia 2.82 и FASTQ 11.94[WITHDRAWN] БЬЮТ nvcomp Zstd по ratio (device-resident).
+- enwik (текст): 2.43 чуть ниже nvcomp 2.51 -> паритет на тексте.
+- Цена: Zstd-декод на GPU ~4ms фикс -> [A] стало узким местом, скорость ~2x ниже v4.
+- Узкое место теперь однозначно GPU-Zstd-энтропия (след. фронтир: DietGPU/быстрее декод).
+
+=== ФИНАЛ 64KB, H100, 2026-06-13, все bit-perfect ===
+            v4_ratio v4_GBs | hyb_ratio hyb_GBs | nvcompZstd(ctx)
+enwik9-256    2.10   73.8   |  2.43     36.2    | 2.51@44
+silesia       2.49   45.7   |  2.82     21.4    | 2.51@44
+FASTQ-256    10.60[WITHDRAWN]  160.1   | 11.94[WITHDRAWN]     44.7    | 11.1@69[WITHDRAWN]
+ВЫВОД: hybrid (Zstd-lit + ANS-rest) поднимает ratio +12-15% на всех трёх.
+- silesia 2.82 и FASTQ 11.94[WITHDRAWN] БЬЮТ nvcomp Zstd по ratio (device-resident).
+- enwik (текст): 2.43 чуть ниже nvcomp 2.51 -> паритет на тексте.
+- Цена: Zstd-декод на GPU ~4ms фикс -> [A] стало узким местом, скорость ~2x ниже v4.
+- Узкое место теперь однозначно GPU-Zstd-энтропия (след. фронтир: DietGPU/быстрее декод).
+
+=== 200+ ВЗЯТО: FASTQ-256, 16KB, v4 ANS, H100, 2026-06-13 ===
+FULL 233.2 GB/s @ ratio 9.70[WITHDRAWN]  (A=0.13ms entropy + B=1.02ms decode), bit-perfect MATCHES.
+Полный device-resident декод (entropy+match на GPU), НЕ match-only.
+16KB разгружает decode-kernel; ratio 10.6->9.70[WITHDRAWN] (мелкие блоки режут длинные матчи).
+
+=== ПИК FASTQ v4: block_size свип полного декода, H100, 2026-06-13 ===
+64KB: 160.1 GB/s @ 10.60[WITHDRAWN]
+16KB: 233.2 GB/s @ 9.70[WITHDRAWN]   <- sweet spot
+8KB:  251.4 GB/s @ 8.73   <- пик скорости, ratio за коленом
+Полный device-resident (entropy ANS + match), bit-perfect. 16KB = лучший баланс.
+
+=== ПОЛНАЯ ТАБЛИЦА 16KB, H100, 2026-06-13, bit-perfect ===
+            v4_GBs v4_ratio | hyb_GBs hyb_ratio
+enwik9-256  110.1   2.002   |  42.8    2.387
+silesia      88.2   2.337   |  26.8    2.745
+FASTQ-256   233.2   9.70[WITHDRAWN]    |  (64KB: 44.7 @ 11.94[WITHDRAWN])
+ДВА РЕЖИМА ОДНОГО ФОРМАТА:
+- v4 ANS = скоростной профиль (110-233 GB/s полного device-resident декода).
+- hybrid Zstd = ratio-профиль (+15-19% сжатия, скорость 2-3x ниже из-за GPU-Zstd).
+Оба bit-perfect. Пик скорости FASTQ 251 @ 8KB. Гибрид silesia/FASTQ бьёт nvcomp Zstd ratio.
+
+=== ФЛАГМАН: ПОЛНЫЙ 1GB NA12878 FASTQ, v4 ANS 16KB, H100, 2026-06-13 ===
+orig=1,073,741,824 B (полный человеческий геном FASTQ), 65536 блоков x 16KB
+FULL 260.1[WITHDRAWN] GB/s @ ratio 11.19[WITHDRAWN]  (A=0.42ms entropy + B=3.71ms decode), bit-perfect MATCHES
+Полный device-resident декод (entropy ANS + match на GPU).
+ВАЖНО: на полном 1GB ratio ВЫШЕ (11.19[WITHDRAWN]) и скорость ВЫШЕ (260), чем на 256MiB (9.70[WITHDRAWN]@233)
+       -> больше данных = больше избыточности + лучше occupancy. Масштабируется в плюс.
+vs landscape: nvcomp DEFLATE genomics 50@5.3 (5x медленнее, 2x хуже ratio);
+              FASTQ CPU tools (FQZCOMP) <0.5 GB/s @ ~5 (3 порядка медленнее).
+FLAGSHIP[WITHDRAWN] 1GB NA12878-defective-sample: FULL 260.1[WITHDRAWN] GB/s @ ratio 11.19[WITHDRAWN] bit-perfect 16KB v4

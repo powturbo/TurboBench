@@ -1,0 +1,24 @@
+=== ЗАМЕР A: координатный индекс read-id->block (clean.fastq 5M ридов, H100) ===
+Индекс read_number -> byte_offset -> block (block=offset/16384):
+- размер: 40.0 MB (8 байт/рид) vs samtools .fai 250.6 MB → в 6.3x КОМПАКТНЕЕ
+- построение: 4.6 сек (разовое, при encode)
+- загрузка в память: 202 ms (разовая, как samtools держит .fai)
+- WARM lookup read->block: 0.337ms/1000 = 0.3 us/lookup (O(1) массив)
+- end-to-end warm (lookup + GPU block decode): 0.0003 + 0.361 = ~0.36 ms/рид
+
+СРАВНЕНИЕ vs samtools faidx (замер B):
+- samtools warm: 2.3 ms/рид | ACEAPEX: 0.36 ms/рид → ~6x быстрее
+- индекс компактнее (40 vs 250 MB), lookup мгновенный, decode на GPU
+
+ГРАНИЦА ЧЕСТНОСТИ: read-level access (read_number/read_id -> block), НЕ хромосомная
+координата. Сырой FASTQ = до alignment, координат chr:pos нет. Для них нужен BAM = future work.
+Применение: targeted extraction ридов по id, диапазоны [N..M], параллельная обработка.
+ВАЖНО: cold-режим (новый процесс на запрос) = 1500ms из-за python+CUDA init, НЕ seek.
+Честное число = WARM (индекс резидентен): 0.36 ms/рид.
+
+=== ПЕРЕПРОВЕРКА stream separation (свежий pod, OOM-страховка) ===
+Числа ИДЕНТИЧНЫ прошлому pod байт-в-байт:
+монолит 339963809 | id 57415136 | seq 40534573 | qual 208315637
+СУММА потоков 306265346 = +9.9% vs монолит (ratio 3.94->4.37).
+ВЫВОД: OOM-сообщение НЕ исказило результаты (компрессия детерминирована, воспроизведено точно).
+stream separation +10% — подтверждённый факт для статьи.

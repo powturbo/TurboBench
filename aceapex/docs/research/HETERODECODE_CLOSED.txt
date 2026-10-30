@@ -1,0 +1,11 @@
+=== Гетеродекод закрыт + разгадка 11 GB/s (2026-06-14) ===
+CPU decompress aceapex (lzbench -I, FASTQ NA12878):
+- EPYC 4344P 8 ядер: 6.4 GB/s wall (подтверждено вживую)
+- Xeon 8468 160 ядер: 1.4 GB/s (memory-bound, плато после 8 ядер!)
+EPYC БЫСТРЕЕ Xeon в 4.5x на decompress — архитектура памяти важнее числа ядер.
+РАЗГАДКА 11 GB/s (из README): enwik9, вариант B (FSE chunked), in-memory MAP_POPULATE,
+EPYC 8 ядер = 11089 MB/s decode. Это enwik9+in-memory, НЕ FASTQ+wall. Оба числа реальны.
+Internal LZ77 reconstruction ~11600 MB/s (match-only, algorithmic).
+ГЕТЕРОДЕКОД GPU+CPU: GPU 165 + CPU 6.4(EPYC) = +3.9% макс -> НЕ стоит реализации.
+CPU decompress memory-bound, ядрами не масштабируется (8 и 160 почти одно). Закрыто замером.
+RATIO: lzbench CPU 24.6 (полный ZSTD-энтропийный) vs GPU-профиль 3.99 на одном FASTQ.

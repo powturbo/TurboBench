@@ -1,0 +1,26 @@
+# colab l4, 2026-09-29, aceapex main 907a470, scripts/colab_gpu_open.sh (excerpt of the log pasted from Colab; per-pass FNV lines omitted)
+# chr1 download truncated (gzip: unexpected end of file) -> md5 mismatch, no archive run; fixtures 5/5 on sm_89
+== provenance 2026-09-29
+gpu NVIDIA L4 | cc 8.9 | driver 580.82.07
+clocks max sm/mem 2040 MHz, 6251 MHz | memory 23034 MiB | power limit 72.00 W
+host Intel(R) Xeon(R) CPU @ 2.20GHz, 12 threads, RAM 52 GB, drive 1
+Build cuda_12.8.r12.8/compiler.35583870_0
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+commit 907a470
+libzstd 1.5.5
+nvcomp Version: 5.3.0.16
+built aceapex_gpu sm_89
+head_rans_warp_emu	pass	GPU rANS warp steps (ax_rans_warp.h) == axr_decode: 85 round-trips, 12 archive chunks, 245 crafted tables, 3496 mutations (127 accepted, 3626 rejected by both), 2457904 bytes, 0 mismatches
+head_open_warp_emu	pass	GPU open-pack steps (ax_open_warp.h, block rounds of 256) == axo_dna_decode: 40 round-trips, 38 archive chunks, 437 crafted streams, 2628 mutations (986 accepted, 2157 rejected by both), 22351557 bytes, 0 mismatches
+fixture dna_open_2MiB on the GPU: exit 0, 3 MATCHES OK, 0 DIFFERS
+fixture dna_open_mixed_300K on the GPU: exit 0, 3 MATCHES OK, 0 DIFFERS
+fixture dna_open_4097B on the GPU: exit 0, 3 MATCHES OK, 0 DIFFERS
+fixture dna_openlit_300K on the GPU: exit 0, 3 MATCHES OK, 0 DIFFERS
+fixture text_open_200K on the GPU: exit 0, 3 MATCHES OK, 0 DIFFERS
+
+gzip: stdin: unexpected end of file
+chr1.fa: downloaded
+chr1.fa: MD5 MISMATCH
+t2t.fa: not on Drive (/content/drive/MyDrive/aceapex_corpus/t2t.fa or t2t.fa.gz) - skipped
+archives on the GPU: bit-perfect 0 of 0 (exit 0: 0); emulators 2/2, fixtures 5/5
+!!! NOT PASSED on NVIDIA L4 - valid figures only in bit-perfect rows

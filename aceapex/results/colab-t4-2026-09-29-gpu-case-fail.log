@@ -1,0 +1,41 @@
+# colab-t4, 2026-09-29, aceapex main 5fef973 (gpu-case 1056b5c), scripts/colab_gpu_open.sh (excerpt as printed)
+# open archive: CUDA illegal instruction in the warm-up pass (k_open_cse/k_open_exc: thread 0's
+# tail check before the round loop left warp 0 diverged at the block scan's shuffles); fixed in
+# gpu-case-fix. zstd and rans rows are valid (bit-perfect).
+== provenance 2026-09-29
+GPU 0: Tesla T4 (UUID: GPU-aa8317f0-21f8-fc78-ba50-9e43e5180394)
+580.82.07, 1590 MHz
+Build cuda_12.8.r12.8/compiler.35583870_0
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+5fef973
+2
+libzstd 1.5.5
+nvcomp Version: 5.3.0.16
+built aceapex_gpu sm_75
+head_rans_warp_emu	pass	GPU rANS warp steps (ax_rans_warp.h) == axr_decode: 85 round-trips, 12 archive chunks, 245 crafted tables, 3496 mutations (127 accepted, 3626 rejected by both), 2457904 bytes, 0 mismatches
+head_open_warp_emu	pass	GPU open-pack steps (ax_open_warp.h, block rounds of 256) == axo_dna_decode: 40 round-trips, 38 archive chunks, 437 crafted streams, 2628 mutations (986 accepted, 2157 rejected by both), 22351557 bytes, 0 mismatches
+fixture dna_open_2MiB on the GPU: exit 2, 0 MATCHES OK, 0 DIFFERS
+fixture dna_open_mixed_300K on the GPU: exit 2, 0 MATCHES OK, 0 DIFFERS
+fixture dna_open_4097B on the GPU: exit 0, 3 MATCHES OK, 0 DIFFERS
+fixture dna_openlit_300K on the GPU: exit 2, 0 MATCHES OK, 0 DIFFERS
+fixture text_open_200K on the GPU: exit 0, 3 MATCHES OK, 0 DIFFERS
+/content/work/chr1.fa: OK
+zstd (FSE_CHUNK=4096): archive 69410925 B, CPU round-trip bit-perfect
+rans (AX_TOK=rans): archive 69106957 B, CPU round-trip bit-perfect
+open (AX_PROFILE=open): archive 67975888 B, CPU round-trip bit-perfect
+== aceapex_gpu zstd
+[sequential] H2D 5.544 + tok(zstd: 4069 frames, 0 chunks) 2.806 + lit(zstd: 11748 frames, 0 pieces) 12.096 + unpack 4.163 + match(G=32) 10.634 = 35.243 ms -> 7.2 GB/s delivered; on-device 29.699 ms -> 8.6 GB/s
+RESULT OK: Tesla T4, 40 SMs, G=32, bit-perfect on all passes
+== aceapex_gpu rans
+[sequential] H2D 5.526 + tok(rANS: 0 frames, 255 chunks) 1.192 + lit(zstd: 11748 frames, 0 pieces) 12.394 + unpack 4.243 + match(G=32) 10.833 = 34.189 ms -> 7.4 GB/s delivered; on-device 28.663 ms -> 8.9 GB/s
+RESULT OK: Tesla T4, 40 SMs, G=32, bit-perfect on all passes
+== aceapex_gpu open
+CUDA cudaStreamSynchronize(s0) @359: an illegal instruction was encountered
+exit 2
+
+chr1 on Tesla T4, ms, median of 7
+archive        bytes     tokens  literals  tok    lit     unpack  match   on-device  +H2D    GB/s  check
+chr1.zstd.aet  69410925  zstd    zstd      2.806  12.096  4.163   10.634  29.699     35.243  8.55  bit-perfect
+chr1.rans.aet  69106957  rANS    zstd      1.192  12.394  4.243   10.833  28.663     34.189  8.86  bit-perfect
+bit-perfect rows 2/3, exits 0 2/3, emulators 2/2, fixtures 2/5
+!!! NOT PASSED - no figure from this run is valid

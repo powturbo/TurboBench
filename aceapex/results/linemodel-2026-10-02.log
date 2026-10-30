@@ -1,0 +1,36 @@
+# AX_LINEMODEL (experiment, tuning builds only; container AXLINE01, no format change of ACEPX2) - ace-core, 2026-10-02
+# The FASTA line ends are taken out before LZ; the line model (headers + runs of equal line lengths; any other length is
+# a run of its own) is stored zstd-19 in front of an ordinary ACEPX2 image of the sequence. Decode: every decoded block
+# goes through a sink that puts its bytes and line ends in place while the block is in cache (tile path), else two passes.
+# Every row: full decode median of 5 on 16 threads == input, 2000 random regions (1 B - 20 KB) == input.
+# GRCh38 = UCSC hg38.fa.gz md5 1c9dcaddfa41027f17cd8f7a82c7293b, unpacked md5 b2aee9f885accc00531e59c4736bee63, 3 273 481 150 B.
+corpus  profile                    archive bytes   change    encode   decode 16 t          region p50 / p99
+chr1    default (1 MiB blocks)     59 429 097                0.37 s   0.0221 s 11.5 GB/s   782 / 912 us
+chr1    + AX_LINEMODEL             57 193 613      -3.76 %   0.56 s   0.0266 s  9.6 GB/s   724 / 835 us
+chr1    + AX_LINEMODEL + AX_HASH12 56 830 736      -4.37 %   0.71 s   0.0264 s  9.6 GB/s   849 / 1067 us
+chr1    open, 16 KiB blocks        63 083 287                0.52 s   0.0145 s 17.6 GB/s    73 / 111 us
+chr1    open + AX_LINEMODEL        58 914 632      -6.61 %   0.71 s   0.0166 s 15.3 GB/s    71 / 96 us
+T2T     default                    806 458 861               4.66 s   0.2608 s 12.1 GB/s  1243 / 1852 us
+T2T     + AX_LINEMODEL             768 385 090     -4.72 %   6.83 s   0.2945 s 10.7 GB/s  1564 / 1801 us
+T2T     + AX_LINEMODEL + AX_HASH12 762 132 243     -5.50 %   7.96 s   0.2885 s 10.9 GB/s  1436 / 1638 us
+T2T     open, 16 KiB blocks        853 264 869               6.08 s   0.1818 s 17.4 GB/s   148 / 265 us
+T2T     open + AX_LINEMODEL        795 603 395     -6.76 %   8.32 s   0.1868 s 16.9 GB/s   138 / 224 us
+GRCh38  default                    780 638 535               4.61 s   0.2632 s 12.4 GB/s   985 / 1154 us
+GRCh38  + AX_LINEMODEL             750 079 828     -3.91 %   6.87 s   0.2983 s 11.0 GB/s   998 / 1200 us
+GRCh38  + AX_LINEMODEL + AX_HASH12 744 499 272     -4.63 %   8.15 s   0.3006 s 10.9 GB/s  1375 / 1713 us
+GRCh38  open, 16 KiB blocks        831 221 278               6.13 s   0.1796 s 18.2 GB/s   145 / 230 us
+GRCh38  open + AX_LINEMODEL        775 237 611     -6.74 %   8.27 s   0.1897 s 17.3 GB/s   145 / 232 us
+The open profile gains most (-6.6..-6.8 %): there every line end was an exception of the DNA pack. Decode costs +3..+20 %
+on the CPU (the sink copies each block once more, in cache); the two-pass fallback (AX_LIT_TILE=0) costs chr1 0.094 s.
+Encode +40-50 % (the split copies the input once; single-threaded memchr - not optimised).
+
+## The GPU exceptions kernel (open profile: every byte that is not ACGT/acgt is an exception: position gap + value)
+corpus  open archive: exceptions          gap+val pieces   with AX_LINEMODEL: exceptions   gap+val
+chr1    4 611 853 (1286 per 64 KiB chunk)  1 206 968 B      3 135 (0.9 per chunk; IUPAC)     2 332 B
+T2T     38 616 137 (815 per chunk)         16 403 877 B     0                                0 B
+GRCh38  60 979 068 (1287 per chunk)        15 988 470 B     31 160 (0.7 per chunk)           34 728 B
+(N runs are matches, not exceptions: N in GRCh38 160 M bytes, 31 160 exceptions left.) On the GPU the exception work
+(the gap / val rANS pieces, the scatter of AX_OPEN_EXC in the bases store) goes to ~0; instead the line ends have to be
+put back: either in the store of the block output (position o = record start + x + x / W per byte run: one division
+per 16-byte store, no extra pass) or one expansion pass over the output (T2T 3.16 GB read + write: ~2 ms at ~3 TB/s on
+an H100 against ~20 ms for the whole decode). Estimate, not measured: the T-H runs carry no AX_LINEMODEL archive yet.

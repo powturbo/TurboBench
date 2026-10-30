@@ -1,0 +1,6 @@
+[cohort] 10 genomes resident: 7.71 GB compressed for 30.48 GB of sequence (x3.96); plans 1.1 s on host; card free 76.5 of 85.0 GB
+[cohort] full decode of all 10 genomes, XXH3 checked on the card: 997.0 ms total, 30.6 GB/s; 10 of 10 verified
+[cohort] W  1024,   4100 windows/batch over 10 genomes:    1399499 windows/s,   1.43 GB/s, batch p50 3.805 ms | genome-0 windows == its full decode
+[cohort] W  1024,  65540 windows/batch over 10 genomes:    2967827 windows/s,   3.04 GB/s, batch p50 22.231 ms | genome-0 windows == its full decode
+[cohort] W  8192,   4100 windows/batch over 10 genomes:    1339083 windows/s,  10.97 GB/s, batch p50 4.036 ms | genome-0 windows == its full decode
+[cohort] W  8192,  65540 windows/batch over 10 genomes:    2644804 windows/s,  21.67 GB/s, batch p50 25.079 ms | genome-0 windows == its full decode

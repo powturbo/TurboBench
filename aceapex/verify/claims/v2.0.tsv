@@ -1,0 +1,5 @@
+# claim_id	level	expected	tolerance	needs	command   (README of tag v2.0; lzbench 2.2.1, EPYC 4344P)
+v2.0_lzbench_nci_ratio_l2	R	8.56%	0.01	tool:~/lzbench/lzbench	lzbench -eaceapex,2 on silesia/nci, ratio column
+v2.0_lzbench_nci_ratio_l1	R	8.72%	0.01	tool:~/lzbench/lzbench	lzbench -eaceapex,1 on silesia/nci, ratio column
+v2.0_lzbench_nci_dec_l2_i8	M	10192	-	tool:~/lzbench/lzbench	lzbench -eaceapex,2 -I8, decompress MB/s, host-dependent
+v2.0_na12878_1gb_ratio	R	7.75%	0.01	corpus:genome/NA12878_1gb.fastq	aceapex -2 on NA12878 1 GB; corpus later found degenerate (v4.0 notes)

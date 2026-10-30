@@ -1,0 +1,122 @@
+# 2026-10-28 00:03 AMD EPYC 4344P 8-Core Processor; load 0.56 0.86 1.10
+## run 1
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -1   |  25.9 MB/s | 10961 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.5 MB/s |  9825 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.2 MB/s |  8716 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7104 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1017 MB/s | 10624 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9616 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7104 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9616 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.2 MB/s |  8716 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.5 MB/s |  9825 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -1   |  25.9 MB/s | 10961 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1017 MB/s | 10624 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+## run 2
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -1   |  25.8 MB/s | 10954 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.6 MB/s |  9843 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.3 MB/s |  8711 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7105 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1016 MB/s | 10639 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9596 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7105 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9596 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.3 MB/s |  8711 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.6 MB/s |  9843 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -1   |  25.8 MB/s | 10954 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1016 MB/s | 10639 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+## run 3
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -1   |  25.9 MB/s | 10988 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.5 MB/s |  9840 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.2 MB/s |  8719 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7110 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1017 MB/s | 10626 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9611 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7110 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9611 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.2 MB/s |  8719 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.5 MB/s |  9840 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -1   |  25.9 MB/s | 10988 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1017 MB/s | 10626 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+## run 4
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -1   |  25.8 MB/s | 10993 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.5 MB/s |  9810 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.2 MB/s |  8718 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7113 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1015 MB/s | 10650 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9605 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7113 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9605 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.2 MB/s |  8718 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.5 MB/s |  9810 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -1   |  25.8 MB/s | 10993 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1015 MB/s | 10650 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+## run 5
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -1   |  25.9 MB/s | 10922 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.5 MB/s |  9842 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.3 MB/s |  8717 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7118 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1007 MB/s | 10632 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9608 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7118 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9608 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.3 MB/s |  8717 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.5 MB/s |  9842 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -1   |  25.9 MB/s | 10922 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1007 MB/s | 10632 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+## run 6
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -1   |  25.9 MB/s | 10975 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.5 MB/s |  9843 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.2 MB/s |  8683 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7102 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1015 MB/s | 10636 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9610 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7102 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9610 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.2 MB/s |  8683 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.5 MB/s |  9843 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -1   |  25.9 MB/s | 10975 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1015 MB/s | 10636 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+## run 7
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -1   |  25.9 MB/s | 10987 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.5 MB/s |  9836 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.2 MB/s |  8707 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7108 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1016 MB/s | 10566 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9617 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| Compressor name         | Compression| Decompress.| Compr. size | Ratio | Filename |
+| ---------------         | -----------| -----------| ----------- | ----- | -------- |
+| aceapex 2.4.0 fast -4   |  25.3 MB/s |  7108 MB/s |    86222212 | 40.68 | /home/aeterna/golden/mixed/silesia.tar|
+| misa77 0.6.0 -1         |   121 MB/s |  9617 MB/s |    90386584 | 42.64 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -3   |  24.2 MB/s |  8707 MB/s |    95273962 | 44.95 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -2   |  24.5 MB/s |  9836 MB/s |   114736373 | 54.13 | /home/aeterna/golden/mixed/silesia.tar|
+| aceapex 2.4.0 fast -1   |  25.9 MB/s | 10987 MB/s |   130026540 | 61.35 | /home/aeterna/golden/mixed/silesia.tar|
+| zxc 0.15.0 -1           |  1016 MB/s | 10566 MB/s |   130717790 | 61.67 | /home/aeterna/golden/mixed/silesia.tar|
+# end load 1.06 1.05 1.06
+done

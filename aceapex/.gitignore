@@ -1,0 +1,39 @@
+# бинари (собираются из исходников); the CLI binary only at the root
+/aceapex
+aceapex_depth*
+aceapex_dl
+aceapex_enc
+aceapex_main*
+e2e_dense
+e2e_pipe*
+e2e_seek
+v7ra
+v7ra_test
+gpu_hash_finder*
+gpu_sa_*
+method_a_encode
+off_delta_analyze
+tile_*_smoke*
+Q4
+/libaceapex_gpu.so*
+# временные/тестовые
+*.aet
+streams.bin
+*_test
+*.o
+aceapex_p5
+lzbench/
+
+# cross-version fixtures are tracked on purpose
+!verify/fixtures/*.aet
+!verify/fixtures/conf/*.aet
+
+# python package build artefacts
+python/build/
+python/*.egg-info/
+python/aceapex/_aceapex_decode*.so
+__pycache__/
+.pytest_cache/
+
+# local Claude Code settings
+.claude/settings.local.json

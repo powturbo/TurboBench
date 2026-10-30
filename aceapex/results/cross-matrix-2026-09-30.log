@@ -1,0 +1,40 @@
+# scripts/cross_matrix.sh on 6f0b2c0 (mingw-fix), ace-core, libzstd 1.5.5 per target (official tarball),
+# toolchains: system gcc 11.4 (x86-64), arm-linux-gnueabihf-g++ 11.4, Bootlin glibc stable 2024.05-1 (i686, aarch64, powerpc64le-power8),
+# x86_64-w64-mingw32-g++-posix 10.3; qemu-user static 6.2. judge: ./verify.sh HEAD
+x86_64	build	pass	CLI, C99 decoder, api_roundtrip, api_concurrent; libzstd 1.5.5 (g++)
+x86_64	conf	pass	44/44 decodes bit-perfect
+x86_64	slice	pass	4/4 (C99 + CLI, fixtures of every libzstd line)
+x86_64	det	pass	chain re-encode == chr1_4MiB.zstd-1.5.5.aet
+x86_64	api_roundtrip	pass	468/468 library compress->decompress_mt round-trips bit-perfect (13 sizes x 2 kinds x 2 levels x 3x3 threads)
+x86_64	api_concurrent	pass	96 jobs on 4 threads at once (DNA/text/random, 1 B..5 MiB, levels 1-3, full + region): 0 failed
+x86_32	build	pass	CLI, C99 decoder, api_roundtrip, api_concurrent; libzstd 1.5.5 (/home/aeterna/pubrepo/.wk/tc/x86-i686--glibc--stable-2024.05-1/bin/i686-linux-g++)
+x86_32	conf	pass	44/44 decodes bit-perfect
+x86_32	slice	pass	4/4 (C99 + CLI, fixtures of every libzstd line)
+x86_32	det	pass	chain re-encode == chr1_4MiB.zstd-1.5.5.aet
+x86_32	l1	pass	3/3 profiles: default (l1) encode == x86-64 bytes
+x86_32	api_roundtrip	pass	468/468 library compress->decompress_mt round-trips bit-perfect (13 sizes x 2 kinds x 2 levels x 3x3 threads)
+x86_32	api_concurrent	pass	96 jobs on 4 threads at once (DNA/text/random, 1 B..5 MiB, levels 1-3, full + region): 0 failed
+arm32	build	pass	CLI, C99 decoder, api_roundtrip, api_concurrent; libzstd 1.5.5 (arm-linux-gnueabihf-g++)
+arm32	conf	pass	44/44 decodes bit-perfect
+arm32	slice	pass	4/4 (C99 + CLI, fixtures of every libzstd line)
+arm32	det	pass	chain re-encode == chr1_4MiB.zstd-1.5.5.aet
+arm32	l1	pass	3/3 profiles: default (l1) encode == x86-64 bytes
+arm32	api_roundtrip	pass	468/468 library compress->decompress_mt round-trips bit-perfect (13 sizes x 2 kinds x 2 levels x 3x3 threads)
+arm32	api_concurrent	pass	96 jobs on 4 threads at once (DNA/text/random, 1 B..5 MiB, levels 1-3, full + region): 0 failed
+arm64	build	pass	CLI, C99 decoder, api_roundtrip, api_concurrent; libzstd 1.5.5 (/home/aeterna/pubrepo/.wk/tc/aarch64--glibc--stable-2024.05-1/bin/aarch64-linux-g++)
+arm64	conf	pass	44/44 decodes bit-perfect
+arm64	slice	pass	4/4 (C99 + CLI, fixtures of every libzstd line)
+arm64	det	pass	chain re-encode == chr1_4MiB.zstd-1.5.5.aet
+arm64	l1	pass	3/3 profiles: default (l1) encode == x86-64 bytes
+arm64	api_roundtrip	pass	468/468 library compress->decompress_mt round-trips bit-perfect (13 sizes x 2 kinds x 2 levels x 3x3 threads)
+arm64	api_concurrent	pass	96 jobs on 4 threads at once (DNA/text/random, 1 B..5 MiB, levels 1-3, full + region): 0 failed
+ppc64le	build	pass	CLI, C99 decoder, api_roundtrip, api_concurrent; libzstd 1.5.5 (/home/aeterna/pubrepo/.wk/tc/powerpc64le-power8--glibc--stable-2024.05-1/bin/powerpc64le-linux-g++)
+ppc64le	conf	pass	44/44 decodes bit-perfect
+ppc64le	slice	pass	4/4 (C99 + CLI, fixtures of every libzstd line)
+ppc64le	det	pass	chain re-encode == chr1_4MiB.zstd-1.5.5.aet
+ppc64le	l1	pass	3/3 profiles: default (l1) encode == x86-64 bytes
+ppc64le	api_roundtrip	pass	468/468 library compress->decompress_mt round-trips bit-perfect (13 sizes x 2 kinds x 2 levels x 3x3 threads)
+ppc64le	api_concurrent	pass	96 jobs on 4 threads at once (DNA/text/random, 1 B..5 MiB, levels 1-3, full + region): 0 failed
+mingw64	build	pass	library (no CLI: POSIX mmap), C99 decoder, api_roundtrip, api_concurrent; libzstd 1.5.5 (x86_64-w64-mingw32-g++-posix)
+mingw64	run	declared	no runner for this target on the host
+HEAD              52     0        3        12        0      0
