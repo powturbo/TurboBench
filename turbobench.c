@@ -101,7 +101,7 @@ int memcheck(unsigned char *in, unsigned n, unsigned char *cpy, int cmp, char *f
   for(i = 0; i < n; i++)
     if(in[i] != cpy[i]) {
       if(cmp > 3) abort(); // crash (AFL) fuzzing
-      printf("ERROR at %d:%x, %x file=%s\n", i, in[i], cpy[i], finame);
+      printf("\nERROR at %d:%x, %x file=%s\n", i, in[i], cpy[i], finame);
       if(cmp > 2) exit(EXIT_FAILURE);
       return i+1;
     }
