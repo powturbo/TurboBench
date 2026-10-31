@@ -2466,7 +2466,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 //=== A =============================================================================================================================
       #if _ACEAPEX
     case P_ACEFAST: lev+=10; 
-    case P_ACE:     { int64_t r = aceapex_compress(in, inlen, out, outsize, lev, threads?threads:1); return r > 0 ? (unsigned)r : 0; }
+    case P_ACE:     { int64_t r = aceapex_compress(in, inlen, out, outsize, lev, threads>1?threads:1); return r > 0 ? (unsigned)r : 0; }
       #endif
 
       #if _AOCL
@@ -3235,10 +3235,13 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
      *             1048576  (1MB)    1 << 20
      *             2097152  (2MB)    1 << 21
      * Set to 0 to use the default (512KB). */
-    case P_ZXC: { zxc_compress_opts_t opts = {0}; opts.level = lev; opts.n_threads = threads?threads:1; if(q = strchr(prm,'B')) opts.block_size = 1 << atoi(q+(q[1] == '='?2:1)); 
-      zxc_cctx *zxc_cctx = zxc_create_cctx(&opts);
-      int64_t rc = zxc_compress_cctx(zxc_cctx, in, inlen, out, outsize, NULL);
-      zxc_free_cctx(zxc_cctx); 
+    case P_ZXC: { //zxc_compress_opts_t opts = {0}; opts.level = lev; opts.n_threads = threads?threads:1; if(q = strchr(prm,'B')) opts.block_size = 1 << atoi(q+(q[1] == '='?2:1)); 
+      zxc_cctx *cctx = zxc_create_cctx();
+      zxc_cctx_set_param(cctx, ZXC_C_LEVEL, lev);
+      if(threads > 1) zxc_cctx_set_param(cctx, ZXC_C_THREADS, threads);
+      if(q = strchr(prm,'B')) zxc_cctx_set_param(cctx, ZXC_C_BLOCK_SIZE, 1 << atoi(q+(q[1] == '='?2:1))); 
+      int64_t rc = zxc_compress_cctx(cctx, in, inlen, out, outsize);
+      zxc_free_cctx(cctx); 
       return rc > 0?rc:0;
     }
       #endif
@@ -3601,8 +3604,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
   switch(codec) {
 //=== A =============================================================================================================================
       #if _ACEAPEX
-    case P_ACE:     
-    case P_ACEFAST: { int64_t r = aceapex_decompress_mt(in, inlen, out, outlen, threads?threads:1); return r == (int64_t)outlen ? inlen : 0; }
+    case P_ACEFAST: 
+    case P_ACE:     { int64_t r = aceapex_decompress_mt(in, inlen, out, outlen, threads>1?threads:1); return r == (int64_t)outlen ? inlen : 0; }
       #endif
 
       #if _AOCL
@@ -4225,11 +4228,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
       
       #if _ZXC
-    case P_ZXC: {
-      zxc_decompress_opts_t opts = {0}; opts.n_threads = threads?threads:1; 
-      zxc_dctx *zxc_dctx = zxc_create_dctx(); 
-      size_t rc = zxc_decompress_dctx(zxc_dctx, in, inlen, out, outlen, &opts); 
-      zxc_free_dctx(zxc_dctx); 
+    case P_ZXC: { zxc_dctx *dctx = zxc_create_dctx();
+      if(threads > 1) zxc_dctx_set_param(dctx, ZXC_D_THREADS, threads);
+      size_t rc = zxc_decompress_dctx(dctx, in, inlen, out, outlen); 
+      zxc_free_dctx(dctx); 
       return rc;    
     }
       #endif
