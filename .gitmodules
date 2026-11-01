@@ -177,3 +177,6 @@
 [submodule "aceapex"]
 	path = aceapex
 	url = https://github.com/yasha1971-coder/aceapex.git
+[submodule "zlib-rs"]
+	path = zlib-rs
+	url = https://github.com/trifectatechfoundation/zlib-rs.git
