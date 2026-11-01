@@ -789,6 +789,12 @@ ifneq ($(wildcard mzstd/.),)
   RUST_FEATURES += mzstd
   PLG_FLAGS += -D_MZSTD
 endif
+ifneq ($(wildcard zlib-rs/.),)
+  RUST_FEATURES += zlib-rs
+  PLG_FLAGS += -D_ZLIB_RS
+  RUST_FEATURES += libz-rs-sys/custom-prefix
+  RUST_EXP := LIBZ_RS_SYS_PREFIX="zz_"
+endif
 
 comma := ,
 empty :=
@@ -820,6 +826,7 @@ $(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml $(PCO_C_BUILD)/Cargo.toml
 		-e 's|path\s*=\s*"\.\./mzstd/mzstd-ffi"|path = "$(abspath mzstd/mzstd-ffi)"|' \
 		-e 's|path\s*=\s*"\.\./pcodec/pco_c"|path = "$(abspath $(PCO_C_BUILD))"|' \
 		-e 's|path\s*=\s*"\.\./pulsar-best"|path = "$(abspath pulsar-best)"|' \
+		-e 's|path\s*=\s*"\.\./zlib-rs/libz-rs-sys"|path = "$(abspath zlib-rs/libz-rs-sys)"|' \
 		$@
 #	@echo "----- generated paths -----"
 #	@grep -E 'path\s*=' $@ || true
@@ -829,11 +836,10 @@ RUST_TARGET_DIR := $(BUILD)/rust
 ifdef CROSS
 RUST_TARGET     = --target $(CROSS)gc-unknown-linux-gnu
 RUST_LIB        = $(RUST_TARGET_DIR)/$(CROSS)gc-unknown-linux-gnu/release/lib$(RUST_PKG_NAME).a
-RUST_EXP        = CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER=riscv64-linux-gnu-gcc
+RUST_EXP        += CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER=riscv64-linux-gnu-gcc
 else
 RUST_TARGET     :=
 RUST_LIB        := $(RUST_TARGET_DIR)/release/lib$(RUST_PKG_NAME).a
-RUST_EXP        :=
 endif
 
 $(RUST_LIB): $(RUST_MANIFEST)
@@ -1015,7 +1021,7 @@ PLG_FLAGS += -D_ZXC
 ZXC_SRCS := $(wildcard zxc/*.c)
 ZXC_LIB = $(BUILD)/zxc/libzxc.a
 $(ZXC_LIB): $(ZXC_SRCS)
-	$(CMAKE) -S zxc -B $(BUILD)/zxc -DCMAKE_C_COMPILER=$(CC) && make -C $(BUILD)/zxc
+	$(CMAKE) -S zxc -B $(BUILD)/zxc -DCMAKE_C_COMPILER=$(CC) -DZXC_BUILD_TESTS=0 -DZXC_BUILD_CLI=0 -DZXC_INSTALL=0  && make -C $(BUILD)/zxc
 LIBS += $(ZXC_LIB)
 endif
 endif
