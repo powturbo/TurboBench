@@ -463,6 +463,10 @@ enum {
 #define _ZLIB_NG 0
 #endif
  P_ZLIB_NG,
+#ifndef _ZLIB_RS
+#define _ZLIB_RS 0
+#endif
+ P_ZLIB_RS,
 #ifndef _ZLIB_TURBO
 #define _ZLIB_TURBO 0
 #endif
@@ -1574,11 +1578,14 @@ Z_EXTERN Z_EXPORT int32_t zng_compress2(uint8_t *dest, size_t *destLen, const ui
 Z_EXTERN Z_EXPORT int32_t zng_uncompress(uint8_t *dest, size_t *destLen, const uint8_t *source, size_t sourceLen);
   #endif
 
+  #if _ZLIB_RS
+// zlib-rs with prefix zz_
+Z_EXTERN int Z_EXPORT zz_compress2(unsigned char *dest, unsigned long *destLen, const unsigned char *source, unsigned long sourceLen, int level);
+Z_EXTERN int Z_EXPORT zz_uncompress(unsigned char *dest, unsigned long *destLen, const unsigned char *source, unsigned long sourceLen);
+  #endif
+
   #if _ZLIB_TURBO
-/* zlib-turbo for TurboBench: in a file of its own, as zlib-turbo is built with Z_PREFIX to link beside zlib,
-   and its zlib.h cannot be included with zlib's in plugin.cc */
-//#include "zlib-turbo/zlib.h"
-//#include "zlib-turbo/zturbo.h"
+// zlib-turbo for TurboBench: in a file of its own, as zlib-turbo is built with Z_PREFIX to link beside zlib, and its zlib.h cannot be included with zlib's in plugin.cc 
 unsigned zlib_turbo_compress(const unsigned char *in, unsigned inlen, unsigned char *out, unsigned outsize, int lev, int threads);
 unsigned zlib_turbo_decompress(const unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen);
 const char *zlib_turbo_version(void);
@@ -2088,6 +2095,7 @@ struct plugs plugs[] = {
   
   { P_ZLIB,          "zlib",          _ZLIB,      "zlib",                        "1,2,3,4,5,6,7,8,9" },
   { P_ZLIB_NG,       "zlib-ng",       _ZLIB_NG,   "zlib-ng",                     "1,2,3,4,5,6,7,8,9" },
+  { P_ZLIB_RS,       "zlib-rs",       _ZLIB_RS,   "zlib-rs",                     "1,2,3,4,5,6,7,8,9" },
   { P_ZLIB_TURBO,    "zlib-turbo",    _ZLIB_TURBO,"zlib-turbo",                  "1,2,3,4,5,6,7,8,9,10,11,12/t#" },
   { P_ZLING,         "zling",         _ZLING,     "Libzling",                    "0,1,2,3,4" },
   { P_ZOPFLI,        "zopfli",        _ZOPFLI,    "zopfli",                      ""},
@@ -3164,11 +3172,15 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
 //=== Z =============================================================================================================================
       #if _ZLIB
-    case P_ZLIB:     { uLongf outlen = outsize; int rc = compress2(out, &outlen, in, inlen, lev); if(rc != Z_OK) printf("zlib compress2 rc=%d\n", rc);  return outlen; }
+    case P_ZLIB:      { uLongf outlen = outsize; int rc = compress2(out, &outlen, in, inlen, lev); if(rc != Z_OK) printf("zlib compress2 rc=%d\n", rc);  return outlen; }
       #endif
 
       #if _ZLIB_NG
-    case P_ZLIB_NG:   { size_t outlen = outsize; int rc = zng_compress2(out, &outlen, in, inlen, lev); if(rc) printf("zlib compress2 rc=%d\n", rc);  return outlen; }
+    case P_ZLIB_NG:   { size_t outlen = outsize; int rc = zng_compress2(out, &outlen, in, inlen, lev); if(rc) printf("zlib-ng compress2 rc=%d\n", rc);  return outlen; }
+      #endif
+
+      #if _ZLIB_RS
+    case P_ZLIB_RS:   { unsigned long outlen = outsize; int rc = zz_compress2(out, &outlen, in, inlen, lev); if(rc) printf("zlib-rs compress2 rc=%d\n", rc);  return outlen; }
       #endif
 
       #if _ZLIB_TURBO  
@@ -4204,6 +4216,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #if _ZLIB_NG
     case P_ZOPFLI:
     case P_ZLIB_NG: { size_t outsize = outlen; int rc = zng_uncompress(out, &outsize, in, inlen); } break;
+      #endif
+
+      #if _ZLIB_RS
+    case P_ZLIB_RS: { unsigned long outsize = outlen; int rc = zz_uncompress(out, &outsize, in, inlen); } break;
       #endif
 
       #if _ZLIB_TURBO
