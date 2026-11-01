@@ -15,6 +15,7 @@ mbrotli-ffi = { path = "../mbrotli/mbrotli-ffi", optional = true }
 mzstd-ffi = { path = "../mzstd/mzstd-ffi", optional = true }
 cpcodec  = { path = "../pcodec/pco_c", optional = true }
 pulsar  = { path = "../pulsar-best",  optional = true }
+libz-rs-sys = { path = "../zlib-rs/libz-rs-sys",  optional = true }
 
 [features]
 default = []
@@ -24,6 +25,8 @@ mbrotli = ["dep:mbrotli-ffi"]
 mzstd   = ["dep:mzstd-ffi"]
 pcodec  = ["dep:cpcodec"]
 pulsar  = ["dep:pulsar"]
+zlib-rs = ["dep:libz-rs-sys"]
+custom-prefix = []
 
 # INSTALL: rustup target add riscv64gc-unknown-linux-gnu
 [target.riscv64gc-unknown-linux-gnu]
