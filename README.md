@@ -211,6 +211,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [zlib](http://zlib.net) |  |c  |lz+huffman  |
 | [zlib cloudflare](https://github.com/cloudflare/zlib) |c  |  |lz+huffman  |
 | [zlib-ng](https://github.com/Dead2/zlib-ng) |  |c  |lz+huffman  |
+| [zlib-rs](https://github.com/trifectatechfoundation/zlib-rs) |  |rust  |lz+huffman  |
 | [zlib-turbo](https://github.com/icodywu/zlib-turbo) |  |c  |lz+huffman |
 | [zopfli](https://code.google.com/p/zopfli) |  |c  |lz+huffman  |
 | [zstd](https://github.com/facebook/zstd) |  |c  |lz+huffman/tans  |
@@ -362,5 +363,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -eFAST -aFAST
 ```
 
-Last update: 19 OCT 2026
+Last update: 01 NOV 2026
 
