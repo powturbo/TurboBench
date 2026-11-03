@@ -211,7 +211,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [zlib](http://zlib.net) |  |c  |lz+huffman  |
 | [zlib cloudflare](https://github.com/cloudflare/zlib) |c  |  |lz+huffman  |
 | [zlib-ng](https://github.com/Dead2/zlib-ng) |  |c  |lz+huffman  |
-| [zlib-rs](https://github.com/trifectatechfoundation/zlib-rs) |  |rust  |lz+huffman  |
+| [zlib-rs](https://github.com/trifectatechfoundation/zlib-rs) |2026/11  |rust  |lz+huffman  |
 | [zlib-turbo](https://github.com/icodywu/zlib-turbo) |  |c  |lz+huffman |
 | [zopfli](https://code.google.com/p/zopfli) |  |c  |lz+huffman  |
 | [zstd](https://github.com/facebook/zstd) |  |c  |lz+huffman/tans  |
@@ -241,14 +241,14 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 
 | Compressor | Added | Language | Comment |
 | ---------- | ----- | -------- | ------- |
-| bitwise range coder |  |  |  |
+| Bitwise range coder |  |  |  |
 | [TurboRC-Range Coder](https://github.com/powturbo/Turbo-Range-Coder) |  |c  |  |
 | [Bitwise RC v2010](http://encode.su/threads/1153-Simple-binary-rangecoder-demo) |  |c  |  |
 | [Bitwise vector RC v2012](http://encode.su/threads/1200-Vectorized-rangecoder) |  |c  |  |
 | [AOMedia AV1 entropy coder](https://aomedia.googlesource.com/aom/+/master/aom_dsp/) |  |c  |  |
 | [Daala entropy coder](https://github.com/xiph/daala) |  |c  |  |
 | [FastAri v15-10](https://github.com/davidcatt/FastARI) |  |c  |  |
-| bytewise range coder |  |  |  |
+| Bytewise range coder |  |  |  |
 | [TurboAC](https://sites.google.com/site/powturbo) |  |c  |  |
 | [subotin range coder v2000](http://ezcodesample.com/ralpha/Subbotin.txt) |  |c  |  |
 | [Fast AC v2006](http://www.cipr.rpi.edu/research/SPIHT/) |  |c  |  |
