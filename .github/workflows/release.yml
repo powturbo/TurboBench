@@ -57,7 +57,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -90,16 +90,20 @@ jobs:
             make STATIC=1 PHAZ=0
           fi
 
-      - name: Generate silesia.tar.md (Linux)
-        if: matrix.platform == 'linux' 
+      - name: Benchmark silesia.tar.md (Linux)
+        if: matrix.platform == 'linux'
         run: |
           curl -L -o silesia.tar.gz \
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
           ./turbobench silesia.tar -U -V0
           ./turbobench silesia.tar.tbb -p4
-          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
-          ls -la silesia.*.tar.md
+          mv -f silesia.tar.md "silesia.${{ matrix.aarch }}.tar.md"
+          ./turbobench silesia.tar -V0 -eBWT -abwt
+          ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -abwt
+          ./turbobench silesia.tar@bwt.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.aarch }}.tar@bwt.md"
+          ls -la silesia.tar*.md
 #        if: matrix.platform == 'linux' && matrix.os != 'ubuntu-24.04-riscv'
 #        run: |
 #          ./turbobench silesia.tar -V0 -U -eBWT -abwt
@@ -124,7 +128,7 @@ jobs:
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
           ./turbobench silesia.tar -V0 -U -eBWT -abwt
-          ./turbobench silesia.tar -V0 -U -ebwtsatan,7x,8x,9x -b68m -abwt
+          ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -abwt
           ./turbobench silesia.tar@bwt.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
 
@@ -154,20 +158,20 @@ jobs:
           gcc --version
           clang --version || true
           make STATIC=1 PHAZ=0
-      - name: Generate silesia.tar.md (Windows)
-        if: matrix.platform == 'windows'
-        shell: msys2 {0}
-        run: |
-          curl -L -o silesia.tar.gz \
-            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-          gunzip silesia.tar.gz
-          ./turbobench.exe silesia.tar -U -V0
-          ./turbobench.exe silesia.tar.tbb -p4
-          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
-          ./turbobench silesia.tar -V0 -eBWT -abwt
-          ./turbobench silesia.tar -V0 -U -ebwtsatan,7x,8x,9x -b68m -abwt
-          ./turbobench silesia.tar@bwt.tbb -p4
-          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
+#     - name: Generate silesia.tar.md (Windows)
+#       if: matrix.platform == 'windows'
+#       shell: msys2 {0}
+#       run: |
+#         curl -L -o silesia.tar.gz \
+#           https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+#         gunzip silesia.tar.gz
+#         ./turbobench.exe silesia.tar -U -V0
+#         ./turbobench.exe silesia.tar.tbb -p4
+#         mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
+#         ./turbobench silesia.tar -V0 -eBWT -abwt
+#         ./turbobench silesia.tar -V0 -U -ebwtsatan,7x,8x,9x -b68m -abwt
+#         ./turbobench silesia.tar@bwt.tbb -p4
+#         mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
 #          ls -la silesia.*.tar.md
 
       # ------------------ Package (Linux / macOS) ------------------
@@ -264,7 +268,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.repository.default_branch }}
