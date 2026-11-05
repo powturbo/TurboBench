@@ -99,17 +99,12 @@ jobs:
           ./turbobench silesia.tar -U -V0
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.aarch }}.tar.md"
-          ./turbobench silesia.tar -V0 -eBWT -abwt
-          ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -abwt
-          ./turbobench silesia.tar@bwt.tbb -p4
-          mv -f silesia.tar.md "silesia.${{ matrix.aarch }}.tar@bwt.md"
-#          ls -la silesia.tar*.md
-#        if: matrix.platform == 'linux' && matrix.os != 'ubuntu-24.04-riscv'
-#        run: |
-#          ./turbobench silesia.tar -V0 -U -eBWT -abwt
-#          ./turbobench silesia.tar -V0 -U -ebwtsatan,7x,8x,9x -b68m -abwt
-#          ./turbobench silesia.tar@bwt.tbb -p4
-#          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
+          if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
+            ./turbobench silesia.tar -V0 -eBWT -abwt
+            ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -abwt
+            ./turbobench silesia.tar@bwt.tbb -p4
+            mv -f silesia.tar.md "silesia.${{ matrix.aarch }}.tar@bwt.md"
+          fi
 
       # ------------------ macOS ------------------
       - name: Build (macOS)
