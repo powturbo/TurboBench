@@ -1956,11 +1956,11 @@ struct plugs plugs[] = {
   { P_BZIP2,         "bzip2",         _BZIP2,     "Bzip2",                       "" },
   { P_BZIP3,         "bzip3",         _BZIP3,     "Bzip3",                       "0,16,32,64,128,256,512/b#:level 0 blocksize in Mib{16}" },
 
-  { P_BLOSC_LZ,      "blosc-lz",      _BLOSC,     "c-blosc2 lz",                  "0/SBDsd" },
-  { P_BLOSC_LZ4,     "blosc-lz4",     _BLOSC,     "c-blosc2 lz4",                 "0,1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
-  { P_BLOSC_LZ4HC,   "blosc-lz4hc",   _BLOSC,     "c-blosc2 lz4hc",               "1,2,3,4,5,6,7,8,9,10,11,12/SBDsd" },
-  { P_BLOSC_ZLIB,    "blosc-zlib",    _BLOSC,     "c-blosc2 zlib-ng",             "1,2,3,4,5,6,7,8,9/SBDsd" },
-  { P_BLOSC_ZSTD,    "blosc-zstd",    _BLOSC,     "c-blosc2 zstd",                "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/d#SBDsd" },
+  { P_BLOSC_LZ,      "blosc-lz",      _BLOSC,     "c-blosc2 lz",                 "0/bu#SBDdbst#" }, // b:blocksize size:u1,u2,u4,u8 / Filter1 = S:shuffle B:bitshuffle D:byte delta / filter2 = d:delta b:byte delta s:shuffle  
+  { P_BLOSC_LZ4,     "blosc-lz4",     _BLOSC,     "c-blosc2 lz4",                "0,1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/bu#SBDdbst#" },
+  { P_BLOSC_LZ4HC,   "blosc-lz4hc",   _BLOSC,     "c-blosc2 lz4hc",              "1,2,3,4,5,6,7,8,9,10,11,12/bu#SBDdbst#" },
+  { P_BLOSC_ZLIB,    "blosc-zlib",    _BLOSC,     "c-blosc2 zlib-ng",            "1,2,3,4,5,6,7,8,9/bu#SBDdbst#" },
+  { P_BLOSC_ZSTD,    "blosc-zstd",    _BLOSC,     "c-blosc2 zstd",               "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/bu#SBDdbst#" },
   
   { P_CHAMELEON,     "chameleon",     _CHAMELEON, "Chameleon",                   "1,2" },
   { P_CRLZP,         "crlzp",         _CRES,        "CR lzp",                    "0,1,2" },
