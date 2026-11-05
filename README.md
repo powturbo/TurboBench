@@ -363,5 +363,17 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ./turbobench enwik9 -eFAST -aFAST
 ```
 
-Last update: 01 NOV 2026
+### Codec parameters:
+- Blosc
+  b# : blocksize
+  B: Filter 0: bitshuffle
+  S: Filter 0: Shuffle
+  D: Filter 0: Byte delta
+  d: Filter 1: delta
+  b: Filter 1: Byte delta
+  s: Filter 1: Shuffle
+  u# : integer size, u1, u2, u4, u8
+  t# : threads
+
+Last update: 05 NOV 2026
 
