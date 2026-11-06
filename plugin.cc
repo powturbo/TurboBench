@@ -3676,7 +3676,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_BLOSC_LZ4HC:
     case P_BLOSC_ZLIB:
     case P_BLOSC_ZSTD: {
-      int filter0 = strchr(prm,'B')?BLOSC_BITSHUFFLE : strchr(prm,'S')?BLOSC_SHUFFLE : strchr(prm,'D')?BLOSC_FILTER_BYTEDELTA : 0;
+      int filter0  = strchr(prm,'B')?BLOSC_BITSHUFFLE : strchr(prm,'S')?BLOSC_SHUFFLE : strchr(prm,'D')?BLOSC_FILTER_BYTEDELTA : 0;
       int typesize = (q=strchr(prm,'u'))?atoi(q+(q[1]=='='?2:1)):1;
       if(lev == 100) return (filter0 & BLOSC_BITSHUFFLE) ? blosc2_bitunshuffle(typesize, inlen, in, out) : blosc2_unshuffle(typesize, inlen, in, out);
       char *q; return bloscdecomp(in, inlen, out, outlen, typesize, threads);
