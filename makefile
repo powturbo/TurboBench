@@ -857,6 +857,12 @@ TAMP_DIR = tamp/tamp/_c_src/tamp
 OB += $(call obj,$(TAMP_DIR)/common.o $(TAMP_DIR)/compressor.o $(TAMP_DIR)/decompressor.o)
 endif
 
+ifneq ($(wildcard tovyCT/.),)
+PLG_FLAGS+=-D_TOVYCT
+TOVYCT_DIR = tovyCT/src/c
+OB += $(call obj,$(TOVYCT_DIR)/tvct_crc.o $(TOVYCT_DIR)/tvct_guard.o $(TOVYCT_DIR)/tvct_kernels.o $(TOVYCT_DIR)/tvct_text.o) 
+endif
+
 ifneq ($(wildcard Turbo-Range-Coder/.),)
 ifneq ($(ARCH),loongarch64)
 PLG_FLAGS += -D_TURBORC
