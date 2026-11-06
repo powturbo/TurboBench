@@ -422,6 +422,10 @@ enum {
 #define _TORNADO 0
 #endif
  P_TORNADO,
+#ifndef _TOVYCT
+#define _TOVYCT 0
+#endif
+ P_TOVYCT,
 #ifndef _TSQ
 #define _TSQ 0
 #endif
@@ -1440,6 +1444,10 @@ struct snappy_env env;
 #include "tornado_/tormem.h"
   #endif
 
+  #if _TOVYCT
+#include "tovyCT/include/tvct.h"
+  #endif
+
   #if _TSQ
 #include "turbosqueeze/turbosqueeze.h"
   #endif
@@ -2074,6 +2082,7 @@ struct plugs plugs[] = {
   { P_TAMP,          "tamp",          _TAMP,      "tamp",                        "8,9,10,11,12,13,14,15" },
   { P_TCOBS,         "tcobs",         _TCOBS,     "tcobs",                       "" },
   { P_TORNADO,       "tornado",       _TORNADO,   "Tornado",                     "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
+  { P_TOVYCT,        "tvct",          _TOVYCT,    "tovyCT",                      "" },
   { P_TSQ,           "tsq",           _TSQ,       "turbosqueeze",                "0,1,2,3,4,5,6,7" },
   
   { P_UNISHOX2,      "unishox2",      _UNISHOX2,  "unishox2",                    "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
@@ -3099,6 +3108,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _TORNADO
     case P_TORNADO:   return torcompress(lev, in, out, inlen);
+      #endif
+
+      #if _TOVYCT
+    case P_TOVYCT: { int64_t rc = tvct_compress3(in, (size_t)inlen, out, outsize, threads, 0, 1, 0, 1, 0, 4); return (rc <= 0 || (size_t)rc > outsize)?0:rc; }
       #endif
 
       #if _TSQ
@@ -4146,6 +4159,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_TORNADO: return tordecompress(in, out, inlen, outlen);
       #endif
 
+      #if _TOVYCT
+    case P_TOVYCT: { int64_t rc = tvct_decompress(in, (size_t)inlen, out, outlen, threads); return rc <= 0?0:rc; }
+      #endif
+
       #if _TSQ
     case P_TSQ: { TSQDecompressionContext_MT *dctx = tsqAllocateContextDecompression_MT(8, false); uint8_t *decompressed = nullptr; size_t ds = 0;
       tsqDecompress_MT(dctx, in, inlen, false, &decompressed, &ds, false); tsqDeallocateContextDecompression_MT(dctx);
@@ -4763,7 +4780,12 @@ char *codver(int codec, char *v, char *s) {
       #if _TAMP
     case P_TAMP:  return "v2.3.0";
       #endif
-      #if _TURBORC
+
+      #if _TOVYCT
+    case P_TOVYCT: sprintf(s, "%s MT", (char *)tvct_version()); break;
+      #endif
+
+     #if _TURBORC
     case P_TURBORC: 
     case P_BWTSATAN: sprintf(s, "%s MT", (char *)turborc_version()); break;
       #endif
