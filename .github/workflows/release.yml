@@ -98,13 +98,14 @@ jobs:
           gunzip silesia.tar.gz
           ./turbobench silesia.tar -U -V0
           ./turbobench silesia.tar.tbb -p4
-          mv -f silesia.tar.md "silesia.${{ matrix.aarch }}.tar.md"
+          mv -f silesia.tar.md "silesia.${{ matrix.arch }}.tar.md"
           if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
             ./turbobench silesia.tar -V0 -eBWT -abwt
             ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -abwt
             ./turbobench silesia.tar@bwt.tbb -p4
-            mv -f silesia.tar.md "silesia.${{ matrix.aarch }}.tar@bwt.md"
+            mv -f silesia.tar.md "silesia.${{ matrix.arch }}.tar@bwt.md"
           fi
+          ls -la silesia.*.md
 
       # ------------------ macOS ------------------
       - name: Build (macOS)
