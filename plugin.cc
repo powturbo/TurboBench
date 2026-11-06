@@ -2483,7 +2483,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
   switch(codec) {
 //=== A =============================================================================================================================
       #if _ACEAPEX
-    case P_ACEFAST: lev+=10; 
+    case P_ACEFAST: lev += 10; 
     case P_ACE:     { int64_t r = aceapex_compress(in, inlen, out, outsize, lev, threads>1?threads:1); return r > 0 ? (unsigned)r : 0; }
       #endif
 
