@@ -1947,7 +1947,7 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
   { P_ACE,           "aceapex",       _ACEAPEX,   "aceapex",                     "1,2,3,4/t#" },
-  { P_ACEFAST,       "aceapex_fast",  _ACEAPEX,   "aceapex fast",                "1,2,3,4,5,6,7,8/t#" },
+  { P_ACEFAST,       "aceapex-fast",  _ACEAPEX,   "aceapex fast",                "1,2,3,4,5,6,7,8/t#" },
 //{ P_ACECUDA,       "aceapex_cuda",  _ACEAPEX,   "aceapex cuda",                "1,2" },
   { P_AOCL_LZ4,      "aocl-lz4",      _AOCL,      "AMD aocl-compression lz4",    "0,1,2,3,4,5,6,7,8,9,10,11,12" },
   { P_AOCL_LZMA,     "aocl-lzma",     _AOCL,      "AMD aocl-compression lzma",   "1,2,3,4,5,6,7,8,9" },
