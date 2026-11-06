@@ -158,21 +158,21 @@ jobs:
           gcc --version
           clang --version || true
           make STATIC=1 PHAZ=0
-     - name: Generate silesia.tar.md (Windows)
-       if: matrix.platform == 'windows'
-       shell: msys2 {0}
-       run: |
-         curl -L -o silesia.tar.gz \
-           https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-         gunzip silesia.tar.gz
-         ./turbobench.exe silesia.tar -U -V0
-         ./turbobench.exe silesia.tar.tbb -p4
-         mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
-         ./turbobench silesia.tar -V0 -eBWT -abwt
-         ./turbobench silesia.tar -V0 -U -ebwtsatan,7x,8x,9x -b68m -abwt
-         ./turbobench silesia.tar@bwt.tbb -p4
-         mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
-         ls -la silesia.*.tar.md
+      - name: Generate silesia.tar.md (Windows)   # ← now 6 spaces
+        if: matrix.platform == 'windows'
+        shell: msys2 {0}
+        run: |
+          curl -L -o silesia.tar.gz \
+            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+          gunzip silesia.tar.gz
+          ./turbobench.exe silesia.tar -U -V0
+          ./turbobench.exe silesia.tar.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
+          ./turbobench silesia.tar -V0 -eBWT -abwt
+          ./turbobench silesia.tar -V0 -U -ebwtsatan,7x,8x,9x -b68m -abwt
+          ./turbobench silesia.tar@bwt.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
+          ls -la silesia.*.tar.md
 
       # ------------------ Package (Linux / macOS) ------------------
       - name: Package artifact (Linux/macOS)
