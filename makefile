@@ -342,7 +342,7 @@ endif
 
 #--- I -----------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard ../ic/.),)
-PLG_FLAGS+=-D_IC
+PLG_FLAGS+=-D_TURBOPFOR
 IC_DIR=../ic
 IC_SRCS := $(shell find $(IC_DIR)/lib -type f -name '*.[c]' -name '*.[a]')
 IC_LIB = $(BUILD)/ic/libic.a
