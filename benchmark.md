@@ -39,7 +39,7 @@
 |79354817| 37.44%   |284.29|729.43|22 |zlib-ng 1|silesia.tar|
 |80028646| 37.76%   |15.15|$\color{green}{\textbf{4272.45}}$|37 |$\color{green}{\textbf{misa77 3}}$|silesia.tar|
 |81342959| 38.38%   |112.90|3604.00|19 |lz4 3|silesia.tar|
-|83113789| 39.21%   |0.68|$\color{green}{\textbf{4372.67}}$|40 |$\color{green}{\textbf{aceapex\_fast 8}}$|silesia.tar|
+|83113789| 39.21%   |0.68|$\color{green}{\textbf{4372.67}}$|40 |$\color{green}{\textbf{aceapex\\_fast 8}}$|silesia.tar|
 |83147688| 39.23%   |423.69|2378.49|10 |lzav 1|silesia.tar|
 |85476705| 40.33%   |50.40|$\color{green}{\textbf{4534.70}}$|25 |$\color{green}{\textbf{misa77 2}}$|silesia.tar|
 |86544351| 40.83%   |105.29|4375.01|20 |zxc 5|silesia.tar|
@@ -49,7 +49,7 @@
 |98875304| 46.65%   |243.25|5055.16|11 |zxc 3|silesia.tar|
 |100299378| 47.32%   |$\color{green}{\textbf{754.03}}$|4218.62|7 |$\color{green}{\textbf{lz4 1}}$|silesia.tar|
 |125918634| 59.41%   |$\color{green}{\textbf{2823.71}}$|3341.44|12 |$\color{green}{\textbf{memlz}}$|silesia.tar|
-|130490328| 61.57%   |640.44|$\color{green}{\textbf{5497.42}}$|3🥇|$\color{green}{\textbf{aceapex\_fast 1}}$|silesia.tar|
+|130490328| 61.57%   |640.44|$\color{green}{\textbf{5497.42}}$|3🥇|$\color{green}{\textbf{aceapex\\_fast 1}}$|silesia.tar|
 |211947520|100.00%   |$\color{green}{\textbf{18290.26}}$|$\color{green}{\textbf{18344.08}}$|44 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
 
 
@@ -153,7 +153,7 @@
 |79354817| 37.44%   |255.25|735.93|26 |zlib-ng 1|silesia.tar|
 |80028646| 37.76%   |16.61|$\color{green}{\textbf{6275.28}}$|32 |$\color{green}{\textbf{misa77 3}}$|silesia.tar|
 |81342959| 38.38%   |117.63|3362.27|23 |lz4 3|silesia.tar|
-|83113789| 39.21%   |0.98|$\color{green}{\textbf{8142.43}}$|38 |$\color{green}{\textbf{aceapex\_fast 8}}$|silesia.tar|
+|83113789| 39.21%   |0.98|$\color{green}{\textbf{8142.43}}$|38 |$\color{green}{\textbf{aceapex\\_fast 8}}$|silesia.tar|
 |83147688| 39.23%   |528.21|3309.77|9 |lzav 1|silesia.tar|
 |85476705| 40.33%   |53.47|7781.89|29 |misa77 2|silesia.tar|
 |86544351| 40.83%   |106.07|7156.76|22 |zxc 5|silesia.tar|
@@ -163,7 +163,7 @@
 |98875304| 46.65%   |242.61|7756.54|10 |zxc 3|silesia.tar|
 |100299378| 47.32%   |$\color{green}{\textbf{602.89}}$|3650.37|12 |$\color{green}{\textbf{lz4 1}}$|silesia.tar|
 |125918634| 59.41%   |$\color{green}{\textbf{5952.58}}$|4471.75|8 |$\color{green}{\textbf{memlz}}$|silesia.tar|
-|130490328| 61.57%   |776.95|$\color{green}{\textbf{11211.78}}$|3🥇|$\color{green}{\textbf{aceapex\_fast 1}}$|silesia.tar|
+|130490328| 61.57%   |776.95|$\color{green}{\textbf{11211.78}}$|3🥇|$\color{green}{\textbf{aceapex\\_fast 1}}$|silesia.tar|
 |211947520|100.00%   |$\color{green}{\textbf{26539.88}}$|$\color{green}{\textbf{29659.60}}$|44 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
 
 
@@ -237,7 +237,7 @@
 |79354817| 37.44%   |319.91|902.66|28 |zlib-ng 1|silesia.tar|
 |80028646| 37.76%   |23.61|8908.35|29 |misa77 3|silesia.tar|
 |81342959| 38.38%   |124.98|4984.54|24 |lz4 3|silesia.tar|
-|83113789| 39.21%   |1.30|$\color{green}{\textbf{9691.69}}$|36 |$\color{green}{\textbf{aceapex\_fast 8}}$|silesia.tar|
+|83113789| 39.21%   |1.30|$\color{green}{\textbf{9691.69}}$|36 |$\color{green}{\textbf{aceapex\\_fast 8}}$|silesia.tar|
 |83147688| 39.23%   |$\color{green}{\textbf{705.46}}$|3502.57|9 |$\color{green}{\textbf{lzav 1}}$|silesia.tar|
 |85476705| 40.33%   |104.55|9335.66|18 |misa77 2|silesia.tar|
 |86544351| 40.83%   |110.61|6452.77|27 |zxc 5|silesia.tar|
@@ -248,7 +248,7 @@
 |100299378| 47.32%   |$\color{green}{\textbf{787.04}}$|5361.55|10 |$\color{green}{\textbf{lz4 1}}$|silesia.tar|
 |101737172| 48.00%   |$\color{green}{\textbf{852.31}}$|5239.74|11 |$\color{green}{\textbf{aocl-lz4 0}}$|silesia.tar|
 |125918634| 59.41%   |$\color{green}{\textbf{6677.19}}$|4253.58|13 |$\color{green}{\textbf{memlz}}$|silesia.tar|
-|130490328| 61.57%   |1066.85|$\color{green}{\textbf{15626.89}}$|3🥇|$\color{green}{\textbf{aceapex\_fast 1}}$|silesia.tar|
+|130490328| 61.57%   |1066.85|$\color{green}{\textbf{15626.89}}$|3🥇|$\color{green}{\textbf{aceapex\\_fast 1}}$|silesia.tar|
 |211947520|100.00%   |$\color{green}{\textbf{29982.67}}$|$\color{green}{\textbf{30072.01}}$|42 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
 
 
