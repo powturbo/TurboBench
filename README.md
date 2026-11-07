@@ -364,7 +364,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ```
 
 ### Codec parameters:
-- Blosc (i.e. ./turbobench -eblosc-zstd,3:Bb:u8 )
+- Blosc (i.e. ./turbobench -eblosc-zstd,3:Bb:u8 )<br />
   b# : blocksize {auto}<br />
   B: Filter 0: bitshuffle<br />
   S: Filter 0: Shuffle<br />
