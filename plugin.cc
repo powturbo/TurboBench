@@ -1351,12 +1351,12 @@ size_t ozl_csvdecomp(unsigned char *in, size_t inlen, unsigned char *out, size_t
 
   #if _PCODEC0 // dynamic lib
 #include "pcodec_/cpcodec.h" // https://github.com/pcodec/pcodec --------------------------------------------
-  #if defined(_WIN32)
+    #if defined(_WIN32)
 #include <windows.h>
 #define __off64_t   _off64_t
-  #else
+    #else
 #include <dlfcn.h> // dlopen
-  #endif
+    #endif
   
 typedef enum PcoError(*fpco_compress  )(const void *nums,       size_t n,              unsigned char dtype, const struct PcoChunkConfig *config, void *dst, size_t dst_cap, size_t *n_written);
 typedef enum PcoError(*fpco_decompress)(const void *compressed, size_t compressed_len, unsigned char dtype,                                      void *dst, size_t dst_cap, size_t *n_written);
@@ -1947,7 +1947,7 @@ HUF_PUBLIC_API size_t HUF_decompress(void* dst,  size_t originalSize, const void
 //------------------------------------------------- registry -------------------------------------------------------------------------------------------------
 struct plugs plugs[] = {
   { P_ACE,           "aceapex",       _ACEAPEX,   "aceapex",                     "1,2,3,4/t#" },
-  { P_ACEFAST,       "aceapex-fast",  _ACEAPEX,   "aceapex fast",                "1,2,3,4,5,6,7,8/t#" },
+  { P_ACEFAST,       "aceapex_fast",  _ACEAPEX,   "aceapex fast",                "1,2,3,4,5,6,7,8/t#" },
 //{ P_ACECUDA,       "aceapex_cuda",  _ACEAPEX,   "aceapex cuda",                "1,2" },
   { P_AOCL_LZ4,      "aocl-lz4",      _AOCL,      "AMD aocl-compression lz4",    "0,1,2,3,4,5,6,7,8,9,10,11,12" },
   { P_AOCL_LZMA,     "aocl-lzma",     _AOCL,      "AMD aocl-compression lzma",   "1,2,3,4,5,6,7,8,9" },
@@ -2052,17 +2052,17 @@ struct plugs plugs[] = {
   { P_OPENZL_LZ4,    "openzl_lz4",    _OPENZL,    "openzl lz4",                  "1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99" }, 
   { P_OPENZL_TP,     "openzl_tp",     _OPENZL,    "openzl transpose",            "2,4,8" },
   { P_OPENZL_CSV,    "openzl_csv",    _OZLCSV,    "openzl csv",                  "1,2,3,4,5,6,7,8,9 / b#:blocksize in MiB W:Without header s#:separator N:Null aware" },
-  { P_PCODECI8,      "pcodec_i8",     _PCODEC,    "pcodec_i8",                   "0,1,2,3,4,5,6,7,8,9" },
-  { P_PCODECU8,      "pcodec_u8",     _PCODEC,    "pcodec_u8",                   "0,1,2,3,4,5,6,7,8,9" },
-  { P_PCODECI16,     "pcodec_i16",    _PCODEC,    "pcodec_i16",                  "0,1,2,3,4,5,6,7,8,9" },
-  { P_PCODECU16,     "pcodec_u16",    _PCODEC,    "pcodec_u16",                  "0,1,2,3,4,5,6,7,8,9" },
-  { P_PCODECF16,     "pcodec_f16",    _PCODEC,    "pcodec_f16",                  "0,1,2,3,4,5,6,7,8,9" },
-  { P_PCODECI32,     "pcodec_i32",    _PCODEC,    "pcodec_i32",                  "0,1,2,3,4,5,6,7,8,9" },
-  { P_PCODECU32,     "pcodec_u32",    _PCODEC,    "pcodec_u32",                  "0,1,2,3,4,5,6,7,8,9" },
-  { P_PCODECF32,     "pcodec_f32",    _PCODEC,    "pcodec_f32",                  "0,1,2,3,4,5,6,7,8,9" },
-  { P_PCODECI64,     "pcodec_i64",    _PCODEC,    "pcodec_i64",                  "0,1,2,3,4,5,6,7,8,9" },
-  { P_PCODECU64,     "pcodec_u64",    _PCODEC,    "pcodec_u64",                  "0,1,2,3,4,5,6,7,8,9" },
-  { P_PCODECF64,     "pcodec_f64",    _PCODEC,    "pcodec_f64",                  "0,1,2,3,4,5,6,7,8,9" },
+  { P_PCODECI8,      "pcodec_i8",     _PCODEC,    "pcodec_i8",                   "0,1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_PCODECU8,      "pcodec_u8",     _PCODEC,    "pcodec_u8",                   "0,1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_PCODECI16,     "pcodec_i16",    _PCODEC,    "pcodec_i16",                  "0,1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_PCODECU16,     "pcodec_u16",    _PCODEC,    "pcodec_u16",                  "0,1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_PCODECF16,     "pcodec_f16",    _PCODEC,    "pcodec_f16",                  "0,1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_PCODECI32,     "pcodec_i32",    _PCODEC,    "pcodec_i32",                  "0,1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_PCODECU32,     "pcodec_u32",    _PCODEC,    "pcodec_u32",                  "0,1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_PCODECF32,     "pcodec_f32",    _PCODEC,    "pcodec_f32",                  "0,1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_PCODECI64,     "pcodec_i64",    _PCODEC,    "pcodec_i64",                  "0,1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_PCODECU64,     "pcodec_u64",    _PCODEC,    "pcodec_u64",                  "0,1,2,3,4,5,6,7,8,9,10,11,12" },
+  { P_PCODECF64,     "pcodec_f64",    _PCODEC,    "pcodec_f64",                  "0,1,2,3,4,5,6,7,8,9,10,11,12" },
   { P_PHAZ,          "phaz",          _PHAZ,      "PivCo-Huffman/zstd",          "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },  // level = zstd level
   { P_PITHY,         "pithy",         _PITHY,     "Pithy",                       "0,1,2,3,4,5,6,7,8,9" }, 
   { P_PULSAR,        "pulsar",        _PULSAR,    "pulsar",                      "" },
@@ -2245,10 +2245,6 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_CHAMELEON: workmemsize = sizeof(struct Chameleon); break;
       #endif
 
-    //  #if _BLOSC
-    //case P_BLOSC_LZ: case P_BLOSC_LZ4: case P_BLOSC_LZ4HC: case P_BLOSC_ZLIB: case P_BLOSC_ZSTD : blosc2_init(); blosc2_set_nthreads(threads>1?threads:1);break;
-    //  #endif
-
       #if _DENSITY
     case P_DENSITY:
       switch (lev) {
@@ -2343,20 +2339,6 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       break;
       #endif
 
-      #if _PCODEC0
-    case P_PCODECI8:
-    case P_PCODECU8:
-    case P_PCODECI16:
-    case P_PCODECU16:
-    case P_PCODECF16:
-    case P_PCODECI32:
-    case P_PCODECU32:
-    case P_PCODECF32:
-    case P_PCODECI64:
-    case P_PCODECU64:
-    case P_PCODECF64: pco_ini(); break;  
-      #endif
-        
       #if _QUICKLZ
     case P_QUICKLZ:
       state_size  = max(qlz_get_setting1(1), max(qlz_get_setting2(1), qlz_get_setting3(1))); workmemsize = max(state_size, workmemsize);
@@ -2567,7 +2549,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       char *q;
       int blocksize = (q=strchr(prm,'b'))?atoi(q+(q[1]=='='?2:1)):0;
       int filter0   = strchr(prm,'B')?BLOSC_BITSHUFFLE : strchr(prm,'S')?BLOSC_SHUFFLE : strchr(prm,'D')?BLOSC_FILTER_BYTEDELTA : 0;
-      int filter1   = strchr(prm,'d')?BLOSC_DELTA : strchr(prm,'b')?BLOSC_FILTER_BYTEDELTA : strchr(prm,'s')?BLOSC_SHUFFLE:0;
+      int filter1   = strchr(prm,'e')?BLOSC_DELTA : strchr(prm,'d')?BLOSC_FILTER_BYTEDELTA : strchr(prm,'s')?BLOSC_SHUFFLE:0;
       int typesize  = (q=strchr(prm,'u'))?atoi(q+(q[1]=='='?2:1)):1;
       if(lev == 100) return (filter0 & BLOSC_BITSHUFFLE) ? blosc2_bitshuffle(typesize, inlen, in, out) : blosc2_shuffle(typesize, inlen, in, out);
       return blosccomp(in, inlen, out, outsize, codec - P_BLOSC_LZ, lev, typesize, filter0, filter1, 0, threads, blocksize);
@@ -3009,6 +2991,20 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif     
 
 //=== P =============================================================================================================================
+      #if _PCODEC0
+    case P_PCODECI8:
+    case P_PCODECU8:
+    case P_PCODECI16:
+    case P_PCODECU16:
+    case P_PCODECF16:
+    case P_PCODECI32:
+    case P_PCODECU32:
+    case P_PCODECF32:
+    case P_PCODECI64:
+    case P_PCODECU64:
+    case P_PCODECF64: pco_ini(); break;  
+      #endif     
+
       #if _PCODEC
     case P_PCODECI8:  { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_I8,  &config, out, outsize, &w); return w; } break;
     case P_PCODECU8:  { size_t w=0; struct PcoChunkConfig config; memset(&config,0, sizeof(config)); config.compression_level = lev; pco_compress(in, inlen,   PCO_TYPE_U8,  &config, out, outsize, &w); return w; } break;
