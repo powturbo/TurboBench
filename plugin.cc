@@ -160,8 +160,8 @@ enum {
 #endif
  P_HEATSHRINK,
 
-#ifndef _IC
-#define _IC 0
+#ifndef _TURBOPFOR
+#define _TURBOPFOR 0
 #endif
  P_IC,
 #ifndef _IGUANA
@@ -890,7 +890,7 @@ EXTERN_C_END
   #endif
 
 //--- I -----------------------------------------------------------
-  #if _IC
+  #if _TURBOPFOR
 //#include "../ic/include/ic.h"
 #include "../ic/lib/include_/vp4.h"
   #endif
@@ -1999,7 +1999,7 @@ struct plugs plugs[] = {
 
   { P_HEATSHRINK,    "heatshrink",    _HEATSHRINK,"heatshrink",                  "" },
   
-  { P_IC,            "ic",            _IC,        "TurboPFor",                   "3,4,5,6,7,8,9,10,11" },
+  { P_IC,            "ic",            _TURBOPFOR,        "TurboPFor",                   "3,4,5,6,7,8,9,10,11" },
   { P_IGUANA,        "iguana",        _IGUANA,    "iguana",                      "" },
   { P_ISA_L,         "igzip",         _ISA_L,     "igzip",                       "0,1,2,3" },
   
@@ -2658,7 +2658,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
 //=== I =============================================================================================================================
-      #if _IC
+      #if _TURBOPFOR
     case P_IC: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+(q[1]=='='?2:1)):4, zzag = strchr(prm,'z')?1:0; inlen/=esize; 
       switch(esize) {
         case 1: return zzag?p4nzenc8(     (uint8_t  *)in, inlen, out):p4nenc8(     (uint8_t  *)in, inlen, out);
@@ -3812,7 +3812,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
 //=== I =============================================================================================================================
-      #if _IC
+      #if _TURBOPFOR
     case P_IC: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+(q[1]=='='?2:1)):4, zzag = strchr(prm,'z')?1:0; outlen/=esize; 
       switch(esize) {
         case 1: return zzag?p4nzdec8(     in, outlen, (uint8_t  *)out):p4ndec8(in,      outlen, (uint8_t  *)out);
