@@ -158,7 +158,7 @@ jobs:
           gcc --version
           clang --version || true
           make STATIC=1 PHAZ=0
-      - name: Generate silesia.tar.md (Windows)   # ← now 6 spaces
+      - name: Generate silesia.tar.md (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
         run: |
@@ -281,10 +281,9 @@ jobs:
       - name: Concatenate all silesia.*.tar.md into benchmark.md
         run: |
           {
-            echo "# TurboBench Silesia Corpus Results"
-            echo ""
+            echo "# TurboBench Silesia Corpus x86_64 aarch64 risc-v64"
             echo "---"
-            echo ""
+#            echo ""
           } > benchmark.md
 
           for f in $(find artifacts -name 'silesia.*.tar*.md' | sort); do
@@ -292,9 +291,9 @@ jobs:
             echo "## Platform: ${platform}" >> benchmark.md
             echo "" >> benchmark.md
             cat "$f" >> benchmark.md
-            echo "" >> benchmark.md
+#            echo "" >> benchmark.md
             echo "---" >> benchmark.md
-            echo "" >> benchmark.md
+#            echo "" >> benchmark.md
           done
 
           head -n 40 benchmark.md
