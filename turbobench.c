@@ -313,7 +313,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size) {
 
 void *aligned_alloc(size_t alignment, size_t size) {
   if(!aligned_alloc) die("aligned_alloc");
-  void *p = (*aligned_alloc)(alignment, size);
+  void *p = (*mem_aligned_alloc)(alignment, size);
   if(p) mem_add(malloc_usable_size(p));
   return p;
 }
@@ -552,7 +552,7 @@ struct plugg {
 
 struct plugg plugg[] = {
   { "TURBO",     "lzturbo,10,11,12,19/lz4,1,5,12/zxc,3,4,5,6/misa77,0,1,2,3,4/lzav,1,2/memlz/memcpy",                                                                   "lz4 class: Fastest de-/compression. HDD/SSD/RAM speed" },
-  { "FAST",      "lzturbo,10,10a,11,12/aocl-lz4,0/aceapex-fast,1,8/brotli,0,1,4,5,6/igzip,1,2,3/libdeflate,1,6,12/lz4,1,3,5,12/lzav,1,2/memlz/misa77,0,1,2,3,4/wzip,0/zlib,1,6,9/zlib-turbo,1,6,9,12/zlib-ng,1,6,9/zstd,1,3,9/zxc,3,4,5,7/memcpy", "lz4,zlib,zstd class" },
+  { "FAST",      "lzturbo,10,10a,11,12/aocl-lz4,0/aceapex_fast,1,8/brotli,0,1,4,5,6/igzip,1,2,3/libdeflate,1,6,12/lz4,1,3,5,12/lzav,1,2/memlz/misa77,0,1,2,3,4/wzip,0/zlib,1,6,9/zlib-turbo,1,6,9,12/zlib-ng,1,6,9/zstd,1,3,9/zxc,3,4,5,7/memcpy", "lz4,zlib,zstd class" },
   { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,6/zstd,5,9/libdeflate,6/zlib-ng,6/igzip,3/memcpy",                                                                         "Compression speed > 'zlib 6' class" },
   { "MAX",       "lzturbo,19/lzma,9/lzham,4/brotli,11/libdeflate,12/lz4,9/lizard,19,29,39,49/lzlib,9/lzraven/wzip,13/zstd,22/memcpy",                                   "Best compression (slow)" },
   { "OPTIMAL",   "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,12/libdeflate,12/lizard,49/lzlib,9/zstd,22/zopfli/memcpy",                                                    "Lz Optimal compression (slow)" },
@@ -1374,16 +1374,18 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         plug->memc, plug->memd,
         finame);
       break;
-    case FMT_MARKDOWN:
+    case FMT_MARKDOWN: { char sname[256],*p,*q;
       //#define MD_B "<span style=\"color:green\">**"
       //#define MD_E "**</span>"
       #define MD_B "$\\color{green}{\\textbf{"
       #define MD_E "}}$"
+      for(p = name, q=sname; *p; p++,q++) { if(*p = '_') *q++ = '\\'; *q = *p; } 
       if(memout)
         fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%u|%u|%u|%u|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ", 
-                      plug->memc, plug->memd, plug->stkc, plug->stkd, n?MD_B:"",  name, n?MD_E:"",   finame);
+                      plug->memc, plug->memd, plug->stkc, plug->stkd, n?MD_B:"",  sname, n?MD_E:"",   finame);
       else        
-        fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ",  n?MD_B:"",  name, n?MD_E:"",   finame);  break;
+        fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ",  n?MD_B:"",  sname, n?MD_E:"",   finame); 
+    } break;
     case FMT_CSV:    fprintf(f,"%12"PRId64",%11"PRId64",%s,%9.2f,%9.2f,%-16s,%s\n",       totinlen, plug->len, sratio, tc, td, name, finame);  break;
     case FMT_TSV:    fprintf(f,"%12"PRId64"\t%11"PRId64"\t%s\t%9.2f\t%9.2f\t%-16s\t%s\n", totinlen, plug->len, sratio, tc, td, name, finame);  break;
       break;
