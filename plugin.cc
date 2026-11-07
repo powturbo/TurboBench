@@ -160,6 +160,10 @@ enum {
 #endif
  P_HEATSHRINK,
 
+#ifndef _IC
+#define _IC 0
+#endif
+ P_IC,
 #ifndef _IGUANA
 #define _IGUANA 0
 #endif
@@ -886,6 +890,11 @@ EXTERN_C_END
   #endif
 
 //--- I -----------------------------------------------------------
+  #if _IC
+//#include "../ic/include/ic.h"
+#include "../ic/lib/include_/vp4.h"
+  #endif
+
   #if _IGUANA
 #include "iguana/iguana/encoder.h"
 #include "iguana/iguana/decoder.h"
@@ -1990,6 +1999,7 @@ struct plugs plugs[] = {
 
   { P_HEATSHRINK,    "heatshrink",    _HEATSHRINK,"heatshrink",                  "" },
   
+  { P_IC,            "ic",            _IC,        "TurboPFor",                   "3,4,5,6,7,8,9,10,11" },
   { P_IGUANA,        "iguana",        _IGUANA,    "iguana",                      "" },
   { P_ISA_L,         "igzip",         _ISA_L,     "igzip",                       "0,1,2,3" },
   
@@ -2648,6 +2658,18 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
 //=== I =============================================================================================================================
+      #if _IC
+    case P_IC: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+(q[1]=='='?2:1)):4, zzag = strchr(prm,'z')?1:0; inlen/=esize; 
+      switch(esize) {
+        case 1: return zzag?p4nzenc8(     (uint8_t  *)in, inlen, out):p4nenc8(     (uint8_t  *)in, inlen, out);
+        case 2: return zzag?p4nzenc128v16((uint16_t *)in, inlen, out):p4nenc128v16((uint16_t *)in, inlen, out);
+        case 4: return zzag?p4nzenc128v32((uint32_t *)in, inlen, out):p4nenc128v32((uint32_t *)in, inlen, out);
+        case 8: return zzag?p4nzenc64((uint64_t *)in, inlen, out):p4nenc128v64((uint64_t *)in, inlen, out);
+        default: die("size can be only 1,2,4 or 8 ");
+      }
+    } break;
+      #endif
+
       #if _IGUANA
         #ifdef __x86_64__
     case P_IGUANA:  return (isa >= (IS_AVX512|AVX512VL) )?IguanaComp(in, inlen, out):0;
@@ -3790,6 +3812,17 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
 //=== I =============================================================================================================================
+      #if _IC
+    case P_IC: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+(q[1]=='='?2:1)):4, zzag = strchr(prm,'z')?1:0; outlen/=esize; 
+      switch(esize) {
+        case 1: return zzag?p4nzdec8(     in, outlen, (uint8_t  *)out):p4ndec8(in,      outlen, (uint8_t  *)out);
+        case 2: return zzag?p4nzdec128v16(in, outlen, (uint16_t *)out):p4ndec128v16(in, outlen, (uint16_t *)out);
+        case 4: return zzag?p4nzdec128v32(in, outlen, (uint32_t *)out):p4ndec128v32(in, outlen, (uint32_t *)out);
+        case 8: return zzag?p4nzdec64(in,  outlen, (uint64_t *)out):p4ndec128v64(in, outlen, (uint64_t *)out);
+        default: die("size can be only 1,2,4 or 8 ");
+      }
+    } break;
+      #endif
       #if _IGUANA
         #ifdef __x86_64__
     case P_IGUANA:  return (isa >= (IS_AVX512|AVX512VL) )?IguanaComp(in, inlen, out):0;
