@@ -560,10 +560,10 @@ struct plugg plugg[] = {
   { "ECODER",    "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/pivco,0,1/memcpy", "Entropy coder" },
   { "MEMCPY",    "imemcpy/memcpy",                                                                                                                                      "memcpy" },
   { "WEB",       "brotli,1,2,4,5,11/igzip,0,1,2,3/slz,1,6,9/libdeflate,1,6,9,12/zlib,1,6,9/zlib-ng,1,6,9/zlib-turbo,1,6,9,12/zopfli/zstd,1,9,15,22",                    "web/http compression"},
-  { "U32",       "pcodec_u32,8/pcodec_i32,8/blosc-zstd,3u4,3u4B,3u4S/openzl_le_i32/openzl_le_u32/openzl_zstd,3",                                                        "Integer Compression u32" },
-  { "U64",       "pcodec_u64,8/pcodec_i64,8/blosc-zstd,3u8,3u8B,3u8S/openzl_le_i64/openzl_le_u64/openzl_zstd,3",                                                        "Integer Compression u64" },
-  { "F32",       "pcodec_f32,8/blosc-zstd,3u4,3u4B,3u4S/openzl_le_f32/openzl_zstd,3",                                                                                   "Floating Point Compression f32" },
-  { "F64",       "pcodec_f64,8/blosc-zstd,3u8,3u8B,3u8S/openzl_le_f64/openzl_le_f64/openzl_zstd,3",                                                                     "Floating Point Compression f64" }
+  { "U32",       "ic,1u4/pcodec_u32,8/pcodec_i32,8/blosc-zstd,3u4,3u4B,3u4S/openzl_le_i32/openzl_le_u32/openzl_zstd,3",                                                        "Integer Compression u32" },
+  { "U64",       "ic,1u8/pcodec_u64,8/pcodec_i64,8/blosc-zstd,3u8,3u8B,3u8S/openzl_le_i64/openzl_le_u64/openzl_zstd,3",                                                        "Integer Compression u64" },
+  { "F32",       "ic,1u4/pcodec_f32,8/blosc-zstd,3u4,3u4B,3u4S/openzl_le_f32/openzl_zstd,3",                                                                                   "Floating Point Compression f32" },
+  { "F64",       "ic,1u8/pcodec_f64,8/blosc-zstd,3u8,3u8B,3u8S/openzl_le_f64/openzl_le_f64/openzl_zstd,3",                                                                     "Floating Point Compression f64" }
 };
 
 #define PLUGGSIZE (sizeof(plugg)/sizeof(plugg[0]))
@@ -1383,7 +1383,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
       //#define MD_E "**</span>"
       #define MD_B "$\\color{green}{\\textbf{"
       #define MD_E "}}$"
-      for(p = name, q=sname; *p; p++,q++) { if(*p = '_') *q++ = '\\'; *q = *p; } 
+      for(p = name, q=sname; *p; p++,q++) { if(*p == '_') *q++ = '\\'; *q = *p; } 
       if(memout)
         fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%u|%u|%u|%u|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ", 
                       plug->memc, plug->memd, plug->stkc, plug->stkd, n?MD_B:"",  sname, n?MD_E:"",   finame);
