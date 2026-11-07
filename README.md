@@ -369,10 +369,10 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
   B: Filter 0: bitshuffle<br />
   S: Filter 0: Shuffle<br />
   D: Filter 0: Byte delta<br />
-  d: Filter 1: delta<br />
-  b: Filter 1: Byte delta<br />
+  e: Filter 1: delta<br />
+  d: Filter 1: Byte delta<br />
   s: Filter 1: Shuffle<br />
-  u# : integer size, u1, u2, u4, u8 {u8}<br />
+  u# : element size, u1, u2, u4, u8 {u8}<br />
   t# : threads<br />
 
 Last update: 07 NOV 2026
