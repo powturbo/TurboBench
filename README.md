@@ -372,7 +372,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
   e: Filter 1: delta<br />
   d: Filter 1: Byte delta<br />
   s: Filter 1: Shuffle<br />
-  u# : element size, u1, u2, u4, u8 {u8}<br />
+  u# : # = typesize [1 .. 256] number of bytes {u4}<br />
   t# : threads<br />
 
 Last update: 07 NOV 2026
