@@ -364,16 +364,16 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 ```
 
 ### Codec parameters:
-- Blosc
-  b# : blocksize
-  B: Filter 0: bitshuffle
-  S: Filter 0: Shuffle
-  D: Filter 0: Byte delta
-  d: Filter 1: delta
-  b: Filter 1: Byte delta
-  s: Filter 1: Shuffle
-  u# : integer size, u1, u2, u4, u8
-  t# : threads
+- Blosc (i.e. ./turbobench -eblosc-zstd,3:Bb:u8 )
+  b# : blocksize {auto}<br />
+  B: Filter 0: bitshuffle<br />
+  S: Filter 0: Shuffle<br />
+  D: Filter 0: Byte delta<br />
+  d: Filter 1: delta<br />
+  b: Filter 1: Byte delta<br />
+  s: Filter 1: Shuffle<br />
+  u# : integer size, u1, u2, u4, u8 {u8}<br />
+  t# : threads<br />
 
-Last update: 05 NOV 2026
+Last update: 07 NOV 2026
 
