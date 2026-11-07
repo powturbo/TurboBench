@@ -284,7 +284,3 @@
 |54572811| 25.75%   |18.61|51.13|21 |bzip2|silesia.tar|
 |211947520|100.00%   |$\color{green}{\textbf{27457.90}}$|$\color{green}{\textbf{27557.86}}$|23 |$\color{green}{\textbf{memcpy}}$|silesia.tar|
 
-
-
----
-
