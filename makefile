@@ -601,7 +601,7 @@ LZRAVEN_SRCS := $(shell find $(LZRAVEN_DIR)/src -type f -name '*.[ch]' )
 LZRAVEN_LIB = $(BUILD)/liblzraven/liblzraven.a
 $(LZRAVEN_LIB):  $(LZRAVEN_SRCS)
 	@mkdir -p $(BUILD)/liblzraven 
-	$(MAKE) -C $(LZRAVEN_DIR) WARN="-Wno-error=format-truncation" CC=$(CC) BUILD=$(abspath $(BUILD)/liblzraven) 
+	$(MAKE) lib -C $(LZRAVEN_DIR) WARN="-Wno-error=format-truncation" CC=$(CC) BUILD=$(abspath $(BUILD)/liblzraven) 
 LIBS += $(LZRAVEN_LIB)
 endif
 
