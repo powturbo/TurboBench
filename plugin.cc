@@ -2783,7 +2783,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         opts.autoFlush             = strchr(prm,'f')?1:0;
         opts.frameInfo.blockMode   = LZ4F_blockIndependent;
         opts.frameInfo.contentSize = inlen;
-        opts.frameInfo.blockSizeID = (q=strchr(prm,'B'))?atoi(q+(q[1]=='='?2:1)):LZ4F_max4MB;
+        opts.frameInfo.blockSizeID = (q=strchr(prm,'B'))?(LZ4F_blockSizeID_t)atoi(q+(q[1]=='='?2:1)):LZ4F_max4MB;
         opts.frameInfo.blockSizeID = CLAMP(opts.frameInfo.blockSizeID, LZ4F_default, LZ4F_max4MB);
         opts.nbWorkers             = threads;  
         size_t rc = LZ4F_compressFrame_usingCDict(cctx, out, outsize, in, inlen, NULL, &opts); // : LZ4F_compressFrame(out, outsize, in, inlen, &opts);
