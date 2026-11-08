@@ -2013,7 +2013,7 @@ struct plugs plugs[] = {
   { P_LIBLZG,        "lzg",           _LIBLZG,    "LibLzg",                      "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
   { P_LZRAVEN,       "lzraven",       _LZRAVEN,   "lzraven",                     "" },
   { P_LIZARD,        "lizard",        _LIZARD,    "Lizard",                      "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
-  { P_LZ4,           "lz4",           _LZ4,       "Lz4",                         "0,1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/MfsB#" },
+  { P_LZ4,           "lz4",           _LZ4,       "Lz4",                         "0,1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/t#MfsB#" },
   { P_LZ4ULTRA,      "lz4ultra",      _LZ4ULTRA,  "Lz4ultra",                    "9,10,11,12/z" },
   { P_LZAV,          "lzav",          _LZAV,      "lzav",                        "1,2" },
   { P_LZFSE,         "lzfse",         _LZFSE,     "lzfse",                       "" },  
@@ -4735,7 +4735,7 @@ char *codver(int codec, char *v, char *s) {
     case P_LIZARD: sprintf(s,"v%d.%d.%d", LIZARD_VERSION_MAJOR, LIZARD_VERSION_MINOR, LIZARD_VERSION_RELEASE); break;
       #endif
       #if _LZ4
-    case P_LZ4:     sprintf(s,"v%d.%d.%d", LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE); break;
+    case P_LZ4:     sprintf(s,"v%d.%d.%d MT", LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE); break;
       #endif
       #if _LZLIB
     case P_LZLIB:  sprintf(s,"v%d", LZ_API_VERSION); break;
