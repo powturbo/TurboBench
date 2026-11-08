@@ -2224,6 +2224,11 @@ NOINLINE void libmemcpy(unsigned char *dst, unsigned char *src, size_t len) {
 static size_t dicsize;
 int coddicsize(int _dicsize) { dicsize = _dicsize; }
 
+  #if _LZ4
+//static LZ4F_cctx *lz4_cctx;
+//static LZ4F_dctx *lz4_dctx;
+  #endif
+
   #if _ZSTD
 static ZSTD_CDict *cdictPtr;
 static ZSTD_DDict *ddictPtr;
@@ -2274,9 +2279,11 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #endif
 
       #if _LIBSLZ
-    case P_LIBSLZ:
-      slz_make_crc_table();
-      slz_prepare_dist_table();
+    case P_LIBSLZ: slz_make_crc_table(); slz_prepare_dist_table(); break;
+      #endif
+
+      #if _LZ4
+    //case P_LZ4F: LZ4F_createCompressionContext(&lz4_cctx, LZ4F_VERSION); LZ4F_createDecompressionContext(&lz4_dctx, LZ4F_VERSION); break; 
       #endif
 
       #if _LZFSE
@@ -2438,6 +2445,10 @@ void codexit(int codec, int lev) {
     case P_AOCL_LZ4: case P_AOCL_LZ4HC: case P_AOCL_LZMA: case P_AOCL_BZIP2: case P_AOCL_SNAPPY: case P_AOCL_ZLIB: case P_AOCL_ZSTD: aocl_llc_destroy(&aocl, AOCL_CODEC(codec,lev) ); break;
       #endif
   
+     #if _LZ4
+    //case P_LZ4F: LZ4F_freeCompressionContext(&lz4_cctx, LZ4F_VERSION); LZ4F_freeDecompressionContext(&lz4_dctx, LZ4F_VERSION); 
+      #endif
+
       #if _WZIP
     case P_WLZ4: case P_WLZ4FAST: if(wlz4st) WLZ_Free_State(wlz4st); wlz4st = NULL; break;
     case P_WLZ4HC:   if(wlz4hcst) WLZhc_Free_State(wlz4hcst); wlz4hcst = NULL; break;
@@ -2760,6 +2771,29 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _LIZARD
     case P_LIZARD: return Lizard_compress((const char*)in, (char*)out, inlen, outsize, lev);
       #endif
+      
+      #if _LZ4
+    case P_LZ4:
+      if(strchr(prm,'F')) { return !lev?LZ4_compress_fast((char *)in, (char *)out, inlen, outsize, 4):(lev<9?LZ4_compress_default((char *)in, (char *)out, inlen, outsize):LZ4_compress_HC((char *)in, (char *)out, inlen, outsize, lev)); }
+      else { 
+        LZ4F_cctx *cctx;             LZ4F_createCompressionContext(&cctx, LZ4F_VERSION);
+        LZ4F_preferences_t    opts = LZ4F_INIT_PREFERENCES;
+        opts.compressionLevel      = lev;
+        opts.favorDecSpeed         = strchr(prm,'s')?1:0;
+        opts.autoFlush             = strchr(prm,'f')?1:0;
+        opts.frameInfo.blockMode   = LZ4F_blockIndependent;
+        opts.frameInfo.contentSize = inlen;
+        opts.frameInfo.blockSizeID = (q=strchr(prm,'B'))?atoi(q+(q[1]=='='?2:1)):LZ4F_max4MB;
+        opts.frameInfo.blockSizeID = CLAMP(opts.frameInfo.blockSizeID, LZ4F_default, LZ4F_max4MB);
+        opts.nbWorkers             = threads;  
+        size_t rc = LZ4F_compressFrame_usingCDict(cctx, out, outsize, in, inlen, NULL, &opts); // : LZ4F_compressFrame(out, outsize, in, inlen, &opts);
+        LZ4F_freeCompressionContext(cctx);
+        return LZ4F_isError(rc)?0:rc;
+      }
+      #endif
+      #if _CLICKHOUSE
+    case P_CLICKHOUSE:
+      #endif
 
       #if _LZ4ULTRA
     case P_LZ4ULTRA:
@@ -2772,23 +2806,6 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         if(lev>9) lev = 9; lev -= 2; lev = max(lev,7); //lz4 levels 9..12 -> lzultra 4..7
         return lz4ultra_compress_inmem(in, out, inlen, outsize, nFlags, lev);
       } // else fall through to compression with lz4
-      #endif
-
-      #if _LZ4
-        #if _CLICKHOUSE
-    case P_CLICKHOUSE:
-        #endif
-    case P_LZ4:
-      if(strchr(prm,'F')) { return !lev?LZ4_compress_fast((char *)in, (char *)out, inlen, outsize, 4):(lev<9?LZ4_compress_default((char *)in, (char *)out, inlen, outsize):LZ4_compress_HC((char *)in, (char *)out, inlen, outsize, lev)); }
-      else { char *q;
-         LZ4F_preferences_t opts = LZ4F_INIT_PREFERENCES;
-                              opts.compressionLevel      = lev;
-        if(strchr(prm,'s'))   opts.favorDecSpeed         = 1;
-        if(strchr(prm,'f'))   opts.autoFlush             = 1;
-                              opts.frameInfo.blockSizeID = LZ4F_max4MB;
-        if(q=strchr(prm,'B')) opts.frameInfo.blockSizeID = (LZ4F_blockSizeID_t)atoi(q+(q[1]=='='?2:1)); if(opts.frameInfo.blockSizeID>LZ4F_max4MB) opts.frameInfo.blockSizeID=LZ4F_max4MB;else if(opts.frameInfo.blockSizeID && opts.frameInfo.blockSizeID<LZ4F_default) opts.frameInfo.blockSizeID=LZ4F_default;
-        return LZ4F_compressFrame(out, outsize, in, inlen, &opts);
-      }
       #endif
 
       #if _LZAV
@@ -3882,9 +3899,11 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_LZ4:
       if(strchr(prm,'F')) { LZ4_decompress_safe((const char *)in, (char *)out, inlen, outlen); break; }
       else {
-        lz4: LZ4F_dctx *ctx; LZ4F_createDecompressionContext(&ctx, LZ4F_VERSION);
-        size_t ilen = inlen, olen = outlen, rc = LZ4F_decompress(ctx, out, &olen, in, &ilen, NULL);
-        LZ4F_freeDecompressionContext(ctx);
+        LZ4F_decompressOptions_t opts = {0};
+                       opts.stableDst = 1; 
+        LZ4F_dctx *dctx; LZ4F_createDecompressionContext(&dctx, LZ4F_VERSION);
+        size_t ilen = inlen, olen = outlen, rc = LZ4F_decompress(dctx, out, &olen, in, &ilen, &opts); 
+        LZ4F_freeDecompressionContext(dctx);
         return rc;
       }
       #endif
