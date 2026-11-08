@@ -2040,7 +2040,7 @@ struct plugs plugs[] = {
   { P_MEMLZ,         "memlz",         _MEMLZ,     "memlz",                       "" },
   { P_MINIZ,         "miniz",         _MINIZ,     "miniz",                       "1,2,3,4,5,6,7,8,9" },
   { P_MISA77,        "misa77",        _MISA77,    "misa77",                      "0,1,2,3,4,-1" },
-  { P_MISA77S,       "misa77_safe",   _MISA77,    "misa77 safe",                 "0,1" },
+//  { P_MISA77S,       "misa77_safe",   _MISA77,    "misa77 safe",                 "0,1" },
   { P_MSCOMPRESS,    "mscompress",    _MSCOMPRESS,"ms-compress",                 "2,3,4" },
   { P_MWLZ,          "mwlz",          _MWLZ,      "mwlz",                        "" },
   { P_MZIP,          "mzip",          _MZIP,      "mzip",                        "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },
@@ -4043,8 +4043,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _MISA77
-    case P_MISA77:  return misa77::decompress(in, inlen, out, outlen);
-    case P_MISA77S: return misa77::decompress(in, inlen, out, outlen, misa77::dconfig(true));
+    case P_MISA77: 
+    case P_MISA77S: return !lev || lev==1?misa77::decompress(in, inlen, out, outlen, misa77::dconfig(true)):misa77::decompress(in, inlen, out, outlen);
       #endif
 
       #if _MSCOMPRESS
