@@ -538,9 +538,9 @@ LIBS += $(LZHAM_LIB)
 endif
 endif
 
-ifneq ($(wildcard ../lz0/.),)
+ifneq ($(wildcard ../lz/.),)
 PLG_FLAGS+=-D_LZ
-LZ_DIR=../lz0
+LZ_DIR=../lz
 LZ_SRCS := $(shell find $(LZ_DIR)/lib -type f -name '*.[c]')
 LZ_LIB = $(BUILD)/lz/liblz.a
 $(LZ_LIB):  $(LZ_SRCS)
