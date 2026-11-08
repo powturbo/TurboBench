@@ -147,8 +147,8 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | Compressor | Added | Language | Comment |
 |---|---|---|---|
 | [LzTurbo](https://sites.google.com/site/powturbo) |  |c  |  |
-| [aceapex](https://github.com/yasha1971-coder/aceapex) |2026/10|c++/cuda  |lz  |
-| [AMD AOCL](https://github.com/amd/aocl-compression) | 2026/09 |c++  |tuned lz4,zstd,bzip2 for amd64  |
+| [aceapex](https://github.com/yasha1971-coder/aceapex) |2026/10|c++/cuda MT|lz  |
+| [AMD AOCL](https://github.com/amd/aocl-compression) | 2026/09 |c++ MT|tuned lz4,zstd,bzip2 for amd64  |
 | [BriefLz](https://github.com/jibsen/brieflz) |  |c  |lz  |
 | [Brotli](https://github.com/google/brotli) |  |c  |lz+huffman  |
 | [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) |  |c  |lz  |
@@ -158,25 +158,25 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [FastLz](http://fastlz.org) |  |c  |lz  |
 | [Fast-lzma](https://github.com/conor42/fast-lzma2) |  |c  |lz+range coder  |
 | [glza](https://github.com/kidq330/GLZA) |  |c  |lz+huffman  |
-| [Glyd](https://github.com/surya-koritala/Glyd) | 2026/09 | rust |lz+huffman/tans  |
+| [Glyd](https://github.com/surya-koritala/Glyd) | 2026/09 | rust MT|lz+huffman/tans  |
 | [heatshrink](https://github.com/atomicobject/heatshrink) |  |c  |short strings|
 | [Iguana](https://github.com/ClickHouse/iguana) | 2026/09 |c++  |Not reliable|
 | [Intel(R) ISA-L](https://github.com/01org/isa-l) |  |c  |lz+huffman, zlib compatible|
-| [kanzi](https://github.com/flanglet/kanzi-cpp) | 2026/07 |c++  |lz,bwt,paq|
+| [kanzi](https://github.com/flanglet/kanzi-cpp) | 2026/07 |c++ MT|lz,bwt,paq|
 | [lib](https://github.com/vurtun/lib) | 2026/09 |c  |  |
 | [Libdeflate](https://github.com/ebiggers/libdeflate) |  |c  |lz+huffman  |
 | [LibLZF](http://oldhome.schmorp.de/marc/liblzf.html) |  |c  |lz  |
 | [LibLz](https://github.com/mbitsnbites/liblzg) |  |c  |lz  |
 | [LibSLZ](https://github.com/wtarreau/libslz) |  |c  |lz+huffman, zlib |
-| [Lz4](https://github.com/Cyan4973/lz4) |  |c  |lz  |
+| [Lz4](https://github.com/Cyan4973/lz4) |  |c  |lz MT|
 | [Lz4ultra](https://github.com/emmanuel-marty/lz4ultra) |  |c  |lz  |
 | [lzjody](https://github.com/deep-soft/lzjody) |  |c  |lz |
 | [lizard](https://github.com/inikep/lz5) |  |c  |lz+byte+huffman |
 | [Lzfse](https://github.com/lzfse/lzfse) |  |c  |lz+tans  |
-| [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) |  |c++  |lz+huffman  |
+| [Lzham v1.1](https://github.com/richgel999/lzham_codec_devel) |  |c++  MT|lz+huffman  |
 | [Lzlib](https://github.com/aonez/lzlib) | 2026/09 |c  |lz+range coder  |
 | [Lzmat](https://github.com/nemequ/lzmat) |  |c  |lz  |
-| [Lzma](http://7-zip.org) |  |c  |lz+range coder |
+| [Lzma](http://7-zip.org) |  |c MT|lz+range coder |
 | [Lzo](http://www.oberhumer.com/opensource/lzo) |  |c  |lz  |
 | [Lzoma](https://github.com/alef78/lzoma) |  |c  |lz  |
 | [lzraven](https://github.com/anat0m1a/liblzraven) | 2026/09 |c  |Apple's reimplementation|
@@ -203,7 +203,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Tornado](http://freearc.org) |  |c++  |lz+huffman  |
 | [Unishox](https://github.com/siara-cc/Unishox) |  |c  |short strings|
 | [wfLZ](https://github.com/ShaneWF/wflz) |  |c  |lz  |
-| [wzip](https://github.com/icodywu/WZIP) |2026/10  |c  |wlz4:lz  wzip:lz+huffman  |
+| [wzip](https://github.com/icodywu/WZIP) |2026/10  |c  MT|wlz4:lz  wzip:lz+huffman  |
 | [yalz77](https://github.com/ivan-tkatchev/yalz77) |  |c  |lz  |
 | [yappy v2011]() |  |c  |lz  |
 | [xpack](https://github.com/ebiggers/xpack) |  |  |lz+huffman  |
@@ -212,28 +212,28 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [zlib cloudflare](https://github.com/cloudflare/zlib) |c  |  |lz+huffman  |
 | [zlib-ng](https://github.com/Dead2/zlib-ng) |  |c  |lz+huffman  |
 | [zlib-rs](https://github.com/trifectatechfoundation/zlib-rs) |2026/11  |rust  |lz+huffman  |
-| [zlib-turbo](https://github.com/icodywu/zlib-turbo) |  |c  |lz+huffman |
+| [zlib-turbo](https://github.com/icodywu/zlib-turbo) |  |c MT|lz+huffman |
 | [zopfli](https://code.google.com/p/zopfli) |  |c  |lz+huffman  |
-| [zstd](https://github.com/facebook/zstd) |  |c  |lz+huffman/tans  |
+| [zstd](https://github.com/facebook/zstd) |  |c  MT|lz+huffman/tans  |
 | [zpaq](https://github.com/zpaq/zpaq) |  |c++  |paq+range coder  |
-| [zxc](https://github.com/hellobertrand/zxc) | 2026/05 |c  |lz  |
+| [zxc](https://github.com/hellobertrand/zxc) | 2026/05 |c  MT|lz  |
 
 #### BWT - Burrows–Wheeler transform:
 | Compressor | Added | Language | Comment |
 |---|---|---|---|
 | [bcm](https://github.com/FS-make-simple/bcm) |2026/10 |c++ |  |
-| [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc) |  |c++ |  |
-| [BwtSatan](https://github.com/powturbo/Turbo-Range-Coder) |2026/09 |c  |  |
+| [libbsc/bsc](https://github.com/IlyaGrebnov/libbsc) |  |c++ MT|  |
+| [BwtSatan](https://github.com/powturbo/Turbo-Range-Coder) |2026/09 |c MT|  |
 | [bz2-ng](https://github.com/tfenne/bz2-ng) |  |c  |bzip2 api-compatible|
 | [bzip2](http://www.bzip.org/downloads.html) |  |c  |  |
 | [bzip3](https://github.com/iczelia/bzip3) |  |c  |  |
-| [kanzi bwt (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) |2026/07  |c++ |  | 
+| [kanzi bwt (level 5,6,7)](https://github.com/flanglet/kanzi-cpp) |2026/07  |c++ MT|  | 
 | [Pulsar / rust](https://github.com/ceedot-rock/pulsar-best) |2026/09  |c  |very slow  | 
 
 #### Integer / Floating point:
 | Compressor | Added | Language | Comment |
 |---|---|---|---|
-| [Blosc](https://github.com/Blosc/c-blosc2) |  |c  |integer/fp 8-64  |
+| [Blosc](https://github.com/Blosc/c-blosc2) |  |c MT|integer/fp 8-64  |
 | [OpnZL](https://github.com/facebook/openzl) |2026/07  |c++  |i8-i64,u8-u64,csv,...  |
 | [Pcodec](https://github.com/pcodec/pcodec) |2026/09  |rust  |i8-i64,u8-u64,f32,f64  | 
 
@@ -375,5 +375,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
   u# : # = typesize [1 .. 256] number of bytes {u4}<br />
   t# : threads<br />
 
-Last update: 07 NOV 2026
+Last update: 08 NOV 2026
 
