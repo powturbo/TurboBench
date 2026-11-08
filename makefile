@@ -501,6 +501,9 @@ endif
 ifneq ($(wildcard lz4/.),)
 PLG_FLAGS+=-D_LZ4
 OB+=$(call obj,lz4/lib/lz4hc.o lz4/lib/lz4.o lz4/lib/lz4frame.o lz4/lib/xxhash.o)
+$(BUILD)/lz4/lib/%.o: lz4/lib/%.c
+	@mkdir -p $(dir $@)
+	$(CC) -O3 -DLZ4F_MULTITHREAD=1 -c $< -o $@
 endif
 
 ifneq ($(wildcard lzav/.),)
