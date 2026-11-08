@@ -1384,9 +1384,9 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
       for(p = name, q=sname; *p; p++,q++) { if(*p == '_') { *q++ = '\\'; *q++ = '\\'; } *q = *p; } *q = 0;
       if(memout)
         fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%u|%u|%u|%u|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ", 
-                      plug->memc, plug->memd, plug->stkc, plug->stkd, n?MD_B:"",  n?MD_B?sname:name, n?MD_E:"",   finame);
+                      plug->memc, plug->memd, plug->stkc, plug->stkd, n?MD_B:"",  n?sname:name, n?MD_E:"",   finame);
       else        
-        fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ",  n?MD_B:"",  n?MD_B?sname:name, n?MD_E:"",   finame); 
+        fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ",  n?MD_B:"",  n?sname:name, n?MD_E:"",   finame); 
     } break;
     case FMT_CSV:    fprintf(f,"%12"PRId64",%11"PRId64",%s,%9.2f,%9.2f,%-16s,%s\n",       totinlen, plug->len, sratio, tc, td, name, finame);  break;
     case FMT_TSV:    fprintf(f,"%12"PRId64"\t%11"PRId64"\t%s\t%9.2f\t%9.2f\t%-16s\t%s\n", totinlen, plug->len, sratio, tc, td, name, finame);  break;
