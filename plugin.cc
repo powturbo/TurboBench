@@ -4692,7 +4692,7 @@ char *codver(int codec, char *v, char *s) {
     case P_BZIP2: return (char *)BZ2_bzlibVersion();
       #endif
       #if _BZIP3
-    case P_BZIP3: return "v1.5.4";
+    case P_BZIP3: return "v1.5.5";
       #endif
       #if _BRIEFLZ
     case P_BRIEFLZ:  sprintf(s,"v%d.%d.%d", BLZ_VER_MAJOR, BLZ_VER_MINOR, BLZ_VER_PATCH); break;
@@ -4762,7 +4762,7 @@ char *codver(int codec, char *v, char *s) {
     case P_LIBDEFLATE:  strcpy(s, LIBDEFLATE_VERSION_STRING); break;
       #endif   
       #if _LIBSLZ
-    case P_LIBSLZ:  return "v1.4-dev3";
+    case P_LIBSLZ:  return "v1.4-dev5";
       #endif
  
       #if _ZPAQ
@@ -4799,13 +4799,13 @@ char *codver(int codec, char *v, char *s) {
       #endif
 
       #if _MBROTLI
-    case P_MBROTLI : return "v0.5.15";
+    case P_MBROTLI : return "v0.5.20";
       #endif
       #if _MINIZ
     case P_MINIZ : return "v11.3.2";
       #endif
       #if _MEMLZ
-    case P_MEMLZ : return "v0.4/v2026.09.19"; 
+    case P_MEMLZ : return "v0.7/v2026.10.31"; 
       #endif
       #if _MISA77
     case P_MISA77:
@@ -4815,7 +4815,7 @@ char *codver(int codec, char *v, char *s) {
     case P_MSCOMPRESS: return "v2020.01.05";
       #endif
       #if _MZSTD
-    case P_MZSTD : return "v0.2.5";
+    case P_MZSTD : return "v0.2.12";
       #endif
 
       #if _NZ1
@@ -4842,7 +4842,7 @@ char *codver(int codec, char *v, char *s) {
     case P_PCODECF32:
     case P_PCODECI64:
     case P_PCODECU64:
-    case P_PCODECF64: return "v1.0.3";  
+    case P_PCODECF64: return "v1.1.0";  
       #endif
       #if _PIVCOHUF
     case P_PIVCOHUF:  sprintf(s,"v%d.%d", PIVCOHUF_VERSION_MAJOR, PIVCOHUF_VERSION_MINOR); break;
@@ -4872,7 +4872,7 @@ char *codver(int codec, char *v, char *s) {
       #endif
 
       #if _TAMP
-    case P_TAMP:  return "v2.3.0";
+    case P_TAMP:  return "v2.6.0";
       #endif
 
       #if _TOVYCT
