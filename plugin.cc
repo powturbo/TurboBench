@@ -413,6 +413,10 @@ enum {
 #define _SMALLZ4 0
 #endif
  P_SMALLZ4,
+#ifndef _SZSTD
+#define _SZSTD 0
+#endif
+ P_SZSTD,
 
 #ifndef _TAMP
 #define _TAMP 0
@@ -598,6 +602,10 @@ enum {
 #define _RECIPARITH 0
 #endif
  P_RECIPARITH,      
+#ifndef _RGC
+#define _RGC 0
+#endif
+ P_RGC,
 #ifndef _SHRC
 #define _SHRC 0
 #endif
@@ -1439,6 +1447,14 @@ EXTERN_C_END
 struct snappy_env env;
   #endif
 
+  #if _SZSTD
+//#include "structured-zstd/c-api/include/structured_zstd.h"
+EXTERN_C_BEGIN
+size_t szstd_ZSTD_compress(void *dst, size_t dstCapacity, const void *src, size_t srcSize, int level);
+size_t szstd_ZSTD_decompress(void *dst, size_t dstCapacity, const void *src, size_t compressedSize);
+EXTERN_C_END
+  #endif
+
 //------  T -------------------------------------
   #if _TAMP
 #include "tamp/tamp/_c_src/tamp/compressor.h"
@@ -1859,6 +1875,10 @@ const MarlinDictionary * Marlin_estimate_best_dictionary(const MarlinDictionary 
 #include "EC/recip_arith_/reciparith.h"
   #endif
 
+  #if _RGC
+#include "EC/rgc/src/rgc/rgc.h"
+  #endif
+
   #if _SUBOTIN
 #include "EC/subotin_/subotin.h"
   #endif
@@ -2088,6 +2108,7 @@ struct plugs plugs[] = {
   { P_SNAPPY,        "snappy",        _SNAPPY,    "Snappy",                      ""  },
   { P_SNAPPY_C,      "snappy_c",      _SNAPPY_C,  "Snappy-c",                    "" },
   { P_SMALLZ4,       "smallz4",       _SMALLZ4,   "SmalLz4",                     "6,7,8,9,10,11,12/z" },
+  { P_SZSTD,         "szstd",         _SZSTD,     "szstd",                       "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/d#" },
   
   { P_TAMP,          "tamp",          _TAMP,      "tamp",                        "8,9,10,11,12,13,14,15" },
   { P_TCOBS,         "tcobs",         _TCOBS,     "tcobs",                       "" },
@@ -2150,7 +2171,8 @@ struct plugs plugs[] = {
   { P_PIVCOHUF,      "pivco",       _PIVCOHUF,  "PivCo-Huffman",                 "0,1", E_HUF },  // 0=PH, 1=PHA (ANS-gated bitmaps)
   { P_POLHF,         "polar",       _POLHF,     "Polar Codes",                   "" },
   { P_PPMDEC,        "ppmdec",      _PPMDEC,    "PPMD Range Coder",              ""},
-  { P_RECIPARITH,   "recip_arith", _RECIPARITH,"recip arith",                    "" },
+  { P_RECIPARITH,    "recip_arith", _RECIPARITH,"recip arith",                   "" },
+  { P_RGC,           "rgc",         _RGC,       "rgc entropy coder",             "" },
   { P_SSERC,        "sserc",       _SSERC,     "sserangecoder",                  "", E_ANS },
   { P_SUBOTIN,      "subotin",     _SUBOTIN,   "subotin RC",                     "" },
   { P_TORNADOHF,    "tornado_huff",_TORNADO,   "Tornado Huf",                    "" },
@@ -3122,6 +3144,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_SNAPPY_C:   { size_t outlen=outsize; int rc = snappy_compress(&env, (const char *)in, inlen, (char *)out, &outlen); return outlen;}
       #endif
 
+      #if _SZSTD
+    case P_SZSTD: return szstd_ZSTD_compress((void *)out, outsize, (const void*)in, inlen, lev);
+      #endif
+
 //=== T =============================================================================================================================
       #if _TAMP
     case P_TAMP: { int64_t rc = 0;
@@ -3529,6 +3555,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _RECIPARITH
     case P_RECIPARITH:     return raenc(in, inlen, out, outsize);
+      #endif
+
+      #if _RGC
+    case P_RGC: { int32_t outlen; uint8_t *pout=NULL; rgc_encode((const uint8_t*)in, inlen, &pout, &outlen); memcpy(out,pout,outlen); return outlen; } 
       #endif
 
       #if _SHRC
@@ -4187,6 +4217,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_SNAPPY_C: return snappy_uncompress((const char *)in, inlen, (char *)out);
       #endif
 
+      #if _SZSTD
+    case P_SZSTD: return szstd_ZSTD_decompress((uint8_t*)out, outlen, (const void*)in, inlen); 
+      #endif
+
 //=== T =============================================================================================================================
       #if _TAMP
     case P_TAMP: { int64_t rc = 0;
@@ -4535,6 +4569,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
         #endif
       #endif
 
+      #if _RGC
+    case P_RGC: { int32_t outlen; uint8_t *pout; rgc_decode((const uint8_t*)in, inlen, &pout, &outlen); memcpy(out,pout,outlen); return inlen; } 
+      #endif
+
       #if _SSERC
     case P_SSERC: return ssercdec(in, inlen, out, outlen);
       #endif
@@ -4821,10 +4859,18 @@ char *codver(int codec, char *v, char *s) {
     case P_QUICKLZ: return "v2012.01.13";
       #endif
 
+      #if _RGC
+    case P_RGC:    sprintf(s,"v%d.%d.%d", RGC_VERSION_MAJOR, RGC_VERSION_MINOR, RGC_VERSION_PATCH); break;
+      #endif
+
       #if _SNAPPY
     case P_SNAPPY:  sprintf(s,"v%d.%d.%d", SNAPPY_MAJOR, SNAPPY_MINOR, SNAPPY_PATCHLEVEL); break;
       #endif
       
+      #if _SZSTD
+    case P_SZSTD:    sprintf(s,"v%d.%d.%d MT", ZSTD_VERSION_MAJOR, ZSTD_VERSION_MINOR, ZSTD_VERSION_RELEASE); break;
+      #endif
+
       #if _TAMP
     case P_TAMP:  return "v2.3.0";
       #endif
