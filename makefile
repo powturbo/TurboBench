@@ -755,12 +755,11 @@ endif
 endif
 
 #--- R ------------------------------------------------------------------------------------------------------------------
-ifneq ($(RUST), 0)
+ifneq ($(RUST), 0) #### Rust static library (ruststatic) 
 ifeq ($(OS), Linux)
 RUST_DIR          := turbobench_
 RUST_PKG_NAME     := ruststatic
 RUST_TARGET_DIR   := $(BUILD)/rust
-RUST_LIB          := $(RUST_TARGET_DIR)/release/lib$(RUST_PKG_NAME).a
 RUST_MANIFEST_DIR := $(BUILD)/ruststatic_manifest
 RUST_MANIFEST     := $(RUST_MANIFEST_DIR)/Cargo.toml
 ifeq ($(ARCH),x86_64)
@@ -780,10 +779,6 @@ ifneq ($(wildcard mbrotli/.),)
   RUST_FEATURES += mbrotli
   PLG_FLAGS += -D_MBROTLI
 endif
-ifneq ($(wildcard pcodec/.),)
-  RUST_FEATURES += pcodec
-  PLG_FLAGS += -D_PCODEC
-endif
 ifneq ($(wildcard pulsar-best/.),)
   RUST_FEATURES += pulsar
   PLG_FLAGS += -D_PULSAR
@@ -798,6 +793,34 @@ ifneq ($(wildcard zlib-rs/.),)
   RUST_FEATURES += libz-rs-sys/custom-prefix
   RUST_EXP := LIBZ_RS_SYS_PREFIX="zz_"
 endif
+ifneq ($(wildcard pcodec/.),)
+  RUST_FEATURES += pcodec
+  PLG_FLAGS += -D_PCODEC
+PCODEC_SRC   := pcodec
+PCODEC_SRCS  := $(shell find $(PCODEC_SRC) -type f -name '*.rs' -print 2>/dev/null; find $(PCODEC_SRC) -type f -name '*.toml' -print 2>/dev/null)
+PCODEC_BUILD := $(BUILD)/pcodec
+PCO_C_BUILD  := $(PCODEC_BUILD)/pco_c
+$(PCO_C_BUILD)/Cargo.toml: $(PCODEC_SRCS)
+	@mkdir -p $(PCODEC_BUILD)
+	cp -a $(PCODEC_SRC)/. $(PCODEC_BUILD)/
+	sed -i.bak 's/crate-type = \["cdylib", "staticlib"\]/crate-type = ["rlib", "cdylib", "staticlib"]/' $(PCO_C_BUILD)/Cargo.toml
+endif
+ifneq ($(wildcard structured-zstd/.),)
+  RUST_FEATURES += szstd
+  PLG_FLAGS += -D_SZSTD
+SZSTD_SRC        := structured-zstd
+SZSTD_SRCS       := $(shell find $(SZSTD_SRC)  -type f -name '*.rs' -print 2>/dev/null; find $(SZSTD_SRC)  -type f -name '*.toml' -print 2>/dev/null)
+SZSTD_CAPI_SRC   := $(SZSTD_SRC)/c-api
+SZSTD_CAPI_BUILD := $(BUILD)/structured-zstd
+$(SZSTD_CAPI_BUILD)/Cargo.toml: $(SZSTD_SRCS)
+#	@mkdir -p $(dir $(SZSTD_CAPI_BUILD))
+	cp -a $(SZSTD_CAPI_SRC)/. $(SZSTD_CAPI_BUILD)/
+	sed -i.bak -E \
+		-e 's|^name = "structured_zstd"$$|name = "structured_zstd_c"|' \
+		-e 's|crate-type = \["cdylib", "staticlib"\]|crate-type = ["rlib", "cdylib", "staticlib"]|' \
+		-e 's|crate-type = \["staticlib", "cdylib"\]|crate-type = ["rlib", "cdylib", "staticlib"]|' \
+		-e 's|path = "\.\./zstd"|path = "$(abspath $(SZSTD_SRC)/zstd)"|' $(SZSTD_CAPI_BUILD)/Cargo.toml
+endif
 
 comma := ,
 empty :=
@@ -805,20 +828,10 @@ space := $(empty) $(empty)
 RUST_FEATURES_CSV := $(subst $(space),$(comma),$(strip $(RUST_FEATURES)))
 RUST_FEATURES_ARG := $(if $(RUST_FEATURES_CSV),--features=$(RUST_FEATURES_CSV))
 
-PCODEC_SRC   := pcodec
-PCODEC_BUILD := $(BUILD)/pcodec
-PCO_C_BUILD  := $(PCODEC_BUILD)/pco_c
-
-$(PCO_C_BUILD)/Cargo.toml: $(PCODEC_SRC)/pco_c/Cargo.toml
-	@mkdir -p $(PCODEC_BUILD)
-	cp -a $(PCODEC_SRC)/. $(PCODEC_BUILD)/
-	sed -i.bak 's/crate-type = \["cdylib", "staticlib"\]/crate-type = ["rlib", "cdylib", "staticlib"]/' \
-		$(PCO_C_BUILD)/Cargo.toml
-	@echo "--> patched $(PCO_C_BUILD)/Cargo.toml (added rlib)"
-
-$(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml $(PCO_C_BUILD)/Cargo.toml
+# ---------- generate ruststatic manifest (patches run first) ----------
+$(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml | $(PCO_C_BUILD)/Cargo.toml $(SZSTD_CAPI_BUILD)/Cargo.toml
 	@echo "--> generating $(RUST_MANIFEST)"
-	@rm -rf $(RUST_MANIFEST_DIR)
+#	@rm -rf $(RUST_MANIFEST_DIR)
 	@mkdir -p $(RUST_MANIFEST_DIR)
 	cp $(RUST_DIR)/Cargo.toml $@
 	cp -a $(RUST_DIR)/src $(RUST_MANIFEST_DIR)/
@@ -829,29 +842,37 @@ $(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml $(PCO_C_BUILD)/Cargo.toml
 		-e 's|path\s*=\s*"\.\./mzstd/mzstd-ffi"|path = "$(abspath mzstd/mzstd-ffi)"|' \
 		-e 's|path\s*=\s*"\.\./pcodec/pco_c"|path = "$(abspath $(PCO_C_BUILD))"|' \
 		-e 's|path\s*=\s*"\.\./pulsar-best"|path = "$(abspath pulsar-best)"|' \
-		-e 's|path\s*=\s*"\.\./zlib-rs/libz-rs-sys"|path = "$(abspath zlib-rs/libz-rs-sys)"|' \
-		$@
-#	@echo "----- generated paths -----"
-#	@grep -E 'path\s*=' $@ || true
-#	@echo "----------------------------"
+		-e 's|path\s*=\s*"\.\./structured-zstd/c-api"|path = "$(abspath $(SZSTD_CAPI_BUILD))"|' \
+		-e 's|path\s*=\s*"\.\./zlib-rs/libz-rs-sys"|path = "$(abspath zlib-rs/libz-rs-sys)"|' $@
 
-RUST_TARGET_DIR := $(BUILD)/rust
 ifdef CROSS
-RUST_TARGET     = --target $(CROSS)gc-unknown-linux-gnu
-RUST_LIB        = $(RUST_TARGET_DIR)/$(CROSS)gc-unknown-linux-gnu/release/lib$(RUST_PKG_NAME).a
-RUST_EXP        += CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER=riscv64-linux-gnu-gcc
+RUST_TARGET  = --target $(CROSS)gc-unknown-linux-gnu
+RUST_LIB     = $(RUST_TARGET_DIR)/$(CROSS)gc-unknown-linux-gnu/release/lib$(RUST_PKG_NAME).a
+RUST_EXP    += CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER=riscv64-linux-gnu-gcc
 else
-RUST_TARGET     :=
-RUST_LIB        := $(RUST_TARGET_DIR)/release/lib$(RUST_PKG_NAME).a
+RUST_TARGET :=
+RUST_LIB    := $(RUST_TARGET_DIR)/release/lib$(RUST_PKG_NAME).a
 endif
+
+RUST_SZSTD_MAP := $(RUST_TARGET_DIR)/szstd-redefine.syms
 
 $(RUST_LIB): $(RUST_MANIFEST)
 	$(RUST_EXP) RUSTFLAGS="$(RUSTFLAGS_EXTRA)" cargo build --release $(RUST_TARGET) --manifest-path=$(RUST_MANIFEST) --target-dir=$(RUST_TARGET_DIR) $(RUST_FEATURES_ARG)
+	@nm -g --defined-only $@ 2>/dev/null | \
+		awk '/ ZSTD_/{print $$3, "szstd_" $$3} / ZDICT_/{print $$3, "szstd_" $$3}' | sort -u > $(RUST_SZSTD_MAP)
+	@if [ -s $(RUST_SZSTD_MAP) ]; then \
+		echo "--> objcopy --redefine-syms ($(shell wc -l < $(RUST_SZSTD_MAP)) symbols)"; \
+		objcopy --redefine-syms=$(RUST_SZSTD_MAP) $@ $@.szstd; \
+		mv -f $@.szstd $@; \
+	else \
+		echo "--> no ZSTD_/ZDICT_ symbols to rename"; \
+	fi
+
 rustlib: $(RUST_LIB)
 LIBS += $(RUST_LIB)
 .PHONY: rustlib
-endif
-endif
+endif # OS == Linux
+endif # RUST != 0
 
 #--- T ----------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard tamp/.),)
@@ -1140,6 +1161,11 @@ endif
 ifdef RECIPARITH
 PLG_FLAGS+=-D_RECIPARITH
 OB+=$(call obj,EC/recip_arith_/reciparith.o)
+endif
+
+ifneq ($(wildcard EC/rgc/.),)
+PLG_FLAGS+=-D_RGC
+OB+=$(call obj,EC/rgc/src/rgc/rgc.o)
 endif
 
 ifneq ($(and $(wildcard EC/sserangecoding/.),$(filter x86_64,$(ARCH))),)
