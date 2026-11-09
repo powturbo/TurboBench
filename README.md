@@ -199,6 +199,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [smaz](https://github.com/antirez/smaz) |  |c  |short strings  |
 | [Snappy](https://github.com/google/snappy) |  |c++ |lz  |
 | [Snappy-c](https://github.com/andikleen/snappy-c) |  |c  |lz  |
+| [structured-zstd](https://github.com/structured-world/structured-zstd) | 2026/11 | rust |zstd reimplementation|
 | [Tamp](https://github.com/BrianPugh/tamp) | 2026/07 |c |  |
 | [Tornado](http://freearc.org) |  |c++  |lz+huffman  |
 | [Unishox](https://github.com/siara-cc/Unishox) |  |c  |short strings|
@@ -254,6 +255,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Fast AC v2006](http://www.cipr.rpi.edu/research/SPIHT/) |  |c  |  |
 | [FQZ/PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder) |  |c  |  |
 | [PPMD Range Coder v15-03](http://encode.su/threads/2149-ao0ec-Bytewise-adaptive-order-0-entropy-coder) |  |c  |  |
+| [rgc](https://github.com/mykola-ponomarenko-ua/rgc) |2026/11|c  |  |
 | [sserangecoding](https://github.com/richgel999/sserangecoding) |  |c  |  |
 | ABS: Asymmetric binary systems |  |  |  |
 | [Fpaqc:Asymmetric Binary Coder v07-12](http://www.mattmahoney.net/dc/) |  |c++  |  |
@@ -375,5 +377,8 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
   u# : # = typesize [1 .. 256] number of bytes {u4}<br />
   t# : threads<br />
 
-Last update: 08 NOV 2026
+- Lz4:
+  t# : threads<br />
+
+Last update: 09 NOV 2026
 
