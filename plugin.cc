@@ -3558,7 +3558,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _RGC
-    case P_RGC: { int32_t outlen; uint8_t *pout=NULL; rgc_encode((const uint8_t*)in, inlen, &pout, &outlen); memcpy(out,pout,outlen); return outlen; } 
+    case P_RGC: { int32_t outlen; uint8_t *pout=NULL; rgc_encode((const uint8_t*)in, inlen, &pout, &outlen); memcpy(out,pout,outlen); rgc_free(pout); return outlen; } 
       #endif
 
       #if _SHRC
@@ -4570,7 +4570,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _RGC
-    case P_RGC: { int32_t outlen; uint8_t *pout; rgc_decode((const uint8_t*)in, inlen, &pout, &outlen); memcpy(out,pout,outlen); return inlen; } 
+    case P_RGC: { int32_t outlen; uint8_t *pout; rgc_decode((const uint8_t*)in, inlen, &pout, &outlen); memcpy(out,pout,outlen); rgc_free(pout); return inlen; } 
       #endif
 
       #if _SSERC
