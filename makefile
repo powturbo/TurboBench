@@ -805,7 +805,7 @@ $(PCO_C_BUILD)/Cargo.toml: $(PCODEC_SRCS)
 	cp -a $(PCODEC_SRC)/. $(PCODEC_BUILD)/
 	sed -i.bak 's/crate-type = \["cdylib", "staticlib"\]/crate-type = ["rlib", "cdylib", "staticlib"]/' $(PCO_C_BUILD)/Cargo.toml
 endif
-ifneq ($(wildcard structured-zstd/.),)
+ifneq ($(wildcard structured-zstd0/.),)
   RUST_FEATURES += szstd
   PLG_FLAGS += -D_SZSTD
 SZSTD_SRC        := structured-zstd
