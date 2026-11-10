@@ -180,9 +180,6 @@
 [submodule "zlib-rs"]
 	path = zlib-rs
 	url = https://github.com/trifectatechfoundation/zlib-rs.git
-[submodule "structured-zstd"]
-	path = structured-zstd
-	url = https://github.com/structured-world/structured-zstd.git
 [submodule "EC/rgc"]
 	path = EC/rgc
 	url = https://github.com/mykola-ponomarenko-ua/rgc.git
