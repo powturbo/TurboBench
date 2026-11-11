@@ -285,19 +285,17 @@ endif
 
 ifneq ($(wildcard bzip3/.),)
 PLG_FLAGS+=-D_BZIP3
-BZIP3_SRCS := bzip3/src/libbz3.c $(wildcard bzip3/src/coder/*.c) 
+BZIP3_SRCS := bzip3/src/libbz3.c $(wildcard bzip3/src/coder/*.c) bzip3/src/sys/crc.c
 #$(wildcard bzip3/src/sys/*.c)
-ifeq ($(ARCH),aarch64)
-BZIP3_SRCS += bzip3/src/sys/crcarm.c
+ifeq ($(ARCH),x86_64)
+BZIP3_SRCS += bzip3/src/sys/crcx86.c
 #else ifeq ($(ARCH),aarch64)
-#BZIP3_SRCS += bzip3/src/sys/crcx86.c
-else
-BZIP3_SRCS += bzip3/src/sys/crc.c
+#BZIP3_SRCS += bzip3/src/sys/crcarm.c
 endif
 BZIP3_OBJS := $(call obj,$(BZIP3_SRCS))
 $(BZIP3_OBJS): $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) -O3 -Ibzip3/include -Ibzip3/src -Ibzip3/3rdparty/libsais  -c $< -o $@
+	$(CC) -O3 $(_SSE) -Ibzip3/include -Ibzip3/src -Ibzip3/3rdparty/libsais -c $< -o $@
 OB += $(BZIP3_OBJS)
 endif
 
