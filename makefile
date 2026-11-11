@@ -283,7 +283,7 @@ $(BZIP2_LIB): $(BZIP2_OBJS) | $(BUILD)/bzip2
 LIBS += $(BZIP2_LIB)
 endif
 
-ifneq ($(wildcard bzip3/.),)
+ifneq ($(wildcard bzip3_disabled/.),)
 PLG_FLAGS+=-D_BZIP3
 BZIP3_SRCS := bzip3/src/libbz3.c
 BZIP3_LIB = $(BUILD)/bzip3/libbzip3.a
