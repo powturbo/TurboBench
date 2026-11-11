@@ -19,6 +19,6 @@ pub use mzstd_ffi;
 #[cfg(feature = "zlib-rs")]
 pub use libz_rs_sys;
 
-#[cfg(feature = "szstd")]
-pub use structured_zstd_c;
+//#[cfg(feature = "szstd")]
+//pub use structured_zstd_c;
 
