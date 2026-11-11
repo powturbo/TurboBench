@@ -289,8 +289,8 @@ BZIP3_SRCS := bzip3/src/libbz3.c $(wildcard bzip3/src/coder/*.c)
 #$(wildcard bzip3/src/sys/*.c)
 ifeq ($(ARCH),aarch64)
 BZIP3_SRCS += bzip3/src/sys/crcarm.c
-else ifeq ($(ARCH),aarch64)
-BZIP3_SRCS += bzip3/src/sys/crcx86.c
+#else ifeq ($(ARCH),aarch64)
+#BZIP3_SRCS += bzip3/src/sys/crcx86.c
 else
 BZIP3_SRCS += bzip3/src/sys/crc.c
 endif
