@@ -850,8 +850,8 @@ $(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml | $(PCO_C_BUILD)/Cargo.toml $(SZSTD_CAP
 		-e 's|path\s*=\s*"\.\./mzstd/mzstd-ffi"|path = "$(abspath mzstd/mzstd-ffi)"|' \
 		-e 's|path\s*=\s*"\.\./pcodec/pco_c"|path = "$(abspath $(PCO_C_BUILD))"|' \
 		-e 's|path\s*=\s*"\.\./pulsar-best"|path = "$(abspath pulsar-best)"|' \
-#		-e 's|path\s*=\s*"\.\./structured-zstd/c-api"|path = "$(abspath $(SZSTD_CAPI_BUILD))"|' \
 		-e 's|path\s*=\s*"\.\./zlib-rs/libz-rs-sys"|path = "$(abspath zlib-rs/libz-rs-sys)"|' $@
+#		-e 's|path\s*=\s*"\.\./structured-zstd/c-api"|path = "$(abspath $(SZSTD_CAPI_BUILD))"|' 
 
 ifdef CROSS
 RUST_TARGET  = --target $(CROSS)gc-unknown-linux-gnu
