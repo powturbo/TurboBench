@@ -283,13 +283,22 @@ $(BZIP2_LIB): $(BZIP2_OBJS) | $(BUILD)/bzip2
 LIBS += $(BZIP2_LIB)
 endif
 
-ifneq ($(wildcard bzip3_disabled/.),)
+ifneq ($(wildcard bzip3/.),)
 PLG_FLAGS+=-D_BZIP3
-BZIP3_SRCS := bzip3/src/libbz3.c
-BZIP3_LIB = $(BUILD)/bzip3/libbzip3.a
-$(BZIP3_LIB): $(BZIP3_SRCS)
-	$(CMAKE) -S bzip3 -B $(BUILD)/bzip3 -DBZIP3_BUILD_APPS=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_COMPILER="$(CC)" && make -C $(BUILD)/bzip3 
-LIBS+=$(BZIP3_LIB)
+BZIP3_SRCS := bzip3/src/libbz3.c $(wildcard bzip3/src/coder/*.c) 
+#$(wildcard bzip3/src/sys/*.c)
+ifeq ($(ARCH),aarch64)
+BZIP3_SRCS += bzip3/src/sys/crcarm.c
+else ifeq ($(ARCH),aarch64)
+BZIP3_SRCS += bzip3/src/sys/crcx86.c
+else
+BZIP3_SRCS += bzip3/src/sys/crc.c
+endif
+BZIP3_OBJS := $(call obj,$(BZIP3_SRCS))
+$(BZIP3_OBJS): $(BUILD)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) -O3 -Ibzip3/include -Ibzip3/src -Ibzip3/3rdparty/libsais  -c $< -o $@
+OB += $(BZIP3_OBJS)
 endif
 
 #--- C ----------------------------------------------------------------------------------------------------------------------------------
@@ -805,6 +814,7 @@ $(PCO_C_BUILD)/Cargo.toml: $(PCODEC_SRCS)
 	cp -a $(PCODEC_SRC)/. $(PCODEC_BUILD)/
 	sed -i.bak 's/crate-type = \["cdylib", "staticlib"\]/crate-type = ["rlib", "cdylib", "staticlib"]/' $(PCO_C_BUILD)/Cargo.toml
 endif
+SZSTD_CAPI_CARGO :=
 ifneq ($(wildcard structured-zstd0/.),)
   RUST_FEATURES += szstd
   PLG_FLAGS += -D_SZSTD
@@ -813,13 +823,13 @@ SZSTD_SRCS       := $(shell find $(SZSTD_SRC)  -type f -name '*.rs' -print 2>/de
 SZSTD_CAPI_SRC   := $(SZSTD_SRC)/c-api
 SZSTD_CAPI_BUILD := $(BUILD)/structured-zstd
 $(SZSTD_CAPI_BUILD)/Cargo.toml: $(SZSTD_SRCS)
-#	@mkdir -p $(dir $(SZSTD_CAPI_BUILD))
 	cp -a $(SZSTD_CAPI_SRC)/. $(SZSTD_CAPI_BUILD)/
 	sed -i.bak -E \
 		-e 's|^name = "structured_zstd"$$|name = "structured_zstd_c"|' \
 		-e 's|crate-type = \["cdylib", "staticlib"\]|crate-type = ["rlib", "cdylib", "staticlib"]|' \
 		-e 's|crate-type = \["staticlib", "cdylib"\]|crate-type = ["rlib", "cdylib", "staticlib"]|' \
 		-e 's|path = "\.\./zstd"|path = "$(abspath $(SZSTD_SRC)/zstd)"|' $(SZSTD_CAPI_BUILD)/Cargo.toml
+SZSTD_CAPI_CARGO = $(SZSTD_CAPI_BUILD)/Cargo.toml
 endif
 
 comma := ,
@@ -829,7 +839,7 @@ RUST_FEATURES_CSV := $(subst $(space),$(comma),$(strip $(RUST_FEATURES)))
 RUST_FEATURES_ARG := $(if $(RUST_FEATURES_CSV),--features=$(RUST_FEATURES_CSV))
 
 # ---------- generate ruststatic manifest (patches run first) ----------
-$(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml | $(PCO_C_BUILD)/Cargo.toml $(SZSTD_CAPI_BUILD)/Cargo.toml
+$(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml | $(PCO_C_BUILD)/Cargo.toml $(SZSTD_CAPI_CARGO)
 	@echo "--> generating $(RUST_MANIFEST)"
 #	@rm -rf $(RUST_MANIFEST_DIR)
 	@mkdir -p $(RUST_MANIFEST_DIR)
@@ -842,7 +852,7 @@ $(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml | $(PCO_C_BUILD)/Cargo.toml $(SZSTD_CAP
 		-e 's|path\s*=\s*"\.\./mzstd/mzstd-ffi"|path = "$(abspath mzstd/mzstd-ffi)"|' \
 		-e 's|path\s*=\s*"\.\./pcodec/pco_c"|path = "$(abspath $(PCO_C_BUILD))"|' \
 		-e 's|path\s*=\s*"\.\./pulsar-best"|path = "$(abspath pulsar-best)"|' \
-		-e 's|path\s*=\s*"\.\./structured-zstd/c-api"|path = "$(abspath $(SZSTD_CAPI_BUILD))"|' \
+#		-e 's|path\s*=\s*"\.\./structured-zstd/c-api"|path = "$(abspath $(SZSTD_CAPI_BUILD))"|' \
 		-e 's|path\s*=\s*"\.\./zlib-rs/libz-rs-sys"|path = "$(abspath zlib-rs/libz-rs-sys)"|' $@
 
 ifdef CROSS
