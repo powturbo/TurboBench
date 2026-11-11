@@ -813,7 +813,7 @@ $(PCO_C_BUILD)/Cargo.toml: $(PCODEC_SRCS)
 	sed -i.bak 's/crate-type = \["cdylib", "staticlib"\]/crate-type = ["rlib", "cdylib", "staticlib"]/' $(PCO_C_BUILD)/Cargo.toml
 endif
 SZSTD_CAPI_CARGO :=
-ifneq ($(wildcard structured-zstd0/.),)
+ifneq ($(wildcard structured-zstd_disabled/.),)
   RUST_FEATURES += szstd
   PLG_FLAGS += -D_SZSTD
 SZSTD_SRC        := structured-zstd
@@ -851,6 +851,7 @@ $(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml | $(PCO_C_BUILD)/Cargo.toml $(SZSTD_CAP
 		-e 's|path\s*=\s*"\.\./pcodec/pco_c"|path = "$(abspath $(PCO_C_BUILD))"|' \
 		-e 's|path\s*=\s*"\.\./pulsar-best"|path = "$(abspath pulsar-best)"|' \
 		-e 's|path\s*=\s*"\.\./zlib-rs/libz-rs-sys"|path = "$(abspath zlib-rs/libz-rs-sys)"|' $@
+
 #		-e 's|path\s*=\s*"\.\./structured-zstd/c-api"|path = "$(abspath $(SZSTD_CAPI_BUILD))"|' 
 
 ifdef CROSS
