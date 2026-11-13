@@ -103,13 +103,13 @@ jobs:
           fi
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
-          if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
-            ./turbobench silesia.tar -V0 -eBWT -abwt
-            ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -abwt
-            ./turbobench silesia.tar@bwt.tbb -p4
-            mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
-          fi
-          ls -la silesia.*.md
+#          if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
+#            ./turbobench silesia.tar -V0 -eBWT -abwt
+#            ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -abwt
+#            ./turbobench silesia.tar@bwt.tbb -p4
+#            mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
+#          fi
+#          ls -la silesia.*.md
 
       # ------------------ macOS ------------------
       - name: Build (macOS)
@@ -165,15 +165,17 @@ jobs:
           curl -L -o silesia.tar.gz \
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
-          ./turbobench.exe silesia.tar -U -V0
-          ./turbobench.exe silesia.tar.tbb -p4
+          ./turbobench silesia.tar -U -V0
+          ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
           ./turbobench silesia.tar -V0 -eBWT -abwt
           ./turbobench silesia.tar -V0 -U -ebwtsatan,7x,8x,9x -b68m -abwt
           ./turbobench silesia.tar@bwt.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
+          ./turbobench turbobench.exe -V0 -eFAST -aFAST
+          ./turbobench turbobench.exe.tar@FAST.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@FAST.md"
           ls -la silesia.*.tar.md
-
       # ------------------ Package (Linux / macOS) ------------------
       - name: Package artifact (Linux/macOS)
         if: matrix.platform != 'windows'
