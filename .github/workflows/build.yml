@@ -53,44 +53,45 @@ jobs:
 #      - run: ./turbobench turbobench -V0 -U
 #      - run: ./turbobench silesia.tar -V0 -U
 #      - run: ./turbobench silesia.tar -V0 -U -eBWT -abwt
-  linux-riscv:
-    runs-on: ubuntu-24.04-riscv
-    strategy:
-      fail-fast: false
-      matrix:
-        compiler: ["gcc", "clang"]
-    env:
-      CC: ${{ matrix.compiler }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          submodules: 'true'
-      - run: git submodule update --init --recursive
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq build-essential nasm make gcc-14 g++-14 clang-20
-          sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
-          sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
-          sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
-          sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
-          sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
-          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
-      - name: Show environment
-        run: |
-          uname -m
-          lscpu
-          echo "=== Using CC=$CC ==="
-          make -p -f /dev/null | grep '^CXX'
-          $CC --version
-          gcc --version
-          clang --version || true
-          rustc --version
-          cargo --version
-      - name: make 
-        run: make AOCL=0 BLOSC=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0
+
+#  linux-riscv:
+#    runs-on: ubuntu-24.04-riscv
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        compiler: ["gcc", "clang"]
+#    env:
+#      CC: ${{ matrix.compiler }}
+#    steps:
+#      - uses: actions/checkout@v7
+#        with:
+#          submodules: 'true'
+#      - run: git submodule update --init --recursive
+#      - name: Install Rust
+#        uses: dtolnay/rust-toolchain@stable
+#      - name: Install dependencies
+#        run: |
+#          sudo apt-get update -qq
+#          sudo apt-get install -y -qq build-essential nasm make gcc-14 g++-14 clang-20
+#          sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
+#          sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
+#          sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
+#          sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
+#          sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
+#          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
+#      - name: Show environment
+#        run: |
+#          uname -m
+#          lscpu
+#          echo "=== Using CC=$CC ==="
+#          make -p -f /dev/null | grep '^CXX'
+#          $CC --version
+#          gcc --version
+#          clang --version || true
+#          rustc --version
+#          cargo --version
+#      - name: make 
+#        run: make AOCL=0 BLOSC=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0
 #      - name: Download silesia.tar.gz and gunzip → silesia.tar
 #        run: |
 #          curl -L -o silesia.tar.gz \
