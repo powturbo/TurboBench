@@ -900,8 +900,11 @@ ifneq ($(wildcard Turbo-Range-Coder/.),)
 ifneq ($(ARCH),loongarch64)
 PLG_FLAGS += -D_TURBORC
 RC_DIR  := Turbo-Range-Coder
-RC_SRCS := $(shell find $(RC_DIR) -type f \( -name '*.[ch]' -o -name '*.cpp' -o -name '*.cc' \))
-RC_BDIR := $(BUILD)/$(RC_DIR)
+ifneq ($(wildcard ../Turbo-Range-Coder/.),)
+RC_DIR  := ../Turbo-Range-Coder
+endif
+RC_SRCS := $(addprefix $(RC_DIR)/, $(shell cd $(RC_DIR) && find . -type f \( -name '*.[ch]' \) | sed 's|^\./||'))
+RC_BDIR := $(BUILD)/Turbo-Range-Coder
 RC_LIB  := $(RC_BDIR)/librc.a 
 $(RC_LIB): $(RC_SRCS)
 	@mkdir -p $(RC_BDIR)
