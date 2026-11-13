@@ -1145,8 +1145,8 @@ PIVCO_CMAKE_FILES := $(shell find $(PIVCODIR) -maxdepth 2 -name 'CMakeLists.txt'
 PIVCO_LIB   = $(PIVCO_BDIR)/libpivco_huffman_local.o
 $(PIVCO_LIB): $(PIVCO_SRCS) $(PIVCO_CMAKE_FILES)
 	mkdir -p $(PIVCO_BDIR)
-	$(CMAKE) -S $(PIVCODIR) -B $(PIVCO_BDIR) -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-Wno-format"
-	$(CMAKE) --build $(PIVCO_BDIR) --target pivco_huffman_local -j
+	$(CMAKE) -S $(PIVCODIR) -B $(PIVCO_BDIR) -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_FLAGS="-Wno-format" -DCMAKE_VERBOSE_MAKEFILE=ON
+	$(CMAKE) --build $(PIVCO_BDIR) --target pivco_huffman_local -j 
 OB += $(PIVCO_LIB)
 # PHAZ: PivCo-Huffman entropy transplant onto zstd (full LZ+entropy compressor; level = zstd level). Built from the pivco-huffman submodule's extras/phaz via
 # its own build.sh: patches a private zstd copy (TurboBench's pinned zstd/ SHA 5233c58e) and merges it + pivco into phaz_local.o exporting only
