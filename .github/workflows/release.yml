@@ -173,9 +173,9 @@ jobs:
           ./turbobench silesia.tar@bwt.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
           ./turbobench turbobench.exe -V0 -eFAST -aFAST
-          ./turbobench turbobench.exe.tar@FAST.tbb -p4
-          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@FAST.md"
-          ls -la silesia.*.tar.md
+          ./turbobench turbobench.exe@FAST.tbb -p4
+          mv -f turbobench.exe.md "turbobech.${{ matrix.name }}.exe@FAST.md"
+          ls -la *.md
       # ------------------ Package (Linux / macOS) ------------------
       - name: Package artifact (Linux/macOS)
         if: matrix.platform != 'windows'
@@ -229,6 +229,7 @@ jobs:
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
             silesia.${{ matrix.name }}.tar.md
             silesia.${{ matrix.name }}.tar@bwt.md
+            turbobench.${{ matrix.name }}.exe@FAST.md
           if-no-files-found: ignore
 
   # ------------------------------------------------------------------
