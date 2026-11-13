@@ -1482,7 +1482,7 @@ EXTERN_C_END
 #include "Turbo-Range-Coder/include/anscdf.h"
 #include "Turbo-Range-Coder/include_/tp.h"
 #include "Turbo-Range-Coder/include_/rcutil.h"
-#define BWT_OPTIONS (bwt_flag(usize==2, verbose) | bwt_lzp(lzp_force, lzp_nrev, lzp_lenmin) | bwt_utf8(utf8_o8, utf8_no, utf8_sort, 0, 0)) 
+#define BWT_OPTIONS(usize) (bwt_flag(usize==2, verbose) | bwt_lzp(lzp_force, lzp_nrev, lzp_lenmin) | bwt_utf8(utf8_o8, utf8_no, utf8_sort, utf8_itmax, bwt_nratio)) 
   #endif
 
 //------  W -------------------------------------
@@ -3580,8 +3580,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _BWTSATAN
     case P_BWTSATAN: { 
-      char *q;
-      unsigned bwt16 = 0, verbose = 0,  lzp_force = 0, lzp_nrev = 0, lzp_lenmin = 1,  utf8_o8=0, utf8_no = 0, utf8_sort = 0, usize=0;  
+      unsigned verbose = 0,  lzp_force = 0, lzp_nrev = 0, lzp_lenmin = 1,  utf8_o8=0, utf8_no = 0, utf8_sort = 0, usize=0, bwt_nratio=0, utf8_itmax=0;  
       if(strchr(prm,'V')) verbose   = 1;
       if(strchr(prm,'N')) utf8_no   = 1;
       if(strchr(prm,'X')) utf8_sort = 1;
@@ -3589,18 +3588,16 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       if(strchr(prm,'R')) lzp_nrev  = 1;
       if(strchr(prm,'S')) usize = 2; else if(q = strchr(prm,'U')) usize = 4;
       if(q = strchr(prm,'l')) lzp_lenmin = atoi(q+(q[1]=='='?2:1)); //bwt options  
-      //threads = CLAMP(threads, 0, 64); 
-      return rcbwtenc(in, inlen, out, lev, threads, BWT_OPTIONS); 
+      return rcbwtenc(in, inlen, out, lev, threads, BWT_OPTIONS(usize)); 
     }
       #endif
 
       #if _TURBORC
     case P_TURBORC: { //int ec = 0; 
-      char *q;
       unsigned bwtlev = 9;
       if(q = strchr(prm,'e')) bwtlev    = atoi(q+(q[1]=='='?2:1)); 
 
-      unsigned bwt16 = 0, verbose = 0,  lzp_force = 0, lzp_nrev = 0, lzp_lenmin = 1,  utf8_o8=0, utf8_no = 0, utf8_sort = 0, usize=0;  
+      unsigned verbose = 0,  lzp_force = 0, lzp_nrev = 0, lzp_lenmin = 1,  utf8_o8=0, utf8_no = 0, utf8_sort = 0, usize=0, bwt_nratio=0, utf8_itmax=0;  
       if(strchr(prm,'V')) verbose   = 1;
       if(strchr(prm,'N')) utf8_no   = 1;
       if(strchr(prm,'X')) utf8_sort = 1;
@@ -3626,7 +3623,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
         case 17: return rcu3senc(   in, inlen, out);
         case 18: return rcqlfc0senc( in, inlen, out);
         case 19: return rcqlfc0ssenc(in, inlen, out, 4, 7);
-        case 20: return rcbwtenc( in, inlen, out, bwtlev, threads, BWT_OPTIONS);  
+        case 20: return rcbwtenc( in, inlen, out, bwtlev, threads, BWT_OPTIONS(usize));  
         case 56: return anscdfenc(    in, inlen, out);
         //case 100: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tpenc( in, inlen, out, esize?esize:4); return inlen; }  
         //case 101: { unsigned esize = (q=strchr(prm,'u'))?atoi(q+1):4; tp4enc(in, inlen, out, esize?esize:4); return inlen; }       
