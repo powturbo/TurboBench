@@ -104,10 +104,10 @@ jobs:
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
 #          if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
-#            ./turbobench silesia.tar -V0 -eBWT -abwt
-#            ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -abwt
-#            ./turbobench silesia.tar@bwt.tbb -p4
-#            mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
+#            ./turbobench silesia.tar -V0 -eBWT -aBWT
+#            ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
+#            ./turbobench silesia.tar@BWT.tbb -p4
+#            mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@BWT.md"
 #          fi
 #          ls -la silesia.*.md
 
@@ -127,10 +127,10 @@ jobs:
           ./turbobench silesia.tar -U -V0
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
-          ./turbobench silesia.tar -V0 -U -eBWT -abwt
-          ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -abwt
-          ./turbobench silesia.tar@bwt.tbb -p4
-          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
+          ./turbobench silesia.tar -V0 -U -eBWT -aBWT
+          ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
+          ./turbobench silesia.tar@BWT.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@BWT.md"
 
       # ------------------ Windows (MSYS2) ------------------
       - name: Set git to use LF
@@ -168,13 +168,13 @@ jobs:
           ./turbobench silesia.tar -U -V0
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar.md"
-          ./turbobench silesia.tar -V0 -eBWT -abwt
-          ./turbobench silesia.tar -V0 -U -ebwtsatan,7x,8x,9x -b68m -abwt
-          ./turbobench silesia.tar@bwt.tbb -p4
-          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@bwt.md"
+          ./turbobench silesia.tar -V0 -eBWT -aBWT
+          ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
+          ./turbobench silesia.tar@BWT.tbb -p4
+          mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@BWT.md"
           ./turbobench turbobench.exe -V0 -eFAST -aFAST
           ./turbobench turbobench.exe@FAST.tbb -p4
-          mv -f turbobench.exe.md "turbobech.${{ matrix.name }}.exe@FAST.md"
+          mv -f turbobench.exe.md "turbobench.${{ matrix.name }}.exe@FAST.md"
           ls -la *.md
       # ------------------ Package (Linux / macOS) ------------------
       - name: Package artifact (Linux/macOS)
@@ -228,7 +228,7 @@ jobs:
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
             silesia.${{ matrix.name }}.tar.md
-            silesia.${{ matrix.name }}.tar@bwt.md
+            silesia.${{ matrix.name }}.tar@BWT.md
             turbobench.${{ matrix.name }}.exe@FAST.md
           if-no-files-found: ignore
 
