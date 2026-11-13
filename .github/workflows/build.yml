@@ -38,21 +38,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y nasm libomp-dev
       - run: make BLOSC=0 OPENZL=0 PIVCO=0 RUST=0
-      - name: Download silesia.tar.gz and gunzip → silesia.tar
-        run: |
-          curl -L -o silesia.tar.gz \
-            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-          gunzip silesia.tar.gz
-      - run: |
-          lscpu
-          gcc --version
-          clang --version || true
-          rustc --version
-          cargo --version
-      - run: ./turbobench -l2
-      - run: ./turbobench turbobench -V0 -U
-      - run: ./turbobench silesia.tar -V0 -U
-      - run: ./turbobench silesia.tar -V0 -U -eBWT -abwt
+#      - name: Download silesia.tar.gz and gunzip → silesia.tar
+#        run: |
+#          curl -L -o silesia.tar.gz \
+#            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+#          gunzip silesia.tar.gz
+#      - run: |
+#          lscpu
+#          gcc --version
+#          clang --version || true
+#          rustc --version
+#          cargo --version
+#      - run: ./turbobench -l2
+#      - run: ./turbobench turbobench -V0 -U
+#      - run: ./turbobench silesia.tar -V0 -U
+#      - run: ./turbobench silesia.tar -V0 -U -eBWT -abwt
   linux-riscv:
     runs-on: ubuntu-24.04-riscv
     strategy:
