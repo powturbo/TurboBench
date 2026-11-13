@@ -96,11 +96,11 @@ jobs:
 #          curl -L -o silesia.tar.gz \
 #            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
 #          gunzip silesia.tar.gz
-      - name: benchmark
-        if: matrix.compiler == 'gcc' 
-        run: |
-          ./turbobench -l2
-          ./turbobench turbobench -U -V0 -eTURBO -i1,1
+#      - name: benchmark
+#        if: matrix.compiler == 'gcc' 
+#        run: |
+#          ./turbobench -l2
+#          ./turbobench turbobench -U -V0 -eTURBO -i1,1
 #         ./turbobench silesia.tar -U -i0,0
 
   macos:
@@ -123,22 +123,22 @@ jobs:
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
           cc -v
       - run: make OPENZL=0 PIVCO=0 RUST=0
-      - name: Download silesia.tar.gz and gunzip → silesia.tar
-        run: |
-          curl -L -o silesia.tar.gz https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-          gunzip silesia.tar.gz
-          wget ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
-          gunzip NASA_access_log_Jul95.gz
-          wget https://codeberg.org/pbm/former/raw/branch/master/data/enwik8.gz
-          gunzip enwik8.gz
-      - run: sysctl -n machdep.cpu.brand_string
-      - run: ./turbobench -l2
-      - run: ./turbobench turbobench -V0 -U
-      - run: ./turbobench silesia.tar -V0 -U
-      - run: ./turbobench silesia.tar -V0 -U -eBWT -abwt
-      - run: ./turbobench silesia.tar -V0 -U -ebwtsatan,7x,8x,9x -b68m -abwt
-      - run: ./turbobench NASA_access_log_Jul95 -V0 -eBWT -abwt 
-      - run: ./turbobench enwik8 -V0 -eBWT -abwt 
+#      - name: Download silesia.tar.gz and gunzip → silesia.tar
+#        run: |
+#          curl -L -o silesia.tar.gz https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+#          gunzip silesia.tar.gz
+#          wget ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
+#          gunzip NASA_access_log_Jul95.gz
+#          wget https://codeberg.org/pbm/former/raw/branch/master/data/enwik8.gz
+#          gunzip enwik8.gz
+#      - run: sysctl -n machdep.cpu.brand_string
+#      - run: ./turbobench -l2
+#      - run: ./turbobench turbobench -V0 -U
+#      - run: ./turbobench silesia.tar -V0 -U
+#      - run: ./turbobench silesia.tar -V0 -U -eBWT -abwt
+#      - run: ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -abwt
+#      - run: ./turbobench NASA_access_log_Jul95 -V0 -eBWT -abwt 
+#      - run: ./turbobench enwik8 -V0 -eBWT -abwt 
 
   windows:
     runs-on: windows-latest
@@ -166,22 +166,22 @@ jobs:
             mingw-w64-ucrt-x86_64-llvm-openmp
       - run: git submodule update --init --recursive
       - run: make OPENZL=0 PIVCO=0 RUST=0
-      - name: Download silesia.tar.gz and gunzip → silesia.tar
-        run: |
-          curl -L -o silesia.tar.gz \
-            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-          gunzip silesia.tar.gz
-          wget ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
-          gunzip NASA_access_log_Jul95.gz
-          wget https://codeberg.org/pbm/former/raw/branch/master/data/enwik8.gz 
-          gunzip enwik8.gz
-      - run: ./turbobench -l2
-      - run: ./turbobench turbobench.exe -U -V0
-      - run: ./turbobench.exe silesia.tar -U -V0
-      - run: ./turbobench silesia.tar -V0 -eBWT -abwt
-      - run: ./turbobench silesia.tar -V0 -ebwtsatan,7x,8x,9x -b68m -abwt
-      - run: ./turbobench NASA_access_log_Jul95 -V0 -eBWT -abwt 
-      - run: ./turbobench enwik8 -V0 -eBWT -abwt 
+ #     - name: Download silesia.tar.gz and gunzip → silesia.tar
+ #       run: |
+ #         curl -L -o silesia.tar.gz \
+ #           https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+ #         gunzip silesia.tar.gz
+ #         wget ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz
+ #         gunzip NASA_access_log_Jul95.gz
+ #         wget https://codeberg.org/pbm/former/raw/branch/master/data/enwik8.gz 
+ #         gunzip enwik8.gz
+ #     - run: ./turbobench -l2
+ #     - run: ./turbobench turbobench.exe -U -V0
+ #     - run: ./turbobench.exe silesia.tar -U -V0
+ #     - run: ./turbobench silesia.tar -V0 -eBWT -abwt
+ #     - run: ./turbobench silesia.tar -V0 -ebwtsatan,7b68m,8b68m,9b68m -b68m -abwt
+ #     - run: ./turbobench NASA_access_log_Jul95 -V0 -eBWT -abwt 
+ #     - run: ./turbobench enwik8 -V0 -eBWT -abwt 
 
 #riscv64
 #         sudo apt install libomp-dev
