@@ -172,9 +172,9 @@ jobs:
           ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
           ./turbobench silesia.tar@BWT.tbb -p4
           mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@BWT.md"
-          ./turbobench turbobench.exe -V0 -eFAST -aFAST
-          ./turbobench turbobench.exe@FAST.tbb -p4
-          mv -f turbobench.exe.md "turbobench.${{ matrix.name }}.exe@FAST.md"
+          ./turbobench turbobench.exe -V0 -eFAST
+          ./turbobench turbobench.exe.tbb -p4
+          mv -f turbobench.exe.md "turbobench.${{ matrix.name }}.exe.md"
           ls -la *.md
       # ------------------ Package (Linux / macOS) ------------------
       - name: Package artifact (Linux/macOS)
@@ -229,7 +229,7 @@ jobs:
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
             silesia.${{ matrix.name }}.tar.md
             silesia.${{ matrix.name }}.tar@BWT.md
-            turbobench.${{ matrix.name }}.exe@FAST.md
+            turbobench.${{ matrix.name }}.exe.md
           if-no-files-found: ignore
 
   # ------------------------------------------------------------------
@@ -285,17 +285,14 @@ jobs:
         run: |
           {
             echo "# TurboBench Silesia Corpus x86_64 aarch64 risc-v64"
-            echo "---"
           } > benchmark.md
 
-          for f in $(find artifacts -name 'silesia.*.tar*.md' | sort); do
-            platform=$(basename "$f" | sed 's/^silesia\.//;s/\.tar.*\.md$//')
+          for f in $(find artifacts \( -name 'silesia.*.tar*.md' -o -name 'turbobench.*.exe*.md' \) | sort); do
+            platform=$(basename "$f" | sed -E 's/^(silesia|turbobench)\.//; s/\.(tar|exe).*\.md$//')
             echo "## Platform: ${platform}" >> benchmark.md
             echo "" >> benchmark.md
             cat "$f" >> benchmark.md
-            echo "---" >> benchmark.md
           done
-
           head -n 40 benchmark.md
           wc -l benchmark.md
 
