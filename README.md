@@ -190,6 +190,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [mzip](https://github.com/Cranot/mzip) |2026/09  |c  |too slow|
 | [mbrotli](https://github.com/M-Compressors/mzstd) | 2026/10 | rust |zstd reimplementation|
 | [Oodle](http://www.radgametools.com/oodle.htm) |  |c++  |windows/linux/macos x86_64/arm64|
+| [orz](https://github.com/richox/orz) | 2026/11 | rust |rolz|
 | [Pithy](https://github.com/johnezang/pithy) |  |c  |lz  |
 | [Quicklz](https://github.com/robottwo/quicklz) |  |c  |lz  |
 | [sap](https://github.com/CoreSecurity/pysap) |  |c++|lz+huffman  |
@@ -380,5 +381,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - Lz4:
   t# : threads<br />
 
-Last update: 09 NOV 2026
+Last update: 17 NOV 2026
 
