@@ -1,0 +1,7 @@
+﻿File,Purpose
+src/ffi.rs,"Full C ABI implementation (#[no_mangle] extern ""C"")"
+include/orz.h,Public C header
+examples/c_example.c,Minimal round-trip example
+src/lib.rs,Enabled pub mod ffi; (was previously commented out)
+src/ioutil.rs,Added CountWrite::into_inner() needed by the FFI
+README.md,Documented the C API and linking instructions
