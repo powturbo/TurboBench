@@ -16,6 +16,9 @@ pub use pulsar::*;
 #[cfg(feature = "mzstd")]
 pub use mzstd_ffi;
 
+#[cfg(feature = "orz")]
+pub use orz_ffi;
+
 #[cfg(feature = "zlib-rs")]
 pub use libz_rs_sys;
 
