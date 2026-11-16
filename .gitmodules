@@ -183,3 +183,6 @@
 [submodule "EC/rgc"]
 	path = EC/rgc
 	url = https://github.com/mykola-ponomarenko-ua/rgc.git
+[submodule "orz"]
+	path = orz
+	url = https://github.com/richox/orz.git
