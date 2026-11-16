@@ -335,6 +335,11 @@ enum {
 #endif
  P_OPENZL_CSV,
 
+#ifndef _ORZ
+#define _ORZ 0
+#endif
+ P_ORZ,
+
 #ifndef _PCODEC
 #define _PCODEC 0
 #endif
@@ -1213,6 +1218,10 @@ extern "C" size_t mzip_decompress( char *in, size_t inlen, char *out);
   #endif
 
 //------  O -------------------------------------
+  #if _ORZ
+#include "orz/orz-ffi/include/orz.h"
+  #endif
+
   #if _OPENZL  // Adapted from lzbench
 #include "openzl/include/openzl/openzl.h"
 #include "openzl/include/openzl/codecs/zl_segmenters.h"
@@ -2068,6 +2077,7 @@ struct plugs plugs[] = {
 
   { P_NZ1,           "nz1",           _NZ1,       "nz1 nanozip 1",               "" },
  
+  { P_ORZ,           "orz",           _ORZ,       "orz",                         "0,1,2" },
   { P_OPENZL_U8,     "openzl_u8",     _OPENZL,    "openzl u8",                   "" },
   { P_OPENZL_I8,     "openzl_i8",     _OPENZL,    "openzl i8",                   "" },
   { P_OPENZL_U16,    "openzl_le_u16", _OPENZL,    "openzl u16",                  "" },
@@ -3009,6 +3019,12 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
 //=== O =============================================================================================================================
+      #if _ORZ
+    case P_ORZ: { OrzBuffer cb = {0}; cb.capacity = outsize; int rc = orz_encode((const uint8_t *)in, inlen, lev, &cb); 
+      if(rc != ORZ_OK) return 0; outlen = cb.len; memcpy(out, cb.data, cb.len); orz_buffer_free(&cb); return outlen;
+    }
+      #endif
+
       #if _OPENZL
     case P_OPENZL_U8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >(inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;}
     case P_OPENZL_I8:     { char *q; size_t windowLog = (q=strchr(prm,'w'))?atoi(q+(q[1]=='='?2:1)):WINDOWLOG_OPENZL; openzl_params_s *p = ozl_init_integer_t<uint8_t >(inlen, lev, windowLog); int64_t rc = ozl_compress((char *)in, inlen, (char *)out, outsize, p); ozl_deinit(p); return rc;}
@@ -4096,6 +4112,12 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
 //=== O =============================================================================================================================
+      #if _ORZ
+    case P_ORZ: { OrzBuffer db = {0}; int rc = orz_decode((const uint8_t *)in, inlen, &db); 
+      if(rc != ORZ_OK) return 0; memcpy(out, db.data, db.len); orz_buffer_free(&db); return inlen;
+    }
+      #endif
+
       #if _OODLE
     case P_OODLE: { 
       int nodll = strchr(prm,'d')?1:0;  
