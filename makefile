@@ -786,6 +786,10 @@ ifneq ($(wildcard mbrotli/.),)
   RUST_FEATURES += mbrotli
   PLG_FLAGS += -D_MBROTLI
 endif
+ifneq ($(wildcard orz/.),)
+  RUST_FEATURES += orz
+  PLG_FLAGS += -D_ORZ
+endif
 ifneq ($(wildcard pulsar-best/.),)
   RUST_FEATURES += pulsar
   PLG_FLAGS += -D_PULSAR
@@ -848,6 +852,7 @@ $(RUST_MANIFEST): $(RUST_DIR)/Cargo.toml | $(PCO_C_BUILD)/Cargo.toml $(SZSTD_CAP
 		-e 's|path\s*=\s*"\.\./Glyd"|path = "$(abspath Glyd)"|' \
 		-e 's|path\s*=\s*"\.\./mbrotli/mbrotli-ffi"|path = "$(abspath mbrotli/mbrotli-ffi)"|' \
 		-e 's|path\s*=\s*"\.\./mzstd/mzstd-ffi"|path = "$(abspath mzstd/mzstd-ffi)"|' \
+		-e 's|path\s*=\s*"\.\./turbobench_/orz-ffi"|path = "$(abspath turbobench_/orz-ffi)"|' \
 		-e 's|path\s*=\s*"\.\./pcodec/pco_c"|path = "$(abspath $(PCO_C_BUILD))"|' \
 		-e 's|path\s*=\s*"\.\./pulsar-best"|path = "$(abspath pulsar-best)"|' \
 		-e 's|path\s*=\s*"\.\./zlib-rs/libz-rs-sys"|path = "$(abspath zlib-rs/libz-rs-sys)"|' $@
@@ -863,19 +868,19 @@ RUST_TARGET :=
 RUST_LIB    := $(RUST_TARGET_DIR)/release/lib$(RUST_PKG_NAME).a
 endif
 
-RUST_SZSTD_MAP := $(RUST_TARGET_DIR)/szstd-redefine.syms
+#RUST_SZSTD_MAP := $(RUST_TARGET_DIR)/szstd-redefine.syms
 
 $(RUST_LIB): $(RUST_MANIFEST)
 	$(RUST_EXP) RUSTFLAGS="$(RUSTFLAGS_EXTRA)" cargo build --release $(RUST_TARGET) --manifest-path=$(RUST_MANIFEST) --target-dir=$(RUST_TARGET_DIR) $(RUST_FEATURES_ARG)
-	@nm -g --defined-only $@ 2>/dev/null | \
-		awk '/ ZSTD_/{print $$3, "szstd_" $$3} / ZDICT_/{print $$3, "szstd_" $$3}' | sort -u > $(RUST_SZSTD_MAP)
-	@if [ -s $(RUST_SZSTD_MAP) ]; then \
-		echo "--> objcopy --redefine-syms ($(shell wc -l < $(RUST_SZSTD_MAP)) symbols)"; \
-		objcopy --redefine-syms=$(RUST_SZSTD_MAP) $@ $@.szstd; \
-		mv -f $@.szstd $@; \
-	else \
-		echo "--> no ZSTD_/ZDICT_ symbols to rename"; \
-	fi
+#	@nm -g --defined-only $@ 2>/dev/null | \
+#		awk '/ ZSTD_/{print $$3, "szstd_" $$3} / ZDICT_/{print $$3, "szstd_" $$3}' | sort -u > $(RUST_SZSTD_MAP)
+#	@if [ -s $(RUST_SZSTD_MAP) ]; then \
+#		echo "--> objcopy --redefine-syms ($(shell wc -l < $(RUST_SZSTD_MAP)) symbols)"; \
+#		objcopy --redefine-syms=$(RUST_SZSTD_MAP) $@ $@.szstd; \
+#		mv -f $@.szstd $@; \
+#	else \
+#		echo "--> no ZSTD_/ZDICT_ symbols to rename"; \
+#	fi
 
 rustlib: $(RUST_LIB)
 LIBS += $(RUST_LIB)
