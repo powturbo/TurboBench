@@ -155,6 +155,7 @@ jobs:
             mingw-w64-ucrt-x86_64-clang
             mingw-w64-ucrt-x86_64-libgomp
             mingw-w64-ucrt-x86_64-llvm-openmp
+            mingw-w64-ucrt-x86_64-nasm
       - name: Build (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
