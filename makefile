@@ -435,7 +435,7 @@ ifneq ($(wildcard isa-l/.),)
       $(ISAL_LIB): $(ISAL_SRCS)
 	@echo "--> nasm installed, building isa-l"
 	@mkdir -p  $(BUILD)/isa-l 
-	$(MAKE) -C isa-l -f Makefile.unx
+	$(MAKE) -C isa-l -f Makefile.unx units=igzip
 	@mv -f isa-l/bin/isa-l.a $(ISAL_LIB)
     endif
     LIBS += $(ISAL_LIB)
