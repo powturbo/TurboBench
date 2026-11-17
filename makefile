@@ -639,6 +639,12 @@ $(MINIZ_LIB): $(MINIZ_SRCS)
 LIBS += $(MINIZ_LIB)
 endif
 
+ifneq ($(wildcard turbobench_/minlz-c/.),)
+PLG_FLAGS+=-D_MINLZ
+MINLZ_LIB = turbobench_/minlz-c/libmlz.a
+LIBS += $(MINLZ_LIB)
+endif
+
 ifneq ($(wildcard misa77),)
 PLG_FLAGS += -D_MISA77
 MISA77_SRC := misa77/src
