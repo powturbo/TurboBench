@@ -95,7 +95,8 @@ jobs:
           fi
 
       - name: Benchmark silesia.tar.md (Linux)
-        if: matrix.platform == 'linux' && matrix.arch != 'x86_64'
+        if: matrix.platform == 'linux' 
+#&& matrix.arch != 'x86_64'
         run: |
           curl -L -o silesia.tar.gz \
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
