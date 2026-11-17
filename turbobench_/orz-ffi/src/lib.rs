@@ -4,7 +4,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![feature(portable_simd)]
+//#![feature(portable_simd)]
+#[cfg(feature = "simd")]
 #![feature(likely_unlikely)]
 
 pub mod ffi;
