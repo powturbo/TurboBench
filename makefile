@@ -417,12 +417,10 @@ endif
 #endif 
 endif
 
-ISAL_LIB :=
 ifneq ($(wildcard isa-l/.),)
   ifndef CROSS
     NASM := $(shell command -v nasm 2>/dev/null)
     ifeq ($(NASM),)
-      # nasm not found – try precompiled library
       ifneq ($(wildcard isa-l_/$(OS)-$(ARCH)/isa-l.a),)
         $(info --> nasm not installed, using precompiled libs)
         PLG_FLAGS += -D_ISA_L
@@ -431,13 +429,12 @@ ifneq ($(wildcard isa-l/.),)
         $(info --> nasm not installed and no precompiled lib: isa-l_/$(OS)-$(ARCH)/isa-l.a)
       endif
     else
-      # nasm is present – build from source
       PLG_FLAGS += -D_ISA_L
       ISAL_SRCS := $(shell find isa-l -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.cc' -o -name '*.asm' \) 2>/dev/null)
-      ISAL_LIB  := $(BUILD)/isa-l/bin/isa-l.a
+      ISAL_LIB  := $(BUILD)/isa-l/isa-l.a
       $(ISAL_LIB): $(ISAL_SRCS)
 	@echo "--> nasm installed, building isa-l"
-	@mkdir -p  $(BUILD)/isa-l/bin
+	@mkdir -p  $(BUILD)/isa-l
 	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILD)/isa-l)
 	@mv -f isa-l/bin/isa-l.a $@
     endif
