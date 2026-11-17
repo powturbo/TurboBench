@@ -62,7 +62,11 @@ jobs:
           submodules: recursive
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@nightly
+          with:
+            components: rust-src
+
+#        uses: dtolnay/rust-toolchain@stable
 
       # ------------------ Linux ------------------
       - name: Install build tools (Linux)
