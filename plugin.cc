@@ -287,6 +287,10 @@ enum {
 #define _MINIZ 0
 #endif
  P_MINIZ,
+#ifndef _MINLZ
+#define _MINLZ 0
+#endif
+ P_MINLZ,
 #ifndef _MISA77
 #define _MISA77 0
 #endif
@@ -1190,6 +1194,10 @@ class Out: public libzpaq::Writer {
 #include "memlz/memlz.h"
   #endif
 
+  #if _MINLZ
+#include "turbobench_/minlz-c/libmlz.h"
+  #endif
+
   #if _MINIZ
 typedef unsigned long mz_ulong;
 extern "C" int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len, const unsigned char *pSource, mz_ulong source_len, int level);
@@ -1219,7 +1227,7 @@ extern "C" size_t mzip_decompress( char *in, size_t inlen, char *out);
 
 //------  O -------------------------------------
   #if _ORZ
-#include "orz/orz-ffi/include/orz.h"
+#include "turbobench_/orz-ffi/include/orz.h"
   #endif
 
   #if _OPENZL  // Adapted from lzbench
@@ -2068,6 +2076,7 @@ struct plugs plugs[] = {
   { P_MBROTLI,       "mbrotli",       _MBROTLI,   "mbrotli",                     "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
   { P_MEMLZ,         "memlz",         _MEMLZ,     "memlz",                       "" },
   { P_MINIZ,         "miniz",         _MINIZ,     "miniz",                       "1,2,3,4,5,6,7,8,9" },
+  { P_MINLZ,         "minlz",         _MINLZ,     "minlz",                       "0,1,2,3" },
   { P_MISA77,        "misa77",        _MISA77,    "misa77",                      "0,1,2,3,4,-1" },
 //  { P_MISA77S,       "misa77_safe",   _MISA77,    "misa77 safe",                 "0,1" },
   { P_MSCOMPRESS,    "mscompress",    _MSCOMPRESS,"ms-compress",                 "2,3,4" },
@@ -2986,6 +2995,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _MEMLZ
     case P_MEMLZ: return memlz_compress(out, in, inlen); // memlz_reset((memlz_state*)workmem); return memlz_stream_compress(out, in, inlen, (memlz_state*)workmem);
+      #endif
+
+      #if _MINLZ
+    case P_MINLZ: return mlzcompresslevel(in, inlen, out, outsize, lev);
       #endif
 
       #if _MINIZ
@@ -4085,6 +4098,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_MINIZ: { uLongf outsize = outlen; int rc = mz_uncompress(out, &outsize, in, inlen); } break;
       #endif
 
+      #if _MINLZ
+    case P_MINLZ: return mlzdecompress(in, inlen, out, outlen);
+      #endif
+
       #if _MISA77
     case P_MISA77: 
     case P_MISA77S: return !lev || lev==1?misa77::decompress(in, inlen, out, outlen, misa77::dconfig(true)):misa77::decompress(in, inlen, out, outlen);
@@ -4841,6 +4858,9 @@ char *codver(int codec, char *v, char *s) {
     case P_NZ1 : return "v2025.08.10"; 
       #endif
 
+      #if _ORZ
+    case P_ORZ : return "v1.6.1 2026.03.18"; 
+      #endif
       #if _OPENZL
     case P_OPENZL_U8:  case P_OPENZL_I8:
     case P_OPENZL_U16: case P_OPENZL_I16: 
