@@ -63,8 +63,8 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
-          with:
-            components: rust-src
+        with:
+          components: rust-src
 
 #        uses: dtolnay/rust-toolchain@stable
 
