@@ -434,13 +434,15 @@ ifneq ($(wildcard isa-l/.),)
       ISAL_LIB  := $(BUILD)/isa-l/isa-l.a
       $(ISAL_LIB): $(ISAL_SRCS)
 	@echo "--> nasm installed, building isa-l"
-	@mkdir -p  $(BUILD)/isa-l
+	@mkdir -p  $(BUILD)/isa-l isa-l/bin
 	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILD)/isa-l)
 	@mv -f isa-l/bin/isa-l.a $@
     endif
     LIBS += $(ISAL_LIB)
   endif
 endif
+#
+
 #--- K ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard kanzi-cpp/.),)
 PLG_FLAGS += -D_KANZI 
