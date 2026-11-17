@@ -418,6 +418,7 @@ endif
 endif
 
 ifneq ($(wildcard isa-l/.),)
+ifneq ($(OS), Windows)  # not compiling for windows in CI.
   ifndef CROSS
     NASM := $(shell command -v nasm 2>/dev/null)
     ifeq ($(NASM),)
@@ -440,6 +441,7 @@ ifneq ($(wildcard isa-l/.),)
     endif
     LIBS += $(ISAL_LIB)
   endif
+endif
 endif
 #lib_name=$(abspath $(BUILD)/isa-l)/isa-l.a
 # O=$(abspath $(BUILD)/isa-l) 
