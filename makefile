@@ -434,9 +434,8 @@ ifneq ($(wildcard isa-l/.),)
       ISAL_LIB  := $(BUILD)/isa-l/isa-l.a
       $(ISAL_LIB): $(ISAL_SRCS)
 	@echo "--> nasm installed, building isa-l"
-	@mkdir -p  $(BUILD)/isa-l isa-l/bin
-	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILD)/isa-l)
-	@mv -f isa-l/bin/isa-l.a $@
+	@mkdir -p  $(BUILD)/isa-l 
+	$(MAKE) -C isa-l -f Makefile.unx O=$(abspath $(BUILD)/isa-l) lib_name=$(abspath $(BUILD)/isa-l)/isa-l.a
     endif
     LIBS += $(ISAL_LIB)
   endif
