@@ -180,34 +180,106 @@ char *cpubrand(char* brand, size_t max_len) {
   return brand;
 }
   #elif defined(__linux__)
-char *cpubrand(char* brand, size_t max_len) {
-  FILE* fp = fopen("/proc/cpuinfo", "r");
-  if(!fp) {
-    strncpy(brand, "Unknown Linux CPU", max_len - 1);
-    brand[max_len - 1] = '\0';
-    return brand;
-  }
-  char line[256];
-  brand[0] = '\0';
-  while(fgets(line, sizeof(line), fp)) {
-    if(strncmp(line, "model name", 10) == 0 || strncmp(line, "Hardware", 8) == 0 || strncmp(line, "uarch", 5) == 0) {
-      char *colon = strchr(line, ':');
-      if(colon) {
-        colon++;
-        while (*colon == ' ' || *colon == '\t') colon++;
-        size_t len = strlen(colon);
-        if(len > 0 && colon[len-1] == '\n') colon[len-1] = '\0';
-        strncpy(brand, colon, max_len - 1);
-        brand[max_len - 1] = '\0';
-        break;
+static void set_str(char *dst, size_t max_len, const char *src) {
+  if (max_len == 0) return;
+  strncpy(dst, src, max_len - 1);
+  dst[max_len - 1] = '\0';
+}
+
+static char *trim(char *s) {
+  while (isspace((unsigned char)*s)) s++;
+  size_t n = strlen(s);
+  while (n > 0 && isspace((unsigned char)s[n - 1])) s[--n] = '\0';
+  return s;
+}
+
+static int match_key(const char *line, const char *key, char *value, size_t vlen) {
+  const char *colon = strchr(line, ':');
+  if (!colon) return 0;
+
+  char kbuf[64];
+  size_t klen = (size_t)(colon - line);
+  if (klen >= sizeof(kbuf)) return 0;
+  memcpy(kbuf, line, klen);
+  kbuf[klen] = '\0';
+  if (strcmp(trim(kbuf), key) != 0) return 0;
+
+  char vbuf[256];
+  set_str(vbuf, sizeof(vbuf), colon + 1);
+  char *v = trim(vbuf);
+  if (*v == '\0') return 0;   // key present but empty: keep looking 
+
+  set_str(value, vlen, v);
+  return 1;
+}
+
+static int read_cpuinfo_field(const char *key, char *value, size_t vlen) {
+  FILE *fp = fopen("/proc/cpuinfo", "r");
+  if (!fp) return 0;
+
+  char line[1024];
+  int found = 0;
+  while (!found && fgets(line, sizeof(line), fp)) {
+    size_t n = strlen(line);
+    if (n > 0 && line[n - 1] != '\n' && !feof(fp)) {
+      /* Line longer than buffer: discard the remainder */
+      int c;
+      while ((c = fgetc(fp)) != '\n' && c != EOF) {
       }
     }
+    found = match_key(line, key, value, vlen);
   }
   fclose(fp);
-  if(brand[0] == '\0') {
-    strncpy(brand, "Unknown Linux CPU", max_len - 1);
-    brand[max_len - 1] = '\0';
+  return found;
+}
+
+/* Device-tree model (ARM boards, many RISC-V boards). */
+static int read_devicetree_model(char *value, size_t vlen) {
+  static const char *paths[] = {
+    "/proc/device-tree/model",
+    "/sys/firmware/devicetree/base/model",
+  };
+  for (size_t i = 0; i < sizeof(paths) / sizeof(paths[0]); i++) {
+    FILE *fp = fopen(paths[i], "rb");
+    if (!fp) continue;
+    char buf[256];
+    size_t n = fread(buf, 1, sizeof(buf) - 1, fp);
+    fclose(fp);
+    buf[n] = '\0';
+    char *v = trim(buf);
+    if (*v != '\0') {
+      set_str(value, vlen, v);
+      return 1;
+    }
   }
+  return 0;
+}
+char *cpubrand(char *brand, size_t max_len) {
+  if (max_len == 0) return brand;
+  brand[0] = '\0';
+  char tmp[256];
+
+  if (read_cpuinfo_field("model name", tmp, sizeof(tmp)) ||
+      read_cpuinfo_field("Hardware", tmp, sizeof(tmp)) ||
+      read_cpuinfo_field("uarch", tmp, sizeof(tmp)) ||
+      read_devicetree_model(tmp, sizeof(tmp))) {
+    set_str(brand, max_len, tmp);
+    return brand;
+  }
+  char impl[64], part[64], isa[256];
+  if (read_cpuinfo_field("CPU implementer", impl, sizeof(impl)) &&
+      read_cpuinfo_field("CPU part", part, sizeof(part))) {
+    snprintf(tmp, sizeof(tmp), "ARM implementer %s part %s", impl, part);
+    set_str(brand, max_len, tmp);
+    return brand;
+  }
+  
+  if (read_cpuinfo_field("isa", isa, sizeof(isa))) { //riscv64: no uarch on many kernels, fall back to the ISA string
+    snprintf(tmp, sizeof(tmp), "RISC-V %s", isa);
+    set_str(brand, max_len, tmp);
+    return brand;
+  }
+  set_str(brand, max_len, "Unknown Linux CPU");
   return brand;
 }
     #else
