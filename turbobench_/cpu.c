@@ -301,7 +301,7 @@ static arm64cpu_t arm64cpu[] = {
   {0xc0, 0xac3, "Ampere AmpereOne"},
   {0xc0, 0xac4, "Ampere AmpereOne"},
 };
-#define ARM64CPU_NUM sizeof(arm64cpu[])/sizeof(arm64cpu[0])
+#define ARM64CPU_NUM sizeof(arm64cpu)/sizeof(arm64cpu[0])
 
 char *cpubrand(char *brand, size_t max_len) {
   if (max_len == 0) return brand;
