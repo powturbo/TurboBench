@@ -255,7 +255,7 @@ static int read_devicetree_model(char *value, size_t vlen) {
   return 0;
 }
 
-typedef struct { uint8_t implementer, part; const char *name; } arm64cpu_t;
+typedef struct { uint16_t implementer, part; const char *name; } arm64cpu_t;
 static arm64cpu_t arm64cpu[] = {
   {0x41, 0xd03, "ARM Cortex-A53"},
   {0x41, 0xd04, "ARM Cortex-A35"},
