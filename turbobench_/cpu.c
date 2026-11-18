@@ -256,7 +256,7 @@ static int read_devicetree_model(char *value, size_t vlen) {
 }
 
 typedef struct { uint8_t implementer, part; const char *name; } arm64cpu_t;
-static arm64cpu_t arm64_cpu[] = {
+static arm64cpu_t arm64cpu[] = {
   {0x41, 0xd03, "ARM Cortex-A53"},
   {0x41, 0xd04, "ARM Cortex-A35"},
   {0x41, 0xd05, "ARM Cortex-A55"},
@@ -301,7 +301,7 @@ static arm64cpu_t arm64_cpu[] = {
   {0xc0, 0xac3, "Ampere AmpereOne"},
   {0xc0, 0xac4, "Ampere AmpereOne"},
 };
-#define ARM64CPU_NUM sizeof(arm64_cpu[])/sizeof(arm64_cpu[0])
+#define ARM64CPU_NUM sizeof(arm64cpu[])/sizeof(arm64cpu[0])
 
 char *cpubrand(char *brand, size_t max_len) {
   if (max_len == 0) return brand;
@@ -319,13 +319,13 @@ char *cpubrand(char *brand, size_t max_len) {
   if(read_cpuinfo_field("CPU implementer", impl, sizeof(impl)) &&
       read_cpuinfo_field("CPU part", part, sizeof(part))) {
     snprintf(tmp, sizeof(tmp), "ARM implementer %s part %s", impl, part);
-//      #if defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) 
+      #if defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) 
     for(arm64cpu_t *s = arm64cpu; s < arm64cpu + ARM64CPU_NUM; s++)
       if(s->implementer == impl && s->part == part) { 
         snprintf(tmp, sizeof(tmp), "%s", s->name);
         break;
       }
-//      #endif
+      #endif
     set_str(brand, max_len, tmp);
     return brand;
   }
