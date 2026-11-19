@@ -1974,7 +1974,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     
     memstack_t _stack = stackini();
     becomp(in, len*nb, out, outsize, bsize, 2 ,plug->lev,plug->prm, name, finame);
-    size_t overhead = stackpeak(_stack);                                             //printf("coverhead=%zu ", overhead); 
+    size_t overhead = stackpeak(_stack);                                            //printf("coverhead=%zu ", overhead); 
 
            _stack = stackini(); 
     size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame)/nb, 
@@ -1983,7 +1983,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     tc         = tm_tmin(nb);
     plug->len += outlen;
     plug->tc  += tc;
-    plug->memc = mempeak() - peak;                                              //if(memused()>2048) printf("warning: memory in compression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
+    plug->memc = mempeak() - peak;                                                  //if(memused()>2048) printf("warning: memory in compression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
     plug->stkc = raw > overhead ? raw - overhead : 0;
     
     if(cmp) {
@@ -1994,7 +1994,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
       size_t     peak   = mempeakinit();
       memstack_t _stack = stackini();
       bedecomp(out, outlen, cpz, len*nb, bsize, 2,plug->lev,plug->prm)/nb;
-      size_t  overhead = stackpeak(_stack);                                            //printf("doverhead=%zu ", overhead); 
+      size_t  overhead = stackpeak(_stack);                                        
       
                 _stack = stackini();
       unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm)/nb;
@@ -2002,15 +2002,15 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
  
       td         = tm_tmin(nb);
       plug->td  += td;
-      plug->memd = mempeak() - peak;                                              //if(tm_verbose && totinlen == filen) printf("%9.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
-      plug->stkd = raw > overhead ? raw - overhead : 0;                           //if(memused()>2048) printf("warning: memory in decompression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
-                                                                                  //printf("stkd=%llu ", plug->stkd ); 
+      plug->memd = mempeak() - peak;                                                //if(tm_verbose && totinlen == filen) printf("%9.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
+      plug->stkd = raw > overhead ? raw - overhead : 0;                             //if(memused()>2048) printf("warning: memory in decompression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
+                                                                           
       int e = memcheck(in, len, cpz, fuzz?3:cmp, finame);
       plug->err = plug->err?plug->err:e;
       BEPOST;
-    } //else                                                                      if(tm_verbose && totinlen == filen) { printf("%9.2f   %-16s %s\n", 0.0, name, finame); }
+    } //else                                                                        if(tm_verbose && totinlen == filen) { printf("%9.2f   %-16s %s\n", 0.0, name, finame); }
     if(totinlen >= filen) break;
-  }                                                                          //printf("ILEN=%llu Olen=%llu c=%f d=%f\n", totinlen, plug->len, plug->tc, plug->td);
+  }                                                                                 //printf("ILEN=%llu Olen=%llu c=%f d=%f\n", totinlen, plug->len, plug->tc, plug->td);
   _vfree(out, outsize);
   _vfree(_in, insizem);
   if(_cpy && _cpy != _in)
