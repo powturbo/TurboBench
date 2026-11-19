@@ -1210,7 +1210,10 @@ class Out: public libzpaq::Writer {
   #endif
 
   #if _MINLZ
-#include "turbobench_/minlz-c/libmlz.h"
+#include "turbobench_/minlz/minlz.h"
+//#undef MINLZ_H
+//#include "turbobench_/minlz/unminlz.h"
+//#include "turbobench_/minlz-c/libmlz.h"
   #endif
 
   #if _MINIZ
@@ -2543,7 +2546,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
   int      threads = 0; if(q = strchr(prm,'t')) threads = atoi(q+(q[1]=='='?2:1));
   
   switch(codec) {
-    case P_NOP: return 0;
+    case P_NOP: return nop();
 //=== A =============================================================================================================================
       #if _ACEAPEX
     case P_ACEFAST: lev += 10; 
@@ -3021,7 +3024,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _MINLZ
-    case P_MINLZ: return mlzcompresslevel(in, inlen, out, outsize, lev);
+    case P_MINLZ: return minlz_compress(in, inlen, out, outsize, lev);  //mlzcompresslevel(in, inlen, out, outsize, lev);
       #endif
 
       #if _MINIZ
@@ -3742,7 +3745,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
   int  threads = 0; if(q = strchr(prm,'t')) threads = atoi(q+(q[1]=='='?2:1));
 
   switch(codec) {
-    case P_NOP: return 0;
+    case P_NOP: return nop();
 //=== A =============================================================================================================================
       #if _ACEAPEX
     case P_ACEFAST: 
@@ -4119,7 +4122,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _MEMLZ
-    case P_MEMLZ: return (int64_t)memlz_decompress(out, in); //memlz_reset((memlz_state*)workmem); return (int64_t)memlz_stream_decompress(out, in, (memlz_state*)workmem);
+    case P_MEMLZ: return (int64_t)memlz_decompress(out, in);  //memlz_reset((memlz_state*)workmem); return (int64_t)memlz_stream_decompress(out, in, (memlz_state*)workmem);
       #endif
 
       #if _MINIZ
@@ -4127,7 +4130,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _MINLZ
-    case P_MINLZ: return mlzdecompress(in, inlen, out, outlen);
+    case P_MINLZ: return minlz_decompress(in, inlen, out, outlen); //return mlzdecompress(in, inlen, out, outlen);
+                          
       #endif
 
       #if _MISA77
