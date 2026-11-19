@@ -80,15 +80,13 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq build-essential nasm make libomp-dev
-          sudo apt-get install -y -qq gcc-14 g++-14
+          sudo apt-get install -y -qq gcc-14 g++-14 clang-20
           sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
           sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
           sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
           sudo update-alternatives --install /usr/bin/c++  c++  /usr/bin/g++-14  100
-
-#          sudo apt-get install -y -qq gcc-14 g++-14 clang-20
-#          sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
-#          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
+          sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
 
       - name: Show environment
         run: |
@@ -102,7 +100,7 @@ jobs:
           rustc --version
           cargo --version
       - name: make 
-        run: make AOCL=0 BLOSC=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0
+        run: make AOCL=0 BLOSC=0 BROTLI=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0 LZO=0 KANZI=0 XZ=0 MINIZ=0 LZHAM=0
 #      - name: Download silesia.tar.gz and gunzip → silesia.tar
 #        run: |
 #          curl -L -o silesia.tar.gz \
