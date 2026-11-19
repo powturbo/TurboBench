@@ -392,7 +392,7 @@ NOINLINE unsigned *stackini(void) {
     return from;
 }
 
-size_t stackpeak(unsigned *base) {
+size_t stackpeak(memstack_t base) {
   unsigned *p;
   if (!base || !g_lo || base > g_hi) return 0;
   p = g_lo;
@@ -1970,40 +1970,40 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
         memcpy(p, in, len);
       }
     }
-    size_t     peak   = mempeakinit();    //memstack_t _stack = stackini();
+    size_t     peak   = mempeakinit();    
     
-    unsigned *b0    = stackini();
+    memstack_t _stack = stackini();
     becomp(in, len*nb, out, outsize, bsize, 2 ,plug->lev,plug->prm, name, finame);
-    size_t overhead = stackpeak(b0);                                             //printf("coverhead=%zu ", overhead); 
+    size_t overhead = stackpeak(_stack);                                             //printf("coverhead=%zu ", overhead); 
 
-    unsigned *base = stackini(); 
-    size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame)/nb;
-    size_t raw     = stackpeak(base);
-    size_t fct_use = raw > overhead ? raw - overhead : 0;                        //printf("raw=%zu,use=%zu ", raw, fct_use); 
+           _stack = stackini(); 
+    size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame)/nb, 
+              raw = stackpeak(_stack);               //printf("raw=%zu,use=%zu ", raw, fct_use);
+ 
     tc         = tm_tmin(nb);
     plug->len += outlen;
     plug->tc  += tc;
     plug->memc = mempeak() - peak;                                              //if(memused()>2048) printf("warning: memory in compression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
-    plug->stkc = fct_use; //  stackpeak(_stack);
+    plug->stkc = raw > overhead ? raw - overhead : 0;
     
     if(cmp) {
       unsigned char *cpz = _cpy;
       if(fuzz & 2) { cpz = (_cpy+insizem) - len;                                    /*printf("SEGFAULT Check");fflush(stdout); cpz[len-1] = cpz[len]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
       if(_cpy != _in) memrcpy(cpz, in, len);
       
-      size_t     peak   = mempeakinit();      //memstack_t _stack = stackini();
-      unsigned *b0    = stackini();
+      size_t     peak   = mempeakinit();
+      memstack_t _stack = stackini();
       bedecomp(out, outlen, cpz, len*nb, bsize, 2,plug->lev,plug->prm)/nb;
-      size_t overhead = stackpeak(b0);                                            //printf("doverhead=%zu ", overhead); 
+      size_t  overhead = stackpeak(_stack);                                            //printf("doverhead=%zu ", overhead); 
       
-      unsigned *base = stackini();
+                _stack = stackini();
       unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm)/nb;
-      size_t raw     = stackpeak(base);  
-      size_t fct_use = raw > overhead ? raw - overhead : 0; 
+      size_t raw       = stackpeak(_stack);
+ 
       td         = tm_tmin(nb);
       plug->td  += td;
       plug->memd = mempeak() - peak;                                              //if(tm_verbose && totinlen == filen) printf("%9.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
-      plug->stkd = fct_use; //stackpeak(_stack);                                           //if(memused()>2048) printf("warning: memory in decompression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
+      plug->stkd = raw > overhead ? raw - overhead : 0;                           //if(memused()>2048) printf("warning: memory in decompression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
                                                                                   //printf("stkd=%llu ", plug->stkd ); 
       int e = memcheck(in, len, cpz, fuzz?3:cmp, finame);
       plug->err = plug->err?plug->err:e;
