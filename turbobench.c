@@ -269,7 +269,7 @@ void *malloc(size_t size) {
     if((mem_heapp += size) >= mem_heap+sizeof(mem_heap))
       die("malloc:initial memory overflow\n");
     return p;
-  }
+  }                                           
   void *p = (*mem_malloc)(size);
   if(p) mem_add(malloc_usable_size(p));
   return p;
@@ -1764,11 +1764,15 @@ int plugread(plug_t *plug, char *finame, unsigned long long *totinlen) {
 
 static int mcpy = 0, mode, tincx, fuzz;
 
-unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t outsize, unsigned bsize, int id, int lev, char *prm, char *name, char *fname) {
-  unsigned char *op,*oe = _out + outsize;
-  codstart(bsize, id, lev, prm, 0);
-  TMBEG(tm_Rep);//    mempeakinit();
-    unsigned char *in,*ip;
+unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t outsize, unsigned bsize, int id, int lev, char *prm, char *name, char *fname, size_t *pstack) {
+  unsigned char *op=NULL,*oe = _out + outsize;                         
+  unsigned char *in,*ip;
+  codstart(bsize, id, lev, prm, 0);                                     
+                                                                        memstack_t _stack = stackini();
+                                                                        codcomp(_in, _inlen, _out, outsize, 2, lev,"");
+                                                                        size_t  overhead = stackpeak(_stack);
+                                                                        _stack = stackini(); 
+  TMBEG(tm_Rep);
     for(op = _out, in = _in; in < _in+_inlen; ) {
       unsigned inlen, bs;
       if(mode) {                                                         blknum++;
@@ -1793,14 +1797,21 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
     }
     size_t olen = op - _out;
   TMENDC(_inlen, olen, name, fname, 0);
+                                                                          size_t raw = stackpeak(_stack);
+                                                                          *pstack = raw > overhead ? raw - overhead : 0;  
   end: codend(_inlen, id, lev, prm, 0);
   return op - _out;
 }
 
-int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm) {
-  unsigned char *ip;
-  codstart(_inlen, id, lev, prm, 1);
-  TMBEG(tm_Rep2);     //mempeakinit();
+int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm, size_t *pstack) {
+  unsigned char *ip=NULL;            
+                                                                        //if(id == 2) return coddecomp(_in, _inlen, _out, _outlen, 2, lev,"");
+  codstart(_inlen, id, lev, prm, 1);                                    
+                                                                        memstack_t _stack = stackini();
+                                                                        coddecomp(_in, _inlen, _out, _outlen, 2, lev,"");
+                                                                        size_t  overhead = stackpeak(_stack); 
+                                                                        _stack = stackini();
+  TMBEG(tm_Rep2);     
   unsigned char *out,*op;
   for(ip = _in, out = _out; out < _out+_outlen;) {
     unsigned outlen,bs;
@@ -1820,6 +1831,8 @@ int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned 
     }
   }
   TMEND(_outlen);
+                                                                          size_t raw = stackpeak(_stack);
+                                                                          *pstack = raw > overhead ? raw - overhead : 0;  
   codend(_inlen, id, lev, prm, 1);
   return ip - _in;
 }
@@ -1970,21 +1983,13 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
         memcpy(p, in, len);
       }
     }
-    size_t     peak   = mempeakinit();    
-    
-    memstack_t _stack = stackini();
-    becomp(in, len*nb, out, outsize, bsize, 2 ,plug->lev,plug->prm, name, finame);
-    size_t overhead = stackpeak(_stack);                                            //printf("coverhead=%zu ", overhead); 
-
-           _stack = stackini(); 
-    size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame)/nb, 
-              raw = stackpeak(_stack);               //printf("raw=%zu,use=%zu ", raw, fct_use);
- 
+    size_t peak   = mempeakinit();    
+    size_t _stack, outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame, &_stack)/nb;
     tc         = tm_tmin(nb);
     plug->len += outlen;
     plug->tc  += tc;
     plug->memc = mempeak() - peak;                                                  //if(memused()>2048) printf("warning: memory in compression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
-    plug->stkc = raw > overhead ? raw - overhead : 0;
+    plug->stkc = _stack; 
     
     if(cmp) {
       unsigned char *cpz = _cpy;
@@ -1992,18 +1997,11 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
       if(_cpy != _in) memrcpy(cpz, in, len);
       
       size_t     peak   = mempeakinit();
-      memstack_t _stack = stackini();
-      bedecomp(out, outlen, cpz, len*nb, bsize, 2,plug->lev,plug->prm)/nb;
-      size_t  overhead = stackpeak(_stack);                                        
-      
-                _stack = stackini();
-      unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm)/nb;
-      size_t raw       = stackpeak(_stack);
- 
+      unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm, &_stack)/nb;
       td         = tm_tmin(nb);
       plug->td  += td;
       plug->memd = mempeak() - peak;                                                //if(tm_verbose && totinlen == filen) printf("%9.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
-      plug->stkd = raw > overhead ? raw - overhead : 0;                             //if(memused()>2048) printf("warning: memory in decompression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
+      plug->stkd = _stack;                                                          //if(memused()>2048) printf("warning: memory in decompression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
                                                                            
       int e = memcheck(in, len, cpz, fuzz?3:cmp, finame);
       plug->err = plug->err?plug->err:e;
