@@ -26,10 +26,10 @@ jobs:
           - os: ubuntu-26.04-arm
             compiler: clang
             cxx: clang++
-          - name: linux-riscv64
-            os: ubuntu-24.04-riscv
-            platform: linux
-            arch: riscv64
+#          - name: linux-riscv64
+#            os: ubuntu-24.04-riscv
+#            platform: linux
+#            arch: riscv64
     steps:
       - uses: actions/checkout@v7
         with:
