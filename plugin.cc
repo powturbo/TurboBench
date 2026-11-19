@@ -38,7 +38,7 @@ enum {
 #define _MEMCPY 1
  P_LMCPY,   // must be 0
  P_MCPY,    // must be 1
-
+ P_NOP,     // must be 2  
 #ifndef _ACEAPEX
 #define _ACEAPEX 0
 #endif
@@ -2535,12 +2535,15 @@ static void sendbytes(const void *data, size_t n) { memcpy(gop, data, n); gop +=
 static unsigned char getbyte() { return *gip++; }
   #endif
 
+NOINLINE int nop(void) { return 0; }
+
 unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned outsize, int codec, int lev, char *prm) { unsigned outlen; unsigned char *oend=out+outsize; //printf("#(%d), inlen=%d,outsize=%d\n", codec, inlen, outsize);fflush(stdout);
   char     *q      = strchr(prm,'d');
   unsigned dsize   = q?argtoi(q+(q[1]=='='?2:1),0):dicsize; 
   int      threads = 0; if(q = strchr(prm,'t')) threads = atoi(q+(q[1]=='='?2:1));
   
   switch(codec) {
+    case P_NOP: return 0;
 //=== A =============================================================================================================================
       #if _ACEAPEX
     case P_ACEFAST: lev += 10; 
@@ -3739,6 +3742,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
   int  threads = 0; if(q = strchr(prm,'t')) threads = atoi(q+(q[1]=='='?2:1));
 
   switch(codec) {
+    case P_NOP: return 0;
 //=== A =============================================================================================================================
       #if _ACEAPEX
     case P_ACEFAST: 
