@@ -319,7 +319,6 @@ char *cpubrand(char *brand, size_t max_len) {
   if(read_cpuinfo_field("CPU implementer", impl, sizeof(impl)) && read_cpuinfo_field("CPU part", part, sizeof(part))) {
     snprintf(tmp, sizeof(tmp), "ARM implementer %s part %s", impl, part);
     int iimpl = strtol(impl, NULL, 0), ipart = strtol(part, NULL, 0);
-    printf("IMPLEMENTER=%x,%x\n", iimpl, ipart); 
     for(arm64cpu_t *s = arm64cpu; s < arm64cpu + ARM64CPU_NUM; s++)
       if(s->implementer == iimpl && s->part == ipart) { 
         snprintf(tmp, sizeof(tmp), "%s", s->name);
