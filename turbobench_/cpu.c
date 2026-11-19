@@ -309,23 +309,20 @@ char *cpubrand(char *brand, size_t max_len) {
   char tmp[256];
 
   if (read_cpuinfo_field("model name", tmp, sizeof(tmp)) ||
-      read_cpuinfo_field("Hardware", tmp, sizeof(tmp)) ||
-      read_cpuinfo_field("uarch", tmp, sizeof(tmp)) ||
-      read_devicetree_model(tmp, sizeof(tmp))) {
+      read_cpuinfo_field("Hardware",   tmp, sizeof(tmp)) ||
+      read_cpuinfo_field("uarch",      tmp, sizeof(tmp)) ||
+      read_devicetree_model(           tmp, sizeof(tmp))) {
     set_str(brand, max_len, tmp);
     return brand;
   }
   char impl[64], part[64], isa[256];
-  if(read_cpuinfo_field("CPU implementer", impl, sizeof(impl)) &&
-      read_cpuinfo_field("CPU part", part, sizeof(part))) {
+  if(read_cpuinfo_field("CPU implementer", impl, sizeof(impl)) && read_cpuinfo_field("CPU part", part, sizeof(part))) {
     snprintf(tmp, sizeof(tmp), "ARM implementer %s part %s", impl, part);
-      #if defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) 
     for(arm64cpu_t *s = arm64cpu; s < arm64cpu + ARM64CPU_NUM; s++)
       if(s->implementer == impl && s->part == part) { 
         snprintf(tmp, sizeof(tmp), "%s", s->name);
         break;
       }
-      #endif
     set_str(brand, max_len, tmp);
     return brand;
   }
