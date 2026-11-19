@@ -236,7 +236,7 @@ OB+=$(call obj,turbobench_/bcm/bcm.o)
 endif
 
 ifneq ($(wildcard blaris/.),)
-PLG_FLAGS+=-D_BLARIS -Iblaris/include
+PLG_FLAGS+=-D_BLARIS
 BLARIS_SRCS := blaris/src/blaris-compress.c blaris/src/blaris-decompress.c
 BLARIS_OBJS := $(call obj,$(BLARIS_SRCS))
 $(BLARIS_OBJS): $(BUILD)/%.o: %.c
@@ -357,6 +357,16 @@ $(GLZA_DIR)/%.o: GLZA/%.c
 OB += $(GLZA_OBJS) 
 endif
 
+#--- H -----------------------------------------------------------------------------------------------------------------------------------------------
+ifneq ($(wildcard heatshrink/.),)
+PLG_FLAGS+=-D_HEATSHRINK
+HEATSHRINK_SRCS := heatshrink/heatshrink_encoder.c heatshrink/heatshrink_decoder.c turbobench_/heatshrink/heatshrink.c
+HEATSHRINK_OBJS := $(call obj,$(HEATSHRINK_SRCS))
+$(HEATSHRINK_OBJS): $(BUILD)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) -O3 -DNDEBUG -Wno-int-conversion -c $< -o $@
+OB += $(HEATSHRINK_OBJS)
+endif
 #--- I -----------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard ../ic/.),)
 PLG_FLAGS+=-D_TURBOPFOR
@@ -1320,11 +1330,6 @@ endif
 ifneq ($(wildcard gipfeli/.),)
 PLG_FLAGS+=-D_GIPFELI
 OB+=$(call obj,gipfeli/lz77.o gipfeli/entropy.o gipfeli/entropy_code_builder.o gipfeli/decompress.o gipfeli/gipfeli-internal.o)
-endif
-
-ifneq ($(wildcard heatshrink/.),)
-PLG_FLAGS+=-D_HEATSHRINK -Iheatshrink
-OB+=$(call obj,heatshrink/heatshrink_encoder.o heatshrink/heatshrink_decoder.o turbobench_/heatshrink/heatshrink.o)
 endif
 
 ifneq ($(wildcard liblzf/.),)
