@@ -43,8 +43,9 @@ jobs:
 #          curl -L -o silesia.tar.gz \
 #            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
 #          gunzip silesia.tar.gz
-      - name: Run
-      - run: |
+
+     - name: Install dependencies
+        run: |
           lscpu
           gcc --version
           clang --version || true
