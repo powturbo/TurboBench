@@ -109,7 +109,7 @@ jobs:
         run: |
           ./turbobench -l2
           ./turbobench blaris/bench/data/* -U -V0 -eMICRO -aMICRO
-          ./turbobench data@MICRO.tbb -p5 -U
+          cat data@MICRO.tbb
 #          ./turbobench turbobench -U -V0 -eTURBO -i1,1
 #          ./turbobench turbobench -U -V0 -eTURBO -i1,1
 #         ./turbobench silesia.tar -U -i0,0
