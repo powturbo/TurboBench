@@ -186,3 +186,9 @@
 [submodule "orz"]
 	path = orz
 	url = https://github.com/richox/orz.git
+[submodule "heatshrink"]
+	path = heatshrink
+	url = https://github.com/atomicobject/heatshrink.git
+[submodule "blaris"]
+	path = blaris
+	url = https://github.com/lis05/blaris.git
