@@ -26,6 +26,10 @@ jobs:
           - os: ubuntu-26.04-arm
             compiler: clang
             cxx: clang++
+          - name: linux-riscv64
+            os: ubuntu-24.04-riscv
+            platform: linux
+            arch: riscv64
     steps:
       - uses: actions/checkout@v7
         with:
@@ -75,7 +79,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq build-essential nasm make gcc-14 g++-14 clang-20
+          sudo apt-get install -y -qq build-essential nasm make libomp-dev clang
           sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
           sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
           sudo update-alternatives --install /usr/bin/cc   cc   /usr/bin/gcc-14  100
