@@ -67,6 +67,10 @@ enum {
 #endif
  P_BCM,
  P_BCMEC,
+#ifndef _BLARIS
+#define _BLARIS 0
+#endif
+ P_BLARIS,
 #ifndef _BPC
 #define _BPC 0
 #endif
@@ -696,6 +700,15 @@ static aocl_compression_desc aocl;
 #include "turbobench_/bcm/bcm.h"
   #endif
 
+  #if _BLARIS
+EXTERN_C_BEGIN
+#define BLARIS_COMPRESS
+#define BLARIS_DECOMPRESS
+#define _Static_assert(cond,msg) static_assert(cond, msg) 
+#include "blaris/include/blaris.h"
+EXTERN_C_END
+  #endif
+
   #if _BPC
 #include "BitPlaneComp/src/BPCompressor.hh"
   #endif
@@ -903,7 +916,9 @@ EXTERN_C_END
 
 //--- H -----------------------------------------------------------
   #if _HEATSHRINK
-#include "heatshrink_/heatshrink.h"
+#include "heatshrink/heatshrink_encoder.h"
+#include "heatshrink/heatshrink_decoder.h"
+#include "turbobench_/heatshrink/heatshrink.h"
   #endif
 
 //--- I -----------------------------------------------------------
@@ -2002,6 +2017,7 @@ struct plugs plugs[] = {
   { P_AOCL_ZLIB,     "aocl-zlib",     _AOCL,      "AMD aocl-compression zlib",   "1,2,3,4,5,6,7,8,9" },
   { P_AOCL_ZSTD,     "aocl-zstd",     _AOCL,      "AMD aocl-compression zstd",   "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,-1,-2,-3,-4,-5,-6,-7,-8,-9,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/d#" },
   { P_BCM,           "bcm",           _BCM,       "bcm / bwt",                   "" },
+  { P_BLARIS,        "blaris",        _BLARIS,    "blaris",                      "" },
   { P_BPC,           "bpc",           _BPC,       "bit plane compression",       "" },
   { P_BRIEFLZ,       "brieflz",       _BRIEFLZ,   "BriefLz",                     "1,3,6,9" },
   { P_BROTLI,        "brotli",        _BROTLI,    "Brotli",                      "0,1,2,3,4,5,6,7,8,9,10,11/d#:V"},
@@ -2544,6 +2560,10 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _BCM
     case P_BCM: return bcmcompress(in, inlen, out); break;
+      #endif
+
+      #if _BLARIS
+    case P_BLARIS: { size_t outlen = outsize, rc = blaris_compress(in, ((inlen+3)/4)*4, out, &outlen); return rc == 0?outlen:0; }
       #endif
 
       #if _BPC
@@ -3743,6 +3763,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     case P_BCM: return bcmdecompress(in, inlen, out, outlen);
       #endif
 
+      #if _BLARIS
+    case P_BLARIS: { struct Decoder dec; struct Checkpoint cp; blaris_init((const uint32_t*)in, &dec); cp = (struct Checkpoint){0}; blaris_decompress(&dec, 0, out, outlen, &cp); return inlen; }
+      #endif
+
       #if _BPC
     case P_BPC: {
       #endif
@@ -4720,6 +4744,10 @@ char *codver(int codec, char *v, char *s) {
     case P_BCM:
     case P_BCMEC: return "v1.65";
      #endif
+
+      #if _BLARIS
+    case P_BLARIS: return "v2026-11-14";
+      #endif
 
      #if _BZ2_NG
     case P_BZ2_NG: return (char *)bz2_ng_BZ2_bzlibVersion();
