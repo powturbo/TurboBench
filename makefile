@@ -676,10 +676,15 @@ LIBS += $(MINIZ_LIB)
 endif
 endif
 
-ifneq ($(wildcard turbobench_/minlz-c/.),)
-PLG_FLAGS+=-D_MINLZ
+ifneq ($(wildcard turbobench_/minlz-c0/.),)
+PLG_FLAGS+=-D_MINLZGO
 MINLZ_LIB = turbobench_/minlz-c/libmlz.a
 LIBS += $(MINLZ_LIB)
+endif
+
+ifneq ($(wildcard turbobench_/minlz/.),)
+PLG_FLAGS+=-D_MINLZ
+OB+=$(call obj,turbobench_/minlz/minlz.o)
 endif
 
 ifneq ($(wildcard misa77),)
