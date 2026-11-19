@@ -241,7 +241,7 @@ BLARIS_SRCS := blaris/src/blaris-compress.c blaris/src/blaris-decompress.c
 BLARIS_OBJS := $(call obj,$(BLARIS_SRCS))
 $(BLARIS_OBJS): $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) -O3 -DNDEBUG -DBLARIS_COMPRESS -DBLARIS_DECOMPRESS -Iblaris/include -c $< -o $@
+	$(CC) -O3 -DNDEBUG -Iblaris/include -c $< -o $@
 OB += $(BLARIS_OBJS)
 endif
 
