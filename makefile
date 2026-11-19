@@ -246,6 +246,7 @@ OB += $(BLARIS_OBJS)
 endif
 
 ifneq ($(wildcard brotli/.),)
+ifneq ($(BROTLI), 0) 
 PLG_FLAGS+=-D_BROTLI -Ibrotli/c/include
 BROTLI_SRCS := $(wildcard brotli/c/common/*.c) $(wildcard brotli/c/dec/*.c) $(wildcard brotli/*.c) $(wildcard brotli/c/enc/*.c)
 ifdef CROSS
@@ -283,6 +284,7 @@ LIBS += $(BZ2_NG_LIB)
 endif
 endif
 endif
+endif
 
 ifneq ($(wildcard bzip2/.),)
 PLG_FLAGS+=-D_BZIP2
@@ -310,8 +312,8 @@ OB += $(BZIP3_OBJS)
 endif
 
 #--- C ----------------------------------------------------------------------------------------------------------------------------------
-ifneq ($(BLOSC), 0) 
 ifneq ($(wildcard c-blosc2/.),)
+ifneq ($(BLOSC), 0) 
 ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
 C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 ifdef CROSS #ERROR IN C_BLOSC BUILD  
@@ -467,12 +469,14 @@ endif
 # O=$(abspath $(BUILD)/isa-l) 
 #--- K ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard kanzi-cpp/.),)
+ifneq ($(KANZI), 0) # don't build
 PLG_FLAGS += -D_KANZI 
 KANZI_SRCS := $(wildcard kanzi-cpp/src/io/*.cpp) $(wildcard kanzi-cpp/src/entropy/*.cpp) $(wildcard kanzi-cpp/src/bitstream/*.cpp) $(wildcard kanzi-cpp/src/*.cpp) $(wildcard kanzi-cpp/src/transform/*.cpp)
 KANZI_LIB = $(BUILD)/kanzi-cpp/libkanzi.a
 $(KANZI_LIB): $(KANZI_SRCS)
 	$(CMAKE) -S kanzi-cpp -B $(BUILD)/kanzi-cpp -DKANZI_ENABLE_NATIVE_OPTIMIZATIONS=OFF -DCMAKE_CXX_COMPILER="$(CXX)" -DCMAKE_C_COMPILER="$(CC)" && make -C $(BUILD)/kanzi-cpp
 LIBS += $(KANZI_LIB)
+endif
 endif
 
 #---- L ------------------------------------------------------------------------------------------------------------------------
@@ -550,6 +554,7 @@ OB+=$(call obj,lzfse/src/lzfse_decode_base.o lzfse/src/lzfse_decode.o lzfse/src/
 endif
 
 ifneq ($(wildcard lzham_codec_devel/.),)
+ifneq ($(LZHAM), 0) 
 ifneq ($(OS),Darwin)
 PLG_FLAGS += -D_LZHAM
 LZHAM_FLAGS := -D"UINT64_MAX=-1ull" -Ilzham_codec_devel/include -Ilzham_codec_devel/lzhamcomp -Ilzham_codec_devel/lzhamdecomp -Wno-deprecated-enum-enum-conversion
@@ -572,6 +577,7 @@ LZHAM_LIB = $(BUILD)/lzham_codec_devel/liblzham.a
 $(LZHAM_LIB): $(LZHAM_OBJS) | $(BUILD)/lzham_codec_devel
 	$(AR) rcs $@ $^
 LIBS += $(LZHAM_LIB)
+endif
 endif
 endif
 
@@ -598,12 +604,14 @@ OB += $(call obj,$(LZMA_SRCS))
 endif
 
 ifneq ($(wildcard lzo/.),)
+ifneq ($(LZO), 0) 
 PLG_FLAGS+=-D_LZO -Ilzo/include
 LZO_SRCS := $(wildcard lzo/src/*.c)
 LZO_LIB = $(BUILD)/lzo/liblzo2.a
 $(LZO_LIB): $(LZO_SRCS)
 	$(CMAKE) -S lzo -B $(BUILD)/lzo -DCMAKE_INSTALL_PREFIX=$(BUILD) -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_C_COMPILER="$(CC)" && make -C $(BUILD)/lzo
 LIBS += $(LZO_LIB)
+endif
 endif
 
 ifneq ($(wildcard lzsa/.),)
@@ -658,12 +666,14 @@ OB += $(MEMLZ_LIB)
 endif
 
 ifneq ($(wildcard miniz/.),)
+ifneq ($(MINIZ), 0) 
 PLG_FLAGS+=-D_MINIZ -I$(BUILD)/miniz
 MINIZ_SRCS := $(shell find miniz -type f -name '*.[ch]' -o -name 'CMakeLists.txt')
 MINIZ_LIB = $(BUILD)/miniz/libminiz.a
 $(MINIZ_LIB): $(MINIZ_SRCS)
 	$(CMAKE) -S miniz -B $(BUILD)/miniz -DCMAKE_INSTALL_PREFIX=$(BUILD) -DPROJECT_NAME=tb -DCMAKE_C_COMPILER=$(CC) && make -C $(BUILD)/miniz
 LIBS += $(MINIZ_LIB)
+endif
 endif
 
 ifneq ($(wildcard turbobench_/minlz-c/.),)
@@ -974,6 +984,7 @@ endif
 
 #--- X --------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard xz/.),)
+ifneq ($(XZ), 0) 
 PLG_FLAGS += -D_XZ
 XZ_SRCS := $(shell find xz/src/liblzma -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
 XZ_LIB = $(BUILD)/xz/liblzma.a
@@ -985,6 +996,7 @@ $(XZ_LIB): $(XZ_SRCS)
 	$(CMAKE) -S xz -B $(BUILD)/xz -DXZ_TOOL_XZDEC=OFF -DXZ_TOOL_LZMADEC=OFF -DXZ_TOOL_LZMAINFO=OFF -DXZ_TOOL_XZ=OFF -DXZ_TOOL_SCRIPTS=OFF -DXZ_DOC=OFF && $(MAKE) -C $(BUILD)/xz 
 endif
 LIBS += $(XZ_LIB)
+endif
 endif
 
 #--- Z --------------------------------------------------------------------------------------------------------------------------
