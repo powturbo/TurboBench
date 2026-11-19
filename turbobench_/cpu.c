@@ -318,8 +318,9 @@ char *cpubrand(char *brand, size_t max_len) {
   char impl[64], part[64], isa[256];
   if(read_cpuinfo_field("CPU implementer", impl, sizeof(impl)) && read_cpuinfo_field("CPU part", part, sizeof(part))) {
     snprintf(tmp, sizeof(tmp), "ARM implementer %s part %s", impl, part);
+    unsigned iimpl = atoi(impl), ipart = atoi(part);
     for(arm64cpu_t *s = arm64cpu; s < arm64cpu + ARM64CPU_NUM; s++)
-      if(s->implementer == impl && s->part == part) { 
+      if(s->implementer == iimpl && s->part == ipart) { 
         snprintf(tmp, sizeof(tmp), "%s", s->name);
         break;
       }
