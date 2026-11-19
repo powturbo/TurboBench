@@ -366,36 +366,38 @@ size_t stackpeak(memstack_t paint) {
 }
 
 #elif defined(__linux__)
+#include <stddef.h>
 #include <pthread.h>
 typedef unsigned* memstack_t;
-static unsigned *g_stack_lo;   // lowest usable address                
-static unsigned *g_stack_hi;   // one-past the highest usable address
+#define STACK_MAGIC 0xA5A55A5Au   /* 4: skewed pattern, rare in real data */
+
+static unsigned *g_lo;   /* lowest usable word               */
+static unsigned *g_hi;   /* one past the highest usable word */
 
 NOINLINE unsigned *stackini(void) {
   pthread_attr_t attr;
-  void           *addr;
-  size_t         size;
+  void  *addr;
+  size_t size;
+
   if(pthread_getattr_np(pthread_self(), &attr)) return NULL;
-  if(pthread_attr_getstack(&attr, &addr, &size)) {
+    if(pthread_attr_getstack(&attr, &addr, &size)) { pthread_attr_destroy(&attr); return NULL; }
     pthread_attr_destroy(&attr);
-    return NULL;
-  }
-  pthread_attr_destroy(&attr);
-  g_stack_lo = (unsigned *)addr;
-  g_stack_hi = (unsigned *)((unsigned char *)addr + size);
-  volatile unsigned guard;  
-  unsigned          *from = (unsigned *)&guard;
-  if(from > g_stack_hi) from = g_stack_hi;
-  volatile unsigned *sp = from;
-  while(sp > g_stack_lo) *--sp = STACK_MAGIC;
-  return g_stack_lo;
+
+    g_lo = (unsigned *)addr;
+    g_hi = (unsigned *)((unsigned char *)addr + size);
+    volatile unsigned guard;
+    unsigned *from = (unsigned *)&guard;
+    if (from > g_hi) from = g_hi;
+    for (volatile unsigned *sp = from; sp > g_lo; ) *--sp = STACK_MAGIC;
+    return from;
 }
 
 size_t stackpeak(unsigned *base) {
-  unsigned *p = base;
-  if(!base || !g_stack_hi) return 0;
-  while(p < g_stack_hi && *p == STACK_MAGIC) p++;
-  return (size_t)(g_stack_hi - p) * sizeof(unsigned);
+  unsigned *p;
+  if (!base || !g_lo || base > g_hi) return 0;
+  p = g_lo;
+  while (p < base && *p == STACK_MAGIC) p++;
+  return (size_t)(base - p) * sizeof(unsigned);
 }
 #else
 #define stackini() 0
@@ -557,6 +559,7 @@ struct plugg plugg[] = {
   { "MAX",       "lzturbo,19/lzma,9/lzham,4/brotli,11/libdeflate,12/lz4,9/lizard,19,29,39,49/lzlib,9/lzraven/wzip,13/zstd,22/memcpy",                                   "Best compression (slow)" },
   { "OPTIMAL",   "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,12/libdeflate,12/lizard,49/lzlib,9/zstd,22/zopfli/memcpy",                                                    "Lz Optimal compression (slow)" },
   { "BWT",       "bcm/bsc,0,0e0,0e2,4/bwtsatan,4,5,6,7,7t4,8,9/kanzi,5,6,7/bz2-ng/bzip2/bzip3,512/zstd,22/lzma,9/memcpy",                                               "ST & BWT" },
+  { "MICRO",     "blaris/heatshrink/igzip,0,1,2,3/slz,0,1,6,9/tamp,8,13,14,15/zlib,1,6,9/zlib-turbo,1,6,12/zlib-ng,1,6,9/libdeflate,1,6,12/memcpy",                     "Microcontroller" },
   { "ECODER",    "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/pivco,0,1/memcpy", "Entropy coder" },
   { "MEMCPY",    "imemcpy/memcpy",                                                                                                                                      "memcpy" },
   { "WEB",       "brotli,1,2,4,5,11/igzip,0,1,2,3/slz,1,6,9/libdeflate,1,6,9,12/zlib,1,6,9/zlib-ng,1,6,9/zlib-turbo,1,6,9,12/zopfli/zstd,1,9,15,22",                    "web/http compression"},
@@ -1908,7 +1911,7 @@ int getpagesize() {
   #endif
 
 size_t mininlen;
-
+ 
 unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filenmax, size_t bsize, plug_t *plugr, int tid, int krep) {
   size_t outsize;
   FILE   *fi = strcmp(finame,"stdin")?fopen(finame, "rb"):stdin; if(!fi) { perror(finame); return 0; /*die("open error '%s'\n", finame);*/ }
@@ -1967,28 +1970,41 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
         memcpy(p, in, len);
       }
     }
-    size_t     peak   = mempeakinit();
-    memstack_t _stack = stackini();
+    size_t     peak   = mempeakinit();    //memstack_t _stack = stackini();
+    
+    unsigned *b0    = stackini();
+    becomp(in, len*nb, out, outsize, bsize, 2 ,plug->lev,plug->prm, name, finame);
+    size_t overhead = stackpeak(b0);                                             //printf("coverhead=%zu ", overhead); 
+
+    unsigned *base = stackini(); 
     size_t outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame)/nb;
+    size_t raw     = stackpeak(base);
+    size_t fct_use = raw > overhead ? raw - overhead : 0;                        //printf("raw=%zu,use=%zu ", raw, fct_use); 
     tc         = tm_tmin(nb);
     plug->len += outlen;
     plug->tc  += tc;
     plug->memc = mempeak() - peak;                                              //if(memused()>2048) printf("warning: memory in compression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
-    plug->stkc = stackpeak(_stack);
+    plug->stkc = fct_use; //  stackpeak(_stack);
     
     if(cmp) {
       unsigned char *cpz = _cpy;
       if(fuzz & 2) { cpz = (_cpy+insizem) - len;                                    /*printf("SEGFAULT Check");fflush(stdout); cpz[len-1] = cpz[len]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
       if(_cpy != _in) memrcpy(cpz, in, len);
       
-      size_t     peak   = mempeakinit();
-      memstack_t _stack = stackini();
+      size_t     peak   = mempeakinit();      //memstack_t _stack = stackini();
+      unsigned *b0    = stackini();
+      bedecomp(out, outlen, cpz, len*nb, bsize, 2,plug->lev,plug->prm)/nb;
+      size_t overhead = stackpeak(b0);                                            //printf("doverhead=%zu ", overhead); 
+      
+      unsigned *base = stackini();
       unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm)/nb;
+      size_t raw     = stackpeak(base);  
+      size_t fct_use = raw > overhead ? raw - overhead : 0; 
       td         = tm_tmin(nb);
       plug->td  += td;
-      plug->memd = mempeak() - peak;                                            //if(tm_verbose && totinlen == filen) printf("%9.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
-      plug->stkd = stackpeak(_stack);                                           //if(memused()>2048) printf("warning: memory in decompression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
-      
+      plug->memd = mempeak() - peak;                                              //if(tm_verbose && totinlen == filen) printf("%9.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
+      plug->stkd = fct_use; //stackpeak(_stack);                                           //if(memused()>2048) printf("warning: memory in decompression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
+                                                                                  //printf("stkd=%llu ", plug->stkd ); 
       int e = memcheck(in, len, cpz, fuzz?3:cmp, finame);
       plug->err = plug->err?plug->err:e;
       BEPOST;
@@ -2276,7 +2292,7 @@ int main(int argc, char* argv[]) {
         if(p->memc > g->memc) g->memc = p->memc;
         if(p->memd > g->memd) g->memd = p->memd;
         if(p->stkc > g->stkc) g->stkc = p->stkc;
-        if(p->stkd > g->stkd) g->stkd = p->stkd;
+        if(p->stkd > g->stkd) { g->stkd = p->stkd; /*printf("gstkd=%llu ", g->stkd );*/ };  
       }
       g->id  = p->id;
       g->s   = p->s;
@@ -2333,10 +2349,10 @@ int main(int argc, char* argv[]) {
             if(g->tc < p->tc) { p->tc = g->tc; u++; }
             if(g->td < p->td) { p->td = g->td; u++; }
 
-            if(g->memc > p->memc) { p->memc = g->memc; u++; }
-            if(g->memd > p->memd) { p->memd = g->memd; u++; }
-            if(g->stkc > p->stkc) { p->stkc = g->stkc; u++; }
-            if(g->stkd > p->stkd) { p->stkd = g->stkd; u++; }
+            /*if(g->memc > p->memc)*/ { p->memc = g->memc; u++; }
+            /*if(g->memd > p->memd)*/ { p->memd = g->memd; u++; }
+            /*if(g->stkc > p->stkc)*/ { p->stkc = g->stkc; u++; }
+            /*if(g->stkd > p->stkd)*/ { p->stkd = g->stkd; u++; }
             strcpy(p->tms, u?tms:g->tms);
           }                                                                      
           g->id = -1;
