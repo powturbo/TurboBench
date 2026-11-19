@@ -302,7 +302,7 @@ jobs:
             echo "# TurboBench Silesia Corpus x86_64 aarch64 risc-v64"
           } > benchmark.md
 
-          for f in $(find artifacts \( -name 'silesia.*.tar*.md' -o -name 'turbobench.*.exe*.md' -o -name 'data.*.md'\) | sort -r); do
+          for f in $(find artifacts \( -name 'silesia.*.tar*.md' -o -name 'turbobench.*.exe*.md' -o -name 'data.*.md' \) | sort -r); do
             platform=$(basename "$f" | sed -E 's/^(silesia|turbobench)\.//; s/\.(tar|exe).*\.md$//')
             echo "## Platform: ${platform}" >> benchmark.md
             echo "" >> benchmark.md
