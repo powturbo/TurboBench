@@ -149,7 +149,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [LzTurbo](https://sites.google.com/site/powturbo) |  |c  |  |
 | [aceapex](https://github.com/yasha1971-coder/aceapex) |2026/10|c++/cuda MT|lz  |
 | [AMD AOCL](https://github.com/amd/aocl-compression) | 2026/09 |c++ MT|tuned lz4,zstd,bzip2 for amd64  |
-| [Blaris](https://github.com/lis05/blaris) |2026/11|c  |lz / Microcontrollers  |
+| [Blaris](https://github.com/lis05/blaris) |2026/11|c  |lz / Microcontrollers/memory-constrained  |
 | [BriefLz](https://github.com/jibsen/brieflz) |  |c  |lz  |
 | [Brotli](https://github.com/google/brotli) |  |c  |lz+huffman  |
 | [Chameleon](http://cbloomrants.blogspot.de/2015/03/03-25-15-my-chameleon.html) |  |c  |lz  |
@@ -160,7 +160,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Fast-lzma](https://github.com/conor42/fast-lzma2) |  |c  |lz+range coder  |
 | [glza](https://github.com/kidq330/GLZA) |  |c  |lz+huffman  |
 | [Glyd](https://github.com/surya-koritala/Glyd) | 2026/09 | rust MT|lz+huffman/tans  |
-| [heatshrink](https://github.com/atomicobject/heatshrink) |  |c  |lz / Microcontrollers|
+| [heatshrink](https://github.com/atomicobject/heatshrink) |  |c  |lz / Microcontrollers/memory-constrained|
 | [Iguana](https://github.com/ClickHouse/iguana) | 2026/09 |c++  |Not reliable|
 | [Intel(R) ISA-L](https://github.com/01org/isa-l) |  |c  |lz+huffman, zlib compatible|
 | [kanzi](https://github.com/flanglet/kanzi-cpp) | 2026/07 |c++ MT|lz,bwt,paq|
@@ -202,7 +202,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Snappy](https://github.com/google/snappy) |  |c++ |lz  |
 | [Snappy-c](https://github.com/andikleen/snappy-c) |  |c  |lz  |
 | [structured-zstd](https://github.com/structured-world/structured-zstd) | 2026/11 | rust |zstd reimplementation|
-| [Tamp](https://github.com/BrianPugh/tamp) | 2026/07 |c |lz Microcontrollers |
+| [Tamp](https://github.com/BrianPugh/tamp) | 2026/07 |c |lz Microcontrollers/memory-constrained |
 | [Tornado](http://freearc.org) |  |c++  |lz+huffman  |
 | [Unishox](https://github.com/siara-cc/Unishox) |  |c  |short strings|
 | [wfLZ](https://github.com/ShaneWF/wflz) |  |c  |lz  |
