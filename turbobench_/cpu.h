@@ -45,7 +45,7 @@ char *cpustr(unsigned cpuisa);
 
 unsigned cpuisa(void);
 
-char *cpubrand(char *s, size_t maxlen);
+char *cpu_brand(char *s, size_t maxlen);
 
 #ifdef __cplusplus
 }
