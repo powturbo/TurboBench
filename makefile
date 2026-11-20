@@ -237,11 +237,11 @@ endif
 
 ifneq ($(wildcard blaris/.),)
 PLG_FLAGS+=-D_BLARIS
-BLARIS_SRCS := blaris/src/blaris-compress.c blaris/src/blaris-decompress.c
-BLARIS_OBJS := $(call obj,$(BLARIS_SRCS))
-$(BLARIS_OBJS): $(BUILD)/%.o: %.c
+BLARIS_LEVELS := 1 2 3 4 5 6 7 8 9
+BLARIS_OBJS := $(foreach L,$(BLARIS_LEVELS),$(BUILD)/turbobench_/blaris/blaris_l$(L).o)
+$(BUILD)/turbobench_/blaris/blaris_l%.o: turbobench_/blaris/blaris_tb.c $(wildcard blaris/include/*.h blaris/src/*.c)
 	@mkdir -p $(dir $@)
-	$(CC) -O3 -DNDEBUG -Iblaris/include -c $< -o $@
+	$(CC) -O3 -DNDEBUG -Iblaris/include -Iblaris/src -DBLARIS_TB_LEVEL=$* -c $< -o $@
 OB += $(BLARIS_OBJS)
 endif
 
