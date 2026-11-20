@@ -220,13 +220,12 @@ static inline size_t mempeak(void) { if(!memout) return 0;
 }
 #else
 static size_t mem_peak, mem_used;
-size_t mempeak() { return mem_peak; }
-size_t memused() { return mem_used; }
+static ALWAYS_INLINE size_t mempeak() { return mem_peak; }
+static ALWAYS_INLINE size_t memused() { return mem_used; }
+static ALWAYS_INLINE void mempeakinit(void) { mem_peak = mem_used = 0; }
 
-size_t mempeakinit() { mem_peak = mem_used = 0; return mem_peak; }
-
-void mem_add(size_t size) { if((mem_used += size) > mem_peak) mem_peak = mem_used; }
-void mem_sub(size_t size) {  //if(size > mem_used) { fflush(stdout); printf("\nfree: warning size=%zu > mem_used=%zu\n", size, mem_used); } 
+static ALWAYS_INLINE void mem_add(size_t size) { if((mem_used += size) > mem_peak) mem_peak = mem_used; }
+static ALWAYS_INLINE void mem_sub(size_t size) {  //if(size > mem_used) { fflush(stdout); printf("\nfree: warning size=%zu > mem_used=%zu\n", size, mem_used); } 
   mem_used -= size > mem_used ? mem_used : size; 
 }
 
@@ -1254,7 +1253,7 @@ void plugprtth(FILE *f, int fmt) {
   switch(fmt) {
     case FMT_TEXT:
       if(memout)
-        fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s Rank        C MEM     D MEM   C STACK   D STACK Name            File\n");
+        fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s Rank        C-MEM     C-STACK   D-MEM   D-STACK Name            File\n");
       else
         fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s Rank    Name            File\n");
       break;
@@ -1272,7 +1271,7 @@ void plugprtth(FILE *f, int fmt) {
       break;
     case FMT_MARKDOWN:
       if(memout)
-        fprintf(f,"|C Size|ratio%|C MB/s|D MB/s|Rank|C Mem|D Mem|C Stack|D Stack|Name|File|\n|--------:|-----:|--------:|--------:|--------:|--------:|--------:|--------:|----------------|----------------|----------------|\n");
+        fprintf(f,"|C Size|ratio%|C MB/s|D MB/s|Rank|C Mem|C Stack|D Mem|D Stack|Name|File|\n|--------:|-----:|--------:|--------:|--------:|--------:|--------:|--------:|----------------|----------------|----------------|\n");
       else  
         fprintf(f,"|C Size|ratio%|C MB/s|D MB/s|Rank|Name|File|\n|--------:|-----:|--------:|--------:|----------------|----------------|------------------------------|\n");
       break;
@@ -1345,7 +1344,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         if(n) SetConsoleTextAttribute(h, BBOLD);
         fprintf(f, "%3d %s", score, score<MEDALMAX?medal[score]:"  ");
         if(n) SetConsoleTextAttribute(h, 7);
-        if(memout) fprintf(f, "%9llu %9llu %9llu %9llu ", plug->memc, plug->memd, plug->stkc, plug->stkd);   
+        if(memout) fprintf(f, "%9llu %9llu %9llu %9llu ", plug->memc, plug->stkc, plug->memd, plug->stkd);   
 
         if(n) SetConsoleTextAttribute(h, BBOLD);
         fprintf(f, "%-16s", name);
@@ -1355,7 +1354,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
           #else
         fprintf(f, "%12"PRId64" %s%s%9.2f%s %s%9.2f%s %s%3d%s%s   ",
           plug->len, sratio, c?BOLDB:"", tc, c?BOLDE:"",  d?BOLDB:"", td, d?BOLDE:"", n?BOLDB:"", score, score<MEDALMAX?medal[score]:"  ", n?BOLDE:"", n?BOLDB:"", name, n?BOLDE:"");
-        if(memout) fprintf(f, "%9d %9d %9d %9d ", plug->memc, plug->memd, plug->stkc, plug->stkd);   
+        if(memout) fprintf(f, "%9d %9d %9d %9d ", plug->memc, plug->stkc, plug->memd, plug->stkd);   
         fprintf(f, "%s%-16s%s%s\n", n?BOLDB:"", name, n?BOLDE:"", finame);
           #endif
       }
@@ -1377,7 +1376,6 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
     case FMT_HTML:
       fprintf(f, "<tr><td align=\"right\">%11"PRId64"</td><td align=\"right\">%s</td><td align=\"right\">%s%9.2f%s</td><td align=\"right\">%s%9.2f%s</td><td>%s%-16s%s</td><td align=\"right\">%"PRId64"</td><td align=\"right\">%"PRId64"</td><td>%s</td></tr>\n",
         plug->len, sratio, c?"<b>":"", tc, c?"</b>":"",  d?"<b>":"", td, d?"</b>":"", n?"<b>":"", name, n?"</b>":"",
-//        SIZE_ROUNDUP(plug->memc, Kb)/Kb, SIZE_ROUNDUP(plug->memd,Kb)/Kb,
         plug->memc, plug->memd,
         finame);
       break;
@@ -1387,7 +1385,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
       for(p = name, q=sname; *p; p++,q++) { if(*p == '_') { *q++ = '\\'; *q++ = '\\'; } *q = *p; } *q = 0;
       if(memout)
         fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%u|%u|%u|%u|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ", 
-                      plug->memc, plug->memd, plug->stkc, plug->stkd, n?MD_B:"",  n?sname:name, n?MD_E:"",   finame);
+                      plug->memc, plug->stkc, plug->memd, plug->stkd, n?MD_B:"",  n?sname:name, n?MD_E:"",   finame);
       else        
         fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ",  n?MD_B:"",  n?sname:name, n?MD_E:"",   finame); 
     } break;
@@ -1764,18 +1762,17 @@ int plugread(plug_t *plug, char *finame, unsigned long long *totinlen) {
 
 static int mcpy = 0, mode, tincx, fuzz;
 
-unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t outsize, unsigned bsize, int id, int lev, char *prm, char *name, char *fname, size_t *pstack) {
+unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t outsize, unsigned bsize, int id, int lev, char *prm, char *name, char *fname, size_t *pstack, size_t *pmempeak) {
   unsigned char *op=NULL,*oe = _out + outsize;                         
   unsigned char *in,*ip;
-  codstart(bsize, id, lev, prm, 0);                                     
-                                                                        memstack_t _stack = stackini();
-                                                                        codcomp(_in, _inlen, _out, outsize, 2, lev,"");
-                                                                        size_t  overhead = stackpeak(_stack);
-                                                                        _stack = stackini(); 
+  codstart(bsize, id, lev, prm, 0);                                                            memstack_t _stack = stackini();
+                                                                                               codcomp(_in, _inlen, _out, outsize, 2, lev,"");
+                                                                                               size_t overhead = stackpeak(_stack), _mempeak;
+                                                                                               _stack = stackini(); 
   TMBEG(tm_Rep);
     for(op = _out, in = _in; in < _in+_inlen; ) {
       unsigned inlen, bs;
-      if(mode) {                                                         blknum++;
+      if(mode) {                                                                               blknum++;
         inlen      = ctou32(in); in += 4;
         ctou32(op) = inlen; op += 4; //vbput32(op, inlen);
         if(in+inlen>_in+_inlen) inlen = (_in+_inlen)-in;
@@ -1783,8 +1780,8 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
 
       for(ip = in, in += inlen; ip < in; ) {                                                
         size_t iplen = in - ip; iplen = min(iplen, bsize);
-        bs = (mode || bsize < inlen)?((min(bsize, iplen) < (1<<16))?2:4):0;
-        size_t oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);
+        bs = (mode || bsize < inlen)?((min(bsize, iplen) < (1<<16))?2:4):0;                    mempeakinit();
+        size_t oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);                     _mempeak = mempeak();
         if(oplen <= 0 || oplen >= iplen && mcpy) {
           if(mcpy) { memcpy(op+bs, ip, iplen); oplen = iplen; }
           else if(oplen <= 0) { op = _out; goto end; }
@@ -1796,21 +1793,19 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
       }
     }
     size_t olen = op - _out;
-  TMENDC(_inlen, olen, name, fname, 0);
-                                                                          size_t raw = stackpeak(_stack);
-                                                                          *pstack = raw > overhead ? raw - overhead : 0;  
+  TMENDC(_inlen, olen, name, fname, 0);                                                        size_t raw = stackpeak(_stack);
+                                                                                               *pstack = raw > overhead ? raw - overhead : 0;
+                                                                                               *pmempeak = _mempeak;  
   end: codend(_inlen, id, lev, prm, 0);
   return op - _out;
 }
 
-int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm, size_t *pstack) {
-  unsigned char *ip=NULL;            
-                                                                        //if(id == 2) return coddecomp(_in, _inlen, _out, _outlen, 2, lev,"");
-  codstart(_inlen, id, lev, prm, 1);                                    
-                                                                        memstack_t _stack = stackini();
-                                                                        coddecomp(_in, _inlen, _out, _outlen, 2, lev,"");
-                                                                        size_t  overhead = stackpeak(_stack); 
-                                                                        _stack = stackini();
+int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm, size_t *pstack, size_t *pmempeak) {
+  unsigned char *ip=NULL;                                                                      
+  codstart(_inlen, id, lev, prm, 1);                                                           memstack_t _stack = stackini();
+                                                                                               coddecomp(_in, _inlen, _out, _outlen, 2, lev,"");
+                                                                                               size_t  overhead = stackpeak(_stack), _mempeak;
+                                                                                               _stack = stackini();
   TMBEG(tm_Rep2);     
   unsigned char *out,*op;
   for(ip = _in, out = _out; out < _out+_outlen;) {
@@ -1823,16 +1818,17 @@ int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned 
     for(op = out, out += outlen; op < out; ) {
       unsigned oplen = out - op; oplen = min(oplen, bsize);
       bs = (mode || bsize < outlen)?((min(bsize, oplen)<(1<<16))?2:4):0;
-      int l, iplen = (mode || bsize < outlen)?(bs==2?ctou16(ip):ctou32(ip)):_inlen; ip += bs;
-      if(mcpy && iplen==oplen)
-        memcpy(op, ip, oplen);
-      else l = coddecomp(ip, iplen, op, oplen, id, lev,prm);
+      int l, iplen = (mode || bsize < outlen)?(bs==2?ctou16(ip):ctou32(ip)):_inlen; ip += bs;  
+      if(mcpy && iplen==oplen) memcpy(op, ip, oplen); 
+      else {                                                                                   mempeakinit();
+        l = coddecomp(ip, iplen, op, oplen, id, lev,prm);                                      _mempeak = mempeak();
+      }
       ip += iplen; op += oplen;
-    }
+    }                                          
   }
-  TMEND(_outlen);
-                                                                          size_t raw = stackpeak(_stack);
-                                                                          *pstack = raw > overhead ? raw - overhead : 0;  
+  TMEND(_outlen);                                                                              size_t raw = stackpeak(_stack);
+                                                                                               *pstack = raw > overhead ? raw - overhead : 0;
+                                                                                               *pmempeak = _mempeak;  
   codend(_inlen, id, lev, prm, 1);
   return ip - _in;
 }
@@ -1983,24 +1979,23 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
         memcpy(p, in, len);
       }
     }
-    size_t peak   = mempeakinit();    
-    size_t _stack, outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame, &_stack)/nb;
-    tc         = tm_tmin(nb);
-    plug->len += outlen;
-    plug->tc  += tc;
-    plug->memc = mempeak() - peak;                                                  //if(memused()>2048) printf("warning: memory in compression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
-    plug->stkc = _stack; 
+    size_t _mempeak, _stack, 
+         outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame, &_stack, &_mempeak)/nb;
+    plug->memc  = _mempeak;                                                         //if(memused()>2048) printf("warning: memory in compression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
+    tc          = tm_tmin(nb);
+    plug->len  += outlen;
+    plug->tc   += tc;
+    plug->stkc  = _stack; 
     
     if(cmp) {
       unsigned char *cpz = _cpy;
       if(fuzz & 2) { cpz = (_cpy+insizem) - len;                                    /*printf("SEGFAULT Check");fflush(stdout); cpz[len-1] = cpz[len]; printf("SEGFAULT TEST FAILED"); fflush(stdout);*/  }
       if(_cpy != _in) memrcpy(cpz, in, len);
       
-      size_t     peak   = mempeakinit();
-      unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm, &_stack)/nb;
+      unsigned cpylen  = bedecomp(out, outlen, cpz, len*nb, bsize, plug->id,plug->lev,plug->prm, &_stack, &_mempeak)/nb;
+      plug->memd = _mempeak;                                                        //if(tm_verbose && totinlen == filen) printf("%9.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
       td         = tm_tmin(nb);
       plug->td  += td;
-      plug->memd = mempeak() - peak;                                                //if(tm_verbose && totinlen == filen) printf("%9.2f   %-16s %s\n", TMBS(totinlen,plug->td), name, finame); //for(int i=0; i < strlen(name)+strlen(finame)+55;i++) printf("\b");}
       plug->stkd = _stack;                                                          //if(memused()>2048) printf("warning: memory in decompression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
                                                                            
       int e = memcheck(in, len, cpz, fuzz?3:cmp, finame);
@@ -2287,10 +2282,10 @@ int main(int argc, char* argv[]) {
         g->tck   += p->tc;
         g->tdk   += p->td;
         g->err    = g->err?g->err:p->err;
-        if(p->memc > g->memc) g->memc = p->memc;
-        if(p->memd > g->memd) g->memd = p->memd;
-        if(p->stkc > g->stkc) g->stkc = p->stkc;
-        if(p->stkd > g->stkd) { g->stkd = p->stkd; /*printf("gstkd=%llu ", g->stkd );*/ };  
+        if(p->memc != g->memc) g->memc = p->memc;
+        if(p->memd != g->memd) g->memd = p->memd;
+        if(p->stkc != g->stkc) g->stkc = p->stkc;
+        if(p->stkd != g->stkd) g->stkd = p->stkd;   
       }
       g->id  = p->id;
       g->s   = p->s;
@@ -2347,10 +2342,10 @@ int main(int argc, char* argv[]) {
             if(g->tc < p->tc) { p->tc = g->tc; u++; }
             if(g->td < p->td) { p->td = g->td; u++; }
 
-            /*if(g->memc > p->memc)*/ { p->memc = g->memc; u++; }
-            /*if(g->memd > p->memd)*/ { p->memd = g->memd; u++; }
-            /*if(g->stkc > p->stkc)*/ { p->stkc = g->stkc; u++; }
-            /*if(g->stkd > p->stkd)*/ { p->stkd = g->stkd; u++; }
+            if(g->memc != p->memc) { p->memc = g->memc; u++; }               
+            if(g->memd != p->memd) { p->memd = g->memd; u++; }
+            if(g->stkc != p->stkc) { p->stkc = g->stkc; u++; }
+            if(g->stkd != p->stkd) { p->stkd = g->stkd; u++; }
             strcpy(p->tms, u?tms:g->tms);
           }                                                                      
           g->id = -1;
