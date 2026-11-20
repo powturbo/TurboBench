@@ -552,13 +552,13 @@ struct plugg {
 };
 
 struct plugg plugg[] = {
+  { "MICRO",     "blaris/heatshrink/igzip,0,1,2,3/libdeflate,1,6,12/lz4,1,12/lzav,1,2/slz,1,6,9/tamp,8,13,15/zlib,1,6,9/memcpy",                     "Microcontroller" },
   { "TURBO",     "lzturbo,10,11,12,19/brotli,4/igzip,1,2,3/libdeflate,1,6,12/lz4,1,5,12/lzav,1,2/memlz/misa77,0,1,4/zlib-ng,1,6,9/zstd,3/zxc,3,5,6/memcpy",                         "lz4 class: Fastest de-/compression. HDD/SSD/RAM speed" },
   { "FAST",      "lzturbo,10,10a,11,12/aocl-lz4,0/aceapex_fast,1/brotli,0,1,4,5,6/igzip,1,2,3/libdeflate,1,6,12/lz4,1,3,9,12/lzav,1,2/memlz/misa77,0,1,2,3,4/zlib,1,6,9/zlib-turbo,1,6,9,12/zlib-ng,1,6,9/zstd,1,3,9/zxc,3,5,7/memcpy", "lz4,zlib,zstd class" },
   { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,6/zstd,5,9/libdeflate,6/zlib-ng,6/igzip,3/memcpy",                                                                         "Compression speed > 'zlib 6' class" },
   { "MAX",       "lzturbo,19/lzma,9/lzham,4/brotli,11/libdeflate,12/lz4,9/lizard,19,29,39,49/lzlib,9/lzraven/wzip,13/zstd,22/memcpy",                                   "Best compression (slow)" },
   { "OPTIMAL",   "lzturbo,19/lzma,9/lzham,4/brotli,11/lz4,12/libdeflate,12/lizard,49/lzlib,9/zstd,22/zopfli/memcpy",                                                    "Lz Optimal compression (slow)" },
   { "BWT",       "bcm/bsc,0,0e0,0e2,4/bwtsatan,4,5,6,7,7t4,8,9/kanzi,5,6,7/bz2-ng/bzip2/bzip3,512/zstd,22/lzma,9/memcpy",                                               "ST & BWT" },
-  { "MICRO",     "blaris/heatshrink/igzip,0,1,2,3/slz,0,1,6,9/tamp,8,13,14,15/zlib,1,6,9/zlib-turbo,1,6,12/zlib-ng,1,6,9/libdeflate,1,6,12/memcpy",                     "Microcontroller" },
   { "ECODER",    "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/pivco,0,1/memcpy", "Entropy coder" },
   { "MEMCPY",    "imemcpy/memcpy",                                                                                                                                      "memcpy" },
   { "WEB",       "brotli,1,2,4,5,11/igzip,0,1,2,3/slz,1,6,9/libdeflate,1,6,9,12/zlib,1,6,9/zlib-ng,1,6,9/zlib-turbo,1,6,9,12/zopfli/zstd,1,9,15,22",                    "web/http compression"},
@@ -1253,7 +1253,7 @@ void plugprtth(FILE *f, int fmt) {
   switch(fmt) {
     case FMT_TEXT:
       if(memout)
-        fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s Rank        C-MEM     C-STACK   D-MEM   D-STACK Name            File\n");
+        fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s Rank        C-MEM   C-STACK     D-MEM   D-STACK Name            File\n");
       else
         fprintf(f,"      C Size  ratio%%      C MB/s    D MB/s Rank    Name            File\n");
       break;
