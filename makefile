@@ -943,6 +943,21 @@ TAMP_DIR = tamp/tamp/_c_src/tamp
 OB += $(call obj,$(TAMP_DIR)/common.o $(TAMP_DIR)/compressor.o $(TAMP_DIR)/decompressor.o)
 endif
 
+ifneq ($(wildcard tinyuz/.),)
+PLG_FLAGS+=-D_TINYUZ 
+TINYUZ_SRCS := tinyuz/compress/tuz_enc.cpp tinyuz/decompress/tuz_dec.c HDiffPatch/bsdiff_wrapper/bsdiff_wrapper.cpp HDiffPatch/bsdiff_wrapper/bspatch_wrapper.c
+TINYUZ_LIB := tinyuz/libtinyuz.a
+$(TINYUZ_LIB): $(TINYUZ_SRCS)
+	@mkdir -p $(BUILD)/tinyuz
+	$(MAKE) -C tinyuz BUILD=$(abspath $(BUILD)/tinyuz)
+#TINYUZ_OBJS := $(call obj,$(TINYUZ_SRCS))
+#$(TINYUZ_OBJS): $(BUILD)/%.o: %.cpp
+#	@mkdir -p $(dir $@)
+#	$(CXX) -O3 -c $< -o $@
+#OB += $(TINYUZ_OBJS)
+LIBS+=$(TINYUZ_LIB)
+endif
+
 ifneq ($(wildcard tovyCT/.),)
 PLG_FLAGS+=-D_TOVYCT
 TOVYCT_DIR = tovyCT/src/c
