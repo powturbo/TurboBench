@@ -98,7 +98,7 @@ jobs:
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
           if [ '${{ matrix.os }}' = 'ubuntu-24.04-riscv' ]; then
-            ./turbobench silesia.tar -U -eTURBO -V0
+            ./turbobench silesia.tar -U -eTURBO -V0 -i1,1
           else
             ./turbobench silesia.tar -U -V0
           fi
