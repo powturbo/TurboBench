@@ -439,6 +439,10 @@ enum {
 #define _TCOBS 0
 #endif
  P_TCOBS,
+#ifndef _TINYUZ
+#define _TINYUZ 0
+#endif
+ P_TINYUZ,
 #ifndef _TORNADO
 #define _TORNADO 0
 #endif
@@ -1491,6 +1495,11 @@ EXTERN_C_END
 #include "tamp/tamp/_c_src/tamp/decompressor.h"
   #endif
 
+  #if _TINYUZ
+#include "tinyuz/compress/tuz_enc.h"
+#include "tinyuz/decompress/tuz_dec.h"
+  #endif
+
   #if _TCOBS
 #include "tcobs/v2/tcobs.h"
   #endif
@@ -2145,6 +2154,7 @@ struct plugs plugs[] = {
   
   { P_TAMP,          "tamp",          _TAMP,      "tamp",                        "8,9,10,11,12,13,14,15" },
   { P_TCOBS,         "tcobs",         _TCOBS,     "tcobs",                       "" },
+  { P_TINYUZ,        "tinyuz",        _TINYUZ,    "tinyuz",                       "" },
   { P_TORNADO,       "tornado",       _TORNADO,   "Tornado",                     "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
   { P_TOVYCT,        "tvct",          _TOVYCT,    "tovyCT",                      "" },
   { P_TSQ,           "tsq",           _TSQ,       "turbosqueeze",                "0,1,2,3,4,5,6,7" },
@@ -2427,14 +2437,14 @@ int codini(size_t insize, int codec, int lev, char *prm) {
     case P_SNAPPY_C: snappy_init_env(&env); break;
       #endif
 
-      #if _TAMP
-    case P_TAMP: workmemsize = 1 << lev; break;
-      #endif
-
       #if _SSERC
     case P_SSERC: if(!ssercini) sserangecoder::vrange_init(),ssercini++; break;
       #endif
       
+      #if _TAMP
+    case P_TAMP: workmemsize = 1 << lev; break;
+      #endif
+
       #if _WFLZ
     case P_WFLZ: workmemsize = wfLZ_GetWorkMemSize(); break;
       #endif
@@ -3215,6 +3225,12 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _TCOBS
     case P_TCOBS:     return TCOBSEncode( out, in, inlen);
+      #endif
+
+      #if _TiNYUZ
+    case P_TINYUZ: { tuz_TCompressProps props ={0}; props.dictSize = inlen; props.maxSaveLength = 64*1024-1; props.threadNum = threads>1?threads:1; props.isNeedLiteralLine=1;
+      hpatch_StreamPos_t rc = tuz_compress((const hpatch_TStreamOutput*)out, (const hpatch_TStreamInput*)in, &props); return rc; 
+    }
       #endif
 
       #if _TORNADO
@@ -4296,6 +4312,10 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     } break;
       #endif
       
+      #if _TiNYUZ
+    case P_TINYUZ: { tuz_size_t out_size=outlen; tuz_TResult rc = tuz_decompress_mem((tuz_pbyte_r)in, (tuz_size_t)inlen, (tuz_pbyte_rw *)out, &out_size); return rc; }
+      #endif
+
       #if _TCOBS
     case P_TCOBS:     return TCOBSDecode( out, outlen, in, inlen);
       #endif
