@@ -1,4 +1,4 @@
-#### TurboBench: 2026.11.20 11:36 - AMD Ryzen 5 6600HS Creator Edition (bold = pareto)  MB=1.000.000
+#### TurboBench: 2026.11.20 11:36 - C910 RISC-V 64GC 1.85GHZ -   MB=1.000.000
 |C Size|ratio%|C MB/s|D MB/s|Rank|C Mem|C Stack|D Mem|D Stack|Name|File|
 |--------:|-----:|--------:|--------:|--------:|--------:|--------:|--------:|----------------|----------------|----------------|
 |93668| 26.26%   |$\color{green}{\textbf{1.50}}$|$\color{green}{\textbf{163.23}}$|8 |9012808|2272|11576|656|$\color{green}{\textbf{libdeflate 12}}$|blarisdata|
@@ -24,4 +24,3 @@
 |147659| 41.40%   |$\color{green}{\textbf{91.08}}$|169.84|10 |16768|600|131400|336|$\color{green}{\textbf{lz4 1}}$|blarisdata|
 |162679| 45.61%   |5.52|90.98|19 |0|424|0|264|tamp 8|blarisdata|
 |356654|100.00%   |$\color{green}{\textbf{7278.65}}$|$\color{green}{\textbf{8491.76}}$|23 |0|80|0|80|$\color{green}{\textbf{memcpy}}$|blarisdata|
-
