@@ -2141,7 +2141,7 @@ struct plugs plugs[] = {
   { P_FIRETRAIL,     "firetrail",     _FIRETRAIL, "firetrail",                   ""},
   { P_SHRINKER,      "shrinker",      _SHRINKER,  "Shrinker",                    "", 0, (1<<26) },
   { P_SHOCO,         "shoco",         _SHOCO,     "Shoco",                       "" },
-  { P_LIBSLZ,        "slz",           _LIBSLZ,    "libslz",                      "0,1,2,3,4,5,6,7,8,9" },
+  { P_LIBSLZ,        "slz",           _LIBSLZ,    "libslz",                      "1,2,3,4" },
   { P_SMAZ,          "smaz",          _SMAZ,      "smaz",                        "" },
   { P_SNAPPY,        "snappy",        _SNAPPY,    "Snappy",                      ""  },
   { P_SNAPPY_C,      "snappy_c",      _SNAPPY_C,  "Snappy-c",                    "" },
@@ -2814,7 +2814,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _LIBSLZ
-    case P_LIBSLZ: { if(lev > 7) lev = 7;
+    case P_LIBSLZ: { if(lev > 4) lev = 4;
       unsigned blk = 16384 << lev;
       struct slz_stream strm;
             if(strchr(prm,'d')) slz_init(&strm, !!lev, SLZ_FMT_DEFLATE);
