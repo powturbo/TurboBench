@@ -2253,14 +2253,14 @@ int main(int argc, char* argv[]) {
       strcat(s,"/");
     }
     scmd = q?(q+1):(char*)"";
-  }                                                                 if(verbose > 5) printf("plugreg\n");fflush(stdout);
+  }                                                                                                      if(verbose > 5) printf("plugreg\n");fflush(stdout);
 
   unsigned k = plugreg(plug, s, 0, bsize, bsizex);
   if(k > 1 && argc == 1 && !strcmp(argvx[0],"stdin")) die("multiple codecs not allowed when reading from stdin");
 
   if(beb) { bebuild(&argvx[optind], argc-optind, recurse, beb, filenmax, delim); exit(0); }
   BEINI;
-                                                                                                    if(verbose > 5) printf("Process files\n");fflush(stdout);
+                                                                                                         if(verbose > 5) printf("Process files\n");fflush(stdout);
   unsigned long long totinlen = 0;
   int       krep;
   plug_t   *p;
