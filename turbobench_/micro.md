@@ -20,7 +20,7 @@
 |136457| 38.26%   |$\color{green}{\textbf{76.60}}$|173.39|4🥈|0|65808|7176|208|$\color{green}{\textbf{slz 1}}$|micro|Medium|
 |136739| 38.34%   |7.51|34.65|19 |143520|0|133512|0|heatshrink|micro|Small|
 |140567| 39.41%   |0.14|56.41|21 |0|424|0|264|tamp 15|micro|Pico|
-|147659| 41.40%   |$\color{green}{\textbf{90.68}}$|168.23|9 |16768|600|524616|344|$\color{green}{\textbf{lz4 1}}$|micro|Small|
+|147659| 41.40%   |$\color{green}{\textbf{90.68}}$|168.23|9 |16768|600|524616|344|$\color{green}{\textbf{lz4 1}}$|micro|Medium|
 |162679| 45.61%   |5.50|91.08|18 |0|424|0|264|tamp 8|micro|Pico|
 |356654|100.00%   |$\color{green}{\textbf{6729.32}}$|$\color{green}{\textbf{7430.29}}$|22 |0|80|0|80|$\color{green}{\textbf{memcpy}}$|micro||
 
