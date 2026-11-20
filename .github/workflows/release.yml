@@ -108,9 +108,6 @@ jobs:
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
           if [ '${{ matrix.os }}' = 'ubuntu-24.04-riscv' ]; then
-#            ./turbobench blaris/bench/data/* -U -V0 -eMICRO -aMICRO
-#            ./turbobench data@MICRO.tbb -p4
-#            mv -f data.md "data.${{ matrix.name }}.md"
             ./turbobench silesia.tar -U -eTURBO -V0
           else
             ./turbobench silesia.tar -U -V0
@@ -124,6 +121,9 @@ jobs:
 #            mv -f silesia.tar.md "silesia.${{ matrix.name }}.tar@BWT.md"
 #          fi
 #          ls -la silesia.*.md
+#            ./turbobench blaris/bench/data/* -U -V0 -eMICRO -aMICRO
+#            ./turbobench data@MICRO.tbb -p4
+#            mv -f data.md "data.${{ matrix.name }}.md"
 
       # ------------------ macOS ------------------
       - name: Build (macOS)
