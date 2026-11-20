@@ -185,6 +185,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [LZSA](https://github.com/emmanuel-marty/lzsa) |  |c  |lz  |
 | [mbrotli](https://github.com/Mnwa/mbrotli) | 2026/09 | rust |Brotli reimplementation|
 | [Memlz](https://github.com/rrrlasse/memlz) | 2026/07 |c  |lz  |
+| [Minlz](https://github.com/minio/minlz) | 2026/11 |c  |lz (Experimental C-gist)  |
 | [Miniz](https://github.com/richgel999/miniz) |  |c  |lz+huffman  |
 | [misa77](https://github.com/welcome-to-the-sunny-side/misa77) | 2026/07 |c++ |lz  |
 | [ms-compress](https://github.com/coderforlife/ms-compress) |  |c++  |lz  |
@@ -382,5 +383,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - Lz4:
   t# : threads<br />
 
-Last update: 19 NOV 2026
+Last update: 20 NOV 2026
 
