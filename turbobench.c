@@ -2253,14 +2253,14 @@ int main(int argc, char* argv[]) {
       strcat(s,"/");
     }
     scmd = q?(q+1):(char*)"";
-  }                                                                                                      if(verbose > 5) printf("plugreg\n");fflush(stdout);
+  }                                                                                                       if(verbose > 5) printf("plugreg\n");fflush(stdout);
 
   unsigned k = plugreg(plug, s, 0, bsize, bsizex);
   if(k > 1 && argc == 1 && !strcmp(argvx[0],"stdin")) die("multiple codecs not allowed when reading from stdin");
 
   if(beb) { bebuild(&argvx[optind], argc-optind, recurse, beb, filenmax, delim); exit(0); }
   BEINI;
-                                                                                                         if(verbose > 5) printf("Process files\n");fflush(stdout);
+                                                                                                          if(verbose > 5) printf("Process files\n");fflush(stdout);
   unsigned long long totinlen = 0;
   int       krep;
   plug_t   *p;
@@ -2275,7 +2275,7 @@ int main(int argc, char* argv[]) {
       totinlen = 0; g->len = g->tck = g->tdk = g->memc = g->memd = g->stkc = g->stkd = g->rank = 0;
       BEFILE;
       for(fno = optind; fno < argc; fno++) {
-        finame    = argvx[fno];                                                                            if(verbose > 1) printf("%s,%u\n", finame, filenmax);fflush(stdout);
+        finame    = argvx[fno];                                                                           if(verbose > 1) printf("%s,%u\n", finame, filenmax);fflush(stdout);
         p->len    = p->tc = p->td = p->memc = p->memd = p->stkc = p->stkd = 0;
         totinlen += plugfile(p, finame, filenmax, bsize, plugr, tid, krep);
         g->len   += p->len;
