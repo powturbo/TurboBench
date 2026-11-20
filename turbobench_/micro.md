@@ -24,6 +24,4 @@
 |162679| 45.61%   |5.50|91.08|18 |0|424|0|264|tamp 8|micro|Pico|
 |356654|100.00%   |$\color{green}{\textbf{6729.32}}$|$\color{green}{\textbf{7430.29}}$|22 |0|80|0|80|$\color{green}{\textbf{memcpy}}$|micro||
 
-Pico : 2 KB Ram
-Small: 8-32 KB Ram
-Medium : 32-512 KB Ram
+Pico : 2 KB Ram / Small: 8-32 KB Ram / Medium : 32-512 KB Ram
