@@ -1,15 +1,12 @@
 name: Build & Release
-
 on:
   push:
     # branches: [main, master]
     tags: ['v*']
   pull_request:
   workflow_dispatch:
-
 env:
   APP_NAME: turbobench
-
 jobs:
   build:
     name: Build (${{ matrix.name }})
@@ -50,24 +47,19 @@ jobs:
           #   arch: aarch64
           #   msystem: CLANGARM64
           #   mingw_pkg: mingw-w64-clang-aarch64-gcc-compat
-
     env:
       CC:  ${{ matrix.compiler || 'gcc' }}
       CXX: ${{ matrix.compiler == 'clang' && 'clang++' || 'g++' }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           submodules: recursive
-
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
         with:
           components: rust-src
-
 #        uses: dtolnay/rust-toolchain@stable
-
       # ------------------ Linux ------------------
       - name: cpu info (Linux)
         if: matrix.platform == 'linux'
@@ -89,7 +81,6 @@ jobs:
             sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
           fi
-
       - name: Build (Linux)
         if: matrix.platform == 'linux'
         run: |
@@ -99,7 +90,6 @@ jobs:
           else
             make STATIC=1 PHAZ=0 PIVCO=0
           fi
-
       - name: Benchmark silesia.tar.md (Linux)
         if: matrix.platform == 'linux' 
 #&& matrix.arch != 'x86_64'
@@ -113,18 +103,17 @@ jobs:
             ./turbobench silesia.tar -U -V0
           fi
           ./turbobench silesia.tar.tbb -p4
-          mv -f silesia.tar.md "C0.silesia.${{ matrix.name }}.tar.md"
+          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
 #          if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
 #            ./turbobench silesia.tar -V0 -eBWT -aBWT
 #            ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
 #            ./turbobench silesia.tar@BWT.tbb -p4
-#            mv -f silesia.tar.md "C0.silesia.${{ matrix.name }}.tar@BWT.md"
+#            mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar@BWT.md"
 #          fi
-#          ls -la silesia.*.md
+#          ls -la *.silesia.*.md
 #            ./turbobench blaris/bench/data/* -U -V0 -eMICRO -aMICRO
 #            ./turbobench data@MICRO.tbb -p4
-#            mv -f data.md "data.${{ matrix.name }}.md"
-
+#            mv -f data.md "${{ matrix.name }}.data.md"
       # ------------------ macOS ------------------
       - name: Build (macOS)
         if: matrix.platform == 'macos'
@@ -140,12 +129,11 @@ jobs:
           gunzip silesia.tar.gz
           ./turbobench silesia.tar -U -V0
           ./turbobench silesia.tar.tbb -p4
-          mv -f silesia.tar.md "B0.silesia.${{ matrix.name }}.tar.md"
+          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
           ./turbobench silesia.tar -V0 -U -eBWT -aBWT
           ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
           ./turbobench silesia.tar@BWT.tbb -p4
-          mv -f silesia.tar.md "B1.silesia.${{ matrix.name }}.tar@BWT.md"
-
+          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar@BWT.md"
       # ------------------ Windows (MSYS2) ------------------
       - name: Set git to use LF
         if: matrix.platform == 'windows'
@@ -182,14 +170,14 @@ jobs:
           gunzip silesia.tar.gz
           ./turbobench silesia.tar -U -V0
           ./turbobench silesia.tar.tbb -p4
-          mv -f silesia.tar.md "A0.silesia.${{ matrix.name }}.tar.md"
+          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
           ./turbobench silesia.tar -V0 -eBWT -aBWT
           ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
           ./turbobench silesia.tar@BWT.tbb -p4
-          mv -f silesia.tar.md "A2.silesia.${{ matrix.name }}.tar@BWT.md"
+          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar@BWT.md"
           ./turbobench turbobench.exe -V0 -eFAST
           ./turbobench turbobench.exe.tbb -p4
-          mv -f turbobench.exe.md "A1.turbobench.${{ matrix.name }}.exe.md"
+          mv -f turbobench.exe.md "${{ matrix.name }}.turbobench.exe.md"
           ls -la *.md
       # ------------------ Package (Linux / macOS) ------------------
       - name: Package artifact (Linux/macOS)
@@ -199,19 +187,15 @@ jobs:
           set -e
           DIST="dist/${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
           mkdir -p "$DIST"
-
           if [ -f "${APP_NAME}" ]; then
             cp "${APP_NAME}" "$DIST/"
           else
             find . -maxdepth 1 -type f -perm -u+x -iname "${APP_NAME}*" -exec cp {} "$DIST/" \;
           fi
-
           [ -f README.md ] && cp README.md "$DIST/" || true
           [ -f LICENSE ]   && cp LICENSE   "$DIST/" || true
-
           tar -C dist -czf "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz" \
             "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
-
       # ------------------ Package (Windows) ------------------
       - name: Package artifact (Windows)
         if: matrix.platform == 'windows'
@@ -220,21 +204,17 @@ jobs:
           set -e
           DIST="dist/${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
           mkdir -p "$DIST"
-
           if [ -f "${APP_NAME}.exe" ]; then
             cp "${APP_NAME}.exe" "$DIST/"
           elif [ -f "${APP_NAME}" ]; then
             cp "${APP_NAME}" "$DIST/${APP_NAME}.exe"
           fi
-
           [ -f turbobench.ini ] && cp turbobench.ini "$DIST/" || true
           [ -f README.md ]      && cp README.md      "$DIST/" || true
           [ -f LICENSE ]        && cp LICENSE        "$DIST/" || true
-
           cd dist
           zip -r "../${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}.zip" \
             "${APP_NAME}-${{ matrix.platform }}-${{ matrix.arch }}"
-
       - name: Upload build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -242,11 +222,10 @@ jobs:
           path: |
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
-            silesia.${{ matrix.name }}.tar.md
-            silesia.${{ matrix.name }}.tar@BWT.md
-            turbobench.${{ matrix.name }}.exe.md
+            ${{ matrix.name }}.silesia.tar.md
+            ${{ matrix.name }}.silesia.tar@BWT.md
+            ${{ matrix.name }}.turbobench.exe.md
           if-no-files-found: ignore
-
   # ------------------------------------------------------------------
   # The release + benchmark jobs stay exactly the same
   # ------------------------------------------------------------------
@@ -260,13 +239,11 @@ jobs:
         uses: actions/download-artifact@v6
         with:
           path: artifacts
-
       - name: Flatten artifacts into a release folder
         run: |
           mkdir -p release
           find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec cp {} release/ \;
           ls -la release
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -276,7 +253,6 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   update-benchmark-md:
     name: Concatenate silesia results into benchmark.md
     needs: build
@@ -290,27 +266,23 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.repository.default_branch }}
-
       - name: Download all build artifacts
         uses: actions/download-artifact@v6
         with:
           path: artifacts
-
-      - name: Concatenate all silesia.*.tar.md into benchmark.md
+      - name: Concatenate all *.silesia.tar*.md into benchmark.md
         run: |
           {
             echo "# TurboBench Silesia Corpus x86_64 aarch64 risc-v64"
           } > benchmark.md
-
-          for f in $(find artifacts \( -name '*.silesia.*.tar*.md' -o -name '*.turbobench.*.exe*.md' -o -name '*.data.*.md' \) | sort ); do
-            platform=$(basename "$f" | sed -E 's/^(silesia|turbobench)\.//; s/\.(tar|exe).*\.md$//')
+          for f in $(find artifacts \( -name '*.silesia.tar*.md' -o -name '*.turbobench.exe*.md' -o -name '*.data.md' \) | sort -r ); do
+            platform=$(basename "$f" | sed -E 's/\.(silesia|turbobench|data)\..*$//')
             echo "## Platform: ${platform}" >> benchmark.md
             echo "" >> benchmark.md
             cat "$f" >> benchmark.md
           done
           head -n 40 benchmark.md
           wc -l benchmark.md
-
       - name: Commit and push benchmark.md
         run: |
           git config user.name  "github-actions[bot]"
