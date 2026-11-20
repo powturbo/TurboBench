@@ -56,7 +56,7 @@ jobs:
           rustc --version
           cargo --version
           ./turbobench -l2
-          ./turbobench -h
+#          ./turbobench -h
 #      - run: ./turbobench turbobench -V0 -U
 #      - run: ./turbobench silesia.tar -V0 -U
 #      - run: ./turbobench silesia.tar -V0 -U -eBWT -abwt
