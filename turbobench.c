@@ -2282,10 +2282,10 @@ int main(int argc, char* argv[]) {
         g->tck   += p->tc;
         g->tdk   += p->td;
         g->err    = g->err?g->err:p->err;
-        if(p->memc != g->memc) g->memc = p->memc;
-        if(p->memd != g->memd) g->memd = p->memd;
-        if(p->stkc != g->stkc) g->stkc = p->stkc;
-        if(p->stkd != g->stkd) g->stkd = p->stkd;   
+        if(p->memc > g->memc) g->memc = p->memc;
+        if(p->memd > g->memd) g->memd = p->memd;
+        if(p->stkc > g->stkc) g->stkc = p->stkc;
+        if(p->stkd > g->stkd) g->stkd = p->stkd;   
       }
       g->id  = p->id;
       g->s   = p->s;
