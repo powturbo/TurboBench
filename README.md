@@ -53,7 +53,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 
 ### Benchmark:
 - [Compression Benchmark](https://sites.google.com/site/powturbo/compression-benchmark)
-- [Micro Benchmark - constrained systems](https://github.com/powturbo/TurboBench/turbobench_/micro.md)
+- [Micro Benchmark - constrained systems](https://github.com/powturbo/TurboBench/blob/master/turbobench_/micro.md)
 
 ### TurboBench vs LzBench
 
