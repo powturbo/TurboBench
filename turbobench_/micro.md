@@ -25,6 +25,7 @@
 |162679| 45.61%   |5.55|87.89|21 |0|424|0|264|tamp 8|blarisdata|Tiny|
 |214192| 60.06%   |0.04|$\color{green}{\textbf{272.05}}$|19 |1477848|2784|0|224|$\color{green}{\textbf{blaris 3}}$|blarisdata|Pico|
 |356654|100.00%   |$\color{green}{\textbf{6993.22}}$|$\color{green}{\textbf{7925.64}}$|24 |0|80|0|80|$\color{green}{\textbf{memcpy}}$|blarisdata||
+
 Pico : 2 KB Ram / Tiny : 2-8 KB Ram / Small: 8-32 KB Ram / Medium : 32-256 KB Ram | Large: > 256 KB
 
 
