@@ -112,9 +112,6 @@ jobs:
           ./turbobench -l2
           ./turbobench blaris/bench/data/* -U -V0 -eMICRO -aMICRO -i1,1
           cat data@MICRO.tbb
-#          ./turbobench turbobench -U -V0 -eTURBO -i1,1
-#          ./turbobench turbobench -U -V0 -eTURBO -i1,1
-#         ./turbobench silesia.tar -U -i0,0
 
   macos:
     runs-on: '${{ matrix.os }}'

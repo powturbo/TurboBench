@@ -1,27 +1,29 @@
-#### TurboBench: 2026.11.20 14:23 - C910 RISC-V 64GC 1.85GHZ (MB=1.000.000)
-|C Size|ratio%|C MB/s|D MB/s|Rank|C Mem|C Stack|D Mem|D Stack|Name|File|Category|
-|--------:|-----:|--------:|--------:|--------:|--------:|--------:|--------:|----------------|----------------|----------------|------|
-|93668| 26.26%   |$\color{green}{\textbf{1.44}}$|$\color{green}{\textbf{157.95}}$|7 |9012808|2272|11576|656|$\color{green}{\textbf{libdeflate 12}}$|[micro](https://github.com/lis05/blaris/tree/main/bench/data)|Medium|
-|97248| 27.27%   |$\color{green}{\textbf{2.63}}$|$\color{green}{\textbf{160.01}}$|6 |268152|736|7176|624|$\color{green}{\textbf{zlib 9}}$|micro|Medium|
-|97601| 27.37%   |$\color{green}{\textbf{12.16}}$|155.68|2🏆|864904|2064|11576|656|$\color{green}{\textbf{libdeflate 6}}$|micro|Medium|
-|98445| 27.60%   |10.84|156.56|5🥉|268152|736|7176|624|zlib 6|micro|Medium|
-|106718| 29.92%   |$\color{green}{\textbf{32.39}}$|152.74|1👑|202760|1968|11576|656|$\color{green}{\textbf{libdeflate 1}}$|micro|Medium|
-|109736| 30.77%   |10.19|66.83|14 |348168|14960|0|8160|igzip 3|micro|Medium|
-|113182| 31.73%   |30.86|142.38|8 |268152|704|7176|624|zlib 1|micro|Medium|
-|113184| 31.73%   |31.86|64.89|13 |331784|14960|0|8160|igzip 2|micro|Medium|
-|113592| 31.85%   |$\color{green}{\textbf{35.26}}$|66.21|12 |282632|14960|0|8160|$\color{green}{\textbf{igzip 1}}$|micro|Medium|
-|122473| 34.34%   |3.36|$\color{green}{\textbf{204.62}}$|10 |328128|1616|524616|344|$\color{green}{\textbf{lz4 12}}$|micro|Medium|
-|123408| 34.60%   |$\color{green}{\textbf{37.69}}$|69.05|11 |0|312|0|8160|$\color{green}{\textbf{igzip 0}}$|micro|Medium|
-|127852| 35.85%   |6.17|121.19|16 |524296|0|0|192|lzav 2|micro|Small|
-|130169| 36.50%   |0.02|0.41|20 |2552768|2848|0|96|blaris|micro|Pico|
-|133326| 37.38%   |28.58|113.26|15 |524296|800|0|192|lzav 1|micro|Small|
-|134618| 37.74%   |$\color{green}{\textbf{75.13}}$|171.55|3🥇|0|65808|7176|208|$\color{green}{\textbf{slz 4}}$|micro|Medium|
-|135252| 37.92%   |0.48|86.07|17 |0|424|0|264|tamp 13|micro|Tiny|
-|136457| 38.26%   |$\color{green}{\textbf{76.60}}$|173.39|4🥈|0|65808|7176|208|$\color{green}{\textbf{slz 1}}$|micro|Medium|
-|136739| 38.34%   |7.51|34.65|19 |143520|0|133512|0|heatshrink|micro|Small|
-|140567| 39.41%   |0.14|56.41|21 |0|424|0|264|tamp 15|micro|Tiny|
-|147659| 41.40%   |$\color{green}{\textbf{90.68}}$|168.23|9 |16768|600|524616|344|$\color{green}{\textbf{lz4 1}}$|micro|Medium|
-|162679| 45.61%   |5.50|91.08|18 |0|424|0|264|tamp 8|micro|Tiny|
-|356654|100.00%   |$\color{green}{\textbf{6729.32}}$|$\color{green}{\textbf{7430.29}}$|22 |0|80|0|80|$\color{green}{\textbf{memcpy}}$|micro||
+#### TurboBench: 2026.11.21 09:31 - C910 RISC-V 64GC 1.85GHZ  (MB=1.000.000)
+|C Size|ratio%|C MB/s|D MB/s|Rank|C Mem|C Stack|D Mem|D Stack|Name|File|D Cat|
+|--------:|-----:|--------:|--------:|--------:|--------:|--------:|--------:|----------------|----------------|----------------|---------|
+|93668| 26.26%   |$\color{green}{\textbf{1.48}}$|$\color{green}{\textbf{161.16}}$|8 |9012808|2272|11576|656|$\color{green}{\textbf{libdeflate 12}}$|blarisdata|Medium|
+|97248| 27.27%   |$\color{green}{\textbf{2.69}}$|$\color{green}{\textbf{163.38}}$|6 |268152|736|8328|624|$\color{green}{\textbf{zlib 9}}$|blarisdata|Small|
+|97601| 27.37%   |$\color{green}{\textbf{13.13}}$|157.95|4🥈|864904|2064|11576|656|$\color{green}{\textbf{libdeflate 6}}$|blarisdata|Medium|
+|98445| 27.60%   |11.44|160.58|5🥉|268152|736|8328|624|zlib 6|blarisdata|Small|
+|106718| 29.92%   |$\color{green}{\textbf{34.71}}$|154.80|1👑|202760|1968|11576|656|$\color{green}{\textbf{libdeflate 1}}$|blarisdata|Medium|
+|109736| 30.77%   |10.46|63.11|14 |348168|14960|0|8160|igzip 3|blarisdata|Small|
+|113182| 31.73%   |31.80|147.74|9 |268152|704|8328|624|zlib 1|blarisdata|Small|
+|113184| 31.73%   |33.42|62.61|13 |331784|14960|0|8160|igzip 2|blarisdata|Small|
+|113592| 31.85%   |$\color{green}{\textbf{35.06}}$|62.95|11 |282632|14960|0|8160|$\color{green}{\textbf{igzip 1}}$|blarisdata|Small|
+|120016| 33.65%   |0.02|$\color{green}{\textbf{169.92}}$|16 |2015240|2800|0|128|$\color{green}{\textbf{blaris 9}}$|blarisdata|Pico|
+|122473| 34.34%   |3.46|$\color{green}{\textbf{207.24}}$|10 |328128|1616|524664|344|$\color{green}{\textbf{lz4 12}}$|blarisdata|Large|
+|123408| 34.60%   |$\color{green}{\textbf{37.74}}$|66.02|12 |0|312|0|8160|$\color{green}{\textbf{igzip 0}}$|blarisdata|Small|
+|127852| 35.85%   |6.39|123.71|17 |524296|0|0|192|lzav 2|blarisdata|Tiny|
+|133326| 37.38%   |30.51|115.91|15 |524296|800|0|192|lzav 1|blarisdata|Tiny|
+|134618| 37.74%   |$\color{green}{\textbf{80.16}}$|173.22|2🏆|0|65808|8328|208|$\color{green}{\textbf{slz 4}}$|blarisdata|Small|
+|135252| 37.92%   |0.49|85.92|20 |0|424|0|264|tamp 13|blarisdata|Tiny|
+|136457| 38.26%   |$\color{green}{\textbf{80.24}}$|174.74|3🥇|0|65808|8328|208|$\color{green}{\textbf{slz 1}}$|blarisdata|Small|
+|136739| 38.34%   |7.55|35.23|22 |143520|0|133512|0|heatshrink|blarisdata|Medium|
+|140567| 39.41%   |0.14|58.08|23 |0|424|0|264|tamp 15|blarisdata|Tiny|
+|147659| 41.40%   |$\color{green}{\textbf{89.68}}$|171.22|7 |16768|600|524664|344|$\color{green}{\textbf{lz4 1}}$|blarisdata|Large|
+|151692| 42.53%   |0.10|$\color{green}{\textbf{208.94}}$|18 |1477848|2520|0|224|$\color{green}{\textbf{blaris 6}}$|blarisdata|Pico|
+|162679| 45.61%   |5.55|87.89|21 |0|424|0|264|tamp 8|blarisdata|Tiny|
+|214192| 60.06%   |0.04|$\color{green}{\textbf{272.05}}$|19 |1477848|2784|0|224|$\color{green}{\textbf{blaris 3}}$|blarisdata|Pico|
+|356654|100.00%   |$\color{green}{\textbf{6993.22}}$|$\color{green}{\textbf{7925.64}}$|24 |0|80|0|80|$\color{green}{\textbf{memcpy}}$|blarisdata||
 
-Pico : 2 KB Ram / Tiny : 2-8 KB Ram / Small: 8-32 KB Ram / Medium : 32-512 KB Ram
+
