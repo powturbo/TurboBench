@@ -35,7 +35,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - Text, HTML, CSV, Markdown.
 - :sparkles: **Transfer speed sheets** for real-world scenarios: GPRS, 2G/3G/4G/5G, DSL, Network, HDD, SSD, RAM.
 - :+1: **HTML plots**: Speedup + Speed/Ratio.
-- :new:2026.07 :+1: **Automatic SVG Bar & Scatter Charts** for Compression, Decompression, and Ratio.
+- :new:2026.07 :+1: **SVG Bar & Scatter Charts** for Compression, Decompression, and Ratio.
 - Built-in **peak memory usage** reporting (compression + decompression) in HTML output.
 
 **All-in-one executable** — no Python, no extra graphic libraries, zero dependencies, zero installers, zero configuration, no hassle. Just download, run, and benchmark.
@@ -122,7 +122,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
         ./turbobench -p4 file.tbb
 
 ##### - Bar/Scatter charts
-   + SVG files automatically generated after each benchmark
+   + SVG files generated with the option -H
    
 ### Compile:
 
