@@ -1821,12 +1821,13 @@ int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned 
       int l, iplen = (mode || bsize < outlen)?(bs==2?ctou16(ip):ctou32(ip)):_inlen; ip += bs;  
       if(mcpy && iplen==oplen) memcpy(op, ip, oplen); 
       else {                                                                                   mempeakinit();
-        l = coddecomp(ip, iplen, op, oplen, id, lev,prm);                                      _mempeak = mempeak();
+        l = coddecomp(ip, iplen, op, oplen, id, lev,prm);                                      _mempeak = mempeak();  if(memused()) die("warning: memory in compression not freed by compressor '%s'.%zu\n", plugs[id].s, memused());
       }
       ip += iplen; op += oplen;
     }                                          
   }
-  TMEND(_outlen);                                                                              size_t raw = stackpeak(_stack);
+  TMEND(_outlen);                                                                              
+                                                                                               size_t raw = stackpeak(_stack);
                                                                                                *pstack = raw > overhead ? raw - overhead : 0;
                                                                                                *pmempeak = _mempeak;  
   codend(_inlen, id, lev, prm, 1);
@@ -1981,7 +1982,7 @@ unsigned long long plugfile(plug_t *plug, char *finame, unsigned long long filen
     }
     size_t _mempeak, _stack, 
          outlen = becomp(in, len*nb, out, outsize, bsize, plug->id,plug->lev,plug->prm, name, finame, &_stack, &_mempeak)/nb;
-    plug->memc  = _mempeak;                                                         //if(memused()>2048) printf("warning: memory in compression not freed by compressor '%s %s'.%zu\n", plug->s, plug->prm, memused());
+    plug->memc  = _mempeak;                                                         
     tc          = tm_tmin(nb);
     plug->len  += outlen;
     plug->tc   += tc;
@@ -2339,21 +2340,23 @@ int main(int argc, char* argv[]) {
         if(g->id >= 0 && !strcmp(g->s, p->s) && g->lev == p->lev && !strcmp(g->prm, p->prm)) {
           int u = 0;                                                             
           if(g->len == p->len) {
-            if(g->tc < p->tc) { p->tc = g->tc; u++; }
-            if(g->td < p->td) { p->td = g->td; u++; }
+            if(p->tc < g->tc) { g->tc = p->tc; u++; }
+            if(p->td < g->td) { g->td = p->td; u++; }
 
-            if(g->memc != p->memc) { p->memc = g->memc; u++; }               
-            if(g->memd != p->memd) { p->memd = g->memd; u++; }
-            if(g->stkc != p->stkc) { p->stkc = g->stkc; u++; }
-            if(g->stkd != p->stkd) { p->stkd = g->stkd; u++; }
-            strcpy(p->tms, u?tms:g->tms);
-          }                                                                      
-          g->id = -1;
+            if(p->memc != g->memc) { g->memc = p->memc; u++; }               
+            if(p->memd != g->memd) { g->memd = p->memd; u++;  }
+            if(p->stkc != g->stkc) { g->stkc = p->stkc; u++; }
+            if(p->stkd != g->stkd) { g->stkd = p->stkd; u++; }
+            strcpy(g->tms, u?tms:p->tms);
+          }
+          if(u) {                                                                 
+            g->id = -1;
+            fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
+                 finame, totinlen, g->len,    g->td,g->tc,g->s,g->lev,g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms);
+          }
           break;
         }
-      fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
-                 finame, totinlen, p->len,    p->td,p->tc,p->s,p->lev,p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
-    }
+     }
     for(g = plug; g < plug+gk; g++)
       if(g->id >= 0 /*&& g->tc > 1e-10 && g->td > 1e-10 && !plug->err*/) fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
                                  finame, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms);
