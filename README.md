@@ -205,6 +205,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Snappy-c](https://github.com/andikleen/snappy-c) |  |c  |lz  |
 | [structured-zstd](https://github.com/structured-world/structured-zstd) | 2026/11 | rust |zstd reimplementation|
 | [Tamp](https://github.com/BrianPugh/tamp) | 2026/07 |c |lz Microcontrollers/memory-constrained |
+| [Tinyuz](https://github.com/sisong/tinyuz) | 2026/11 |c |lz Microcontrollers/memory-constrained |
 | [Tornado](http://freearc.org) |  |c++  |lz+huffman  |
 | [Unishox](https://github.com/siara-cc/Unishox) |  |c  |short strings|
 | [wfLZ](https://github.com/ShaneWF/wflz) |  |c  |lz  |
