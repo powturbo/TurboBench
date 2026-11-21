@@ -950,11 +950,6 @@ TINYUZ_LIB := tinyuz/libtinyuz.a
 $(TINYUZ_LIB): $(TINYUZ_SRCS)
 	@mkdir -p $(BUILD)/tinyuz
 	$(MAKE) -C tinyuz BUILD=$(abspath $(BUILD)/tinyuz)
-#TINYUZ_OBJS := $(call obj,$(TINYUZ_SRCS))
-#$(TINYUZ_OBJS): $(BUILD)/%.o: %.cpp
-#	@mkdir -p $(dir $@)
-#	$(CXX) -O3 -c $< -o $@
-#OB += $(TINYUZ_OBJS)
 LIBS+=$(TINYUZ_LIB)
 endif
 
