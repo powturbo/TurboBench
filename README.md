@@ -52,7 +52,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
   + type "./turbobench -h" for help
 
 ### Benchmark:
-- [Compression Benchmark](https://sites.google.com/site/powturbo/compression-benchmark)
+- [Compression Benchmark](https://github.com/powturbo/TurboBench/blob/master/benchmark.md)
 - [Micro Benchmark - constrained systems](https://github.com/powturbo/TurboBench/blob/master/turbobench_/micro.md)
 
 ### TurboBench vs LzBench
@@ -384,5 +384,5 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 - Lz4:
   t# : threads<br />
 
-Last update: 20 NOV 2026
+Last update: 21 NOV 2026
 
