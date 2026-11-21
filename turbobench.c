@@ -552,7 +552,7 @@ struct plugg {
 };
 
 struct plugg plugg[] = {
-  { "MICRO",     "blaris,3,6,9/heatshrink/igzip,0,1,2,3/libdeflate,1,6,12/lz4,1,12/lzav,1,2/slz,1,4/tamp,8,13,15/zlib,1,6,9/memcpy",                     "Microcontroller" },
+  { "MICRO",     "blaris,3,6,9/heatshrink/igzip,0,1,2,3/libdeflate,1,6,12/lz4,1,12/lzav,1,2/slz,1,4/tamp,8,13,15/tinyuz,0,1,2,3,4/zlib,1,6,9/memcpy",                     "Microcontroller" },
   { "TURBO",     "lzturbo,10,11,12,19/brotli,4/igzip,1,2,3/libdeflate,1,6,12/lz4,1,5,12/lzav,1,2/memlz/misa77,0,1,4/zlib-ng,1,6,9/zstd,3/zxc,3,5,6/memcpy",                         "lz4 class: Fastest de-/compression. HDD/SSD/RAM speed" },
   { "FAST",      "lzturbo,10,10a,11,12/aocl-lz4,0/aceapex_fast,1/brotli,0,1,4,5,6/igzip,1,2,3/libdeflate,1,6,12/lz4,1,3,9,12/lzav,1,2/memlz/misa77,0,1,2,3,4/zlib,1,6,9/zlib-turbo,1,6,9,12/zlib-ng,1,6,9/zstd,1,3,9/zxc,3,5,7/memcpy", "lz4,zlib,zstd class" },
   { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,6/zstd,5,9/libdeflate,6/zlib-ng,6/igzip,3/memcpy",                                                                         "Compression speed > 'zlib 6' class" },
@@ -2314,6 +2314,7 @@ int main(int argc, char* argv[]) {
     if((p = strrchr(finame, '\\')) || (p = strrchr(finame, '/')))
       finame = p+1;
   }
+  char fname[64+1]; strncpy(fname, finame, 64); fname[64] = 0;
   if(!totinlen) exit(0);
   sprintf(s, "%s%s.tbb", finame, fsuffix);
   if(merge /*|| tm_rep <= 1 && tm_rep2 <= 1*/) {
@@ -2335,31 +2336,29 @@ int main(int argc, char* argv[]) {
 
     plug_t *g;
     fprintf(fo, "dataset\tsize\tcsize\tdtime\tctime\tcodec\tlevel\tparam\tcmem\tdmem\tcstack\tdstack\ttime\n");
-    for(p = plugt; p < plugt+k; p++) {
-      for(g = plug; g < plug+gk; g++)
-        if(g->id >= 0 && !strcmp(g->s, p->s) && g->lev == p->lev && !strcmp(g->prm, p->prm)) {
+    for(p = plugt; p < plugt+k; p++) {  // benchmarked 
+      for(g = plug; g < plug+gk; g++)   // file
+        if(g->id >= 0 && !strcmp(g->s, g->s) && g->lev == g->lev && !strcmp(g->prm, g->prm)) {
           int u = 0;                                                             
           if(g->len == p->len) {
-            if(p->tc < g->tc) { g->tc = p->tc; u++; }
-            if(p->td < g->td) { g->td = p->td; u++; }
+            if(g->tc < p->tc) { p->tc = g->tc; u++; }
+            if(g->td < p->td) { p->td = g->td; u++; }
 
-            if(p->memc != g->memc) { g->memc = p->memc; u++; }               
-            if(p->memd != g->memd) { g->memd = p->memd; u++;  }
-            if(p->stkc != g->stkc) { g->stkc = p->stkc; u++; }
-            if(p->stkd != g->stkd) { g->stkd = p->stkd; u++; }
-            strcpy(g->tms, u?tms:p->tms);
+            if(g->memc != p->memc) u++;               
+            if(g->memd != p->memd) u++;
+            if(g->stkc != p->stkc) u++;
+            if(g->stkd != p->stkd) u++;
+            strcpy(p->tms, u?tms:g->tms);
           }
-          if(u) {                                                                 
-            g->id = -1;
-            fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
-                 finame, totinlen, g->len,    g->td,g->tc,g->s,g->lev,g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms);
-          }
+          g->id = -1;
           break;
         }
+        fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
+          fname, totinlen, p->len,    p->td,p->tc,p->s,p->lev,p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
      }
-    for(g = plug; g < plug+gk; g++)
-      if(g->id >= 0 /*&& g->tc > 1e-10 && g->td > 1e-10 && !plug->err*/) fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
-                                 finame, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms);
+     for(g = plug; g < plug+gk; g++)
+       if(g->id >= 0 /*&& g->tc > 1e-10 && g->td > 1e-10 && !plug->err*/) fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
+                                 fname, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms);
     fclose(fo);
 
     printfile(s, 0, FMT_TEXT, rem);
@@ -2367,7 +2366,7 @@ int main(int argc, char* argv[]) {
       plug_t plugv[SVG_PLUGMAX],*vp=plugv; int x = 0;
       for(g = plug; g < plug+gk; g++)
         if(g->id >= 0) { *vp = *g; vp->tc = TMBS(totinlen, vp->tc); vp->td = TMBS(totinlen, vp->td);  vp++; if(vp-plugv >= SVG_PLUGMAX) break; }
-      chart(plugv, vp - plugv, finame, totinlen);
+      chart(plugv, vp - plugv, fname, totinlen);
     }
   }
 
