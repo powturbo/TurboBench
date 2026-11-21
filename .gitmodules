@@ -192,3 +192,9 @@
 [submodule "blaris"]
 	path = blaris
 	url = https://github.com/lis05/blaris.git
+[submodule "tinyuz"]
+	path = tinyuz
+	url = https://github.com/sisong/tinyuz.git
+[submodule "HDiffPatch"]
+	path = HDiffPatch
+	url = https://github.com/sisong/HDiffPatch.git
