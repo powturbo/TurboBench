@@ -1,4 +1,4 @@
-#### TurboBench: 2026.11.21 09:31 - C910 RISC-V 64GC 1.85GHZ  (MB=1.000.000)
+#### TurboBench: 2026.11.21 - C910 RISC-V 64GC 1.85GHZ  (MB=1.000.000)
 |C Size|ratio%|C MB/s|D MB/s|Rank|C Mem|C Stack|D Mem|D Stack|Name|File|D Cat|
 |--------:|-----:|--------:|--------:|--------:|--------:|--------:|--------:|----------------|----------------|----------------|---------|
 |93668| 26.26%   |$\color{green}{\textbf{1.48}}$|$\color{green}{\textbf{161.16}}$|8 |9012808|2272|11576|656|$\color{green}{\textbf{libdeflate 12}}$|blarisdata|Medium|
