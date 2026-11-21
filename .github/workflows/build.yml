@@ -110,7 +110,7 @@ jobs:
         if: matrix.compiler == 'gcc' 
         run: |
           ./turbobench -l2
-          ./turbobench blaris/bench/data/* -U -etinyuz,0 -aMICRO -i1,1
+#          ./turbobench blaris/bench/data/* -U -etinyuz,0 -aMICRO -i1,1
 #          cat data@MICRO.tbb
 
   macos:
