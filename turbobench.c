@@ -2338,7 +2338,7 @@ int main(int argc, char* argv[]) {
     fprintf(fo, "dataset\tsize\tcsize\tdtime\tctime\tcodec\tlevel\tparam\tcmem\tdmem\tcstack\tdstack\ttime\n");
     for(p = plugt; p < plugt+k; p++) {  // benchmarked 
       for(g = plug; g < plug+gk; g++)   // file
-        if(g->id >= 0 && !strcmp(g->s, g->s) && g->lev == g->lev && !strcmp(g->prm, g->prm)) {
+        if(g->id >= 0 && !strcmp(g->s, p->s) && g->lev == p->lev && !strcmp(g->prm, p->prm)) {
           int u = 0;                                                             
           if(g->len == p->len) {
             if(g->tc < p->tc) { p->tc = g->tc; u++; }
