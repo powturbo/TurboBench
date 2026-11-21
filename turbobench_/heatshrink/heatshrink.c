@@ -16,7 +16,7 @@
 #define DEF_WINDOW_SZ2 11
 #define DEF_LOOKAHEAD_SZ2 4
 #define DEF_DECODER_INPUT_BUFFER_SIZE 256
-#define DEF_BUFFER_SIZE (64 * 1024)
+#define DEF_BUFFER_SIZE (4 * 1024)
 
 #if 0
 #define LOG(...) fprintf(stderr, __VA_ARGS__)
@@ -516,7 +516,7 @@ int hscompress( unsigned char *in, int inlen, unsigned char *out) {
 }
 
 int hsdecompress( unsigned char *in, int inlen, unsigned char *out, int outlen) {  //printf("\n\n");
-  config cfg = {0};
+  config cfg = {0};                                   
     cfg.window_sz2 = DEF_WINDOW_SZ2;
     cfg.lookahead_sz2 = DEF_LOOKAHEAD_SZ2;
     cfg.buffer_size = DEF_BUFFER_SIZE;
@@ -525,15 +525,15 @@ int hsdecompress( unsigned char *in, int inlen, unsigned char *out, int outlen) 
     cfg.verbose = 0;
     cfg.in_fname = "-";
     cfg.out_fname = "-";
-  size_t buf_sz = cfg.buffer_size,m=sizeof(io_handle) + buf_sz;
-  io_handle *io = calloc(1,m); if (io == NULL) { return NULL; }
+  size_t buf_sz = cfg.buffer_size, m = sizeof(io_handle) + buf_sz;
+  io_handle *io = calloc(1,m); if(!io) return 0; 
   io->fd   = in;
   io->mode = IO_READ;
   io->size = buf_sz;  //io->mode = m;
   io->fe   = in+inlen;
   cfg.in   = io; 
 
-  io = calloc(1,m);  if (io == NULL) { return NULL; }
+  io = calloc(1,m);  if(!io) return 0;
   io->fd   = out;
   io->mode = IO_WRITE;
   io->size = buf_sz;
@@ -541,5 +541,4 @@ int hsdecompress( unsigned char *in, int inlen, unsigned char *out, int outlen) 
   cfg.out  = io;
   return decode(&cfg);
 }
-
 

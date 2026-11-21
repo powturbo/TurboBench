@@ -18,7 +18,7 @@
 |134618| 37.74%   |$\color{green}{\textbf{80.16}}$|173.22|2🏆|0|65808|8328|208|$\color{green}{\textbf{slz 4}}$|blarisdata|Small|
 |135252| 37.92%   |0.49|85.92|20 |0|424|0|264|tamp 13|blarisdata|Tiny|
 |136457| 38.26%   |$\color{green}{\textbf{80.24}}$|174.74|3🥇|0|65808|8328|208|$\color{green}{\textbf{slz 1}}$|blarisdata|Small|
-|136739| 38.34%   |7.55|35.23|22 |143520|0|133512|0|heatshrink|blarisdata|Medium|
+|136739| 38.34%   |7.55|35.23|22 |143520|0|10632|72|heatshrink|blarisdata|Tiny|
 |140567| 39.41%   |0.14|58.08|23 |0|424|0|264|tamp 15|blarisdata|Tiny|
 |147659| 41.40%   |$\color{green}{\textbf{89.68}}$|171.22|7 |16768|600|524664|344|$\color{green}{\textbf{lz4 1}}$|blarisdata|Large|
 |151692| 42.53%   |0.10|$\color{green}{\textbf{208.94}}$|18 |1477848|2520|0|224|$\color{green}{\textbf{blaris 6}}$|blarisdata|Pico|
