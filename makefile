@@ -366,7 +366,7 @@ HEATSHRINK_SRCS := heatshrink/heatshrink_encoder.c heatshrink/heatshrink_decoder
 HEATSHRINK_OBJS := $(call obj,$(HEATSHRINK_SRCS))
 $(HEATSHRINK_OBJS): $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) -O3 -DNDEBUG -Wno-int-conversion -c $< -o $@
+	$(CC) -O3 -DNDEBUG -Wno-int-conversion -fstack-usage -c $< -o $@
 OB += $(HEATSHRINK_OBJS)
 endif
 #--- I -----------------------------------------------------------------------------------------------------------------------------------------------
