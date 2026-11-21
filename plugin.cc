@@ -1484,7 +1484,7 @@ struct snappy_env env;
   #if _SZSTD
 //#include "structured-zstd/c-api/include/structured_zstd.h"
 EXTERN_C_BEGIN
-size_t szstd_ZSTD_compress(void *dst, size_t dstCapacity, const void *src, size_t srcSize, int level);
+size_t szstd_ZSTD_compress(  void *dst, size_t dstCapacity, const void *src, size_t srcSize, int level);
 size_t szstd_ZSTD_decompress(void *dst, size_t dstCapacity, const void *src, size_t compressedSize);
 EXTERN_C_END
   #endif
@@ -1498,6 +1498,19 @@ EXTERN_C_END
   #if _TINYUZ
 #include "tinyuz/compress/tuz_enc.h"
 #include "tinyuz/decompress/tuz_dec.h"
+
+/*static const tuz_size_t tDictSizes[] = {255, 1<<10, 4<<10, 32<<10, 1<<20};
+int _tuz_compress(const unsigned char *in, size_t inlen, unsigned char *out, size_t outsize, int lev, int threads) {
+  hpatch_TStreamOutput out_stream;
+  mem_as_hStreamOutput(&out_stream, out, out+outsize);
+  hpatch_TStreamInput in_stream;
+  mem_as_hStreamInput(&in_stream, in, in+inlen);
+  tuz_TCompressProps props = tuz_kDefaultCompressProps;
+  props.dictSize           = tDictSizes[lev];
+  props.threadNum          = threads;                   // props.maxSaveLength=255;
+  hpatch_StreamPos_t codeSize = tuz_compress(&out_stream, &in_stream, &props);
+  return (int)codeSize;
+}*/
   #endif
 
   #if _TCOBS
@@ -2154,7 +2167,7 @@ struct plugs plugs[] = {
   
   { P_TAMP,          "tamp",          _TAMP,      "tamp",                        "8,9,10,11,12,13,14,15" },
   { P_TCOBS,         "tcobs",         _TCOBS,     "tcobs",                       "" },
-  { P_TINYUZ,        "tinyuz",        _TINYUZ,    "tinyuz",                       "" },
+  { P_TINYUZ,        "tinyuz",        _TINYUZ,    "tinyuz",                      "0,1,2,3,4" },
   { P_TORNADO,       "tornado",       _TORNADO,   "Tornado",                     "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" },
   { P_TOVYCT,        "tvct",          _TOVYCT,    "tovyCT",                      "" },
   { P_TSQ,           "tsq",           _TSQ,       "turbosqueeze",                "0,1,2,3,4,5,6,7" },
@@ -3212,9 +3225,9 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #if _TAMP
     case P_TAMP: { int64_t rc = 0;
       TampConf conf = {
-         .window  = (uint16_t)lev, // Describes the size of the decompression buffer in bits. A 10-bit window represents a 1024-byte buffer. Must be in range [8, 15], representing [256, 32678] byte windows.
-         .literal = 8,
-         .use_custom_dictionary = false
+        .window                = (uint16_t)lev, // describes the size of the decompression buffer in bits. A 10-bit window represents a 1024-byte buffer. Must be in range [8, 15], representing [256, 32678] byte windows.
+        .literal               = 8,
+        .use_custom_dictionary = false
       };
       TampCompressor compressor;
       tamp_compressor_init(&compressor, &conf, (unsigned char *)workmem);
@@ -3227,10 +3240,18 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_TCOBS:     return TCOBSEncode( out, in, inlen);
       #endif
 
-      #if _TiNYUZ
-    case P_TINYUZ: { tuz_TCompressProps props ={0}; props.dictSize = inlen; props.maxSaveLength = 64*1024-1; props.threadNum = threads>1?threads:1; props.isNeedLiteralLine=1;
-      hpatch_StreamPos_t rc = tuz_compress((const hpatch_TStreamOutput*)out, (const hpatch_TStreamInput*)in, &props); return rc; 
-    }
+      #if _TINYUZ
+    case P_TINYUZ: { static const tuz_size_t tDictSizes[] = {255, 1<<10, 4<<10, 32<<10, 1<<20};
+      hpatch_TStreamOutput out_stream;
+      mem_as_hStreamOutput(&out_stream, out, out+outsize);
+      hpatch_TStreamInput in_stream;
+      mem_as_hStreamInput(&in_stream, in, in+inlen);
+      tuz_TCompressProps props = tuz_kDefaultCompressProps;
+      props.dictSize           = tDictSizes[lev];
+      props.threadNum          = threads;                   // props.maxSaveLength=255;
+      hpatch_StreamPos_t codeSize = tuz_compress(&out_stream, &in_stream, &props);
+      return (int)codeSize;
+   }
       #endif
 
       #if _TORNADO
@@ -4312,8 +4333,8 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
     } break;
       #endif
       
-      #if _TiNYUZ
-    case P_TINYUZ: { tuz_size_t out_size=outlen; tuz_TResult rc = tuz_decompress_mem((tuz_pbyte_r)in, (tuz_size_t)inlen, (tuz_pbyte_rw *)out, &out_size); return rc; }
+      #if _TINYUZ
+    case P_TINYUZ: { tuz_size_t out_size = outlen; return tuz_decompress_mem((tuz_pbyte_r)in, (tuz_size_t)inlen, (tuz_pbyte_rw)out, &out_size); }
       #endif
 
       #if _TCOBS
