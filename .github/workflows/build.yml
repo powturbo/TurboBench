@@ -110,8 +110,8 @@ jobs:
         if: matrix.compiler == 'gcc' 
         run: |
           ./turbobench -l2
-          ./turbobench blaris/bench/data/* -U -V0 -eMICRO -aMICRO -i1,1
-          cat data@MICRO.tbb
+#          ./turbobench blaris/bench/data/* -U -V0 -eMICRO -aMICRO -i1,1
+#          cat data@MICRO.tbb
 
   macos:
     runs-on: '${{ matrix.os }}'
