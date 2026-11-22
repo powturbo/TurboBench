@@ -220,6 +220,15 @@ enum {
 #define _LZ4 0
 #endif
  P_LZ4,
+#ifndef _LZ0
+#define _LZ0 0
+//#define _ZX0 0
+#endif
+ P_LZ0,
+#ifndef _ZX0
+#define _ZX0 0
+#endif
+ P_ZX0,
 #ifndef _LZ4ULTRA
 #define _LZ4ULTRA 0
 #endif
@@ -1141,6 +1150,18 @@ class Out: public libzpaq::Writer {
 } zmemout;
   #endif
 
+  #if _LZ0
+#include "lz0/lz0/lz0dec.h"
+#include "lz0/lz0/lz0.h"  
+#include "lz0/zx0_compressor/zx0_compress_wrapper.h"  
+  #endif
+
+  #if _ZX0
+EXTERN_C_BEGIN
+#include "lz0/zx0_decompressor/zx0_decompress.h"  
+EXTERN_C_END  
+  #endif
+
   #if _LZ4
 #include "lz4/lib/lz4.h"
 #include "lz4/lib/lz4hc.h"
@@ -1150,7 +1171,6 @@ class Out: public libzpaq::Writer {
   #if _LZAV
 #include "lzav/lzav.h"  
   #endif
-
 
   #if _LZFSE
 #include "lzfse/src/lzfse.h"
@@ -2070,7 +2090,7 @@ struct plugs plugs[] = {
   { P_GLYD,          "glyd",          _GLYD,      "glyd",                        "0,1,2" },
   { P_GLYDP,         "glyd_par",      _GLYD,      "glyd parallel",               "0,1,2" },
 
-  { P_HEATSHRINK,    "heatshrink",    _HEATSHRINK,"heatshrink",                  "" },
+  { P_HEATSHRINK,    "heatshrink",    _HEATSHRINK,"heatshrink",                  "0,1,2,3,4" },
   
   { P_IC,            "ic",            _TURBOPFOR,        "TurboPFor",                   "3,4,5,6,7,8,9,10,11" },
   { P_IGUANA,        "iguana",        _IGUANA,    "iguana",                      "" },
@@ -2086,6 +2106,8 @@ struct plugs plugs[] = {
   { P_LIBLZG,        "lzg",           _LIBLZG,    "LibLzg",                      "1,2,3,4,5,6,7,8,9" }, //"https://gitorious.org/liblzg" BLOCKSIZE must be < 64MB
   { P_LZRAVEN,       "lzraven",       _LZRAVEN,   "lzraven",                     "" },
   { P_LIZARD,        "lizard",        _LIZARD,    "Lizard",                      "10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49" },
+  { P_LZ0,           "lz0",           _LZ0,       "lz0",                         "1,2,3,4,5,6,7,8,9" },
+  { P_ZX0,           "zx0",           _ZX0,       "zx0",                         "" },
   { P_LZ4,           "lz4",           _LZ4,       "Lz4",                         "0,1,2,3,4,5,6,7,8,9,10,11,12,-1,-2,-3,-4,-5,-6,-7,-8,-10,-20,-30,-40,-50.-60,-70,-80,-90,-99/t#MfsB#" },
   { P_LZ4ULTRA,      "lz4ultra",      _LZ4ULTRA,  "Lz4ultra",                    "9,10,11,12/z" },
   { P_LZAV,          "lzav",          _LZAV,      "lzav",                        "1,2" },
@@ -2750,7 +2772,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
 //=== H =============================================================================================================================
       #if _HEATSHRINK
-    case P_HEATSHRINK:   return hscompress(in, inlen, out);
+    case P_HEATSHRINK:   return hscompress(in, inlen, out, outsize, lev);
       #endif
 
 //=== I =============================================================================================================================
@@ -2857,6 +2879,16 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_LIZARD: return Lizard_compress((const char*)in, (char*)out, inlen, outsize, lev);
       #endif
       
+      #if _LZ0
+    case P_LZ0: { lz0_config cfg; lz0_stats st; unsigned char *raw = NULL; size_t rsz = 0; lz0_config_level(&cfg, lev); if(lz0_compress(in, inlen, &raw, &rsz, &cfg, &st)) return 0;
+      memcpy(out, raw, rsz); free(raw); return rsz;
+    } 
+      #endif
+
+      #if _ZX0
+    case P_ZX0: { unsigned char *pout; size_t outlen; if(zx0_compress_c(in, inlen, &pout, &outlen)) return 0; memcpy(out, pout, outlen); free(pout); return outlen; }
+      #endif
+
       #if _LZ4
     case P_LZ4:
       if(strchr(prm,'F')) { return !lev?LZ4_compress_fast((char *)in, (char *)out, inlen, outsize, 4):(lev<9?LZ4_compress_default((char *)in, (char *)out, inlen, outsize):LZ4_compress_HC((char *)in, (char *)out, inlen, outsize, lev)); }
@@ -3526,7 +3558,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
     //------------------------- Entropy Coders -------------------------
       #if _MEMCPY
-    case P_MCPY:     memcpy(out, in, inlen); return inlen;
+    case P_MCPY:  memcpy(out, in, inlen); return inlen;
     case P_LMCPY: libmemcpy(out, in, inlen); return inlen;
       #endif
 
@@ -4013,6 +4045,15 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #if _LIZARD
     case P_LIZARD: return Lizard_decompress_safe((const char *)in, (char *)out, inlen, outlen);
       #endif
+
+      #if _LZ0
+    case P_LZ0: return strchr(prm,'C')?lz0dec_compact(in, (int)inlen, out, (int)outlen):lz0dec_fast(in, (int)inlen, out, (int)outlen);
+      #endif
+
+      #if _ZX0
+    case P_ZX0: return zx0_decompress_to(in, inlen, out, outlen);
+      #endif
+
 
       #if _LZ4
     case P_LZ4:
