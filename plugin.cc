@@ -2508,8 +2508,8 @@ int codstart(size_t insize, int codec, int lev, char *prm, int mode) {
       #if _ZSTD
     case P_ZSTD:
       if(strchr(prm, 'D')) {
-        if(mode) { if(!ddictPtr) { char *q; ddictPtr = NULL; if(q = strchr(prm,'D')) { q=q+(q[1]=='='?2:1);  if(!(ddictPtr = createDDict_orDie(q     ))) die("zstd:createDDict '%s' failed\n", q); } } }
-        else     { if(!cdictPtr) { char *q; cdictPtr = NULL; if(q = strchr(prm,'D')) { q=q+(q[1]=='='?2:1);  if(!(cdictPtr = createCDict_orDie(q, lev))) die("zstd:createCDict '%s' failed\n", q); } } }
+        if(!mode) { if(!ddictPtr) { char *q; if(q = strchr(prm,'D')) { q=q+(q[1]=='='?2:1);  if(!(ddictPtr = createDDict_orDie(q     ))) die("zstd:createDDict '%s' failed\n", q); } } }
+        else      { if(!cdictPtr) { char *q; if(q = strchr(prm,'D')) { q=q+(q[1]=='='?2:1);  if(!(cdictPtr = createCDict_orDie(q, lev))) die("zstd:createCDict '%s' failed\n", q); } } }
       }
       break;
       #endif
@@ -3411,13 +3411,14 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _ZSTD
-    case P_ZSTD: { ZSTD_CStream *z = ZSTD_createCStream(); if(!z) return -1;
+    case P_ZSTD: {
+      ZSTD_CStream *z = ZSTD_createCStream(); if(!z) return -1;
       if(dsize) {
         unsigned windowLog = bsr32(dsize) - powof2(dsize); 
         ZSTD_CCtx_setParameter(z, ZSTD_c_enableLongDistanceMatching, 1); 
         ZSTD_CCtx_setParameter(z, ZSTD_c_windowLog, windowLog);
-        ZSTD_CCtx_setParameter(z, ZSTD_c_nbWorkers, threads?threads:1);
       }
+      ZSTD_CCtx_setParameter(z, ZSTD_c_nbWorkers, threads?threads:1);
       ZSTD_initCStream(z, lev);
       ZSTD_inBuffer  ip = { in, (size_t)inlen,   0 };
       ZSTD_outBuffer op = { out,(size_t)outsize, 0 };
