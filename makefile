@@ -183,7 +183,6 @@ all: turbobench
 #--- A ------------------------------------------------------------------------------------------------------------------------------------
 # aceapex: the library is one translation unit (src/aceapex_api.cpp includes the codec sources); zstd from the zstd submodule
 ifneq ($(wildcard aceapex/.),)
-#ifneq ($(OS), Windows)  # not compiling for windows in CI.
 PLG_FLAGS += -D_ACEAPEX
 ACEAPEX_DIR := aceapex/src
 ifeq ($(ARCH),x86_64)
@@ -195,7 +194,6 @@ $(BUILD)/$(ACEAPEX_DIR)/aceapex_api.o: $(ACEAPEX_DIR)/aceapex_api.cpp $(wildcard
 	@mkdir -p $(dir $@)
 	$(CXX) -O3 -std=c++17 $(ACEAPEX_FLAGS) -DXXH_INLINE_ALL -Izstd/lib -I$(ACEAPEX_DIR) -c $< -o $@
 OB += $(BUILD)/$(ACEAPEX_DIR)/aceapex_api.o
-#endif
 endif
 
 ifneq ($(AOCL), 0) 
@@ -548,10 +546,15 @@ LIBS += $(LZ_LIB)
 endif
 
 ifneq ($(wildcard lz0/.),)
+ifneq ($(OS), Windows)  # not compiling in CI.
 PLG_FLAGS+=-D_LZ0 
-LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/lz0/*.S) $(wildcard lz0/zx0_compressor/*.c lz0/zx0_decompressor/*.c)
-LZ0_SSOBJ += $(wildcard lz0/lz0/*$(ARCH).s)
+LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/lz0/*.s) $(wildcard lz0/zx0_compressor/*.c lz0/zx0_decompressor/*.c)
 LZ0_COBJS := $(call obj,$(LZ0_CSRCS))
+ifeq ($(ARCH),aarch64)
+LZ0_SSOBJ += lz0dec_fast_arm64.s
+else
+LZ0_SSOBJ += $(wildcard lz0/lz0/*$(ARCH).s)
+endif
 $(LZ0_COBJS): $(BUILD)/%.o: %.c | $(BUILD)
 	@mkdir -p $(dir $@)
 	$(CC) -O3 -DNDEBUG -c $< -o $@
@@ -560,11 +563,7 @@ LZ0_LIB = $(BUILD)/lz0/liblz0.a
 $(LZ0_LIB): $(LZ0_COBJS) | $(BUILD)/lz0
 	$(AR) rcs $@ $^
 LIBS += $(LZ0_LIB)
-#LZ0_LIB := $(BUILD)/lz0/libtinyuz.a
-#$(LZ0_LIB): $(LZ0_SRCS)
-#	@mkdir -p $(BUILD)/lz0
-#	$(MAKE) -C lz0 
-#	@mv lz0/libtinyuz.a $(LZ0_LIB)
+endif
 endif
 
 ifneq ($(wildcard lz4/.),)
