@@ -54,26 +54,29 @@ endif
 
 ifndef CROSS
 else
+  ifeq ($(OS), Windows)
+    CP=$(CROSS)-unknown-elf
+  else
+    CP=$(CROSS)-linux-gnu
+  endif
 
-ifeq ($(OS), Windows)
-CP=$(CROSS)-unknown-elf
-else
-CP=$(CROSS)-linux-gnu
-endif
-ifeq ($(CG),clang)
-CG=clang --target=$(CP) --sysroot=/usr/$(CP) -fuse-ld=lld
-CXX:=$(CP)-clang++
-ifeq ($(CC),clang)
-CC=$(CG)
-else
-CC:=$(CP)-gcc
-CXX:=$(CP)-g++
-endif
-else
-CC:=$(CP)-gcc
-CG=$(CC)
-endif
-#CROSS:=$(CC)
+  ifeq ($(CG),clang)
+    CG=clang --target=$(CP) --sysroot=/usr/$(CP) -fuse-ld=lld
+    CXX:=$(CP)-clang++
+    ifeq ($(CC),clang)
+      CC=$(CG)
+    else
+      CC:=$(CP)-gcc
+      CXX:=$(CP)-g++
+    endif
+  else
+    CC:=$(CP)-gcc
+    CG=$(CC)
+    CXX:=$(CP)-g++
+  endif
+  CXL:=$(CP)-$(CXL)
+  CCO:=$(CP)-$(CCO)
+#  CROSS:=$(CC)
 endif
 CHOST=$(CROSS)
 
@@ -551,7 +554,7 @@ PLG_FLAGS+=-D_LZ0
 LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/zx0_compressor/*.c lz0/zx0_decompressor/*.c)
 LZ0_COBJS := $(call obj,$(LZ0_CSRCS))
 ifeq ($(ARCH),aarch64)
-LZ0_SSOBJ += lz0dec_fast_arm64.s
+LZ0_SSOBJ += lz0/lz0/lz0dec_fast_arm64.s
 else
 LZ0_SSOBJ += $(wildcard lz0/lz0/*$(ARCH).s)
 endif
