@@ -552,7 +552,7 @@ struct plugg {
 };
 
 struct plugg plugg[] = {
-  { "MICRO",     "blaris,3,6,9/heatshrink/igzip,0,1,2,3/libdeflate,1,6,12/lz4,1,12/lzav,1,2/slz,1,4/tamp,8,13,15/tinyuz,0,1,2,3,4/zlib,1,6,9/memcpy",                     "Microcontroller" },
+  { "MICRO",     "blaris,3,6,9/heatshrink,1/igzip,0,1,2,3/libdeflate,1,6,12/lz4,1,12/lzav,1,2/slz,1,4/tamp,8,13,15/zlib,1,6,9/memcpy",                     "Microcontroller" },
   { "TURBO",     "lzturbo,10,11,12,19/brotli,4/igzip,1,2,3/libdeflate,1,6,12/lz4,1,5,12/lzav,1,2/memlz/misa77,0,1,4/zlib-ng,1,6,9/zstd,3/zxc,3,5,6/memcpy",                         "lz4 class: Fastest de-/compression. HDD/SSD/RAM speed" },
   { "FAST",      "lzturbo,10,10a,11,12/aocl-lz4,0/aceapex_fast,1/brotli,0,1,4,5,6/igzip,1,2,3/libdeflate,1,6,12/lz4,1,3,9,12/lzav,1,2/memlz/misa77,0,1,2,3,4/zlib,1,6,9/zlib-turbo,1,6,9,12/zlib-ng,1,6,9/zstd,1,3,9/zxc,3,5,7/memcpy", "lz4,zlib,zstd class" },
   { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,6/zstd,5,9/libdeflate,6/zlib-ng,6/igzip,3/memcpy",                                                                         "Compression speed > 'zlib 6' class" },
@@ -1781,7 +1781,8 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
       for(ip = in, in += inlen; ip < in; ) {                                                
         size_t iplen = in - ip; iplen = min(iplen, bsize);
         bs = (mode || bsize < inlen)?((min(bsize, iplen) < (1<<16))?2:4):0;                    mempeakinit();
-        size_t oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);                     _mempeak = mempeak();
+        size_t oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);                     _mempeak = mempeak(); 
+                                                                                               if(memused()) { die("\nwarning: memory in compression not freed by compressor '%d'.size=%zu\n", id, memused()); }
         if(oplen <= 0 || oplen >= iplen && mcpy) {
           if(mcpy) { memcpy(op+bs, ip, iplen); oplen = iplen; }
           else if(oplen <= 0) { op = _out; goto end; }
@@ -1803,7 +1804,7 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
 int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm, size_t *pstack, size_t *pmempeak) {
   unsigned char *ip=NULL;                                                                      
   codstart(_inlen, id, lev, prm, 1);                                                           memstack_t _stack = stackini();
-                                                                                               coddecomp(_in, _inlen, _out, _outlen, 2, lev,"");
+                                                                                               coddecomp(_in, _inlen, _out, _outlen, 2, lev,""); 
                                                                                                size_t  overhead = stackpeak(_stack), _mempeak;
                                                                                                _stack = stackini();
   TMBEG(tm_Rep2);     
@@ -1821,7 +1822,8 @@ int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned 
       int l, iplen = (mode || bsize < outlen)?(bs==2?ctou16(ip):ctou32(ip)):_inlen; ip += bs;  
       if(mcpy && iplen==oplen) memcpy(op, ip, oplen); 
       else {                                                                                   mempeakinit();
-        l = coddecomp(ip, iplen, op, oplen, id, lev,prm);                                      _mempeak = mempeak();  if(memused()) die("warning: memory in compression not freed by compressor '%s'.%zu\n", plugs[id].s, memused());
+        l = coddecomp(ip, iplen, op, oplen, id, lev,prm);                                      _mempeak = mempeak(); 
+                                                                                               if(memused()) { die("\nFatal: Memory in decompression not freed by compressor '%d'.size=%zu\n", id, memused()); }
       }
       ip += iplen; op += oplen;
     }                                          
