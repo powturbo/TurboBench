@@ -3444,7 +3444,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
     case P_ZXC: { //zxc_compress_opts_t opts = {0}; opts.level = lev; opts.n_threads = threads?threads:1; if(q = strchr(prm,'B')) opts.block_size = 1 << atoi(q+(q[1] == '='?2:1)); 
       zxc_cctx *cctx = zxc_create_cctx();
       zxc_cctx_set_param(cctx, ZXC_C_LEVEL, lev);
-      if(threads > 1) zxc_cctx_set_param(cctx, ZXC_C_THREADS, threads);
+      if(threads > 1) zxc_cctx_set_param(cctx, ZXC_C_THREADS, threads); 
       if(q = strchr(prm,'B')) zxc_cctx_set_param(cctx, ZXC_C_BLOCK_SIZE, 1 << atoi(q+(q[1] == '='?2:1))); 
       int64_t rc = zxc_compress_cctx(cctx, in, inlen, out, outsize);
       zxc_free_cctx(cctx); 
@@ -4920,6 +4920,9 @@ char *codver(int codec, char *v, char *s) {
  
       #if _LIZARD
     case P_LIZARD: sprintf(s,"v%d.%d.%d", LIZARD_VERSION_MAJOR, LIZARD_VERSION_MINOR, LIZARD_VERSION_RELEASE); break;
+      #endif
+      #if _LZ0
+    case P_LZ0:    return "v0.3.0"; break;
       #endif
       #if _LZ4
     case P_LZ4:     sprintf(s,"v%d.%d.%d MT", LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE); break;
