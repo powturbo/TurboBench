@@ -470,7 +470,7 @@ endif
 # O=$(abspath $(BUILD)/isa-l) 
 #--- K ---------------------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard kanzi-cpp/.),)
-ifneq ($(KANZI), 0) # don't build
+ifneq ($(KANZI), 0) #  don't build
 PLG_FLAGS += -D_KANZI 
 KANZI_SRCS := $(wildcard kanzi-cpp/src/io/*.cpp) $(wildcard kanzi-cpp/src/entropy/*.cpp) $(wildcard kanzi-cpp/src/bitstream/*.cpp) $(wildcard kanzi-cpp/src/*.cpp) $(wildcard kanzi-cpp/src/transform/*.cpp)
 KANZI_LIB = $(BUILD)/kanzi-cpp/libkanzi.a
