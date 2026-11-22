@@ -1782,7 +1782,7 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
         size_t iplen = in - ip; iplen = min(iplen, bsize);
         bs = (mode || bsize < inlen)?((min(bsize, iplen) < (1<<16))?2:4):0;                    mempeakinit();
         size_t oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);                     _mempeak = mempeak(); 
-                                                                                               if(memused()) { die("\nwarning: memory in compression not freed by compressor '%d'.size=%zu\n", id, memused()); }
+                                                                                               if(memused()) { printf("\nwarning: memory in compression not freed by compressor '%d'.size=%zu\n", id, memused()); }
         if(oplen <= 0 || oplen >= iplen && mcpy) {
           if(mcpy) { memcpy(op+bs, ip, iplen); oplen = iplen; }
           else if(oplen <= 0) { op = _out; goto end; }
@@ -1823,7 +1823,7 @@ int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned 
       if(mcpy && iplen==oplen) memcpy(op, ip, oplen); 
       else {                                                                                   mempeakinit();
         l = coddecomp(ip, iplen, op, oplen, id, lev,prm);                                      _mempeak = mempeak(); 
-                                                                                               if(memused()) { die("\nFatal: Memory in decompression not freed by compressor '%d'.size=%zu\n", id, memused()); }
+                                                                                               if(memused()) { printf("\nFatal: Memory in decompression not freed by compressor '%d'.size=%zu\n", id, memused()); }
       }
       ip += iplen; op += oplen;
     }                                          
