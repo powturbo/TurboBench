@@ -550,7 +550,7 @@ endif
 
 ifneq ($(wildcard lz0/.),)
 ifneq ($(OS), Windows)  # not compiling in CI.
-ifneq ($(OS), aarch64)  # lnker error in CI.
+ifneq ($(ARCH), aarch64)  # lnker error in CI.
 PLG_FLAGS+=-D_LZ0 
 LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/zx0_compressor/*.c lz0/zx0_decompressor/*.c)
 LZ0_COBJS := $(call obj,$(LZ0_CSRCS))
