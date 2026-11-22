@@ -485,9 +485,8 @@ int main(int argc, char **argv) {
 }
   #endif
 
-int hscompress( unsigned char *in, int inlen, unsigned char *out) {
-  config cfg;
-  memset(&cfg, 0, sizeof(cfg));
+int hscompress(   unsigned char *in, unsigned inlen, unsigned char *out, unsigned outsize, unsigned lev) {
+  config cfg = {0};
   cfg.window_sz2 = DEF_WINDOW_SZ2;
   cfg.lookahead_sz2 = DEF_LOOKAHEAD_SZ2;
   cfg.buffer_size = DEF_BUFFER_SIZE;
@@ -515,7 +514,7 @@ int hscompress( unsigned char *in, int inlen, unsigned char *out) {
   return io->total;
 }
 
-int hsdecompress( unsigned char *in, int inlen, unsigned char *out, int outlen) {  //printf("\n\n");
+int hsdecompress( unsigned char *in, unsigned inlen, unsigned char *out, unsigned outlen) {
   config cfg = {0};                                   
     cfg.window_sz2 = DEF_WINDOW_SZ2;
     cfg.lookahead_sz2 = DEF_LOOKAHEAD_SZ2;
