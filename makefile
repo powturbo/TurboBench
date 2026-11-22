@@ -536,6 +536,37 @@ LIZARD_SRCS := $(filter-out %/debug.c, $(LIZARD_SRCS))
 OB += $(call obj,$(LIZARD_SRCS))
 endif
 
+ifneq ($(wildcard ../lz/.),)
+PLG_FLAGS+=-D_LZ
+LZ_DIR=../lz
+LZ_SRCS := $(shell find $(LZ_DIR)/lib -type f -name '*.[c]')
+LZ_LIB = $(BUILD)/lz/liblz.a
+$(LZ_LIB):  $(LZ_SRCS)
+	@mkdir -p $(BUILD)/lz
+	$(MAKE) $(LZ_LIB) -C $(LZ_DIR) BUILD=$(BUILD)/lz
+LIBS += $(LZ_LIB)
+endif
+
+ifneq ($(wildcard lz0/.),)
+PLG_FLAGS+=-D_LZ0 
+LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/lz0/*.S) $(wildcard lz0/zx0_compressor/*.c lz0/zx0_decompressor/*.c)
+LZ0_SSOBJ += $(wildcard lz0/lz0/*$(ARCH).s)
+LZ0_COBJS := $(call obj,$(LZ0_CSRCS))
+$(LZ0_COBJS): $(BUILD)/%.o: %.c | $(BUILD)
+	@mkdir -p $(dir $@)
+	$(CC) -O3 -DNDEBUG -c $< -o $@
+OB += $(LZ0_SSOBJ)
+LZ0_LIB = $(BUILD)/lz0/liblz0.a
+$(LZ0_LIB): $(LZ0_OBJS) | $(BUILD)/lz0
+	$(AR) rcs $@ $^
+LIBS += $(LZ0_LIB)
+#LZ0_LIB := $(BUILD)/lz0/libtinyuz.a
+#$(LZ0_LIB): $(LZ0_SRCS)
+#	@mkdir -p $(BUILD)/lz0
+#	$(MAKE) -C lz0 
+#	@mv lz0/libtinyuz.a $(LZ0_LIB)
+endif
+
 ifneq ($(wildcard lz4/.),)
 PLG_FLAGS+=-D_LZ4
 OB+=$(call obj,lz4/lib/lz4hc.o lz4/lib/lz4.o lz4/lib/lz4frame.o lz4/lib/xxhash.o)
@@ -579,17 +610,6 @@ $(LZHAM_LIB): $(LZHAM_OBJS) | $(BUILD)/lzham_codec_devel
 LIBS += $(LZHAM_LIB)
 endif
 endif
-endif
-
-ifneq ($(wildcard ../lz/.),)
-PLG_FLAGS+=-D_LZ
-LZ_DIR=../lz
-LZ_SRCS := $(shell find $(LZ_DIR)/lib -type f -name '*.[c]')
-LZ_LIB = $(BUILD)/lz/liblz.a
-$(LZ_LIB):  $(LZ_SRCS)
-	@mkdir -p $(BUILD)/lz
-	$(MAKE) $(LZ_LIB) -C $(LZ_DIR) BUILD=$(BUILD)/lz
-LIBS += $(LZ_LIB)
 endif
 
 ifneq ($(wildcard lzlib/.),)
@@ -946,10 +966,11 @@ endif
 ifneq ($(wildcard tinyuz/.),)
 PLG_FLAGS+=-D_TINYUZ 
 TINYUZ_SRCS := tinyuz/compress/tuz_enc.cpp tinyuz/decompress/tuz_dec.c HDiffPatch/bsdiff_wrapper/bsdiff_wrapper.cpp HDiffPatch/bsdiff_wrapper/bspatch_wrapper.c
-TINYUZ_LIB := tinyuz/libtinyuz.a
+TINYUZ_LIB := $(BUILD)/tinyuz/libtinyuz.a
 $(TINYUZ_LIB): $(TINYUZ_SRCS)
 	@mkdir -p $(BUILD)/tinyuz
-	$(MAKE) -C tinyuz BUILD=$(abspath $(BUILD)/tinyuz)
+	$(MAKE) -C tinyuz BUILD=$(abspath $(BUILD)/tinyuz) DEF_FLAGS="-O3 -DNDEBUG -D_HPATCH_IS_USED_MULTITHREAD=0 -D_IS_USED_MULTITHREAD=0"
+	@mv tinyuz/libtinyuz.a $(TINYUZ_LIB)
 LIBS+=$(TINYUZ_LIB)
 endif
 
