@@ -170,6 +170,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [LibLZF](http://oldhome.schmorp.de/marc/liblzf.html) |  |c  |lz  |
 | [LibLz](https://github.com/mbitsnbites/liblzg) |  |c  |lz  |
 | [LibSLZ](https://github.com/wtarreau/libslz) |  |c  |lz+huffman, zlib |
+| [Lz0](https://github.com/seb3773/lz0) |  |c  |lz  |
 | [Lz4](https://github.com/Cyan4973/lz4) |  |c  |lz MT|
 | [Lz4ultra](https://github.com/emmanuel-marty/lz4ultra) |  |c  |lz  |
 | [lzjody](https://github.com/deep-soft/lzjody) |  |c  |lz |
