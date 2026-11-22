@@ -548,7 +548,7 @@ endif
 ifneq ($(wildcard lz0/.),)
 ifneq ($(OS), Windows)  # not compiling in CI.
 PLG_FLAGS+=-D_LZ0 
-LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/lz0/*.s) $(wildcard lz0/zx0_compressor/*.c lz0/zx0_decompressor/*.c)
+LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/zx0_compressor/*.c lz0/zx0_decompressor/*.c)
 LZ0_COBJS := $(call obj,$(LZ0_CSRCS))
 ifeq ($(ARCH),aarch64)
 LZ0_SSOBJ += lz0dec_fast_arm64.s
