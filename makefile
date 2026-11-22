@@ -557,7 +557,7 @@ $(LZ0_COBJS): $(BUILD)/%.o: %.c | $(BUILD)
 	$(CC) -O3 -DNDEBUG -c $< -o $@
 OB += $(LZ0_SSOBJ)
 LZ0_LIB = $(BUILD)/lz0/liblz0.a
-$(LZ0_LIB): $(LZ0_OBJS) | $(BUILD)/lz0
+$(LZ0_LIB): $(LZ0_COBJS) | $(BUILD)/lz0
 	$(AR) rcs $@ $^
 LIBS += $(LZ0_LIB)
 #LZ0_LIB := $(BUILD)/lz0/libtinyuz.a
@@ -1088,7 +1088,7 @@ ZSTD_S_SRCS := $(wildcard zstd/lib/decompress/*.S)
 ZSTD_OBJS := $(call obj,$(ZSTD_C_SRCS))
 $(ZSTD_OBJS): $(BUILD)/%.o: %.c | $(BUILD)
 	@mkdir -p $(dir $@)
-	$(CC) -O3 -w -Izstd/lib -Izstd/lib/common -c $< -o $@
+	$(CC) -O3 -w -Izstd/lib -Izstd/lib/common -DZSTD_MULTITHREAD=1 -c $< -o $@
 OB += $(ZSTD_S_SRCS)
 ZSTD_LIB = $(BUILD)/zstd/libzstd.a
 $(ZSTD_LIB): $(ZSTD_OBJS) | $(BUILD)/zstd
