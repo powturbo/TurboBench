@@ -1149,12 +1149,19 @@ $(ZXC_LIB): $(ZXCOBJS) | $(BUILD)/zxc
 	$(AR) rcs $@ $^
 LIBS += $(ZXC_LIB)
 else
+ifndef CROSS
 PLG_FLAGS += -D_ZXC 
 ZXC_SRCS := $(wildcard zxc/*.c)
 ZXC_LIB = $(BUILD)/zxc/libzxc.a
+ZXC_CMAKE=-DCMAKE_C_COMPILER=$(CC) 
+ifdef CROSS
+ZXC_CMAKE+= -DCMAKE_SYSTEM_PROCESSOR=$(CROSS)
+endif
+
 $(ZXC_LIB): $(ZXC_SRCS)
-	$(CMAKE) -S zxc -B $(BUILD)/zxc -DCMAKE_C_COMPILER=$(CC) -DZXC_BUILD_TESTS=0 -DZXC_BUILD_CLI=0 -DZXC_INSTALL=0  && make -C $(BUILD)/zxc
+	$(CMAKE) -S zxc -B $(BUILD)/zxc $(ZXC_CMAKE) -DZXC_BUILD_TESTS=0 -DZXC_BUILD_CLI=0 -DZXC_INSTALL=0  && make -C $(BUILD)/zxc
 LIBS += $(ZXC_LIB)
+endif
 endif
 endif
 
