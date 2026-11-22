@@ -1,6 +1,6 @@
 #### TurboBench: 2026.11.22 - C910 RISC-V 64GC 1.85GHZ  (MB=1.000.000)
 |C Size|ratio%|C MB/s|D MB/s|Rank|C Mem|C Stack|D Mem|D Stack|Name|File|D Cat|
-|--------:|-----:|--------:|--------:|---------|--------:|--------:|--------:|----------------|----------------|----------------|
+|--------:|-----:|--------:|--------:|---------|--------:|--------:|--------:|----------------|----------------|----------------|-------|
 |93668| 26.26%   |$\color{green}{\textbf{1.49}}$|$\color{green}{\textbf{152.42}}$|8 |9012808|2272|19736|928|$\color{green}{\textbf{libdeflate 12}}$|[blarisdata](https://github.com/lis05/blaris/tree/main/bench/data)|Medium|
 |97248| 27.27%   |$\color{green}{\textbf{2.80}}$|$\color{green}{\textbf{165.27}}$|5🥉|268152|736|8328|624|$\color{green}{\textbf{zlib 9}}$|blarisdata|Small|
 |97601| 27.37%   |$\color{green}{\textbf{13.20}}$|151.12|2🏆|864904|2064|19736|928|$\color{green}{\textbf{libdeflate 6}}$|blarisdata|Medium|
