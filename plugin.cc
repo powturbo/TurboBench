@@ -4912,7 +4912,7 @@ char *codver(int codec, char *v, char *s) {
     case P_LIBDEFLATE:  strcpy(s, LIBDEFLATE_VERSION_STRING); break;
       #endif   
       #if _LIBSLZ
-    case P_LIBSLZ:  return "v1.4-dev5";
+    case P_LIBSLZ:  return "v1.5-dev0";
       #endif
  
       #if _ZPAQ
