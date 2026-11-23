@@ -190,6 +190,8 @@ PLG_FLAGS += -D_ACEAPEX
 ACEAPEX_DIR := aceapex/src
 ifeq ($(ARCH),x86_64)
 ACEAPEX_FLAGS := $(_AVX2)
+else ifeq ($(ARCH),riscv64)
+ACEAPEX_FLAGS := $(CFLAGS)
 else
 ACEAPEX_FLAGS := $(_SSE)
 endif 
