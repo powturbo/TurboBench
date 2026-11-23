@@ -40,7 +40,8 @@ jobs:
       - name: Setup Zig (master)
         uses: mlugg/setup-zig@v2
         with:
-          version: master
+          version: '0.16.0'
+#          version: master
       - name: Install dependencies
         run: |
           sudo apt-get update
