@@ -41,7 +41,6 @@ jobs:
         uses: mlugg/setup-zig@v1
         with:
           version: master
-        run: zig version
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -53,13 +52,14 @@ jobs:
 #            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
 #          gunzip silesia.tar.gz
 
-      - name: Install dependencies
+      - name: Run
         run: |
           lscpu
           gcc --version
           clang --version || true
           rustc --version
           cargo --version
+          zig version
           ./turbobench -l2
 #          ./turbobench -h
 #      - run: ./turbobench turbobench -V0 -U
