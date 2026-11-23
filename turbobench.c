@@ -334,31 +334,53 @@ void free(void *p) {
 
 #define STACK_MAGIC  0x79a53fb6u
 
-#ifdef _WIN32
+#if defined(_WIN32) || (defined(__APPLE__) && defined(__aarch64__))
+#define STACK_MAGIC  0x79a53fb6u
   #ifndef STACK_PAINT_BYTES
 #define STACK_PAINT_BYTES  (128 * 1024)
   #endif
 #define STACK_PAINT_WORDS  (STACK_PAINT_BYTES / sizeof(unsigned))
-
 typedef struct { unsigned *low, *high; } memstack_t;
 
-NOINLINE memstack_t stackini(void) {
-  volatile unsigned marker = 0;
-  volatile unsigned *p     = (volatile unsigned *)(uintptr_t)&marker;
-  unsigned          *high  = (unsigned *)(uintptr_t)p;
+  #ifdef __APPLE__
+#include <pthread.h>
+#include <stdint.h>
+#include <stddef.h>
+    #ifndef STACK_GUARD_BYTES
+#define STACK_GUARD_BYTES  (64 * 1024) /* keep well clear of guard page (16K pages on arm64) */
+    #endif
+  #endif
 
-  for(size_t i = 0; i < STACK_PAINT_WORDS; i++) *--p = STACK_MAGIC;
-  memstack_t r = { .low  = (unsigned *)(uintptr_t)p, .high = high };
+NOINLINE memstack_t stackini(void) {
+  volatile unsigned  marker = 0;
+  volatile unsigned *p      = (volatile unsigned *)(uintptr_t)&marker;
+  unsigned          *high   = (unsigned *)(uintptr_t)p;
+  size_t             words  = STACK_PAINT_WORDS;
+  #ifdef __APPLE__
+  {
+    pthread_t  self = pthread_self(); // Darwin: stackaddr is the TOP (highest address) of the stack 
+    uintptr_t  top  = (uintptr_t)pthread_get_stackaddr_np(self);
+    size_t     size = pthread_get_stacksize_np(self);
+    uintptr_t  cur  = (uintptr_t)p;
+    uintptr_t  lo   = top - size + STACK_GUARD_BYTES;
+    if(!top || !size || cur <= lo || cur > top) {
+      memstack_t z = { NULL, NULL };
+      return z;
+    }
+    size_t avail = (cur - lo) / sizeof(unsigned);
+    if(words > avail) words = avail;
+  }
+  #endif
+  for(size_t i = 0; i < words; i++) *--p = STACK_MAGIC;
+  memstack_t r = { .low = (unsigned *)(uintptr_t)p, .high = high };
   return r;
 }
 
 size_t stackpeak(memstack_t paint) {
   if(!paint.low || !paint.high || paint.high <= paint.low)
     return 0;
-
   volatile unsigned *p   = (volatile unsigned *)paint.low;
   volatile unsigned *end = (volatile unsigned *)paint.high;
-
   while(p < end && *p == STACK_MAGIC)
     ++p;
   return (size_t)((char *)end - (char *)p);
@@ -368,36 +390,33 @@ size_t stackpeak(memstack_t paint) {
 #include <stddef.h>
 #include <pthread.h>
 typedef unsigned* memstack_t;
-#define STACK_MAGIC 0xA5A55A5Au   /* 4: skewed pattern, rare in real data */
-
+#define STACK_MAGIC 0xA5A55A5Au
 static unsigned *g_lo;   /* lowest usable word               */
 static unsigned *g_hi;   /* one past the highest usable word */
-
 NOINLINE unsigned *stackini(void) {
   pthread_attr_t attr;
   void  *addr;
   size_t size;
-
   if(pthread_getattr_np(pthread_self(), &attr)) return NULL;
-    if(pthread_attr_getstack(&attr, &addr, &size)) { pthread_attr_destroy(&attr); return NULL; }
-    pthread_attr_destroy(&attr);
-
-    g_lo = (unsigned *)addr;
-    g_hi = (unsigned *)((unsigned char *)addr + size);
-    volatile unsigned guard;
-    unsigned *from = (unsigned *)&guard;
-    if (from > g_hi) from = g_hi;
-    for (volatile unsigned *sp = from; sp > g_lo; ) *--sp = STACK_MAGIC;
-    return from;
+  if(pthread_attr_getstack(&attr, &addr, &size)) { pthread_attr_destroy(&attr); return NULL; }
+  pthread_attr_destroy(&attr);
+  g_lo = (unsigned *)addr;
+  g_hi = (unsigned *)((unsigned char *)addr + size);
+  volatile unsigned guard;
+  unsigned *from = (unsigned *)&guard;
+  if(from > g_hi) from = g_hi;
+  for(volatile unsigned *sp = from; sp > g_lo; ) *--sp = STACK_MAGIC;
+  return from;
 }
 
 size_t stackpeak(memstack_t base) {
   unsigned *p;
-  if (!base || !g_lo || base > g_hi) return 0;
+  if(!base || !g_lo || base > g_hi) return 0;
   p = g_lo;
-  while (p < base && *p == STACK_MAGIC) p++;
+  while(p < base && *p == STACK_MAGIC) p++;
   return (size_t)(base - p) * sizeof(unsigned);
 }
+
 #else
 #define stackini() 0
 #define stackpeak(base) 0
