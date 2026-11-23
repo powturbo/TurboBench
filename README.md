@@ -159,6 +159,7 @@ Tired of misleading benchmarks with I/O overhead, cache effects, and CPU throttl
 | [Doboz](https://bitbucket.org/attila_afra) |  |c  |lz  |
 | [FastLz](http://fastlz.org) |  |c  |lz  |
 | [Fast-lzma](https://github.com/conor42/fast-lzma2) |  |c  |lz+range coder  |
+| [Firetrail](https://github.com/VantorreWannes/firetrail) |  |zig  |lz  |
 | [glza](https://github.com/kidq330/GLZA) |  |c  |lz+huffman  |
 | [Glyd](https://github.com/surya-koritala/Glyd) | 2026/09 | rust MT|lz+huffman/tans  |
 | [heatshrink](https://github.com/atomicobject/heatshrink) |  |c  |lz / Microcontrollers/memory-constrained|
