@@ -549,8 +549,8 @@ LIBS += $(LZ_LIB)
 endif
 
 ifneq ($(wildcard lz0/.),)
-#ifneq ($(OS), Windows)  # not compiling in CI.
-#ifneq ($(ARCH), aarch64)  # linker error in CI.
+ifneq ($(OS), Windows)                    # lz0dec_fast_x86_64.s:232: Error: junk at end of line, first unrecognized character is `l'
+ifneq ($(ARCH), aarch64)                  # lz0/lz0/lz0dec_arm64.s:3:1: error: unknown directive .type lz0dec_arm64, %function
 PLG_FLAGS += -D_LZ0
 LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/zx0_compressor/*.c) $(wildcard lz0/zx0_decompressor/*.c)
 LZ0_COBJS := $(call obj,$(LZ0_CSRCS))
@@ -578,8 +578,8 @@ LZ0_LIB = $(BUILD)/lz0/liblz0.a
 $(LZ0_LIB): $(LZ0_COBJS) $(LZ0_SOBJS) | $(BUILD)/lz0
 	$(AR) rcs $@ $^
 LIBS += $(LZ0_LIB)
-#endif
-#endif
+endif
+endif
 endif
 
 ifneq ($(wildcard lz4/.),)
