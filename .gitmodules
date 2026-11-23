@@ -201,3 +201,6 @@
 [submodule "lz0"]
 	path = lz0
 	url = https://github.com/seb3773/lz0.git
+[submodule "firetrail"]
+	path = firetrail
+	url = https://github.com/VantorreWannes/firetrail.git
