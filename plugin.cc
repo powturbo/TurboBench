@@ -1709,9 +1709,9 @@ EXTERN_C_END
 EXTERN_C_BEGIN
 
   #if _FIRETRAIL
-#include "firetrail/firetrail.h"
-static firetrail_encoder_t *firetrail_encoder;
-static firetrail_decoder_t *firetrail_decoder;
+#include "firetrail/include/firetrail.h"
+//static firetrail_encoder *firetrail_enc;
+//static firetrail_decoder *firetrail_dec;
 #endif 
 
   #if _CHAMELEON
@@ -2178,7 +2178,7 @@ struct plugs plugs[] = {
   
   { P_QUICKLZ,       "quicklz",       _QUICKLZ,   "Quicklz",                     "1,2,3" },
   
-  { P_FIRETRAIL,     "firetrail",     _FIRETRAIL, "firetrail",                   ""},
+  { P_FIRETRAIL,     "firetrail",     _FIRETRAIL, "firetrail",                   "1,2,-1"},
   { P_SHRINKER,      "shrinker",      _SHRINKER,  "Shrinker",                    "", 0, (1<<26) },
   { P_SHOCO,         "shoco",         _SHOCO,     "Shoco",                       "" },
   { P_LIBSLZ,        "slz",           _LIBSLZ,    "libslz",                      "1,2,3,4" },
@@ -2465,8 +2465,8 @@ int codini(size_t insize, int codec, int lev, char *prm) {
       #endif
 
       #if _FIRETRAIL
-    firetrail_encoder = firetrail_encoder_create();
-    firetrail_decoder = firetrail_decoder_create();
+//    firetrail_enc = firetrail_encoder_create((firetrail_algorithm)lev);
+//    firetrail_dec = firetrail_decoder_create((firetrail_algorithm)lev);
       #endif
 
       #if _SNAPPY_C
@@ -2559,8 +2559,8 @@ void codexit(int codec, int lev) {
       #endif
       #if _FIRETRAIL
     case P_FIRETRAIL: {
-      if(firetrail_encoder) firetrail_encoder_destroy(firetrail_encoder); firetrail_encoder = NULL;
-      if(firetrail_decoder) firetrail_decoder_destroy(firetrail_decoder); firetrail_decoder = NULL;
+//      if(firetrail_enc) firetrail_encoder_destroy(firetrail_enc); firetrail_enc = NULL;
+//      if(firetrail_dec) firetrail_decoder_destroy(firetrail_dec); firetrail_dec = NULL;
     }  
       #endif    
   }
@@ -2738,7 +2738,12 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _FIRETRAIL
-    case P_FIRETRAIL:  firetrail_encoder_reset(firetrail_encoder);  return firetrail_encoder_compress(firetrail_encoder, (const uint8_t*)in, inlen, (uint8_t*)out);
+    case P_FIRETRAIL: { firetrail_encoder *e = firetrail_encoder_create((firetrail_algorithm)lev); firetrail_encoder_reset(e);  
+      size_t osize = firetrail_max_compressed_size(inlen);  if(osize > outsize) osize = outsize;   
+      size_t rc = firetrail_encoder_compress(e, (const uint8_t*)in, inlen, (uint8_t*)out, osize);
+      firetrail_encoder_destroy(e); 
+      return rc; 
+    }
       #endif
 
 //=== G =============================================================================================================================
@@ -3977,11 +3982,11 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _FIRETRAIL
-    case P_FIRETRAIL: {
-      firetrail_decoder_reset(firetrail_decoder); 
-      size_t rc = firetrail_decoder_decompress(firetrail_decoder, (const uint8_t*)in, inlen, (uint8_t*)out, outlen);
-      if(!rc) return 0;
-      return firetrail_decoder_exact_output_length((const uint8_t*)in, inlen);
+    case P_FIRETRAIL: { firetrail_decoder *d = firetrail_decoder_create((firetrail_algorithm)lev); firetrail_decoder_reset(d); 
+      size_t rc = firetrail_decoder_decompress(d, (const uint8_t*)in, inlen, (uint8_t*)out, outlen);
+      firetrail_decoder_destroy(d);
+      return rc;
+    }
       #endif
 
 //=== G =============================================================================================================================
