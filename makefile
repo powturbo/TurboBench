@@ -555,15 +555,15 @@ PLG_FLAGS += -D_LZ0
 LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/zx0_compressor/*.c) $(wildcard lz0/zx0_decompressor/*.c)
 LZ0_COBJS := $(call obj,$(LZ0_CSRCS))
 ifeq ($(ARCH),aarch64)
+LZ0_FLAGS := $(_SSE)
 LZ0_SSRCS := $(wildcard lz0/lz0/lz0*arm64.s) $(wildcard lz0/lz0/lz0*arm64.S)
 else
 LZ0_SSRCS := $(wildcard lz0/lz0/lz0*$(ARCH).s) $(wildcard lz0/lz0/lz0*$(ARCH).S)
-endif
-LZ0_SOBJS := $(call obj,$(LZ0_SSRCS))
-LZ0_FLAGS := $(_SSE)
 ifeq ($(ARCH),x86_64)
 LZ0_FLAGS := $(_AVX2)
 endif
+endif
+LZ0_SOBJS := $(call obj,$(LZ0_SSRCS))
 
 $(LZ0_COBJS): $(BUILD)/%.o: %.c | $(BUILD)
 	@mkdir -p $(dir $@)
