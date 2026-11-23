@@ -1633,6 +1633,7 @@ int64_t _xz_decompress(char *in, size_t insize, char *out, size_t outsize, int t
 
 //------  Z -------------------------------------
   #if _ZSTD
+#define ZSTD_STATIC_LINKING_ONLY
 #include "zstd/lib/zstd.h"
 #include "zstd/lib/common/fse.h"
 #include "zstd/lib/common/huf.h"
@@ -2508,8 +2509,8 @@ int codstart(size_t insize, int codec, int lev, char *prm, int mode) {
       #if _ZSTD
     case P_ZSTD:
       if(strchr(prm, 'D')) {
-        if(!mode) { if(!ddictPtr) { char *q; if(q = strchr(prm,'D')) { q=q+(q[1]=='='?2:1);  if(!(ddictPtr = createDDict_orDie(q     ))) die("zstd:createDDict '%s' failed\n", q); } } }
-        else      { if(!cdictPtr) { char *q; if(q = strchr(prm,'D')) { q=q+(q[1]=='='?2:1);  if(!(cdictPtr = createCDict_orDie(q, lev))) die("zstd:createCDict '%s' failed\n", q); } } }
+        //if(!mode) { if(!ddictPtr) { char *q; if(q = strchr(prm,'D')) { q=q+(q[1]=='='?2:1);  if(!(ddictPtr = createDDict_orDie(q     ))) die("zstd:createDDict '%s' failed\n", q); } } }
+        //else      { if(!cdictPtr) { char *q; if(q = strchr(prm,'D')) { q=q+(q[1]=='='?2:1);  if(!(cdictPtr = createCDict_orDie(q, lev))) die("zstd:createCDict '%s' failed\n", q); } } }
       }
       break;
       #endif
@@ -3412,13 +3413,14 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
 
       #if _ZSTD
     case P_ZSTD: {
+      #if 0
       ZSTD_CStream *z = ZSTD_createCStream(); if(!z) return -1;
+      ZSTD_CCtx_setParameter(z, ZSTD_c_contentSizeFlag, 1);      //if(threads>1) ZSTD_CCtx_setParameter(z, ZSTD_c_nbWorkers, threads);
       if(dsize) {
         unsigned windowLog = bsr32(dsize) - powof2(dsize); 
         ZSTD_CCtx_setParameter(z, ZSTD_c_enableLongDistanceMatching, 1); 
         ZSTD_CCtx_setParameter(z, ZSTD_c_windowLog, windowLog);
-      }
-      ZSTD_CCtx_setParameter(z, ZSTD_c_nbWorkers, threads?threads:1);
+      }    
       ZSTD_initCStream(z, lev);
       ZSTD_inBuffer  ip = { in, (size_t)inlen,   0 };
       ZSTD_outBuffer op = { out,(size_t)outsize, 0 };
@@ -3426,6 +3428,33 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       ZSTD_endStream(z, &op);
       ZSTD_freeCStream(z);
       return op.pos;
+        #else
+      #define CHECK(a) a 
+      ZSTD_CCtx *z = ZSTD_createCCtx(); if (!z) return -1;
+      if (dsize) { unsigned windowLog = bsr32(dsize) - powof2(dsize);
+        CHECK(ZSTD_CCtx_setParameter(z, ZSTD_c_enableLongDistanceMatching, 1));
+        CHECK(ZSTD_CCtx_setParameter(z, ZSTD_c_windowLog, windowLog));
+      }
+      CHECK(ZSTD_CCtx_setParameter(z, ZSTD_c_compressionLevel, lev));
+      size_t const r = ZSTD_CCtx_setParameter(z, ZSTD_c_nbWorkers, threads ? threads : 1);
+      if(ZSTD_isError(r)) {
+        fprintf(stderr, "nbWorkers not supported: %s\n", ZSTD_getErrorName(r));
+        ZSTD_CCtx_setParameter(z, ZSTD_c_nbWorkers, 0);
+      }
+      ZSTD_inBuffer  ip = { in,  (size_t)inlen,   0 };
+      ZSTD_outBuffer op = { out, (size_t)outsize, 0 };
+      while (ip.pos < ip.size) {
+        size_t ret = ZSTD_compressStream2(z, &op, &ip, ZSTD_e_continue);
+        if (ZSTD_isError(ret)) { ZSTD_freeCCtx(z); return -1; }
+      }
+      size_t remaining;
+      do {
+        remaining = ZSTD_compressStream2(z, &op, &ip, ZSTD_e_end);
+        if (ZSTD_isError(remaining)) { ZSTD_freeCCtx(z); return -1; }  
+      } while (remaining != 0);
+      ZSTD_freeCCtx(z); 
+      return (int)op.pos;
+        #endif
     }
       #endif
 
@@ -4486,6 +4515,36 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
                    inlen = ZSTD_decompress_usingDDict(ctx, out, outlen, in, inlen, ddictPtr);
                    ZSTD_freeDCtx(ctx);
                 } else ZSTD_decompress( out, outlen, in, inlen);
+      /*if(strchr(prm,'D')) {
+        unsigned const expectedDictID = ZSTD_getDictID_fromDDict(ddictPtr);
+        unsigned const actualDictID   = ZSTD_getDictID_fromFrame(in, inlen);
+        if (actualDictID != expectedDictID) { printf("ZSTD: DictID mismatch: expected %u got %u\n", expectedDictID, actualDictID); return 0; }
+        ZSTD_DCtx *ctx = ZSTD_createDCtx();  if(!ctx) { printf("ZSTD: DCtx alloc failed\n"); return 0; }
+        size_t const wr = ZSTD_DCtx_setParameter(ctx, ZSTD_d_nbWorkers, threads);    if (ZSTD_isError(wr)) printf("ZSTD: nbWorkers unavailable (%s), falling back to 1 thread\n",  ZSTD_getErrorName(wr));
+        if (ZSTD_isError(ZSTD_DCtx_refDDict(ctx, ddictPtr))) { printf("ZSTD: failed to reference DDict\n"); ZSTD_freeDCtx(ctx); return 0; }
+        ZSTD_inBuffer  src = { in,  inlen,  0 };
+        ZSTD_outBuffer dst = { out, outlen, 0 };
+        size_t hint = 1;                     // != 0 while frame is not fully decoded
+        size_t prevSrc = 0, prevDst = 0;
+        while (hint != 0) {
+          ZSTD_EndDirective const op = (src.pos < src.size) ? ZSTD_e_continue : ZSTD_e_end;
+          hint = ZSTD_decompressStream2(ctx, &dst, &src, op);
+          if(ZSTD_isError(hint)) {
+            printf("ZSTD: decompression error: %s\n", ZSTD_getErrorName(hint));
+            ZSTD_freeDCtx(ctx);
+            return 0;
+          }
+          if(hint != 0 && src.pos == prevSrc && dst.pos == prevDst) {
+            printf("ZSTD: output buffer too small (or truncated frame)\n");
+            ZSTD_freeDCtx(ctx);
+            return 0;
+          }
+          prevSrc = src.pos;
+          prevDst = dst.pos;
+        }
+        inlen = dst.pos; 
+        ZSTD_freeDCtx(ctx);
+      } //else {     ZSTD_decompress(out, outlen, in, inlen);      }*/
       break;
       #endif
       
