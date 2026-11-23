@@ -344,13 +344,14 @@ OB+=$(call obj,Clickhouse/src/Compression/LZ4_decompress_faster.o)
 endif
 
 #--- F ----------------------------------------------------------------------------------------------------------------------------------------------
-ifneq ($(wildcard firetrail0/.),)
+ifneq ($(wildcard firetrail/.),)
 PLG_FLAGS+=-D_FIRETRAIL
-FIRETRAIL_LIB=firetrail/libfiretrail.a
-LIBS += $(FIRETRAIL_LIB)
-$(FIRETRAIL_LIB): firetrail/src/root.zig 
-	cd firetrail && zig build-lib -O ReleaseFast -femit-bin=libfiretrail.a src/root.zig -lc
-OB+=$(FIRETRAIL_LIB)	
+FIRETRAIL_SRCS :=  $(shell find firetrail/src -type f -name '*.zig' )
+FIRETRAIL_LIB=firetrail/zig-out/lib/libfiretrail.a
+$(FIRETRAIL_LIB): $(FIRETRAIL_SRCS)
+	cd firetrail && zig build --release=fast
+#	cd firetrail && zig build-lib -O ReleaseFast -femit-bin=libfiretrail.a src/root.zig -lc
+LIBS+=$(FIRETRAIL_LIB)	
 endif
 
 #--- G -----------------------------------------------------------------------------------------------------------------------------------------------
