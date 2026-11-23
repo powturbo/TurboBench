@@ -28,7 +28,7 @@ NM      ?= nm
 OBJCOPY ?= objcopy
 
 BUILD ?= build
-obj = $(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(patsubst %.cpp,%.o,$(patsubst %.S,%.o,$(1))))))
+obj = $(addprefix $(BUILD)/,$(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(patsubst %.cpp,%.o,$(patsubst %.s,%.o,$(patsubst %.S,%.o,$(1)))))))
 
 #DEBUG=-DDEBUG -g
 DEBUG=-DNDEBUG
@@ -549,26 +549,37 @@ LIBS += $(LZ_LIB)
 endif
 
 ifneq ($(wildcard lz0/.),)
-ifneq ($(OS), Windows)  # not compiling in CI.
-ifneq ($(ARCH), aarch64)  # lnker error in CI.
-PLG_FLAGS+=-D_LZ0 
-LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/zx0_compressor/*.c lz0/zx0_decompressor/*.c)
+#ifneq ($(OS), Windows)  # not compiling in CI.
+#ifneq ($(ARCH), aarch64)  # linker error in CI.
+PLG_FLAGS += -D_LZ0
+LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/zx0_compressor/*.c) $(wildcard lz0/zx0_decompressor/*.c)
 LZ0_COBJS := $(call obj,$(LZ0_CSRCS))
 ifeq ($(ARCH),aarch64)
-LZ0_SSOBJ += lz0/lz0/lz0dec_fast_arm64.s
+LZ0_SSRCS := $(wildcard lz0/lz0/lz0*arm64.s) $(wildcard lz0/lz0/lz0*arm64.S)
 else
-LZ0_SSOBJ += $(wildcard lz0/lz0/*$(ARCH).s)
+LZ0_SSRCS := $(wildcard lz0/lz0/lz0*$(ARCH).s) $(wildcard lz0/lz0/lz0*$(ARCH).S)
 endif
+LZ0_SOBJS := $(call obj,$(LZ0_SSRCS))
+LZ0_FLAGS := $(_SSE)
+ifeq ($(ARCH),x86_64)
+LZ0_FLAGS := $(_AVX2)
+endif
+
 $(LZ0_COBJS): $(BUILD)/%.o: %.c | $(BUILD)
 	@mkdir -p $(dir $@)
-	$(CC) -O3 -DNDEBUG -c $< -o $@
-OB += $(LZ0_SSOBJ)
+	$(CC) -O3 -DNDEBUG $(LZ0_FLAGS) -c $< -o $@
+$(LZ0_SOBJS): $(BUILD)/%.o: %.s | $(BUILD)
+	@mkdir -p $(dir $@)
+	$(CC) -O3 -DNDEBUG $(LZ0_FLAGS) -c $< -o $@
+$(BUILD)/%.o: %.S | $(BUILD)
+	@mkdir -p $(dir $@)
+	$(CC) -O3 -DNDEBUG $(LZ0_FLAGS) -c $< -o $@
 LZ0_LIB = $(BUILD)/lz0/liblz0.a
-$(LZ0_LIB): $(LZ0_COBJS) | $(BUILD)/lz0
+$(LZ0_LIB): $(LZ0_COBJS) $(LZ0_SOBJS) | $(BUILD)/lz0
 	$(AR) rcs $@ $^
 LIBS += $(LZ0_LIB)
-endif
-endif
+#endif
+#endif
 endif
 
 ifneq ($(wildcard lz4/.),)
