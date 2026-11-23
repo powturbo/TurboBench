@@ -1103,7 +1103,7 @@ ZSTD_S_SRCS := $(wildcard zstd/lib/decompress/*.S)
 ZSTD_OBJS := $(call obj,$(ZSTD_C_SRCS))
 $(ZSTD_OBJS): $(BUILD)/%.o: %.c | $(BUILD)
 	@mkdir -p $(dir $@)
-	$(CC) -O3 -w -Izstd/lib -Izstd/lib/common -DZSTD_MULTITHREAD=1 -c $< -o $@
+	$(CC) -O3 -w -Izstd/lib -Izstd/lib/common -DZSTD_MULTITHREAD -c $< -o $@
 OB += $(ZSTD_S_SRCS)
 ZSTD_LIB = $(BUILD)/zstd/libzstd.a
 $(ZSTD_LIB): $(ZSTD_OBJS) | $(BUILD)/zstd
