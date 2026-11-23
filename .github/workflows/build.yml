@@ -198,8 +198,8 @@ jobs:
         with:
           version: '0.16.0' # set to any published release >= 0.16.0
       - uses: goto-bus-stop/setup-zig@v2
-          with:
-            version: 0.16.0      
+        with:
+          version: 0.16.0      
       - run: git submodule update --init --recursive
       - run: make OPENZL=0 PIVCO=0 RUST=0
  #     - name: Download silesia.tar.gz and gunzip → silesia.tar
