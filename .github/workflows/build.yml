@@ -82,6 +82,10 @@ jobs:
       - run: git submodule update --init --recursive
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+      - name: Setup Zig (master)
+        uses: mlugg/setup-zig@v2
+        with:
+          version: '0.16.0'
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
@@ -142,6 +146,10 @@ jobs:
           brew install nasm libomp llvm
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
           cc -v
+      - name: Install Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: '0.16.0' # set to any published release >= 0.16.0
       - run: make OPENZL=0 PIVCO=0 RUST=0
 #      - name: Download silesia.tar.gz and gunzip → silesia.tar
 #        run: |
@@ -185,6 +193,9 @@ jobs:
             mingw-w64-ucrt-x86_64-libgomp
             mingw-w64-ucrt-x86_64-llvm-openmp
             mingw-w64-ucrt-x86_64-nasm
+        uses: mlugg/setup-zig@v2
+        with:
+          version: '0.16.0' # set to any published release >= 0.16.0
       - run: git submodule update --init --recursive
       - run: make OPENZL=0 PIVCO=0 RUST=0
  #     - name: Download silesia.tar.gz and gunzip → silesia.tar
