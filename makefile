@@ -344,7 +344,7 @@ OB+=$(call obj,Clickhouse/src/Compression/LZ4_decompress_faster.o)
 endif
 
 #--- F ----------------------------------------------------------------------------------------------------------------------------------------------
-ifneq ($(wildcard firetrail0/.),)
+ifneq ($(wildcard firetrail/.),)
 ifneq ($(OS), Windows)
 ifneq ($(OS), Darwin)
 ifneq ($(ARCH), riscv64)
