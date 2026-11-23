@@ -196,12 +196,16 @@ jobs:
       - name: Install Zig
         uses: mlugg/setup-zig@v2
         with:
-          version: '0.16.0' # set to any published release >= 0.16.0
+          version: '0.16.0'
       - uses: goto-bus-stop/setup-zig@v2
         with:
           version: 0.16.0      
       - run: git submodule update --init --recursive
-      - run: make OPENZL=0 PIVCO=0 RUST=0
+      - run: |
+          ZIG_DIR=$(find "D:\a\_temp" -name "zig.exe" -printf '%h\n' | head -1)
+          echo "ZIG_DIR=$ZIG_DIR" >> $GITHUB_OUTPUT
+          echo "$ZIG_DIR" >> $GITHUB_PATH 
+          make OPENZL=0 PIVCO=0 RUST=0
  #     - name: Download silesia.tar.gz and gunzip → silesia.tar
  #       run: |
  #         curl -L -o silesia.tar.gz \
