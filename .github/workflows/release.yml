@@ -126,10 +126,10 @@ jobs:
         run: |
           brew install nasm libomp llvm
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
-      - name: Install Zig
-        uses: mlugg/setup-zig@v2
-        with:
-          version: '0.16.0' # set to any published release >= 0.16.0
+#      - name: Install Zig
+#        uses: mlugg/setup-zig@v2
+#        with:
+#          version: '0.16.0' # set to any published release >= 0.16.0
       - name: Build (macOS)
         run:  make
       - name: Generate silesia.tar.md (macOS)
@@ -165,13 +165,13 @@ jobs:
             mingw-w64-ucrt-x86_64-libgomp
             mingw-w64-ucrt-x86_64-llvm-openmp
             mingw-w64-ucrt-x86_64-nasm
-      - name: Install Zig
-        uses: mlugg/setup-zig@v2
-        with:
-          version: '0.16.0'
-      - uses: goto-bus-stop/setup-zig@v2
-        with:
-          version: 0.16.0      
+#      - name: Install Zig
+#        uses: mlugg/setup-zig@v2
+#        with:
+#          version: '0.16.0'
+#      - uses: goto-bus-stop/setup-zig@v2
+#        with:
+#          version: 0.16.0      
       - name: Build (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
