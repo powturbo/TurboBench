@@ -60,11 +60,11 @@ jobs:
         with:
           components: rust-src
 #        uses: dtolnay/rust-toolchain@stable
-      - name: Setup Zig (master)
-        uses: mlugg/setup-zig@v1
-        with:
-          version: master
-        run: zig version
+
+#      - name: Setup Zig (master)
+#        uses: mlugg/setup-zig@v2
+#        with:
+#          version: master
 
       # ------------------ Linux ------------------
       - name: cpu info (Linux)
