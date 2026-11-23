@@ -346,7 +346,7 @@ endif
 #--- F ----------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard firetrail/.),)
 #ifneq ($(OS), Windows)
-#ifneq ($(OS), Darwin)
+ifneq ($(OS), Darwin)
 ifneq ($(ARCH), riscv64)
 PLG_FLAGS+=-D_FIRETRAIL
 FIRETRAIL_SRCS :=  $(shell find firetrail/src -type f -name '*.zig' )
@@ -356,7 +356,7 @@ $(FIRETRAIL_LIB): $(FIRETRAIL_SRCS)
 #	cd firetrail && zig build-lib -O ReleaseFast -femit-bin=libfiretrail.a src/root.zig -lc
 LIBS+=$(FIRETRAIL_LIB)
 #endif
-#endif
+endif
 endif
 endif
 
