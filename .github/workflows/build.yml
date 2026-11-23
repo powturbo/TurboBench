@@ -37,10 +37,15 @@ jobs:
       - run: git submodule update --init --recursive
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+      - name: Setup Zig (master)
+        uses: mlugg/setup-zig@v1
+        with:
+          version: master
+        run: zig version
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y nasm libomp-dev zig
+          sudo apt-get install -y nasm libomp-dev
       - run: make BLOSC=0 OPENZL=0 PIVCO=0 RUST=0
 #      - name: Download silesia.tar.gz and gunzip → silesia.tar
 #        run: |

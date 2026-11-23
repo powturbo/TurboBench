@@ -60,6 +60,12 @@ jobs:
         with:
           components: rust-src
 #        uses: dtolnay/rust-toolchain@stable
+      - name: Setup Zig (master)
+        uses: mlugg/setup-zig@v1
+        with:
+          version: master
+        run: zig version
+
       # ------------------ Linux ------------------
       - name: cpu info (Linux)
         if: matrix.platform == 'linux'
@@ -81,9 +87,9 @@ jobs:
             sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
           fi
-          if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
-            sudo apt-get install -y -qq zig
-          fi 
+#          if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
+#            sudo apt-get install -y -qq zig
+#          fi 
       - name: Build (Linux)
         if: matrix.platform == 'linux'
         run: |
