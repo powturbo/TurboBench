@@ -1737,6 +1737,8 @@ int plugread(plug_t *plug, char *finame, unsigned long long *totinlen) {
     p->stkd   = strtoull(++t, &t, 10);   
 
     for(q = ++t; *q && *q != '\t'; q++); *q++ = 0; strncpy(p->tms, t, TMS_SIZE); p->tms[TMS_SIZE]=0; t = q;
+    p->err = strtoull(t, &t, 10);
+
     if(p->prm[0]=='?')
       p->prm[0]=0;
     int i;
@@ -1782,7 +1784,7 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
         size_t iplen = in - ip; iplen = min(iplen, bsize);
         bs = (mode || bsize < inlen)?((min(bsize, iplen) < (1<<16))?2:4):0;                    mempeakinit();
         size_t oplen = codcomp(ip, iplen, op+bs, oe-(op+bs), id, lev,prm);                     _mempeak = mempeak(); 
-                                                                                               if(memused()) { printf("\nwarning: memory in compression not freed by compressor '%d'.size=%zu\n", id, memused()); }
+                                                                                               if(memused()) { printf("warning: memory in compression not freed by compressor '%d'.size=%zu\n", id, memused()); }
         if(oplen <= 0 || oplen >= iplen && mcpy) {
           if(mcpy) { memcpy(op+bs, ip, iplen); oplen = iplen; }
           else if(oplen <= 0) { op = _out; goto end; }
@@ -1823,7 +1825,7 @@ int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned 
       if(mcpy && iplen==oplen) memcpy(op, ip, oplen); 
       else {                                                                                   mempeakinit();
         l = coddecomp(ip, iplen, op, oplen, id, lev,prm);                                      _mempeak = mempeak(); 
-                                                                                               if(memused()) { printf("\nFatal: Memory in decompression not freed by compressor '%d'.size=%zu\n", id, memused()); }
+                                                                                               if(memused()) { printf("Fatal: Memory in decompression not freed by compressor '%d'.size=%zu\n", id, memused()); }
       }
       ip += iplen; op += oplen;
     }                                          
@@ -2337,30 +2339,34 @@ int main(int argc, char* argv[]) {
     sprintf(tms, "%.4d-%.2d-%.2d.%.2d:%.2d:%.2d", 1900 + ltm->tm_year, ltm->tm_mon+1, ltm->tm_mday, ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
 
     plug_t *g;
-    fprintf(fo, "dataset\tsize\tcsize\tdtime\tctime\tcodec\tlevel\tparam\tcmem\tdmem\tcstack\tdstack\ttime\n");
+    fprintf(fo, "dataset\tsize\tcsize\tdtime\tctime\tcodec\tlevel\tparam\tcmem\tdmem\tcstack\tdstack\ttime\terr\n");
     for(p = plugt; p < plugt+k; p++) {  // benchmarked 
+      if(p->err) { p->len = totinlen+1; p->tc = p->td = 0; } 
       for(g = plug; g < plug+gk; g++)   // file
         if(g->id >= 0 && !strcmp(g->s, p->s) && g->lev == p->lev && !strcmp(g->prm, p->prm)) {
           int u = 0;                                                             
           if(g->len == p->len) {
-            if(g->tc < p->tc) { p->tc = g->tc; u++; }
-            if(g->td < p->td) { p->td = g->td; u++; }
+            if(p->err) u++; // { p->len = totinlen+1; p->tc = p->td = 0; u++; }
+            else {
+              if(g->tc < p->tc) { p->tc = g->tc; u++; }
+              if(g->td < p->td) { p->td = g->td; u++; }
 
-            if(g->memc != p->memc) u++;               
-            if(g->memd != p->memd) u++;
-            if(g->stkc != p->stkc) u++;
-            if(g->stkd != p->stkd) u++;
-            strcpy(p->tms, u?tms:g->tms);
+              if(g->memc != p->memc) u++;               
+              if(g->memd != p->memd) u++;
+              if(g->stkc != p->stkc) u++;
+              if(g->stkd != p->stkd) u++;
+              strcpy(p->tms, u?tms:g->tms);
+            }
           }
           g->id = -1;
           break;
         }
-        fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
-          fname, totinlen, p->len,    p->td,p->tc,p->s,p->lev,p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms);
+        fprintf(fo,   "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\t%s\n", 
+          fname, totinlen, p->len,    p->td,p->tc,p->s,p->lev,p->prm[0]?p->prm:"?", p->memc, p->memd, p->stkc, p->stkd, p->tms[0]?p->tms:tms, p->err?"1":"");
      }
      for(g = plug; g < plug+gk; g++)
-       if(g->id >= 0 /*&& g->tc > 1e-10 && g->td > 1e-10 && !plug->err*/) fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\n", 
-                                 fname, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms);
+       if(g->id >= 0 /*&& g->tc > 1e-10 && g->td > 1e-10 && !plug->err*/) fprintf(fo, "%s\t%"PRId64"\t%"PRId64"\t%.6f\t%.6f\t%s\t%d\t%s\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%"PRId64"\t%s\t%s\n", 
+                                 fname, totinlen, g->len, g->td, g->tc, g->s, g->lev, g->prm[0]?g->prm:"?", g->memc, g->memd, g->stkc, g->stkd, g->tms[0]?g->tms:tms, g->err?"1":"");
     fclose(fo);
 
     printfile(s, 0, FMT_TEXT, rem);
