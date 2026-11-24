@@ -555,16 +555,17 @@ ifneq ($(ARCH), aarch64)                  # lz0/lz0/lz0dec_arm64.s 3 1  error un
 PLG_FLAGS += -D_LZ0
 LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/zx0_compressor/*.c) $(wildcard lz0/zx0_decompressor/*.c)
 
+LZ0_FLAGS := $(CFLAGS)
 LZ0_COBJS := $(call obj,$(LZ0_CSRCS))
 ifeq ($(ARCH), x86_64)
 LZ0_sSRCS = $(wildcard lz0/lz0/lz*$(ARCH).s)
 LZ0_SSRCS = $(wildcard lz0/lz0/lz0*$(ARCH).S)
 LZ0_FLAGS := $(_AVX2)
 else 
-  LZ0_FLAGS := $(_SSE)
   ARCHA := $(ARCH)
   ifeq ($(ARCH),aarch64)
     ARCHA = arm64
+    LZ0_FLAGS := $(_SSE)
   endif
   LZ0_SSRCS = $(wildcard lz0/lz0/lz0*$(ARCHA).S)
 endif
