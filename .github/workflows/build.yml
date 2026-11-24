@@ -193,6 +193,10 @@ jobs:
             mingw-w64-ucrt-x86_64-libgomp
             mingw-w64-ucrt-x86_64-llvm-openmp
             mingw-w64-ucrt-x86_64-nasm
+      - run: git submodule update --init --recursive
+      - name: Make
+      - run: make OPENZL=0 PIVCO=0 RUST=0
+
 #      - name: Install Zig
 #        uses: mlugg/setup-zig@v2
 #        with:
@@ -200,9 +204,6 @@ jobs:
 #      - uses: goto-bus-stop/setup-zig@v2
 #        with:
 #          version: 0.16.0      
-      - run: git submodule update --init --recursive
-      - run: |
-           make OPENZL=0 PIVCO=0 RUST=0
 #          ZIG_DIR=$(find "D:\a\_temp" -name "zig.exe" -printf '%h\n' | head -1)
 #          echo "ZIG_DIR=$ZIG_DIR" >> $GITHUB_OUTPUT
 #          echo "$ZIG_DIR" >> $GITHUB_PATH 
