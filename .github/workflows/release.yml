@@ -64,7 +64,7 @@ jobs:
         with:
           version: '0.16.0'
 #          version: master
-
+#        uses: dtolnay/rust-toolchain@stable
       # ------------------ Linux ------------------
       - name: cpu info (Linux)
         if: matrix.platform == 'linux'
@@ -86,7 +86,6 @@ jobs:
             sudo update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-20   100
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100 || true
           fi
-
       - name: Build (Linux)
         if: matrix.platform == 'linux'
         run: |
@@ -121,17 +120,12 @@ jobs:
 #            ./turbobench data@MICRO.tbb -p4
 #            mv -f data.md "${{ matrix.name }}.data.md"
       # ------------------ macOS ------------------
-      - name: Install (macOS)
+      - name: Build (macOS)
         if: matrix.platform == 'macos'
         run: |
           brew install nasm libomp llvm
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
-#      - name: Install Zig
-#        uses: mlugg/setup-zig@v2
-#        with:
-#          version: '0.16.0' # set to any published release >= 0.16.0
-      - name: Build (macOS)
-        run:  make
+          make
       - name: Generate silesia.tar.md (macOS)
         if: matrix.platform == 'macos'
         run: |
@@ -171,7 +165,7 @@ jobs:
         run: |
           gcc --version
           clang --version || true
-          make STATIC=1 PIVCO=0 PHAZ=0
+          make STATIC=1 PHAZ=0
       - name: Generate silesia.tar.md (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
@@ -190,15 +184,6 @@ jobs:
           ./turbobench turbobench.exe.tbb -p4
           mv -f turbobench.exe.md "${{ matrix.name }}.turbobench.exe.md"
           ls -la *.md
-
-#      - name: Install Zig
-#        uses: mlugg/setup-zig@v2
-#        with:
-#          version: '0.16.0'
-#      - uses: goto-bus-stop/setup-zig@v2
-#        with:
-#          version: 0.16.0      
-
       # ------------------ Package (Linux / macOS) ------------------
       - name: Package artifact (Linux/macOS)
         if: matrix.platform != 'windows'
