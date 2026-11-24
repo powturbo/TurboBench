@@ -144,6 +144,7 @@ void _vfree(void *p, size_t size) {
     #endif
 }
 
+//--- dynamic alloc/free ----------------------------------------------------------------------------------------------------
   #if defined(NMEMSIZE) || defined(_WIN32) 
 #define mempeakinit() 0
 #define mempeak() 0
@@ -225,9 +226,7 @@ static ALWAYS_INLINE size_t memused() { return mem_used; }
 static ALWAYS_INLINE void mempeakinit(void) { mem_peak = mem_used = 0; }
 
 static ALWAYS_INLINE void mem_add(size_t size) { if((mem_used += size) > mem_peak) mem_peak = mem_used; }
-static ALWAYS_INLINE void mem_sub(size_t size) {  //if(size > mem_used) { fflush(stdout); printf("\nfree: warning size=%zu > mem_used=%zu\n", size, mem_used); } 
-  mem_used -= size > mem_used ? mem_used : size; 
-}
+static ALWAYS_INLINE void mem_sub(size_t size) { mem_used -= size > mem_used ? mem_used : size; } //if(size > mem_used) { fflush(stdout); printf("\nfree: warning size=%zu > mem_used=%zu\n", size, mem_used); } 
 
 #define _POSIX_C_SOURCE 200809L
 #define _DARWIN_C_SOURCE
@@ -265,8 +264,7 @@ static __attribute__((constructor)) void mem_init(void) {
 void *malloc(size_t size) {
   if(!mem_malloc) {
     void *p = mem_heapp;
-    if((mem_heapp += size) >= mem_heap+sizeof(mem_heap))
-      die("malloc:initial memory overflow\n");
+    if((mem_heapp += size) >= mem_heap+sizeof(mem_heap)) die("malloc:initial memory overflow\n");
     return p;
   }                                           
   void *p = (*mem_malloc)(size);
@@ -278,8 +276,7 @@ void *calloc(size_t alignment, size_t size) {
   size_t _size = alignment*size;
   if(!mem_calloc) {
     void *p = mem_heapp;
-    if((mem_heapp += _size) >= mem_heap + sizeof(mem_heap))
-      die("calloc:initial memory overflow\n");
+    if((mem_heapp += _size) >= mem_heap + sizeof(mem_heap))  die("calloc:initial memory overflow\n");
     memset(p, 0, _size);
     return p;
   }
@@ -299,8 +296,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size) {
   size_t _size = alignment*size;
   if(!posix_memalign) {
     void *p = mem_heapp;
-    if((mem_heapp += _size) >= mem_heap + sizeof(mem_heap))
-      die("posix_memalign:initial memory overflow\n");
+    if((mem_heapp += _size) >= mem_heap + sizeof(mem_heap))  die("posix_memalign:initial memory overflow\n");
     memset(p, 0, _size);
     *memptr = p;
     return 0;
@@ -310,8 +306,7 @@ int posix_memalign(void **memptr, size_t alignment, size_t size) {
   return rc;
 }
 
-void *aligned_alloc(size_t alignment, size_t size) {
-  if(!aligned_alloc) die("aligned_alloc");
+void *aligned_alloc(size_t alignment, size_t size) {       if(!aligned_alloc) die("aligned_alloc");
   void *p = (*mem_aligned_alloc)(alignment, size);
   if(p) mem_add(malloc_usable_size(p));
   return p;
@@ -331,17 +326,13 @@ void free(void *p) {
   (*mem_free)(p);
 }
 #endif
-
-#define STACK_MAGIC  0x79a53fb6u
+//--- Stack -------------------------------------------------------------------------------------------------------
+#define STACK_MAGIC0  0x79a53fb6u
+#define STACK_MAGIC1  0x28c40ed1u
+#define STACK_MAGIC2  0xa0b1c2d3u
+#define STACK_MAGIC3  0x7e849f56u
 
 #if defined(_WIN32) || (defined(__APPLE__) && defined(__aarch64__))
-#define STACK_MAGIC  0x79a53fb6u
-  #ifndef STACK_PAINT_BYTES
-#define STACK_PAINT_BYTES  (128 * 1024)
-  #endif
-#define STACK_PAINT_WORDS  (STACK_PAINT_BYTES / sizeof(unsigned))
-typedef struct { unsigned *low, *high; } memstack_t;
-
   #ifdef __APPLE__
 #include <pthread.h>
 #include <stdint.h>
@@ -351,7 +342,13 @@ typedef struct { unsigned *low, *high; } memstack_t;
     #endif
   #endif
 
-NOINLINE memstack_t stackini(void) {
+  #ifndef STACK_PAINT_BYTES
+#define STACK_PAINT_BYTES  (128 * 1024)
+  #endif
+#define STACK_PAINT_WORDS  (STACK_PAINT_BYTES / sizeof(unsigned))
+typedef struct { unsigned *low, *high; } memstack_t;
+
+NOINLINE memstack_t stackini(void, unsigned stack_magic) {
   volatile unsigned  marker = 0;
   volatile unsigned *p      = (volatile unsigned *)(uintptr_t)&marker;
   unsigned          *high   = (unsigned *)(uintptr_t)p;
@@ -376,12 +373,12 @@ NOINLINE memstack_t stackini(void) {
   return r;
 }
 
-size_t stackpeak(memstack_t paint) {
+size_t stackpeak(memstack_t paint, unsigned stack_magic) {
   if(!paint.low || !paint.high || paint.high <= paint.low)
     return 0;
   volatile unsigned *p   = (volatile unsigned *)paint.low;
   volatile unsigned *end = (volatile unsigned *)paint.high;
-  while(p < end && *p == STACK_MAGIC)
+  while(p < end && *p == stack_magic)
     ++p;
   return (size_t)((char *)end - (char *)p);
 }
@@ -390,10 +387,10 @@ size_t stackpeak(memstack_t paint) {
 #include <stddef.h>
 #include <pthread.h>
 typedef unsigned* memstack_t;
-#define STACK_MAGIC 0xA5A55A5Au
 static unsigned *g_lo;   /* lowest usable word               */
 static unsigned *g_hi;   /* one past the highest usable word */
-NOINLINE unsigned *stackini(void) {
+
+NOINLINE unsigned *stackini(unsigned stack_magic) {
   pthread_attr_t attr;
   void  *addr;
   size_t size;
@@ -405,21 +402,21 @@ NOINLINE unsigned *stackini(void) {
   volatile unsigned guard;
   unsigned *from = (unsigned *)&guard;
   if(from > g_hi) from = g_hi;
-  for(volatile unsigned *sp = from; sp > g_lo; ) *--sp = STACK_MAGIC;
+  for(volatile unsigned *sp = from; sp > g_lo; ) *--sp = stack_magic;
   return from;
 }
 
-size_t stackpeak(memstack_t base) {
+size_t stackpeak(memstack_t base, unsigned stack_magic) {
   unsigned *p;
   if(!base || !g_lo || base > g_hi) return 0;
   p = g_lo;
-  while(p < base && *p == STACK_MAGIC) p++;
+  while(p < base && *p == stack_magic) p++;
   return (size_t)(base - p) * sizeof(unsigned);
 }
 
 #else
-#define stackini() 0
-#define stackpeak(base) 0
+#define stackini(stack_magic) 0
+#define stackpeak(base, stack_magic) 0
 typedef unsigned *memstack_t;
 #endif
 
@@ -571,7 +568,7 @@ struct plugg {
 };
 
 struct plugg plugg[] = {
-  { "MICRO",     "blaris,3,6,9/heatshrink,1/igzip,0,1,2,3/libdeflate,1,6,12/lz4,1,12/lzav,1,2/slz,1,4/tamp,8,13,15/zlib,1,6,9/memcpy",                     "Microcontroller" },
+  { "MICRO",     "blaris,3,6,9/heatshrink,1/igzip,0,1,2,3/libdeflate,1,6,12/lz4,1,12/lzav,1,2/misa77,1,4/slz,1,4/tamp,8,13,15/tinyuz,0,1,2,3/zlib,1,6,9/memcpy",                     "Microcontroller" },
   { "TURBO",     "lzturbo,10,11,12,19/aceapex_fast,1/brotli,4/igzip,1,2,3/libdeflate,1,6,12/lz4,1,5,12/lzav,1,2/memlz/misa77,0,1,4/zlib-ng,1,6,9/zstd,3/zxc,3,5,6/memcpy",                         "lz4 class: Fastest de-/compression. HDD/SSD/RAM speed" },
   { "FAST",      "lzturbo,10,10a,11,12/aocl-lz4,0/aceapex_fast,1/brotli,0,1,4,5,6/igzip,1,2,3/libdeflate,1,6,12/lz4,1,3,9,12/lzav,1,2/memlz/misa77,0,1,2,3,4/zlib,1,6,9/zlib-turbo,1,6,9,12/zlib-ng,1,6,9/zstd,1,3,9/zxc,3,5,7/memcpy", "lz4,zlib,zstd class" },
   { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,6/zstd,5,9/libdeflate,6/zlib-ng,6/igzip,3/memcpy",                                                                         "Compression speed > 'zlib 6' class" },
@@ -1373,7 +1370,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
           #else
         fprintf(f, "%12"PRId64" %s%s%9.2f%s %s%9.2f%s %s%3d%s%s   ",
           plug->len, sratio, c?BOLDB:"", tc, c?BOLDE:"",  d?BOLDB:"", td, d?BOLDE:"", n?BOLDB:"", score, score<MEDALMAX?medal[score]:"  ", n?BOLDE:"", n?BOLDB:"", name, n?BOLDE:"");
-        if(memout) fprintf(f, "%9d %9d %9d %9d ", plug->memc, plug->stkc, plug->memd, plug->stkd);   
+        if(memout) fprintf(f, "%9llu %9llu %9llu %9llu ", plug->memc, plug->stkc, plug->memd, plug->stkd);   
         fprintf(f, "%s%-16s%s%s\n", n?BOLDB:"", name, n?BOLDE:"", finame);
           #endif
       }
@@ -1393,7 +1390,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
         plug->len, sratio, c?"<b>":"", tc, c?"</b>":"",  d?"<b>":"", td, d?"</b>":"", n?"<b>":"", name, n?"</b>":"", finame);
       break;
     case FMT_HTML:
-      fprintf(f, "<tr><td align=\"right\">%11"PRId64"</td><td align=\"right\">%s</td><td align=\"right\">%s%9.2f%s</td><td align=\"right\">%s%9.2f%s</td><td>%s%-16s%s</td><td align=\"right\">%"PRId64"</td><td align=\"right\">%"PRId64"</td><td>%s</td></tr>\n",
+      fprintf(f, "<tr><td align=\"right\">%11"PRId64"</td><td align=\"right\">%s</td><td align=\"right\">%s%9.2f%s</td><td align=\"right\">%s%9.2f%s</td><td>%s%-16s%s</td><td align=\"right\">%"PRIu64"</td><td align=\"right\">%"PRIu64"</td><td>%s</td></tr>\n",
         plug->len, sratio, c?"<b>":"", tc, c?"</b>":"",  d?"<b>":"", td, d?"</b>":"", n?"<b>":"", name, n?"</b>":"",
         plug->memc, plug->memd,
         finame);
@@ -1403,7 +1400,7 @@ void plugprt(plug_t *plug, unsigned long long totinlen, char *finame, int fmt, d
       #define MD_E "}}$"
       for(p = name, q=sname; *p; p++,q++) { if(*p == '_') { *q++ = '\\'; *q++ = '\\'; } *q = *p; } *q = 0;
       if(memout)
-        fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%u|%u|%u|%u|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ", 
+        fprintf(f, "|%"PRIu64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%llu|%llu|%llu|%llu|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ", 
                       plug->memc, plug->stkc, plug->memd, plug->stkd, n?MD_B:"",  n?sname:name, n?MD_E:"",   finame);
       else        
         fprintf(f, "|%"PRId64"|%s|%s%.2f%s|%s%.2f%s|%d%s|%s%s%s|%s|\n", plug->len, sratio, c?MD_B:"",  tc, c?MD_E:"",    d?MD_B:"",  td, d?MD_E:"", score, score<MEDALMAX?medal[score]:" ",  n?MD_B:"",  n?sname:name, n?MD_E:"",   finame); 
@@ -1525,7 +1522,7 @@ void plugprtp(plug_t *plug, long long totinlen, char *finame, int fmt, int speed
       fprintf(f, "|%s|\n", finame);
       break;
     default:
-      if(memout) fprintf(f, "%.10d %.10d %.10d %.10d ", plug->memc, plug->memd, plug->stkc, plug->stkd); 
+      if(memout) fprintf(f, "%.10llu %.10llu %.10llu %.10llu ", plug->memc, plug->memd, plug->stkc, plug->stkd); 
       fprintf(f, "%s\n", finame);
       break;
   }
@@ -1786,10 +1783,10 @@ static int mcpy = 0, mode, tincx, fuzz;
 unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t outsize, unsigned bsize, int id, int lev, char *prm, char *name, char *fname, size_t *pstack, size_t *pmempeak) {
   unsigned char *op=NULL,*oe = _out + outsize;                         
   unsigned char *in,*ip;
-  codstart(bsize, id, lev, prm, 0);                                                            memstack_t _stack = stackini();
+  codstart(bsize, id, lev, prm, 0);                                                            memstack_t _stack = stackini(STACK_MAGIC2);
                                                                                                codcomp(_in, _inlen, _out, outsize, 2, lev,"");
-                                                                                               size_t overhead = stackpeak(_stack), _mempeak;
-                                                                                               _stack = stackini(); 
+                                                                                               size_t overhead = stackpeak(_stack,STACK_MAGIC2), _mempeak;
+                                                                                               _stack = stackini(STACK_MAGIC0); 
   TMBEG(tm_Rep);
     for(op = _out, in = _in; in < _in+_inlen; ) {
       unsigned inlen, bs;
@@ -1815,7 +1812,7 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
       }
     }
     size_t olen = op - _out;
-  TMENDC(_inlen, olen, name, fname, 0);                                                        size_t raw = stackpeak(_stack);
+  TMENDC(_inlen, olen, name, fname, 0);                                                        size_t raw = stackpeak(_stack,STACK_MAGIC0);
                                                                                                *pstack = raw > overhead ? raw - overhead : 0;
                                                                                                *pmempeak = _mempeak;  
   end: codend(_inlen, id, lev, prm, 0);
@@ -1824,10 +1821,10 @@ unsigned becomp(unsigned char *_in, size_t _inlen, unsigned char *_out, size_t o
 
 int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned _outlen, unsigned bsize, int id, int lev, char *prm, size_t *pstack, size_t *pmempeak) {
   unsigned char *ip=NULL;                                                                      
-  codstart(_inlen, id, lev, prm, 1);                                                           memstack_t _stack = stackini();
+  codstart(_inlen, id, lev, prm, 1);                                                           memstack_t _stack = stackini(STACK_MAGIC3);
                                                                                                coddecomp(_in, _inlen, _out, _outlen, 2, lev,""); 
-                                                                                               size_t  overhead = stackpeak(_stack), _mempeak;
-                                                                                               _stack = stackini();
+                                                                                               size_t  overhead = stackpeak(_stack,STACK_MAGIC3), _mempeak;
+                                                                                               _stack = stackini(STACK_MAGIC1);
   TMBEG(tm_Rep2);     
   unsigned char *out,*op;
   for(ip = _in, out = _out; out < _out+_outlen;) {
@@ -1850,7 +1847,7 @@ int bedecomp(unsigned char *_in, unsigned _inlen, unsigned char *_out, unsigned 
     }                                          
   }
   TMEND(_outlen);                                                                              
-                                                                                               size_t raw = stackpeak(_stack);
+                                                                                               size_t raw = stackpeak(_stack,STACK_MAGIC1);
                                                                                                *pstack = raw > overhead ? raw - overhead : 0;
                                                                                                *pmempeak = _mempeak;  
   codend(_inlen, id, lev, prm, 1);
