@@ -348,7 +348,7 @@ void free(void *p) {
 #define STACK_PAINT_WORDS  (STACK_PAINT_BYTES / sizeof(unsigned))
 typedef struct { unsigned *low, *high; } memstack_t;
 
-NOINLINE memstack_t stackini(void, unsigned stack_magic) {
+NOINLINE memstack_t stackini(unsigned stack_magic) {
   volatile unsigned  marker = 0;
   volatile unsigned *p      = (volatile unsigned *)(uintptr_t)&marker;
   unsigned          *high   = (unsigned *)(uintptr_t)p;
@@ -368,7 +368,7 @@ NOINLINE memstack_t stackini(void, unsigned stack_magic) {
     if(words > avail) words = avail;
   }
   #endif
-  for(size_t i = 0; i < words; i++) *--p = STACK_MAGIC;
+  for(size_t i = 0; i < words; i++) *--p = stack_magic;
   memstack_t r = { .low = (unsigned *)(uintptr_t)p, .high = high };
   return r;
 }
