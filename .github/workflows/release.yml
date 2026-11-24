@@ -165,20 +165,13 @@ jobs:
             mingw-w64-ucrt-x86_64-libgomp
             mingw-w64-ucrt-x86_64-llvm-openmp
             mingw-w64-ucrt-x86_64-nasm
-#      - name: Install Zig
-#        uses: mlugg/setup-zig@v2
-#        with:
-#          version: '0.16.0'
-#      - uses: goto-bus-stop/setup-zig@v2
-#        with:
-#          version: 0.16.0      
       - name: Build (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
         run: |
           gcc --version
           clang --version || true
-          make STATIC=1 PHAZ=0
+          make STATIC=1 PIVCO=0 PHAZ=0
       - name: Generate silesia.tar.md (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
@@ -197,6 +190,15 @@ jobs:
           ./turbobench turbobench.exe.tbb -p4
           mv -f turbobench.exe.md "${{ matrix.name }}.turbobench.exe.md"
           ls -la *.md
+
+#      - name: Install Zig
+#        uses: mlugg/setup-zig@v2
+#        with:
+#          version: '0.16.0'
+#      - uses: goto-bus-stop/setup-zig@v2
+#        with:
+#          version: 0.16.0      
+
       # ------------------ Package (Linux / macOS) ------------------
       - name: Package artifact (Linux/macOS)
         if: matrix.platform != 'windows'
