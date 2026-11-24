@@ -608,8 +608,10 @@ PLG_FLAGS+=-D_LZAV
 endif
 
 ifneq ($(wildcard lzfse/.),)
+ifneq ($(LZFSE), 0) 
 PLG_FLAGS+=-D_LZFSE
 OB+=$(call obj,lzfse/src/lzfse_decode_base.o lzfse/src/lzfse_decode.o lzfse/src/lzfse_encode_base.o lzfse/src/lzfse_encode.o lzfse/src/lzfse_fse.o lzfse/src/lzvn_decode_base.o lzfse/src/lzvn_encode_base.o)
+endif
 endif
 
 ifneq ($(wildcard lzham_codec_devel/.),)
@@ -1046,12 +1048,14 @@ endif
 #--- W ------------------------------------------------------------------------------------------------------------------
 # wzip: WLZ4 and WZIP (plain C); WZIP's levels 7-13 find matches in threads of their own (t#)
 ifneq ($(wildcard wzip/.),)
+ifneq ($(WZIP), 0) 
 PLG_FLAGS += -D_WZIP
 WZIP_SRC := wzip/src
 $(BUILD)/$(WZIP_SRC)/%.o: $(WZIP_SRC)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) -O2 $(CFLAGS) -DNDEBUG -DWZIP_MULTITHREAD=1 -c $< -o $@
 OB += $(call obj,$(addprefix $(WZIP_SRC)/,WLZ4.c WZIP_L.c WZIP_M.c WZIP_wrapper.c Huffman_Compress.c Huffman_Decompress.c))
+endif
 endif
 
 #--- X --------------------------------------------------------------------------------------------------------------------
@@ -1406,11 +1410,13 @@ OB+=$(call obj,doboz/Source/Doboz/Compressor.o doboz/Source/Doboz/Decompressor.o
 endif
 
 ifneq ($(wildcard fast-lzma2/.),)
+ifneq ($(FLZMA), 0) 
 PLG_FLAGS+=-D_FLZMA2
 FLZMA2_SRCS := $(wildcard fast-lzma2/*.c) 
 FLZMA2_SRCS := $(filter-out %/xxhash.c, $(FLZMA2_SRCS))
 FLZMA2_OBJS := $(call obj,$(FLZMA2_SRCS))
 OB += $(FLZMA2_OBJS)
+endif
 endif
 
 ifneq ($(wildcard FastLZ/.),)
