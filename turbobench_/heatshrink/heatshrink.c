@@ -406,10 +406,7 @@ static int decode(config *cfg) {
 static void report(config *cfg) {
     size_t inb = cfg->in->total;
     size_t outb = cfg->out->total;
-    fprintf(cfg->out->fd == STDOUT_FILENO ? stderr : stdout,
-        "%s %0.2f %%\t %zd -> %zd (-w %u -l %u)\n",
-        cfg->in_fname, 100.0 - (100.0 * outb) / inb, inb, outb,
-        cfg->window_sz2, cfg->lookahead_sz2);
+    fprintf(stderr,  "%s %0.2f %%\t %zd -> %zd (-w %u -l %u)\n",  cfg->in_fname, 100.0 - (100.0 * outb) / inb, inb, outb, cfg->window_sz2, cfg->lookahead_sz2);
 }
    #ifndef LIBMEM
 
