@@ -362,11 +362,13 @@ endif
 
 #--- G -----------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard GLZA/.),)
+ifneq ($(GLZA), 0) 
 PLG_FLAGS+=-D_GLZA
 GLZA_OBJS := $(call obj,GLZA/GLZAmodel.o GLZA/GLZAcomp.o GLZA/GLZAencode.o GLZA/GLZAcompress.o GLZA/GLZAformat.o GLZA/GLZAdecode.o)
 $(GLZA_DIR)/%.o: GLZA/%.c
 	 $(CC) -O2 $(CFLAGS) $< -c -o $@
-OB += $(GLZA_OBJS) 
+OB += $(GLZA_OBJS)
+endif 
 endif
 
 #--- H -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -541,9 +543,11 @@ OB+=$(call obj,$(LIBSLZ_SRCS))
 endif
 
 ifneq ($(wildcard lizard/.),)
+ifneq ($(LIZARD), 0) 
 LIZARD_SRCS := $(wildcard lizard/lib/*.c) $(wildcard lizard/lib/entropy/*.c) 
 LIZARD_SRCS := $(filter-out %/debug.c, $(LIZARD_SRCS))
 OB += $(call obj,$(LIZARD_SRCS))
+endif
 endif
 
 ifneq ($(wildcard ../lz/.),)
@@ -659,6 +663,7 @@ endif
 endif
 
 ifneq ($(wildcard lzsa/.),)
+ifneq ($(LZSA), 0) 
 ifneq ($(OS),Darwin)
 PLG_FLAGS+=-D_LZSA
 LZSA_SRCS := $(wildcard lzsa/src/*.c)
@@ -674,6 +679,7 @@ $(LZSA_OBJS): $(BUILD)/%.o: %.c | $(BUILD)
 OB += $(LZSA_OBJS)
 endif
 endif
+endif
 
 ifneq ($(and $(wildcard LZSSE/.),$(filter x86_64,$(ARCH))),)
 PLG_FLAGS += -D_LZSSE
@@ -684,6 +690,7 @@ $(BUILD)/LZSSE/%.o: LZSSE/%.cpp
 endif
 
 ifneq ($(wildcard liblzraven/.),)
+ifneq ($(LZRAVEN), 0) 
 PLG_FLAGS+=-D_LZRAVEN
 LZRAVEN_DIR=liblzraven
 LZRAVEN_SRCS := $(shell find $(LZRAVEN_DIR)/src -type f -name '*.[ch]' )
@@ -692,6 +699,7 @@ $(LZRAVEN_LIB):  $(LZRAVEN_SRCS)
 	@mkdir -p $(BUILD)/liblzraven 
 	$(MAKE) lib -C $(LZRAVEN_DIR) WARN="-Wno-error=format-truncation" CC=$(CC) BUILD=$(abspath $(BUILD)/liblzraven) 
 LIBS += $(LZRAVEN_LIB)
+endif
 endif
 
 #---- M ----------------------------------------------------------------------------------------------------------------------------------------
@@ -991,9 +999,13 @@ ifneq ($(wildcard tinyuz/.),)
 PLG_FLAGS+=-D_TINYUZ 
 TINYUZ_SRCS := tinyuz/compress/tuz_enc.cpp tinyuz/decompress/tuz_dec.c HDiffPatch/bsdiff_wrapper/bsdiff_wrapper.cpp HDiffPatch/bsdiff_wrapper/bspatch_wrapper.c
 TINYUZ_LIB := $(BUILD)/tinyuz/libtinyuz.a
+#TINYUZ_FLAGS:=
+#ifeq ($(ARCH),riscv64)
+#TINYUZ_FLAGS := $(CFLAGS)
+#endif 
 $(TINYUZ_LIB): $(TINYUZ_SRCS)
 	@mkdir -p $(BUILD)/tinyuz
-	$(MAKE) -C tinyuz BUILD=$(abspath $(BUILD)/tinyuz) DEF_FLAGS="-O3 -DNDEBUG -D_HPATCH_IS_USED_MULTITHREAD=0 -D_IS_USED_MULTITHREAD=0"
+	$(MAKE) -C tinyuz BUILD=$(abspath $(BUILD)/tinyuz) DEF_FLAGS="-O3 -DNDEBUG -D_HPATCH_IS_USED_MULTITHREAD=0 -D_IS_USED_MULTITHREAD=0 $(CFLAGS)"
 	@mv tinyuz/libtinyuz.a $(TINYUZ_LIB)
 LIBS+=$(TINYUZ_LIB)
 endif
