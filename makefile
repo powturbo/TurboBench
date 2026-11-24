@@ -202,7 +202,7 @@ OB += $(BUILD)/$(ACEAPEX_DIR)/aceapex_api.o
 endif
 
 ifneq ($(if $(wildcard aocl-compression/.),$(if $(filter 0,$(AOCL)),,1)),)
-ifneq ($(ARCH),x86_64)
+ifeq ($(ARCH),x86_64)
 PLG_FLAGS += -D_AOCL
 AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'CMakeLists.txt' \))
 AOCL_BDIR = $(BUILD)/aocl-compression
@@ -233,12 +233,12 @@ endif
 endif
 
 #--- B -------------------------------------------------------------------------------------------------------------------------------
-ifneq ($(wildcard turbobench_/bcm/.),)
+ifneq ($(if $(wildcard turbobench_/bcm/.),$(if $(filter 0,$(BCM)),,1)),)
 PLG_FLAGS+=-D_BCM
 OB+=$(call obj,turbobench_/bcm/bcm.o)
 endif
 
-ifneq ($(wildcard blaris/.),)
+ifneq ($(if $(wildcard blaris/.),$(if $(filter 0,$(BLARIS)),,1)),)
 PLG_FLAGS+=-D_BLARIS
 BLARIS_LEVELS := 1 2 3 4 5 6 7 8 9
 BLARIS_OBJS := $(foreach L,$(BLARIS_LEVELS),$(BUILD)/turbobench_/blaris/blaris_l$(L).o)
@@ -261,7 +261,7 @@ $(BROTLI_LIB): $(BROTLI_SRCS)
 LIBS+=$(BROTLI_LIB)
 endif
 
-ifneq ($(wildcard bz2-ng/.),)
+ifneq ($(if $(wildcard bz2-ng/.),$(if $(filter 0,$(BZ2_NG)),,1)),)
 ifneq ($(OS), Darwin) 
 ifneq ($(OS), Windows) #cmake error
 PLG_FLAGS += -D_BZ2_NG
@@ -287,7 +287,7 @@ endif
 endif
 endif
 
-ifneq ($(wildcard bzip2/.),)
+ifneq ($(if $(wildcard bzip2/.),$(if $(filter 0,$(BZIP2)),,1)),)
 PLG_FLAGS+=-D_BZIP2
 BZIP2_OBJS = $(call obj,bzip2/blocksort.o bzip2/huffman.o bzip2/crctable.o bzip2/randtable.o bzip2/compress.o bzip2/decompress.o bzip2/bzlib.o)
 BZIP2_LIB = $(BUILD)/bzip2/libbzip2.a
@@ -296,7 +296,7 @@ $(BZIP2_LIB): $(BZIP2_OBJS) | $(BUILD)/bzip2
 LIBS += $(BZIP2_LIB)
 endif
 
-ifneq ($(wildcard bzip3/.),)
+ifneq ($(if $(wildcard bzip3/.),$(if $(filter 0,$(BZIP3)),,1)),)
 PLG_FLAGS+=-D_BZIP3
 BZIP3_SRCS := bzip3/src/libbz3.c $(wildcard bzip3/src/coder/*.c) bzip3/src/sys/crc.c
 #$(wildcard bzip3/src/sys/*.c)
@@ -340,7 +340,7 @@ OB+=$(call obj,Clickhouse/src/Compression/LZ4_decompress_faster.o)
 endif
 
 #--- F ----------------------------------------------------------------------------------------------------------------------------------------------
-ifneq ($(wildcard firetrail/.),)
+ifneq ($(if $(wildcard firetrail/.),$(if $(filter 0,$(FIRETRAIL)),,1)),)
 ifneq ($(OS), Windows)
 ifneq ($(OS), Darwin)
 ifneq ($(ARCH), riscv64)
@@ -366,7 +366,7 @@ OB += $(GLZA_OBJS)
 endif
 
 #--- H -----------------------------------------------------------------------------------------------------------------------------------------------
-ifneq ($(wildcard heatshrink/.),)
+ifneq ($(if $(wildcard heatshrink/.),$(if $(filter 0,$(HEATSHRINK)),,1)),)
 PLG_FLAGS+=-D_HEATSHRINK
 HEATSHRINK_SRCS := heatshrink/heatshrink_encoder.c heatshrink/heatshrink_decoder.c turbobench_/heatshrink/heatshrink.c
 HEATSHRINK_OBJS := $(call obj,$(HEATSHRINK_SRCS))
@@ -375,6 +375,7 @@ $(HEATSHRINK_OBJS): $(BUILD)/%.o: %.c
 	$(CC) -O3 -DNDEBUG -Wno-int-conversion -fstack-usage -c $< -o $@
 OB += $(HEATSHRINK_OBJS)
 endif
+
 #--- I -----------------------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(wildcard ../ic/.),)
 PLG_FLAGS+=-D_TURBOPFOR
@@ -443,7 +444,7 @@ endif
 endif 
 endif
 
-ifneq ($(wildcard isa-l/.),)
+ifneq ($(if $(wildcard isa-l/.),$(if $(filter 0,$(ISA_L)),,1)),)
 ifneq ($(OS), Windows)  # not compiling for windows in CI.
   ifndef CROSS
     NASM := $(shell command -v nasm 2>/dev/null)
@@ -485,7 +486,7 @@ ifneq ($(wildcard lib/.),)
 PLG_FLAGS+=-D_LIB
 endif
 
-ifneq ($(wildcard libbsc/.),)
+ifneq ($(if $(wildcard libbsc/.),$(if $(filter 0,$(LIBBSC)),,1)),)
 PLG_FLAGS+=-D_LIBBSC
 ifneq ($(HAVE_OPENMP),0)
   LIBBSC_FLAGS   := -DLIBBSC_OPENMP_SUPPORT -DLIBSAIS_OPENMP $(OMP_CFLAGS)
@@ -516,7 +517,7 @@ $(LIBBSC_LIB): $(LIBSC_SRCS)
 LIBS+=$(LIBBSC_LIB)
 endif
 
-ifneq ($(wildcard libdeflate/.),)
+ifneq ($(if $(wildcard libdeflate/.),$(if $(filter 0,$(LIBDEFLATE)),,1)),)
 PLG_FLAGS+=-D_LIBDEFLATE
 LIBDEFLATE_SRCS := $(wildcard libdeflate/lib/*.c) libdeflate/lib/arm/cpu_features.c libdeflate/lib/x86/cpu_features.c 
 LIBDEFLATE_LIB = $(BUILD)/libdeflate/libdeflate.a
@@ -525,7 +526,7 @@ $(LIBDEFLATE_LIB): $(LIBDEFLATE_SRCS) libdeflate/CMakeLists.txt
 LIBS+=$(LIBDEFLATE_LIB)
 endif
 
-ifneq ($(wildcard libslz/.),)
+ifneq ($(if $(wildcard libslz/.),$(if $(filter 0,$(LIBSLZ)),,1)),)
 PLG_FLAGS+=-D_LIBSLZ
 LIBSLZ_SRCS := libslz/src/slz.c libslz/src/uslz.c libslz/src/slz_common.c
 OB+=$(call obj,$(LIBSLZ_SRCS))
@@ -548,7 +549,7 @@ $(LZ_LIB):  $(LZ_SRCS)
 LIBS += $(LZ_LIB)
 endif
 
-ifneq ($(wildcard lz0/.),)
+ifneq ($(if $(wildcard lz0/.),$(if $(filter 0,$(LZ0)),,1)),)
 ifneq ($(OS), Windows)                    # lz0dec_fast_x86_64.s 232  Error junk at end of line, first unrecognized character is `l'
 ifneq ($(ARCH), aarch64)                  # lz0/lz0/lz0dec_arm64.s 3 1  error unknown directive .type lz0dec_arm64, %function
 PLG_FLAGS += -D_LZ0
@@ -589,7 +590,7 @@ endif
 endif
 endif
 
-ifneq ($(wildcard lz4/.),)
+ifneq ($(if $(wildcard lz4/.),$(if $(filter 0,$(LZ4)),,1)),)
 PLG_FLAGS+=-D_LZ4
 OB+=$(call obj,lz4/lib/lz4hc.o lz4/lib/lz4.o lz4/lib/lz4frame.o lz4/lib/xxhash.o)
 $(BUILD)/lz4/lib/%.o: lz4/lib/%.c
@@ -597,7 +598,7 @@ $(BUILD)/lz4/lib/%.o: lz4/lib/%.c
 	$(CC) -O3 -DLZ4F_MULTITHREAD=1 -c $< -o $@
 endif
 
-ifneq ($(wildcard lzav/.),)
+ifneq ($(if $(wildcard lzav/.),$(if $(filter 0,$(LZAV)),,1)),)
 PLG_FLAGS+=-D_LZAV
 endif
 
@@ -632,12 +633,12 @@ LIBS += $(LZHAM_LIB)
 endif
 endif
 
-ifneq ($(wildcard lzlib/.),)
+ifneq ($(if $(wildcard lzlib/.),$(if $(filter 0,$(LZLIB)),,1)),)
 PLG_FLAGS+=-D_LZLIB
 OB+=$(call obj,lzlib/lzlib.o turbobench_/lzlib/bbexample.o)
 endif
 
-ifneq ($(wildcard lzma/.),)
+ifneq ($(if $(wildcard lzma/.),$(if $(filter 0,$(LZMA)),,1)),)
 PLG_FLAGS+=-D_LZMA
 LZMA_SRCS := lzma/C/Alloc.c lzma/C/CpuArch.c lzma/C/LzFind.c lzma/C/LzmaDec.c lzma/C/LzmaEnc.c lzma/C/LzmaLib.c lzma/C/Threads.c lzma/C/LzFindMt.c lzma/C/LzFindOpt.c
 OB += $(call obj,$(LZMA_SRCS))
@@ -689,7 +690,7 @@ LIBS += $(LZRAVEN_LIB)
 endif
 
 #---- M ----------------------------------------------------------------------------------------------------------------------------------------
-ifneq ($(wildcard memlz/.),)
+ifneq ($(if $(wildcard memlz/.),$(if $(filter 0,$(MEMLZ)),,1)),)
 PLG_FLAGS+=-D_MEMLZ
 ifeq ($(ARCH),x86_64)
 MEMLZ_FLAGS := $(_SSE)
@@ -723,7 +724,7 @@ PLG_FLAGS+=-D_MINLZ
 OB+=$(call obj,turbobench_/minlz/minlz.o)
 endif
 
-ifneq ($(wildcard misa77),)
+ifneq ($(if $(wildcard misa77/.),$(if $(filter 0,$(MISA77)),,1)),)
 PLG_FLAGS += -D_MISA77
 MISA77_SRC := misa77/src
 ifeq ($(ARCH),x86_64)
