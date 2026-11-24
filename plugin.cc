@@ -2178,7 +2178,7 @@ struct plugs plugs[] = {
   
   { P_QUICKLZ,       "quicklz",       _QUICKLZ,   "Quicklz",                     "1,2,3" },
   
-  { P_FIRETRAIL,     "firetrail",     _FIRETRAIL, "firetrail",                   "1,2,-1"},
+  { P_FIRETRAIL,     "firetrail",     _FIRETRAIL, "firetrail",                   "0,1,-1"},
   { P_SHRINKER,      "shrinker",      _SHRINKER,  "Shrinker",                    "", 0, (1<<26) },
   { P_SHOCO,         "shoco",         _SHOCO,     "Shoco",                       "" },
   { P_LIBSLZ,        "slz",           _LIBSLZ,    "libslz",                      "1,2,3,4" },
