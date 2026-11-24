@@ -110,7 +110,7 @@ jobs:
           rustc --version
           cargo --version
       - name: make 
-        run: make AOCL=0 BLOSC=0 BROTLI=0 OPENZL=0 PIVCO=0 OPENMP=0 RUST=0 LZO=0 KANZI=0 XZ=0 MINIZ=0 LZHAM=0
+        run: make AOCL=0 BLOSC=0 BROTLI=0 GLZA=0 KANZI=0 LIZARD=0 LZHAM=0 LZO=0 LZRAVEN=0 LZSA=0 MINIZ=0 OPENZL=0 OPENMP=0 PIVCO=0 RUST=0 XZ=0
 #      - name: Download silesia.tar.gz and gunzip → silesia.tar
 #        run: |
 #          curl -L -o silesia.tar.gz \
@@ -120,8 +120,8 @@ jobs:
         if: matrix.compiler == 'gcc' 
         run: |
           ./turbobench -l2
-#          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
-#          cat data@MICRO.tbb
+          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
+          cat data@MICRO.tbb
 #          ./turbobench blaris/bench/data/* -U -elz0,1C -aMICRO -i1,1
 #          cat data@MICRO.tbb
 #          ./turbobench blaris/bench/data/* -U -etinyuz,0,1,2,3 -aMICRO -i1,1
