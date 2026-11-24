@@ -61,7 +61,6 @@ jobs:
           rustc --version
           cargo --version
           zig version
-          ./turbobench -l2
           ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
           cat data@MICRO.tbb
 #          ./turbobench -h
