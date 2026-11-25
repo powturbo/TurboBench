@@ -265,13 +265,13 @@ endif
 
 ifneq ($(if $(wildcard bz2-ng/.),$(if $(filter 0,$(BZ2_NG)),,1)),)
 ifneq ($(OS), Darwin) 
-ifneq ($(OS), Windows) #cmake error
+ifneq ($(OS), Windows) #rename w. objcopy not working
 PLG_FLAGS += -D_BZ2_NG
 BZ2_NG_SRCS := $(wildcard bz2-ng/c/lib/*.c)
 BZ2_NG_ALIB  = $(BUILD)/bz2-ng/libbz2.a          
 BZ2_NG_LIB   = $(BUILD)/bz2-ng/libbz2_ng.a
 $(BZ2_NG_ALIB): $(BZ2_NG_SRCS)
-	$(CMAKE) -S bz2-ng/c -B $(BUILD)/bz2-ng -DCMAKE_BUILD_TYPE=Release -DBZ2NG_BUILD_PROGRAMS=OFF -DBZ2NG_BUILD_TESTS=OFF -DBZ2NG_BUILD_BENCH=OFF && $(MAKE) -C $(BUILD)/bz2-ng
+	$(CMAKE) -S bz2-ng/c -B $(BUILD)/bz2-ng -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DWIN32=1 -DBZ2NG_BUILD_PROGRAMS=OFF  -DBZ2NG_BUILD_SHARED=OFF -DBZ2NG_BUILD_TESTS=OFF -DBZ2NG_BUILD_BENCH=OFF && $(MAKE) -C $(BUILD)/bz2-ng
 ifeq ($(OS),Darwin)
 #  OBJCOPY ?= $(shell which llvm-objcopy || which gobjcopy || echo objcopy)
   OBJCOPY = llvm-objcopy
@@ -331,7 +331,7 @@ C_BLOSC2_LIB = $(BUILD)/c-blosc2/blosc/libblosc2.a
 $(C_BLOSC2_LIB): $(C_BLOSC2_SRCS)
 	$(BLOSC_EXP) $(CMAKE) -S c-blosc2 -B $(BUILD)/c-blosc2 -DBLOSC_ZSTD_SOURCE_DIR=zstd -DBUILD_TESTS=OFF -DBUILD_BENCHMARKS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_FUZZERS=OFF \
 	          -DPREFER_EXTERNAL_LZ4=ON -DPREFER_EXTERNAL_ZLIB=ON -DPREFER_EXTERNAL_ZSTD=ON  -DBUILD_SHARED=OFF -DBUILD_SHARED_LIBS=OFF $(BLOSC_CC)
-	$(CMAKE) --build $(BUILD)/c-blosc2 --parallel 4
+	$(CMAKE) --build $(BUILD)/c-blosc2 --parallel 1
 endif
 LIBS += $(C_BLOSC2_LIB)
 endif
@@ -448,7 +448,7 @@ endif
 endif
 
 ifneq ($(if $(wildcard isa-l/.),$(if $(filter 0,$(ISA_L)),,1)),)
-ifneq ($(OS), Windows)  # not compiling for windows in CI.
+#ifneq ($(OS), Windows)  # not compiling for windows in CI.
   ifndef CROSS
     NASM := $(shell command -v nasm 2>/dev/null)
     ifeq ($(NASM),)
@@ -466,12 +466,12 @@ ifneq ($(OS), Windows)  # not compiling for windows in CI.
       $(ISAL_LIB): $(ISAL_SRCS)
 	@echo "--> nasm installed, building isa-l"
 	@mkdir -p  $(BUILD)/isa-l 
-	$(MAKE) -C isa-l -f Makefile.unx units=igzip
+	$(MAKE) -C isa-l -f Makefile.unx units=igzip arch=mingw AR=ar 
 	@mv -f isa-l/bin/isa-l.a $(ISAL_LIB)
     endif
     LIBS += $(ISAL_LIB)
   endif
-endif
+#endif
 endif
 
 #--- K ---------------------------------------------------------------------------------------------------------------------------------------------------------
