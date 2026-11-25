@@ -125,7 +125,7 @@ endif
 
 CFLAGS+=-w -Wall $(DDEBUG) -fpermissive 
 #-Wimplicit-function-declaration -std=gnu99 
-CXXFLAGS+=$(DDEBUG) -w -Wall -fpermissive  -fno-rtti 
+CXXFLAGS+=$(DDEBUG) -w -Wall -fpermissive -fno-rtti 
 
 ifeq ($(OS),$(filter $(OS),Linux GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
 LDFLAGS+=-lrt -lpthread
