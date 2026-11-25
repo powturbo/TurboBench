@@ -448,7 +448,6 @@ endif
 endif
 
 ifneq ($(if $(wildcard isa-l/.),$(if $(filter 0,$(ISA_L)),,1)),)
-#ifneq ($(OS), Windows)  # not compiling for windows in CI.
   ifndef CROSS
     NASM := $(shell command -v nasm 2>/dev/null)
     ifeq ($(NASM),)
@@ -461,17 +460,19 @@ ifneq ($(if $(wildcard isa-l/.),$(if $(filter 0,$(ISA_L)),,1)),)
       endif
     else
       PLG_FLAGS += -D_ISA_L
+      ifeq ($(OS), Windows) 
+        CMAKE_FLAGS := arch=mingw AR=ar 
+      endif
       ISAL_SRCS := $(wildcard isa-l/igzip/*.*) $(wildcard isa-l/igzip/aarch64/*.*) $(wildcard isa-l/igzip/riscv64/*.*) $(wildcard isa-l/shim/*.*) $(wildcard isa-l/include/*.*)
       ISAL_LIB  := $(BUILD)/isa-l/isa-l.a
       $(ISAL_LIB): $(ISAL_SRCS)
 	@echo "--> nasm installed, building isa-l"
 	@mkdir -p  $(BUILD)/isa-l 
-	$(MAKE) -C isa-l -f Makefile.unx units=igzip arch=mingw AR=ar 
+	$(MAKE) -C isa-l -f Makefile.unx units=igzip $(CMAKE_FLAGS)
 	@mv -f isa-l/bin/isa-l.a $(ISAL_LIB)
     endif
     LIBS += $(ISAL_LIB)
   endif
-#endif
 endif
 
 #--- K ---------------------------------------------------------------------------------------------------------------------------------------------------------
