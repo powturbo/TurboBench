@@ -225,7 +225,6 @@ jobs:
  #     - run: ./turbobench silesia.tar -V0 -ebwtsatan,7b68m,8b68m,9b68m -b68m -abwt
  #     - run: ./turbobench NASA_access_log_Jul95 -V0 -eBWT -abwt 
  #     - run: ./turbobench enwik8 -V0 -eBWT -abwt 
-
 #riscv64
 #         sudo apt install libomp-dev
 
