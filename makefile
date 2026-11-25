@@ -549,10 +549,20 @@ $(LZ_LIB):  $(LZ_SRCS)
 LIBS += $(LZ_LIB)
 endif
 
+
+#ifneq ($(if $(wildcard lz0/.),$(if $(filter 0,$(LZ0)),,1)),)
+#PLG_FLAGS += -D_LZ0 -DLZ0_VERSION=\"$(VERSION)\"
+#LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/zx0_compressor/*.c) $(wildcard lz0/zx0_decompressor/*.c)
+#LZ0_LIB = $(BUILD)/lz0/liblz0.a
+#$(LZ0_LIB):  $(LZ0_SRCS)
+#	@mkdir -p $(BUILD)/lz0 
+#	$(MAKE) lib -C lz0 BUILD=$(abspath $(BUILD)/lz0) 
+#LIBS += $(LZ0_LIB)
+#endif
+
 ifneq ($(if $(wildcard lz0/.),$(if $(filter 0,$(LZ0)),,1)),)
-ifneq ($(OS), Windows)                    # lz0dec_fast_x86_64.s 232  Error junk at end of line, first unrecognized character is `l'
-ifneq ($(ARCH), aarch64)                  # lz0/lz0/lz0dec_arm64.s 3 1  error unknown directive .type lz0dec_arm64, %function
-PLG_FLAGS += -D_LZ0
+#ifneq ($(OS), Windows)                    # lz0dec_fast_x86_64.s 232  Error junk at end of line, first unrecognized character is `l'
+PLG_FLAGS += -D_LZ0 -DLZ0_VERSION='"0.4.0"'
 LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/zx0_compressor/*.c) $(wildcard lz0/zx0_decompressor/*.c)
 
 LZ0_FLAGS := $(CFLAGS)
@@ -587,8 +597,7 @@ LZ0_LIB = $(BUILD)/lz0/liblz0.a
 $(LZ0_LIB): $(LZ0_COBJS) $(LZ0_sOBJS) $(LZ0_SOBJS) | $(BUILD)/lz0
 	$(AR) rcs $@ $^
 LIBS += $(LZ0_LIB)
-endif
-endif
+#endif
 endif
 
 ifneq ($(if $(wildcard lz4/.),$(if $(filter 0,$(LZ4)),,1)),)
