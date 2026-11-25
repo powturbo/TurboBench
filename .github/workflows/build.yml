@@ -121,11 +121,9 @@ jobs:
         if: matrix.compiler == 'gcc' 
         run: |
           ./turbobench -l2
-          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO
-          cat data@MICRO.tbb
-          ./turbobench blaris/bench/data/* -U -ezxc,3 -aMICRO
-          cat data@MICRO.tbb
 
+#          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO
+#          cat data@MICRO.tbb
 #          ./turbobench blaris/bench/data/* -U -elz0,1C -aMICRO -i1,1
 #          cat data@MICRO.tbb
 
@@ -148,10 +146,10 @@ jobs:
           brew install nasm libomp llvm
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
           cc -v
-#      - name: Install Zig
-#        uses: mlugg/setup-zig@v2
-#        with:
-#          version: '0.16.0' # set to any published release >= 0.16.0
+      - name: Install Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: '0.17.0'
       - run: make OPENZL=0 PIVCO=0 RUST=0
       - name: benchmark
         run: |
@@ -201,11 +199,10 @@ jobs:
             mingw-w64-ucrt-x86_64-nasm
       - run: git submodule update --init --recursive
       - run: make OPENZL=0 PIVCO=0 RUST=0
-
-#      - name: Install Zig
-#        uses: mlugg/setup-zig@v2
-#        with:
-#          version: '0.16.0'
+      - name: Install Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: '0.17.0'
 #      - uses: goto-bus-stop/setup-zig@v2
 #        with:
 #          version: 0.16.0      
