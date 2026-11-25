@@ -2886,7 +2886,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
       
       #if _LZ0
-    case P_LZ0: { lz0_config cfg; lz0_stats st; unsigned char *raw = NULL; size_t rsz = 0; lz0_config_level(&cfg, lev); if(lz0_compress(in, inlen, &raw, &rsz, &cfg, &st)) return 0;
+    case P_LZ0: { lz0_config cfg={0}; lz0_stats st={0}; unsigned char *raw = NULL; size_t rsz = 0; lz0_config_level(&cfg, lev); if(lz0_compress(in, inlen, &raw, &rsz, &cfg, &st)) return 0;
       memcpy(out, raw, rsz); free(raw); return rsz;
     } 
       #endif
@@ -4980,23 +4980,23 @@ char *codver(int codec, char *v, char *s) {
       #endif
  
       #if _ZPAQ
-    case P_ZPAQ:  return "7.12 2016.04.19";
+    case P_ZPAQ:    return "7.12 2016.04.19";
       #endif
  
       #if _LIZARD
-    case P_LIZARD: sprintf(s,"v%d.%d.%d", LIZARD_VERSION_MAJOR, LIZARD_VERSION_MINOR, LIZARD_VERSION_RELEASE); break;
+    case P_LIZARD:  sprintf(s,"v%d.%d.%d", LIZARD_VERSION_MAJOR, LIZARD_VERSION_MINOR, LIZARD_VERSION_RELEASE); break;
       #endif
       #if _LZ0
-    case P_LZ0:    return "v0.3.0"; break;
+    case P_LZ0:     return sprintf(s,"v%s", LZ0_VERSION);
       #endif
       #if _LZ4
-    case P_LZ4:     sprintf(s,"v%d.%d.%d MT", LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE); break;
+    case P_LZ4:    sprintf(s,"v%d.%d.%d MT", LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE); break;
       #endif
       #if _LZLIB
     case P_LZLIB:  sprintf(s,"v%d", LZ_API_VERSION); break;
       #endif
       #if _LZAV
-    case P_LZAV:  sprintf(s,"v%s", LZAV_VER_STR); break;
+    case P_LZAV:   sprintf(s,"v%s", LZAV_VER_STR); break;
       #endif
       #if _LZMA
     case P_LZMA:  sprintf(s, "v%s MT", MY_VERSION_NUMBERS); break;
@@ -5005,7 +5005,7 @@ char *codver(int codec, char *v, char *s) {
     case P_LZSA : return "v1.4.1"; // file lzsa.c
       #endif
       #if _LZO
-     case P_LZO1b:case P_LZO1c: case P_LZO1f: case P_LZO1x: case P_LZO1y: case P_LZO1z: case P_LZO2a: strcpy(s, "v2.10 2017.03.01"); break;
+     case P_LZO1b: case P_LZO1c: case P_LZO1f: case P_LZO1x: case P_LZO1y: case P_LZO1z: case P_LZO2a: strcpy(s, "v2.10 2017.03.01"); break;
       #endif
 
       #if _LZRAVEN
