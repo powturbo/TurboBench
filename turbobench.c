@@ -768,7 +768,7 @@ void plugrank(plug_t *plug, int k) {
     }
   }
   borda_scores(plug, k, borda);
-  for(i = 0; i < k; i++) { order[i] = i;     if(plug[i].id > 1) copeland[i] = 1e15; }
+  for(i = 0; i < k; i++) { order[i] = i;     if(plug[i].id <= 2) copeland[i] = -1e15; }
   g_plug = plug; g_copeland = copeland; g_borda = borda;
   qsort(order, (size_t)k, sizeof(int), final_cmp);
   plug[order[0]].rank = 1;
