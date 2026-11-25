@@ -120,7 +120,7 @@ else ifeq ($(ARCH),x86_64)
 endif
 
 ifeq ($(OS),Windows)
-  LDFLAGS=-Wl,--stack,33554432 -lpowrprof
+  LDFLAGS=-Wl,--stack,33554432 -lpowrprof -Wl,--allow-multiple-definition
 endif
 
 CFLAGS+=-w -Wall $(DDEBUG) -fpermissive 
@@ -205,21 +205,22 @@ endif
 ifneq ($(if $(wildcard aocl-compression/.),$(if $(filter 0,$(AOCL)),,1)),)
 ifeq ($(ARCH),x86_64)
 PLG_FLAGS += -D_AOCL
-AOCL_SRCS := $(shell find aocl-compression -type f \( -name '*.[ch]' -o -name 'CMakeLists.txt' \))
-AOCL_BDIR = $(BUILD)/aocl-compression
+AOCL_DIR := aocl-compression
+AOCL_SRCS := $(wildcard $(AOCL_DIR)/algo/*/*.*) $(wildcard $(AOCL_DIR)/api/*/*.*) $(AOCL_DIR)/CMakeLists.txt
+AOCL_BDIR = $(BUILD)/$(AOCL_DIR)
 AOCL_LIB  = $(AOCL_BDIR)/libaocl.a
 ifeq ($(OS), Windows)
 AOCL_ALIB = $(AOCL_BDIR)/lib/aocl_compression.a
 $(AOCL_ALIB): $(AOCL_SRCS)
 	@mkdir -p $(dir $@)
-	$(MAKE) -C aocl-compression BUILD_STATIC_LIBS=1 BUILD_DIR=$(abspath $(AOCL_BDIR)) LIB_DIR=$(abspath $(AOCL_BDIR))/lib
+	$(MAKE) -C $(AOCL_DIR) BUILD_STATIC_LIBS=1 BUILD_DIR=$(abspath $(AOCL_BDIR)) LIB_DIR=$(abspath $(AOCL_BDIR))/lib
 else
 ifneq ($(HAVE_OPENMP),0)
   AOCL_OMP = -DAOCL_ENABLE_THREADS=1 -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -D$(OMP_CFLAGS)       #-DOpenMP_CXX_FLAGS="-fopenmp" -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=/usr/lib/llvm-*/lib/libomp.so 
 endif
 AOCL_ALIB = $(AOCL_BDIR)/lib/libaocl_compression.a
 $(AOCL_ALIB): $(AOCL_SRCS)
-	$(CMAKE) -S aocl-compression -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1
+	$(CMAKE) -S $(AOCL_DIR) -B $(AOCL_BDIR) -DCMAKE_INSTALL_PREFIX=$(AOCL_BDIR) -DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC_LIBS=1
 	$(CMAKE) --build $(AOCL_BDIR) --target install -j
 	@test -f $@ || (echo "ERROR: $@ was not produced by the install step"; exit 1)
 endif
@@ -316,7 +317,8 @@ endif
 #--- C ----------------------------------------------------------------------------------------------------------------------------------
 ifneq ($(if $(wildcard c-blosc2//.),$(if $(filter 0,$(BLOSC)),,1)),)
 ifneq ($(OS), Windows)  # not compiling for windows in CI. ar.exe ERROR
-C_BLOSC2_SRCS := $(shell find c-blosc2 -type f -name '*.[c]' -o -name '*.cpp' -o -name '*.cc')
+C_BLOSC2_SRCS := $(wildcard c-blosc2/blosc/*.*) $(wildcard c-blosc2/blosc/win32/*.*) $(wildcard c-blosc2/include/*.*) $(wildcard c-blosc2/include/blosc2/*.*) $(wildcard c-blosc2/plugins/codecs/*/*.*) \
+                 $(wildcard c-blosc2/plugins/filters/*/*.*) $(wildcard c-blosc2/plugins/tuners/*.*) 
 ifdef CROSS #ERROR IN C_BLOSC BUILD  
 ifeq ($(ARCH), riscv64) 
 BLOSC_CC := -DCMAKE_C_FLAGS="" 
@@ -346,7 +348,7 @@ ifneq ($(OS), Windows)
 ifneq ($(OS), Darwin)
 ifneq ($(ARCH), riscv64)
 PLG_FLAGS+=-D_FIRETRAIL
-FIRETRAIL_SRCS :=  $(shell find firetrail/src -type f -name '*.zig' )
+FIRETRAIL_SRCS := $(wildcard firetrail/src/algorihms/*.zig) $(wildcard firetrail/src/*.zig) $(wildcard firetrail/*.zig)   
 FIRETRAIL_LIB=firetrail/zig-out/lib/libfiretrail.a
 $(FIRETRAIL_LIB): $(FIRETRAIL_SRCS)
 	cd firetrail && zig build --release=fast
@@ -459,7 +461,7 @@ ifneq ($(OS), Windows)  # not compiling for windows in CI.
       endif
     else
       PLG_FLAGS += -D_ISA_L
-      ISAL_SRCS := $(shell find isa-l -type f \( -name '*.c' -o -name '*.cpp' -o -name '*.cc' -o -name '*.asm' \) 2>/dev/null)
+      ISAL_SRCS := $(wildcard isa-l/igzip/*.*) $(wildcard isa-l/igzip/aarch64/*.*) $(wildcard isa-l/igzip/riscv64/*.*) $(wildcard isa-l/shim/*.*) $(wildcard isa-l/include/*.*)
       ISAL_LIB  := $(BUILD)/isa-l/isa-l.a
       $(ISAL_LIB): $(ISAL_SRCS)
 	@echo "--> nasm installed, building isa-l"
@@ -679,7 +681,7 @@ endif
 ifneq ($(if $(wildcard liblzraven/.),$(if $(filter 0,$(LZRAVEN)),,1)),)
 PLG_FLAGS+=-D_LZRAVEN
 LZRAVEN_DIR=liblzraven
-LZRAVEN_SRCS := $(shell find $(LZRAVEN_DIR)/src -type f -name '*.[ch]' )
+LZRAVEN_SRCS := $(wildcard liblzraven/src/*.*)
 LZRAVEN_LIB = $(BUILD)/liblzraven/liblzraven.a
 $(LZRAVEN_LIB):  $(LZRAVEN_SRCS)
 	@mkdir -p $(BUILD)/liblzraven 
@@ -704,7 +706,7 @@ endif
 
 ifneq ($(if $(wildcard miniz/.),$(if $(filter 0,$(MINIZ)),,1)),)
 PLG_FLAGS+=-D_MINIZ -I$(BUILD)/miniz
-MINIZ_SRCS := $(shell find miniz -type f -name '*.[ch]' -o -name 'CMakeLists.txt')
+MINIZ_SRCS := $(wildcard miniz/*.*)
 MINIZ_LIB = $(BUILD)/miniz/libminiz.a
 $(MINIZ_LIB): $(MINIZ_SRCS)
 	$(CMAKE) -S miniz -B $(BUILD)/miniz -DCMAKE_INSTALL_PREFIX=$(BUILD) -DPROJECT_NAME=tb -DCMAKE_C_COMPILER=$(CC) && make -C $(BUILD)/miniz
