@@ -105,11 +105,11 @@ jobs:
           gunzip silesia.tar.gz
           if [ '${{ matrix.os }}' = 'ubuntu-24.04-riscv' ]; then
             ./turbobench silesia.tar -U -eTURBO -V0 -i1,1
-          else
-            ./turbobench silesia.tar -U -V0
+            ./turbobench silesia.tar.tbb -p4
+            mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
+#          else
+#           ./turbobench silesia.tar -U -V0
           fi
-          ./turbobench silesia.tar.tbb -p4
-          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
 #          if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
 #            ./turbobench silesia.tar -V0 -eBWT -aBWT
 #            ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
