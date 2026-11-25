@@ -2565,10 +2565,8 @@ void codexit(int codec, int lev) {
       #endif
       #if _FIRETRAIL
     case P_FIRETRAIL:
-      if(firetrail_enc) firetrail_encoder_destroy(firetrail_enc);
-      firetrail_enc = NULL;
-      if(firetrail_dec) firetrail_decoder_destroy(firetrail_dec);
-      firetrail_dec = NULL;
+      if(firetrail_enc) firetrail_encoder_destroy(firetrail_enc); firetrail_enc = NULL;
+      if(firetrail_dec) firetrail_decoder_destroy(firetrail_dec); firetrail_dec = NULL;
       break;
       #endif    
   }
