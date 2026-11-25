@@ -102,6 +102,7 @@ else ifeq ($(ARCH),riscv64)
 #  CFLAGS=-march=rv64gc_zba_zbb_zbs
 #  CFLAGS=-mabi=lp64d -mno-strict-align
   CFLAGS=-march=rv64gc -mabi=lp64d -fno-tree-vectorize  
+  CXXFLAGS=-march=rv64gc -mabi=lp64d -fno-tree-vectorize  
 #  MARCH=rv64gc  
 #  CFLAGS=$(MARCH)  
 #-fno-tree-loop-vectorize
@@ -549,19 +550,7 @@ $(LZ_LIB):  $(LZ_SRCS)
 LIBS += $(LZ_LIB)
 endif
 
-
-#ifneq ($(if $(wildcard lz0/.),$(if $(filter 0,$(LZ0)),,1)),)
-#PLG_FLAGS += -D_LZ0 -DLZ0_VERSION=\"$(VERSION)\"
-#LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/zx0_compressor/*.c) $(wildcard lz0/zx0_decompressor/*.c)
-#LZ0_LIB = $(BUILD)/lz0/liblz0.a
-#$(LZ0_LIB):  $(LZ0_SRCS)
-#	@mkdir -p $(BUILD)/lz0 
-#	$(MAKE) lib -C lz0 BUILD=$(abspath $(BUILD)/lz0) 
-#LIBS += $(LZ0_LIB)
-#endif
-
 ifneq ($(if $(wildcard lz0/.),$(if $(filter 0,$(LZ0)),,1)),)
-#ifneq ($(OS), Windows)                    # lz0dec_fast_x86_64.s 232  Error junk at end of line, first unrecognized character is `l'
 PLG_FLAGS += -D_LZ0 -DLZ0_VERSION='"0.4.0"'
 LZ0_CSRCS := $(wildcard lz0/lz0/*.c) $(wildcard lz0/zx0_compressor/*.c) $(wildcard lz0/zx0_decompressor/*.c)
 
@@ -597,7 +586,6 @@ LZ0_LIB = $(BUILD)/lz0/liblz0.a
 $(LZ0_LIB): $(LZ0_COBJS) $(LZ0_sOBJS) $(LZ0_SOBJS) | $(BUILD)/lz0
 	$(AR) rcs $@ $^
 LIBS += $(LZ0_LIB)
-#endif
 endif
 
 ifneq ($(if $(wildcard lz4/.),$(if $(filter 0,$(LZ4)),,1)),)
