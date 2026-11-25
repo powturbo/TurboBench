@@ -562,13 +562,20 @@ enum {
 char *fmtext[] = { "txt", "txt", "html", "htm", "md", "vbul", "csv", "tsv", "squash" };
 #define LSIZE 512
 
+char *tm2yyyymmdd(time_t t, char *buf, size_t bufsize) {
+  struct tm *tm = localtime(&t);   // use gmtime(&t) for UTC
+  if(!tm) { snprintf(buf, bufsize, "????.??.?? ??:??"); return buf; }
+  strftime(buf, bufsize, "%Y.%m.%d %H:%M", tm);
+  return buf;
+}
+
 //------------- plugin : usage ---------------------------------
 struct plugg {
   char id[17],*s,*desc;
 };
 
 struct plugg plugg[] = {
-  { "MICRO",     "blaris,3,6,9/heatshrink,1/igzip,0,1,2,3/libdeflate,1,6,12/lz0,1/lz4,1,12/lzav,1,2/misa77,1,4/slz,1,4/tamp,8,13/tinyuz,0,3/zlib,1,9/zlib-ng,1,6,9/zlib-turbo,12/memcpy", "Microcontroller" },
+  { "MICRO",     "blaris,3,6,9/heatshrink,1/igzip,0,1,3/libdeflate,1,6,12/lz0,1,9/lz4,1,12/lzav,1,2/misa77,1,4/slz,1,4/tamp,8,13/tinyuz,0,3/zlib,1,9/zlib-ng,1,6,9/zlib-turbo,1,12/memcpy", "Microcontroller" },
   { "TURBO",     "lzturbo,10,11,12,19/aceapex_fast,1/brotli,4/igzip,1,2,3/libdeflate,1,6,12/lz4,1,5,12/lzav,1,2/memlz/misa77,0,1,4/zlib-ng,1,6,9/zstd,3/zxc,3,5,6/memcpy",                         "lz4 class: Fastest de-/compression. HDD/SSD/RAM speed" },
   { "FAST",      "lzturbo,10,10a,11,12/aocl-lz4,0/aceapex_fast,1/brotli,0,1,4,5,6/igzip,1,2,3/libdeflate,1,6,12/lz4,1,3,9,12/lzav,1,2/memlz/misa77,0,1,2,3,4/zlib,1,6,9/zlib-turbo,1,6,9,12/zlib-ng,1,6,9/zstd,1,3,9/zxc,3,5,7/memcpy", "lz4,zlib,zstd class" },
   { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,6/zstd,5,9/libdeflate,6/zlib-ng,6/igzip,3/memcpy",                                                                         "Compression speed > 'zlib 6' class" },
@@ -589,6 +596,7 @@ struct plugg plugg[] = {
 
 void plugsprt(void) {
   plugs_t *gs;
+  printf("TurboBench Compression Benchmark. Available codecs %s\n", __DATE__);
 
     #if defined(_COMPRESS1) || defined(_COMPRESS2)
   struct plugg *pg;
@@ -620,6 +628,7 @@ void plugsprtv(FILE *f, int fmt) {
     case FMT_VBULLETIN2:
       fprintf(f,"[list]\n");
       break;
+    default: printf("TurboBench Codec List. Build %s %s\n", __DATE__, __TIME__);
   }
 
   for(gs = plugs; gs->id >= 0; gs++)
@@ -1216,13 +1225,6 @@ bandwidth_t bw[] = {
   {14ull*GB,   0, "SSD 14GB/s"}//PCIe 5.0 NVMe (e.g. Crucial T705)
 };
 #define BWSIZE (sizeof(bw)/sizeof(bandwidth_t))
-
-char *tm2yyyymmdd(time_t t, char *buf, size_t bufsize) {
-  struct tm *tm = localtime(&t);   // use gmtime(&t) for UTC
-  if(!tm) { snprintf(buf, bufsize, "????.??.?? ??:??"); return buf; }
-  strftime(buf, bufsize, "%Y.%m.%d %H:%M", tm);
-  return buf;
-}
 
 void plugprth(FILE *f, int fmt, char *t) {
   char *plot  = "<script src=https://cdn.plot.ly/plotly-latest.min.js></script>";
