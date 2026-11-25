@@ -4987,7 +4987,7 @@ char *codver(int codec, char *v, char *s) {
     case P_LIZARD:  sprintf(s,"v%d.%d.%d", LIZARD_VERSION_MAJOR, LIZARD_VERSION_MINOR, LIZARD_VERSION_RELEASE); break;
       #endif
       #if _LZ0
-    case P_LZ0:     return "v0.4.0"; //sprintf(s,"v0%s", LZ0_VERSION);
+    case P_LZ0:    sprintf(s, "v0.4.0 %s", __DATE__); break;
       #endif
       #if _LZ4
     case P_LZ4:    sprintf(s,"v%d.%d.%d MT", LZ4_VERSION_MAJOR, LZ4_VERSION_MINOR, LZ4_VERSION_RELEASE); break;
