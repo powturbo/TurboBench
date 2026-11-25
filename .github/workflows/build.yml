@@ -61,8 +61,8 @@ jobs:
           rustc --version
           cargo --version
           zig version
-#          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
-#          cat data@MICRO.tbb
+          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
+          cat data@MICRO.tbb
 #          ./turbobench -h
 #      - run: ./turbobench turbobench -V0 -U
 #      - run: ./turbobench silesia.tar -V0 -U
@@ -121,8 +121,8 @@ jobs:
         if: matrix.compiler == 'gcc' 
         run: |
           ./turbobench -l2
-#          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
-#          cat data@MICRO.tbb
+          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
+          cat data@MICRO.tbb
 #          ./turbobench blaris/bench/data/* -U -elz0,1C -aMICRO -i1,1
 #          cat data@MICRO.tbb
 #          ./turbobench blaris/bench/data/* -U -etinyuz,0,1,2,3 -aMICRO -i1,1
@@ -152,11 +152,10 @@ jobs:
 #        with:
 #          version: '0.16.0' # set to any published release >= 0.16.0
       - run: make OPENZL=0 PIVCO=0 RUST=0
-#      - name: benchmark
-#        run: |
-#          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
-#          cat data@MICRO.tbb
-
+      - name: benchmark
+        run: |
+          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
+          cat data@MICRO.tbb
 #      - name: Download silesia.tar.gz and gunzip → silesia.tar
 #        run: |
 #          curl -L -o silesia.tar.gz https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
