@@ -27,7 +27,7 @@ size_t minlz_decompress(unsigned char *in, size_t inlen, unsigned char *out, siz
     int iplen = ctou32(ip);
     if(iplen == MINLZ_MAX_BLOCK_SIZE) { memcpy(op, ip+4, MINLZ_MAX_BLOCK_SIZE); } 
     else { int rc = minlz_decode_block(op, oplen, ip+4, iplen);
-      if(rc < 0) { die("ERROR minlz_decode_block "); return 0; }
+      if(rc < 0) return 0;
     } 
     ip += 4 + iplen;
   }
