@@ -200,7 +200,7 @@ jobs:
             mingw-w64-ucrt-x86_64-llvm-openmp
             mingw-w64-ucrt-x86_64-nasm
             mingw-w64-ucrt-x86_64-go
-      - run: git submodule update --init --recursive
+        run: git submodule update --init --recursive
       - name: Install Zig
       - uses: mlugg/setup-zig@v2
         with:
