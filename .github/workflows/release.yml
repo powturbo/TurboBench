@@ -96,7 +96,6 @@ jobs:
           else
             make STATIC=1 PHAZ=0
           fi
-
       - name: Benchmark silesia.tar.md (Linux)
         if: matrix.platform == 'linux' 
         run: |
@@ -108,6 +107,7 @@ jobs:
             ./turbobench silesia.tar.tbb -p4
             mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
           fi
+
 #          if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
 #            ./turbobench silesia.tar -V0 -eBWT -aBWT
 #            ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
