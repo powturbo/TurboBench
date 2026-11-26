@@ -727,6 +727,18 @@ endif
 
 ifneq ($(if $(wildcard misa77/.),$(if $(filter 0,$(MISA77)),,1)),)
 PLG_FLAGS += -D_MISA77
+MISA77_SRCS := $(wildcard misa77/src/*.cpp) $(wildcard misa77/src/*/*.*) $(wildcard misa77/src/*/*/*.*)
+MISA77_LIB = $(BUILD)/misa77/libmisa77.a
+ifdef CROSS
+MISA77_CMAKE=-DCMAKE_CXX_COMPILER=$(CXX) -DCMAKE_SYSTEM_PROCESSOR=$(CROSS) -DMISA77_MARCH=$(MARCH)
+endif
+$(MISA77_LIB): $(MISA77_SRCS)
+	$(CMAKE) -S misa77 -B $(BUILD)/misa77 -DMISA77_BUILD_TESTS=OFF && make -C $(BUILD)/misa77
+LIBS += $(MISA77_LIB)
+endif
+
+ifneq ($(if $(wildcard misa77_NOCMAAKE/.),$(if $(filter 0,$(MISA77)),,1)),)
+PLG_FLAGS += -D_MISA77
 MISA77_SRC := misa77/src
 ifeq ($(ARCH),x86_64)
   $(BUILD)/$(MISA77_SRC)/%_sse2.o: MISA77_FLAGS += -march=x86-64
@@ -745,19 +757,6 @@ MISA77_OBJS += $(call obj,$(MISA77_SRCS) $(MISA77_SRC)/isa/target_portable.o) $(
 MISA77_LIB = $(BUILD)/misa77/libmisa77.a
 $(MISA77_LIB): $(MISA77_OBJS) | $(BUILD)/misa77
 	$(AR) rcs $@ $^
-LIBS += $(MISA77_LIB)
-endif
-
-ifneq ($(wildcard misa77_cmake/.),)
-PLG_FLAGS += -D_MISA77 
-MISA77_DIR = misa77
-MISA77_SRCS := $(wildcard $(MISA77_DIR)/src/*.cpp)
-MISA77_LIB = $(BUILD)/misa77/libmisa77.a
-ifdef CROSS
-MISA77_CMAKE=-DCMAKE_CXX_COMPILER=$(CXX) -DCMAKE_SYSTEM_PROCESSOR=$(CROSS) -DMISA77_MARCH=$(MARCH)
-endif
-$(MISA77_LIB): $(MISA77_SRCS)
-	$(CMAKE) -S misa77 -B $(BUILD)/misa77 -DMISA77_BUILD_TESTS=OFF $(MISA77_CMAKE) && make -C $(BUILD)/misa77
 LIBS += $(MISA77_LIB)
 endif
 
