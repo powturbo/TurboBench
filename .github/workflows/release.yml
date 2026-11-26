@@ -73,7 +73,7 @@ jobs:
           lscpu
           cat /proc/cpuinfo
           
-      - name: Install build tools (Linux)
+      - name: Install (Linux)
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update -qq
@@ -96,17 +96,19 @@ jobs:
           else
             make STATIC=1 PHAZ=0
           fi
-      - name: Benchmark silesia.tar.md (Linux)
+      - name: Benchmark (Linux)
         if: matrix.platform == 'linux' 
         run: |
           curl -L -o silesia.tar.gz \
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
           gunzip silesia.tar.gz
           if [ '${{ matrix.os }}' = 'ubuntu-24.04-riscv' ]; then
-            ./turbobench silesia.tar -U -eTURBO -V0 -i1,1
-            ./turbobench silesia.tar.tbb -p4
-            mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
+            ./turbobench silesia.tar -U -eTURBO -V0 -i1,3
+          else
+            ./turbobench silesia.tar -U -eFAST -V0 -i1,3
           fi
+          ./turbobench silesia.tar.tbb -p4
+          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
 
 #          if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
 #            ./turbobench silesia.tar -V0 -eBWT -aBWT
