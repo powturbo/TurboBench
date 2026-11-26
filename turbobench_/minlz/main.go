@@ -34,15 +34,15 @@ func mlzcompresslevel(in *C.uint8_t, inlen C.size_t, out *C.uint8_t, outsize C.s
 func compress(in *C.uint8_t, inlen C.size_t, out *C.uint8_t, outsize C.size_t, level C.int) C.size_t {
 	src, ok := asSlice(in, inlen)
 	if !ok {
-		return -1
+		return 0
 	}
 	dst, ok := asSlice(out, outsize)
 	if !ok {
-		return -2
+		return 0
 	}
 	enc, err := minlz.Encode(dst[:0], src, int(level))
 	if err != nil {
-		return -3
+		return 0
 	}
 	return C.size_t(finish(dst, enc))
 }
@@ -51,20 +51,20 @@ func compress(in *C.uint8_t, inlen C.size_t, out *C.uint8_t, outsize C.size_t, l
 func mlzdecompress(in *C.uint8_t, inlen C.size_t, out *C.uint8_t, outlen C.size_t) C.size_t {
 	src, ok := asSlice(in, inlen)
 	if !ok {
-		return -1
+		return 0
 	}
 	dst, ok := asSlice(out, outlen)
 	if !ok {
-		return -2
+		return 0
 	}
 	// Cheap pre-check from the block header: reject before allocating for
 	// a block that wants more room than the caller provided.
 	if n, err := minlz.DecodedLen(src); err != nil || n > len(dst) {
-		return -3
+		return 0
 	}
 	dec, err := minlz.Decode(dst[:0], src)
 	if err != nil {
-		return -4
+		return 0
 	}
 	return C.size_t(finish(dst, dec))
 }

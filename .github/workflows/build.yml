@@ -45,7 +45,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y nasm libomp-dev
+          sudo apt-get install -y nasm libomp-dev golang
       - run: make BLOSC=0 OPENZL=0 PIVCO=0 RUST=0
 #      - name: Download silesia.tar.gz and gunzip → silesia.tar
 #        run: |
@@ -90,7 +90,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq build-essential nasm make libomp-dev
+          sudo apt-get install -y -qq build-essential nasm make libomp-dev golang
           sudo apt-get install -y -qq gcc-14 g++-14 clang-20
           sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
           sudo update-alternatives --install /usr/bin/g++  g++  /usr/bin/g++-14  100
@@ -142,7 +142,7 @@ jobs:
       - run: git submodule update --init --recursive
       - name: Install dependencies
         run: |
-          brew install nasm libomp llvm
+          brew install nasm libomp llvm golang
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
           cc -v
       - name: Install Zig
@@ -196,6 +196,7 @@ jobs:
             mingw-w64-ucrt-x86_64-libgomp
             mingw-w64-ucrt-x86_64-llvm-openmp
             mingw-w64-ucrt-x86_64-nasm
+            mingw-w64-ucrt-x86_64-go
       - run: git submodule update --init --recursive
       - run: make OPENZL=0 PIVCO=0 RUST=0
       - name: Install Zig
