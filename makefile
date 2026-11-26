@@ -714,14 +714,15 @@ $(MINIZ_LIB): $(MINIZ_SRCS)
 LIBS += $(MINIZ_LIB)
 endif
 
-ifneq ($(wildcard turbobench_/minlz/.),)
-ifeq ($(ARCH),x86_64)
-ifeq ($(ARCH),Linux)
+ifneq ($(if $(wildcard minlz/.),$(if $(filter 0,$(MINLZ)),,1)),)
+#ifneq ($(OS),Windows)
 PLG_FLAGS+=-D_MINLZ
+MINLZ_SRCS := $(wildcard turbobench_/minlz/*.*)
 MINLZ_LIB = turbobench_/minlz/libmlz.a
+$(MINLZ_LIB): $(MINLZ_SRCS)
+	cd turbobench_/minlz && go get minlz-cbind && go build -buildmode=c-archive -o libmlz.a .
 LIBS += $(MINLZ_LIB)
-endif
-endif
+#endif
 endif
 
 ifneq ($(wildcard turbobench_/minlz-c/.),)
