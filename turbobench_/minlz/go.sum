@@ -1,0 +1,4 @@
+github.com/klauspost/compress v1.20.1 h1:T7kKElXUMXrUJ2E9QhQhxFtcK5rPyLdsGZvdbLMPdiQ=
+github.com/klauspost/compress v1.20.1/go.mod h1:LUdAzn7YLVvxLpc7y3V1m40wESHTgc1422pwwBSKYuI=
+github.com/minio/minlz v1.2.4 h1:IUykJ7UF3tLobAd09zvYPuJ4MTvhL7K0CbVQ3qZ8TeE=
+github.com/minio/minlz v1.2.4/go.mod h1:xHhZ+MJmC2U4ssK/rSENsoyCfv0VFQo1mT6AdCA2RJ8=
