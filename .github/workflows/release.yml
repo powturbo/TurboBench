@@ -77,7 +77,7 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq build-essential nasm make libomp-dev clang
+          sudo apt-get install -y -qq build-essential nasm make libomp-dev clang golang
           if [ '${{ matrix.os }}' = 'ubuntu-24.04-riscv' ]; then
             sudo apt-get install -y -qq gcc-14 g++-14 clang-20
             sudo update-alternatives --install /usr/bin/gcc  gcc  /usr/bin/gcc-14  100
@@ -105,7 +105,7 @@ jobs:
           if [ '${{ matrix.os }}' = 'ubuntu-24.04-riscv' ]; then
             ./turbobench silesia.tar -U -eTURBO -V0 -i1,3
           else
-            ./turbobench silesia.tar -U -eFAST -V0 -i1,3
+            ./turbobench silesia.tar -U -eFAST -V0 -i3,3
           fi
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
@@ -121,13 +121,15 @@ jobs:
 #            ./turbobench data@MICRO.tbb -p4
 #            mv -f data.md "${{ matrix.name }}.data.md"
       # ------------------ macOS ------------------
-      - name: Build (macOS)
+      - name: Install (macOS)
         if: matrix.platform == 'macos'
         run: |
-          brew install nasm libomp llvm
+          brew install nasm libomp llvmv golang
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
-          make
-      - name: Generate silesia.tar.md (macOS)
+      - name: Make (macOS)
+        if: matrix.platform == 'macos'
+        run: make
+      - name: Benchmark (macOS)
         if: matrix.platform == 'macos'
         run: |
           curl -L -o silesia.tar.gz \
@@ -140,6 +142,7 @@ jobs:
           ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
           ./turbobench silesia.tar@BWT.tbb -p4
           mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar@BWT.md"
+
       # ------------------ Windows (MSYS2) ------------------
       - name: Set git to use LF
         if: matrix.platform == 'windows'
@@ -160,14 +163,15 @@ jobs:
             mingw-w64-ucrt-x86_64-libgomp
             mingw-w64-ucrt-x86_64-llvm-openmp
             mingw-w64-ucrt-x86_64-nasm
-      - name: Build (Windows)
+            mingw-w64-ucrt-x86_64-go
+      - name: Make (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
         run: |
           gcc --version
           clang --version || true
           make STATIC=1 PHAZ=0
-      - name: Generate silesia.tar.md (Windows)
+      - name: Benchmark (Windows)
         if: matrix.platform == 'windows'
         shell: msys2 {0}
         run: |

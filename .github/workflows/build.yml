@@ -26,10 +26,6 @@ jobs:
           - os: ubuntu-26.04-arm
             compiler: clang
             cxx: clang++
-#          - name: linux-riscv64
-#            os: ubuntu-24.04-riscv
-#            platform: linux
-#            arch: riscv64
     steps:
       - uses: actions/checkout@v7
         with:
@@ -46,7 +42,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y nasm libomp-dev golang
-      - name: Shoe Environemt
+      - name: Environemt
         run: |
           lscpu
           gcc --version
@@ -62,10 +58,10 @@ jobs:
 #            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
 #          gunzip silesia.tar.gz
 
-      - name: Benchmark
-        run: |
-          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
-          cat data@MICRO.tbb
+#      - name: Benchmark
+#        run: |
+#          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
+#          cat data@MICRO.tbb
 #          ./turbobench -h
 #      - run: ./turbobench turbobench -V0 -U
 #      - run: ./turbobench silesia.tar -V0 -U
@@ -152,10 +148,11 @@ jobs:
           version: '0.17.0'
       - name: Make
         run: make OPENZL=0 PIVCO=0 RUST=0
-      - name: benchmark
-        run: |
-          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
-          cat data@MICRO.tbb
+
+#      - name: benchmark
+#        run: |
+#          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
+#          cat data@MICRO.tbb
 #      - name: Download silesia.tar.gz and gunzip → silesia.tar
 #        run: |
 #          curl -L -o silesia.tar.gz https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
