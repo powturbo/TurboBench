@@ -308,7 +308,6 @@ enum {
 #define _MISA77 0
 #endif
  P_MISA77,
- P_MISA77S,
 #ifndef _MSCOMPRESS
 #define _MSCOMPRESS 0
 #endif
@@ -2138,7 +2137,6 @@ struct plugs plugs[] = {
   { P_MINIZ,         "miniz",         _MINIZ,     "miniz",                       "1,2,3,4,5,6,7,8,9" },
   { P_MINLZ,         "minlz",         _MINLZ,     "minlz",                       "0,1,2,3" },
   { P_MISA77,        "misa77",        _MISA77,    "misa77",                      "0,1,2,3,4,5,-1" },
-//  { P_MISA77S,       "misa77_safe",   _MISA77,    "misa77 safe",                 "0,1" },
   { P_MSCOMPRESS,    "mscompress",    _MSCOMPRESS,"ms-compress",                 "2,3,4" },
   { P_MWLZ,          "mwlz",          _MWLZ,      "mwlz",                        "" },
   { P_MZIP,          "mzip",          _MZIP,      "mzip",                        "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22" },
@@ -3106,8 +3104,7 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _MISA77
-    case P_MISA77:
-    case P_MISA77S: return misa77::compress(in, inlen, out, outsize, misa77::config(lev));
+    case P_MISA77: return misa77::compress(in, inlen, out, outsize, misa77::config(lev));
       #endif
 
       #if _MSCOMPRESS
@@ -4261,8 +4258,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _MISA77
-    case P_MISA77: 
-    case P_MISA77S: return !lev || lev==1?misa77::decompress(in, inlen, out, outlen, misa77::dconfig(true)):misa77::decompress(in, inlen, out, outlen);
+    case P_MISA77: return misa77::decompress(in, inlen, out, outlen);
       #endif
 
       #if _MSCOMPRESS
@@ -5043,8 +5039,7 @@ char *codver(int codec, char *v, char *s) {
     case P_MEMLZ : return "v0.7/v2026.10.31"; 
       #endif
       #if _MISA77
-    case P_MISA77:
-    case P_MISA77S:    sprintf(s,"v%d.%d.%d", MISA77_VERSION_MAJOR, MISA77_VERSION_MINOR, MISA77_VERSION_PATCH); break;
+    case P_MISA77: sprintf(s,"v%d.%d.%d", MISA77_VERSION_MAJOR, MISA77_VERSION_MINOR, MISA77_VERSION_PATCH); break;
       #endif
       #if _MSCOMPRESS
     case P_MSCOMPRESS: return "v2020.01.05";
