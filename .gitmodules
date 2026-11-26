@@ -204,3 +204,6 @@
 [submodule "firetrail"]
 	path = firetrail
 	url = https://github.com/VantorreWannes/firetrail.git
+[submodule "minlz"]
+	path = minlz
+	url = https://github.com/minio/minlz.git
