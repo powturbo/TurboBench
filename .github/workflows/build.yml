@@ -90,7 +90,7 @@ jobs:
         uses: mlugg/setup-zig@v2
         with:
           version: '0.17.0'
-        run: |
+      - run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq build-essential nasm make libomp-dev golang
           sudo apt-get install -y -qq gcc-14 g++-14 clang-20
