@@ -147,7 +147,7 @@ jobs:
           brew install nasm libomp llvm golang
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
           cc -v
-        uses: mlugg/setup-zig@v2
+      - uses: mlugg/setup-zig@v2
         with:
           version: '0.17.0'
       - name: Make
