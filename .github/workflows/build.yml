@@ -188,7 +188,7 @@ jobs:
         with:
           submodules: 'true'
       - name: Install
-      - uses: msys2/setup-msys2@v2
+        uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
           update: true
