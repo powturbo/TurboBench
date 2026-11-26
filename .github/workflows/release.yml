@@ -96,9 +96,9 @@ jobs:
           else
             make STATIC=1 PHAZ=0
           fi
+
       - name: Benchmark silesia.tar.md (Linux)
         if: matrix.platform == 'linux' 
-#&& matrix.arch != 'x86_64'
         run: |
           curl -L -o silesia.tar.gz \
             https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
@@ -107,8 +107,6 @@ jobs:
             ./turbobench silesia.tar -U -eTURBO -V0 -i1,1
             ./turbobench silesia.tar.tbb -p4
             mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
-#          else
-#           ./turbobench silesia.tar -U -V0
           fi
 #          if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
 #            ./turbobench silesia.tar -V0 -eBWT -aBWT
