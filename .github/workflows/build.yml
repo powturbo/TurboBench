@@ -46,14 +46,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y nasm libomp-dev golang
-      - run: make BLOSC=0 OPENZL=0 PIVCO=0 RUST=0
-#      - name: Download silesia.tar.gz and gunzip → silesia.tar
-#        run: |
-#          curl -L -o silesia.tar.gz \
-#            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-#          gunzip silesia.tar.gz
-
-      - name: Run
+      - name: Shoe Environemt
         run: |
           lscpu
           gcc --version
@@ -61,6 +54,16 @@ jobs:
           rustc --version
           cargo --version
           zig version
+      - name: Build
+      - run: make BLOSC=0 OPENZL=0 PIVCO=0 RUST=0
+#      - name: Download silesia.tar.gz and gunzip → silesia.tar
+#        run: |
+#          curl -L -o silesia.tar.gz \
+#            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+#          gunzip silesia.tar.gz
+
+      - name: Benchmark
+        run: |
           ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
           cat data@MICRO.tbb
 #          ./turbobench -h
@@ -81,13 +84,12 @@ jobs:
         with:
           submodules: 'true'
       - run: git submodule update --init --recursive
-      - name: Install Rust
+      - name: Install 
         uses: dtolnay/rust-toolchain@stable
       - name: Setup Zig (master)
         uses: mlugg/setup-zig@v2
         with:
           version: '0.17.0'
-      - name: Install dependencies
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq build-essential nasm make libomp-dev golang
@@ -110,14 +112,14 @@ jobs:
           clang --version || true
           rustc --version
           cargo --version
-      - name: make 
+      - name: Build 
         run: make AOCL=0 BLOSC=0 BROTLI=0 FLZMA=0 GLZA=0 KANZI=0 LIZARD=0 LZFSE=0 LZHAM=0 LZO=0 LZRAVEN=0 LZSA=0 MINIZ=0 OPENZL=0 OPENMP=0 PIVCO=0 RUST=0 WZIP=0 XZ=0
 #      - name: Download silesia.tar.gz and gunzip → silesia.tar
 #        run: |
 #          curl -L -o silesia.tar.gz \
 #            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
 #          gunzip silesia.tar.gz
-      - name: benchmark
+      - name: Benchmark
         if: matrix.compiler == 'gcc' 
         run: |
           ./turbobench -l2
@@ -140,16 +142,16 @@ jobs:
         with:
           submodules: 'true'
       - run: git submodule update --init --recursive
-      - name: Install dependencies
+      - name: Install
         run: |
           brew install nasm libomp llvm golang
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
           cc -v
-      - name: Install Zig
         uses: mlugg/setup-zig@v2
         with:
           version: '0.17.0'
-      - run: make OPENZL=0 PIVCO=0 RUST=0
+      - name: Make
+        run: make OPENZL=0 PIVCO=0 RUST=0
       - name: benchmark
         run: |
           ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -i1,1
@@ -185,6 +187,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           submodules: 'true'
+      - name: Install
       - uses: msys2/setup-msys2@v2
         with:
           msystem: UCRT64
@@ -198,11 +201,13 @@ jobs:
             mingw-w64-ucrt-x86_64-nasm
             mingw-w64-ucrt-x86_64-go
       - run: git submodule update --init --recursive
-      - run: make OPENZL=0 PIVCO=0 RUST=0
       - name: Install Zig
-        uses: mlugg/setup-zig@v2
+      - uses: mlugg/setup-zig@v2
         with:
           version: '0.17.0'
+      - name: Make
+        run: make OPENZL=0 PIVCO=0 RUST=0
+
 #      - uses: goto-bus-stop/setup-zig@v2
 #        with:
 #          version: 0.16.0      
