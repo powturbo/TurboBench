@@ -304,6 +304,10 @@ enum {
 #define _MINLZ 0
 #endif
  P_MINLZ,
+#ifndef _MINLZC
+#define _MINLZC 0
+#endif
+ P_MINLZC,
 #ifndef _MISA77
 #define _MISA77 0
 #endif
@@ -1228,10 +1232,42 @@ EXTERN_C_END
   #endif
 
   #if _MINLZ
-#include "turbobench_/minlz/minlz.h"
-//#undef MINLZ_H
-//#include "turbobench_/minlz/unminlz.h"
-//#include "turbobench_/minlz-c/libmlz.h"
+#include "turbobench_/minlz/mlz.h"
+#define MINLZ_MAX_BLOCK_SIZE (8 << 20)
+
+size_t _mlzcompresslevel(unsigned char *in, size_t inlen, unsigned char *out, size_t outsize, int lev) {
+  unsigned char *ip = in, *in_ = in+inlen, *op = out, *out_ = out+inlen; 
+  unsigned iplen;
+  size_t osize = outsize;
+  for(*op++ = 0; ip < in_; ip += iplen) {
+    iplen = in_ - ip > MINLZ_MAX_BLOCK_SIZE? MINLZ_MAX_BLOCK_SIZE :  in_ - ip;
+    int oplen = mlzcompresslevel(ip, iplen, op+4, osize, lev); 
+    if(oplen <= 0 || oplen >= MINLZ_MAX_BLOCK_SIZE) { oplen = MINLZ_MAX_BLOCK_SIZE; memcpy(op+4, ip, MINLZ_MAX_BLOCK_SIZE); }; 
+    ctou32(op) = oplen; op += 4 + oplen;   osize -=  4 + oplen;   if(op >= out_) goto e;
+  }
+  if(op >= out_) { e: *out = 0xff; memcpy(out+1,in,inlen); op = out_+1; }
+  return op - out;
+}
+
+size_t _mlzdecompress(unsigned char *in, size_t inlen, unsigned char *out, size_t outlen) {
+  unsigned char *op = out, *out_ = out+outlen, *ip = in;
+  unsigned oplen;
+  if(*ip++ == 0xff) { memcpy(out,ip,outlen); return inlen+1; }
+  for(; op < out_; op += oplen) {
+    oplen = out_ - op > MINLZ_MAX_BLOCK_SIZE? MINLZ_MAX_BLOCK_SIZE :  out_ - op;
+    int iplen = ctou32(ip);
+    if(iplen == MINLZ_MAX_BLOCK_SIZE) { memcpy(op, ip+4, MINLZ_MAX_BLOCK_SIZE); } 
+    else { int rc = mlzdecompress(ip+4, iplen, op, oplen);
+      if(rc < 0) { die("ERROR minlz_decode_block "); return 0; }
+    } 
+    ip += 4 + iplen;
+  }
+  return ip - in;
+}
+  #endif
+
+  #if _MINLZC
+#include "turbobench_/minlz-c/minlz.h"
   #endif
 
   #if _MINIZ
@@ -2136,6 +2172,7 @@ struct plugs plugs[] = {
   { P_MEMLZ,         "memlz",         _MEMLZ,     "memlz",                       "" },
   { P_MINIZ,         "miniz",         _MINIZ,     "miniz",                       "1,2,3,4,5,6,7,8,9" },
   { P_MINLZ,         "minlz",         _MINLZ,     "minlz",                       "0,1,2,3" },
+  { P_MINLZC,        "minlzc",        _MINLZ,     "minlz-c",                     "0,1,2,3" },
   { P_MISA77,        "misa77",        _MISA77,    "misa77",                      "0,1,2,3,4,5,-1" },
   { P_MSCOMPRESS,    "mscompress",    _MSCOMPRESS,"ms-compress",                 "2,3,4" },
   { P_MWLZ,          "mwlz",          _MWLZ,      "mwlz",                        "" },
@@ -3096,7 +3133,11 @@ unsigned codcomp(unsigned char *in, unsigned inlen, unsigned char *out, unsigned
       #endif
 
       #if _MINLZ
-    case P_MINLZ: return minlz_compress(in, inlen, out, outsize, lev);  //mlzcompresslevel(in, inlen, out, outsize, lev);
+    case P_MINLZ: { int64_t rc = _mlzcompresslevel(in, inlen, out, outsize, lev);  /*if(rc <= 0) die("error:minlzc %lld\n", rc); die("rc=%lld ", rc);*/ return rc; }
+      #endif
+
+      #if _MINLZC
+    case P_MINLZC: return minlz_compress(in, inlen, out, outsize, lev); 
       #endif
 
       #if _MINIZ
@@ -4253,8 +4294,11 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _MINLZ
-    case P_MINLZ: return minlz_decompress(in, inlen, out, outlen); //return mlzdecompress(in, inlen, out, outlen);
-                          
+    case P_MINLZ: return _mlzdecompress(in, inlen, out, outlen);                          
+      #endif
+
+      #if _MINLZC
+    case P_MINLZC: return minlz_decompress(in, inlen, out, outlen);                     
       #endif
 
       #if _MISA77
@@ -5038,6 +5082,14 @@ char *codver(int codec, char *v, char *s) {
       #if _MEMLZ
     case P_MEMLZ : return "v0.7/v2026.10.31"; 
       #endif
+      #if _MINLZ
+    case P_MINLZ: return "v1.3.0";
+      #endif
+
+      #if _MINLZC
+    case P_MINLZC: return "minlz-c gist"; 
+      #endif
+
       #if _MISA77
     case P_MISA77: sprintf(s,"v%d.%d.%d", MISA77_VERSION_MAJOR, MISA77_VERSION_MINOR, MISA77_VERSION_PATCH); break;
       #endif
