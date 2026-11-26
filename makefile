@@ -714,15 +714,19 @@ $(MINIZ_LIB): $(MINIZ_SRCS)
 LIBS += $(MINIZ_LIB)
 endif
 
-ifneq ($(wildcard turbobench_/minlz-c0/.),)
-PLG_FLAGS+=-D_MINLZGO
-MINLZ_LIB = turbobench_/minlz-c/libmlz.a
+ifneq ($(wildcard turbobench_/minlz/.),)
+ifeq ($(ARCH),x86_64)
+ifeq ($(ARCH),Linux)
+PLG_FLAGS+=-D_MINLZ
+MINLZ_LIB = turbobench_/minlz/libmlz.a
 LIBS += $(MINLZ_LIB)
 endif
+endif
+endif
 
-ifneq ($(wildcard turbobench_/minlz/.),)
-PLG_FLAGS+=-D_MINLZ
-OB+=$(call obj,turbobench_/minlz/minlz.o)
+ifneq ($(wildcard turbobench_/minlz-c/.),)
+PLG_FLAGS+=-D_MINLZC
+OB+=$(call obj,turbobench_/minlz-c/minlz.o)
 endif
 
 ifneq ($(if $(wildcard misa77/.),$(if $(filter 0,$(MISA77)),,1)),)
@@ -1566,7 +1570,7 @@ endif
 OB+=$(BUILD)/tornado_/tormem.o
 endif
 
-ifneq ($(wildcard ms-compress/.),)
+ifneq ($(if $(wildcard ms-compress/.),$(if $(filter 0,$(MS_COMPRESS)),,1)),)
 PLG_FLAGS+=-D_MSCOMPRESS
 OB+=$(call obj,ms-compress/src/mscomp.o ms-compress/src/lznt1_compress.o ms-compress/src/lznt1_decompress.o ms-compress/src/xpress_compress.o ms-compress/src/xpress_decompress.o ms-compress/src/xpress_huff_compress.o ms-compress/src/xpress_huff_decompress.o)
 endif
