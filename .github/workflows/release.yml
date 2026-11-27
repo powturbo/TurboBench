@@ -158,7 +158,7 @@ jobs:
           git config --global core.autocrlf false
           git config --global core.eol lf
         shell: bash
-      - name: Setup MSYS2 (Windows)
+      - name: Install (Windows)
         if: matrix.platform == 'windows'
         uses: msys2/setup-msys2@v2
         with:
@@ -179,24 +179,24 @@ jobs:
           gcc --version
           clang --version || true
           make STATIC=1 PHAZ=0
-      - name: Benchmark (Windows)
-        if: matrix.platform == 'windows'
-        shell: msys2 {0}
-        run: |
-          curl -L -o silesia.tar.gz \
-            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-          gunzip silesia.tar.gz
-          ./turbobench silesia.tar -U -V0
-          ./turbobench silesia.tar.tbb -p4
-          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
-          ./turbobench silesia.tar -V0 -eBWT -aBWT
-          ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
-          ./turbobench silesia.tar@BWT.tbb -p4
-          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar@BWT.md"
-          ./turbobench turbobench.exe -V0 -eFAST
-          ./turbobench turbobench.exe.tbb -p4
-          mv -f turbobench.exe.md "${{ matrix.name }}.turbobench.exe.md"
-          ls -la *.md
+#      - name: Benchmark (Windows)
+#        if: matrix.platform == 'windows'
+#        shell: msys2 {0}
+#        run: |
+#          curl -L -o silesia.tar.gz \
+#            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+#          gunzip silesia.tar.gz
+#          ./turbobench silesia.tar -U -V0
+#          ./turbobench silesia.tar.tbb -p4
+#          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
+#          ./turbobench silesia.tar -V0 -eBWT -aBWT
+#          ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
+#          ./turbobench silesia.tar@BWT.tbb -p4
+#          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar@BWT.md"
+#          ./turbobench turbobench.exe -V0 -eFAST
+#          ./turbobench turbobench.exe.tbb -p4
+#          mv -f turbobench.exe.md "${{ matrix.name }}.turbobench.exe.md"
+#          ls -la *.md
       # ------------------ Package (Linux / macOS) ------------------
       - name: Package artifact (Linux/macOS)
         if: matrix.platform != 'windows'
