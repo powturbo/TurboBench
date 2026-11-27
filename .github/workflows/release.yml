@@ -182,9 +182,13 @@ jobs:
         if: matrix.platform == 'windows'
         shell: msys2 {0}
         run: |
-          curl -L -o silesia.tar.gz \
-            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
-          gunzip silesia.tar.gz
+          ./turbobench turbobench.exe -V0 -eFAST
+          ./turbobench turbobench.exe.tbb -p4
+          mv -f turbobench.exe.md "${{ matrix.name }}.turbobench.exe.md"
+
+#          curl -L -o silesia.tar.gz \
+#            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
+#          gunzip silesia.tar.gz
 #          ./turbobench silesia.tar -U -V0
 #          ./turbobench silesia.tar.tbb -p4
 #          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
@@ -192,9 +196,6 @@ jobs:
 #          ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
 #          ./turbobench silesia.tar@BWT.tbb -p4
 #          mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar@BWT.md"
-          ./turbobench turbobench.exe -V0 -eFAST
-          ./turbobench turbobench.exe.tbb -p4
-          mv -f turbobench.exe.md "${{ matrix.name }}.turbobench.exe.md"
 #          ls -la *.md
       # ------------------ Package (Linux / macOS) ------------------
       - name: Package artifact (Linux/macOS)
