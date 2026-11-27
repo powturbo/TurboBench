@@ -576,7 +576,7 @@ struct plugg {
 
 struct plugg plugg[] = {
   { "MICRO",     "blaris,3,6,9/heatshrink,1/igzip,0,1,3/libdeflate,1,6,12/lz0,1,9/lz4,1,12/lzav,1,2/minlz,4,6,9/misa77,1,4/slz,1,4/tamp,8,13/tinyuz,0,3/zlib,1,9/zlib-ng,1,6,9/zlib-turbo,1,12/memcpy", "Microcontroller" },
-  { "TURBO",     "lzturbo,10,11,12,19/aceapex_fast,1/brotli,4/igzip,1,2,3/libdeflate,1,6,12/lz4,1,5,12/lzav,1,2/memlz/minlz,4,7/misa77,0,1,4/zlib-ng,1,6,9/zstd,3/zxc,3,5,6/memcpy",                         "lz4 class: Fastest de-/compression. HDD/SSD/RAM speed" },
+  { "TURBO",     "lzturbo,10,11,12,19/aceapex_fast,1/brotli,4/igzip,1,2,3/libdeflate,1,6,12/lz4,1,5,12/lzav,1,2/memlz/minlz,4,7/misa77,0,1,4/zlib-ng,1,6,9/zstd,3/zxc,3,5,6/memcpy",                    "lz4 class: Fastest de-/compression. HDD/SSD/RAM speed" },
   { "FAST",      "lzturbo,10,10a,11,12/aocl-lz4,0/aceapex_fast,1/brotli,1,4,6,11/igzip,1,2,3/libdeflate,1,6,12/lz4,1,3,12/lzav,1,2/memlz/minlz,4,6,9/misa77,1,3,4,5/zlib,1,6,9/zlib-turbo,1,6,12/zlib-ng,1,6,9/zstd,1,3,9,22/zxc,3,5,7/memcpy", "lz4,zlib,zstd class" },
   { "EFFICIENT", "lzturbo,12/brotli,4,5/zlib,6/zstd,5,9/libdeflate,6/zlib-ng,6/igzip,3/memcpy",                                                                         "Compression speed > 'zlib 6' class" },
   { "MAX",       "lzturbo,19/lzma,9/lzham,4/brotli,11/libdeflate,12/lz4,9/lizard,19,29,39,49/lzlib,9/lzraven/wzip,13/zstd,22/memcpy",                                   "Best compression (slow)" },
@@ -584,11 +584,11 @@ struct plugg plugg[] = {
   { "BWT",       "bcm/bsc,0,0e0,0e2,4/bwtsatan,4,5,6,7,7t4,8,9/kanzi,5,6,7/bz2-ng/bzip2/bzip3,512/zstd,22/lzma,9/memcpy",                                               "ST & BWT" },
   { "ECODER",    "turbohf/turboanx/turborc/turborc_o1/turboac_byte/arith_static/rans_static16/rans_static16o1/subotin/fasthf/fastac/zlibh/fse/fsehuf/pivco,0,1/memcpy", "Entropy coder" },
   { "MEMCPY",    "imemcpy/memcpy",                                                                                                                                      "memcpy" },
-  { "WEB",       "brotli,1,2,4,5,11/igzip,0,1,2,3/slz,1,4/libdeflate,1,6,9,12/zlib,1,6,9/zlib-ng,1,6,9/zlib-turbo,1,6,9,12/zopfli/zstd,1,9,15,22",                    "web/http compression"},
-  { "U32",       "ic,1u4/pcodec_u32,8/pcodec_i32,8/blosc2-zstd,3u4,3u4B,3u4S/openzl_le_i32/openzl_le_u32/openzl_zstd,3",                                                        "Integer Compression u32" },
-  { "U64",       "ic,1u8/pcodec_u64,8/pcodec_i64,8/blosc2-zstd,3u8,3u8B,3u8S/openzl_le_i64/openzl_le_u64/openzl_zstd,3",                                                        "Integer Compression u64" },
-  { "F32",       "ic,1u4/pcodec_f32,8/blosc2-zstd,3u4,3u4B,3u4S/openzl_le_f32/openzl_zstd,3",                                                                                   "Floating Point Compression f32" },
-  { "F64",       "ic,1u8/pcodec_f64,8/blosc2-zstd,3u8,3u8B,3u8S/openzl_le_f64/openzl_le_f64/openzl_zstd,3",                                                                     "Floating Point Compression f64" }
+  { "WEB",       "brotli,1,2,4,5,11/igzip,0,1,2,3/slz,1,4/libdeflate,1,6,9,12/zlib,1,6,9/zlib-ng,1,6,9/zlib-turbo,1,6,9,12/zopfli/zstd,1,9,15,22",                      "web/http compression"},
+  { "U32",       "ic,1u4/pcodec_u32,8/pcodec_i32,8/blosc2-zstd,3u4,3u4B,3u4S/openzl_le_i32/openzl_le_u32/openzl_zstd,3",                                                "Integer Compression u32" },
+  { "U64",       "ic,1u8/pcodec_u64,8/pcodec_i64,8/blosc2-zstd,3u8,3u8B,3u8S/openzl_le_i64/openzl_le_u64/openzl_zstd,3",                                                "Integer Compression u64" },
+  { "F32",       "ic,1u4/pcodec_f32,8/blosc2-zstd,3u4,3u4B,3u4S/openzl_le_f32/openzl_zstd,3",                                                                           "Floating Point Compression f32" },
+  { "F64",       "ic,1u8/pcodec_f64,8/blosc2-zstd,3u8,3u8B,3u8S/openzl_le_f64/openzl_le_f64/openzl_zstd,3",                                                             "Floating Point Compression f64" }
 };
 
 #define PLUGGSIZE (sizeof(plugg)/sizeof(plugg[0]))
