@@ -304,14 +304,13 @@ BZIP3_SRCS := bzip3/src/libbz3.c $(wildcard bzip3/src/coder/*.c) bzip3/src/sys/c
 #$(wildcard bzip3/src/sys/*.c)
 ifeq ($(ARCH),x86_64)
 BZIP3_SRCS += bzip3/src/sys/crcx86.c
-else ifeq ($(ARCH),aarch64)
-BZIP3_SRCS += bzip3/src/sys/crcarm.c
+#else ifeq ($(ARCH),aarch64)
+#BZIP3_SRCS += bzip3/src/sys/crcarm.c
 endif
 BZIP3_OBJS := $(call obj,$(BZIP3_SRCS))
 $(BZIP3_OBJS): $(BUILD)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) -O3 $(_SSE) -Ibzip3/include -Ibzip3/src -Ibzip3/3rdparty/libsais -c $< -o $@
-#-DVERSION='"1.5.5"' 
 OB += $(BZIP3_OBJS)
 endif
 
