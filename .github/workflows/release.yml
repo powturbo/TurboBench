@@ -105,10 +105,18 @@ jobs:
           if [ '${{ matrix.os }}' = 'ubuntu-24.04-riscv' ]; then
             ./turbobench silesia.tar -U -eTURBO -V0 -i1,3
           else
-            ./turbobench silesia.tar -U -eFAST -V0 -i3,3
+            ./turbobench silesia.tar -U -eFAST -V0
+            ./turbobench silesia.tar -V0 -eBWT -aBWT
+            ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
+            ./turbobench silesia.tar@BWT.tbb -p4
+            mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar@BWT.md"
+            ./turbobench turbobench.exe -V0 -eFAST
+            ./turbobench turbobench.exe.tbb -p4
+            mv -f turbobench.exe.md "${{ matrix.name }}.turbobench.exe.md"
           fi
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
+          ls -la *.md
 
 #          if [ '${{ matrix.os }}' != 'ubuntu-24.04-riscv' ]; then
 #            ./turbobench silesia.tar -V0 -eBWT -aBWT
