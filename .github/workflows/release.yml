@@ -104,15 +104,17 @@ jobs:
           gunzip silesia.tar.gz
           if [ '${{ matrix.os }}' = 'ubuntu-24.04-riscv' ]; then
             ./turbobench silesia.tar -U -eTURBO -V0 -i1,3
-          else
-            ./turbobench silesia.tar -U -eFAST -V0
-            ./turbobench silesia.tar -V0 -eBWT -aBWT
+          else 
+            ./turbobench silesia.tar -U -eFAST -V0 -i1,3
+          fi
+          if [ '${{ matrix.arch }}' = 'x86_64' ]; then
+            ./turbobench silesia.tar -V0 -eBWT -aBWT -i1,3
             ./turbobench silesia.tar -V0 -U -ebwtsatan,7b68m,8b68m,9b68m -b68m -aBWT
             ./turbobench silesia.tar@BWT.tbb -p4
             mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar@BWT.md"
-            ./turbobench turbobench.exe -V0 -eFAST
-            ./turbobench turbobench.exe.tbb -p4
-            mv -f turbobench.exe.md "${{ matrix.name }}.turbobench.exe.md"
+            ./turbobench turbobench -V0 -eFAST -i1,3
+            ./turbobench turbobench.tbb -p4
+            mv -f turbobench.md "${{ matrix.name }}.turbobench.md"
           fi
           ./turbobench silesia.tar.tbb -p4
           mv -f silesia.tar.md "${{ matrix.name }}.silesia.tar.md"
@@ -242,7 +244,7 @@ jobs:
             ${{ env.APP_NAME }}-${{ matrix.platform }}-${{ matrix.arch }}.zip
             ${{ matrix.name }}.silesia.tar.md
             ${{ matrix.name }}.silesia.tar@BWT.md
-            ${{ matrix.name }}.turbobench.exe.md
+            ${{ matrix.name }}.turbobench.md
           if-no-files-found: ignore
   # ------------------------------------------------------------------
   # The release + benchmark jobs stay exactly the same
@@ -293,7 +295,7 @@ jobs:
           {
             echo "# TurboBench Silesia Corpus x86_64 aarch64 risc-v64"
           } > benchmark.md
-          for f in $(find artifacts \( -name '*.silesia.tar*.md' -o -name '*.turbobench.exe*.md' -o -name '*.data.md' \) | sort ); do
+          for f in $(find artifacts \( -name '*.silesia.tar*.md' -o -name '*.turbobench.md' -o -name '*.data.md' \) | sort ); do
             platform=$(basename "$f" | sed -E 's/\.(silesia|turbobench|data)\..*$//')
             echo "## Platform: ${platform}" >> benchmark.md
             echo "" >> benchmark.md
