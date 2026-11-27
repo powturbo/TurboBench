@@ -140,7 +140,7 @@ jobs:
       - run: git submodule update --init --recursive
       - name: Install
         run: |
-          brew install nasm libomp llvm go
+          brew install nasm libomp llvm golang
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
           cc -v
       - uses: mlugg/setup-zig@v2

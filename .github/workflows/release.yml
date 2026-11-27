@@ -124,8 +124,7 @@ jobs:
       - name: Install (macOS)
         if: matrix.platform == 'macos'
         run: |
-          brew install nasm libomp llvmv 
-          brew install go
+          brew install nasm libomp llvm golang
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
       - name: Make (macOS)
         if: matrix.platform == 'macos'
