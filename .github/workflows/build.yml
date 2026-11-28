@@ -119,10 +119,11 @@ jobs:
 #            https://github.com/DataCompression/corpus-collection/raw/main/Silesia-Corpus/silesia.tar.gz
 #          gunzip silesia.tar.gz
 #      - name: Benchmark
-#        if: matrix.compiler == 'gcc' 
-#        run: |
+        if: matrix.compiler == 'gcc' 
+        run: |
+          ./turbobench blaris/bench/data/* -U -emisa77,1,5/aceapex_fast,1 -aMICRO -V0
+          cat data@MICRO.tbb
 #          ./turbobench blaris/bench/data/* -U -eMICRO -aMICRO -V0
-#          cat data@MICRO.tbb
 
   macos:
     runs-on: '${{ matrix.os }}'
