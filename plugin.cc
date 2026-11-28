@@ -4138,7 +4138,7 @@ unsigned coddecomp(unsigned char *in, unsigned inlen, unsigned char *out, unsign
       #endif
 
       #if _LZ0
-    case P_LZ0: return strchr(prm,'C')?lz0dec_compact(in, (int)inlen, out, (int)outlen):lz0dec_fast(in, (int)inlen, out, (int)outlen);
+    case P_LZ0: return strchr(prm,'C')?lz0dec_compact(in, inlen, out, outlen):lz0dec_fast(in, inlen, out, outlen);
       #endif
 
       #if _ZX0
